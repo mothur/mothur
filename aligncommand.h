@@ -177,7 +177,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 				}
 				
 				Sequence temp = templateDB->findClosestSequence(candidateSeq);
-				Sequence* templateSeq = &temp;
+				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
 				
 				float searchScore = templateDB->getSearchScore();
 				
@@ -204,7 +204,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 						
 						//rerun alignment
 						Sequence temp2 = templateDB->findClosestSequence(copy);
-						Sequence* templateSeq2 = &temp2;
+						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
 						
 						searchScore = templateDB->getSearchScore();
 						
@@ -213,7 +213,8 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 						//check if any better
 						if (copy->getNumBases() > candidateSeq->getNumBases()) {
 							candidateSeq->setAligned(copy->getAligned());  //use reverse compliments alignment since its better
-							templateSeq = templateSeq2; 
+							delete templateSeq;
+							templateSeq = templateSeq2;
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
@@ -221,6 +222,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;
+                            delete templateSeq2;
 							delete copy;	
 						}
 					}
@@ -238,6 +240,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 				
 				report.print();
 				delete nast;
+                delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
 				
 				pDataArray->count++;

@@ -590,11 +590,11 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, sumFile + toString(getpid()) + ".temp", lines[process]);
+				num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, sumFile + m->mothurGetpid(process) + ".temp", lines[process]);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = fastafile + toString(getpid()) + ".num.temp";
+				string tempFile = fastafile + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;

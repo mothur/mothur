@@ -753,11 +753,11 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + toString(getpid()) + ".temp", name  + toString(getpid()) + ".temp", group  + toString(getpid()) + ".temp");
+				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + m->mothurGetpid(process) + ".temp", name  + m->mothurGetpid(process) + ".temp", group  + m->mothurGetpid(process) + ".temp");
                 
                 //pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".num.temp";
+				string tempFile = m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << '\t' << outputNames.size() << endl;
                 for (int i = 0; i < outputNames.size(); i++) {  out << outputNames[i] << endl;  }

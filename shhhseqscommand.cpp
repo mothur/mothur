@@ -398,11 +398,11 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				mapfileNames = driverGroups(parser, newFName + toString(getpid()) + ".temp", newNName + toString(getpid()) + ".temp", newMName, lines[process].start, lines[process].end, groups);
+				mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
 				
 				//pass filenames to parent
 				ofstream out;
-				string tempFile = newMName + toString(getpid()) + ".temp";
+				string tempFile = newMName + m->mothurGetpid(process) + ".temp";
 				m->openOutputFile(tempFile, out);
 				out << mapfileNames.size() << endl;
 				for (int i = 0; i < mapfileNames.size(); i++) {

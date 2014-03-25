@@ -25,7 +25,7 @@ vector<string> TreeGroupCommand::setParameters(){
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);		
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 //CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
@@ -397,7 +397,12 @@ int TreeGroupCommand::execute(){
 						treeCalculators.push_back(new MemEuclidean());
 					}else if (Estimators[i] == "mempearson") { 
 						treeCalculators.push_back(new MemPearson());
-					}
+                    }else if (Estimators[i] == "jsd") {
+                        treeCalculators.push_back(new JSD());
+                    }else if (Estimators[i] == "rjsd") {
+                        treeCalculators.push_back(new RJSD());
+                    }
+
 				}
 			}
 			
@@ -804,7 +809,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                         
                         driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);   
                         
-                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(getpid()) + ".dist";
+                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
                         ofstream outtemp;
                         m->openOutputFile(tempdistFileName, outtemp);
                         

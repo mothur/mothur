@@ -1443,7 +1443,7 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = contigsreport + toString(getpid()) + ".num.temp";
+				string tempFile = contigsreport + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
@@ -1713,7 +1713,7 @@ int ScreenSeqsCommand::createProcessesAlignSummary(vector<float>& sims, vector<f
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = alignreport + toString(getpid()) + ".num.temp";
+				string tempFile = alignreport + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
@@ -1996,7 +1996,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = fastafile + toString(getpid()) + ".num.temp";
+				string tempFile = fastafile + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
@@ -2532,11 +2532,11 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], goodFileName + toString(getpid()) + ".temp", badAccnos + toString(getpid()) + ".temp", filename, badSeqNames);
+				num = driver(lines[process], goodFileName + m->mothurGetpid(process) + ".temp", badAccnos + m->mothurGetpid(process) + ".temp", filename, badSeqNames);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = filename + toString(getpid()) + ".num.temp";
+				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

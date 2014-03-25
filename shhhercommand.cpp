@@ -2076,11 +2076,11 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(dividedFiles[process], compositeFASTAFileName + toString(getpid()) + ".temp", compositeNamesFileName  + toString(getpid()) + ".temp");
+				num = driver(dividedFiles[process], compositeFASTAFileName + m->mothurGetpid(process) + ".temp", compositeNamesFileName  + m->mothurGetpid(process) + ".temp");
                 
                 //pass numSeqs to parent
 				ofstream out;
-				string tempFile = compositeFASTAFileName + toString(getpid()) + ".num.temp";
+				string tempFile = compositeFASTAFileName + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

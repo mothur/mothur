@@ -543,6 +543,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
 		int longestBase = templateDB->getLongestBase();
+        if (m->debug) { m->mothurOut("[DEBUG]: template longest base = "  + toString(templateDB->getLongestBase()) + " \n"); }
 		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
 		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
@@ -565,11 +566,12 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			int numBasesNeeded = origNumBases * threshold;
 	
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
-				if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
-					alignment->resize(candidateSeq->getUnaligned().length()+1);
+				if (candidateSeq->getUnaligned().length()+1 > alignment->getnRows()) {
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + candidateSeq->getName() + " " + toString(candidateSeq->getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
+					alignment->resize(candidateSeq->getUnaligned().length()+2);
 				}
 				Sequence temp = templateDB->findClosestSequence(candidateSeq);
-				Sequence* templateSeq = &temp;
+				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
 				
 				float searchScore = templateDB->getSearchScore();
 								
@@ -593,19 +595,26 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 						//get reverse compliment
 						copy = new Sequence(candidateSeq->getName(), originalUnaligned);
 						copy->reverseComplement();
+                        
+                        if (m->debug) { m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
 						
 						//rerun alignment
 						Sequence temp2 = templateDB->findClosestSequence(copy);
-						Sequence* templateSeq2 = &temp2;
+						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
+                        
+                        if (m->debug) { m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
 						
 						searchScore = templateDB->getSearchScore();
 						
 						nast2 = new Nast(alignment, copy, templateSeq2);
+                        
+                        if (m->debug) { m->mothurOut("[DEBUG]: completed Nast2 "  + candidateSeq->getName() + " flipped numBases = " + toString(copy->getNumBases()) + " old numbases = " + toString(candidateSeq->getNumBases()) +" \n"); }
 			
 						//check if any better
 						if (copy->getNumBases() > candidateSeq->getNumBases()) {
 							candidateSeq->setAligned(copy->getAligned());  //use reverse compliments alignment since its better
-							templateSeq = templateSeq2; 
+                            delete templateSeq;
+							templateSeq = templateSeq2;
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
@@ -613,8 +622,10 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;
+                            delete templateSeq2;
 							delete copy;	
 						}
+                        if (m->debug) { m->mothurOut("[DEBUG]: done.\n"); }
 					}
 					
 					//create accnos file with names
@@ -630,6 +641,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 				
 				report.print();
 				delete nast;
+                delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
 				
 				count++;
@@ -734,7 +746,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 				}
 								
 				Sequence temp = templateDB->findClosestSequence(candidateSeq);
-				Sequence* templateSeq = &temp;
+				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
 				
 				float searchScore = templateDB->getSearchScore();
 								
@@ -759,7 +771,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 						
 						//rerun alignment
 						Sequence temp2 = templateDB->findClosestSequence(copy);
-						Sequence* templateSeq2 = &temp2;
+						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
 						
 						searchScore = templateDB->getSearchScore();
 						
@@ -768,7 +780,8 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 						//check if any better
 						if (copy->getNumBases() > candidateSeq->getNumBases()) {
 							candidateSeq->setAligned(copy->getAligned());  //use reverse compliments alignment since its better
-							templateSeq = templateSeq2; 
+							delete templateSeq;
+							templateSeq = templateSeq2;
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
@@ -776,6 +789,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment, please check sequence.";
 							delete nast2;
+                            delete templateSeq2;
 							delete copy;	
 						}
 					}
@@ -821,6 +835,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 				
 				delete buf3;
 				delete nast;
+                delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
 			}
 			delete candidateSeq;
@@ -856,11 +871,11 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = alignFileName + toString(getpid()) + ".num.temp";
+				string tempFile = alignFileName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

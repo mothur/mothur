@@ -981,7 +981,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 				vector<string> listFileNames = cluster(dividedNames[process], labels);
 				
 				//write out names to file
-				string filename = toString(getpid()) + ".temp";
+				string filename = m->mothurGetpid(process) + ".temp";
 				ofstream out;
 				m->openOutputFile(filename, out);
 				out << tag << endl;
@@ -990,7 +990,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 				
 				//print out labels
 				ofstream outLabels;
-				filename = toString(getpid()) + ".temp.labels";
+				filename = m->mothurGetpid(process) + ".temp.labels";
 				m->openOutputFile(filename, outLabels);
 				
 				outLabels << cutoff << endl;

@@ -347,7 +347,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = qualfile + toString(getpid()) + ".num.temp";
+				string tempFile = qualfile + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				
 				out << numSeqs << endl;

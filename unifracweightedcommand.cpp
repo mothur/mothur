@@ -778,7 +778,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".weightedcommand.results.temp";
+				string tempFile = outputDir + m->mothurGetpid(process) + ".weightedcommand.results.temp";
 				m->openOutputFile(tempFile, out);
 				for (int i = lines[process].start; i < (lines[process].start + lines[process].num); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
 				out.close();

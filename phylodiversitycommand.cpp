@@ -420,7 +420,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 			}else if (pid == 0){
 				driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
 				
-				string outTemp = outputDir + toString(getpid()) + ".sumDiv.temp";
+				string outTemp = outputDir + m->mothurGetpid(process) + ".sumDiv.temp";
 				ofstream out;
 				m->openOutputFile(outTemp, out);
 				

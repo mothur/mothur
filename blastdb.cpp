@@ -23,14 +23,10 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 
 		int randNumber = rand();
 		//int randNumber = 12345;
-		string pid = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		pid += getpid();	
-#else
-		pid += toString(threadID);	
-#endif
+		string pid = m->mothurGetpid(threadID);
 		
-		
+        if (m->debug) { m->mothurOut("[DEBUG]: tag = " + tag + "\t pid = " + pid + "\n"); }
+        
 		dbFileName = tag + pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = tag + pid + toString(randNumber) + ".candidate.unaligned.fasta";
 		blastFileName = tag + pid + toString(randNumber) + ".blast";
@@ -122,13 +118,7 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		}
 		
 		int randNumber = rand();
-		string pid = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		pid += getpid();	
-#else
-		pid += toString(threadID);	
-#endif
-		
+		string pid = m->mothurGetpid(threadID);
 		dbFileName = pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = pid + toString(randNumber) + ".candidate.unaligned.fasta";
 		blastFileName = pid + toString(randNumber) + ".blast";

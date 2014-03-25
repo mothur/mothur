@@ -390,9 +390,9 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 				process++;
 			}else if (pid == 0){
                 outputNames.clear();
-				num = driverGroups(newFName + toString(getpid()) + ".temp", newNName + toString(getpid()) + ".temp", newMFile, lines[process].start, lines[process].end, groups);
+				num = driverGroups(newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMFile, lines[process].start, lines[process].end, groups);
                 
-                string tempFile = toString(getpid()) + ".outputNames.temp";
+                string tempFile = m->mothurGetpid(process) + ".outputNames.temp";
                 ofstream outTemp;
                 m->openOutputFile(tempFile, outTemp);
                 

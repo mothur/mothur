@@ -286,7 +286,7 @@ int DeconvoluteCommand::execute() {
 			
 			m->gobble(in);
 			
-			if(count % 1000 == 0)	{ m->mothurOut(toString(count) + "\t" + toString(sequenceStrings.size())); m->mothurOutEndLine();	}
+			if(count % 1000 == 0)	{ m->mothurOutJustToScreen(toString(count) + "\t" + toString(sequenceStrings.size()) + "\n");	}
 		}
 		
 		if(count % 1000 != 0)	{ m->mothurOut(toString(count) + "\t" + toString(sequenceStrings.size())); m->mothurOutEndLine();	}

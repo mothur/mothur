@@ -469,11 +469,11 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 				process++;
 			}else if (pid == 0){
 				
-				num = driver(filename, qFileName, rFileName, summaryFileName + toString(getpid()) + ".temp", errorOutputFileName+ toString(getpid()) + ".temp", chimeraOutputFileName + toString(getpid()) + ".temp", lines[process], qLines[process], rLines[process]);
+				num = driver(filename, qFileName, rFileName, summaryFileName + m->mothurGetpid(process) + ".temp", errorOutputFileName+ m->mothurGetpid(process) + ".temp", chimeraOutputFileName + m->mothurGetpid(process) + ".temp", lines[process], qLines[process], rLines[process]);
 				
 				//pass groupCounts to parent
 				ofstream out;
-				string tempFile = filename + toString(getpid()) + ".info.temp";
+				string tempFile = filename + m->mothurGetpid(process) + ".info.temp";
 				m->openOutputFile(tempFile, out);
 				
 				//output totalBases and totalMatches

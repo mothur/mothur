@@ -100,7 +100,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".unweighted.results.temp";
+				string tempFile = outputDir + m->mothurGetpid(process) + ".unweighted.results.temp";
 				m->openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
@@ -360,7 +360,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".unweighted.results.temp";
+				string tempFile = outputDir + m->mothurGetpid(process) + ".unweighted.results.temp";
 				m->openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;

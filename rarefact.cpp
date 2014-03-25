@@ -133,7 +133,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			
 				//pass numSeqs to parent
 				for(int i=0;i<displays.size();i++){
-					string tempFile = toString(getpid()) + toString(i) + ".rarefact.temp";
+					string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
 					displays[i]->outputTempFiles(tempFile);
 				}
 				exit(0);

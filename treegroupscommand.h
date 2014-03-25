@@ -60,6 +60,8 @@
 #include "memchord.h"
 #include "memeuclidean.h"
 #include "mempearson.h"
+#include "sharedrjsd.h"
+#include "sharedjsd.h"
 
 
 

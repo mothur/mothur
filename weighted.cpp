@@ -79,7 +79,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".weighted.results.temp";
+				string tempFile = outputDir + m->mothurGetpid(process) + ".weighted.results.temp";
 				m->openOutputFile(tempFile, out);
 	
 				out << Myresults.size() << endl;

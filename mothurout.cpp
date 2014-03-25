@@ -1364,8 +1364,8 @@ int MothurOut::appendFiles(string temp, string filename) {
 		ifstream input;
 	
 		//open output file in append mode
-		openOutputFileAppend(filename, output);
-		int ableToOpen = openInputFile(temp, input, "no error");
+		openOutputFileBinaryAppend(filename, output);
+		int ableToOpen = openInputFileBinary(temp, input, "no error");
 		//int ableToOpen = openInputFile(temp, input);
 		
 		int numLines = 0;
@@ -2755,6 +2755,33 @@ string MothurOut::getSimpleLabel(string label){
 		exit(1);
 	}
 }
+/***********************************************************************/
+string MothurOut::mothurGetpid(int threadID){
+	try {
+        
+        string pid = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+		pid += toString(getpid()); if(debug) { mothurOut("[DEBUG]: " + pid + "\n"); }
+        //remove any weird chars
+        string pid1 = "";
+        for (int i = 0; i < pid.length(); i++) {
+            if(pid[i]>47 && pid[i]<58) { //is a digit
+                pid1 += pid[i];
+            }
+        }
+        pid = pid1;
+#else
+		pid += toString(threadID);
+#endif
+		return pid;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurGetpid");
+		exit(1);
+	}
+}
+
 /***********************************************************************/
 
 bool MothurOut::isLabelEquivalent(string label1,  string label2){

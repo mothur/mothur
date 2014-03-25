@@ -433,10 +433,10 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-                string filename = toString(getpid()) + ".temp";
+                string filename = m->mothurGetpid(process) + ".temp";
 				numSeqs = driver(lines[process].start, lines[process].end, filename, groupMap);
                 
-                string tempFile = toString(getpid()) + ".num.temp";
+                string tempFile = m->mothurGetpid(process) + ".num.temp";
                 ofstream outTemp;
                 m->openOutputFile(tempFile, outTemp);
                 
@@ -451,7 +451,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 			}
 		}
 		
-		string filename = toString(getpid()) + ".temp";
+		string filename = m->mothurGetpid(process) + ".temp";
         numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
         
 		//force parent to wait until all the processes are done

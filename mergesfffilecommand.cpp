@@ -220,7 +220,7 @@ int MergeSfffilesCommand::execute(){
 		if (outputDir == "") {  thisOutputDir += m->hasPath(outputFile);  }
         variables["[filename]"] = thisOutputDir + m->getSimpleName(outputFile);
 		outputFile = getOutputFileName("sff",variables);
-        m->openOutputFile(outputFile, out);
+        m->openOutputFileBinary(outputFile, out);
         outputNames.push_back(outputFile); outputTypes["sff"].push_back(outputFile);
         outputFileHeader = outputFile + ".headers";
         numTotalReads = 0;

@@ -1583,11 +1583,11 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", breakUp[process], fileGroup, accnos + toString(getpid()) + ".byCount");
+				num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + m->mothurGetpid(process) + ".temp", fasta + toString(m->mothurGetpid(process)) + ".temp", breakUp[process], fileGroup, accnos + toString(m->mothurGetpid(process)) + ".byCount");
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
@@ -1714,6 +1714,8 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string filename, string accnos, string fasta, map<string, int>& priority){
 	try {
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
+        
 		Chimera* chimera;
 		if (templatefile != "self") { //you want to run slayer with a reference template
 			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
@@ -1998,6 +2000,8 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		int process = 0;
 		int num = 0;
 		processIDS.clear();
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
@@ -2008,11 +2012,11 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", thisPriority);
+				num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp", fasta + toString(m->mothurGetpid(process)) + ".temp", thisPriority);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

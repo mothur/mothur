@@ -159,7 +159,7 @@ int correctDist::createProcess(string distanceFileName){
 				process++;
 			}
 			else if(pid == 0){
-				driver(start[process], end[process], distanceFileName + toString(getpid()) + ".temp");
+				driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
 				exit(0);
 			}
 			else{

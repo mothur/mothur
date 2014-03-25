@@ -442,12 +442,12 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-                string locationsFile = toString(getpid()) + ".temp";
-				num = driverPcr(filename, goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
+                string locationsFile = m->mothurGetpid(process) + ".temp";
+				num = driverPcr(filename, goodFileName + m->mothurGetpid(process) + ".temp", badFileName + m->mothurGetpid(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = filename + toString(getpid()) + ".num.temp";
+				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
                 out << pstart << '\t' << adjustNeeded << endl;
 				out << num << '\t' << badSeqNames.size() << endl;
@@ -464,7 +464,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 			}
 		}
 		
-        string locationsFile = toString(getpid()) + ".temp";
+        string locationsFile = m->mothurGetpid(process) + ".temp";
         num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, adjustNeeded);
         
 		//force parent to wait until all the processes are done

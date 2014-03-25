@@ -567,11 +567,11 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 				process++;
 			}else if (pid == 0){
                 //clear old file because we append in driver
-                m->mothurRemove(newSummaryFile + toString(getpid()) + ".temp");
+                m->mothurRemove(newSummaryFile + m->mothurGetpid(process) + ".temp");
                 
-				otusToRemove = driver(newSummaryFile + toString(getpid()) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
+				otusToRemove = driver(newSummaryFile + m->mothurGetpid(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
                 
-                string tempFile = toString(getpid()) + ".otus2Remove.temp";
+                string tempFile = m->mothurGetpid(process) + ".otus2Remove.temp";
                 ofstream outTemp;
                 m->openOutputFile(tempFile, outTemp);
                 
@@ -827,7 +827,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 			}else if (pid == 0){
  				counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
                 
-                string tempFile = toString(getpid()) + ".cons_counts.temp";
+                string tempFile = m->mothurGetpid(process) + ".cons_counts.temp";
                 ofstream outTemp;
                 m->openOutputFile(tempFile, outTemp);
                 

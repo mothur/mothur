@@ -16,7 +16,7 @@ vector<string> CreateDatabaseCommand::setParameters(){
 		CommandParameter pname("repname", "InputTypes", "", "", "NameCount", "NameCount", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-		CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pcontaxonomy);
+		CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pconstaxonomy);
 		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(plist);
         CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -37,11 +37,11 @@ string CreateDatabaseCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, or count file and creates a database file.\n";
-		helpString += "The create.database command parameters are repfasta, list, shared, repname, contaxonomy, group, count and label. List, repfasta, repnames or count, and contaxonomy are required.\n";
+		helpString += "The create.database command parameters are repfasta, list, shared, repname, constaxonomy, group, count and label. List, repfasta, repnames or count, and constaxonomy are required.\n";
         helpString += "The repfasta file is fasta file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The repname file is the name file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The count file is the count file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, count=yourCountFile). If it includes group info, mothur will give you the abundance breakdown by group. \n";
-        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile, name=yourNameFile).\n";
+        helpString += "The constaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile, name=yourNameFile).\n";
         helpString += "The group file is optional and will just give you the abundance breakdown by group.\n";
         helpString += "The label parameter allows you to specify a label to be used from your listfile.\n";
         helpString += "NOTE: Make SURE the repfasta, repnames and contaxonomy are for the same label as the listfile.\n";
@@ -133,12 +133,12 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 					if (path == "") {	parameters["repname"] = inputDir + it->second;		}
 				}
 				
-				it = parameters.find("contaxonomy");
+				it = parameters.find("constaxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["contaxonomy"] = inputDir + it->second;		}
+					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("repfasta");
@@ -208,9 +208,9 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
             if (sharedfile != "") { if (outputDir == "") { outputDir = m->hasPath(sharedfile); } }
             else { if (outputDir == "") { outputDir = m->hasPath(listfile); } }
 			
-			contaxonomyfile = validParameter.validFile(parameters, "contaxonomy", true);
+			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
-               contaxonomyfile = "";  m->mothurOut("The contaxonomy parameter is required, aborting."); m->mothurOutEndLine(); abort = true; 
+               contaxonomyfile = "";  m->mothurOut("The constaxonomy parameter is required, aborting."); m->mothurOutEndLine(); abort = true;
 			}
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
 
@@ -581,7 +581,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             int binNumber = 0;
             string temp = "";
             for (int i = 0; i < info[0].size(); i++) { if (isspace(info[0][i])) {;}else{temp +=info[0][i]; } }
-            m->mothurConvert(temp, binNumber);
+            m->mothurConvert(m->getSimpleLabel(temp), binNumber);
             set<int>::iterator it = sanity.find(binNumber);
             if (it != sanity.end()) {
                 m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;

@@ -432,7 +432,7 @@ int MatrixOutputCommand::execute(){
 		string current = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; if (!subsample) { m->setPhylipFile(current); } }
 		}
 		
 		m->mothurOutEndLine();
@@ -540,7 +540,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                         
                         driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);   
                         
-                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(getpid()) + ".dist";
+                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
                         ofstream outtemp;
                         m->openOutputFile(tempdistFileName, outtemp);
                             
@@ -739,6 +739,8 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 variables["[calc]"] = matrixCalculators[i]->getName();
                 string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                //set current phylip file to average distance matrix
+                m->setPhylipFile(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);

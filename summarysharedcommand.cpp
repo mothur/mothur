@@ -611,7 +611,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
         
             
             if(processors == 1){
-                driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
+                driver(thisItersLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
                 m->appendFiles((sumFileName + ".temp"), sumFileName);
                 m->mothurRemove((sumFileName + ".temp"));
                 if (mult) {
@@ -632,11 +632,11 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         processIDS.push_back(pid); 
                         process++;
                     }else if (pid == 0){
-                        driver(thisLookup, lines[process].start, lines[process].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
+                        driver(thisItersLookup, lines[process].start, lines[process].end, sumFileName + m->mothurGetpid(process) + ".temp", sumAllFileName + m->mothurGetpid(process) + ".temp", calcDists);
                         
                         //only do this if you want a distance file
                         if (createPhylip) {
-                            string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(getpid()) + ".dist";
+                            string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + m->mothurGetpid(process) + ".dist";
                             ofstream outtemp;
                             m->openOutputFile(tempdistFileName, outtemp);
                             
@@ -659,10 +659,10 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 }
                 
                 //parent do your part
-                driver(thisLookup, lines[0].start, lines[0].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
-                m->appendFiles((sumFileName + toString(getpid()) + ".temp"), sumFileName);
-                m->mothurRemove((sumFileName + toString(getpid()) + ".temp"));
-                if (mult) { m->appendFiles((sumAllFileName + toString(getpid()) + ".temp"), sumAllFileName); }
+                driver(thisItersLookup, lines[0].start, lines[0].end, sumFileName + m->mothurGetpid(process) + ".temp", sumAllFileName + m->mothurGetpid(process) + ".temp", calcDists);
+                m->appendFiles((sumFileName + m->mothurGetpid(process) + ".temp"), sumFileName);
+                m->mothurRemove((sumFileName + m->mothurGetpid(process) + ".temp"));
+                if (mult) { m->appendFiles((sumAllFileName + m->mothurGetpid(process) + ".temp"), sumAllFileName); }
                 
                 //force parent to wait until all the processes are done
                 for (int i = 0; i < processIDS.size(); i++) {
@@ -724,9 +724,9 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                     
                     //for each bin
-                    for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
+                    for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
                         if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                        for (int j = 0; j < thisLookup.size(); j++) { newLookup[j]->push_back(thisLookup[j]->getAbundance(k), thisLookup[j]->getGroup()); }
+                        for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
                     }
                     
                     // Allocate memory for thread data.
@@ -738,7 +738,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 }
                 
                 //parent do your part
-                driver(thisLookup, lines[0].start, lines[0].end, sumFileName +"0.temp", sumAllFileName + "0.temp", calcDists);   
+                driver(thisItersLookup, lines[0].start, lines[0].end, sumFileName +"0.temp", sumAllFileName + "0.temp", calcDists);
                 m->appendFiles((sumFileName + "0.temp"), sumFileName);
                 m->mothurRemove((sumFileName + "0.temp"));
                 if (mult) { m->appendFiles((sumAllFileName + "0.temp"), sumAllFileName); }
@@ -754,7 +754,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
                     m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
                     
-                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  }
                     
                     if (createPhylip) {
                         for (int k = 0; k < calcDists.size(); k++) {

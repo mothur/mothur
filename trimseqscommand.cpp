@@ -1047,15 +1047,15 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
 							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
+								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 
 								if(qFileName != ""){
-									tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
+									tempPrimerQualFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 									m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
 								}
 								if(nameFile != ""){
-									tempNameFileNames[i][j] += toString(getpid()) + ".temp";
+									tempNameFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 									m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
 								}
 							}
@@ -1065,27 +1065,27 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 							
 				driverCreateTrim(filename,
 								 qFileName,
-								 (trimFASTAFileName + toString(getpid()) + ".temp"),
-								 (scrapFASTAFileName + toString(getpid()) + ".temp"),
-								 (trimQualFileName + toString(getpid()) + ".temp"),
-								 (scrapQualFileName + toString(getpid()) + ".temp"),
-								 (trimNameFileName + toString(getpid()) + ".temp"),
-								 (scrapNameFileName + toString(getpid()) + ".temp"),
-                                 (trimCountFileName + toString(getpid()) + ".temp"),
-								 (scrapCountFileName + toString(getpid()) + ".temp"),
-								 (groupFile + toString(getpid()) + ".temp"),
+								 (trimFASTAFileName + m->mothurGetpid(process) + ".temp"),
+								 (scrapFASTAFileName + m->mothurGetpid(process) + ".temp"),
+								 (trimQualFileName + m->mothurGetpid(process) + ".temp"),
+								 (scrapQualFileName + m->mothurGetpid(process) + ".temp"),
+								 (trimNameFileName + m->mothurGetpid(process) + ".temp"),
+								 (scrapNameFileName + m->mothurGetpid(process) + ".temp"),
+                                 (trimCountFileName + m->mothurGetpid(process) + ".temp"),
+								 (scrapCountFileName + m->mothurGetpid(process) + ".temp"),
+								 (groupFile + m->mothurGetpid(process) + ".temp"),
 								 tempFASTAFileNames,
 								 tempPrimerQualFileNames,
 								 tempNameFileNames,
 								 lines[process],
 								 qLines[process]);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
+                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + m->mothurGetpid(process) + '\n'); }
 				
 				//pass groupCounts to parent
 				if(createGroup){
 					ofstream out;
-					string tempFile = filename + toString(getpid()) + ".num.temp";
+					string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
 					m->openOutputFile(tempFile, out);
 					
 					out << groupCounts.size() << endl;

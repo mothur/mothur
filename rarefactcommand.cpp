@@ -570,6 +570,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 typesFiles[extension] = temp;
             }
             if (!(m->inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
+            
 		}
 		
 		//for each type create a combo file
@@ -648,9 +649,8 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 
                 for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //each chunk
 				    //grab data for each group
-                    for (map<string, map<int, vector< vector<string> > > >::iterator itFileNameGroup = files.begin(); itFileNameGroup != files.end(); itFileNameGroup++) {
-                        
-                        string group = itFileNameGroup->first;
+                    for (int n = 0; n < groupNames.size(); n++) {
+                        string group = groupNames[n];
                        
                         map<int, vector< vector<string> > >::iterator itLine = files[group].find(*itNumSampled);
                         if (itLine != files[group].end()) { 

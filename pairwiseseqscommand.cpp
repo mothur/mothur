@@ -528,8 +528,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 				processIDS.push_back(pid); 
 				process++;
 			}else if (pid == 0){
-				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", cutoff); }
-				else { driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", "square"); }
+				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
+				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 

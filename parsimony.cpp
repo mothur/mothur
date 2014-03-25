@@ -102,7 +102,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".pars.results.temp";
+				string tempFile = outputDir + m->mothurGetpid(process) + ".pars.results.temp";
 				m->openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;

@@ -837,7 +837,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 					for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
 						for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
                             if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                tempBarcodePrimerComboFileNames[i][j] += toString(getpid()) + ".temp";
+                                tempBarcodePrimerComboFileNames[i][j] += m->mothurGetpid(process) + ".temp";
                                 ofstream temp;
                                 m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
                                 temp.close();
@@ -846,9 +846,9 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 					}
 				}
 				driverCreateTrim(flowFileName,
-								 (trimFlowFileName + toString(getpid()) + ".temp"),
-								 (scrapFlowFileName + toString(getpid()) + ".temp"),
-								 (fastaFileName + toString(getpid()) + ".temp"),
+								 (trimFlowFileName + m->mothurGetpid(process) + ".temp"),
+								 (scrapFlowFileName + m->mothurGetpid(process) + ".temp"),
+								 (fastaFileName + m->mothurGetpid(process) + ".temp"),
 								 tempBarcodePrimerComboFileNames, lines[process]);
 
 				exit(0);

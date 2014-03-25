@@ -1201,7 +1201,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = toString(getpid()) + ".pvalues.temp";
+					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
 					m->openOutputFile(tempFile, out);
 					
 					//pass values
@@ -1379,7 +1379,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = toString(getpid()) + ".pvalues.temp";
+					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
 					m->openOutputFile(tempFile, out);
 					
 					//pass values

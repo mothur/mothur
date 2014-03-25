@@ -726,11 +726,11 @@ int ChimeraPintailCommand::createProcesses(string outputFileName, string filenam
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp");
+				num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp");
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

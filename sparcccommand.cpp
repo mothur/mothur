@@ -437,7 +437,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = toString(getpid()) + ".pvalues.temp";
+					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
 					m->openOutputFile(tempFile, out);
 					
 					//pass values

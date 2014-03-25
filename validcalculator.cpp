@@ -675,6 +675,8 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["gower"]					= "gower";
 		treegroup["memchi2"]				= "memchi2";
 		treegroup["memchord"]				= "memchord";
+        treegroup["jsd"]                    = "jsd";
+        treegroup["rjsd"]                   = "rjsd";
 		treegroup["memeuclidean"]			= "memeuclidean";
 		treegroup["mempearson"]				= "mempearson";
 		

@@ -659,12 +659,12 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, strin
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				string filteredFasta = filename + toString(getpid()) + ".temp";
+				string filteredFasta = filename + m->mothurGetpid(process) + ".temp";
 				num = driverRunFilter(F, filteredFasta, filename, lines[process]);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = filename +  toString(getpid()) + ".num.temp";
+				string tempFile = filename +  m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
@@ -1095,7 +1095,7 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 				num = driverCreateFilter(F, filename, lines[process]);
 				
 				//write out filter counts to file
-				filename += toString(getpid()) + "filterValues.temp";
+				filename += m->mothurGetpid(process) + "filterValues.temp";
 				ofstream out;
 				m->openOutputFile(filename, out);
 				

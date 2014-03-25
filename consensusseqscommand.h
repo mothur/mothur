@@ -44,7 +44,8 @@ private:
 	map<string, string> fastaMap;
 	map<string, string> nameMap;
 	map<string, int> nameFileMap;
-	int cutoff, seqLength;
+	int seqLength;
+    float cutoff;
 	
 	int readFasta();
 	int readNames();

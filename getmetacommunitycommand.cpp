@@ -415,11 +415,11 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
 				process++;
 			}else if (pid == 0){
                 outputNames.clear();
-				num = processDriver(thislookup, dividedPartitions[process], (outputFileName + toString(getpid())), rels[process], matrix[process], doneFlags, process);
+				num = processDriver(thislookup, dividedPartitions[process], (outputFileName + m->mothurGetpid(process)), rels[process], matrix[process], doneFlags, process);
                 
                 //pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".outputNames.temp";
+				string tempFile = m->mothurGetpid(process) + ".outputNames.temp";
 				m->openOutputFile(tempFile, out);
                 out << num << endl;
                 out << outputNames.size() << endl;

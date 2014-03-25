@@ -1639,11 +1639,11 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(outputFileName + toString(getpid()) + ".temp", files[process], accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", numChimeras);
+				num = driver(outputFileName + toString(m->mothurGetpid(process)) + ".temp", files[process], accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", numChimeras);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out << numChimeras << endl;
@@ -1823,11 +1823,11 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(getpid()) + ".temp", filename + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", accnos + ".byCount." + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
+				num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", filename + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

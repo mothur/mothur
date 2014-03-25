@@ -146,6 +146,7 @@ class MothurOut {
         bool isLabelEquivalent(string, string);
         string getSimpleLabel(string);
         string findEdianness();
+        string mothurGetpid(int);
 	
 		
 		//string manipulation

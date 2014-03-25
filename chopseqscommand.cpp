@@ -378,11 +378,11 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				wroteAccnos = driver(lines[process], filename, outFasta + toString(getpid()) + ".temp", outAccnos + toString(getpid()) + ".temp");
+				wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp");
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = fastafile + toString(getpid()) + ".bool.temp";
+				string tempFile = fastafile + m->mothurGetpid(process) + ".bool.temp";
 				m->openOutputFile(tempFile, out);
 				out << wroteAccnos << endl;				
 				out.close();

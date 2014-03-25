@@ -980,11 +980,11 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], taxFileName + m->mothurGetpid(process) + ".temp", tempTaxFile + m->mothurGetpid(process) + ".temp", accnos + m->mothurGetpid(process) + ".temp", filename);
 
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = filename + toString(getpid()) + ".num.temp";
+				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

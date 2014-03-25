@@ -1098,11 +1098,11 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", accnos + ".byCount." + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
+				num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFName + toString(getpid()) + ".num.temp";
+				string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();

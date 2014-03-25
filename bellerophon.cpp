@@ -370,7 +370,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
 				process++;
 			}else if (pid == 0){
 				exitCommand = driverChimeras(mid, lines[process]);
-				string tempOut = outputDir + toString(getpid()) + ".temp";
+				string tempOut = outputDir + toString(m->mothurGetpid(process)) + ".temp";
 				writePrefs(tempOut, lines[process]);
 				exit(0);
 			}else { 

@@ -546,7 +546,7 @@ void Pintail::createProcessesQuan() {
 				
 				//write out data to file so parent can read it
 				ofstream out;
-				string s = toString(getpid()) + ".temp";
+				string s = m->mothurGetpid(process) + ".temp";
 				m->openOutputFile(s, out);
 								
 				//output observed distances

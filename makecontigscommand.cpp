@@ -704,7 +704,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
 							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
+								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 							}
 						}
@@ -712,14 +712,14 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 				}
                 
 				num = driver(files[process], 
-                             outputFasta + toString(getpid()) + ".temp", 
-                             outputScrapFasta + toString(getpid()) + ".temp", 
-                             outputMisMatches + toString(getpid()) + ".temp",
+                             outputFasta + m->mothurGetpid(process) + ".temp",
+                             outputScrapFasta + m->mothurGetpid(process) + ".temp",
+                             outputMisMatches + m->mothurGetpid(process) + ".temp",
                              tempFASTAFileNames, process, group);
 				
 				//pass groupCounts to parent
                 ofstream out;
-                string tempFile = toString(getpid()) + ".num.temp";
+                string tempFile = m->mothurGetpid(process) + ".num.temp";
                 m->openOutputFile(tempFile, out);
                 out << num << endl;
 				if (createFileGroup || createOligosGroup) {
@@ -1143,7 +1143,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             num++;
             
 			//report progress
-			if((num) % 1000 == 0){	m->mothurOut(toString(num)); m->mothurOutEndLine();		}
+			if((num) % 1000 == 0){	m->mothurOutJustToScreen(toString(num)); m->mothurOutEndLine();		}
 		}
         
 		//report progress
@@ -1289,7 +1289,7 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& c
                     count++;
                     
                     //report progress
-                    if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+                    if((count) % 10000 == 0){	m->mothurOutJustToScreen(toString(count)); m->mothurOutEndLine();		}
                 //}
             }
 		}
