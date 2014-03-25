@@ -1433,7 +1433,7 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
         
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
@@ -1703,7 +1703,7 @@ int ScreenSeqsCommand::createProcessesAlignSummary(vector<float>& sims, vector<f
         
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
@@ -1986,7 +1986,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
@@ -2526,7 +2526,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later

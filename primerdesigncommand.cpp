@@ -560,7 +560,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
@@ -819,7 +819,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later

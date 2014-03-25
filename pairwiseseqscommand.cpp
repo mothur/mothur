@@ -522,7 +522,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid); 

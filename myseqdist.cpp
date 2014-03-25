@@ -152,7 +152,7 @@ int correctDist::createProcess(string distanceFileName){
 		
 		while(process != processors){
 			
-			int pid = fork();
+			pid_t pid = fork();
 			
 			if(pid > 0){
 				processIDs.push_back(pid);
