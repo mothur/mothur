@@ -32,10 +32,13 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort;
-    string oligosfile, groupfile, package;
+    bool abort, requiredonly;
+    string oligosfile, groupfile, package, inputfile, file;
     string outputDir;
-    vector<string> outputNames;
+    vector<string> outputNames, Groups;
+    
+    int readOligos();
+    int readFile();
 };
 
 /**************************************************************************************************/

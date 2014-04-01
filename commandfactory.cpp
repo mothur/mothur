@@ -150,6 +150,7 @@
 #include "kruskalwalliscommand.h"
 #include "sracommand.h"
 #include "mergesfffilecommand.h"
+#include "getmimarkspackagecommand.h"
 
 /*******************************************************/
 
@@ -323,6 +324,7 @@ CommandFactory::CommandFactory(){
     commands["kruskal.wallis"]      = "kruskal.wallis";
     commands["sra"]                 = "sra";
     commands["merge.sfffiles"]      = "merge.sfffiles";
+    commands["get.mimarkspackage"]  = "get.mimarkspackage";
     
 
 }
@@ -552,6 +554,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "kruskal.wallis")        {	command = new KruskalWallisCommand(optionString);           }
         else if(commandName == "sra")                   {	command = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
+        else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -722,6 +725,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "kruskal.wallis")        {	pipecommand = new KruskalWallisCommand(optionString);           }
         else if(commandName == "sra")                   {	pipecommand = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	pipecommand = new MergeSfffilesCommand(optionString);           }
+        else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -878,6 +882,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
         else if(commandName == "sra")                   {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
+        else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

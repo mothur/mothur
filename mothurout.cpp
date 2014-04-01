@@ -2823,7 +2823,7 @@ bool MothurOut::isSubset(vector<string> bigset, vector<string> subset) {
         
 		if (subset.size() > bigset.size()) { return false;  }
 		
-		//check if each guy in suset is also in bigset
+		//check if each guy in subset is also in bigset
 		for (int i = 0; i < subset.size(); i++) {
 			bool match = false;
 			for (int j = 0; j < bigset.size(); j++) {
@@ -3598,6 +3598,26 @@ bool MothurOut::inUsersGroups(vector<string> groupnames, vector<string> Groups) 
 		errorOut(e, "MothurOut", "inUsersGroups");
 		exit(1);
 	}	
+}
+/**************************************************************************************************/
+//removes entries that are only white space
+int MothurOut::removeBlanks(vector<string>& tempVector) {
+	try {
+		vector<string> newVector;
+		for (int i = 0; i < tempVector.size(); i++) {
+            bool isBlank = true;
+            for (int j = 0; j < tempVector[i].length(); j++) {
+                if (!isspace(tempVector[i][j])) { isBlank = false; j+= tempVector[i].length(); } //contains non space chars, break out and save
+            }
+            if (!isBlank) { newVector.push_back(tempVector[i]); }
+        }
+        tempVector = newVector;
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "removeBlanks");
+		exit(1);
+	}
 }
 /***********************************************************************/
 //this function determines if the user has given us labels that are smaller than the given label.
