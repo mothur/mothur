@@ -677,11 +677,13 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             //append new header to reads
             for (int i = 0; i < filehandles.size(); i++) {
                 for (int j = 0; j < filehandles[i].size(); j++) {
-                    m->appendBinaryFiles(filehandles[i][j], filehandlesHeaders[i][j]);
-                    m->renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
-                    m->mothurRemove(filehandlesHeaders[i][j]);
-                    //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
-                    if (numSplitReads[i][j] == 0) { m->mothurRemove(filehandles[i][j]); }
+                    if (filehandles[i][j] != "") {
+                        m->appendBinaryFiles(filehandles[i][j], filehandlesHeaders[i][j]);
+                        m->renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
+                        m->mothurRemove(filehandlesHeaders[i][j]);
+                        //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
+                        if (numSplitReads[i][j] == 0) { m->mothurRemove(filehandles[i][j]); }
+                    }
                 }
             }
 			//cout << "here3" << endl;
@@ -1260,6 +1262,25 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
             if(!success)				{	trashCode += 'r';	}
         }
 
+        if (trashCode.length() == 0) { //is this sequence in the ignore group
+            string thisGroup = "";
+            
+            if(barcodes.size() != 0){
+                thisGroup = barcodeNameVector[barcode];
+                if (numFPrimers != 0) {
+                    if (primerNameVector[primer] != "") {
+                        if(thisGroup != "") {
+                            thisGroup += "." + primerNameVector[primer];
+                        }else {
+                            thisGroup = primerNameVector[primer];
+                        }
+                    }
+                }
+            }
+            
+            int pos = thisGroup.find("ignore");
+            if (pos != string::npos) {  trashCode += "i"; }
+        }
         
         return trashCode.length();
     }
@@ -1911,36 +1932,39 @@ bool SffInfoCommand::readOligos(string oligoFile){
 					string primerName = primerNameVector[itPrimer->second];
 					string barcodeName = barcodeNameVector[itBar->second];
 					
-					string comboGroupName = "";
-					string fastaFileName = "";
-					string qualFileName = "";
-					string nameFileName = "";
-					
-					if(primerName == ""){
-						comboGroupName = barcodeNameVector[itBar->second];
-					}
-					else{
-						if(barcodeName == ""){
-							comboGroupName = primerNameVector[itPrimer->second];
-						}
-						else{
-							comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
-						}
-					}
-					
-					ofstream temp;
-                    map<string, string> variables;
-                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
-                    variables["[group]"] = comboGroupName;
-					string thisFilename = getOutputFileName("sff",variables);
-					if (uniqueNames.count(thisFilename) == 0) {
-						outputNames.push_back(thisFilename);
-						outputTypes["sff"].push_back(thisFilename);
-						uniqueNames.insert(thisFilename);
-					}
-					
-					filehandles[itBar->second][itPrimer->second] = thisFilename;
-					temp.open(thisFilename.c_str(), ios::binary);		temp.close();
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeNameVector[itBar->second];
+                        }
+                        else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerNameVector[itPrimer->second];
+                            }
+                            else{
+                                comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
+                            }
+                        }
+                        
+                        ofstream temp;
+                        map<string, string> variables;
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+                        variables["[group]"] = comboGroupName;
+                        string thisFilename = getOutputFileName("sff",variables);
+                        if (uniqueNames.count(thisFilename) == 0) {
+                            outputNames.push_back(thisFilename);
+                            outputTypes["sff"].push_back(thisFilename);
+                            uniqueNames.insert(thisFilename);
+                        }
+                        
+                        filehandles[itBar->second][itPrimer->second] = thisFilename;
+                        temp.open(thisFilename.c_str(), ios::binary);		temp.close();
+                    }
 				}
 			}
 		}

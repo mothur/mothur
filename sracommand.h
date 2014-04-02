@@ -43,10 +43,11 @@ private:
     vector<string> outputNames, Groups;
     vector<string> primerNameVector;
     vector<string> barcodeNameVector;
-    map<string, string> Group2Barcode;
-    map<string, string> Group2Primer;
+    map<string, vector<string> > Group2Barcode;
+    map<string, vector<string> > Group2Primer;
     map<string, string> Group2Organism;
     map<string, map<string, string> > mimarks;  //group -> <field -> valueForGroup> ex.  F003D001 -> <lat_lon -> 42.282026 -83.733850>
+    set<string> uniqueNames;
 
     bool checkCasesInstrumentModels(string&);
     bool checkCasesPlatforms(string&);

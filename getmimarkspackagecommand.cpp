@@ -34,7 +34,7 @@ vector<string> GetMIMarksPackageCommand::setParameters(){
 string GetMIMarksPackageCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The get.mimarkspackage command creates a mimarks package form with your groups. The required fields are flagged with * characters. Fields marked with '**' indicated they are in a group where at least one of the fields is required.\n";
+		helpString += "The get.mimarkspackage command creates a mimarks package form with your groups. The required fields are flagged with * characters. \n";
         helpString += "Further documentation on the different packages and required formats can be found here, http://www.mothur.org/wiki/MIMarks_Data_Packages.\n";
 		helpString += "The get.mimarkspackage command parameters are: oligos, group, package and requiredonly. oligos or group is required.\n";
 		helpString += "The oligos parameter is used to provide your oligos file so mothur can extract your group names.\n";
@@ -196,6 +196,8 @@ int GetMIMarksPackageCommand::execute(){
         else if (file != "")  { readFile();     }
         else {  GroupMap groupmap(groupfile); groupmap.readMap(); Groups = groupmap.getNamesOfGroups(); }
         
+        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
+        
         if (outputDir == "") { outputDir += m->hasPath(inputfile); }
         map<string, string> variables;
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
@@ -207,7 +209,6 @@ int GetMIMarksPackageCommand::execute(){
         
         out << "#This is a tab-delimited file. Additional Documentation can be found at http://www.mothur.org/wiki/MIMarks_Data_Packages." << endl;
         out << "#Please fill all the required fields indicated with '*'" << endl;
-        out << "#Fields marked with '**' indicated they are in a group where at least one of the fields is required." << endl;
         out << "#Unknown or inapplicable fields can be assigned NA value." << endl;
         out << "#You may add extra custom fields to this template. Make sure all the fields are separated by tabs." << endl;
         out << "#You may remove any fields not required (marked with '*'). Make sure all the fields are separated by tabs." << endl;
@@ -223,9 +224,9 @@ int GetMIMarksPackageCommand::execute(){
         }else if (package == "host_associated") {
             out << "#Environmental:MIMARKS.specimen.host-associated.3.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon   *title  *seq_methods	*host   **clone **isolate   **strain" << endl;
+                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon   *title  *seq_methods	*host   " << endl;
             }else {
-                out << "*sample_name	description	bioproject_id	sample_title	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon   *title  *seq_methods **clone **isolate   **strain    rel_to_oxygen	samp_collect_device	samp_mat_process	*host	age	altitude	blood_press_diast	blood_press_syst	body_habitat	body_product	tissue	chem_administration	depth	diet	disease_stat	dry_mass	elev	family_relationship	genotype	gravidity	height_or_length	host_body_temp	host_color	host_growth_cond	host_shape	host_subject_id	host_taxid	infra_specific_name	infra_specific_rank	last_meal	life_stage	misc_param	organism_count	oxy_stat_samp	perturbation	phenotype	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	substrate	temp	tot_mass" << endl;
+                out << "*sample_name	description	bioproject_id	sample_title	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon   *title  *seq_methods    rel_to_oxygen	samp_collect_device	samp_mat_process	*host	age	altitude	blood_press_diast	blood_press_syst	body_habitat	body_product	tissue	chem_administration	depth	diet	disease_stat	dry_mass	elev	family_relationship	genotype	gravidity	height_or_length	host_body_temp	host_color	host_growth_cond	host_shape	host_subject_id	host_taxid	infra_specific_name	infra_specific_rank	last_meal	life_stage	misc_param	organism_count	oxy_stat_samp	perturbation	phenotype	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	substrate	temp	tot_mass" << endl;
             }
         }else if (package == "human_associated") {
             out << "#Environmental:MIMARKS.specimen.human-associated.3.0" << endl;
@@ -438,7 +439,7 @@ int GetMIMarksPackageCommand::readOligos(){
 			primerNameVector.push_back("");
 		}
         
-        set<string> uniqueNames;
+        
         for(int i = 0; i <  barcodeNameVector.size(); i++){
             for(int j = 0; j < primerNameVector.size(); j++){
                 
@@ -470,7 +471,6 @@ int GetMIMarksPackageCommand::readOligos(){
         
         if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
-        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
         
 		return true;
 		

@@ -13,6 +13,7 @@
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
 	try {
+        CommandParameter pfile("file", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","",false,false,true); parameters.push_back(pfile);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FastaTaxName","",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","list",false,false,true); parameters.push_back(pphylip);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName","list",false,false,true); parameters.push_back(pfasta);
@@ -47,13 +48,14 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
 		helpString += "You will also need to set the taxlevel you want to split by. mothur will split the sequences into distinct taxonomy groups, and split the distance file based on those groups. \n";
 		helpString += "For the classification method using a fasta file, you need to provide your fasta file, names file and taxonomy file.  \n";
 		helpString += "You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n";
+        helpString += "The file option allows you to enter your file containing your list of column and names/count files as well as the singleton file.  This file is mothur generated, when you run cluster.split() with the cluster=f parameter.  This can be helpful when you have a large dataset that you may be able to use all your processors for the splitting step, but have to reduce them for the cluster step due to RAM constraints. For example: cluster.split(fasta=yourFasta, taxonomy=yourTax, count=yourCount, taxlevel=3, cluster=f, processors=8) then cluster.split(file=yourFile, processors=4).  This allows your to maximize your processors during the splitting step.  Also, if you are unsure if the cluster step will have RAM issue with multiple processors, you can avoid running the first part of the command multiple times.\n";
 		helpString += "The phylip and column parameter allow you to enter your distance file. \n";
 		helpString += "The fasta parameter allows you to enter your aligned fasta file. \n";
 		helpString += "The name parameter allows you to enter your name file. \n";
@@ -89,6 +91,7 @@ string ClusterSplitCommand::getOutputPattern(string type) {
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
         else if (type == "column") {  pattern = "[filename],dist"; }
+        else if (type == "file")   {  pattern = "[filename],file"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -108,6 +111,7 @@ ClusterSplitCommand::ClusterSplitCommand(){
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
@@ -147,6 +151,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			outputTypes["rabund"] = tempOutNames;
 			outputTypes["sabund"] = tempOutNames;
 			outputTypes["column"] = tempOutNames;
+            outputTypes["file"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -203,12 +208,25 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("file");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["file"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			file = validParameter.validFile(parameters, "file", true);
+			if (file == "not open") { file = ""; abort = true; }
+			else if (file == "not found") { file = ""; }
+            else { distfile = file; }
+            
+            phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
-			else if (phylipfile == "not found") { phylipfile = ""; }	
+			else if (phylipfile == "not found") { phylipfile = ""; }
 			else {  distfile = phylipfile;  format = "phylip"; 	m->setPhylipFile(phylipfile); }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
@@ -236,7 +254,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			else if (taxFile == "not found") { taxFile = ""; }
 			else {  m->setTaxonomyFile(taxFile); if (splitmethod != "fasta") { splitmethod = "classify"; } }
 			
-			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) { 
+			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (file == "")) {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip, then fasta
 				columnfile = m->getColumnFile(); 
@@ -248,13 +266,13 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 						fastafile = m->getFastaFile(); 
 						if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 						else { 
-							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a phylip or a column or fastafile."); m->mothurOutEndLine(); 
+							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a file, phylip or a column or fastafile."); m->mothurOutEndLine();
 							abort = true; 
 						}
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: fasta, phylip or column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "") && (file != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: file, fasta, phylip or column."); m->mothurOutEndLine(); abort = true; }
             
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
@@ -368,97 +386,104 @@ int ClusterSplitCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
-		time_t estart;
-		vector<string> listFileNames;
-		set<string> labels;
-		string singletonName = "";
-		double saveCutoff = cutoff;
+        
+        time_t estart;
+        vector<string> listFileNames;
+        vector< map<string, string> > distName;
+        set<string> labels;
+        string singletonName = "";
+        
+        double saveCutoff = cutoff;
 
-		//****************** file prep work ******************************//
-		#ifdef USE_MPI
+        if (file != "") {  deleteFiles = false; estart = time(NULL); singletonName = readFile(distName); }
+        else {
+		          
+            //****************** file prep work ******************************//
+#ifdef USE_MPI
 			int pid;
 			int tag = 2001;
-			MPI_Status status; 
+			MPI_Status status;
 			MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 			
 			if (pid == 0) { //only process 0 converts and splits
-			
-		#endif
-		
-		//if user gave a phylip file convert to column file
-		if (format == "phylip") {
-			estart = time(NULL);
-			m->mothurOut("Converting to column format..."); m->mothurOutEndLine();
-			
-			ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
-			
-			NameAssignment* nameMap = NULL;
-			convert->setFormat("phylip");
-			convert->read(nameMap);
-			
-			if (m->control_pressed) {  delete convert;  return 0;  }
-			
-			distfile = convert->getOutputFile();
-		
-			//if no names file given with phylip file, create it
-			ListVector* listToMakeNameFile =  convert->getListVector();
-			if ((namefile == "") && (countfile == "")) {  //you need to make a namefile for split matrix
-				ofstream out;
-				namefile = phylipfile + ".names";
-				m->openOutputFile(namefile, out);
-				for (int i = 0; i < listToMakeNameFile->getNumBins(); i++) {
-					string bin = listToMakeNameFile->get(i);
-					out << bin << '\t' << bin << endl;
-				}
-				out.close();
-			}
-			delete listToMakeNameFile;
-			delete convert;
-			
-			m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file."); m->mothurOutEndLine();
-		}
-		if (m->control_pressed) { return 0; }
-		
-		estart = time(NULL);
-		m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
-		
-		//split matrix into non-overlapping groups
-		SplitMatrix* split;
-		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
-		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
-		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
-		
-		split->split();
-		
-		if (m->control_pressed) { delete split; return 0; }
-		
-		singletonName = split->getSingletonNames();
-		vector< map<string, string> > distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
-		delete split;
-		
-        if (m->debug) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
                 
-		//output a merged distance file
-		//if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
+#endif
+                
+                //if user gave a phylip file convert to column file
+                if (format == "phylip") {
+                    estart = time(NULL);
+                    m->mothurOut("Converting to column format..."); m->mothurOutEndLine();
+                    
+                    ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
+                    
+                    NameAssignment* nameMap = NULL;
+                    convert->setFormat("phylip");
+                    convert->read(nameMap);
+                    
+                    if (m->control_pressed) {  delete convert;  return 0;  }
+                    
+                    distfile = convert->getOutputFile();
+                    
+                    //if no names file given with phylip file, create it
+                    ListVector* listToMakeNameFile =  convert->getListVector();
+                    if ((namefile == "") && (countfile == "")) {  //you need to make a namefile for split matrix
+                        ofstream out;
+                        namefile = phylipfile + ".names";
+                        m->openOutputFile(namefile, out);
+                        for (int i = 0; i < listToMakeNameFile->getNumBins(); i++) {
+                            string bin = listToMakeNameFile->get(i);
+                            out << bin << '\t' << bin << endl;
+                        }
+                        out.close();
+                    }
+                    delete listToMakeNameFile;
+                    delete convert;
+                    
+                    m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file."); m->mothurOutEndLine();
+                }
+                if (m->control_pressed) { return 0; }
+                
+                estart = time(NULL);
+                m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
+                
+                //split matrix into non-overlapping groups
+                SplitMatrix* split;
+                if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
+                else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
+                else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
+                else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
+                
+                split->split();
+                
+                if (m->control_pressed) { delete split; return 0; }
+                
+                singletonName = split->getSingletonNames();
+                distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
+                delete split;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
+                
+                //output a merged distance file
+                //if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
 				
-		if (m->control_pressed) { return 0; }
-		
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
-		estart = time(NULL);
-              
-        if (!runCluster) { 
-
-                m->mothurOutEndLine();
-                m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-                for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
-                m->mothurOutEndLine();
-                return 0;
+                if (m->control_pressed) { return 0; }
                 
-        }
-   
+                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
+                estart = time(NULL);
+                
+                if (!runCluster) { 
+                    printFile(singletonName, distName);
+                    
+                    m->mothurOutEndLine();
+                    m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+                    for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
+                    m->mothurOutEndLine();
+                    return 0;
+                    
+                }
+                deleteFiles = true;
+            }
 		//****************** break up files between processes and cluster each file set ******************************//
 	#ifdef USE_MPI
 			////you are process 0 from above////
@@ -651,6 +676,9 @@ int ClusterSplitCommand::execute(){
 		mergeLists(listFileNames, labelBins, listSingle);
 
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        
+        //delete after all are complete incase a crash happens
+        if (!deleteFiles) { for (int i = 0; i < distName.size(); i++) {	m->mothurRemove(distName[i].begin()->first); m->mothurRemove(distName[i].begin()->second); 	} }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
 		
@@ -1258,9 +1286,10 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
         if(namefile != ""){	delete nameMap; }
         else { delete ct; }
         
-        m->mothurRemove(thisDistFile);
-        m->mothurRemove(thisNamefile);
-        
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
         return listFileName;
         
 	}
@@ -1413,8 +1442,10 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             return listFileName;
         }
         
-        m->mothurRemove(thisDistFile);
-        m->mothurRemove(thisNamefile);
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
         
         if (saveCutoff != cutoff) { 
             if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
@@ -1493,6 +1524,69 @@ int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbund
     }
     catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "createRabund");
+		exit(1);
+	}
+    
+}
+//**********************************************************************************************************************
+int ClusterSplitCommand::printFile(string singleton, vector< map<string, string> >& distName){
+    try {
+        ofstream out;
+        map<string, string> variables;
+        string thisOutputDir = outputDir;
+		if (outputDir == "") { thisOutputDir = m->hasPath(distfile); }
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(distfile));
+		string outputFileName = getOutputFileName("file", variables);
+        m->openOutputFile(outputFileName, out);
+        
+        out << singleton << endl;
+        if (namefile != "") { out << "name" << endl; }
+        else if (countfile != "") { out << "count" << endl; }
+        else { out << "unknown" << endl; }
+        
+        for (int i = 0; i < distName.size(); i++) {    out << distName[i].begin()->first << '\t' << distName[i].begin()->second << endl;	}
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "printFile");
+		exit(1);
+	}
+    
+}
+//**********************************************************************************************************************
+string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
+    try {
+        string singleton, thiscolumn, thisname, type;
+        
+        ifstream in;
+        m->openInputFile(file, in);
+        
+        in >> singleton; m->gobble(in);
+        in >> type; m->gobble(in);
+        
+        if (type == "name") { namefile = "name"; }
+        else if (type == "count") { countfile = "count"; }
+        else {  m->mothurOut("[ERROR]: unknown file type. Are the files in column 2 of the file name files or count files? Please change unknown to name or count.\n"); m->control_pressed = true; }
+        
+        
+        while(!in.eof()) {
+            if (m->control_pressed) { break; }
+            
+            in >> thiscolumn; m->gobble(in);
+            in >> thisname; m->gobble(in);
+            
+            map<string, string> temp;
+            temp[thiscolumn] = thisname;
+            distName.push_back(temp);
+        }
+        in.close();
+        
+        return singleton;
+    }
+    catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "readFile");
 		exit(1);
 	}
     

@@ -36,6 +36,7 @@ private:
     string oligosfile, groupfile, package, inputfile, file;
     string outputDir;
     vector<string> outputNames, Groups;
+    set<string> uniqueNames;
     
     int readOligos();
     int readFile();

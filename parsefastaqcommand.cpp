@@ -502,6 +502,26 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
             if(!success)				{	trashCode += 'r';	}
         }
         
+        if (trashCode.length() == 0) { //is this sequence in the ignore group
+            string thisGroup = "";
+            
+            if(barcodes.size() != 0){
+                thisGroup = barcodeNameVector[barcode];
+                if (numPrimers != 0) {
+                    if (primerNameVector[primer] != "") {
+                        if(thisGroup != "") {
+                            thisGroup += "." + primerNameVector[primer];
+                        }else {
+                            thisGroup = primerNameVector[primer];
+                        }
+                    }
+                }
+            }
+            
+            int pos = thisGroup.find("ignore");
+            if (pos != string::npos) {  trashCode += "i"; }
+        }
+
         
         return trashCode.length();
     }

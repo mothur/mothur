@@ -313,6 +313,8 @@ int SRACommand::execute(){
         else if (sfffile != "")     {       parseSffFile(filesBySample);    }
         else if (fastqfile != "")   {       parseFastqFile(filesBySample);  }
         
+        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
+        
         sanityCheckMiMarksGroups();
         
         //checks groups and files returned from parse - removes any groups that did not get reads assigned to them, orders files.
@@ -386,7 +388,7 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
             
-            string barcodeForThisSample = Group2Barcode[Groups[i]];
+            string barcodeForThisSample = Group2Barcode[Groups[i]][0];
             
             if (m->control_pressed) { break; }
             out << "\t<Action>\n";
@@ -430,7 +432,7 @@ int SRACommand::execute(){
         for (int i = 0; i < Groups.size(); i++) {
             
             vector<string> thisGroupsFiles = filesBySample[Groups[i]];
-            string barcodeForThisSample = Group2Barcode[Groups[i]];
+            string barcodeForThisSample = Group2Barcode[Groups[i]][0];
             
             for (int j = 0; j < thisGroupsFiles.size(); j++) {
                 string libId = thisGroupsFiles[j] + "." + barcodeForThisSample;
@@ -444,10 +446,10 @@ int SRACommand::execute(){
                     out << "\t\t\t<File file_path=\"" + pieces[0] + "\">\n";
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
-                    vector<string> thisBarcodes; m->splitAtChar(Group2Barcode[Groups[i]], thisBarcodes, '.');
+                    vector<string> thisBarcodes; m->splitAtChar(Group2Barcode[Groups[i]][0], thisBarcodes, '.');
                     string forwardBarcode = thisBarcodes[0];
                     string reverseBarcode = thisBarcodes[1];
-                    vector<string> thisPrimers; m->splitAtChar(Group2Primer[Groups[i]], thisPrimers, '.');
+                    vector<string> thisPrimers; m->splitAtChar(Group2Primer[Groups[i]][0], thisPrimers, '.');
                     string forwardPrimer = thisPrimers[0];
                     string reversePrimer = thisPrimers[1];
                     //attributes
@@ -484,8 +486,8 @@ int SRACommand::execute(){
                     out << "\t\t\t</File>\n";
                     //attributes
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"BarCode\">" + Group2Barcode[Groups[i]] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"primer\">" + Group2Primer[Groups[i]] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"BarCode\">" + Group2Barcode[Groups[i]][0] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"primer\">" + Group2Primer[Groups[i]][0] + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
@@ -706,7 +708,7 @@ int SRACommand::readMIMarksFile(){
                         if (headers[i] == "organism") {
                             if (!m->inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
                                 organismError = true;
-                                m->mothurOut("[WARNING]: " + linePieces[i]+ " is not an acceptable organism, changing to metagenome. You can correct the issue and rerun the command, or NCBI will allow you to modify the organism after submission.\n"); linePieces[i] = "metagenome"; categories[headers[i]] = linePieces[i];
+                                m->mothurOut("[WARNING]: " + linePieces[i]+ " is not an acceptable organism, changing to acceptable 'metagenome'. NCBI will allow you to modify the organism after submission.\n"); linePieces[i] = "metagenome"; categories[headers[i]] = linePieces[i];
                             }
                             Group2Organism[linePieces[0]] = linePieces[i];
                         }
@@ -747,7 +749,7 @@ int SRACommand::readMIMarksFile(){
             string organismTypes = "";
             for (int i = 0; i < acceptableOrganisms.size()-1; i++) { organismTypes += acceptableOrganisms[i] + ", "; }
             organismTypes += acceptableOrganisms[acceptableOrganisms.size()-1];
-            m->mothurOut("[WARNING]: The acceptable organism choices are: " + organismTypes + ".\n");
+            m->mothurOut("\n[WARNING]: The acceptable organism choices are: " + organismTypes + ".\n\n\n");
         }
         
         return 0;
@@ -1244,7 +1246,6 @@ int SRACommand::readOligos(){
 			primerNameVector.push_back("");
 		}
         
-        set<string> uniqueNames; //used to cleanup outputFileNames
         if (pairedOligos) {
             for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
                 for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
@@ -1269,8 +1270,22 @@ int SRACommand::readOligos(){
                             }
                         }
                         uniqueNames.insert(comboGroupName);
-                        Group2Barcode[comboGroupName] = (itBar->second).forward+"."+(itBar->second).reverse;
-                        Group2Primer[comboGroupName] = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                        
+                        map<string, vector<string> >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Barcode.end()) {
+                            vector<string> tempBarcodes; tempBarcodes.push_back((itBar->second).forward+"."+(itBar->second).reverse);
+                            Group2Barcode[comboGroupName] = tempBarcodes;
+                        }else {
+                            Group2Barcode[comboGroupName].push_back((itBar->second).forward+"."+(itBar->second).reverse);
+                        }
+                        
+                        itGroup2Barcode = Group2Primer.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Primer.end()) {
+                            vector<string> tempPrimers; tempPrimers.push_back((itPrimer->second).forward+"."+(itPrimer->second).reverse);
+                            Group2Primer[comboGroupName] = tempPrimers;
+                        }else {
+                            Group2Primer[comboGroupName].push_back((itPrimer->second).forward+"."+(itPrimer->second).reverse);
+                        }
                     }
                 }
             }
@@ -1298,8 +1313,22 @@ int SRACommand::readOligos(){
                             }
                         }
                         uniqueNames.insert(comboGroupName);
-                        Group2Barcode[comboGroupName] = itBar->first;
-                        Group2Primer[comboGroupName] = itPrimer->first;
+                        
+                        map<string, vector<string> >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Barcode.end()) {
+                            vector<string> tempBarcodes; tempBarcodes.push_back(itBar->first);
+                            Group2Barcode[comboGroupName] = tempBarcodes;
+                        }else {
+                            Group2Barcode[comboGroupName].push_back(itBar->first);
+                        }
+                        
+                        itGroup2Barcode = Group2Primer.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Primer.end()) {
+                            vector<string> tempPrimers; tempPrimers.push_back(itPrimer->first);
+                            Group2Primer[comboGroupName] = tempPrimers;
+                        }else {
+                            Group2Primer[comboGroupName].push_back(itPrimer->first);
+                        }
                     }
                 }
             }
@@ -1308,7 +1337,6 @@ int SRACommand::readOligos(){
                
         if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
-        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
         
 		return true;
 		
