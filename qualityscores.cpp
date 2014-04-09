@@ -23,7 +23,19 @@ QualityScores::QualityScores(){
 		exit(1);
 	}							
 }
+/**************************************************************************************************/
 
+QualityScores::QualityScores(string n, vector<int> s){
+	try {
+		m = MothurOut::getInstance();
+		setName(n);
+        setScores(s);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QualityScores", "QualityScores");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 QualityScores::QualityScores(ifstream& qFile){
@@ -344,10 +356,9 @@ double QualityScores::calculateAverage(bool logTransform){
         if (logTransform)   {  aveQScore += pow(10.0, qScores[i]);  }
         else                {  aveQScore += qScores[i];             }
 	}
-	aveQScore /= (double) seqLength;
     
-    if (logTransform)   {  aveQScore = log10(aveQScore /(double) seqLength);  }
-    else                {  aveQScore /= (double) seqLength;                 }
+    if (logTransform)   {  aveQScore = log10(aveQScore /(double) seqLength);    }
+    else                {  aveQScore /= (double) seqLength;                     }
 	
 	return aveQScore;
 }
@@ -366,6 +377,8 @@ bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage, bool lo
 			
 		double aveQScore = calculateAverage(logTransform);
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: " + sequence.getName() + " average = " + toString(aveQScore) + "\n"); }
+        
 		if(aveQScore >= qAverage)	{	success = 1;	}
 		else						{	success = 0;	}
 		

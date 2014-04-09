@@ -16,6 +16,7 @@ vector<string> ParseFastaQCommand::setParameters(){
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pfastq);
         CommandParameter poligos("oligos", "InputTypes", "", "", "oligosGroup", "none", "none","",false,false); parameters.push_back(poligos);
         CommandParameter pgroup("group", "InputTypes", "", "", "oligosGroup", "none", "none","",false,false); parameters.push_back(pgroup);
+        CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
         CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pbdiffs);
         CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
@@ -51,6 +52,7 @@ string ParseFastaQCommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
         helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
 		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
+        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
 		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=sanger.\n";
         helpString += "The fasta parameter allows you to indicate whether you want a fasta file generated. Default=T.\n";
         helpString += "The qfile parameter allows you to indicate whether you want a quality file generated. Default=T.\n";
@@ -211,6 +213,9 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			}
 
 			if ((!fasta) && (!qual)) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
+            
+            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
+			reorient = m->isTrue(temp);
 
 		}		
 	}
@@ -235,14 +240,17 @@ int ParseFastaQCommand::execute(){
 		if (fasta) { m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}
 		if (qual) { m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);		}
         
-        TrimOligos* trimOligos = NULL;
-        int numBarcodes, numPrimers; numBarcodes = 0; numPrimers = 0;
+        TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
+        pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
         if (oligosfile != "")       {
             readOligos(oligosfile);
-            numPrimers = primers.size(); numBarcodes = barcodes.size();
             //find group read belongs to
-            if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes); numBarcodes = pairedBarcodes.size(); numPrimers = pairedPrimers.size(); }
-            else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);  }
+            if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); numBarcodes = oligos.getPairedBarcodes().size(); numPrimers = oligos.getPairedPrimers().size(); }
+            else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  numPrimers = oligos.getPrimers().size(); numBarcodes = oligos.getBarcodes().size();  }
+            
+            if (reorient) {
+                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+            }
 
         }
         else if (groupfile != "")   { readGroup(groupfile);     }
@@ -290,7 +298,7 @@ int ParseFastaQCommand::execute(){
                 
                 if (split > 1) {
                     int barcodeIndex, primerIndex, trashCodeLength;
-                    if (oligosfile != "")      {  trashCodeLength = findGroup(thisRead, barcodeIndex, primerIndex, trimOligos, numBarcodes, numPrimers);    }
+                    if (oligosfile != "")      {  trashCodeLength = findGroup(thisRead, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);    }
                     else if (groupfile != "")  {  trashCodeLength = findGroup(thisRead, barcodeIndex, primerIndex, "groupMode");   }
                     else {  m->mothurOut("[ERROR]: uh oh, we shouldn't be here...\n"); }
                     
@@ -322,7 +330,7 @@ int ParseFastaQCommand::execute(){
         if (split > 1) {
             
             if (groupfile != "")        { delete groupMap;      }
-            else if (oligosfile != "")  { delete trimOligos;    }
+            else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
            
 			map<string, string>::iterator it;
 			set<string> namesToRemove;
@@ -460,7 +468,7 @@ vector<int> ParseFastaQCommand::convertQual(string qual) {
 	}
 }
 //**********************************************************************************************************************
-int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer, TrimOligos*& trimOligos, int numBarcodes, int numPrimers) {
+int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
 	try {
         int success = 1;
         string trashCode = "";
@@ -469,7 +477,11 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         Sequence currSeq(thisRead.seq.getName(), thisRead.seq.getAligned());
         QualityScores currQual; currQual.setScores(convertQual(thisRead.quality));
         
-        if(linker.size() != 0){
+        //for reorient
+        Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
+        QualityScores savedQual(currQual.getName(), currQual.getScores());
+        
+        if(numLinkers != 0){
             success = trimOligos->stripLinker(currSeq, currQual);
             if(success > ldiffs)		{	trashCode += 'k';	}
             else{ currentSeqsDiffs += success;  }
@@ -482,7 +494,7 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
             else{ currentSeqsDiffs += success;  }
         }
         
-        if(spacer.size() != 0){
+        if(numSpacers != 0){
             success = trimOligos->stripSpacer(currSeq, currQual);
             if(success > sdiffs)		{	trashCode += 's';	}
             else{ currentSeqsDiffs += success;  }
@@ -497,26 +509,48 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         
         if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
         
-        if(revPrimer.size() != 0){
+        if(numRPrimers != 0){
             success = trimOligos->stripReverse(currSeq, currQual);
             if(!success)				{	trashCode += 'r';	}
         }
         
-        if (trashCode.length() == 0) { //is this sequence in the ignore group
-            string thisGroup = "";
+        if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+            int thisSuccess = 0;
+            string thisTrashCode = "";
+            int thisCurrentSeqsDiffs = 0;
             
-            if(barcodes.size() != 0){
-                thisGroup = barcodeNameVector[barcode];
-                if (numPrimers != 0) {
-                    if (primerNameVector[primer] != "") {
-                        if(thisGroup != "") {
-                            thisGroup += "." + primerNameVector[primer];
-                        }else {
-                            thisGroup = primerNameVector[primer];
-                        }
-                    }
-                }
+            int thisBarcodeIndex = 0;
+            int thisPrimerIndex = 0;
+            //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+            if(numBarcodes != 0){
+                thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
+                if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
             }
+            //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+            if(numPrimers != 0){
+                thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, true);
+                if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
+            }
+            
+            if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+            
+            if (thisTrashCode == "") {
+                trashCode = thisTrashCode;
+                success = thisSuccess;
+                currentSeqsDiffs = thisCurrentSeqsDiffs;
+                barcode = thisBarcodeIndex;
+                primer = thisPrimerIndex;
+                savedSeq.reverseComplement();
+                currSeq.setAligned(savedSeq.getAligned());
+                savedQual.flipQScores();
+                currQual.setScores(savedQual.getScores());
+            }else { trashCode += "(" + thisTrashCode + ")";  }
+        }
+        
+        if (trashCode.length() == 0) { //is this sequence in the ignore group
+            string thisGroup = oligos.getGroupName(barcode, primer);
             
             int pos = thisGroup.find("ignore");
             if (pos != string::npos) {  trashCode += "i"; }
@@ -538,13 +572,7 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         
         string group = groupMap->getGroup(thisRead.seq.getName());
         if (group == "not found") {     trashCode += "g";   } //scrap for group
-        else { //find file group
-            map<string, int>::iterator it = barcodes.find(group);
-            if (it != barcodes.end()) {
-                barcode = it->second;
-            }else { trashCode += "g"; }
-        }
-        
+                
         return trashCode.length();
     }
 	catch(exception& e) {
@@ -556,276 +584,139 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
 
 bool ParseFastaQCommand::readOligos(string oligoFile){
 	try {
-		ifstream inOligos;
-		m->openInputFile(oligoFile, inOligos);
-		
-		string type, oligo, roligo, group;
-        bool hasPrimer = false; bool hasPairedBarcodes = false; pairedOligos = false;
+        bool allBlank = false;
+        oligos.read(oligosfile);
         
-		int indexPrimer = 0;
-		int indexBarcode = 0;
-        int indexPairedPrimer = 0;
-		int indexPairedBarcode = 0;
-        set<string> uniquePrimers;
-        set<string> uniqueBarcodes;
-		
-		while(!inOligos.eof()){
-            
-			inOligos >> type;
-            
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
-            
-			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
-			}
-			else{
-				m->gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-				
-				if(type == "FORWARD"){
-					group = "";
-					
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-					
-					//check for repeat barcodes
-					map<string, int>::iterator itPrime = primers.find(oligo);
-					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
-                    
-					primers[oligo]=indexPrimer; indexPrimer++;
-					primerNameVector.push_back(group);
-				}
-                else if (type == "PRIMER"){
-                    m->gobble(inOligos);
-					
-                    inOligos >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    roligo = reverseOligo(roligo);
-                    
-                    group = "";
-                    
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-                    
-                    oligosPair newPrimer(oligo, roligo);
-                    
-                    if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
-					
-					//check for repeat barcodes
-                    string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    else { uniquePrimers.insert(tempPair); }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
-					pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
-					primerNameVector.push_back(group);
-                    hasPrimer = true;
-                }
-				else if(type == "REVERSE"){
-					//Sequence oligoRC("reverse", oligo);
-					//oligoRC.reverseComplement();
-                    string oligoRC = reverseOligo(oligo);
-					revPrimer.push_back(oligoRC);
-				}
-				else if(type == "BARCODE"){
-					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-                    
-                    string temp = "";
-                    while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					}
-					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {
-                        hasPairedBarcodes = true;
-                        string reverseBarcode = group; //reverseOligo(group); //reverse barcode
-                        group = temp;
-                        
-                        for(int i=0;i<reverseBarcode.length();i++){
-                            reverseBarcode[i] = toupper(reverseBarcode[i]);
-                            if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
-                        }
-                        
-                        reverseBarcode = reverseOligo(reverseBarcode);
-                        oligosPair newPair(oligo, reverseBarcode);
-                        
-                        if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
-                        //check for repeat barcodes
-                        string tempPair = oligo+reverseBarcode;
-                        if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
-                        else { uniqueBarcodes.insert(tempPair); }
-                        
-                        pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }else {
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-                        
-                        barcodes[oligo]=indexBarcode; indexBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }
-				}else if(type == "LINKER"){
-					linker.push_back(oligo);
-				}else if(type == "SPACER"){
-					spacer.push_back(oligo);
-				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
-			}
-			m->gobble(inOligos);
-		}
-		inOligos.close();
-		
-        if (hasPairedBarcodes || hasPrimer) {
+        if (m->control_pressed) { return false; } //error in reading oligos
+        
+        if (oligos.hasPairedBarcodes()) {
             pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
+            numPrimers = oligos.getPairedPrimers().size();
+            numBarcodes = oligos.getPairedBarcodes().size();
+        }else {
+            pairedOligos = false;
+            numPrimers = oligos.getPrimers().size();
+            numBarcodes = oligos.getBarcodes().size();
         }
         
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-			barcodes[""] = 0;
-			barcodeNameVector.push_back("");
-		}
-		
-		if(primerNameVector.size() == 0){
-			primers[""] = 0;
-			primerNameVector.push_back("");
-		}
-		
-		fastqFileNames.resize(barcodeNameVector.size());
+        numLinkers = oligos.getLinkers().size();
+        numSpacers = oligos.getSpacers().size();
+        numRPrimers = oligos.getReversePrimers().size();
+        
+        vector<string> groupNames = oligos.getGroupNames();
+        if (groupNames.size() == 0) { allBlank = true;  }
+        
+        
+        fastqFileNames.resize(oligos.getBarcodeNames().size());
 		for(int i=0;i<fastqFileNames.size();i++){
-			fastqFileNames[i].assign(primerNameVector.size(), "");
+            for(int j=0;j<oligos.getPrimerNames().size();j++){  fastqFileNames[i].push_back(""); }
 		}
-		
-		
-			set<string> uniqueNames; //used to cleanup outputFileNames
-            if (pairedOligos) {
-                for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
-                    for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
+        
+        set<string> uniqueNames; //used to cleanup outputFileNames
+        if (pairedOligos) {
+            map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
+            map<int, oligosPair> primers = oligos.getPairedPrimers();
+            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                    
+                    string primerName = oligos.getPrimerName(itPrimer->first);
+                    string barcodeName = oligos.getBarcodeName(itBar->first);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
                         
-                        string primerName = primerNameVector[itPrimer->first];
-                        string barcodeName = barcodeNameVector[itBar->first];
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            string fastqFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeNameVector[itBar->first];
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
                             }
                             else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerNameVector[itPrimer->first];
-                                }
-                                else{
-                                    comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
-                                }
+                                comboGroupName = barcodeName + "." + primerName;
                             }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
-                            variables["[group]"] = comboGroupName;
-                            fastqFileName = getOutputFileName("fastq", variables);
-                            if (uniqueNames.count(fastqFileName) == 0) {
-                                outputNames.push_back(fastqFileName);
-                                outputTypes["fastq"].push_back(fastqFileName);
-                                uniqueNames.insert(fastqFileName);
-                            }
-                            
-                            fastqFileNames[itBar->first][itPrimer->first] = fastqFileName;
-                            m->openOutputFile(fastqFileName, temp);		temp.close();
-                            
                         }
-                    }
-                }
-            }else {
-                for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
                         
-                        string primerName = primerNameVector[itPrimer->second];
-                        string barcodeName = barcodeNameVector[itBar->second];
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            string fastqFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeNameVector[itBar->second];
-                            }
-                            else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerNameVector[itPrimer->second];
-                                }
-                                else{
-                                    comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
-                                }
-                            }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
-                            variables["[group]"] = comboGroupName;
-                            fastqFileName = getOutputFileName("fastq", variables);
-                            if (uniqueNames.count(fastqFileName) == 0) {
-                                outputNames.push_back(fastqFileName);
-                                outputTypes["fastq"].push_back(fastqFileName);
-                                uniqueNames.insert(fastqFileName);
-                            }
-                            
-                            fastqFileNames[itBar->second][itPrimer->second] = fastqFileName;
-                            m->openOutputFile(fastqFileName, temp);		temp.close();
-                            
+                        ofstream temp;
+                        map<string, string> variables;
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
+                        variables["[group]"] = comboGroupName;
+                        string fastqFileName = getOutputFileName("fastq", variables);
+                        if (uniqueNames.count(fastqFileName) == 0) {
+                            outputNames.push_back(fastqFileName);
+                            outputTypes["fastq"].push_back(fastqFileName);
+                            uniqueNames.insert(fastqFileName);
                         }
+                        
+                        fastqFileNames[itBar->first][itPrimer->first] = fastqFileName;
+                        m->openOutputFile(fastqFileName, temp);		temp.close();
                     }
                 }
             }
-		
+        }else {
+            map<string, int> barcodes = oligos.getBarcodes() ;
+            map<string, int> primers = oligos.getPrimers();
+            for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                    
+                    string primerName = oligos.getPrimerName(itPrimer->second);
+                    string barcodeName = oligos.getBarcodeName(itBar->second);
+                   
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
+                            }
+                            else{
+                                comboGroupName = barcodeName + "." + primerName;
+                            }
+                        }
+                        
+                        ofstream temp;
+                        map<string, string> variables;
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
+                        variables["[group]"] = comboGroupName;
+                        string fastqFileName = getOutputFileName("fastq", variables);
+                        if (uniqueNames.count(fastqFileName) == 0) {
+                            outputNames.push_back(fastqFileName);
+                            outputTypes["fastq"].push_back(fastqFileName);
+                            uniqueNames.insert(fastqFileName);
+                        }
+                        
+                        fastqFileNames[itBar->second][itPrimer->second] = fastqFileName;
+                        m->openOutputFile(fastqFileName, temp);		temp.close();
+                    }
+                }
+            }
+        }
+        
+        if (allBlank) {
+            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+            return false;
+        }
+       
         ofstream temp;
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
         variables["[group]"] = "scrap";
         noMatchFile = getOutputFileName("fastq", variables);
         m->openOutputFile(noMatchFile, temp);		temp.close();
-
+       
 		return true;
 		
 	}
@@ -859,7 +750,6 @@ bool ParseFastaQCommand::readGroup(string groupfile){
                 ofstream temp;
                 m->openOutputFileBinary(thisFilename, temp); temp.close();
                 fastqFileNames[i].push_back(thisFilename);
-                barcodes[groups[i]] = i;
             }
         }
         
@@ -877,48 +767,6 @@ bool ParseFastaQCommand::readGroup(string groupfile){
 		exit(1);
 	}
 }
-//********************************************************************/
-string ParseFastaQCommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
-        
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-            
-            else						{	reverse += 'N';	}
-        }
-        
-        
-        return reverse;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "reverseOligo");
-		exit(1);
-	}
-}
-
-
 //**********************************************************************************************************************
 
 

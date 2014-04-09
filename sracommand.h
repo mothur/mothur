@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "trimoligos.h"
+#include "oligos.h"
 
 /**************************************************************************************************/
 
@@ -37,12 +38,10 @@ private:
     bool abort, isSFF, pairedOligos;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;
     string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;
-    string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType;
+    string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType, checkorient;
     string submissionName, lastName, firstName, email, centerName, centerType, description, website, orientation, packageType;
-    string projectName, grantId, grantTitle, grantAgency, projectTitle;
+    string projectName, grantId, grantTitle, grantAgency, projectTitle, inputDir;
     vector<string> outputNames, Groups;
-    vector<string> primerNameVector;
-    vector<string> barcodeNameVector;
     map<string, vector<string> > Group2Barcode;
     map<string, vector<string> > Group2Primer;
     map<string, string> Group2Organism;

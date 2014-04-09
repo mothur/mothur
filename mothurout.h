@@ -166,6 +166,7 @@ class MothurOut {
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
         map<string, vector<string> > parseClasses(string);
+        
 		
 		//math operation
         double max(vector<double>&); //returns largest value in vector

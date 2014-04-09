@@ -15,14 +15,6 @@
 #include "sequence.hpp"
 #include "qualityscores.h"
 
-struct oligosPair {
-	string forward;
-	string reverse;
-	
-	oligosPair() { forward = ""; reverse = "";  }
-	oligosPair(string f, string r) : forward(f), reverse(r) {}
-	~oligosPair() {}
-};
 
 class TrimOligos {
 	
@@ -82,6 +74,9 @@ class TrimOligos {
         
         int stripPairedBarcode(Sequence& seq, QualityScores& qual, int& group);
         int stripPairedPrimers(Sequence& seq, QualityScores& qual, int& group, bool);
+        int stripPairedBarcode(Sequence& seq,  int& group);
+        int stripPairedPrimers(Sequence& seq,  int& group);
+
 };
 
 #endif

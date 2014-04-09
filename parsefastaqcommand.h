@@ -15,6 +15,7 @@
 #include "trimoligos.h"
 #include "sequence.hpp"
 #include "groupmap.h"
+#include "oligos.h"
 
 struct fastqRead2 {
     string quality;
@@ -50,16 +51,11 @@ private:
 
 	vector<string> outputNames;	
 	string outputDir, fastaQFile, format, oligosfile, groupfile;
-	bool abort, fasta, qual, pacbio, pairedOligos;
-    int pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, split;
+	bool abort, fasta, qual, pacbio, pairedOligos, reorient;
+    int pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, split, numBarcodes, numPrimers, numLinkers, numSpacers, numRPrimers;
     GroupMap* groupMap;
+    Oligos oligos;
     
-    //oligos file data structures
-    vector<string> linker, spacer, primerNameVector, barcodeNameVector, revPrimer;
-	map<string, int> barcodes;
-	map<string, int> primers;
-    map<int, oligosPair> pairedBarcodes;
-    map<int, oligosPair> pairedPrimers;
     vector<vector<string> > fastqFileNames;
     string noMatchFile;
 	
@@ -67,9 +63,8 @@ private:
     vector<char> convertTable;
     bool readOligos(string oligosFile);
     bool readGroup(string oligosFile);
-    string reverseOligo(string oligo);
     fastqRead2 readFastq(ifstream&, bool&);
-    int findGroup(fastqRead2, int&, int&, TrimOligos*&, int, int);
+    int findGroup(fastqRead2, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
     int findGroup(fastqRead2, int&, int&, string);
     
 };

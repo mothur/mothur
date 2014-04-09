@@ -16,6 +16,7 @@ vector<string> TrimFlowsCommand::setParameters(){
 	try {
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","flow-file",false,true,true); parameters.push_back(pflow);
 		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(poligos);
+        CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "","",false,false); parameters.push_back(pmaxhomop);
 		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pmaxflows);
 		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pminflows);
@@ -47,6 +48,14 @@ string TrimFlowsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The trim.flows command reads a flowgram file and creates .....\n";
+        helpString += "The oligos parameter allows you to provide an oligos file.\n";
+        helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
+        helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
+        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. The default is false.\n";
+		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
+		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
+        helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
+		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
         helpString += "The order parameter options are A, B or I.  Default=A. A = TACG and B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC and I = TACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGC.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.flows.\n";
@@ -231,6 +240,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
             
 			if(oligoFileName == "")	{	allFiles = 0;		}
 			else					{	allFiles = 1;		}
+            
+            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
+			reorient = m->isTrue(temp);
 
 			numFPrimers = 0;
 			numRPrimers = 0;
@@ -416,7 +428,15 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		int count = 0;
 		bool moreSeqs = 1;
 		
-		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
+		TrimOligos* trimOligos = NULL;
+        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); }
+        else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  }
+        
+        TrimOligos* rtrimOligos = NULL;
+        if (reorient) {
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+        }
+
 		
 		while(moreSeqs) {
 				
@@ -430,7 +450,9 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			flowData.capFlows(maxFlows);	
 			
 			Sequence currSeq = flowData.getSequence();
-            //cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
+            //for reorient
+            Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
+            
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
@@ -444,7 +466,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			int barcodeIndex = 0;
 			
             if(numLinkers != 0){
-                success = trimOligos.stripLinker(currSeq);
+                success = trimOligos->stripLinker(currSeq);
                 if(success > ldiffs)		{	trashCode += 'k';	}
                 else{ currentSeqDiffs += success;  }
                 
@@ -452,21 +474,21 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
             
             if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
             
-			if(barcodes.size() != 0){
-				success = trimOligos.stripBarcode(currSeq, barcodeIndex);
+			if(numBarcodes != 0){
+				success = trimOligos->stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
             if(numSpacers != 0){
-                success = trimOligos.stripSpacer(currSeq);
+                success = trimOligos->stripSpacer(currSeq);
                 if(success > sdiffs)		{	trashCode += 's';	}
                 else{ currentSeqDiffs += success;  }
                 
             }
             
 			if(numFPrimers != 0){
-				success = trimOligos.stripForward(currSeq, primerIndex);
+				success = trimOligos->stripForward(currSeq, primerIndex);
 				if(success > pdiffs)		{	trashCode += 'f';	}
 				else{ currentSeqDiffs += success;  }
 			}
@@ -474,24 +496,45 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			if (currentSeqDiffs > tdiffs)	{	trashCode += 't';   }
 			
 			if(numRPrimers != 0){
-				success = trimOligos.stripReverse(currSeq);
+				success = trimOligos->stripReverse(currSeq);
 				if(!success)				{	trashCode += 'r';	}
 			}
-			
-			if(trashCode.length() == 0){
-                string thisGroup = "";
-                if(barcodes.size() != 0){
-                    thisGroup = barcodeNameVector[barcodeIndex];
-                    if (primers.size() != 0) { 
-                        if (primerNameVector[primerIndex] != "") { 
-                            if(thisGroup != "") {
-                                thisGroup += "." + primerNameVector[primerIndex]; 
-                            }else {
-                                thisGroup = primerNameVector[primerIndex]; 
-                            }
-                        } 
-                    }
+            
+			if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                int thisSuccess = 0;
+                string thisTrashCode = "";
+                int thisCurrentSeqsDiffs = 0;
+                
+                int thisBarcodeIndex = 0;
+                int thisPrimerIndex = 0;
+                //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+                if(numBarcodes != 0){
+                    thisSuccess = rtrimOligos->stripBarcode(savedSeq, thisBarcodeIndex);
+                    if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
+                //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+                if(numFPrimers != 0){
+                    thisSuccess = rtrimOligos->stripForward(savedSeq, thisPrimerIndex);
+                    if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                }
+                
+                if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+                
+                if (thisTrashCode == "") {
+                    trashCode = thisTrashCode;
+                    success = thisSuccess;
+                    currentSeqDiffs = thisCurrentSeqsDiffs;
+                    barcodeIndex = thisBarcodeIndex;
+                    primerIndex = thisPrimerIndex;
+                    savedSeq.reverseComplement();
+                    currSeq.setAligned(savedSeq.getAligned());
+                }else { trashCode += "(" + thisTrashCode + ")";  }
+            }
+
+			if(trashCode.length() == 0){
+                string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
                 
                 int pos = thisGroup.find("ignore");
                 if (pos == string::npos) {		
@@ -534,6 +577,8 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		scrapFlowFile.close();
 		flowFile.close();
 		if(fasta){	fastaFile.close();	}
+        delete trimOligos;
+        if (reorient) { delete rtrimOligos; }
 		
 		return count;
 	}
@@ -545,199 +590,131 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 
 //***************************************************************************************************************
 
-void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
+int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 	try {
-		ifstream oligosFile;
-		m->openInputFile(oligoFileName, oligosFile);
-		
-		string type, oligo, group;
-
-		int indexPrimer = 0;
-		int indexBarcode = 0;
-		
-		while(!oligosFile.eof()){
-		
-			oligosFile >> type; 	//get the first column value of the row - is it a comment or a feature we are interested in?
-            
-            if (m->debug) { m->mothurOut("[DEBUG]: type = " + type + ".\n"); }
-            
-			if(type[0] == '#'){	//igore the line because there's a comment
-				while (!oligosFile.eof())	{	char c = oligosFile.get(); if (c == 10 || c == 13){	break;	}	}
-                m->gobble(oligosFile);// get rest of line if there's any crap there
-			}
-			else{				//there's a feature we're interested in
-                m->gobble(oligosFile);
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }					//make type case insensitive
-
-				oligosFile >> oligo;	//get the DNA sequence for the feature
-
-				for(int i=0;i<oligo.length();i++){	//make type case insensitive and change any U's to T's
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: oligos = " + oligo + ".\n"); }
-                
-				if(type == "FORWARD"){	//if the feature is a forward primer...
-					group = "";
-
-					while (!oligosFile.eof())	{	// get rest of line in case there is a primer name = will have the name of the primer
-						char c = oligosFile.get(); 
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					} 
-
-					//have we seen this primer already?
-					map<string, int>::iterator itPrimer = primers.find(oligo);
-					if (itPrimer != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-
-					primers[oligo]=indexPrimer; indexPrimer++;
-					primerNameVector.push_back(group);
-
-				}
-				else if(type == "REVERSE"){
-					string oligoRC = reverseOligo(oligo);
-					revPrimer.push_back(oligoRC);
-                    if (m->debug) { m->mothurOut("[DEBUG]: reverse oligos = " + oligoRC + ".\n"); }
-				}
-				else if(type == "BARCODE"){
-					oligosFile >> group;
-
-					//check for repeat barcodes
-					map<string, int>::iterator itBar = barcodes.find(oligo);
-					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    
-                    if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ".\n"); }
-                    
-					barcodes[oligo]=indexBarcode; indexBarcode++;
-					barcodeNameVector.push_back(group);
-				}else if(type == "LINKER"){
-					linker.push_back(oligo);
-				}else if(type == "SPACER"){
-					spacer.push_back(oligo);
-				}
-				else{
-					m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  
-				}
-			}
-
-			m->gobble(oligosFile);
-		}
-		oligosFile.close();
-		
-		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
-		
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-			barcodes[""] = 0;
-			barcodeNameVector.push_back("");			
-		}
-		
-		if(primerNameVector.size() == 0){
-			primers[""] = 0;
-			primerNameVector.push_back("");			
-		}
-
-		outFlowFileNames.resize(barcodeNameVector.size());
-		for(int i=0;i<outFlowFileNames.size();i++){
-			outFlowFileNames[i].assign(primerNameVector.size(), "");
-		}
-		
-		if(allFiles){
-
-			for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-				for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-
-					string primerName = primerNameVector[itPrimer->second];
-					string barcodeName = barcodeNameVector[itBar->second];
-                    
-					if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing 
-					else {					
-                        string comboGroupName = "";
-                        string fileName = "";
-                        
-                        map<string, string> variables; 
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
-                        
-                        if(primerName == ""){
-                            comboGroupName = barcodeNameVector[itBar->second];
-                            variables["[tag]"] = comboGroupName;
-                            fileName = getOutputFileName("flow", variables);
-                        }
-                        else{
-                            if(barcodeName == ""){
-                                comboGroupName = primerNameVector[itPrimer->second];
-                            }
-                            else{
-                                comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
-                            }
-                            variables["[tag]"] = comboGroupName;
-                            fileName = getOutputFileName("flow", variables);
-                        }
-                        
-                        outFlowFileNames[itBar->second][itPrimer->second] = fileName;
-                        
-                        ofstream temp;
-                        m->openOutputFile(fileName, temp);
-                        temp.close();
-                    }
-				}
-			}
-		}
-		
-		numFPrimers = primers.size();
-		numRPrimers = revPrimer.size();
-        numLinkers = linker.size();
-        numSpacers = spacer.size();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getOligos");
-		exit(1);
-	}
-}
-//********************************************************************/
-string TrimFlowsCommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
+        bool allBlank = false;
+        oligos.read(oligoFileName);
         
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-            
-            else						{	reverse += 'N';	}
+        if (m->control_pressed) { return 0; } //error in reading oligos
+        
+        if (oligos.hasPairedBarcodes()) {
+            pairedOligos = true;
+            numFPrimers = oligos.getPairedPrimers().size();
+            numBarcodes = oligos.getPairedBarcodes().size();
+        }else {
+            pairedOligos = false;
+            numFPrimers = oligos.getPrimers().size();
+            numBarcodes = oligos.getBarcodes().size();
         }
         
+        numLinkers = oligos.getLinkers().size();
+        numSpacers = oligos.getSpacers().size();
+        numRPrimers = oligos.getReversePrimers().size();
         
-        return reverse;
-    }
+        vector<string> groupNames = oligos.getGroupNames();
+        if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
+        
+        
+        outFlowFileNames.resize(oligos.getBarcodeNames().size());
+		for(int i=0;i<outFlowFileNames.size();i++){
+            for(int j=0;j<oligos.getPrimerNames().size();j++){  outFlowFileNames[i].push_back(""); }
+		}
+
+        if (allFiles) {
+            set<string> uniqueNames; //used to cleanup outputFileNames
+            if (pairedOligos) {
+                map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
+                map<int, oligosPair> primers = oligos.getPairedPrimers();
+                for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                    for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                        
+                        string primerName = oligos.getPrimerName(itPrimer->first);
+                        string barcodeName = oligos.getBarcodeName(itBar->first);
+                        
+                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                        else {
+                            string comboGroupName = "";
+                            
+                            if(primerName == ""){
+                                comboGroupName = barcodeName;
+                            }else{
+                                if(barcodeName == ""){
+                                    comboGroupName = primerName;
+                                }
+                                else{
+                                    comboGroupName = barcodeName + "." + primerName;
+                                }
+                            }
+                            
+                            
+                            ofstream temp;
+                            map<string, string> variables;
+                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+                            variables["[tag]"] = comboGroupName;
+                            string fileName = getOutputFileName("flow", variables);
+                            if (uniqueNames.count(fileName) == 0) {
+                                outputNames.push_back(fileName);
+                                outputTypes["flow"].push_back(fileName);
+                                uniqueNames.insert(fileName);
+                            }
+                            
+                            outFlowFileNames[itBar->first][itPrimer->first] = fileName;
+                            m->openOutputFile(fileName, temp);		temp.close();
+                        }
+                    }
+                }
+            }else {
+                map<string, int> barcodes = oligos.getBarcodes() ;
+                map<string, int> primers = oligos.getPrimers();
+                for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                    for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                        
+                        string primerName = oligos.getPrimerName(itPrimer->second);
+                        string barcodeName = oligos.getBarcodeName(itBar->second);
+                        
+                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                        else {
+                            string comboGroupName = "";
+                            
+                            if(primerName == ""){
+                                comboGroupName = barcodeName;
+                            }else{
+                                if(barcodeName == ""){
+                                    comboGroupName = primerName;
+                                }
+                                else{
+                                    comboGroupName = barcodeName + "." + primerName;
+                                }
+                            }
+                            
+                            ofstream temp;
+                            map<string, string> variables;
+                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+                            variables["[tag]"] = comboGroupName;
+                            string fileName = getOutputFileName("flow", variables);
+                            if (uniqueNames.count(fileName) == 0) {
+                                outputNames.push_back(fileName);
+                                outputTypes["flow"].push_back(fileName);
+                                uniqueNames.insert(fileName);
+                            }
+                            
+                            outFlowFileNames[itBar->second][itPrimer->second] = fileName;
+                            m->openOutputFile(fileName, temp);		temp.close();
+                        }
+                    }
+                }
+            }
+            
+        }
+		return 0;
+	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "reverseOligo");
+		m->errorOut(e, "TrimFlowsCommand", "getOligos");
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 
@@ -884,7 +861,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		//Windows version shared memory, so be careful when passing variables through the trimFlowData struct. 
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+		/*
 		vector<trimFlowData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
@@ -958,7 +935,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-		
+		*/
 		
 #endif	
 		//append files

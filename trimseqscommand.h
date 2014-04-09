@@ -16,6 +16,7 @@
 #include "qualityscores.h"
 #include "trimoligos.h"
 #include "counttable.h"
+#include "oligos.h"
 
 
 class TrimSeqsCommand : public Command {
@@ -44,34 +45,22 @@ private:
         linePair() {}
     };
     
-	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
+    Oligos oligos;
+	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&, map<string, string>&);
 	bool keepFirstTrim(Sequence&, QualityScores&);
 	bool removeLastTrim(Sequence&, QualityScores&);
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
-    string reverseOligo(string);
-
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile, outputDir;
 	
 	bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient, logtransform;
-	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
+	int numBarcodes, numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
 	int qWindowSize, qWindowStep, keepFirst, removeLast;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
-	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;
-    map<int, oligosPair> pairedBarcodes;
-    map<int, oligosPair> pairedPrimers;
-	map<string, int> barcodes;
-	vector<string> groupVector;
-	map<string, int> primers;
-    vector<string>  linker;
-    vector<string>  spacer;
-	map<string, int> combos;
-	map<string, int> groupToIndex;
-	vector<string> primerNameVector;	//needed here?
-	vector<string> barcodeNameVector;	//needed here?
+    vector<string> groupVector,outputNames;
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
     map<string, int> nameCount; //for countfile name -> repCount
@@ -93,34 +82,23 @@ private:
 struct trimData {
     unsigned long long start, end;
     MothurOut* m;
-    string filename, qFileName, trimFileName, scrapFileName, trimQFileName, scrapQFileName, trimNFileName, scrapNFileName, trimCFileName, scrapCFileName, groupFileName, nameFile, countfile;
+    string filename, qFileName, oligosfile, trimFileName, scrapFileName, trimQFileName, scrapQFileName, trimNFileName, scrapNFileName, trimCFileName, scrapCFileName, groupFileName, nameFile, countfile;
 	vector<vector<string> > fastaFileNames;
     vector<vector<string> > qualFileNames;
     vector<vector<string> > nameFileNames;
     unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
-    bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient, logtransform;
-	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
+    bool flip, allFiles, qtrim, keepforward, createGroup, reorient, logtransform;
+	int maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
 	int qWindowSize, qWindowStep, keepFirst, removeLast, count;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
-    vector<string> revPrimer;
-	map<string, int> barcodes;
-	map<string, int> primers;
     map<string, int> nameCount;
-    vector<string>  linker;
-    vector<string>  spacer;
-	map<string, int> combos;
-	vector<string> primerNameVector;	
-	vector<string> barcodeNameVector;	
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
     map<string, string> groupMap;
-    map<int, oligosPair> pairedBarcodes;
-    map<int, oligosPair> pairedPrimers;
     
 	trimData(){}
 	trimData(string fn, string qn, string nf, string cf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string tcn, string scn,string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
-                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po,
-                      vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
+                      int pd, int bd, int ld, int sd, int td, string o, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
                       int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage, bool lt,
                       int minL, int maxA, int maxH, int maxL, bool fli, bool reo, map<string, string> nm, map<string, int> ncount) {
         filename = fn;
@@ -145,22 +123,13 @@ struct trimData {
         qlineEnd = qend;
 		m = mout;
         nameCount = ncount;
+        oligosfile = o;
         
         pdiffs = pd;
         bdiffs = bd;
         ldiffs = ld;
         sdiffs = sd;
         tdiffs = td;
-        barcodes = bar;
-        pairedPrimers = ppr;
-        pairedBarcodes = pbr;
-        pairedOligos = po;
-        primers = pri;      numFPrimers = primers.size();
-        revPrimer = revP;   numRPrimers = revPrimer.size();
-        linker = li;        numLinkers = linker.size();
-        spacer = spa;       numSpacers = spacer.size();
-        primerNameVector = priNameVector;
-        barcodeNameVector = barNameVector;
         
         createGroup = cGroup;
         allFiles = aFiles;
@@ -260,37 +229,30 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
             } 
 		}
 		
+        int numBarcodes, numLinkers, numSpacers, numRPrimers, numFPrimers;
+        bool pairedOligos;
+        Oligos oligos(pDataArray->oligosfile);
+        if (oligos.hasPairedBarcodes()) {
+            pairedOligos = true;
+            numFPrimers = oligos.getPairedPrimers().size();
+            numBarcodes = oligos.getPairedBarcodes().size();
+        }else {
+            pairedOligos = false;
+            numFPrimers = oligos.getPrimers().size();
+            numBarcodes = oligos.getBarcodes().size();
+        }
+        
+        numLinkers = oligos.getLinkers().size();
+        numSpacers = oligos.getSpacers().size();
+        numRPrimers = oligos.getReversePrimers().size();
+        
         TrimOligos* trimOligos = NULL;
-        int numBarcodes = pDataArray->barcodes.size();
-        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes);   numBarcodes = pDataArray->pairedBarcodes.size(); pDataArray->numFPrimers = pDataArray->pairedPrimers.size(); }
-        else                {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);  }
+        if (pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes());    }
+        else                {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  }
         
         TrimOligos* rtrimOligos = NULL;
         if (pDataArray->reorient) {
-            //create reoriented primer and barcode pairs
-            map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
-            for (map<int, oligosPair>::iterator it = pDataArray->pairedPrimers.begin(); it != pDataArray->pairedPrimers.end(); it++) {
-                oligosPair tempPair(trimOligos->reverseOligo((it->second).reverse), (trimOligos->reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
-                rpairedPrimers[it->first] = tempPair;
-            }
-            for (map<int, oligosPair>::iterator it = pDataArray->pairedBarcodes.begin(); it != pDataArray->pairedBarcodes.end(); it++) {
-                oligosPair tempPair(trimOligos->reverseOligo((it->second).reverse), (trimOligos->reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
-                rpairedBarcodes[it->first] = tempPair;
-            }
-            
-            int index = rpairedBarcodes.size();
-            for (map<string, int>::iterator it = pDataArray->barcodes.begin(); it != pDataArray->barcodes.end(); it++) {
-                oligosPair tempPair("", trimOligos->reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
-                rpairedBarcodes[index] = tempPair; index++;
-            }
-            
-            index = rpairedPrimers.size();
-            for (map<string, int>::iterator it = pDataArray->primers.begin(); it != pDataArray->primers.end(); it++) {
-                oligosPair tempPair("", trimOligos->reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
-                rpairedPrimers[index] = tempPair; index++;
-            }
-
-            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
+            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0,  oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
         }
         
 		pDataArray->count = 0;
@@ -329,7 +291,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				int barcodeIndex = 0;
 				int primerIndex = 0;
 				
-                if(pDataArray->numLinkers != 0){
+                if(numLinkers != 0){
 					success = trimOligos->stripLinker(currSeq, currQual);
 					if(success > pDataArray->ldiffs)		{	trashCode += 'k';	}
 					else{ currentSeqsDiffs += success;  }
@@ -341,14 +303,14 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 					else{ currentSeqsDiffs += success;  }
 				}
                 
-                if(pDataArray->numSpacers != 0){
+                if(numSpacers != 0){
 					success = trimOligos->stripSpacer(currSeq, currQual);
 					if(success > pDataArray->sdiffs)		{	trashCode += 's';	}
 					else{ currentSeqsDiffs += success;  }
 
 				}
                 
-				if(pDataArray->numFPrimers != 0){
+				if(numFPrimers != 0){
 					success = trimOligos->stripForward(currSeq, currQual, primerIndex, pDataArray->keepforward);
 					if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
 					else{ currentSeqsDiffs += success;  }
@@ -356,7 +318,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				
 				if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
 				
-				if(pDataArray->numRPrimers != 0){
+				if(numRPrimers != 0){
 					success = trimOligos->stripReverse(currSeq, currQual);
 					if(!success)				{	trashCode += 'r';	}
 				}
@@ -375,7 +337,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
-                    if(pDataArray->numFPrimers != 0){
+                    if(numFPrimers != 0){
                         thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, pDataArray->keepforward);
                         if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
@@ -478,20 +440,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				
 				if(trashCode.length() == 0){
                     string thisGroup = "";
-                    if (pDataArray->createGroup) {
-						if(numBarcodes != 0){
-							thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
-							if (pDataArray->numFPrimers != 0) {
-								if (pDataArray->primerNameVector[primerIndex] != "") { 
-									if(thisGroup != "") {
-										thisGroup += "." + pDataArray->primerNameVector[primerIndex]; 
-									}else {
-										thisGroup = pDataArray->primerNameVector[primerIndex]; 
-									}
-								} 
-							}
-                        }
-                    }
+                    if (pDataArray->createGroup) {    thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);                     }
                     
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {

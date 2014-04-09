@@ -16,6 +16,7 @@
 #include "flowdata.h"
 #include "groupmap.h"
 #include "trimoligos.h"
+#include "oligos.h"
 
 class TrimFlowsCommand : public Command {
 public:
@@ -47,43 +48,29 @@ private:
 	int comboStarts;
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
+    vector<string> outputNames;
+	set<string> filesToRemove;
+    bool allFiles;
+	int processors;
+	int numFPrimers, numRPrimers, numBarcodes;
+	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
+	int numFlows;
+	float signal, noise;
+	bool fasta, pairedOligos, reorient;
+	string flowOrder, flowFileName, oligoFileName, outputDir;
+    Oligos oligos;
+
 
 	vector<unsigned long long> getFlowFileBreaks();
 	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
 	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
-    string reverseOligo(string);
-    
-	vector<string> outputNames;
-	set<string> filesToRemove;
+	int getOligos(vector<vector<string> >&);		//a rewrite of what is in trimseqscommand.h
 	
-	void getOligos(vector<vector<string> >&);		//a rewrite of what is in trimseqscommand.h
 	
-	bool allFiles;
-	int processors;
-	int numFPrimers, numRPrimers;
-	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
-	int numFlows;
-	float signal, noise;
-	bool fasta;
-	string flowOrder;	
-	
-	string flowFileName, oligoFileName, outputDir;
-
-	map<string, int> barcodes;
-	map<string, int> primers;
-	vector<string> revPrimer;
-    vector<string> linker;
-    vector<string> spacer;
-
-	vector<string> primerNameVector;	//needed here?
-	vector<string> barcodeNameVector;	//needed here?
-
-	map<string, int> combos;			//needed here?
-	map<string, int> groupToIndex;		//needed here?
 	
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
@@ -133,7 +120,7 @@ struct trimFlowData {
 	}
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyTrimFlowThreadFunction(LPVOID lpParam){ 
@@ -260,6 +247,6 @@ static DWORD WINAPI MyTrimFlowThreadFunction(LPVOID lpParam){
 	}
 } 
 #endif
-
+*/
 
 #endif

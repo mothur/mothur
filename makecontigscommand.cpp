@@ -24,7 +24,7 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
-
+        CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
         CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
         CommandParameter ptrimoverlap("trimoverlap", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptrimoverlap);
@@ -71,6 +71,7 @@ string MakeContigsCommand::getHelpString(){
 		//helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5) The default is 6.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
@@ -153,7 +154,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else { 
 				string path;
@@ -378,6 +379,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 				abort=true;
 			}
             
+            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
+			reorient = m->isTrue(temp);
+            
             //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
             for (int i = -64; i < 65; i++) { 
                 char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
@@ -440,14 +444,17 @@ int MakeContigsCommand::execute(){
             groupCounts.clear();
             groupMap.clear();
             vector<vector<string> > fastaFileNames;
+            map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
             createOligosGroup = false;
+            oligos = new Oligos();
+            numBarcodes = 0; numFPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
             string outputGroupFileName;
             map<string, string> variables; 
             string thisOutputDir = outputDir;
             if (outputDir == "") {  thisOutputDir = m->hasPath(filesToProcess[l][0][0]); }
             variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(filesToProcess[l][0][0]));
             variables["[tag]"] = "";
-            if(oligosfile != ""){  createOligosGroup = getOligos(fastaFileNames, variables["[filename]"]);  }
+            if(oligosfile != ""){  createOligosGroup = getOligos(fastaFileNames, variables["[filename]"], uniqueFastaNames);  }
             if (createOligosGroup || createFileGroup) {
                 outputGroupFileName = getOutputFileName("group",variables);
             }
@@ -468,10 +475,10 @@ int MakeContigsCommand::execute(){
             //remove temp fasta and qual files
             for (int i = 0; i < processors; i++) { for(int j = 0; j < filesToProcess[l][i].size(); j++) { m->mothurRemove(filesToProcess[l][i][j]); }  }
             
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
             
             if(allFiles){
-                map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
+                // so we don't add the same groupfile multiple times
                 map<string, string>::iterator it;
                 set<string> namesToRemove;
                 for(int i=0;i<fastaFileNames.size();i++){
@@ -481,11 +488,7 @@ int MakeContigsCommand::execute(){
                                 if(m->isBlank(fastaFileNames[i][j])){
                                     m->mothurRemove(fastaFileNames[i][j]);
                                     namesToRemove.insert(fastaFileNames[i][j]);
-                                }else{	
-                                    it = uniqueFastaNames.find(fastaFileNames[i][j]);
-                                    if (it == uniqueFastaNames.end()) {	
-                                        uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
-                                    }	
+                                    uniqueFastaNames.erase(fastaFileNames[i][j]); //remove from list for group file print
                                 }
                             }
                         }
@@ -502,8 +505,8 @@ int MakeContigsCommand::execute(){
                     m->openInputFile(it->first, in);
                     
                     ofstream out;
-                    string thisGroupName = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
-                    thisGroupName += getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
+                    string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
                     m->openOutputFile(thisGroupName, out);
                     
                     while (!in.eof()){
@@ -566,6 +569,7 @@ int MakeContigsCommand::execute(){
                 }
             }
             m->mothurOut("Done.\n");
+            delete oligos;
         }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
@@ -822,7 +826,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                 }
             }
 			         
-			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, barcodes, primers, tempFASTAFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
+			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -942,7 +946,12 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
         m->openOutputFile(outputMisMatches, outMisMatch);
         outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  
         
-        TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, primers, barcodes);
+        TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, oligos->getPairedPrimers(), oligos->getPairedBarcodes());
+        
+        TrimOligos* rtrimOligos = NULL;
+        if (reorient) {
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes()); numBarcodes = oligos->getReorientedPairedBarcodes().size();
+        }
         
         while ((!inFFasta.eof()) && (!inRFasta.eof())) {
             
@@ -973,8 +982,15 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             
             int barcodeIndex = 0;
             int primerIndex = 0;
+            Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
+            Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
+            QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
+            if (thisfqualfile != "") {
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+            }
                         
-            if(barcodes.size() != 0){
+            if(numBarcodes != 0){
                 if (thisfqualfile != "") {
                     if ((thisfindexfile != "") || (thisrindexfile != "")) {
                         success = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
@@ -988,7 +1004,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                 else{ currentSeqsDiffs += success;  }
             }
             
-            if(primers.size() != 0){
+            if(numFPrimers != 0){
                 if (thisfqualfile != "") {
                     success = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
                 }else {
@@ -999,6 +1015,58 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             }
             
             if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
+            
+            if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                int thisSuccess = 0;
+                string thisTrashCode = "";
+                int thisCurrentSeqsDiffs = 0;
+                
+                int thisBarcodeIndex = 0;
+                int thisPrimerIndex = 0;
+                
+                if(numBarcodes != 0){
+                    if (thisfqualfile != "") {
+                        if ((thisfindexfile != "") || (thisrindexfile != "")) {
+                            thisSuccess = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                        }else {
+                            thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
+                        }
+                    }else {
+                        thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
+                    }
+                    if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                }
+
+                if(numFPrimers != 0){
+                    if (thisfqualfile != "") {
+                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
+                    }else {
+                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
+                    }
+                    if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                }
+                
+                if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+                
+                if (thisTrashCode == "") {
+                    trashCode = thisTrashCode;
+                    success = thisSuccess;
+                    currentSeqsDiffs = thisCurrentSeqsDiffs;
+                    barcodeIndex = thisBarcodeIndex;
+                    primerIndex = thisPrimerIndex;
+                    savedFSeq.reverseComplement();
+                    savedRSeq.reverseComplement();
+                    fSeq.setAligned(savedFSeq.getAligned());
+                    rSeq.setAligned(savedRSeq.getAligned());
+                    if(thisfqualfile != ""){
+                        savedFQual->flipQScores(); savedRQual->flipQScores();
+                        fQual->setScores(savedFQual->getScores()); rQual->setScores(savedRQual->getScores());
+                    }
+                }else { trashCode += "(" + thisTrashCode + ")";  }
+            }
+
             
             //flip the reverse reads
             rSeq.reverseComplement();
@@ -1021,7 +1089,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             if (thisfqualfile != "") {
                 scores1 = fQual->getQualityScores();
                 scores2 = rQual->getQualityScores();
-                delete fQual; delete rQual;
+                delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
             }
             
             // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
@@ -1088,18 +1156,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                 if (m->debug) { m->mothurOut(fSeq.getName()); }
                 
                 if (createOligosGroup) {
-                    if(barcodes.size() != 0){
-                        string thisGroup = barcodeNameVector[barcodeIndex];
-                        if (primers.size() != 0) { 
-                            if (primerNameVector[primerIndex] != "") { 
-                                if(thisGroup != "") {
-                                    thisGroup += "." + primerNameVector[primerIndex]; 
-                                }else {
-                                    thisGroup = primerNameVector[primerIndex]; 
-                                }
-                            } 
-                        }
-                        
+                        string thisGroup = oligos->getGroupName(barcodeIndex, primerIndex);
                         if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
                         
                         int pos = thisGroup.find("ignore");
@@ -1110,8 +1167,6 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                             if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
                             else { groupCounts[it->first] ++; }
                         }else { ignore = true; }
-                        
-                    }
                 }else if (createFileGroup) {
                     int pos = group.find("ignore");
                     if (pos == string::npos) {
@@ -1123,7 +1178,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                     }else { ignore = true; }
                 }
                 if (m->debug) { m->mothurOut("\n"); }
-                
+            
                 if(allFiles && !ignore){
                     ofstream output;
                     m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
@@ -1159,6 +1214,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             inRQual.close();
         }
         delete alignment;
+        if (reorient) { delete rtrimOligos; }
         
         if (m->control_pressed) {  m->mothurRemove(outputFasta); m->mothurRemove(outputScrapFasta);m->mothurRemove(outputMisMatches);  }
     
@@ -1749,6 +1805,24 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
             
+            if (inputDir != "") {
+                string path = m->hasPath(forward);
+                if (path == "") {  forward = inputDir + forward;  }
+                
+                path = m->hasPath(reverse);
+                if (path == "") {  reverse = inputDir + reverse;  }
+                
+                if (findex != "") {
+                    path = m->hasPath(findex);
+                    if (path == "") {  findex = inputDir + findex;  }
+                }
+                
+                if (rindex != "") {
+                    path = m->hasPath(rindex);
+                    if (path == "") {  rindex = inputDir + rindex;  }
+                }
+            }
+            
             //check to make sure both are able to be opened
             ifstream in2;
             int openForward = m->openInputFile(forward, in2, "noerror");
@@ -1905,155 +1979,53 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 //illumina data requires paired forward and reverse data
 //BARCODE   atgcatgc   atgcatgc    groupName 
 //PRIMER   atgcatgc   atgcatgc    groupName  
-//PRIMER   atgcatgc   atgcatgc  
-bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, string rootname){
+//PRIMER   atgcatgc   atgcatgc
+bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, string rootname, map<string, string>& fastaFile2Group){
 	try {
-		ifstream in;
-		m->openInputFile(oligosfile, in);
-		
-		ofstream test;
-		
-		string type, foligo, roligo, group;
+        if (m->debug) { m->mothurOut("[DEBUG]: oligosfile = " + oligosfile + "\n"); }
         
-		int indexPrimer = 0;
-		int indexBarcode = 0;
-        set<string> uniquePrimers;
-        set<string> uniqueBarcodes;
-		
-		while(!in.eof()){
-            
-			in >> type; 
+        bool allBlank = false;
+        oligos->read(oligosfile, false);
+        
+        if (m->control_pressed) { return false; } //error in reading oligos
+        
+        if (oligos->hasPairedBarcodes()) {
+            numFPrimers = oligos->getPairedPrimers().size();
+            numBarcodes = oligos->getPairedBarcodes().size();
+        }else {
+            m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); m->control_pressed = true;
+        }
     
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
-            
-			if(type[0] == '#'){
-				while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(in);
-			}
-			else{
-				m->gobble(in);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				in >> foligo;
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + foligo + ".\n"); }
-				
-				for(int i=0;i<foligo.length();i++){
-					foligo[i] = toupper(foligo[i]);
-					if(foligo[i] == 'U')	{	foligo[i] = 'T';	}
-				}
-				
-				if(type == "PRIMER"){
-					m->gobble(in);
-					
-                    in >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    //roligo = reverseOligo(roligo);
-                    
-                    if (m->debug) { m->mothurOut("[DEBUG]: reading - " + roligo + ".\n"); }
-                    
-                    group = "";
-                    
-					// get rest of line in case there is a primer name
-					while (!in.eof())	{	
-						char c = in.get(); 
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					} 
-                    
-                    oligosPair newPrimer(foligo, roligo);
-                    
-                    if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
-                    
-					//check for repeat barcodes
-                    string tempPair = foligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    else { uniquePrimers.insert(tempPair); }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-					primers[indexPrimer]=newPrimer; indexPrimer++;		
-					primerNameVector.push_back(group);
-				}else if(type == "BARCODE"){
-					m->gobble(in);
-					
-                    in >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    //roligo = reverseOligo(roligo);
-                    
-                    oligosPair newPair(foligo, roligo);
-                    
-                    if ((foligo == "NONE") || (roligo == "NONE")) { if (!noneOk) { m->mothurOut("[ERROR]: barcodes must be paired unless you are using an index file.\n"); m->control_pressed = true; } }
-                    
-                    group = "";
-                    while (!in.eof())	{	
-						char c = in.get(); 
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					} 
-					
-                    if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
-                        
-                    //check for repeat barcodes
-                    string tempPair = foligo+roligo;
-                    if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
-                    else { uniqueBarcodes.insert(tempPair); }
-                        
-                    barcodes[indexBarcode]=newPair; indexBarcode++;
-					barcodeNameVector.push_back(group);
-				}else if(type == "LINKER"){
-					linker.push_back(foligo);
-                    m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n");
-				}else if(type == "SPACER"){
-					spacer.push_back(foligo);
-                    m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n");
-				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are primer, barcode, linker and spacer. Ignoring " + foligo + "."); m->mothurOutEndLine(); }
-			}
-			m->gobble(in);
-		}	
-		in.close();
-		
-		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
-		
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-            oligosPair temp("", "");
-			barcodes[0] = temp;
-			barcodeNameVector.push_back("");			
-		}
-		
-		if(primerNameVector.size() == 0){
-            oligosPair temp("", "");
-			primers[0] = temp;
-			primerNameVector.push_back("");			
-		}
-		
-		fastaFileNames.resize(barcodeNameVector.size());
+        if (m->control_pressed) { return false; }
+    
+        numLinkers = oligos->getLinkers().size();
+        numSpacers = oligos->getSpacers().size();
+        numRPrimers = oligos->getReversePrimers().size();
+        if (numLinkers != 0) { m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n"); }
+        if (numSpacers != 0) { m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n"); }
+       
+        vector<string> groupNames = oligos->getGroupNames();
+        if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
+        
+        
+        fastaFileNames.resize(oligos->getBarcodeNames().size());
 		for(int i=0;i<fastaFileNames.size();i++){
-			fastaFileNames[i].assign(primerNameVector.size(), "");
+            for(int j=0;j<oligos->getPrimerNames().size();j++){  fastaFileNames[i].push_back(""); }
 		}
-		
-		if(allFiles){
-			set<string> uniqueNames; //used to cleanup outputFileNames
-			for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-				for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-					
-					string primerName = primerNameVector[itPrimer->first];
-					string barcodeName = barcodeNameVector[itBar->first];
+    
+        if (allFiles) {
+            set<string> uniqueNames; //used to cleanup outputFileNames
+            map<int, oligosPair> barcodes = oligos->getPairedBarcodes();
+            map<int, oligosPair> primers = oligos->getPairedPrimers();
+            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
                     
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing 
-					else {
+                    string primerName = oligos->getPrimerName(itPrimer->first);
+                    string barcodeName = oligos->getBarcodeName(itBar->first);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
                         string comboGroupName = "";
                         string fastaFileName = "";
                         string qualFileName = "";
@@ -2061,98 +2033,48 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                         string countFileName = "";
                         
                         if(primerName == ""){
-                            comboGroupName = barcodeNameVector[itBar->first];
-                        }
-                        else{
+                            comboGroupName = barcodeName;
+                        }else{
                             if(barcodeName == ""){
-                                comboGroupName = primerNameVector[itPrimer->first];
+                                comboGroupName = primerName;
                             }
                             else{
-                                comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
+                                comboGroupName = barcodeName + "." + primerName;
                             }
                         }
                         
                         
                         ofstream temp;
-                        fastaFileName = rootname + comboGroupName + ".fasta";
+                        map<string, string> variables;
+                        variables["[filename]"] = rootname;
+                        variables["[tag]"] = comboGroupName;
+                        fastaFileName = getOutputFileName("fasta", variables);
                         if (uniqueNames.count(fastaFileName) == 0) {
                             outputNames.push_back(fastaFileName);
                             outputTypes["fasta"].push_back(fastaFileName);
                             uniqueNames.insert(fastaFileName);
+                            fastaFile2Group[fastaFileName] = comboGroupName;
                         }
                         
                         fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                         m->openOutputFile(fastaFileName, temp);		temp.close();
+                        cout << fastaFileName << endl;
                     }
-				}
-			}
-		}
-		
-		bool allBlank = true;
-		for (int i = 0; i < barcodeNameVector.size(); i++) {
-			if (barcodeNameVector[i] != "") {
-				allBlank = false;
-				break;
-			}
-		}
-		for (int i = 0; i < primerNameVector.size(); i++) {
-			if (primerNameVector[i] != "") {
-				allBlank = false;
-				break;
-			}
-		}
-        
-		if (allBlank) {
-			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
-			allFiles = false;
-			return false;
-		}
-		
-		return true;
-		
+                }
+            }
+        }
+
+        if (allBlank) {
+            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+            allFiles = false;
+            return false;
+        }
+
+        return true;
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeContigsCommand", "getOligos");
-		exit(1);
-	}
-}
-//********************************************************************/
-string MakeContigsCommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
-        
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-            
-            else						{	reverse += 'N';	}
-        }
-        
-        
-        return reverse;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "reverseOligo");
 		exit(1);
 	}
 }
@@ -2162,7 +2084,7 @@ vector<int> MakeContigsCommand::convertQual(string qual) {
 		vector<int> qualScores;
         bool negativeScores = false;
 		
-		for (int i = 0; i < qual.length(); i++) { 
+		for (int i = 0; i < qual.length(); i++) {
             
             int temp = 0;
             temp = int(qual[i]);

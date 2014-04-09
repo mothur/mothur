@@ -9,6 +9,7 @@
 #include "getmimarkspackagecommand.h"
 #include "groupmap.h"
 
+
 //**********************************************************************************************************************
 vector<string> GetMIMarksPackageCommand::setParameters(){
 	try {
@@ -106,7 +107,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 			outputTypes["tsv"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			inputDir = validParameter.validFile(parameters, "inputdir", false);
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -192,11 +193,9 @@ int GetMIMarksPackageCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        if (oligosfile != "") { readOligos();   }
+        if (oligosfile != "") { Oligos oligos(oligosfile); Groups = oligos.getGroupNames();  }
         else if (file != "")  { readFile();     }
         else {  GroupMap groupmap(groupfile); groupmap.readMap(); Groups = groupmap.getNamesOfGroups(); }
-        
-        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
         
         if (outputDir == "") { outputDir += m->hasPath(inputfile); }
         map<string, string> variables;
@@ -332,155 +331,7 @@ int GetMIMarksPackageCommand::execute(){
 	}
 }
 //***************************************************************************************************************
-int GetMIMarksPackageCommand::readOligos(){
-	try {
-		ifstream inOligos;
-		m->openInputFile(oligosfile, inOligos);
-		
-		string type, oligo, roligo, group;
-        vector<string> primerNameVector, barcodeNameVector;
-        set<string> uniquePrimers;
-        set<string> uniqueBarcodes;
-   		
-		while(!inOligos.eof()){
-            
-			inOligos >> type;
-            
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
-            
-			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
-			}
-			else{
-				m->gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-				
-				if(type == "FORWARD"){
-					group = "";
-					
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-					
-					primerNameVector.push_back(group);
-				}
-                else if (type == "PRIMER"){
-                    m->gobble(inOligos);
-					
-                    inOligos >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    
-                    group = "";
-                    
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-                    
-					primerNameVector.push_back(group);
-                }else if(type == "BARCODE"){
-					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-                    
-                    string temp = "";
-                    while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					}
-					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {
-                        
-                        string reverseBarcode = group; //reverseOligo(group); //reverse barcode
-                        group = temp;
-                        
-                        barcodeNameVector.push_back(group);
-                    }else {
-                        barcodeNameVector.push_back(group);
-                    }
-				}
-			}
-			m->gobble(inOligos);
-		}
-		inOligos.close();
-        
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-			barcodeNameVector.push_back("");
-		}
-		
-		if(primerNameVector.size() == 0){
-			primerNameVector.push_back("");
-		}
-        
-        
-        for(int i = 0; i <  barcodeNameVector.size(); i++){
-            for(int j = 0; j < primerNameVector.size(); j++){
-                
-                string primerName = primerNameVector[j];
-                string barcodeName = barcodeNameVector[i];
-                
-                if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                else if ((primerName == "") && (barcodeName == "")) { }
-                else {
-                    string comboGroupName = "";
-                    
-                    if(primerName == ""){
-                        comboGroupName = barcodeNameVector[i];
-                    }
-                    else{
-                        if(barcodeName == ""){
-                            comboGroupName = primerNameVector[j];
-                        }
-                        else{
-                            comboGroupName = barcodeNameVector[i] + "." + primerNameVector[j];
-                        }
-                    }
-                    uniqueNames.insert(comboGroupName);
-                }
-            }
-        }
-        
-        
-        
-        if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
-        
-        
-		return true;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetMIMarksPackageCommand", "readOligos");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
+
 // going to have to rework this to allow for other options --
 /*
  file option 1
@@ -506,7 +357,7 @@ int GetMIMarksPackageCommand::readOligos(){
 
 int GetMIMarksPackageCommand::readFile(){
 	try {
-        //vector<string> theseFiles;
+        Oligos oligos;
         inputfile = file;
         
         ifstream in;
@@ -533,6 +384,14 @@ int GetMIMarksPackageCommand::readFile(){
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
+            
+            if (inputDir != "") {
+                string path = m->hasPath(thisFileName2);
+                if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
+                
+                path = m->hasPath(thisFileName1);
+                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
+            }
             
             //check to make sure both are able to be opened
             ifstream in2;
@@ -603,12 +462,14 @@ int GetMIMarksPackageCommand::readFile(){
             if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
                     oligosfile = thisFileName2;
                     if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
-                    readOligos();
+                    oligos.read(oligosfile);
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
                 Groups.push_back(group);
             }
         }
         in.close();
+        
+        Groups = oligos.getGroupNames();
         
         inputfile = file;
         

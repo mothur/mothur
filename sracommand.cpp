@@ -18,6 +18,7 @@ vector<string> SRACommand::setParameters(){
         CommandParameter pfile("file", "InputTypes", "", "", "sffFastQFile-oligos", "sffFastQFile", "none","xml",false,false); parameters.push_back(pfile);
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","xml",false,false); parameters.push_back(pfastq);
         CommandParameter pcontact("project", "InputTypes", "", "", "none", "none", "none","xml",false,true,true); parameters.push_back(pcontact);
+        CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
         CommandParameter pmimark("mimark", "InputTypes", "", "", "none", "none", "none","xml",false,true,true); parameters.push_back(pmimark);
         //choose only one multiple options
         CommandParameter pplatform("platform", "Multiple", "_LS454-ILLUMINA-ION_TORRENT-PACBIO_SMRT", "_LS454", "", "", "","",false,false); parameters.push_back(pplatform);
@@ -51,7 +52,7 @@ string SRACommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sra command creates the necessary files for a NCBI submission. The xml file and individual sff or fastq files parsed from the original sff or fastq file.\n";
-		helpString += "The sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, platform, orientation, libstrategy, datatype, libsource, libselection and instrument.\n";
+		helpString += "The sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, checkorient, platform, orientation, libstrategy, datatype, libsource, libselection and instrument.\n";
         helpString += "The sff parameter is used to provide the original sff file.\n";
 		helpString += "The fastq parameter is used to provide the original fastq file.\n";
         helpString += "The project parameter is used to provide your project file.\n";
@@ -63,6 +64,7 @@ string SRACommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
         helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
 		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
+        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. The default is false.\n";
         helpString += "The platform parameter is used to specify platform you are using choices are: _LS454,ILLUMINA,ION_TORRENT,PACBIO_SMRT. Default=_LS454. This is a controlled vocabulary section in the XML file that will be generated.\n";
         helpString += "The orientation parameter is used to specify sequence orientation. Choices are: forward and reverse. Default=forward. This is a controlled vocabulary section in the XML file that will be generated.\n";
         helpString += "The instrument parameter is used to specify instrument. Choices are 454_GS-454_GS_20-454_GS_FLX-454_GS_FLX_Titanium-454_GS_Junior-Illumina_Genome_Analyzer-Illumina_Genome_Analyzer_II-Illumina_Genome_Analyzer_IIx-Illumina_HiSeq_2000-Illumina_HiSeq_1000-Illumina_MiSeq-PacBio_RS-Ion_Torrent_PGM-unspecified. Default=454_GS. This is a controlled vocabulary section in the XML file that will be generated. \n";
@@ -134,7 +136,7 @@ SRACommand::SRACommand(string option)  {
             outputTypes["xml"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			inputDir = validParameter.validFile(parameters, "inputdir", false);
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
             
@@ -284,6 +286,8 @@ SRACommand::SRACommand(string option)  {
 			m->mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
+            
+            checkorient = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
             			
 		}
 		
@@ -816,12 +820,21 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
             
+            if (inputDir != "") {
+                string path = m->hasPath(thisFileName1);
+                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
+                
+                path = m->hasPath(thisFileName2);
+                if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
+            }
+            
             //check to make sure both are able to be opened
             ifstream in2;
             int openForward = m->openInputFile(thisFileName1, in2, "noerror");
             
             //if you can't open it, try default location
             if (openForward == 1) {
+                
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -941,6 +954,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         if (ldiffs != 0) { commandString += ", ldiffs=" + toString(ldiffs); }
         if (sdiffs != 0) { commandString += ", sdiffs=" + toString(sdiffs); }
         if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
+        if (m->isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
         
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
@@ -986,6 +1000,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         if (ldiffs != 0) { commandString += ", ldiffs=" + toString(ldiffs); }
         if (sdiffs != 0) { commandString += ", sdiffs=" + toString(sdiffs); }
         if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
+        if (m->isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
        
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
@@ -1072,201 +1087,40 @@ int SRACommand::checkGroups(map<string, vector<string> >& files){
 //***************************************************************************************************************
 int SRACommand::readOligos(){
 	try {
-		ifstream inOligos;
-		m->openInputFile(oligosfile, inOligos);
-		
-		string type, oligo, roligo, group;
-        bool hasPrimer = false; bool hasPairedBarcodes = false; pairedOligos = false;
-        map<int, oligosPair> pairedBarcodes;
-        map<int, oligosPair> pairedPrimers;
-        map<string, int> barcodes;
-        map<string, int> primers;
-        vector<string>  linker;
-        vector<string>  spacer, revPrimer;
-		int indexPrimer = 0;
-		int indexBarcode = 0;
-        int indexPairedPrimer = 0;
-		int indexPairedBarcode = 0;
-        set<string> uniquePrimers;
-        set<string> uniqueBarcodes;
-   		
-		while(!inOligos.eof()){
-            
-			inOligos >> type;
-            
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
-            
-			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
-			}
-			else{
-				m->gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-				
-				if(type == "FORWARD"){
-					group = "";
-					
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-					
-					//check for repeat barcodes
-					map<string, int>::iterator itPrime = primers.find(oligo);
-					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
-                    
-					primers[oligo] = indexPrimer; indexPrimer++;
-					primerNameVector.push_back(group);
-				}
-                else if (type == "PRIMER"){
-                    m->gobble(inOligos);
-					
-                    inOligos >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    roligo = reverseOligo(roligo);
-                    
-                    group = "";
-                    
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-                    
-                    oligosPair newPrimer(oligo, roligo);
-                    
-                    if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
-					
-					//check for repeat barcodes
-                    string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    else { uniquePrimers.insert(tempPair); }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
-					pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
-					primerNameVector.push_back(group);
-                    hasPrimer = true;
-                }
-				else if(type == "REVERSE"){
-					//Sequence oligoRC("reverse", oligo);
-					//oligoRC.reverseComplement();
-                    string oligoRC = reverseOligo(oligo);
-					revPrimer.push_back(oligoRC);
-				}
-				else if(type == "BARCODE"){
-					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-                    
-                    string temp = "";
-                    while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					}
-					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {
-                        hasPairedBarcodes = true;
-                        string reverseBarcode = group; //reverseOligo(group); //reverse barcode
-                        group = temp;
-                        
-                        for(int i=0;i<reverseBarcode.length();i++){
-                            reverseBarcode[i] = toupper(reverseBarcode[i]);
-                            if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
-                        }
-                        
-                        reverseBarcode = reverseOligo(reverseBarcode);
-                        oligosPair newPair(oligo, reverseBarcode);
-                        
-                        if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
-                        //check for repeat barcodes
-                        string tempPair = oligo+reverseBarcode;
-                        if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
-                        else { uniqueBarcodes.insert(tempPair); }
-                        
-                        pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }else {
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-                        
-                        barcodes[oligo]=indexBarcode; indexBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }
-				}else if(type == "LINKER"){
-					linker.push_back(oligo);
-				}else if(type == "SPACER"){
-					spacer.push_back(oligo);
-				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
-			}
-			m->gobble(inOligos);
-		}
-		inOligos.close();
-		
-        if (hasPairedBarcodes || hasPrimer) {
-            pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
-        }
-		
+		Oligos oligos(oligosfile);
         
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-			barcodeNameVector.push_back("");
-		}
-		
-		if(primerNameVector.size() == 0){
-			primerNameVector.push_back("");
-		}
+        if (m->control_pressed) { return false; } //error in reading oligos
         
+        if (oligos.hasPairedBarcodes())     {   pairedOligos = true;    }
+        else                                {  pairedOligos = false;    }
+        
+        set<string> uniqueNames; //used to cleanup outputFileNames
         if (pairedOligos) {
-            for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
-                for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
+            map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
+            map<int, oligosPair> primers = oligos.getPairedPrimers();
+            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
                     
-                    string primerName = primerNameVector[itPrimer->first];
-                    string barcodeName = barcodeNameVector[itBar->first];
+                    string primerName = oligos.getPrimerName(itPrimer->first);
+                    string barcodeName = oligos.getBarcodeName(itBar->first);
                     
                     if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
-                        string fastqFileName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
                         
                         if(primerName == ""){
-                            comboGroupName = barcodeNameVector[itBar->first];
-                        }
-                        else{
+                            comboGroupName = barcodeName;
+                        }else{
                             if(barcodeName == ""){
-                                comboGroupName = primerNameVector[itPrimer->first];
+                                comboGroupName = primerName;
                             }
                             else{
-                                comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
+                                comboGroupName = barcodeName + "." + primerName;
                             }
                         }
                         uniqueNames.insert(comboGroupName);
@@ -1290,26 +1144,31 @@ int SRACommand::readOligos(){
                 }
             }
         }else {
+            map<string, int> barcodes = oligos.getBarcodes() ;
+            map<string, int> primers = oligos.getPrimers();
             for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
                 for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
                     
-                    string primerName = primerNameVector[itPrimer->second];
-                    string barcodeName = barcodeNameVector[itBar->second];
+                    string primerName = oligos.getPrimerName(itPrimer->second);
+                    string barcodeName = oligos.getBarcodeName(itBar->second);
                     
                     if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
-                        string fastqFileName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
                         
                         if(primerName == ""){
-                            comboGroupName = barcodeNameVector[itBar->second];
-                        }
-                        else{
+                            comboGroupName = barcodeName;
+                        }else{
                             if(barcodeName == ""){
-                                comboGroupName = primerNameVector[itPrimer->second];
+                                comboGroupName = primerName;
                             }
                             else{
-                                comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
+                                comboGroupName = barcodeName + "." + primerName;
                             }
                         }
                         uniqueNames.insert(comboGroupName);
@@ -1333,10 +1192,8 @@ int SRACommand::readOligos(){
                 }
             }
         }
-
-               
-        if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
+        if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
 		return true;
 		

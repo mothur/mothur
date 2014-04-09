@@ -10,6 +10,7 @@
 #define Mothur_getmimarkspackagecommand_h
 
 #include "command.hpp"
+#include "oligos.h"
 
 /**************************************************************************************************/
 
@@ -33,12 +34,10 @@ public:
     
 private:
     bool abort, requiredonly;
-    string oligosfile, groupfile, package, inputfile, file;
+    string oligosfile, groupfile, package, inputfile, file, inputDir;
     string outputDir;
     vector<string> outputNames, Groups;
-    set<string> uniqueNames;
     
-    int readOligos();
     int readFile();
 };
 

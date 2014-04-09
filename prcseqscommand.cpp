@@ -312,7 +312,7 @@ int PcrSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         int start = time(NULL);
-        fileAligned = true;
+        fileAligned = true; pairedOligos = false;
         
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
@@ -326,7 +326,7 @@ int PcrSeqsCommand::execute(){
 		
 		
         length = 0;
-		if(oligosfile != ""){    readOligos();     if (m->debug) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(primers.size()) + ", revprimers = " + toString(revPrimer.size()) + ".\n"); } }  if (m->control_pressed) {  return 0; }
+		if(oligosfile != ""){    readOligos();     if (m->debug) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(numFPrimers) + ", revprimers = " + toString(numRPrimers) + ".\n"); } }  if (m->control_pressed) {  return 0; }
         if(ecolifile != "") {    readEcoli();      }  if (m->control_pressed) {  return 0; }
         
         vector<unsigned long long> positions; 
@@ -529,7 +529,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, locationsFile+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
+			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, locationsFile+extension, m, oligosfile, ecolifile, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
 			pDataArray.push_back(tempPcr);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -586,8 +586,8 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                 
                 string name = "";
                 int thisStart = -1; int thisEnd = -1;
-                if (primers.size() != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
-                if (revPrimer.size() != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+                if (numFPrimers != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
+                if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
                 else { pend = -1; break; }
                 
                 int myDiff = 0;
@@ -642,8 +642,22 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
         set<int> locations; //locations[0] = beginning locations, 
         
         //pdiffs, bdiffs, primers, barcodes, revPrimers
-        map<string, int> faked;
-        TrimOligos trim(pdiffs, 0, primers, faked, revPrimer);
+        map<string, int> primers;
+        map<string, int> barcodes; //not used
+        vector<string> revPrimer;
+        if (pairedOligos) {
+            map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
+            for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
+                primers[(it->second).forward] = it->first;
+                revPrimer.push_back((it->second).reverse);
+            }
+            if (pdiffs != 0) { m->mothurOut("[WARNING]: Pcr.seqs is only designed to allow diffs in forward primers. Reverse primers must be an exact match.\n"); }
+        }else{
+            primers = oligos.getPrimers();
+            revPrimer = oligos.getReversePrimers();
+        }
+        
+        TrimOligos trim(pdiffs, 0, primers, barcodes, revPrimer);
         
 		while (!done) {
             
@@ -871,8 +885,8 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
             
             string name = "";
             int thisStart = -1; int thisEnd = -1;
-            if (primers.size() != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
-            if (revPrimer.size() != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+            if (numFPrimers != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
+            if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
             
             
             //cout << seq.getName() << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
@@ -925,130 +939,6 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         m->errorOut(e, "PcrSeqsCommand", "adjustDots");
         exit(1);
     }
-}
-//********************************************************************/
-string PcrSeqsCommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
-       
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-
-            else						{	reverse += 'N';	}
-        }
-
-        
-        return reverse;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "PcrSeqsCommand", "reverseOligo");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-bool PcrSeqsCommand::readOligos(){
-	try {
-		ifstream inOligos;
-		m->openInputFile(oligosfile, inOligos);
-		
-		string type, oligo, group;
-        int primerCount = 0;
-		
-		while(!inOligos.eof()){
-            
-			inOligos >> type; 
-            
-			if(type[0] == '#'){ //ignore
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
-			}else{
-				m->gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-				
-				if(type == "FORWARD"){
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{	
-                        char c = inOligos.get(); 
-                        if (c == 10 || c == 13 || c == -1){	break;	}
-                        else if (c == 32 || c == 9){;} //space or tab
-					} 
-					primers[oligo] = primerCount; primerCount++;
-                    //cout << "for oligo = " << oligo  << endl;
-                }else if(type == "REVERSE"){
-                    string oligoRC = reverseOligo(oligo);
-                    revPrimer.push_back(oligoRC);
-                    //cout << "rev oligo = " << oligo << " reverse = " << oligoRC << endl;
-				}else if(type == "BARCODE"){
-                    inOligos >> group;
-                }else if(type == "PRIMER"){
-					m->gobble(inOligos);
-                    primers[oligo] = primerCount; primerCount++;
-					
-                    string roligo="";
-                    inOligos >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    revPrimer.push_back(reverseOligo(roligo));
-                    
-                    // get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-                        char c = inOligos.get();
-                        if (c == 10 || c == 13 || c == -1){	break;	}
-                        else if (c == 32 || c == 9){;} //space or tab
-					}
-                    //cout << "prim oligo = " << oligo << " reverse = " << roligo << endl;
-				}else if((type == "LINKER")||(type == "SPACER")) {;}
-				else{	m->mothurOut(type + " is not recognized as a valid type. Choices are primer, forward, reverse, linker, spacer and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-			}
-			m->gobble(inOligos);
-		}	
-		inOligos.close();
-		
-		if ((primers.size() == 0) && (revPrimer.size() == 0)) {
-			m->mothurOut("[ERROR]: your oligos file does not contain valid primers or reverse primers.  Please correct."); m->mothurOutEndLine();
-            m->control_pressed = true;
-			return false;
-		}
-        
-        return true;
-        
-    }catch(exception& e) {
-		m->errorOut(e, "PcrSeqsCommand", "readOligos");
-		exit(1);
-	}
 }
 //***************************************************************************************************************
 bool PcrSeqsCommand::readEcoli(){
@@ -1321,6 +1211,35 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+
+int PcrSeqsCommand::readOligos(){
+	try {
+        oligos.read(oligosfile);
+        
+        if (m->control_pressed) { return false; } //error in reading oligos
+        
+        if (oligos.hasPairedBarcodes()) {
+            pairedOligos = true;
+            numFPrimers = oligos.getPairedPrimers().size();
+        }else {
+            pairedOligos = false;
+            numFPrimers = oligos.getPrimers().size();
+        }
+        numRPrimers = oligos.getReversePrimers().size();
+        
+        if (oligos.getLinkers().size() != 0) { m->mothurOut("[WARNING]: pcr.seqs is not setup to remove linkers, ignoring.\n"); }
+        if (oligos.getSpacers().size() != 0) { m->mothurOut("[WARNING]: pcr.seqs is not setup to remove spacers, ignoring.\n"); }
+
+        return true;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PcrSeqsCommand", "readOligos");
+		exit(1);
+	}
+}
+
 /**************************************************************************************/
 
 

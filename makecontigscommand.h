@@ -18,6 +18,7 @@
 #include "blastalign.hpp"
 #include "noalign.hpp"
 #include "trimoligos.h"
+#include "oligos.h"
 
 struct fastqRead {
 	vector<int> scores;
@@ -62,18 +63,12 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk;
-    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq;
+	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers;
     vector<string> outputNames;
-    
-    map<int, oligosPair> barcodes;
-	map<int, oligosPair> primers;
-    vector<string>  linker;
-    vector<string>  spacer;
-	vector<string> primerNameVector;	
-	vector<string> barcodeNameVector;
+    Oligos* oligos;
 	vector<char> convertTable;
     
 	map<string, int> groupCounts; 
@@ -89,8 +84,7 @@ private:
     //bool checkReads(fastqRead&, fastqRead&, string, string);
     int createProcesses(vector< vector<string> >, string, string, string, vector<vector<string> >, int);
     int driver(vector<string>, string, string, string, vector<vector<string> >, int, string);
-    bool getOligos(vector<vector<string> >&, string);
-    string reverseOligo(string);
+    bool getOligos(vector<vector<string> >&, string, map<string, string>&);
     vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques, bool);
     vector<pairFastqRead> mergeReads(vector<pairFastqRead> frReads, vector<pairFastqRead> friReads, map<string, pairFastqRead>& pairUniques);
 };
@@ -105,22 +99,19 @@ struct contigsData {
 	string outputFasta; 
     string outputScrapFasta; 
 	string outputMisMatches;
-	string align, group;
+	string align, group, oligosfile;
     vector<string> files;
     vector<vector<string> > fastaFileNames;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq;
-    bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap;
+    bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
-    vector<string> primerNameVector;	
-	vector<string> barcodeNameVector;
-    map<int, oligosPair> barcodes;
-	map<int, oligosPair> primers;
+    
 	
 	contigsData(){}
-	contigsData(string g, vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, map<int, oligosPair> br, map<int, oligosPair> pr, vector<vector<string> > ffn, vector<string>bnv, vector<string> pnv, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, int tid) {
+	contigsData(string g, vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, int tid) {
         files = f;
 		outputFasta = of;
         outputMisMatches = om;
@@ -135,10 +126,7 @@ struct contigsData {
 		count = 0;
         outputScrapFasta = osf;
         fastaFileNames = ffn;
-        barcodes = br;
-        primers = pr;
-        barcodeNameVector = bnv;
-        primerNameVector = pnv;
+        oligosfile = olig;
         pdiffs = pdf;
         bdiffs = bdf;
         tdiffs = tdf;
@@ -148,6 +136,7 @@ struct contigsData {
         createFileGroup = cfg;
 		threadID = tid;
         deltaq = delt;
+        reorient = ro;
         done=false;
 	}
 };
@@ -204,7 +193,17 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         
         outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  
         
-        TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->primers, pDataArray->barcodes);
+        Oligos oligos;
+        if (pDataArray->oligosfile != "") { oligos.read(pDataArray->oligosfile);  }
+        int numFPrimers = oligos.getPairedPrimers().size();
+        int numBarcodes = oligos.getPairedBarcodes().size();
+
+        
+        TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes());
+        TrimOligos* rtrimOligos = NULL;
+        if (pDataArray->reorient) {
+            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+        }
         
         while ((!inFFasta.eof()) && (!inRFasta.eof())) {
             
@@ -236,8 +235,15 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 
             int barcodeIndex = 0;
             int primerIndex = 0;
+            Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
+            Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
+            QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
+            if (thisfqualfile != "") {
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+            }
             
-            if(pDataArray->barcodes.size() != 0){
+            if(numBarcodes != 0){
                 if (thisfqualfile != "") {
                     if ((thisfindexfile != "") || (thisrindexfile != "")) {
                         success = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
@@ -251,7 +257,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 else{ currentSeqsDiffs += success;  }
             }
             
-            if(pDataArray->primers.size() != 0){
+            if(numFPrimers != 0){
                 if (thisfqualfile != "") {
                     success = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
                 }else {
@@ -262,6 +268,57 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             }
             
             if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
+            
+            if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                int thisSuccess = 0;
+                string thisTrashCode = "";
+                int thisCurrentSeqsDiffs = 0;
+                
+                int thisBarcodeIndex = 0;
+                int thisPrimerIndex = 0;
+                
+                if(numBarcodes != 0){
+                    if (thisfqualfile != "") {
+                        if ((thisfindexfile != "") || (thisrindexfile != "")) {
+                            thisSuccess = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                        }else {
+                            thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
+                        }
+                    }else {
+                        thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
+                    }
+                    if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                }
+                
+                if(numFPrimers != 0){
+                    if (thisfqualfile != "") {
+                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
+                    }else {
+                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
+                    }
+                    if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
+                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                }
+                
+                if (thisCurrentSeqsDiffs > pDataArray->tdiffs)	{	thisTrashCode += 't';   }
+                
+                if (thisTrashCode == "") {
+                    trashCode = thisTrashCode;
+                    success = thisSuccess;
+                    currentSeqsDiffs = thisCurrentSeqsDiffs;
+                    barcodeIndex = thisBarcodeIndex;
+                    primerIndex = thisPrimerIndex;
+                    savedFSeq.reverseComplement();
+                    savedRSeq.reverseComplement();
+                    fSeq.setAligned(savedFSeq.getAligned());
+                    rSeq.setAligned(savedRSeq.getAligned());
+                    if(thisfqualfile != ""){
+                        savedFQual->flipQScores(); savedRQual->flipQScores();
+                        fQual->setScores(savedFQual->getScores()); rQual->setScores(savedRQual->getScores());
+                    }
+                }else { trashCode += "(" + thisTrashCode + ")";  }
+            }
             
             //flip the reverse reads
             rSeq.reverseComplement();
@@ -284,7 +341,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             if (thisfqualfile != "") {
                 scores1 = fQual->getQualityScores();
                 scores2 = rQual->getQualityScores();
-                delete fQual; delete rQual;
+                delete fQual; delete rQual; delete savedFQual; delete savedRQual;
             }
             
             int overlapStart = fSeq.getStartPos();
@@ -344,29 +401,17 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             if(trashCode.length() == 0){
                 bool ignore = false;
                 if (pDataArray->createOligosGroup) {
-                    if(pDataArray->barcodes.size() != 0){
-                        string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
-                        if (pDataArray->primers.size() != 0) { 
-                            if (pDataArray->primerNameVector[primerIndex] != "") { 
-                                if(thisGroup != "") {
-                                    thisGroup += "." + pDataArray->primerNameVector[primerIndex]; 
-                                }else {
-                                    thisGroup = pDataArray->primerNameVector[primerIndex]; 
-                                }
-                            } 
-                        }
+                    string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
+                    if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
+                    
+                    int pos = thisGroup.find("ignore");
+                    if (pos == string::npos) {
+                        pDataArray->groupMap[fSeq.getName()] = thisGroup;
                         
-                        if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
-                        
-                        int pos = thisGroup.find("ignore");
-                        if (pos == string::npos) {
-                            pDataArray->groupMap[fSeq.getName()] = thisGroup; 
-                        
-                            map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
-                            if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
-                            else { pDataArray->groupCounts[it->first] ++; }
-                        }else { ignore = true; }
-                    }
+                        map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
+                        if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
+                        else { pDataArray->groupCounts[it->first] ++; }
+                    }else { ignore = true; }
                 }else if (pDataArray->createFileGroup) {
                     int pos = pDataArray->group.find("ignore");
                     if (pos == string::npos) {
@@ -414,6 +459,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             inRQual.close();
         }
         delete alignment;
+        if (pDataArray->reorient) { delete rtrimOligos; }
         
         pDataArray->done = true;
         if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta); }

@@ -211,6 +211,16 @@ struct distlinePair {
 	
 };
 /************************************************************/
+struct oligosPair {
+	string forward;
+	string reverse;
+	
+	oligosPair() { forward = ""; reverse = "";  }
+	oligosPair(string f, string r) : forward(f), reverse(r) {}
+	~oligosPair() {}
+};
+
+/************************************************************/
 struct seqPriorityNode {
 	int numIdentical;
 	string seq;

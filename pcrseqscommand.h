@@ -16,6 +16,7 @@
 #include "alignment.hpp"
 #include "needlemanoverlap.hpp"
 #include "counttable.h"
+#include "oligos.h"
 
 class PcrSeqsCommand : public Command {
 public:
@@ -45,25 +46,23 @@ private:
     };
     
     vector<linePair> lines;
-	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
-    bool abort, keepprimer, keepdots, fileAligned;
+    bool abort, keepprimer, keepdots, fileAligned, pairedOligos;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
-	int start, end, processors, length, pdiffs;
+	int start, end, processors, length, pdiffs, numFPrimers, numRPrimers;
+    Oligos oligos;
 	
-    vector<string> revPrimer, outputNames;
-	map<string, int> primers;
+    vector<string> outputNames;
     
     int writeAccnos(set<string>);
     int readName(set<string>&);
     int readGroup(set<string>);
     int readTax(set<string>);
     int readCount(set<string>);
-    bool readOligos();
+    int readOligos();
     bool readEcoli();
 	int driverPcr(string, string, string, string, set<string>&, linePair, int&, bool&);
 	int createProcesses(string, string, string, set<string>&);
     bool isAligned(string, map<int, int>&);
-    string reverseOligo(string);
     int adjustDots(string, string, int, int);
     
 };
@@ -79,22 +78,17 @@ struct pcrData {
 	unsigned long long fend;
 	int count, start, end, length, pdiffs, pstart, pend;
 	MothurOut* m;
-	map<string, int> primers;
-    vector<string> revPrimer;
     set<string> badSeqNames;
     bool keepprimer, keepdots, fileAligned, adjustNeeded;
 	
-	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, map<string, int> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
 		m = mout;
         oligosfile = ol;
         ecolifile = ec;
-        primers = pr;
-        revPrimer = rpr;
         nomatch = nm;
         keepprimer = kp;
         keepdots = kd;
@@ -144,7 +138,26 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         map<string, int> faked;
         set<int> locations; //locations = beginning locations
         
-        TrimOligos trim(pDataArray->pdiffs, 0, pDataArray->primers, faked, pDataArray->revPrimer);
+        Oligos oligos(pDataArray->oligosfile);
+        int numFPrimers, numRPrimers;
+        map<string, int> primers;
+        map<string, int> barcodes; //not used
+        vector<string> revPrimer;
+        if (oligos.hasPairedBarcodes()) {
+            numFPrimers = oligos.getPairedPrimers().size();
+            map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
+            for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
+                primers[(it->second).forward] = it->first;
+                revPrimer.push_back((it->second).reverse);
+            }
+        }else {
+            numFPrimers = oligos.getPrimers().size();
+            primers = oligos.getPrimers();
+            revPrimer = oligos.getReversePrimers();
+        }
+        numRPrimers = oligos.getReversePrimers().size();
+        
+        TrimOligos trim(pDataArray->pdiffs, 0, primers, barcodes, revPrimer);
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
             pDataArray->count++;
@@ -179,7 +192,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     ///////////////////////////////////////////////////////////////
                     
                     //process primers
-                    if (pDataArray->primers.size() != 0) {
+                    if (numFPrimers != 0) {
                         int primerStart = 0; int primerEnd = 0;
                         bool good = trim.findForward(currSeq, primerStart, primerEnd);
                         
@@ -224,7 +237,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                     
                     //process reverse primers
-                    if (pDataArray->revPrimer.size() != 0) {
+                    if (numRPrimers != 0) {
                         int primerStart = 0; int primerEnd = 0;
                         bool good = trim.findReverse(currSeq, primerStart, primerEnd);
                          
@@ -327,7 +340,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         
         if (pDataArray->fileAligned && !pDataArray->keepdots) { //print out smallest start value and largest end value
             if (locations.size() > 1) { pDataArray->adjustNeeded = true; }
-            if (pDataArray->primers.size() != 0)    {   set<int>::iterator it = locations.begin();  pDataArray->pstart = *it;  }
+            if (numFPrimers != 0)    {   set<int>::iterator it = locations.begin();  pDataArray->pstart = *it;  }
         }
         
         return 0;
