@@ -7,3 +7,12 @@
 build
 xcuserdata
 *.xcuserdata
+*.xml
+nbproject/
+mothur
+
+*.stdout
+
+uchime
+
+*.stderr
