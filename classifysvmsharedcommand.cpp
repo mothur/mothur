@@ -595,6 +595,30 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
     }
 }
 
+void printPerformanceSummary(MultiClassSVM* s, ostream& output) {
+    output << "multiclass SVM accuracy: " << s->getAccuracy() << std::endl;
+
+    output << "two-class SVM performance" << std::endl;
+    int labelFieldWidth = 2 + std::max_element(s->getLabels().begin(), s->getLabels().end())->size();
+    int performanceFieldWidth = 10;
+    int performancePrecision = 3;
+    output << std::setw(labelFieldWidth) << "class 1"
+              << std::setw(labelFieldWidth) << "class 2"
+              << std::setw(performanceFieldWidth) << "precision"
+              << std::setw(performanceFieldWidth) << "recall"
+              << std::setw(performanceFieldWidth) << "f"
+              << std::setw(performanceFieldWidth) << "accuracy" << std::endl;
+    for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
+        SvmPerformanceSummary sps = s->getSvmPerformanceSummary(**svm);
+        output << std::setw(labelFieldWidth) << std::setprecision(performancePrecision) << sps.getPositiveClassLabel()
+                  << std::setw(labelFieldWidth) << std::setprecision(performancePrecision) << sps.getNegativeClassLabel()
+                  << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getPrecision()
+                  << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getRecall()
+                  << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getF()
+                  << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getAccuracy() << std::endl;
+    }
+
+}
 //**********************************************************************************************************************
 
 void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
@@ -689,6 +713,9 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
             std::ofstream outputFile(filename.c_str());
 
+            printPerformanceSummary(mcsvm, std::cout);
+            printPerformanceSummary(mcsvm, outputFile);
+
             outputFile << "actual  predicted" << std::endl;
             for ( LabeledObservationVector::const_iterator i = labeledObservationVector.begin(); i != labeledObservationVector.end(); i++ ) {
                 Label actualLabel = i->getLabel();
@@ -742,8 +769,9 @@ void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVecto
         std::cout << "leaving processSharedAndDesignData" << std::endl;
     }
     catch (exception& e) {
-        m->errorOut(e, "ClassifySvmSharedCommand", "processSharedAndDesignData");
+        m->errorOut(e, "ClassifySvmSharedCommand", "trainSharedAndDesignData");
         exit(1);
     }
 }
+
 //**********************************************************************************************************************

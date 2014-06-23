@@ -730,7 +730,7 @@ public:
     // x holds the support vectors
     const LabeledObservationVector x;
     const double b;
-    const NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
+    const NumericClassToLabel discriminantToLabel;
 };
 
 
