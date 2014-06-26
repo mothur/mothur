@@ -9,10 +9,15 @@
 /* Begin PBXBuildFile section */
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
+<<<<<<< HEAD
 		483C952E188F0CAD0035E7B7 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */; };
 		4893DE2918EEF28100C615DF /* oligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4893DE2818EEF28100C615DF /* oligos.cpp */; };
 		48A85BAD18E1AF2000199B6F /* getmimarkspackagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A85BAC18E1AF2000199B6F /* getmimarkspackagecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E981CE189C38FB0042BE9D /* mergesfffilecommand.cpp */; };
+=======
+		7B21820017AD777B00286E6A /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
+		7B21820317AD77BD00286E6A /* svm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B21820117AD77BD00286E6A /* svm.cpp */; };
+>>>>>>> 23e2d0d2d1ad8607b011c098ea66a6b98d59e3f2
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
 		834D9D5C1656DEC800E7FAB9 /* regularizeddecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D5A1656DEC700E7FAB9 /* regularizeddecisiontree.cpp */; };
@@ -410,10 +415,21 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomecommand.cpp; sourceTree = "<group>"; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
+<<<<<<< HEAD
+		483C952C188F0C960035E7B7 /* sharedrjsd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedrjsd.h; sourceTree = "<group>"; };
+		483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrjsd.cpp; sourceTree = "<group>"; };
+		4893DE2718EEF27300C615DF /* oligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = oligos.h; sourceTree = "<group>"; };
+		4893DE2818EEF28100C615DF /* oligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = oligos.cpp; sourceTree = "<group>"; };
+		48A85BAB18E1AF0600199B6F /* getmimarkspackagecommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = getmimarkspackagecommand.h; sourceTree = "<group>"; };
+		48A85BAC18E1AF2000199B6F /* getmimarkspackagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getmimarkspackagecommand.cpp; sourceTree = "<group>"; };
+		48E981CD189C38E60042BE9D /* mergesfffilecommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mergesfffilecommand.h; sourceTree = "<group>"; };
+		48E981CE189C38FB0042BE9D /* mergesfffilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergesfffilecommand.cpp; sourceTree = "<group>"; };
+=======
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifysvmsharedcommand.cpp; sourceTree = "<group>"; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifysvmsharedcommand.h; sourceTree = "<group>"; };
 		7B21820117AD77BD00286E6A /* svm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = svm.cpp; sourceTree = "<group>"; };
 		7B21820217AD77BD00286E6A /* svm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = svm.hpp; sourceTree = "<group>"; };
+>>>>>>> 23e2d0d2d1ad8607b011c098ea66a6b98d59e3f2
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
