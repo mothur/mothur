@@ -7,8 +7,7 @@
 build
 xcuserdata
 *.xcuserdata
-TARGET_BUILD_DIRTARGET_BUILD_DIR
-*.xcuserdata
+<<<<<<< HEAD
 *.xml
 nbproject/
 mothur
@@ -18,3 +17,6 @@ mothur
 uchime
 
 *.stderr
+=======
+TARGET_BUILD_DIRTARGET_BUILD_DIR
+>>>>>>> 23e2d0d2d1ad8607b011c098ea66a6b98d59e3f2

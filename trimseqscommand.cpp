@@ -12,7 +12,6 @@
 #include "trimoligos.h"
 
 
-
 //**********************************************************************************************************************
 vector<string> TrimSeqsCommand::setParameters(){	
 	try {
@@ -66,7 +65,7 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "The trim.seqs command parameters are fasta, name, count, flip, checkorient, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast, logtransform and allfiles.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n";
-       helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
+        helpString += "The checkorient parameter will check the reverse compliment of the sequence if the barcodes and primers cannot be found in the forward. The default is false.\n";
 		helpString += "The oligos parameter allows you to provide an oligos file.\n";
 		helpString += "The name parameter allows you to provide a names file with your fasta file.\n";
         helpString += "The count parameter allows you to provide a count file with your fasta file.\n";
@@ -386,7 +385,6 @@ int TrimSeqsCommand::execute(){
 		vector<vector<string> > fastaFileNames;
 		vector<vector<string> > qualFileNames;
 		vector<vector<string> > nameFileNames;
-        map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
 		
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
@@ -442,7 +440,7 @@ int TrimSeqsCommand::execute(){
 		
 		string outputGroupFileName;
 		if(oligoFile != ""){
-			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames, uniqueFastaNames);
+			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames);
 			if ((createGroup) && (countfile == "")){
                 map<string, string> myvariables; 
                 myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
@@ -466,6 +464,7 @@ int TrimSeqsCommand::execute(){
 		if (m->control_pressed) {  return 0; }			
  	
 		if(allFiles){
+			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
 			map<string, string>::iterator it;
 			set<string> namesToRemove;
 			for(int i=0;i<fastaFileNames.size();i++){
@@ -485,7 +484,11 @@ int TrimSeqsCommand::execute(){
 									m->mothurRemove(nameFileNames[i][j]);
 									namesToRemove.insert(nameFileNames[i][j]);
 								}
-                                uniqueFastaNames.erase(fastaFileNames[i][j]); //remove from list for group file print
+							}else{	
+								it = uniqueFastaNames.find(fastaFileNames[i][j]);
+								if (it == uniqueFastaNames.end()) {	
+									uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
+								}	
 							}
 						}
 					}
@@ -676,17 +679,48 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		int count = 0;
 		bool moreSeqs = 1;
+        int numBarcodes = barcodes.size();
 		TrimOligos* trimOligos = NULL;
-        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); }
-        else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  }
+        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes); numBarcodes = pairedBarcodes.size(); }
+        else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);  }
         
         TrimOligos* rtrimOligos = NULL;
         if (reorient) {
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+            //create reoriented primer and barcode pairs
+            map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
+            for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
+                  oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+                rpairedPrimers[it->first] = tempPair;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
+            }
+            for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
+                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[it->first] = tempPair;
+                 //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
+            }
+            int index = rpairedBarcodes.size();
+            for (map<string, int>::iterator it = barcodes.begin(); it != barcodes.end(); it++) {
+                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[index] = tempPair; index++;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
+            }
+            
+            index = rpairedPrimers.size();
+            for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
+                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedPrimers[index] = tempPair; index++;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
+            }
+
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size(); 
         }
         
 		while (moreSeqs) {
 				
+            int obsBDiffs = 0;
+            int obsPDiffs = 0;
+            
+            
 			if (m->control_pressed) {
                 delete trimOligos; if (reorient) { delete rtrimOligos; }
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
@@ -718,6 +752,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				int barcodeIndex = 0;
 				int primerIndex = 0;
 				
+                
+//                cout << currSeq.getName() << '\t'; cout.flush();
+                
                 if(numLinkers != 0){
 					success = trimOligos->stripLinker(currSeq, currQual);
 					if(success > ldiffs)		{	trashCode += 'k';	}
@@ -732,6 +769,10 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     }
 					else{ currentSeqsDiffs += success;  }
 				}
+                obsBDiffs = success;
+                
+//                cout << success << '\t'; cout.flush();
+                
 				//cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
                 if(numSpacers != 0){
 					success = trimOligos->stripSpacer(currSeq, currQual);
@@ -747,9 +788,14 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     }
 					else{ currentSeqsDiffs += success;  }
 				}
-				
+                obsPDiffs = success;
+                
+//                cout << success << '\t'; cout.flush();
+
 				if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
 				
+//                cout << currentSeqsDiffs << endl;
+                
 				if(numRPrimers != 0){
 					success = trimOligos->stripReverse(currSeq, currQual);
 					if(!success)				{	trashCode += 'r';	}
@@ -768,16 +814,31 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                         if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
+                    
+                    int revBDiffs = thisSuccess;
+                    
+//                    cout << thisSuccess << '\t'; cout.flush();
+
+                    
                     //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                     if(numFPrimers != 0){
                         thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, keepforward);
                         if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
-                   
+                    int revPDiffs = thisSuccess;
+
+//                    cout << thisSuccess << '\t'; cout.flush();
+
                     if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
                     
-                    if (thisTrashCode == "") { 
+//                    cout << thisCurrentSeqsDiffs << endl;
+
+                    
+                    if (thisTrashCode == "") {
+                        obsPDiffs = revPDiffs;
+                        obsBDiffs = revBDiffs;
+                        
                         trashCode = thisTrashCode;
                         success = thisSuccess;
                         currentSeqsDiffs = thisCurrentSeqsDiffs;
@@ -839,9 +900,24 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				
                 if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
                 
+                currSeq.setName(currSeq.getName() + '\t' + toString(obsBDiffs) + '\t' + toString(obsPDiffs));
+
 				if(trashCode.length() == 0){
                     string thisGroup = "";
-                    if (createGroup) {  thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);    }
+                    if (createGroup) {
+						if(numBarcodes != 0){
+							thisGroup = barcodeNameVector[barcodeIndex];
+							if (numFPrimers != 0) {
+								if (primerNameVector[primerIndex] != "") { 
+									if(thisGroup != "") {
+										thisGroup += "." + primerNameVector[primerIndex]; 
+									}else {
+										thisGroup = primerNameVector[primerIndex]; 
+									}
+								} 
+							}
+                        }
+                    }
                     
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {
@@ -987,7 +1063,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				//loop through and create all the processes you want
 		while (process != processors) {
-			pid_t pid = fork();
+			int pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
@@ -1004,15 +1080,15 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
 							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 
 								if(qFileName != ""){
-									tempPrimerQualFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+									tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
 									m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
 								}
 								if(nameFile != ""){
-									tempNameFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+									tempNameFileNames[i][j] += toString(getpid()) + ".temp";
 									m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
 								}
 							}
@@ -1022,27 +1098,27 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 							
 				driverCreateTrim(filename,
 								 qFileName,
-								 (trimFASTAFileName + m->mothurGetpid(process) + ".temp"),
-								 (scrapFASTAFileName + m->mothurGetpid(process) + ".temp"),
-								 (trimQualFileName + m->mothurGetpid(process) + ".temp"),
-								 (scrapQualFileName + m->mothurGetpid(process) + ".temp"),
-								 (trimNameFileName + m->mothurGetpid(process) + ".temp"),
-								 (scrapNameFileName + m->mothurGetpid(process) + ".temp"),
-                                 (trimCountFileName + m->mothurGetpid(process) + ".temp"),
-								 (scrapCountFileName + m->mothurGetpid(process) + ".temp"),
-								 (groupFile + m->mothurGetpid(process) + ".temp"),
+								 (trimFASTAFileName + toString(getpid()) + ".temp"),
+								 (scrapFASTAFileName + toString(getpid()) + ".temp"),
+								 (trimQualFileName + toString(getpid()) + ".temp"),
+								 (scrapQualFileName + toString(getpid()) + ".temp"),
+								 (trimNameFileName + toString(getpid()) + ".temp"),
+								 (scrapNameFileName + toString(getpid()) + ".temp"),
+                                 (trimCountFileName + toString(getpid()) + ".temp"),
+								 (scrapCountFileName + toString(getpid()) + ".temp"),
+								 (groupFile + toString(getpid()) + ".temp"),
 								 tempFASTAFileNames,
 								 tempPrimerQualFileNames,
 								 tempNameFileNames,
 								 lines[process],
 								 qLines[process]);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + m->mothurGetpid(process) + '\n'); }
+                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
 				
 				//pass groupCounts to parent
 				if(createGroup){
 					ofstream out;
-					string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
+					string tempFile = filename + toString(getpid()) + ".num.temp";
 					m->openOutputFile(tempFile, out);
 					
 					out << groupCounts.size() << endl;
@@ -1146,8 +1222,8 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                                               tempPrimerQualFileNames,
                                               tempNameFileNames,
                                               lines[h].start, lines[h].end, qLines[h].start, qLines[h].end, m,
-                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, oligoFile,
-                                              createGroup, allFiles, keepforward, keepFirst, removeLast,
+                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
+                                             primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
                                               qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform, 
                                              minLength, maxAmbig, maxHomoP, maxLength, flip, reorient, nameMap, nameCount);
 			pDataArray.push_back(tempTrim);
@@ -1458,201 +1534,9 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 
 //***************************************************************************************************************
 
-bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, vector<vector<string> >& nameFileNames, map<string, string>& fastaFile2Group){
+bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, vector<vector<string> >& nameFileNames){
 	try {
-        
-        bool allBlank = false;
-        oligos.read(oligoFile);
-        
-        if (m->control_pressed) { return false; } //error in reading oligos
-        
-        if (oligos.hasPairedBarcodes()) {
-            pairedOligos = true;
-            numFPrimers = oligos.getPairedPrimers().size();
-            numBarcodes = oligos.getPairedBarcodes().size();
-        }else {
-            pairedOligos = false;
-            numFPrimers = oligos.getPrimers().size();
-            numBarcodes = oligos.getBarcodes().size();
-        }
-        
-        numLinkers = oligos.getLinkers().size();
-        numSpacers = oligos.getSpacers().size();
-        numRPrimers = oligos.getReversePrimers().size();
-        
-        vector<string> groupNames = oligos.getGroupNames();
-        if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
-        
-        
-        fastaFileNames.resize(oligos.getBarcodeNames().size());
-		for(int i=0;i<fastaFileNames.size();i++){
-            for(int j=0;j<oligos.getPrimerNames().size();j++){  fastaFileNames[i].push_back(""); }
-		}
-        
-		if(qFileName != "")	{	qualFileNames = fastaFileNames;	}
-		if(nameFile != "")	{	nameFileNames = fastaFileNames;	}
-        
-        
-        if (allFiles) {
-            set<string> uniqueNames; //used to cleanup outputFileNames
-            if (pairedOligos) {
-                map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
-                map<int, oligosPair> primers = oligos.getPairedPrimers();
-                for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                        
-                        string primerName = oligos.getPrimerName(itPrimer->first);
-                        string barcodeName = oligos.getBarcodeName(itBar->first);
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            string fastaFileName = "";
-                            string qualFileName = "";
-                            string nameFileName = "";
-                            string countFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeName;
-                            }else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerName;
-                                }
-                                else{
-                                    comboGroupName = barcodeName + "." + primerName;
-                                }
-                            }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
-                            variables["[tag]"] = comboGroupName;
-                            fastaFileName = getOutputFileName("fasta", variables);
-                            if (uniqueNames.count(fastaFileName) == 0) {
-                                outputNames.push_back(fastaFileName);
-                                outputTypes["fasta"].push_back(fastaFileName);
-                                uniqueNames.insert(fastaFileName);
-                                fastaFile2Group[fastaFileName] = comboGroupName;
-                            }
-                            
-                            fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp);		temp.close();
-                            
-                            if(qFileName != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
-                                qualFileName = getOutputFileName("qfile", variables);
-                                if (uniqueNames.count(qualFileName) == 0) {
-                                    outputNames.push_back(qualFileName);
-                                    outputTypes["qfile"].push_back(qualFileName);
-                                }
-                                
-                                qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                                m->openOutputFile(qualFileName, temp);		temp.close();
-                            }
-                            
-                            if(nameFile != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
-                                nameFileName = getOutputFileName("name", variables);
-                                if (uniqueNames.count(nameFileName) == 0) {
-                                    outputNames.push_back(nameFileName);
-                                    outputTypes["name"].push_back(nameFileName);
-                                }
-                                
-                                nameFileNames[itBar->first][itPrimer->first] = nameFileName;
-                                m->openOutputFile(nameFileName, temp);		temp.close();
-                            }
-                        }
-                    }
-                }
-            }else {
-                map<string, int> barcodes = oligos.getBarcodes() ;
-                map<string, int> primers = oligos.getPrimers();
-                for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                        
-                        string primerName = oligos.getPrimerName(itPrimer->second);
-                        string barcodeName = oligos.getBarcodeName(itBar->second);
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            string fastaFileName = "";
-                            string qualFileName = "";
-                            string nameFileName = "";
-                            string countFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeName;
-                            }else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerName;
-                                }
-                                else{
-                                    comboGroupName = barcodeName + "." + primerName;
-                                }
-                            }
-                            
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
-                            variables["[tag]"] = comboGroupName;
-                            fastaFileName = getOutputFileName("fasta", variables);
-                            if (uniqueNames.count(fastaFileName) == 0) {
-                                outputNames.push_back(fastaFileName);
-                                outputTypes["fasta"].push_back(fastaFileName);
-                                uniqueNames.insert(fastaFileName);
-                                fastaFile2Group[fastaFileName] = comboGroupName;
-                            }
-                           
-                            fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp);		temp.close();
-                            
-                            if(qFileName != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
-                                qualFileName = getOutputFileName("qfile", variables);
-                                if (uniqueNames.count(qualFileName) == 0) {
-                                    outputNames.push_back(qualFileName);
-                                    outputTypes["qfile"].push_back(qualFileName);
-                                }
-                                
-                                qualFileNames[itBar->second][itPrimer->second] = qualFileName;
-                                m->openOutputFile(qualFileName, temp);		temp.close();
-                            }
-                           
-                            if(nameFile != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
-                                nameFileName = getOutputFileName("name", variables);
-                                if (uniqueNames.count(nameFileName) == 0) {
-                                    outputNames.push_back(nameFileName);
-                                    outputTypes["name"].push_back(nameFileName);
-                                }
-                                
-                                nameFileNames[itBar->second][itPrimer->second] = nameFileName;
-                                m->openOutputFile(nameFileName, temp);		temp.close();
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-    
-    
-    
-    if (allBlank) {
-        m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
-        allFiles = false;
-        return false;
-    }
-    
-
-    
-		/*ifstream inOligos;
+		ifstream inOligos;
 		m->openInputFile(oligoFile, inOligos);
 		
 		ofstream test;
@@ -1669,7 +1553,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		
 		while(!inOligos.eof()){
 
-			inOligos >> type;
+			inOligos >> type; 
             
 		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
             
@@ -1974,8 +1858,33 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                 }
             }
 		}
-         */
-				return true;
+		numFPrimers = primers.size();
+        if (pairedOligos) { numFPrimers  = pairedPrimers.size(); }
+		numRPrimers = revPrimer.size();
+        numLinkers = linker.size();
+        numSpacers = spacer.size();
+		
+		bool allBlank = true;
+		for (int i = 0; i < barcodeNameVector.size(); i++) {
+			if (barcodeNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+		for (int i = 0; i < primerNameVector.size(); i++) {
+			if (primerNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+
+		if (allBlank) {
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+			allFiles = false;
+			return false;
+		}
+		
+		return true;
 		
 	}
 	catch(exception& e) {
@@ -2075,6 +1984,46 @@ bool TrimSeqsCommand::cullHomoP(Sequence& seq){
 	}
 	
 }
+//********************************************************************/
+string TrimSeqsCommand::reverseOligo(string oligo){
+	try {
+        string reverse = "";
+        
+        for(int i=oligo.length()-1;i>=0;i--){
+            
+            if(oligo[i] == 'A')		{	reverse += 'T';	}
+            else if(oligo[i] == 'T'){	reverse += 'A';	}
+            else if(oligo[i] == 'U'){	reverse += 'A';	}
+            
+            else if(oligo[i] == 'G'){	reverse += 'C';	}
+            else if(oligo[i] == 'C'){	reverse += 'G';	}
+            
+            else if(oligo[i] == 'R'){	reverse += 'Y';	}
+            else if(oligo[i] == 'Y'){	reverse += 'R';	}
+            
+            else if(oligo[i] == 'M'){	reverse += 'K';	}
+            else if(oligo[i] == 'K'){	reverse += 'M';	}
+            
+            else if(oligo[i] == 'W'){	reverse += 'W';	}
+            else if(oligo[i] == 'S'){	reverse += 'S';	}
+            
+            else if(oligo[i] == 'B'){	reverse += 'V';	}
+            else if(oligo[i] == 'V'){	reverse += 'B';	}
+            
+            else if(oligo[i] == 'D'){	reverse += 'H';	}
+            else if(oligo[i] == 'H'){	reverse += 'D';	}
+            
+            else						{	reverse += 'N';	}
+        }
+        
+        
+        return reverse;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "reverseOligo");
+		exit(1);
+	}
+}
 
 //***************************************************************************************************************
 
@@ -2095,3 +2044,4 @@ bool TrimSeqsCommand::cullAmbigs(Sequence& seq){
 	
 }
 //***************************************************************************************************************
+

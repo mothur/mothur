@@ -2864,7 +2864,7 @@ int MothurOut::mothurRemove(string filename){
 bool MothurOut::mothurConvert(string item, int& num){
 	try {
 		bool error = false;
-		
+
 		if (isNumeric1(item)) {
 			convert(item, num);
 		}else {
