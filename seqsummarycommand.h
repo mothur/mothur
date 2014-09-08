@@ -49,12 +49,8 @@ private:
 	vector<linePair*> lines;
 	vector<int> processIDS;
 	
-	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string);
-	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string, linePair*);	
-
-	#ifdef USE_MPI
-	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long long>&);	
-	#endif
+	long long createProcessesCreateSummary(map<int, long long>&, map<int,  long long>&, map<int,  long long>&, map<int,  long long>&, map<int,  long long>&, string, string);
+	long long driverCreateSummary(map<int, long long>&, map<int,  long long>&, map<int,  long long>&, map<int,  long long>&, map<int,  long long>&, string, string, linePair*);
 
 
 };
@@ -64,11 +60,11 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct seqSumData {
-	vector<int> startPosition;
-	vector<int> endPosition;
-	vector<int> seqLength; 
-	vector<int> ambigBases; 
-	vector<int> longHomoPolymer; 
+	map<int, long long> startPosition;
+    map<int, long long> endPosition;
+    map<int, long long> seqLength;
+    map<int, long long> ambigBases;
+    map<int, long long> longHomoPolymer;
 	string filename; 
 	string sumFile; 
 	unsigned long long start;
@@ -133,19 +129,36 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
 					else { num = it->second; }
 				}
 				
-				//for each sequence this sequence represents
-				for (int i = 0; i < num; i++) {
-					pDataArray->startPosition.push_back(current.getStartPos());
-					pDataArray->endPosition.push_back(current.getEndPos());
-					pDataArray->seqLength.push_back(current.getNumBases());
-					pDataArray->ambigBases.push_back(current.getAmbigBases());
-					pDataArray->longHomoPolymer.push_back(current.getLongHomoPolymer());
-				}
-				
+				int thisStartPosition = current.getStartPos();
+                map<int, long long>::iterator it = pDataArray->startPosition.find(thisStartPosition);
+                if (it == pDataArray->startPosition.end()) { pDataArray->startPosition[thisStartPosition] = num; } //first finding of this start position, set count.
+                else { it->second += num; } //add counts
+                
+                int thisEndPosition = current.getEndPos();
+                it = pDataArray->endPosition.find(thisEndPosition);
+                if (it == pDataArray->endPosition.end()) { pDataArray->endPosition[thisEndPosition] = num; } //first finding of this end position, set count.
+                else { it->second += num; } //add counts
+                
+                int thisSeqLength = current.getNumBases();
+                it = pDataArray->seqLength.find(thisSeqLength);
+                if (it == pDataArray->seqLength.end()) { pDataArray->seqLength[thisSeqLength] = num; } //first finding of this length, set count.
+                else { it->second += num; } //add counts
+                
+                int thisAmbig = current.getAmbigBases();
+                it = pDataArray->ambigBases.find(thisAmbig);
+                if (it == pDataArray->ambigBases.end()) { pDataArray->ambigBases[thisAmbig] = num; } //first finding of this ambig, set count.
+                else { it->second += num; } //add counts
+                
+                int thisHomoP = current.getLongHomoPolymer();
+                it = pDataArray->longHomoPolymer.find(thisHomoP);
+                if (it == pDataArray->longHomoPolymer.end()) { pDataArray->longHomoPolymer[thisHomoP] = num; } //first finding of this homop, set count.
+                else { it->second += num; } //add counts
+                
+				count++;
 				outSummary << current.getName() << '\t';
-				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
-				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
-				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
+				outSummary << thisStartPosition << '\t' << thisEndPosition << '\t';
+				outSummary << thisSeqLength << '\t' << thisAmbig << '\t';
+				outSummary << thisHomoP << '\t' << num << endl;
 			}
 		}
 		

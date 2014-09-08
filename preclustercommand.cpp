@@ -403,7 +403,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
                 
 				exit(0);
 			}else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process; //successful fork()'s
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
                 recalc = true;
 				break;

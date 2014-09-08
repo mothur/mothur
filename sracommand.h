@@ -22,20 +22,20 @@ public:
     ~SRACommand(){}
     
     vector<string> setParameters();
-    string getCommandName()			{ return "sra";			}
+    string getCommandName()			{ return "make.sra";			}
     string getCommandCategory()		{ return "Sequence Processing";		}
     
     string getOutputPattern(string);
     
 	string getHelpString();
-    string getCitation() { return "http://www.mothur.org/wiki/sra"; }
+    string getCitation() { return "http://www.mothur.org/wiki/Make.sra"; }
     string getDescription()		{ return "create a Sequence Read Archive / SRA"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, isSFF, pairedOligos;
+    bool abort, isSFF, pairedOligos, setOligosParameter;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;
     string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;
     string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType, checkorient;
@@ -44,6 +44,8 @@ private:
     vector<string> outputNames, Groups;
     map<string, vector<string> > Group2Barcode;
     map<string, vector<string> > Group2Primer;
+    vector<string> linkers;
+    vector<string> spacers;
     map<string, string> Group2Organism;
     map<string, map<string, string> > mimarks;  //group -> <field -> valueForGroup> ex.  F003D001 -> <lat_lon -> 42.282026 -83.733850>
     set<string> uniqueNames;
@@ -63,7 +65,6 @@ private:
     int parseFastqFile(map<string, vector<string> >&);
     int checkGroups(map<string, vector<string> >&);
     int mapGroupToFile(map<string, vector<string> >&, vector<string>);
-    string reverseOligo(string oligo);
     
 };
 

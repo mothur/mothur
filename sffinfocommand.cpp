@@ -706,7 +706,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
                     //cout << "erasing " << i << '\t' << outputNames[i] << endl;
                     outputNames.erase(outputNames.begin()+i);
                     i--;
-                } 
+                }else { outputTypes["sff"].push_back(outputNames[i]); }
             }
             //cout << "here4" << endl;
             if(m->isBlank(noMatchFile)){  m->mothurRemove(noMatchFile); }
@@ -1930,7 +1930,6 @@ bool SffInfoCommand::readOligos(string oligoFile){
                         string thisFilename = getOutputFileName("sff",variables);
                         if (uniqueNames.count(thisFilename) == 0) {
                             outputNames.push_back(thisFilename);
-                            outputTypes["sff"].push_back(thisFilename);
                             uniqueNames.insert(thisFilename);
                         }
                         
@@ -1994,7 +1993,6 @@ bool SffInfoCommand::readGroup(string oligoFile){
                 variables["[group]"] = groups[i];
                 string thisFilename = getOutputFileName("sff",variables);
                 outputNames.push_back(thisFilename);
-                outputTypes["sff"].push_back(thisFilename);
                
                 ofstream temp;
                 m->openOutputFileBinary(thisFilename, temp); temp.close();

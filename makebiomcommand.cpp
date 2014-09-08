@@ -755,8 +755,11 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
                     vector<string> scores;
                     vector<string> taxonomies = parseTax(it->second, scores);
                     for (int i = 0; i < boots.size(); i++) {
-                        float tempScore; m->mothurConvert(scores[i], tempScore);
-                        boots[i] += tempScore;
+                        if (scores[i] == "null") { scoresNULL = true; break; }
+                        else {
+                            float tempScore; m->mothurConvert(scores[i], tempScore);
+                            boots[i] += tempScore;
+                        }
                     }
                 }else { scoresNULL = true; }
                 
