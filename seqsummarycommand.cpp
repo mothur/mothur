@@ -185,6 +185,8 @@ int SeqSummaryCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        int start = time(NULL);
+        
 		//set current fasta to fastafile
 		m->setFastaFile(fastafile);
 		
@@ -192,139 +194,25 @@ int SeqSummaryCommand::execute(){
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
 		string summaryFile = getOutputFileName("summary",variables);
 				
-		int numSeqs = 0;
-		
-		vector<int> startPosition;
-		vector<int> endPosition;
-		vector<int> seqLength;
-		vector<int> ambigBases;
-		vector<int> longHomoPolymer;
+		long long numSeqs = 0;
+        long long size = 0;
+		map<int, long long> startPosition;
+		map<int, long long> endPosition;
+		map<int, long long> seqLength;
+		map<int, long long> ambigBases;
+		map<int, long long> longHomoPolymer;
 		
 		if (namefile != "") { nameMap = m->readNames(namefile); }
         else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, false, false);
             nameMap = ct.getNameMap();
+            size = ct.getNumSeqs();
         }
 		
 		if (m->control_pressed) { return 0; }
 			
-#ifdef USE_MPI	
-				int pid, numSeqsPerProcessor; 
-				int tag = 2001;
-				int startTag = 1; int endTag = 2; int lengthTag = 3; int baseTag = 4; int lhomoTag = 5;
-				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-				vector<unsigned long long> MPIPos;
-				
-				MPI_Status status; 
-				MPI_Status statusOut;
-				MPI_File inMPI; 
-				MPI_File outMPI; 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-							
-				char tempFileName[1024];
-				strcpy(tempFileName, fastafile.c_str());
-				
-				char sumFileName[1024];
-				strcpy(sumFileName, summaryFile.c_str());
-		
-				MPI_File_open(MPI_COMM_WORLD, tempFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				MPI_File_open(MPI_COMM_WORLD, sumFileName, outMode, MPI_INFO_NULL, &outMPI);
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); return 0;  }
-				
-				if (pid == 0) { //you are the root process
-						//print header
-						string outputString = "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs\n";	
-						int length = outputString.length();
-						char* buf2 = new char[length];
-						memcpy(buf2, outputString.c_str(), length);
-					
-						MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &statusOut);
-						delete buf2;
-						
-						MPIPos = m->setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
-					
-						for(int i = 1; i < processors; i++) { 
-							MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-							MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-						}
-						
-						//figure out how many sequences you have to do
-						numSeqsPerProcessor = numSeqs / processors;
-						int startIndex =  pid * numSeqsPerProcessor;
-						if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-						
-						//do your part
-						MPICreateSummary(startIndex, numSeqsPerProcessor, startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, inMPI, outMPI, MPIPos);
-						
-				}else { //i am the child process
-			
-					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(numSeqs+1);
-					MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-				
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-				
-					//do your part
-					MPICreateSummary(startIndex, numSeqsPerProcessor, startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, inMPI, outMPI, MPIPos);
-				}
-				
-				MPI_File_close(&inMPI);
-				MPI_File_close(&outMPI);
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-				if (pid == 0) {
-					//get the info from the child processes
-					for(int i = 1; i < processors; i++) { 
-						int size;
-						MPI_Recv(&size, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
 
-						vector<int> temp; temp.resize(size+1);
-						
-						for(int j = 0; j < 5; j++) { 
-						
-							MPI_Recv(&temp[0], (size+1), MPI_INT, i, 2001, MPI_COMM_WORLD, &status); 
-							int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what count this is for
-							
-							if (receiveTag == startTag) { 
-								for (int k = 0; k < size; k++) {		startPosition.push_back(temp[k]);	}
-							}else if (receiveTag == endTag) { 
-								for (int k = 0; k < size; k++) {		endPosition.push_back(temp[k]);	}
-							}else if (receiveTag == lengthTag) { 
-								for (int k = 0; k < size; k++) {		seqLength.push_back(temp[k]);	}
-							}else if (receiveTag == baseTag) { 
-								for (int k = 0; k < size; k++) {		ambigBases.push_back(temp[k]);	}
-							}else if (receiveTag == lhomoTag) { 
-								for (int k = 0; k < size; k++) {		longHomoPolymer.push_back(temp[k]);	}
-							}
-						} 
-					}
-
-				}else{
-				
-					//send my counts
-					int size = startPosition.size();
-					MPI_Send(&size, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-					
-					startPosition.push_back(startTag);
-					int ierr = MPI_Send(&(startPosition[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-					endPosition.push_back(endTag);
-					ierr = MPI_Send (&(endPosition[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-					seqLength.push_back(lengthTag);
-					ierr = MPI_Send(&(seqLength[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-					ambigBases.push_back(baseTag);
-					ierr = MPI_Send(&(ambigBases[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-					longHomoPolymer.push_back(lhomoTag);
-					ierr = MPI_Send(&(longHomoPolymer[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				}
-				
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#else
 			vector<unsigned long long> positions; 
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(fastafile, processors);
@@ -350,40 +238,116 @@ int SeqSummaryCommand::execute(){
 			}
 			
 			if (m->control_pressed) {  return 0; }
-#endif
 			
-		#ifdef USE_MPI
-			if (pid == 0) { 
-		#endif
 		
-		sort(startPosition.begin(), startPosition.end());
-		sort(endPosition.begin(), endPosition.end());
-		sort(seqLength.begin(), seqLength.end());
-		sort(ambigBases.begin(), ambigBases.end());
-		sort(longHomoPolymer.begin(), longHomoPolymer.end());
-		int size = startPosition.size();
-		
+        
+        //set size
+        if (countfile != "") {}//already set
+        else if (namefile == "") { size = numSeqs;  }
+        else { for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) { size += it->second; } }
+        
+        long long ptile0_25	= 1+(long long)(size * 0.025); //number of sequences at 2.5%
+        long long ptile25		= 1+(long long)(size * 0.250); //number of sequences at 25%
+        long long ptile50		= 1+(long long)(size * 0.500);
+        long long ptile75		= 1+(long long)(size * 0.750);
+        long long ptile97_5	= 1+(long long)(size * 0.975);
+        long long ptile100	= (long long)(size);
+        vector<int> starts; starts.resize(7,0); vector<int> ends; ends.resize(7,0); vector<int> ambigs; ambigs.resize(7,0); vector<int> lengths; lengths.resize(7,0); vector<int> homops; homops.resize(7,0);
+        
 		//find means
-		unsigned long long meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
-		meanStartPosition = 0; meanEndPosition = 0; meanSeqLength = 0; meanAmbigBases = 0; meanLongHomoPolymer = 0;
-		for (int i = 0; i < size; i++) {
-			meanStartPosition += startPosition[i];
-			meanEndPosition += endPosition[i];
-			meanSeqLength += seqLength[i];
-			meanAmbigBases += ambigBases[i];
-			meanLongHomoPolymer += longHomoPolymer[i];
-		}
+		long long meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
+        meanStartPosition = 0; meanEndPosition = 0; meanSeqLength = 0; meanAmbigBases = 0; meanLongHomoPolymer = 0;
+        //minimum
+        if ((startPosition.begin())->first == -1) { starts[0] = 0; }
+        else {starts[0] = (startPosition.begin())->first; }
+        long long totalSoFar = 0;
+        starts[0] = (startPosition.begin())->first;
+        int lastValue = starts[0];
+        for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            meanStartPosition += (value*it->second);
+            totalSoFar += it->second;
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  starts[1] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   starts[2] = value;  } //save value
+            if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  starts[3] = value; } //save value
+            if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  starts[4] = value; } //save value
+            if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  starts[5] = value;  } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  starts[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+
+        if ((endPosition.begin())->first == -1) { ends[0] = 0; }
+        else {ends[0] = (endPosition.begin())->first; }
+        totalSoFar = 0;
+        ends[0] = (endPosition.begin())->first;
+        lastValue = ends[0];
+        for (map<int, long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            meanEndPosition += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  ends[1] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   ends[2] = value;  } //save value
+            if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  ends[3] = value; } //save value
+            if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  ends[4] = value; } //save value
+            if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  ends[5] = value;  } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  ends[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+        lengths[0] = (seqLength.begin())->first;
+        totalSoFar = 0;
+        lastValue = lengths[0];
+        for (map<int, long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++) {
+            int value = it->first;
+            meanSeqLength += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  lengths[1] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   lengths[2] = value;  } //save value
+            if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  lengths[3] = value; } //save value
+            if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  lengths[4] = value; } //save value
+            if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  lengths[5] = value;  } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  lengths[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
                 
+        ambigs[0] = (ambigBases.begin())->first;
+        totalSoFar = 0;
+        lastValue = ambigs[0];
+        for (map<int, long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++) {
+            int value = it->first;
+            meanAmbigBases += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  ambigs[1] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   ambigs[2] = value;  } //save value
+            if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  ambigs[3] = value; } //save value
+            if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  ambigs[4] = value; } //save value
+            if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  ambigs[5] = value;  } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  ambigs[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+
+        homops[0] = (longHomoPolymer.begin())->first;
+        totalSoFar = 0;
+        lastValue = homops[0];
+        for (map<int, long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++) {
+            int value = it->first;
+            meanLongHomoPolymer += (it->first*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  homops[1] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   homops[2] = value;  } //save value
+            if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  homops[3] = value; } //save value
+            if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  homops[4] = value; } //save value
+            if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  homops[5] = value;  } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  homops[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+        		      
         double meanstartPosition, meanendPosition, meanseqLength, meanambigBases, meanlongHomoPolymer;
                 
 		meanstartPosition = meanStartPosition / (double) size; meanendPosition = meanEndPosition /(double) size; meanlongHomoPolymer = meanLongHomoPolymer / (double) size; meanseqLength = meanSeqLength / (double) size; meanambigBases = meanAmbigBases /(double) size;
-				
-		int ptile0_25	= int(size * 0.025);
-		int ptile25		= int(size * 0.250);
-		int ptile50		= int(size * 0.500);
-		int ptile75		= int(size * 0.750);
-		int ptile97_5	= int(size * 0.975);
-		int ptile100	= size - 1;
 		
 		//to compensate for blank sequences that would result in startPosition and endPostion equalling -1
 		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
@@ -393,17 +357,16 @@ int SeqSummaryCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer\tNumSeqs"); m->mothurOutEndLine();
-		m->mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0]) + "\t" + toString(1)); m->mothurOutEndLine();
-		m->mothurOut("2.5%-tile:\t" + toString(startPosition[ptile0_25]) + "\t" + toString(endPosition[ptile0_25]) + "\t" + toString(seqLength[ptile0_25]) + "\t" + toString(ambigBases[ptile0_25]) + "\t"+ toString(longHomoPolymer[ptile0_25]) + "\t" + toString(ptile0_25+1)); m->mothurOutEndLine();
-		m->mothurOut("25%-tile:\t" + toString(startPosition[ptile25]) + "\t" + toString(endPosition[ptile25]) + "\t" + toString(seqLength[ptile25]) + "\t" + toString(ambigBases[ptile25]) + "\t" + toString(longHomoPolymer[ptile25]) + "\t" + toString(ptile25+1)); m->mothurOutEndLine();
-		m->mothurOut("Median: \t" + toString(startPosition[ptile50]) + "\t" + toString(endPosition[ptile50]) + "\t" + toString(seqLength[ptile50]) + "\t" + toString(ambigBases[ptile50]) + "\t" + toString(longHomoPolymer[ptile50]) + "\t" + toString(ptile50+1)); m->mothurOutEndLine();
-		m->mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75]) + "\t" + toString(ptile75+1)); m->mothurOutEndLine();
-		m->mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5]) + "\t" + toString(ptile97_5+1)); m->mothurOutEndLine();
-		m->mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100]) + "\t" + toString(ptile100+1)); m->mothurOutEndLine();
+		m->mothurOut("Minimum:\t" + toString(starts[0]) + "\t" + toString(ends[0]) + "\t" + toString(lengths[0]) + "\t" + toString(ambigs[0]) + "\t" + toString(homops[0]) + "\t" + toString(1)); m->mothurOutEndLine();
+		m->mothurOut("2.5%-tile:\t" + toString(starts[1]) + "\t" + toString(ends[1]) + "\t" + toString(lengths[1]) + "\t" + toString(ambigs[1]) + "\t" + toString(homops[1]) + "\t" + toString(ptile0_25)); m->mothurOutEndLine();
+		m->mothurOut("25%-tile:\t" + toString(starts[2]) + "\t" + toString(ends[2]) + "\t" + toString(lengths[2]) + "\t" + toString(ambigs[2]) + "\t" + toString(homops[2]) + "\t" + toString(ptile25)); m->mothurOutEndLine();
+		m->mothurOut("Median: \t" + toString(starts[3]) + "\t" + toString(ends[3]) + "\t" + toString(lengths[3]) + "\t" + toString(ambigs[3]) + "\t" + toString(homops[3]) + "\t" + toString(ptile50)); m->mothurOutEndLine();
+		m->mothurOut("75%-tile:\t" + toString(starts[4]) + "\t" + toString(ends[4]) + "\t" + toString(lengths[4]) + "\t" + toString(ambigs[4]) + "\t" + toString(homops[4]) + "\t" + toString(ptile75)); m->mothurOutEndLine();
+		m->mothurOut("97.5%-tile:\t" + toString(starts[5]) + "\t" + toString(ends[5]) + "\t" + toString(lengths[5]) + "\t" + toString(ambigs[5]) + "\t" + toString(homops[5]) + "\t" + toString(ptile97_5)); m->mothurOutEndLine();
+		m->mothurOut("Maximum:\t" + toString(starts[6]) + "\t" + toString(ends[6]) + "\t" + toString(lengths[6]) + "\t" + toString(ambigs[6]) + "\t" + toString(homops[6]) + "\t" + toString(ptile100)); m->mothurOutEndLine();
 		m->mothurOut("Mean:\t" + toString(meanstartPosition) + "\t" + toString(meanendPosition) + "\t" + toString(meanseqLength) + "\t" + toString(meanambigBases) + "\t" + toString(meanlongHomoPolymer)); m->mothurOutEndLine();
-
 		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
-		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(startPosition.size())); m->mothurOutEndLine(); }
+		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
@@ -411,11 +374,10 @@ int SeqSummaryCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();
-		
-		#ifdef USE_MPI
-			}
-		#endif
 
+        if ((namefile == "") && (countfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numSeqs) + " sequences.\n");  }
+        else{ m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
+        
         //set fasta file as new current fastafile
 		string current = "";
 		itTypes = outputTypes.find("summary");
@@ -431,7 +393,7 @@ int SeqSummaryCommand::execute(){
 	}
 }
 /**************************************************************************************/
-int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename, string sumFile, linePair* filePos) {	
+ long long SeqSummaryCommand::driverCreateSummary(map<int, long long>& startPosition, map<int,  long long>& endPosition, map<int,  long long>& seqLength, map<int,  long long>& ambigBases, map<int,  long long>& longHomoPolymer, string filename, string sumFile, linePair* filePos) {
 	try {
 		
 		ofstream outSummary;
@@ -472,21 +434,38 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 					else { num = it->second; }
 				}
 				
-				//for each sequence this sequence represents
-				for (int i = 0; i < num; i++) {
-					startPosition.push_back(current.getStartPos());
-					endPosition.push_back(current.getEndPos());
-					seqLength.push_back(current.getNumBases());
-					ambigBases.push_back(current.getAmbigBases());
-					longHomoPolymer.push_back(current.getLongHomoPolymer());
-				}
+				int thisStartPosition = current.getStartPos();
+                map<int, long long>::iterator it = startPosition.find(thisStartPosition);
+                if (it == startPosition.end()) { startPosition[thisStartPosition] = num; } //first finding of this start position, set count.
+                else { it->second += num; } //add counts
+                
+                int thisEndPosition = current.getEndPos();
+                it = endPosition.find(thisEndPosition);
+                if (it == endPosition.end()) { endPosition[thisEndPosition] = num; } //first finding of this end position, set count.
+                else { it->second += num; } //add counts
+                
+                int thisSeqLength = current.getNumBases();
+                it = seqLength.find(thisSeqLength);
+                if (it == seqLength.end()) { seqLength[thisSeqLength] = num; } //first finding of this length, set count.
+                else { it->second += num; } //add counts
+                
+                int thisAmbig = current.getAmbigBases();
+                it = ambigBases.find(thisAmbig);
+                if (it == ambigBases.end()) { ambigBases[thisAmbig] = num; } //first finding of this ambig, set count.
+                else { it->second += num; } //add counts
+                
+                int thisHomoP = current.getLongHomoPolymer();
+                it = longHomoPolymer.find(thisHomoP);
+                if (it == longHomoPolymer.end()) { longHomoPolymer[thisHomoP] = num; } //first finding of this homop, set count.
+                else { it->second += num; } //add counts
+
 				count++;
 				outSummary << current.getName() << '\t';
-				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
-				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
-				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
+				outSummary << thisStartPosition << '\t' << thisEndPosition << '\t';
+				outSummary << thisSeqLength << '\t' << thisAmbig << '\t';
+				outSummary << thisHomoP << '\t' << num << endl;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(num) + "\n");  }
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -506,75 +485,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-/**************************************************************************************/
-int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long long>& MPIPos) {	
-	try {
-		
-		int pid;
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-
-		for(int i=0;i<num;i++){
-			
-			if (m->control_pressed) { return 0; }
-			
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-	
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buf4;
-
-			Sequence current(iss);  
-
-			if (current.getName() != "") {
-				
-				int num = 1;
-				if ((namefile != "") || (countfile != "")) {
-					//make sure this sequence is in the namefile, else error 
-					map<string, int>::iterator it = nameMap.find(current.getName());
-					
-					if (it == nameMap.end()) { cout << "[ERROR]: " << current.getName() << " is not in your name or count file, please correct." << endl; m->control_pressed = true; }
-					else { num = it->second; }
-				}
-				
-				//for each sequence this sequence represents
-				for (int j = 0; j < num; j++) {
-					startPosition.push_back(current.getStartPos());
-					endPosition.push_back(current.getEndPos());
-					seqLength.push_back(current.getNumBases());
-					ambigBases.push_back(current.getAmbigBases());
-					longHomoPolymer.push_back(current.getLongHomoPolymer());
-				}
-				
-				string outputString = current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t";
-				outputString += toString(current.getNumBases()) + "\t" + toString(current.getAmbigBases()) + "\t" + toString(current.getLongHomoPolymer()) + "\t" + toString(num) + "\n";
-				
-				//output to file
-				length = outputString.length();
-				char* buf3 = new char[length];
-				memcpy(buf3, outputString.c_str(), length);
-					
-				MPI_File_write_shared(outMPI, buf3, length, MPI_CHAR, &status);
-				delete buf3;
-			}	
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "MPICreateSummary");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/
-int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename, string sumFile) {
+ long long SeqSummaryCommand::createProcessesCreateSummary(map<int, long long>& startPosition, map<int, long long>& endPosition, map<int,  long long>& seqLength, map<int,  long long>& ambigBases, map<int,  long long>& longHomoPolymer, string filename, string sumFile) {
 	try {
 		int process = 1;
 		int num = 0;
@@ -598,13 +510,16 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
-				out << startPosition.size() << endl;
-				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
-				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
-				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
-				for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
-				for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
-				
+                out << startPosition.size() << endl;
+				for (map<int,  long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << endPosition.size() << endl;
+				for (map<int,  long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << seqLength.size() << endl;
+				for (map<int,  long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << ambigBases.size() << endl;
+				for (map<int,  long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << longHomoPolymer.size() << endl;
+				for (map<int,  long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
 				out.close();
 				
 				exit(0);
@@ -630,15 +545,54 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			ifstream in;
 			m->openInputFile(tempFilename, in);
 			
-			int temp, tempNum;
+            long long  tempNum;
 			in >> tempNum; m->gobble(in); num += tempNum;
 			in >> tempNum; m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
-				
+			for (int k = 0; k < tempNum; k++)			{
+                 long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = startPosition.find(first);
+                if (it == startPosition.end()) { startPosition[first] = second; } //first finding of this start position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{
+                 long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = endPosition.find(first);
+                if (it == endPosition.end()) { endPosition[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{
+                 long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = seqLength.find(first);
+                if (it == seqLength.end()) { seqLength[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{
+                 long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = ambigBases.find(first);
+                if (it == ambigBases.end()) { ambigBases[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{
+                 long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = longHomoPolymer.find(first);
+                if (it == longHomoPolymer.end()) { longHomoPolymer[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+							
 			in.close();
 			m->mothurRemove(tempFilename);
 			
@@ -687,11 +641,36 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
             if (pDataArray[i]->count != pDataArray[i]->end) {
                 m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
             }
-            for (int k = 0; k < pDataArray[i]->startPosition.size(); k++) {	startPosition.push_back(pDataArray[i]->startPosition[k]);       }
-			for (int k = 0; k < pDataArray[i]->endPosition.size(); k++) {	endPosition.push_back(pDataArray[i]->endPosition[k]);       }
-            for (int k = 0; k < pDataArray[i]->seqLength.size(); k++) {	seqLength.push_back(pDataArray[i]->seqLength[k]);       }
-            for (int k = 0; k < pDataArray[i]->ambigBases.size(); k++) {	ambigBases.push_back(pDataArray[i]->ambigBases[k]);       }
-            for (int k = 0; k < pDataArray[i]->longHomoPolymer.size(); k++) {	longHomoPolymer.push_back(pDataArray[i]->longHomoPolymer[k]);       }
+            for (map<int, long long>::iterator it = pDataArray[i]->startPosition.begin(); it != pDataArray[i]->startPosition.end(); it++)		{
+                map<int, long long>::iterator itMain = startPosition.find(it->first);
+                if (itMain == startPosition.end()) { //newValue
+                    startPosition[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->endPosition.begin(); it != pDataArray[i]->endPosition.end(); it++)		{
+                map<int, long long>::iterator itMain = endPosition.find(it->first);
+                if (itMain == endPosition.end()) { //newValue
+                    endPosition[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->seqLength.begin(); it != pDataArray[i]->seqLength.end(); it++)		{
+                map<int, long long>::iterator itMain = seqLength.find(it->first);
+                if (itMain == seqLength.end()) { //newValue
+                    seqLength[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->ambigBases.begin(); it != pDataArray[i]->ambigBases.end(); it++)		{
+                map<int, long long>::iterator itMain = ambigBases.find(it->first);
+                if (itMain == ambigBases.end()) { //newValue
+                    ambigBases[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->longHomoPolymer.begin(); it != pDataArray[i]->longHomoPolymer.end(); it++)		{
+                map<int, long long>::iterator itMain = longHomoPolymer.find(it->first);
+                if (itMain == longHomoPolymer.end()) { //newValue
+                    longHomoPolymer[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}

@@ -51,14 +51,14 @@ vector<string> SRACommand::setParameters(){
 string SRACommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The sra command creates the necessary files for a NCBI submission. The xml file and individual sff or fastq files parsed from the original sff or fastq file.\n";
-		helpString += "The sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, checkorient, platform, orientation, libstrategy, datatype, libsource, libselection and instrument.\n";
+		helpString += "The make.sra command creates the necessary files for a NCBI submission. The xml file and individual sff or fastq files parsed from the original sff or fastq file.\n";
+		helpString += "The make.sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, checkorient, platform, orientation, libstrategy, datatype, libsource, libselection and instrument.\n";
         helpString += "The sff parameter is used to provide the original sff file.\n";
 		helpString += "The fastq parameter is used to provide the original fastq file.\n";
         helpString += "The project parameter is used to provide your project file.\n";
         helpString += "The oligos parameter is used to provide an oligos file to parse your sff or fastq file by. It is required and must contain barcodes and primers, or you must provide a file option. \n";
         helpString += "The mimark parameter is used to provide your mimarks file.  You can create the template for this file using the get.mimarkspackage command.\n";
-		helpString += "The file parameter is used to provide a file containing a list of individual fastq or sff files or paired fastq files with a group assignment. File lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile.\n";
+		helpString += "The file parameter is used to provide a file containing a list of individual fastq or sff files or paired fastq files with a group assignment. File lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. If you are running the command with a 2 column file and ffastq and rfastq you must provide an oligos file or mothur will assume your rfastq file is an oligos file. \n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -72,7 +72,7 @@ string SRACommand::getHelpString(){
         helpString += "The libsource parameter is used to specify library source. Default=METAGENOMIC. Choices are METAGENOMIC,GENOMIC,TRANSCRIPTOMIC,METATRANSCRIPTOMIC,SYNTHETIC,VIRAL_RNA,OTHER. This is a controlled vocabulary section in the XML file that will be generated. \n";
         helpString += "The libselection parameter is used to specify library selection. Default=PCR. Choices are PCR,RANDOM,RANDOM_PCR,RT-PCR,HMPR,MF,CF-S,CF-H,CF-T,CF-M,MDA,MSLL,cDNA,ChIP,MNase,DNAse,Hybrid_Selection,Reduced_Representation,Restriction_Digest,5-methylcytidine_antibody,MBD2_protein_methyl-CpG_binding_domain,CAGE,RACE,size_fractionation,Padlock_probes_capture_method,other,unspecified. This is a controlled vocabulary section in the XML file that will be generated. \n";
         helpString += "The datatype parameter is used to specify datatype. Default=METAGENOME. Choices are METAGENOME,GENOME_SEQUENCING,METAGENOMIC_ASSEMBLY,ASSEMBLY,TRANSCRIPTOME,PROTEOMIC,MAP,CLONE_ENDS,TARGETED_LOCI,RANDOM_SURVEY,EXOME,VARIATION,EPIGENOMICS,PHENOTYPE,GENOTYPE,OTHER. This is a controlled vocabulary section in the XML file that will be generated. \n";
-		helpString += "sra(sff=sff=GHL4YHV01.sff, GHL4YHV01.oligos, project=test.project, mimark=MIMarksData.txt)\n";
+		helpString += "make.sra(sff=sff=GHL4YHV01.sff, GHL4YHV01.oligos, project=test.project, mimark=MIMarksData.txt)\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -203,10 +203,11 @@ SRACommand::SRACommand(string option)  {
 			if (file == "not open") {  file = "";  abort = true; }
 			else if (file == "not found") { file = ""; }
             
+            setOligosParameter = false;
             oligosfile = validParameter.validFile(parameters, "oligos", true);
 			if (oligosfile == "not found")      {  oligosfile = "";     }
             else if(oligosfile == "not open")	{	abort = true;		}
-			else {	m->setOligosFile(oligosfile); }
+			else {	m->setOligosFile(oligosfile); setOligosParameter = true; }
             
             contactfile = validParameter.validFile(parameters, "project", true);
 			if (contactfile == "not found")      {	contactfile = ""; m->mothurOut("[ERROR]: You must provide a project file before you can use the sra command."); m->mothurOutEndLine(); abort = true;	}
@@ -303,9 +304,10 @@ int SRACommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
+        uniqueNames.insert("scrap");
         readContactFile();
         readMIMarksFile();
-        if (oligosfile != "") { readOligos(); Groups.push_back("scrap"); }
+        if (oligosfile != "") { readOligos(); }
         
         if (m->control_pressed) { return 0; }
         
@@ -317,10 +319,9 @@ int SRACommand::execute(){
         else if (sfffile != "")     {       parseSffFile(filesBySample);    }
         else if (fastqfile != "")   {       parseFastqFile(filesBySample);  }
         
-        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
-        
         sanityCheckMiMarksGroups();
         
+        cout << "files by sample size = " << filesBySample.size() << endl;
         //checks groups and files returned from parse - removes any groups that did not get reads assigned to them, orders files.
         checkGroups(filesBySample);
         
@@ -338,14 +339,14 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         out << "<Submission>\n";
         out << "\t<Description>\n";
-        out << "\t\t<Comment> New Submission. Generated by mothur version " + m->getVersion() + " </Comment> \n";
+        out << "\t\t<Comment> New Submission. Generated by mothur version " + m->getVersion() + "</Comment> \n";
         out << "\t\t<Submitter user_name=\"" + submissionName + "\"/>\n";
         out << "\t\t<Organization type=\"" + centerType + "\">\n";
         out << "\t\t<Name>" + centerName + "</Name>\n";
-        out << "\t\t<Contact> email=\"" + email + "\">\n";
+        out << "\t\t<Contact email=\"" + email + "\">\n";
         out << "\t\t\t<Name>\n";
         out << "\t\t\t\t<First>" + firstName + "</First>\n";
-        out << "\t\t\t\t<Last>" + firstName + "</Last>\n";
+        out << "\t\t\t\t<Last>" + lastName + "</Last>\n";
         out << "\t\t\t</Name>\n";
         out << "\t\t</Contact>\n";
         out << "\t\t</Organization>\n";
@@ -360,7 +361,7 @@ int SRACommand::execute(){
         out << "\t\t\t\t<XmlContent>\n";
         out << "\t\t\t\t\t<Project schema_version=\"2.0\">\n";
         out << "\t\t\t\t\t\t<ProjectID>\n";
-        out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + " </SPUID> \n";
+        out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + "</SPUID> \n";
         out << "\t\t\t\t\t\t</ProjectID>\n";
         out << "\t\t\t\t\t\t<Descriptor>\n";
         out << "\t\t\t\t\t\t\t<Title>" + projectTitle + " </Title> \n";
@@ -382,7 +383,7 @@ int SRACommand::execute(){
         out << "\t\t\t\t</XmlContent>\n";
         out << "\t\t\t</Data>\n";
         out << "\t\t\t<Identifier>\n";
-        out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + " </SPUID> \n";
+        out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + "</SPUID> \n";
         out << "\t\t\t</Identifier>\n";
         out << "\t\t</AddData>\n";
         out << "\t</Action>\n";
@@ -392,8 +393,6 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
             
-            string barcodeForThisSample = Group2Barcode[Groups[i]][0];
-            
             if (m->control_pressed) { break; }
             out << "\t<Action>\n";
             out << "\t\t<AddData target_db=\"BioSample\">\n";
@@ -401,31 +400,31 @@ int SRACommand::execute(){
             out << "\t\t\t\t<XmlContent>\n";
             out << "\t\t\t\t\t<BioSample schema_version=\"2.0\">\n";
             out << "\t\t\t\t\t\t<SampleId>\n";
-            out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + " </SPUID> \n";
+            out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID> \n";
             out << "\t\t\t\t\t\t</SampleId>\n";
             out << "\t\t\t\t\t\t<Organism>\n";
             string organismName = "metagenome";
             map<string, string>::iterator itOrganism = Group2Organism.find(Groups[i]);
             if (itOrganism != Group2Organism.end()) { organismName = itOrganism->second; } //user supplied acceptable organism, so use it.
-            out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + " </OrganismName> \n";
+            out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
             out << "\t\t\t\t\t\t</Organism>\n";
-            out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>n";
-            out << "\t\t\t\t\t\t<Attributes>n";
+            out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
+            out << "\t\t\t\t\t\t<Attributes>\n";
             //add biosample required attributes
             map<string, map<string, string> >:: iterator it = mimarks.find(Groups[i]);
             if (it != mimarks.end()) {
                 map<string, string> categories = it->second;
                 for (map<string, string>:: iterator it2 = categories.begin(); it2 != categories.end(); it2++) {
                     if (m->control_pressed) { break; }
-                    out << "\t\t\t\t\t\t\t<Attribute attribute_name=\"" + it2->first + "\">\"" + it2->second + "\"</Attribute>\n";
+                    out << "\t\t\t\t\t\t\t<Attribute attribute_name=\"" + it2->first + "\">" + it2->second + "</Attribute>\n";
                 }
             }
-            out << "\t\t\t\t\t\t</Attributes>n";
+            out << "\t\t\t\t\t\t</Attributes>\n";
             out << "\t\t\t\t\t</BioSample>\n";
             out << "\t\t\t\t</XmlContent>\n";
             out << "\t\t\t</Data>\n";
             out << "\t\t\t<Identifier>\n";
-            out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + " </SPUID>\n";
+            out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
             out << "\t\t\t</Identifier>\n";
             out << "\t\t</AddData>\n";
             out << "\t</Action>\n";
@@ -436,30 +435,56 @@ int SRACommand::execute(){
         for (int i = 0; i < Groups.size(); i++) {
             
             vector<string> thisGroupsFiles = filesBySample[Groups[i]];
-            string barcodeForThisSample = Group2Barcode[Groups[i]][0];
             
             for (int j = 0; j < thisGroupsFiles.size(); j++) {
-                string libId = thisGroupsFiles[j] + "." + barcodeForThisSample;
+                string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + Groups[i];
                 
                 if (m->control_pressed) { break; }
                 out << "\t<Action>\n";
                 out << "\t\t<AddFiles target_db=\"SRA\">\n";
                 if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
                     vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                    libId = pieces[0] + barcodeForThisSample;
-                    out << "\t\t\t<File file_path=\"" + pieces[0] + "\">\n";
+                    libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
+                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[0]) + "\">\n";
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
-                    vector<string> thisBarcodes; m->splitAtChar(Group2Barcode[Groups[i]][0], thisBarcodes, '.');
-                    string forwardBarcode = thisBarcodes[0];
-                    string reverseBarcode = thisBarcodes[1];
-                    vector<string> thisPrimers; m->splitAtChar(Group2Primer[Groups[i]][0], thisPrimers, '.');
-                    string forwardPrimer = thisPrimers[0];
-                    string reversePrimer = thisPrimers[1];
                     //attributes
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"BarCode\">" + forwardBarcode + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"primer\">" + forwardPrimer + "</Attribute>\n";
+                    int readOrder = 0;
+                    if (linkers.size() != 0) {
+                        string linkerString = "";
+                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    vector<string> thisGroupsBarcodes = Group2Barcode[Groups[i]];
+                    if (thisGroupsBarcodes.size() != 0) {
+                        string barcodeString = "";
+                        for (int k = 0; k < thisGroupsBarcodes.size(); k++) {
+                            vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcodes[k], thisBarcodes, '.');
+                            barcodeString += thisBarcodes[0] + ";"; //forward barcode
+                        }
+                        barcodeString = barcodeString.substr(0, barcodeString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    if (spacers.size() != 0) {
+                        string spacerString = "";
+                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    vector<string> thisGroupsPrimers = Group2Primer[Groups[i]];
+                    if (thisGroupsPrimers.size() != 0) {
+                        string primerString = "";
+                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {
+                            vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimers[k], thisPrimers, '.');
+                            primerString += thisPrimers[0] + ";"; //forward primer
+                        }
+                        primerString = primerString.substr(0, primerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
+                        readOrder++;
+                    }
                     out << "\t\t\t<Attribute name=\"read_type\">forward</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
@@ -469,12 +494,46 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
 
-                    out << "\t\t\t<File file_path=\"" + pieces[1] + "\">\n";
+                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[1]) + "\">\n";
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"BarCode\">" + reverseBarcode + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"primer\">" + reversePrimer + "</Attribute>\n";
+                    readOrder = 0;
+                    if (linkers.size() != 0) {
+                        string linkerString = "";
+                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    thisGroupsBarcodes = Group2Barcode[Groups[i]];
+                    if (thisGroupsBarcodes.size() != 0) {
+                        string barcodeString = "";
+                        for (int k = 0; k < thisGroupsBarcodes.size(); k++) {
+                            vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcodes[k], thisBarcodes, '.');
+                            barcodeString += thisBarcodes[1] + ";"; //reverse barcode
+                        }
+                        barcodeString = barcodeString.substr(0, barcodeString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    if (spacers.size() != 0) {
+                        string spacerString = "";
+                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    thisGroupsPrimers = Group2Primer[Groups[i]];
+                    if (thisGroupsPrimers.size() != 0) {
+                        string primerString = "";
+                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {
+                            vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimers[k], thisPrimers, '.');
+                            primerString += thisPrimers[1] + ";"; //reverse primer
+                        }
+                        primerString = primerString.substr(0, primerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+
                     out << "\t\t\t<Attribute name=\"read_type\">reverse</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
@@ -485,13 +544,40 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
 
                 }else { //single
-                    out << "\t\t\t<File file_path=\"" + thisGroupsFiles[j] + "\">\n";
+                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(thisGroupsFiles[j]) + "\">\n";
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
                     //attributes
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"BarCode\">" + Group2Barcode[Groups[i]][0] + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"primer\">" + Group2Primer[Groups[i]][0] + "</Attribute>\n";
+                    //linkers -> barcodes -> spacers -> primers
+                    //<Attribute read_order="0" max_mismatch="1" name="BarCode">ATCTTAC;GGATCA</Attribute>
+                    int readOrder = 0;
+                    if (linkers.size() != 0) {
+                        string linkerString = "";
+                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    vector<string> thisGroupsBarcodes = Group2Barcode[Groups[i]];
+                    if (thisGroupsBarcodes.size() != 0) {
+                        string barcodeString = "";
+                        for (int k = 0; k < thisGroupsBarcodes.size(); k++) {  barcodeString += thisGroupsBarcodes[k] + ";"; }  barcodeString = barcodeString.substr(0, barcodeString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    if (spacers.size() != 0) {
+                        string spacerString = "";
+                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                        readOrder++;
+                    }
+                    vector<string> thisGroupsPrimers = Group2Primer[Groups[i]];
+                    if (thisGroupsPrimers.size() != 0) {
+                        string primerString = "";
+                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {  primerString += thisGroupsPrimers[k] + ";"; }  primerString = primerString.substr(0, primerString.length()-1);
+                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
+                        readOrder++;
+                    }
                     out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
@@ -505,22 +591,22 @@ int SRACommand::execute(){
                 ///////////////////bioProject info
                 out << "\t\t\t<AttributeRefId name=\"BioProject\">\n";
                 out << "\t\t\t\t<RefId>\n";
-                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + " </SPUID> \n";
+                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + "</SPUID> \n";
                 out << "\t\t\t\t</RefId>\n";
                 out << "\t\t\t</AttributeRefId>\n";
                 //////////////////bioSample info
                 out << "\t\t\t<AttributeRefId name=\"BioSample\">\n";
                 out << "\t\t\t\t<RefId>\n";
-                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + " </SPUID>\n";
+                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
                 out << "\t\t\t\t</RefId>\n";
                 out << "\t\t\t</AttributeRefId>\n";
                 //libID
                 out << "\t\t\t<Identifier>\n";
                 if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
                     vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                    libId = pieces[0] + barcodeForThisSample;
+                    libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
                 }
-                out << "\t\t\t\t<LocalId>" + libId + " </LocalId>\n";
+                out << "\t\t\t\t<LocalId>" + libId + "</LocalId>\n";
                 out << "\t\t\t</Identifier>\n";
                 out << "\t\t</AddFiles>\n";
                 out << "\t</Action>\n";
@@ -765,7 +851,7 @@ int SRACommand::readMIMarksFile(){
 }
 
 //**********************************************************************************************************************
-// going to have to rework this to allow for other options --
+
 /*
  file option 1
  
@@ -781,16 +867,22 @@ int SRACommand::readMIMarksFile(){
  
  file option 3
  
- fastqfile  fastqfile   group
- fastqfile  fastqfile   group
- fastqfile  fastqfile   group
+ ffastqfile1 rfastqfile1
+ ffastqfile2 rfastqfile2
+ ...
+ 
+ file option 4
+ 
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
  ...
  
 */
 
 int SRACommand::readFile(map<string, vector<string> >& files){
 	try {
-        //vector<string> theseFiles;
+        bool runParseFastqFile = false;
         inputfile = file;
         files.clear();
         
@@ -815,7 +907,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 string group = pieces[0];
                 libLayout = "paired";
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. \n"); m->control_pressed = true;
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
@@ -896,27 +988,30 @@ int SRACommand::readFile(map<string, vector<string> >& files){
            
             
             if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
-                //process pair
-                int pos = thisFileName1.find(".sff");
-                if (pos != string::npos) {//these files are sff files
-                    isSFF = true;
-                    sfffile = thisFileName1; oligosfile = thisFileName2;
-                    if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
-                    readOligos();
-                    if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
-                    parseSffFile(files);
-                    if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + sfffile + "\n"); }
-                }else{
-                    isSFF = false;
-                    fastqfile = thisFileName1; oligosfile = thisFileName2;
-                    if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
-                    readOligos();
-                    if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
-                    parseFastqFile(files);
-                    if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
-                }
-                
+                libLayout = "single";
+                if (!setOligosParameter) {
+                    //process pair
+                    int pos = thisFileName1.find(".sff");
+                    if (pos != string::npos) {//these files are sff files
+                        isSFF = true;
+                        sfffile = thisFileName1; oligosfile = thisFileName2;
+                        if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
+                        readOligos();
+                        if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
+                        parseSffFile(files);
+                        if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + sfffile + "\n"); }
+                    }else{
+                        isSFF = false;
+                        fastqfile = thisFileName1; oligosfile = thisFileName2;
+                        if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
+                        readOligos();
+                        if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
+                        parseFastqFile(files);
+                        if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
+                    }
+                }else {  runParseFastqFile = true;  libLayout = "paired";}
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
+                libLayout = "paired";
                 map<string, vector<string> >::iterator it = files.find(group);
                 if (it == files.end()) {
                     vector<string> temp; temp.push_back(thisFileName1 + " " + thisFileName2); files[group] = temp;
@@ -926,7 +1021,43 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             }
         }
         in.close();
-    
+        
+        if (runParseFastqFile) {
+        
+            vector<string> theseFiles;
+            string commandString = "file=" + file;
+            
+            commandString += ", oligos=" + oligosfile;
+            //add in pdiffs, bdiffs, ldiffs, sdiffs, tdiffs
+            if (pdiffs != 0) { commandString += ", pdiffs=" + toString(pdiffs); }
+            if (bdiffs != 0) { commandString += ", bdiffs=" + toString(bdiffs); }
+            if (ldiffs != 0) { commandString += ", ldiffs=" + toString(ldiffs); }
+            if (sdiffs != 0) { commandString += ", sdiffs=" + toString(sdiffs); }
+            if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
+            if (m->isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
+            
+            m->mothurOutEndLine();
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
+            fastqinfoCommand->execute();
+            
+            map<string, vector<string> > filenames = fastqinfoCommand->getOutputFiles();
+            map<string, vector<string> >::iterator it = filenames.find("fastq");
+            if (it != filenames.end()) { theseFiles = it->second; }
+            else { m->control_pressed = true; } // error in sffinfo
+            
+            delete fastqinfoCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            
+            for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
+            
+            mapGroupToFile(files, theseFiles);
+        }
+        
         inputfile = file;
         
         return 0;
@@ -973,6 +1104,8 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         m->mothurCalling = false;
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
+        for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
+        
         mapGroupToFile(files, theseFiles);
         
         return 0;
@@ -988,7 +1121,6 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
 	try {
         vector<string> theseFiles;
         inputfile = fastqfile;
-        libLayout = "single"; //controlled vocab
         
         //run sffinfo to parse sff file into individual sampled sff files
         string commandString = "fastq=" + fastqfile;
@@ -1019,6 +1151,8 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         m->mothurCalling = false;
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
+        for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
+        
         mapGroupToFile(files, theseFiles);
         
         return 0;
@@ -1032,32 +1166,31 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
 //maps group to file
 int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<string> theseFiles){
 	try {
-        
         for (int i = 0; i < Groups.size(); i++) {
             
-            set<int> matches;
             for (int j = 0; j < theseFiles.size(); j++) {
+                
+                string tempName = m->getSimpleName(theseFiles[j]);
+                if ((tempName == "GZGO5KL01.F006D146.sff") || (tempName == "G3BMWHG01.F008D021.sff") || (tempName == "GO2JXTW01.M002D125.sff") || (tempName == "GO5715J01.M003D125.sff")) { cout << Groups[i] << '\t' << theseFiles[j] << endl; }
+                //cout << i << '\t' << j << '\t' << Groups[i] << '\t' << theseFiles[j] << endl;
                 int pos = theseFiles[j].find(Groups[i]);
                 if (pos != string::npos) { //you have a potential match, make sure you dont have a case of partial name
                     if (theseFiles[j][pos+Groups[i].length()] == '.') { //final.soil.sff vs final.soil2.sff both would match soil.
-                        matches.insert(i);
+                        map<string, vector<string> >::iterator it = files.find(Groups[i]);
+                        if (it == files.end()) {
+                            vector<string> temp; temp.push_back(theseFiles[j]);
+                            files[Groups[i]] = temp;
+                        }else {
+                            files[Groups[i]].push_back(theseFiles[j]);
+                        }
                     }
-                }
-            }
-            
-            if(matches.size() == 1) {
-                map<string, vector<string> >::iterator it = files.find(Groups[i]);
-                if (it == files.end()) {
-                    vector<string> temp; temp.push_back(theseFiles[*matches.begin()]); files[Groups[i]] = temp;
-                }else {
-                    files[Groups[i]].push_back(theseFiles[*matches.begin()]);
                 }
             }
         }
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "SRACommand", "checkGroups");
+		m->errorOut(e, "SRACommand", "mapGroupToFile");
 		exit(1);
 	}
 }
@@ -1071,7 +1204,7 @@ int SRACommand::checkGroups(map<string, vector<string> >& files){
             
             map<string, vector<string> >::iterator it = files.find(Groups[i]);
              //no files for this group, remove it
-            if (it == files.end()) { }
+            if (it == files.end()) {  }
             else { newGroups.push_back(Groups[i]); }
         }
         
@@ -1091,10 +1224,15 @@ int SRACommand::readOligos(){
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligos.hasPairedBarcodes())     {   pairedOligos = true;    }
-        else                                {  pairedOligos = false;    }
+        if (oligos.hasPairedBarcodes())     {   pairedOligos = true;    libLayout = "paired"; }
+        else                                {  pairedOligos = false;    libLayout = "single"; }
         
-        set<string> uniqueNames; //used to cleanup outputFileNames
+        vector<string> thisFilesLinkers = oligos.getLinkers();
+        for (int i = 0; i < thisFilesLinkers.size(); i++) { linkers.push_back(thisFilesLinkers[i]); }
+        
+        vector<string> thisFilesSpacers = oligos.getSpacers();
+        for (int i = 0; i < thisFilesSpacers.size(); i++) { spacers.push_back(thisFilesSpacers[i]); }
+        
         if (pairedOligos) {
             map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
             map<int, oligosPair> primers = oligos.getPairedPrimers();
@@ -1108,10 +1246,6 @@ int SRACommand::readOligos(){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
-                        string fastaFileName = "";
-                        string qualFileName = "";
-                        string nameFileName = "";
-                        string countFileName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -1156,10 +1290,6 @@ int SRACommand::readOligos(){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
-                        string fastaFileName = "";
-                        string qualFileName = "";
-                        string nameFileName = "";
-                        string countFileName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -1195,51 +1325,34 @@ int SRACommand::readOligos(){
         
         if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
+        Groups.clear();
+        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it);  }
+        
+        //remove dups
+        for (map<string, vector<string> >::iterator itUniques = Group2Barcode.begin(); itUniques != Group2Barcode.end(); itUniques++) {
+            vector<string> tbarcodes = itUniques->second;
+            set<string> temp;
+            for (int i = 0; i < tbarcodes.size(); i++) {  temp.insert(tbarcodes[i]);  }
+            vector<string> newBarcodes;
+            for (set<string>::iterator itSet = temp.begin(); itSet != temp.end(); itSet++) { newBarcodes.push_back(*itSet); }
+            itUniques->second = newBarcodes;
+        }
+        
+        //remove dups
+        for (map<string, vector<string> >::iterator itUniques = Group2Primer.begin(); itUniques != Group2Primer.end(); itUniques++) {
+            vector<string> tprimers = itUniques->second;
+            set<string> temp;
+            for (int i = 0; i < tprimers.size(); i++) {  temp.insert(tprimers[i]);  }
+            vector<string> newPrimers;
+            for (set<string>::iterator itSet = temp.begin(); itSet != temp.end(); itSet++) { newPrimers.push_back(*itSet); }
+            itUniques->second = newPrimers;
+        }
+        
 		return true;
 		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SRACommand", "readOligos");
-		exit(1);
-	}
-}
-//********************************************************************/
-string SRACommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
-        
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-            
-            else						{	reverse += 'N';	}
-        }
-        
-        
-        return reverse;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "SRACommand", "reverseOligo");
 		exit(1);
 	}
 }

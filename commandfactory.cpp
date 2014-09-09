@@ -135,6 +135,7 @@
 #include "makecontigscommand.h"
 #include "loadlogfilecommand.h"
 #include "sffmultiplecommand.h"
+#include "classifysvmsharedcommand.h"
 #include "classifyrfsharedcommand.h"
 #include "filtersharedcommand.h"
 #include "primerdesigncommand.h"
@@ -285,7 +286,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";
-	commands["summary.seqs"]		= "MPIEnabled";
+	commands["summary.seqs"]		= "summary.seqs";
 	commands["cluster.split"]		= "MPIEnabled";
 	commands["shhh.flows"]			= "MPIEnabled";
 	commands["sens.spec"]			= "sens.spec";
@@ -309,7 +310,8 @@ CommandFactory::CommandFactory(){
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "MPIEnabled"; 
-    commands["classify.rf"]         = "classify.rf"; 
+    commands["classify.rf"]         = "classify.rf";
+    //commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared"; 
     commands["primer.design"]		= "primer.design";
     commands["get.dists"]           = "get.dists";
@@ -322,7 +324,7 @@ CommandFactory::CommandFactory(){
     commands["make.lefse"]          = "make.lefse";
     commands["lefse"]               = "lefse";
     commands["kruskal.wallis"]      = "kruskal.wallis";
-    commands["sra"]                 = "sra";
+    commands["make.sra"]            = "make.sra";
     commands["merge.sfffiles"]      = "merge.sfffiles";
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     
@@ -363,6 +365,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 else if(optionString[i] == '=')  { foundEquals = true;	}
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
+            if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
             if(m->dirCheck(outputOption)){ 
                 setOutputDirectory(outputOption); 
                 m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
@@ -378,6 +381,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 else if(optionString[i] == '=')  { foundEquals = true;	}
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
+            if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
             if(m->dirCheck(intputOption)){ 
                 setInputDirectory(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
@@ -539,7 +543,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
-        else if(commandName == "classify.rf")           {	command = new ClassifyRFSharedCommand(optionString);        }
+        //else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
+        else if(commandName == "classify.rf")           {	command = new ClassifyRFSharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
         else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
@@ -552,7 +557,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.lefse")			{	command = new MakeLefseCommand(optionString);				}
         else if(commandName == "lefse")                 {	command = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	command = new KruskalWallisCommand(optionString);           }
-        else if(commandName == "sra")                   {	command = new SRACommand(optionString);                     }
+        else if(commandName == "make.sra")              {	command = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
         else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
 		else											{	command = new NoCommand(optionString);						}
@@ -723,8 +728,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.lefse")			{	pipecommand = new MakeLefseCommand(optionString);				}
         else if(commandName == "lefse")                 {	pipecommand = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	pipecommand = new KruskalWallisCommand(optionString);           }
-        else if(commandName == "sra")                   {	pipecommand = new SRACommand(optionString);                     }
+        else if(commandName == "make.sra")              {	pipecommand = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	pipecommand = new MergeSfffilesCommand(optionString);           }
+        //else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
@@ -880,7 +886,8 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.lefse")			{	shellcommand = new MakeLefseCommand();				}
         else if(commandName == "lefse")                 {	shellcommand = new LefseCommand();                  }
         else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
-        else if(commandName == "sra")                   {	shellcommand = new SRACommand();                    }
+        //else if(commandName == "classify.svm")          {   shellcommand = new ClassifySvmSharedCommand();      }
+        else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
 		else											{	shellcommand = new NoCommand();						}
