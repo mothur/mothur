@@ -25,8 +25,6 @@ void NameAssignment::readMap(){
 		while(fileHandle){
 			fileHandle >> firstCol;	m->gobble(fileHandle);			//read from first column
 			fileHandle >> secondCol;			//read from second column
-            
-            if (m->debug) { m->mothurOut("[DEBUG]: firstCol = " + firstCol + ", secondCol= " + secondCol + "\n"); }
 						
 			itData = (*this).find(firstCol);
 			if (itData == (*this).end()) {

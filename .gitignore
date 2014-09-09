@@ -7,14 +7,3 @@
 build
 xcuserdata
 *.xcuserdata
-TARGET_BUILD_DIRTARGET_BUILD_DIR
-*.xcuserdata
-*.xml
-nbproject/
-mothur
-
-*.stdout
-
-uchime
-
-*.stderr

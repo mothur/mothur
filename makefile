@@ -21,15 +21,13 @@ FORTRAN_FLAGS =
 
 # Optimize to level 3:
 CXXFLAGS += -O3 
-# -g -O0 for valgrind
-#CXXFLAGS += -g -O0 
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
 	#CXX = g++44
 	
 	#if you are a mac user use the following line
-	#TARGET_ARCH += -arch x86_64
+	TARGET_ARCH += -arch x86_64
 	
 	#if you using cygwin to build Windows the following line
 	#CXX = x86_64-w64-mingw32-g++
@@ -38,7 +36,6 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
  	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
-	CXXFLAGS += -mtune=native -march=native -m64
 	#CXXFLAGS += -mtune=native -march=native 
 	
 	CXXFLAGS += -DBIT_VERSION 

@@ -262,22 +262,39 @@ void ListVector::printHeaders(ostream& output){
 	try {
 		string snumBins = toString(numBins);
 		output << "label\tnumOtus\t";
-        
-        vector<string> theseLabels = getLabels();
-        
-        map<string, string> labelOtu;
-        for (int i = 0; i < data.size(); i ++) { data[i] = theseLabels[i]; }
-        
-        vector<string> hold = data;
-        sort(hold.begin(), hold.end(), abundNamesSort);
-        
-        
-        for(int i = 0; i < hold.size(); i++) { //print original label for sorted by abundance otu
-            output << labelOtu[hold[i]] << '\t';
-        }
-					
-        output << endl;
-		
+		if (m->sharedHeaderMode == "tax") {
+			for (int i = 0; i < numBins; i++) {
+				
+				//if there is a bin label use it otherwise make one
+				string binLabel = "PhyloType";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) {
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
+				if (i < binLabels.size()) {  binLabel = binLabels[i]; }
+				
+				output << binLabel << '\t';
+			}
+			output << endl;
+		}else {
+			for (int i = 0; i < numBins; i++) {
+				//if there is a bin label use it otherwise make one
+				string binLabel = "Otu";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) {
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
+				if (i < binLabels.size()) {  binLabel = binLabels[i]; }
+				
+				output << binLabel << '\t';
+			}
+			
+			output << endl;
+		}
 		m->printedListHeaders = true;
 	}
 	catch(exception& e) {

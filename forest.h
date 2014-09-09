@@ -9,6 +9,7 @@
 #ifndef __Mothur__forest__
 #define __Mothur__forest__
 
+#include <iostream>
 #include "mothurout.h"
 #include "macros.h"
 #include "decisiontree.hpp"
