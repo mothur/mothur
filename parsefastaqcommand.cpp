@@ -72,9 +72,9 @@ string ParseFastaQCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],fasta"; } 
-        else if (type == "qfile") {  pattern = "[filename],qual"; }
-        else if (type == "fastq") {  pattern = "[filename],[group],fastq"; } 
+        if (type == "fasta") {  pattern = "[filename],fasta-[filename],[group],[tag],fasta"; }
+        else if (type == "qfile") {  pattern = "[filename],qual-[filename],[group],[tag],qual"; }
+        else if (type == "fastq") {  pattern = "[filename],[group],fastq-[filename],[group],[tag],fastq"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -102,7 +102,7 @@ ParseFastaQCommand::ParseFastaQCommand(){
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(string option){
 	try {
-		abort = false; calledHelp = false;
+		abort = false; calledHelp = false; fileOption = 0; createFileGroup = false;
         split = 1;
 		
 		if(option == "help") {	help(); abort = true; calledHelp = true; }
@@ -175,7 +175,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             file = validParameter.validFile(parameters, "file", true);
 			if (file == "not found") {	file = "";	}
 			else if (file == "not open")	{	file = ""; abort = true;	}
-            else { inputfile = file; }
+            else { inputfile = file; fileOption = true; }
             
             if ((file == "") && (fastaQFile == "")) {  m->mothurOut("You must provide a file or fastq option."); m->mothurOutEndLine(); abort = true;  }
 
@@ -248,6 +248,20 @@ int ParseFastaQCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
+        pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
+        if (oligosfile != "")       {
+            readOligos(oligosfile);
+            //find group read belongs to
+            if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); numBarcodes = oligos.getPairedBarcodes().size(); numPrimers = oligos.getPairedPrimers().size(); }
+            else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  numPrimers = oligos.getPrimers().size(); numBarcodes = oligos.getBarcodes().size();  }
+            
+            if (reorient) {
+                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+            }
+            
+        }else if (groupfile != "")   { readGroup(groupfile);     }
+        
         if (file != "") {
             //read file
             vector< vector<string> > files = readFile();
@@ -258,65 +272,56 @@ int ParseFastaQCommand::execute(){
                 
                 if (m->control_pressed) { break; }
                 
-            }
-           
-            //if oligos, then parse, otherwise just create fasta and qual for each.
-            
-            //process forward and reverse
-            
-            //parse each set of file with oligos file
-            
-            
-            
-        }else {
-            TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
-            pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
-            if (oligosfile != "")       {
-                readOligos(oligosfile);
-                //find group read belongs to
-                if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); numBarcodes = oligos.getPairedBarcodes().size(); numPrimers = oligos.getPairedPrimers().size(); }
-                else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  numPrimers = oligos.getPrimers().size(); numBarcodes = oligos.getBarcodes().size();  }
-                
-                if (reorient) {
-                    rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+                if (fileOption == 2)  {
+                    if (oligosfile != "") {
+                        //parse, includes fasta and qual
+                    }else{
+                        //just make fasta and qual
+                    }
+                }else if (fileOption == 3) {
+                    //copy and rename files
+                    //just make fasta and qual
+                }else if (fileOption == 4)  {
+                    //parse, includes fasta and qual
                 }
-                
-            }else if (groupfile != "")   { readGroup(groupfile);     }
-            
+            }
+        }else {
             processFile(fastaQFile, trimOligos, rtrimOligos);
             
-            if (split > 1) {
-                
-                if (groupfile != "")        { delete groupMap;      }
-                else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
-                
-                map<string, string>::iterator it;
-                set<string> namesToRemove;
-                for(int i=0;i<fastqFileNames.size();i++){
-                    for(int j=0;j<fastqFileNames[0].size();j++){
-                        if (fastqFileNames[i][j] != "") {
-                            if (namesToRemove.count(fastqFileNames[i][j]) == 0) {
-                                if(m->isBlank(fastqFileNames[i][j])){
-                                    m->mothurRemove(fastqFileNames[i][j]);
-                                    namesToRemove.insert(fastqFileNames[i][j]);
-                                }
+        }
+		
+        if (split > 1) {
+            map<string, string>::iterator it;
+            set<string> namesToRemove;
+            for(int i=0;i<fastqFileNames.size();i++){
+                for(int j=0;j<fastqFileNames[0].size();j++){
+                    if (fastqFileNames[i][j] != "") {
+                        if (namesToRemove.count(fastqFileNames[i][j]) == 0) {
+                            if(m->isBlank(fastqFileNames[i][j])){
+                                m->mothurRemove(fastqFileNames[i][j]);
+                                namesToRemove.insert(fastqFileNames[i][j]);
                             }
                         }
                     }
                 }
-                
-                //remove names for outputFileNames, just cleans up the output
-                for(int i = 0; i < outputNames.size(); i++) {
-                    if (namesToRemove.count(outputNames[i]) != 0) {
-                        outputNames.erase(outputNames.begin()+i);
-                        i--;
-                    }
-                }
-                if(m->isBlank(noMatchFile)){  m->mothurRemove(noMatchFile); }
-                else { outputNames.push_back(noMatchFile); outputTypes["fastq"].push_back(noMatchFile); }
             }
-		}
-		
+            
+            //remove names for outputFileNames, just cleans up the output
+            for(int i = 0; i < outputNames.size(); i++) {
+                if (namesToRemove.count(outputNames[i]) != 0) {
+                    outputNames.erase(outputNames.begin()+i);
+                    i--;
+                }
+            }
+            if(m->isBlank(noMatchFile)){  m->mothurRemove(noMatchFile); }
+            else { outputNames.push_back(noMatchFile); outputTypes["fastq"].push_back(noMatchFile); }
+        }
+
+        
+        if (groupfile != "")        { delete groupMap;      }
+        else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
+        
+        
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
 		
 		//set fasta file as new current fastafile
@@ -340,6 +345,128 @@ int ParseFastaQCommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParseFastaQCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//assumes file option was used
+int ParseFastaQCommand::processFile(string inputfile, string inputReverse, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos){
+    try {
+        
+        //open Output Files
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        string ffastaFile = getOutputFileName("fasta",variables);
+        string fqualFile = getOutputFileName("qfile",variables);
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputReverse));
+        string rfastaFile = getOutputFileName("fasta",variables);
+        string rqualFile = getOutputFileName("qfile",variables);
+        ofstream outfFasta, outfQual, outrFasta, outrQual;
+        
+        if (fasta) { m->openOutputFile(ffastaFile, outfFasta);  outputNames.push_back(ffastaFile); outputTypes["fasta"].push_back(ffastaFile);	m->openOutputFile(rfastaFile, outfFasta);  outputNames.push_back(rfastaFile); outputTypes["fasta"].push_back(rfastaFile);}
+        if (qual) { m->openOutputFile(fqualFile, outfQual);	outputNames.push_back(fqualFile);  outputTypes["qfile"].push_back(fqualFile);	m->openOutputFile(rqualFile, outrQual);	outputNames.push_back(rqualFile);  outputTypes["qfile"].push_back(rqualFile);	}
+        
+        ifstream inf;
+        m->openInputFile(inputfile, inf);
+        
+        ifstream inr;
+        m->openInputFile(inputReverse, inr);
+        
+        
+        //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+        for (int i = -64; i < 65; i++) {
+            char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+            convertTable.push_back(temp);
+        }
+        
+        int count = 0;
+        while (!inf.eof() && !inr.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            bool ignoref, ignorer;
+            fastqRead2 thisfRead = readFastq(inf, ignoref);
+            fastqRead2 thisrRead = readFastq(inr, ignorer);
+            
+            if (!ignoref && ! ignorer) {
+                vector<int> qualScores;
+                if (qual) {
+                    qualScores = convertQual(thisfRead.quality);
+                    outfQual << ">" << thisfRead.seq.getName() << endl;
+                    for (int i = 0; i < qualScores.size(); i++) { outfQual << qualScores[i] << " "; }
+                    outfQual << endl;
+                    
+                    qualScores = convertQual(thisrRead.quality);
+                    outrQual << ">" << thisrRead.seq.getName() << endl;
+                    for (int i = 0; i < qualScores.size(); i++) { outrQual << qualScores[i] << " "; }
+                    outrQual << endl;
+
+                }
+                
+                if (m->control_pressed) { break; }
+                
+                if (pacbio) {
+                    //do reverse first because above overwrites qualScores with reverse scores
+                    if (!qual) { qualScores = convertQual(thisrRead.quality); } //convert if not done
+                    string sequence = thisrRead.seq.getAligned();
+                    for (int i = 0; i < qualScores.size(); i++) {
+                        if (qualScores[i] == 0){ sequence[i] = 'N'; }
+                    }
+                    thisrRead.seq.setAligned(sequence);
+                    
+                    qualScores = convertQual(thisfRead.quality);
+                    sequence = thisfRead.seq.getAligned();
+                    for (int i = 0; i < qualScores.size(); i++) {
+                        if (qualScores[i] == 0){ sequence[i] = 'N'; }
+                    }
+                    thisfRead.seq.setAligned(sequence);
+                }
+                
+                //print sequence info to files
+                if (fasta) { thisfRead.seq.printSequence(outfFasta); thisrRead.seq.printSequence(outrFasta); }
+                
+                if (split > 1) {
+                    int barcodeIndex, primerIndex, trashCodeLength;
+                    if (oligosfile != "")      {  trashCodeLength = findGroup(thisfRead, thisrRead, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);    }
+                    else if (groupfile != "")  {  trashCodeLength = findGroup(thisfRead, barcodeIndex, primerIndex, "groupMode");   }
+                    else {  m->mothurOut("[ERROR]: uh oh, we shouldn't be here...\n"); }
+                    
+                    if(trashCodeLength == 0){
+                        ofstream out;
+                        m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
+                        out << thisfRead.wholeRead;
+                        out.close();
+                        
+                        ofstream out2;
+                        m->openOutputFileAppend(rfastqFileNames[barcodeIndex][primerIndex], out2);
+                        out2 << thisrRead.wholeRead;
+                        out2.close();
+                    }else{
+                        ofstream out;
+                        m->openOutputFileAppend(noMatchFile, out);
+                        out << thisfRead.wholeRead;
+                        out << thisrRead.wholeRead;
+                        out.close();
+                    }
+                }
+                //report progress
+                if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
+                count++;
+            }
+        }
+        
+        inf.close(); inr.close();
+        if (fasta)	{ outfFasta.close(); outrFasta.close();	}
+        if (qual)	{ outfQual.close();	outrQual.close();   }
+        
+        //report progress
+        if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+        
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "processFile");
 		exit(1);
 	}
 }
@@ -595,10 +722,10 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
                 currentSeqsDiffs = thisCurrentSeqsDiffs;
                 barcode = thisBarcodeIndex;
                 primer = thisPrimerIndex;
-                savedSeq.reverseComplement();
-                currSeq.setAligned(savedSeq.getAligned());
-                savedQual.flipQScores();
-                currQual.setScores(savedQual.getScores());
+                //savedSeq.reverseComplement();
+                //currSeq.setAligned(savedSeq.getAligned());
+                //savedQual.flipQScores();
+                //currQual.setScores(savedQual.getScores());
             }else { trashCode += "(" + thisTrashCode + ")";  }
         }
         
@@ -634,7 +761,97 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
 	}
 }
 //**********************************************************************************************************************
-
+int ParseFastaQCommand::findGroup(fastqRead2 thisfRead, fastqRead2 thisrRead, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
+	try {
+        int success = 1;
+        string trashCode = "";
+        int currentSeqsDiffs = 0;
+        
+        Sequence fcurrSeq(thisfRead.seq.getName(), thisfRead.seq.getAligned());
+        QualityScores fcurrQual; fcurrQual.setScores(convertQual(thisfRead.quality));
+        Sequence rcurrSeq(thisrRead.seq.getName(), thisrRead.seq.getAligned());
+        QualityScores rcurrQual; rcurrQual.setScores(convertQual(thisrRead.quality));
+        
+        //for reorient
+        Sequence fsavedSeq(fcurrSeq.getName(), fcurrSeq.getAligned());
+        QualityScores fsavedQual(fcurrQual.getName(), fcurrQual.getScores());
+        Sequence rsavedSeq(rcurrSeq.getName(), rcurrSeq.getAligned());
+        QualityScores rsavedQual(rcurrQual.getName(), rcurrQual.getScores());
+        
+        if(numBarcodes != 0){
+            success = trimOligos->stripBarcode(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, barcode);
+            
+            if(success > bdiffs)		{	trashCode += 'b';	}
+            else{ currentSeqsDiffs += success;  }
+        }
+        
+        if(numPrimers != 0){
+            success = trimOligos->stripForward(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, primer);
+           
+            if(success > pdiffs)		{	trashCode += 'f';	}
+            else{ currentSeqsDiffs += success;  }
+        }
+        
+        if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
+        
+        if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+            int thisSuccess = 0;
+            string thisTrashCode = "";
+            int thisCurrentSeqsDiffs = 0;
+            
+            int thisBarcodeIndex = 0;
+            int thisPrimerIndex = 0;
+            
+            if(numBarcodes != 0){
+                
+                thisSuccess = rtrimOligos->stripBarcode(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisBarcodeIndex);
+                
+                
+                if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
+            }
+            
+            if(numPrimers != 0){
+                
+                thisSuccess = rtrimOligos->stripForward(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisPrimerIndex);
+                
+                if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
+            }
+            
+            if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+            
+            if (thisTrashCode == "") {
+                trashCode = thisTrashCode;
+                success = thisSuccess;
+                currentSeqsDiffs = thisCurrentSeqsDiffs;
+                barcode = thisBarcodeIndex;
+                primer = thisPrimerIndex;
+                //fsavedSeq.reverseComplement();
+                //rsavedSeq.reverseComplement();
+                //fcurrSeq.setAligned(fsavedSeq.getAligned());
+                //rcurrSeq.setAligned(rsavedSeq.getAligned());
+                //fsavedQual.flipQScores(); rsavedQual.flipQScores();
+               // fcurrQual.setScores(fsavedQual.getScores()); rcurrQual.setScores(rsavedQual.getScores());
+                
+            }else { trashCode += "(" + thisTrashCode + ")";  }
+        }
+        
+        if (trashCode.length() == 0) { //is this sequence in the ignore group
+            string thisGroup = oligos.getGroupName(barcode, primer);
+            
+            int pos = thisGroup.find("ignore");
+            if (pos != string::npos) {  trashCode += "i"; }
+        }
+        
+        return trashCode.length();
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "findGroup");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 /*
  
  file option 1
@@ -645,20 +862,30 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
  
  file option 2
  
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- group fastqfile  fastqfile
+ group ffastqfile  rfastqfile
+ group ffastqfile  rfastqfile
+ group ffastqfile  rfastqfile
  ...
+ 
+ file option 3 
+ 
+ My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
  
  */
 
+//lines can be 2, 3, or 4 columns
+// forward.fastq reverse.fastq -> 2 column
+// groupName forward.fastq reverse.fastq -> 3 column
+// forward.fastq reverse.fastq forward.index.fastq  reverse.index.fastq  -> 4 column
+// forward.fastq reverse.fastq none  reverse.index.fastq  -> 4 column
+// forward.fastq reverse.fastq forward.index.fastq  none  -> 4 column
 vector< vector<string> > ParseFastaQCommand::readFile(){
 	try {
-        
         vector< vector<string> > files;
+        string forward, reverse, findex, rindex;
         
         ifstream in;
-        m->openInputFile(file, in);
+        m->openInputFile(inputfile, in);
         
         while(!in.eof()) {
             
@@ -668,117 +895,207 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             vector<string> pieces = m->splitWhiteSpace(line);
             
             string group = "";
-            string thisFileName1, thisFileName2; thisFileName1 = ""; thisFileName2 = "";
             if (pieces.size() == 2) {
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
+                forward = pieces[0];
+                reverse = pieces[1];
+                group = "";
+                findex = "";
+                rindex = "";
+                fileOption = 2;
             }else if (pieces.size() == 3) {
                 if (oligosfile != "") { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
-                thisFileName1 = pieces[1];
-                thisFileName2 = pieces[2];
-                string group = pieces[0];
+                group = pieces[0];
+                forward = pieces[1];
+                reverse = pieces[2];
+                findex = "";
+                rindex = "";
+                createFileGroup = true;
+                fileOption = 3;
+            }else if (pieces.size() == 4) {
+                if (oligosfile == "") { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                forward = pieces[0];
+                reverse = pieces[1];
+                findex = pieces[2];
+                rindex = pieces[3];
+                fileOption = 4;
+                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
+                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2 or 3 columns. The 2 column files are forwardFastqFile and reverseFastqFile. The 3 column are groupName, forwardFastqFile reverseFastqFile. You may have multiple lines in the file. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->control_pressed = true;
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
+            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
             
             if (inputDir != "") {
-                string path = m->hasPath(thisFileName1);
-                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
+                string path = m->hasPath(forward);
+                if (path == "") {  forward = inputDir + forward;  }
                 
-                path = m->hasPath(thisFileName2);
-                if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
+                path = m->hasPath(reverse);
+                if (path == "") {  reverse = inputDir + reverse;  }
+                
+                if (findex != "") {
+                    path = m->hasPath(findex);
+                    if (path == "") {  findex = inputDir + findex;  }
+                }
+                
+                if (rindex != "") {
+                    path = m->hasPath(rindex);
+                    if (path == "") {  rindex = inputDir + rindex;  }
+                }
             }
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(thisFileName1, in2, "noerror");
+            int openForward = m->openInputFile(forward, in2, "noerror");
             
             //if you can't open it, try default location
             if (openForward == 1) {
-                
                 if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
+                    string tryPath = m->getDefaultPath() + m->getSimpleName(forward);
+                    m->mothurOut("Unable to open " + forward + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
                     openForward = m->openInputFile(tryPath, in3, "noerror");
                     in3.close();
-                    thisFileName1 = tryPath;
+                    forward = tryPath;
                 }
             }
             
             //if you can't open it, try output location
             if (openForward == 1) {
                 if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                    string tryPath = m->getOutputDir() + m->getSimpleName(forward);
+                    m->mothurOut("Unable to open " + forward + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
                     openForward = m->openInputFile(tryPath, in4, "noerror");
-                    thisFileName1 = tryPath;
+                    forward = tryPath;
                     in4.close();
                 }
             }
             
             if (openForward == 1) { //can't find it
-                m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
+                m->mothurOut("[WARNING]: can't find " + forward + ", ignoring pair.\n");
             }else{  in2.close();  }
             
-            int openReverse = 1;
-            
             ifstream in3;
-            openReverse = m->openInputFile(thisFileName2, in3, "noerror");
+            int openReverse = m->openInputFile(reverse, in3, "noerror");
             
             //if you can't open it, try default location
             if (openReverse == 1) {
                 if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
-                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
+                    string tryPath = m->getDefaultPath() + m->getSimpleName(reverse);
+                    m->mothurOut("Unable to open " + reverse + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
                     openReverse = m->openInputFile(tryPath, in3, "noerror");
                     in3.close();
-                    thisFileName2 = tryPath;
+                    reverse = tryPath;
                 }
             }
             
             //if you can't open it, try output location
             if (openReverse == 1) {
                 if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
-                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                    string tryPath = m->getOutputDir() + m->getSimpleName(reverse);
+                    m->mothurOut("Unable to open " + reverse + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
                     openReverse = m->openInputFile(tryPath, in4, "noerror");
-                    thisFileName2 = tryPath;
+                    reverse = tryPath;
                     in4.close();
                 }
             }
             
             if (openReverse == 1) { //can't find it
-                m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
+                m->mothurOut("[WARNING]: can't find " + reverse + ", ignoring pair.\n");
             }else{  in3.close();  }
             
+            int openFindex = 0;
+            if (findex != "") {
+                ifstream in4;
+                openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
+                
+                //if you can't open it, try default location
+                if (openFindex == 1) {
+                    if (m->getDefaultPath() != "") { //default path is set
+                        string tryPath = m->getDefaultPath() + m->getSimpleName(findex);
+                        m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
+                        ifstream in5;
+                        openFindex = m->openInputFile(tryPath, in5, "noerror");
+                        in5.close();
+                        findex = tryPath;
+                    }
+                }
+                
+                //if you can't open it, try output location
+                if (openFindex == 1) {
+                    if (m->getOutputDir() != "") { //default path is set
+                        string tryPath = m->getOutputDir() + m->getSimpleName(findex);
+                        m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                        ifstream in6;
+                        openFindex = m->openInputFile(tryPath, in6, "noerror");
+                        findex = tryPath;
+                        in6.close();
+                    }
+                }
+                
+                if (openFindex == 1) { //can't find it
+                    m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
+                }
+            }
             
-            if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair a
-                vector<string> temp;
-                temp.push_back(thisFileName1); temp.push_back(thisFileName2);
-                files.push_back(temp);
-            }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair
-                vector<string> temp;
-                temp.push_back(thisFileName1); temp.push_back(thisFileName2);
-                files.push_back(temp);
-                Groups.push_back(group);
+            int openRindex = 0;
+            if (rindex != "") {
+                ifstream in7;
+                openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
+                
+                //if you can't open it, try default location
+                if (openRindex == 1) {
+                    if (m->getDefaultPath() != "") { //default path is set
+                        string tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
+                        m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
+                        ifstream in8;
+                        openRindex = m->openInputFile(tryPath, in8, "noerror");
+                        in8.close();
+                        rindex = tryPath;
+                    }
+                }
+                
+                //if you can't open it, try output location
+                if (openRindex == 1) {
+                    if (m->getOutputDir() != "") { //default path is set
+                        string tryPath = m->getOutputDir() + m->getSimpleName(rindex);
+                        m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                        ifstream in9;
+                        openRindex = m->openInputFile(tryPath, in9, "noerror");
+                        rindex = tryPath;
+                        in9.close();
+                    }
+                }
+                
+                if (openRindex == 1) { //can't find it
+                    m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n");
+                }
+            }
+            
+            
+            if ((openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) { //good pair
+                file2Group[files.size()] = group;
+                vector<string> pair;
+                pair.push_back(forward);
+                pair.push_back(reverse);
+                pair.push_back(findex);
+                pair.push_back(rindex);
+                if (((findex != "") || (rindex != "")) && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->control_pressed = true;  }
+                files.push_back(pair);
             }
         }
         in.close();
         
         return files;
     }
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "readFile");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "ParseFastaQCommand", "readFileNames");
+        exit(1);
+    }
 }
-
 //***************************************************************************************************************
 
 bool ParseFastaQCommand::readOligos(string oligoFile){
@@ -839,6 +1156,12 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         
                         ofstream temp;
                         map<string, string> variables;
+                        string tempInput = inputfile;
+                        if (fileOption) {
+                            variables["[tag]"] = "forward";
+                            inputfile = ffastq;
+                        }
+                        
                         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
                         variables["[group]"] = comboGroupName;
                         string fastqFileName = getOutputFileName("fastq", variables);
@@ -850,6 +1173,27 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         
                         fastqFileNames[itBar->first][itPrimer->first] = fastqFileName;
                         m->openOutputFile(fastqFileName, temp);		temp.close();
+                        
+                        if (fileOption) {
+                            variables["[tag]"] = "reverse";
+                            inputfile = rfastq;
+                        }
+                        
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                        string rfastqFileName = getOutputFileName("fastq", variables);
+                        if (uniqueNames.count(rfastqFileName) == 0) {
+                            outputNames.push_back(rfastqFileName);
+                            outputTypes["fastq"].push_back(rfastqFileName);
+                            uniqueNames.insert(rfastqFileName);
+                        }
+                        
+                        ofstream temp2;
+                        rfastqFileNames[itBar->first][itPrimer->first] = rfastqFileName;
+                        m->openOutputFile(rfastqFileName, temp2);		temp2.close();
+                        
+                        if (fileOption) {
+                            inputfile = tempInput;
+                        }
                     }
                 }
             }
@@ -891,6 +1235,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         
                         fastqFileNames[itBar->second][itPrimer->second] = fastqFileName;
                         m->openOutputFile(fastqFileName, temp);		temp.close();
+                        
                     }
                 }
             }

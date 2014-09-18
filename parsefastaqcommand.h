@@ -50,18 +50,21 @@ public:
 private:
 
 	vector<string> outputNames;	
-	string outputDir, inputDir, fastaQFile, format, oligosfile, groupfile, file, inputfile;
-	bool abort, fasta, qual, pacbio, pairedOligos, reorient;
-    int pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, split, numBarcodes, numPrimers, numLinkers, numSpacers, numRPrimers;
+	string outputDir, inputDir, fastaQFile, format, oligosfile, groupfile, file, inputfile, ffastq, rfastq;
+	bool abort, fasta, qual, pacbio, pairedOligos, reorient, createFileGroup;
+    int pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, split, numBarcodes, numPrimers, numLinkers, numSpacers, numRPrimers, fileOption;
     GroupMap* groupMap;
     Oligos oligos;
     
+    map<int, string> file2Group;
     vector< vector<string> > readFile();
     vector<vector<string> > fastqFileNames;
+    vector<vector<string> > rfastqFileNames;
     string noMatchFile;
     vector<string> Groups;
 	
     int processFile(string inputfile, TrimOligos*&, TrimOligos*&);
+    int processFile(string inputfile, string inputReverse, TrimOligos*&, TrimOligos*&);
 	vector<int> convertQual(string);
     vector<char> convertTable;
     bool readOligos(string oligosFile);
@@ -69,6 +72,8 @@ private:
     fastqRead2 readFastq(ifstream&, bool&);
     int findGroup(fastqRead2, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
     int findGroup(fastqRead2, int&, int&, string);
+    int findGroup(fastqRead2, fastqRead2, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
+    
     
 };
 

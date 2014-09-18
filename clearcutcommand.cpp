@@ -264,76 +264,80 @@ int ClearcutCommand::execute() {
 		string outputName = getOutputFileName("tree", variables);
 		outputNames.push_back(outputName); outputTypes["tree"].push_back(outputName);
 		
-		vector<char*> cPara;
-		
-		char* tempClearcut = new char[9];  
-		*tempClearcut = '\0'; strncat(tempClearcut, "clearcut", 8); 
-		cPara.push_back(tempClearcut);
+        int numArgs = 4; //clearcut, in, out and fastafile or phylipfile
+        if (version) { numArgs++; } if (verbose) { numArgs++; } if (quiet) { numArgs++; } if (seed != "*")	{ numArgs++; } if (norandom) { numArgs++; }
+        if (shuffle) { numArgs++; } if (neighbor) { numArgs++; } if (stdoutWanted) { numArgs++; } if (DNA)	{ numArgs++; } if (protein) { numArgs++; }
+        if (jukes) { numArgs++; } if (kimura) { numArgs++; } if (matrixout != "") { numArgs++; } if (ntrees != "1")	{ numArgs++; } if (expblen) { numArgs++; } if (expdist) { numArgs++; }
+        
+        
+        char** clearcutParameters;
+		clearcutParameters = new char*[numArgs];
+        
+        clearcutParameters[0] = new char[9];
+		*clearcutParameters[0] = '\0'; strncat(clearcutParameters[0], "clearcut", 8);
 				
 		//you gave us a distance matrix
-		if (phylipfile != "") {  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--distance", 10);  cPara.push_back(temp);	}
+        if (phylipfile != "") {  clearcutParameters[1] = new char[11];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--distance", 10); 	}
 		
 		//you gave us a fastafile
-		if (fastafile != "") { char* temp = new char[12];  *temp = '\0'; strncat(temp, "--alignment", 11);  cPara.push_back(temp); 	}
+		if (fastafile != "") { clearcutParameters[1] = new char[12];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--alignment", 11);  	}
 		
-		if (version)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--version", 9);  cPara.push_back(temp);	}
-		if (verbose)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--verbose", 9);  cPara.push_back(temp);	}
-		if (quiet)				{  char* temp = new char[8];  *temp = '\0'; strncat(temp, "--quiet", 7);  cPara.push_back(temp);	}
+        int parameterCount = 2;
+		if (version)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--version", 9);  	parameterCount++; }
+		if (verbose)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--verbose", 9);  parameterCount++;	}
+		if (quiet)				{  clearcutParameters[parameterCount] = new char[8];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--quiet", 7);  parameterCount++;	}
 		if (seed != "*")		{  
 			string tempSeed = "--seed=" + seed;
-			char* temp = new char[tempSeed.length()+1];
-			*temp = '\0'; strncat(temp, tempSeed.c_str(), tempSeed.length());
-			cPara.push_back(temp);
+			clearcutParameters[parameterCount] = new char[tempSeed.length()+1];
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempSeed.c_str(), tempSeed.length());
+			parameterCount++;
 		}
-		if (norandom)			{  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--norandom", 10);  cPara.push_back(temp);	}
-		if (shuffle)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--shuffle", 9);  cPara.push_back(temp);	}
-		if (neighbor)			{  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--neighbor", 10);  cPara.push_back(temp);	}
+		if (norandom)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--norandom", 10);  parameterCount++;	}
+		if (shuffle)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--shuffle", 9);  parameterCount++;	}
+		if (neighbor)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--neighbor", 10);  parameterCount++;	}
 		
 		string tempIn = "--in=" + inputFile;  
-		char* tempI = new char[tempIn.length()+1];
-		*tempI = '\0'; strncat(tempI, tempIn.c_str(), tempIn.length());
-		cPara.push_back(tempI);
+        clearcutParameters[parameterCount] = new char[tempIn.length()+1];
+		*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempIn.c_str(), tempIn.length());
+        parameterCount++;
 		
-		if (stdoutWanted)		{  char* temp = new char[9];  *temp = '\0'; strncat(temp, "--stdout", 8);  cPara.push_back(temp);	}
+		if (stdoutWanted)		{  clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--stdout", 8);  parameterCount++;	}
 		else{  
-			string tempOut = "--out=" + outputName;  
-			char* temp = new char[tempOut.length()+1];
-			*temp = '\0'; strncat(temp, tempOut.c_str(), tempOut.length());
-			cPara.push_back(temp);
+            string tempOut = "--out=" + outputName;
+			clearcutParameters[parameterCount] = new char[tempOut.length()+1];
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempOut.c_str(), tempOut.length());
+			parameterCount++;
+            
 		}
 			
-		if (DNA)				{  char* temp = new char[6];  *temp = '\0'; strncat(temp, "--DNA", 5);  cPara.push_back(temp);		}
-		if (protein)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--protein", 9);  cPara.push_back(temp);	}
-		if (jukes)				{  char* temp = new char[8];  *temp = '\0'; strncat(temp, "--jukes", 7);  cPara.push_back(temp);		}
-		if (kimura)				{ char* temp = new char[9];  *temp = '\0'; strncat(temp, "--kimura", 8);  cPara.push_back(temp);		}
+		if (DNA)				{  clearcutParameters[parameterCount] = new char[6];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--DNA", 5);  parameterCount++;		}
+		if (protein)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--protein", 9);  parameterCount++;	}
+		if (jukes)				{  clearcutParameters[parameterCount] = new char[8];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--jukes", 7);  parameterCount++;	}
+		if (kimura)				{ clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--kimura", 8);  parameterCount++;		}
 		if (matrixout != "")	{  
 			string tempMatrix =  "--matrixout=" + outputDir + matrixout; 
-			char* temp = new char[tempMatrix.length()+1];
-			*temp = '\0'; strncat(temp, tempMatrix.c_str(), tempMatrix.length());
-			cPara.push_back(temp);
+			clearcutParameters[parameterCount] = new char[tempMatrix.length()+1];
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempMatrix.c_str(), tempMatrix.length());
+			parameterCount++;
 			outputNames.push_back((outputDir + matrixout));
 			outputTypes["matrixout"].push_back((outputDir + matrixout));
 		}
 
 		if (ntrees != "1")		{  
 			string tempNtrees = "--ntrees=" + ntrees; 
-			char* temp = new char[tempNtrees.length()+1];
-			*temp = '\0'; strncat(temp, tempNtrees.c_str(), tempNtrees.length());
-			cPara.push_back(temp);
+			clearcutParameters[parameterCount] = new char[tempNtrees.length()+1];
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempNtrees.c_str(), tempNtrees.length());
+			parameterCount++;
 		}
 
-		if (expblen)			{ char* temp = new char[10];  *temp = '\0'; strncat(temp, "--expblen", 9);  cPara.push_back(temp); 	}
-		if (expdist)			{ char* temp = new char[10];  *temp = '\0'; strncat(temp, "--expdist", 9);  cPara.push_back(temp);	}
-		
-		char** clearcutParameters;
-		clearcutParameters = new char*[cPara.size()];
-		for (int i = 0; i < cPara.size(); i++) {  clearcutParameters[i] = cPara[i];  }
-		int numArgs = cPara.size();
-		
+		if (expblen)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expblen", 9);  parameterCount++; 	}
+		if (expdist)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expdist", 9);  parameterCount++;	}
+        
+        errno = 0;
 		clearcut_main(numArgs, clearcutParameters); 
 		
 		//free memory
-		for(int i = 0; i < cPara.size(); i++)  {  delete[] cPara[i];  }
+		for(int i = 0; i < numArgs; i++)  {  delete[] clearcutParameters[i];  }
 		delete[] clearcutParameters; 
 		
 		if (!stdoutWanted) {	

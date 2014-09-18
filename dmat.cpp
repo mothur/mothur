@@ -569,8 +569,10 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
       if(first_state == 0) {
 	goto XIT_BAD;
       }
-
+            //fprintf(stdout, "the token buf is %s", token->buf);
+//fprintf(stdout, "the token buf is %f", errno);
       val = atof(token->buf);
+            //fprintf(stdout, "the token buf is %f", errno);
       if(errno) {
 	fprintf(stderr, "Clearcut: Distance value out-of-range.\n");
 	goto XIT_BAD;
