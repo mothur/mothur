@@ -492,15 +492,16 @@ int GetLineageCommand::readCount(){
 		
         string headers = m->getline(in); m->gobble(in);
         out << headers << endl;
+        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
         
-        string name, rest; int thisTotal;
+        string name, rest; int thisTotal; rest = "";
         while (!in.eof()) {
             
             if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
-            rest = m->getline(in); m->gobble(in);
+            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
             if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) != 0) {

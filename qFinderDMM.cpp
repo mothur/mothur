@@ -20,14 +20,14 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
         numSamples = (int)countMatrix.size();
         numOTUs = (int)countMatrix[0].size();
         
-        //cout << "before kmeans" <<endl;
+       // if (m->debug) { m->mothurOut("before kmeans\n"); }
         findkMeans();
-            //cout << "done kMeans" << endl;
+       //if (m->debug) { m->mothurOut("done kMeans\n"); }
         
         optimizeLambda();
         
         
-            //cout << "done optimizeLambda" << endl;
+         //if (m->debug) { m->mothurOut("done optimizeLambda\n"); }
         
         double change = 1.0000;
         currNLL = 0.0000;
@@ -36,12 +36,12 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
         
         while(change > 1.0e-6 && iter < 100){
             
-                    //cout << "Calc_Z: ";
+           // if (m->debug) { m->mothurOut("Calc_Z: \n"); }
             calculatePiK();
             
             optimizeLambda();
             
-                    //printf("Iter:%d\t",iter);
+              // if (m->debug) { m->mothurOut("Iter: " + toString(iter) + "\n"); }
             
             for(int i=0;i<numPartitions;i++){
                 weights[i] = 0.0000;
@@ -58,11 +58,11 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             
             currNLL = nLL;
             
-                   // printf("NLL=%.5f\tDelta=%.4e\n",currNLL, change);
+                  //  printf("NLL=%.5f\tDelta=%.4e\n",currNLL, change);
             
             iter++;
         }
-        
+        //if (m->debug) { m->mothurOut("done while loop\n"); }
         error.resize(numPartitions);
         
         logDeterminant = 0.0000;
@@ -73,12 +73,16 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             
             error[currentPartition].assign(numOTUs, 0.0000);
             
+            if (m->debug) { m->mothurOut("current partition = " + toString(currentPartition) + "\n"); }
+            
             if(currentPartition > 0){
                 logDeterminant += (2.0 * log(numSamples) - log(weights[currentPartition]));
             }
+            //if (m->debug) { m->mothurOut("before hession\n"); }
             vector<vector<double> > hessian = getHessian();
+            //if (m->debug) { m->mothurOut("after hession\n"); }
             vector<vector<double> > invHessian = l.getInverse(hessian);
-            
+            //if (m->debug) { m->mothurOut("after inverse\n"); }
             for(int i=0;i<numOTUs;i++){
                 logDeterminant += log(abs(hessian[i][i]));
                 error[currentPartition][i] = invHessian[i][i];

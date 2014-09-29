@@ -60,11 +60,13 @@ private:
     vector< vector<string> > readFile();
     vector<vector<string> > fastqFileNames;
     vector<vector<string> > rfastqFileNames;
-    string noMatchFile;
+    vector<vector<string> > fastaFileNames;
+    vector<vector<string> > qualFileNames;
+    string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;
 	
     int processFile(string inputfile, TrimOligos*&, TrimOligos*&);
-    int processFile(string inputfile, string inputReverse, TrimOligos*&, TrimOligos*&);
+    int processFile(vector<string> inputfiles, TrimOligos*&, TrimOligos*&);
 	vector<int> convertQual(string);
     vector<char> convertTable;
     bool readOligos(string oligosFile);

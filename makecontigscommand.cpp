@@ -977,7 +977,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             
             if (thisrindexfile != "") {
                 Sequence temp(inRIndex); m->gobble(inRIndex);
-                rindexBarcode.setAligned(temp.getAligned());
+                rindexBarcode.setAligned(trimOligos.reverseOligo(temp.getAligned()));
             }
             
             int barcodeIndex = 0;

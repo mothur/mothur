@@ -2169,15 +2169,16 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
 		
         string headers = m->getline(in); m->gobble(in);
         goodCountOut << headers << endl;
+        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
         
-        string name, rest; int thisTotal;
+        string name, rest; int thisTotal; rest = "";
         while (!in.eof()) {
 
 			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
             
 			in >> name; m->gobble(in); 
             in >> thisTotal; 
-            rest = m->getline(in); m->gobble(in);
+            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
             
 			it = badSeqNames.find(name);
 			

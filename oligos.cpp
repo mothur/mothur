@@ -461,6 +461,9 @@ map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
 //********************************************************************/
 string Oligos::reverseOligo(string oligo){
 	try {
+        
+        if (oligo == "NONE") { return "NONE"; }
+        
         string reverse = "";
         
         for(int i=oligo.length()-1;i>=0;i--){

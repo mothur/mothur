@@ -48,6 +48,9 @@ EstOutput Jest::getValues(vector<SharedRAbundVector*> shared) {
         //cout << data[0] << endl;
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
+        
+        if (data[0] < 0) { data[0] = 0; }
+        if (data[0] > 1) { data[0] = 1; }
 		
 		delete sharedChao;
 		delete chaoS1;

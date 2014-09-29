@@ -1889,11 +1889,13 @@ void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, doubl
 
 void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vector<double>& b){
     try {
+        //if(m->debug){   m->mothurOut("lubksb\n");    }
         double total;
         int n = (int)A.size();
         int ii = 0;
         
         for(int i=0;i<n;i++){
+            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
             if (m->control_pressed) { break; }
             int ip = index[i];
             total = b[ip];
@@ -1901,6 +1903,7 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
             
             if (ii != 0) {
                 for(int j=ii-1;j<i;j++){
+                    //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
                     total -= A[i][j] * b[j];
                 }
             }
@@ -1908,10 +1911,13 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
             b[i] = total;
         }
         for(int i=n-1;i>=0;i--){
+            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
             total = b[i];
-            for(int j=i+1;j<n;j++){ total -= A[i][j] * b[j];  }
+            for(int j=i+1;j<n;j++){ total -= A[i][j] * b[j];   }
             b[i] = total / A[i][i];
+            //if (A[i][i] == 0) { cout << "ohno!!" << endl; }
         }
+        //if(m->debug){   m->mothurOut("end lubksb\n");    }
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "lubksb");
@@ -1922,6 +1928,7 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
 
 void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float& d){
     try {
+        //if(m->debug){   m->mothurOut("ludcmp\n");    }
         double tiny = 1e-20;
         
         int n = (int)A.size();
@@ -1932,6 +1939,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         d = 1.0;
         
         for(int i=0;i<n;i++){
+            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
             float big = 0.0;
             for(int j=0;j<n;j++){   if((temp=fabs(A[i][j])) > big ) big=temp;  }
             if(big==0.0){   m->mothurOut("Singular matrix in routine ludcmp\n");    }
@@ -1940,7 +1948,9 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         
         for(int j=0;j<n;j++){
             if (m->control_pressed) { break; }
+            //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
             for(int i=0;i<j;i++){
+                //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
                 float sum = A[i][j];
                 for(int k=0;k<i;k++){   sum -= A[i][k] * A[k][j];   }
                 A[i][j] = sum;
@@ -1948,6 +1958,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
             
             float big = 0.0;
             for(int i=j;i<n;i++){
+                //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
                 float sum = A[i][j];
                 for(int k=0;k<j;k++){   sum -= A[i][k] * A[k][j];   }
                 A[i][j] = sum;
@@ -1975,6 +1986,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
                 for(int i=j+1;i<n;i++){ A[i][j] *= dum; }
             }
         }
+        //if(m->debug){   m->mothurOut("end ludcmp\n");    }
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "ludcmp");

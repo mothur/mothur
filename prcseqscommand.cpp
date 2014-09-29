@@ -1167,8 +1167,9 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
 		
         string headers = m->getline(in); m->gobble(in);
         goodCountOut << headers << endl;
+        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
         
-        string name, rest; int thisTotal, removedCount; removedCount = 0;
+        string name, rest; int thisTotal, removedCount; removedCount = 0; rest = "";
         bool wroteSomething = false;
         while (!in.eof()) {
             
@@ -1176,7 +1177,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
             
 			in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
-            rest = m->getline(in); m->gobble(in);
+            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
             
 			if (badSeqNames.count(name) != 0) { removedCount+=thisTotal; }
 			else{

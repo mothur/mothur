@@ -639,6 +639,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
             string foligo = it->second.forward;
             string roligo = it->second.reverse;
             
+            //if (m->debug) { m->mothurOut("[DEBUG]: " + toString(it->first) + " barcode pair = '" + foligo + " " + roligo + "'\n"); m->mothurOut("[DEBUG]: sequence pair = '" + rawFSequence + " " + rawRSequence + "'\n");}
+            
             if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
                 success = bdiffs + 10;	//if the sequence is shorter than the barcode then bail out
                 break;
