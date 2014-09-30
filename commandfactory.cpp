@@ -311,7 +311,7 @@ CommandFactory::CommandFactory(){
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "MPIEnabled"; 
     commands["classify.rf"]         = "classify.rf";
-    //commands["classify.svm"]        = "classify.svm";
+    commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared"; 
     commands["primer.design"]		= "primer.design";
     commands["get.dists"]           = "get.dists";

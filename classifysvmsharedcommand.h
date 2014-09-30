@@ -15,7 +15,7 @@
 #include "inputdata.h"
 #include "svm.hpp"
 
-class ClassifySvmSharedCommand : public Command, ExternalSvmTrainingInterruption {
+class ClassifySvmSharedCommand : public Command, ExternalSvmTrainingInterruption { 
 public:
   ClassifySvmSharedCommand();
   ClassifySvmSharedCommand(string);

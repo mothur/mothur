@@ -878,6 +878,12 @@ int SRACommand::readMIMarksFile(){
  group fastqfile  fastqfile
  ...
  
+ file option 5
+  
+ My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
+ ...
+ 
+ 
 */
 
 int SRACommand::readFile(map<string, vector<string> >& files){
@@ -897,7 +903,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             vector<string> pieces = m->splitWhiteSpace(line);
             
             string group = "";
-            string thisFileName1, thisFileName2; thisFileName1 = ""; thisFileName2 = "";
+            string thisFileName1, thisFileName2, findex, rindex; thisFileName1 = ""; thisFileName2 = ""; findex = ""; rindex = "";
             if (pieces.size() == 2) {
                 thisFileName1 = pieces[0];
                 thisFileName2 = pieces[1];
@@ -905,9 +911,18 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 thisFileName1 = pieces[1];
                 thisFileName2 = pieces[2];
                 string group = pieces[0];
+                if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
                 libLayout = "paired";
+            }else if (pieces.size() == 4) {
+                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                thisFileName1 = pieces[0];
+                thisFileName2 = pieces[1];
+                findex = pieces[2];
+                rindex = pieces[3];
+                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
+                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->control_pressed = true;
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
@@ -918,6 +933,16 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 
                 path = m->hasPath(thisFileName2);
                 if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
+                
+                if (findex != "") {
+                    path = m->hasPath(findex);
+                    if (path == "") {  findex = inputDir + findex;  }
+                }
+                
+                if (rindex != "") {
+                    path = m->hasPath(rindex);
+                    if (path == "") {  rindex = inputDir + rindex;  }
+                }
             }
             
             //check to make sure both are able to be opened
@@ -986,6 +1011,74 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
             }else{  in3.close();  }
            
+            int openFindex = 0;
+            if (findex != "") {
+                ifstream in4;
+                openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
+                
+                //if you can't open it, try default location
+                if (openFindex == 1) {
+                    if (m->getDefaultPath() != "") { //default path is set
+                        string tryPath = m->getDefaultPath() + m->getSimpleName(findex);
+                        m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
+                        ifstream in5;
+                        openFindex = m->openInputFile(tryPath, in5, "noerror");
+                        in5.close();
+                        findex = tryPath;
+                    }
+                }
+                
+                //if you can't open it, try output location
+                if (openFindex == 1) {
+                    if (m->getOutputDir() != "") { //default path is set
+                        string tryPath = m->getOutputDir() + m->getSimpleName(findex);
+                        m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                        ifstream in6;
+                        openFindex = m->openInputFile(tryPath, in6, "noerror");
+                        findex = tryPath;
+                        in6.close();
+                    }
+                }
+                
+                if (openFindex == 1) { //can't find it
+                    m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
+                }
+            }
+            
+            int openRindex = 0;
+            if (rindex != "") {
+                ifstream in7;
+                openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
+                
+                //if you can't open it, try default location
+                if (openRindex == 1) {
+                    if (m->getDefaultPath() != "") { //default path is set
+                        string tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
+                        m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
+                        ifstream in8;
+                        openRindex = m->openInputFile(tryPath, in8, "noerror");
+                        in8.close();
+                        rindex = tryPath;
+                    }
+                }
+                
+                //if you can't open it, try output location
+                if (openRindex == 1) {
+                    if (m->getOutputDir() != "") { //default path is set
+                        string tryPath = m->getOutputDir() + m->getSimpleName(rindex);
+                        m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                        ifstream in9;
+                        openRindex = m->openInputFile(tryPath, in9, "noerror");
+                        rindex = tryPath;
+                        in9.close();
+                    }
+                }
+                
+                if (openRindex == 1) { //can't find it
+                    m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n");
+                }
+            }
+
             
             if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
                 libLayout = "single";
@@ -1018,6 +1111,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }else {
                     files[group].push_back(thisFileName1 + " " + thisFileName2);
                 }
+            }else if ((pieces.size() == 4) && (openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) {
+                libLayout = "paired"; runParseFastqFile = true;
             }
         }
         in.close();
@@ -1025,7 +1120,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         if (runParseFastqFile) {
         
             vector<string> theseFiles;
-            string commandString = "file=" + file;
+            string commandString = "fasta=f, qfile=f, file=" + file;
             
             commandString += ", oligos=" + oligosfile;
             //add in pdiffs, bdiffs, ldiffs, sdiffs, tdiffs
