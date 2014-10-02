@@ -636,7 +636,7 @@ vector< vector< vector<string> > > MakeContigsCommand::preProcessData(unsigned l
             if (filePairsToProcess.size() != 0) {
                 for (int i = 0; i < filePairsToProcess.size(); i++) {
                     
-                    if (m->control_pressed) { for (int l = 0; l < filesToProcess.size(); l++) { for (int k = 0; k < filesToProcess[l].size(); k++) { for(int j = 0; j < filesToProcess[l][k].size(); j++) { m->mothurRemove(filesToProcess[l][k][j]); } filesToProcess[l][k].clear(); } return filesToProcess; } }
+                    if (m->control_pressed) { for (int l = 0; l < filesToProcess.size(); l++) { for (int k = 0; k < filesToProcess[l].size(); k++) { for(int j = 0; j < filesToProcess[l][k].size(); j++) { m->mothurRemove(filesToProcess[l][k][j]); } filesToProcess[l][k].clear(); }  } return filesToProcess; }
                     
                     unsigned long int thisFilesReads;
                     vector< vector<string> > files = readFastqFiles(thisFilesReads, filePairsToProcess[i][0], filePairsToProcess[i][1], filePairsToProcess[i][2], filePairsToProcess[i][3]);

@@ -412,7 +412,7 @@ bool Consensus::isSubset(vector<string> bigset, vector<string> subset) {
 //**********************************************************************************************************************
 int Consensus::findSpot(string node) {
 	try {
-		int spot;
+		int spot = 0;
 		
 		//check if each guy in suset is also in bigset
 		for (int i = 0; i < treeSet.size(); i++) {

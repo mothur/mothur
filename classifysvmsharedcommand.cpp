@@ -6,7 +6,6 @@
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
 
-#include <fstream>
 
 #include "classifysvmsharedcommand.h"
 

@@ -498,7 +498,7 @@ map<int, double> LefseCommand::runKruskalWallis(vector<SharedRAbundFloatVector*>
             }
             
             double pValue = 0.0;
-            double H = linear.calcKruskalWallis(values, pValue);
+            linear.calcKruskalWallis(values, pValue);
              
             if (pValue < anovaAlpha) {  significantOtuLabels[i] = pValue;  }
         }

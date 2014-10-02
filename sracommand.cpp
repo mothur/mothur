@@ -58,7 +58,7 @@ string SRACommand::getHelpString(){
         helpString += "The project parameter is used to provide your project file.\n";
         helpString += "The oligos parameter is used to provide an oligos file to parse your sff or fastq file by. It is required and must contain barcodes and primers, or you must provide a file option. \n";
         helpString += "The mimark parameter is used to provide your mimarks file.  You can create the template for this file using the get.mimarkspackage command.\n";
-		helpString += "The file parameter is used to provide a file containing a list of individual fastq or sff files or paired fastq files with a group assignment. File lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. If you are running the command with a 2 column file and ffastq and rfastq you must provide an oligos file or mothur will assume your rfastq file is an oligos file. \n";
+		helpString += "The file parameter is used to provide a file containing a list of individual fastq or sff files or paired fastq files with a group assignment. File lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file. \n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -84,7 +84,6 @@ string SRACommand::getHelpString(){
 string SRACommand::getOutputPattern(string type) {
     try {
         string pattern = "";
-        
         if (type == "xml") {  pattern = "[filename],xml"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
@@ -321,7 +320,7 @@ int SRACommand::execute(){
         
         sanityCheckMiMarksGroups();
         
-        cout << "files by sample size = " << filesBySample.size() << endl;
+        //cout << "files by sample size = " << filesBySample.size() << endl;
         //checks groups and files returned from parse - removes any groups that did not get reads assigned to them, orders files.
         checkGroups(filesBySample);
         
@@ -436,6 +435,8 @@ int SRACommand::execute(){
             
             vector<string> thisGroupsFiles = filesBySample[Groups[i]];
             
+            //cout << Groups[i] << '\t' << thisGroupsFiles.size() << endl;
+            
             for (int j = 0; j < thisGroupsFiles.size(); j++) {
                 string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + Groups[i];
                 
@@ -448,93 +449,50 @@ int SRACommand::execute(){
                     out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[0]) + "\">\n";
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
+                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[1]) + "\">\n";
+                    out << "\t\t\t\t<DataType>generic-data</DataType> \n";
+                    out << "\t\t\t</File>\n";
+                    
                     //attributes
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    int readOrder = 0;
                     if (linkers.size() != 0) {
                         string linkerString = "";
                         for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
                     }
                     vector<string> thisGroupsBarcodes = Group2Barcode[Groups[i]];
                     if (thisGroupsBarcodes.size() != 0) {
                         string barcodeString = "";
                         for (int k = 0; k < thisGroupsBarcodes.size(); k++) {
                             vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcodes[k], thisBarcodes, '.');
-                            barcodeString += thisBarcodes[0] + ";"; //forward barcode
+                            if (thisBarcodes[0] != "NONE") { barcodeString += thisBarcodes[0] + ";"; }
+                            if (thisBarcodes[1] != "NONE") { barcodeString += thisBarcodes[1] + ";"; }//forward barcode + reverse barcode
                         }
                         barcodeString = barcodeString.substr(0, barcodeString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
                     }
                     if (spacers.size() != 0) {
                         string spacerString = "";
                         for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
                     }
                     vector<string> thisGroupsPrimers = Group2Primer[Groups[i]];
                     if (thisGroupsPrimers.size() != 0) {
                         string primerString = "";
                         for (int k = 0; k < thisGroupsPrimers.size(); k++) {
                             vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimers[k], thisPrimers, '.');
-                            primerString += thisPrimers[0] + ";"; //forward primer
+                            if (thisPrimers[0] != "") { primerString += thisPrimers[0] + ";"; }
+                            if (thisPrimers[1] != "") { primerString += thisPrimers[1] + ";"; }
                         }
-                        primerString = primerString.substr(0, primerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
-                        readOrder++;
-                    }
-                    out << "\t\t\t<Attribute name=\"read_type\">forward</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
-
-                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[1]) + "\">\n";
-                    out << "\t\t\t\t<DataType>generic-data</DataType> \n";
-                    out << "\t\t\t</File>\n";
-                    out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
-                    readOrder = 0;
-                    if (linkers.size() != 0) {
-                        string linkerString = "";
-                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
-                        readOrder++;
-                    }
-                    thisGroupsBarcodes = Group2Barcode[Groups[i]];
-                    if (thisGroupsBarcodes.size() != 0) {
-                        string barcodeString = "";
-                        for (int k = 0; k < thisGroupsBarcodes.size(); k++) {
-                            vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcodes[k], thisBarcodes, '.');
-                            barcodeString += thisBarcodes[1] + ";"; //reverse barcode
+                        if (primerString != "") {
+                            primerString = primerString.substr(0, primerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Primer\">" + primerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
                         }
-                        barcodeString = barcodeString.substr(0, barcodeString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
-                        readOrder++;
                     }
-                    if (spacers.size() != 0) {
-                        string spacerString = "";
-                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
-                        readOrder++;
-                    }
-                    thisGroupsPrimers = Group2Primer[Groups[i]];
-                    if (thisGroupsPrimers.size() != 0) {
-                        string primerString = "";
-                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {
-                            vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimers[k], thisPrimers, '.');
-                            primerString += thisPrimers[1] + ";"; //reverse primer
-                        }
-                        primerString = primerString.substr(0, primerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
-                        readOrder++;
-                    }
-
-                    out << "\t\t\t<Attribute name=\"read_type\">reverse</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
@@ -550,35 +508,39 @@ int SRACommand::execute(){
                     //attributes
                     out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
                     //linkers -> barcodes -> spacers -> primers
-                    //<Attribute read_order="0" max_mismatch="1" name="BarCode">ATCTTAC;GGATCA</Attribute>
-                    int readOrder = 0;
+                   
                     if (linkers.size() != 0) {
                         string linkerString = "";
                         for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"0\" max_mismatch=\"" + toString(ldiffs) + "\" name=\"Linker\">" + linkerString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
                     }
                     vector<string> thisGroupsBarcodes = Group2Barcode[Groups[i]];
                     if (thisGroupsBarcodes.size() != 0) {
                         string barcodeString = "";
                         for (int k = 0; k < thisGroupsBarcodes.size(); k++) {  barcodeString += thisGroupsBarcodes[k] + ";"; }  barcodeString = barcodeString.substr(0, barcodeString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(bdiffs) + "\" name=\"BarCode\">" + barcodeString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
                     }
                     if (spacers.size() != 0) {
                         string spacerString = "";
                         for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(sdiffs) + "\" name=\"Adapter\">" + spacerString + "</Attribute>\n";
-                        readOrder++;
+                        out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
                     }
                     vector<string> thisGroupsPrimers = Group2Primer[Groups[i]];
                     if (thisGroupsPrimers.size() != 0) {
                         string primerString = "";
-                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {  primerString += thisGroupsPrimers[k] + ";"; }  primerString = primerString.substr(0, primerString.length()-1);
-                        out << "\t\t\t<Attribute read_order=\"" + toString(readOrder) + "\" max_mismatch=\"" + toString(pdiffs) + "\" name=\"Primer\">" + primerString + "</Attribute>\n";
-                        readOrder++;
+                        for (int k = 0; k < thisGroupsPrimers.size(); k++) {
+                            if (thisGroupsPrimers[k] != "") {   primerString += thisGroupsPrimers[k] + ";";  }
+                        }
+                        if (primerString != "") {
+                            primerString = primerString.substr(0, primerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Primer\">" + primerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
+                        }
                     }
-                    out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
+                    //out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
@@ -626,7 +588,7 @@ int SRACommand::execute(){
 		
     }
 	catch(exception& e) {
-		m->errorOut(e, "SRACommand", "SRACommand");
+		m->errorOut(e, "SRACommand", "execute");
 		exit(1);
 	}
 }
@@ -709,7 +671,7 @@ int SRACommand::readMIMarksFile(){
         requiredFieldsForPackage.push_back("feature"); requiredFieldsForPackage.push_back("material");
         requiredFieldsForPackage.push_back("geo_loc_name"); requiredFieldsForPackage.push_back("lat_lon");
         requiredFieldsForPackage.push_back("seq_methods"); requiredFieldsForPackage.push_back("title");
-        vector<string> chooseAtLeastOneForPackage;
+        //vector<string> chooseAtLeastOneForPackage;
         
         ifstream in;
         m->openInputFile(mimarksfile, in);
@@ -740,7 +702,7 @@ int SRACommand::readMIMarksFile(){
         //remove * from required's
         for (int i = 0; i < headers.size(); i++) {
             if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); }
-            if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); chooseAtLeastOneForPackage.push_back(headers[i]); }  //secondary condition
+            //if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); chooseAtLeastOneForPackage.push_back(headers[i]); }  //secondary condition
             if (m->debug) { m->mothurOut("[DEBUG]: " + headers[i] + "\n"); }
         }
         
@@ -748,11 +710,11 @@ int SRACommand::readMIMarksFile(){
         
         //check to make sure package has all its required parts
         //MIMARKS.specimen.water.3.0
-        if (packageType == "MIMARKS.specimen.air.3.0") {   requiredFieldsForPackage.push_back("altitude");  }
-        else if ((packageType == "MIMARKS.specimen.host-associated.3.0") || (packageType == "MIMARKS.specimen.human-associated.3.0") || (packageType == "MIMARKS.specimen.human-gut.3.0") || (packageType == "MIMARKS.specimen.human-oral.3.0") || (packageType == "MIMARKS.specimen.human-skin.3.0") || (packageType == "MIMARKS.specimen.human-vaginal.3.0") || (packageType == "MIMARKS.specimen.plant-associated.3.0")) {  requiredFieldsForPackage.push_back("host");  }
-        else if ((packageType == "MIMARKS.specimen.microbial.3.0") || (packageType == "MIMARKS.specimen.sediment.3.0") || (packageType == "soil")) {   requiredFieldsForPackage.push_back("depth");  requiredFieldsForPackage.push_back("elev"); }
-        else if (packageType == "MIMARKS.specimen.water.3.0") {   requiredFieldsForPackage.push_back("depth");  }
-        else if ((packageType == "MIMARKS.specimen.miscellaneous.3.0") || (packageType == "wastewater")) { }
+        if (packageType == "MIMARKS.specimen.air.4.0") {   requiredFieldsForPackage.push_back("altitude");  }
+        else if ((packageType == "MIMARKS.specimen.host-associated.4.0") || (packageType == "MIMARKS.specimen.human-associated.4.0") || (packageType == "MIMARKS.specimen.human-gut.4.0") || (packageType == "MIMARKS.specimen.human-oral.4.0") || (packageType == "MIMARKS.specimen.human-skin.4.0") || (packageType == "MIMARKS.specimen.human-vaginal.4.0") || (packageType == "MIMARKS.specimen.plant-associated.4.0")) {  requiredFieldsForPackage.push_back("host");  }
+        else if ((packageType == "MIMARKS.specimen.microbial.4.0") || (packageType == "MIMARKS.specimen.sediment.4.0") || (packageType == "soil")) {   requiredFieldsForPackage.push_back("depth");  requiredFieldsForPackage.push_back("elev"); }
+        else if (packageType == "MIMARKS.specimen.water.4.0") {   requiredFieldsForPackage.push_back("depth");  }
+        else if ((packageType == "MIMARKS.specimen.miscellaneous.4.0") || (packageType == "wastewater")) { }
         else {
             m->mothurOut("[ERROR]: unknown package " + packageType + ", please correct.\n"); m->control_pressed = true; in.close(); return 0;
         }
@@ -761,16 +723,18 @@ int SRACommand::readMIMarksFile(){
             string requiredFields = "";
             for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) { requiredFields += requiredFieldsForPackage[i] + ", "; } requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
             m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".\n"); m->control_pressed = true; in.close(); return 0;
+            
+            
         }
         
-        if (m->debug) {  m->mothurOut("[DEBUG]: chooseAtLeastOneForPackage.size() = " + toString(chooseAtLeastOneForPackage.size()) + "\n");   }
+        //if (m->debug) {  m->mothurOut("[DEBUG]: chooseAtLeastOneForPackage.size() = " + toString(chooseAtLeastOneForPackage.size()) + "\n");   }
         
-        if (!m->inUsersGroups(chooseAtLeastOneForPackage, headers)){ //returns true if any of the choose at least ones are in headers
-            string requiredFields = "";
-            for (int i = 0; i < chooseAtLeastOneForPackage.size()-1; i++) { requiredFields += chooseAtLeastOneForPackage[i] + ", "; cout << chooseAtLeastOneForPackage[i] << endl; }
-            if (chooseAtLeastOneForPackage.size() < 1) { requiredFields += chooseAtLeastOneForPackage[chooseAtLeastOneForPackage.size()-1]; }
-            m->mothurOut("[ERROR]: missing a choose at least one fields for the package, please correct. These are marked with '**'. Required fields are " + requiredFields + ".\n"); m->control_pressed = true; in.close(); return 0;
-        }
+        //if (!m->inUsersGroups(chooseAtLeastOneForPackage, headers)){ //returns true if any of the choose at least ones are in headers
+            //string requiredFields = "";
+            //for (int i = 0; i < chooseAtLeastOneForPackage.size()-1; i++) { requiredFields += chooseAtLeastOneForPackage[i] + ", "; cout << chooseAtLeastOneForPackage[i] << endl; }
+            //if (chooseAtLeastOneForPackage.size() < 1) { requiredFields += chooseAtLeastOneForPackage[chooseAtLeastOneForPackage.size()-1]; }
+            //m->mothurOut("[ERROR]: missing a choose at least one fields for the package, please correct. These are marked with '**'. Required fields are " + requiredFields + ".\n"); m->control_pressed = true; in.close(); return 0;
+       // }
         
         map<string, bool> allNA;  for (int i = 1; i < headers.size(); i++) {  allNA[headers[i]] = true; }
         while(!in.eof()) {
@@ -778,7 +742,7 @@ int SRACommand::readMIMarksFile(){
             if (m->control_pressed) { break; }
             
             temp = m->getline(in);  m->gobble(in);
-            
+            cout << temp << endl;
             if (m->debug) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             string original = temp;
@@ -894,6 +858,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         
         ifstream in;
         m->openInputFile(file, in);
+        
+        int fileOption = 0;
         
         while(!in.eof()) {
             
@@ -1086,6 +1052,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     //process pair
                     int pos = thisFileName1.find(".sff");
                     if (pos != string::npos) {//these files are sff files
+                        fileOption = 1;
                         isSFF = true;
                         sfffile = thisFileName1; oligosfile = thisFileName2;
                         if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
@@ -1094,6 +1061,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         parseSffFile(files);
                         if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + sfffile + "\n"); }
                     }else{
+                        fileOption = 2;
                         isSFF = false;
                         fastqfile = thisFileName1; oligosfile = thisFileName2;
                         if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
@@ -1102,7 +1070,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         parseFastqFile(files);
                         if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
                     }
-                }else {  runParseFastqFile = true;  libLayout = "paired";}
+                }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
                 libLayout = "paired";
                 map<string, vector<string> >::iterator it = files.find(group);
@@ -1111,8 +1079,9 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }else {
                     files[group].push_back(thisFileName1 + " " + thisFileName2);
                 }
+                fileOption = 4;
             }else if ((pieces.size() == 4) && (openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) {
-                libLayout = "paired"; runParseFastqFile = true;
+                libLayout = "paired"; runParseFastqFile = true; fileOption = 5;
             }
         }
         in.close();
@@ -1151,6 +1120,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
             
             mapGroupToFile(files, theseFiles);
+            
+            if (fileOption == 5) {  fixMap(files); }
         }
         
         inputfile = file;
@@ -1266,7 +1237,7 @@ int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<strin
             for (int j = 0; j < theseFiles.size(); j++) {
                 
                 string tempName = m->getSimpleName(theseFiles[j]);
-                if ((tempName == "GZGO5KL01.F006D146.sff") || (tempName == "G3BMWHG01.F008D021.sff") || (tempName == "GO2JXTW01.M002D125.sff") || (tempName == "GO5715J01.M003D125.sff")) { cout << Groups[i] << '\t' << theseFiles[j] << endl; }
+                //if ((tempName == "GZGO5KL01.F006D146.sff") || (tempName == "G3BMWHG01.F008D021.sff") || (tempName == "GO2JXTW01.M002D125.sff") || (tempName == "GO5715J01.M003D125.sff")) { cout << Groups[i] << '\t' << theseFiles[j] << endl; }
                 //cout << i << '\t' << j << '\t' << Groups[i] << '\t' << theseFiles[j] << endl;
                 int pos = theseFiles[j].find(Groups[i]);
                 if (pos != string::npos) { //you have a potential match, make sure you dont have a case of partial name
@@ -1289,13 +1260,61 @@ int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<strin
 		exit(1);
 	}
 }
-
+//***************************************************************************************************************
+//fixes map to files for index files parse
+int SRACommand::fixMap(map<string, vector<string> >& files){
+    try {
+        for (map<string, vector<string> >::iterator it = files.begin(); it != files.end(); it++) {
+            
+            vector<string> theseFiles = it->second;
+            
+            if (theseFiles.size() != 2) { m->mothurOut("[ERROR]: unexpected number of files, quitting. \n."); m->control_pressed = true; }
+            
+            if (m->control_pressed) { return 0; }
+            
+            vector<string> temp; temp.resize(1, "");
+            
+            for (int j = 0; j < theseFiles.size(); j++) {
+                
+                string tempName = m->getSimpleName(theseFiles[j]);
+                int pos = theseFiles[j].find("forward.fastq");
+                if (pos != string::npos) { //you have a potential match for the forward file
+                    if (temp[0] == "") {
+                        temp[0] = theseFiles[j];
+                    }else {
+                        string reverse = temp[0];
+                        temp[0] = theseFiles[j] + " " + reverse;
+                    }
+                }else {
+                    pos = theseFiles[j].find("reverse.fastq");
+                    if (pos != string::npos) { //you have a potential match for the reverse file
+                        if (temp[0] == "") {
+                            temp[0] = theseFiles[j];
+                        }else {
+                            temp[0] += " " + theseFiles[j];
+                        }
+                    }else {
+                        m->mothurOut("[ERROR]: unexpected parsing results, quitting. \n."); m->control_pressed = true;  //shouldn't get here unless the fastq.info changes the format of the output filenames???
+                    }
+                }
+            }
+            
+            it->second = temp;
+        }
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SRACommand", "mapGroupToFile");
+        exit(1);
+    }
+}
 //***************************************************************************************************************
 //checks groups and files returned from parse - removes any groups that did not get reads assigned to them, orders files.
 int SRACommand::checkGroups(map<string, vector<string> >& files){
 	try {
         vector<string> newGroups;
         for (int i = 0; i < Groups.size(); i++) {
+            if (m->debug) { m->mothurOut("[DEBUG]: group " + toString(i) + " = " + Groups[i] + "\n"); }
             
             map<string, vector<string> >::iterator it = files.find(Groups[i]);
              //no files for this group, remove it
@@ -1304,7 +1323,7 @@ int SRACommand::checkGroups(map<string, vector<string> >& files){
         }
         
         Groups = newGroups;
-        
+
         return 0;
     }
 	catch(exception& e) {

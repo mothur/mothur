@@ -74,7 +74,7 @@ string ParseFastaQCommand::getOutputPattern(string type) {
         
         if (type == "fasta") {  pattern = "[filename],fasta-[filename],[group],[tag],fasta"; }
         else if (type == "qfile") {  pattern = "[filename],qual-[filename],[group],[tag],qual"; }
-        else if (type == "fastq") {  pattern = "[filename],[group],fastq-[filename],[group],[tag],fastq"; }
+        else if (type == "fastq") {  pattern = "[filename],[group],fastq-[filename],[group],[tag],fastq"; } //make.sra assumes the [filename],[group],[tag],fastq format for the 4 column file option. If this changes, may have to modify fixMap function. 
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -315,6 +315,8 @@ int ParseFastaQCommand::execute(){
                                 m->mothurRemove(fastqFileNames[i][j]);
                                 namesToRemove.insert(fastqFileNames[i][j]);
                                 
+                                if (pairedOligos) { m->mothurRemove(rfastqFileNames[i][j]); namesToRemove.insert(rfastqFileNames[i][j]); }
+                                
                                 if(fasta){
                                     m->mothurRemove(fastaFileNames[i][j]);
                                     namesToRemove.insert(fastaFileNames[i][j]);
@@ -333,7 +335,6 @@ int ParseFastaQCommand::execute(){
             //remove names for outputFileNames, just cleans up the output
             for(int i = 0; i < outputNames.size(); i++) {
                 if (namesToRemove.count(outputNames[i]) != 0) {
-                    //cout << "erasing " << i << '\t' << outputNames[i] << endl;
                     outputNames.erase(outputNames.begin()+i);
                     i--;
                 }else { outputTypes["fastq"].push_back(outputNames[i]); }

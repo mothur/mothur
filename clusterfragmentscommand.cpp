@@ -332,7 +332,7 @@ bool ClusterFragmentsCommand::isFragment(string seq1, string seq2){
 		else { //try aligning and see if you can find it
 			
 			//find number of acceptable differences for this sequence fragment
-			int totalDiffs;
+			int totalDiffs = 0;
 			if (diffs == 0) { //you didnt set diffs you want a percentage
 				totalDiffs = floor((seq2.length() * (percent / 100.0)));
 			}else if (percent == 0) { //you didn't set percent you want diffs

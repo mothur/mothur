@@ -202,7 +202,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
-		int total = num;
+		//int total = num;
 					
 		for (int h = start; h < (start+num); h++) {
 				
