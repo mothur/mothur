@@ -261,19 +261,14 @@ void ListVector::clear(){
 void ListVector::printHeaders(ostream& output){
 	try {
 		string snumBins = toString(numBins);
-		output << "label\tnumOtus\t";
+        string tagHeader = "Otu";
+        if (m->sharedHeaderMode == "tax") { tagHeader = "PhyloType"; }
+		output << "label\tnum" + tagHeader + "s\t";
         
         vector<string> theseLabels = getLabels();
         
-        map<string, string> labelOtu;
-        for (int i = 0; i < data.size(); i ++) { data[i] = theseLabels[i]; }
-        
-        vector<string> hold = data;
-        sort(hold.begin(), hold.end(), abundNamesSort);
-        
-        
-        for(int i = 0; i < hold.size(); i++) { //print original label for sorted by abundance otu
-            output << labelOtu[hold[i]] << '\t';
+        for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
+            output << theseLabels[i] << '\t';
         }
 					
         output << endl;

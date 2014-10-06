@@ -32,13 +32,10 @@ public:
   
   void help() { m->mothurOut(getHelpString()); }
 
-  void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
-  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
-
   bool interruptTraining() { return m->control_pressed; }
 
-  std::vector<double>& getSmocList() { return smocList; }
-  const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
+  //std::vector<double>& getSmocList() { return smocList; }
+  //const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
 
 private:
     bool abort;
@@ -53,6 +50,9 @@ private:
     bool useTiming;
 
     GroupMap designMap;
+    
+    void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
+    void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
 
     // mode is either "rfe" or "classify"
     string mode;
