@@ -33,6 +33,7 @@ public:
   
   void help() { m->mothurOut(getHelpString()); }
 
+<<<<<<< HEAD
   void readSharedAndDesignFiles(const string&, const string&, LabeledObservationVector&, FeatureVector&);
   void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
 
@@ -40,6 +41,12 @@ public:
 
   vector<double>& getSmocList() { return smocList; }
   const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
+=======
+  bool interruptTraining() { return m->control_pressed; }
+
+  //std::vector<double>& getSmocList() { return smocList; }
+  //const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
+>>>>>>> FETCH_HEAD
 
   bool interruptTraining() { return m->control_pressed; }
 
