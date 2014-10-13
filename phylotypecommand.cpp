@@ -303,11 +303,7 @@ int PhylotypeCommand::execute(){
 				}	
 				
 				//print listvector
-                if (!m->printedListHeaders) { vector<string> binLabels = list.getLabels(); outList << "label\tnumOtus\t";
-                    for (int i = 0; i < list.getNumBins(); i++) { outList << binLabels[i] << '\t'; } outList << endl;
-                    m->printedListHeaders = true;
-                }
-                
+                if (!m->printedListHeaders) { list.printHeaders(outList); }
                 list.print(outList);
                 
                 if (countfile == "") {
