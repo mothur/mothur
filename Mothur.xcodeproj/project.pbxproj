@@ -2496,23 +2496,23 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
+
+
 				ARCHS = "$(ARCHS_STANDARD)";
-=======
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
+
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
@@ -2541,23 +2541,23 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
+
+
 				ARCHS = "$(ARCHS_STANDARD)";
-=======
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
-=======
+
+
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
->>>>>>> FETCH_HEAD
+
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = NO;
