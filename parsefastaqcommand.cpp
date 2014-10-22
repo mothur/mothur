@@ -871,12 +871,13 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
             else{ currentSeqsDiffs += success;  }
         }
         
-        if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
-        
         if(numRPrimers != 0){
             success = trimOligos->stripReverse(currSeq, currQual);
-            if(!success)				{	trashCode += 'r';	}
+            if(success > pdiffs)		{	trashCode += 'r';	}
+            else{ currentSeqsDiffs += success;  }
         }
+        
+        if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
         
         if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
             int thisSuccess = 0;

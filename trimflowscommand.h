@@ -204,9 +204,10 @@ static DWORD WINAPI MyTrimFlowThreadFunction(LPVOID lpParam){
 			
 			if(pDataArray->revPrimer.size() != 0){
 				success = trimOligos.stripReverse(currSeq);
-				if(!success)				{	trashCode += 'r';	}
+                if(success > pdiffs)		{	trashCode += 'r';	}
+                else{ currentSeqsDiffs += success;  }
 			}
-			
+ 
 			if(trashCode.length() == 0){
 				
 				flowData.printFlows(trimFlowFile);

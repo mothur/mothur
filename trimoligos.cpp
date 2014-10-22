@@ -2133,10 +2133,10 @@ int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group, boo
     }
 }
 //******************************************************************/
-bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
+int TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
     try {
         string rawSequence = seq.getUnaligned();
-        bool success = 0;	//guilty until proven innocent
+        int success = pdiffs + 10;	//guilty until proven innocent
         int maxRevPrimerLength = revPrimer[0].length();
         
         for(int i=0;i<revPrimer.size();i++){
@@ -2144,7 +2144,7 @@ bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
             if (oligo.length() > maxRevPrimerLength) { maxRevPrimerLength = oligo.length(); }
             
             if(rawSequence.length() < oligo.length()){
-                success = 0;
+                success = pdiffs + 1;
                 break;
             }
             
@@ -2153,7 +2153,7 @@ bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
                 if(qual.getName() != ""){
                     qual.trimQScores(-1, rawSequence.length()-oligo.length());
                 }
-                success = 1;
+                success = 0;
                 break;
             }
         }	
@@ -2236,11 +2236,11 @@ bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
     }
 }
 //******************************************************************/
-bool TrimOligos::stripReverse(Sequence& seq){
+int TrimOligos::stripReverse(Sequence& seq){
     try {
         
         string rawSequence = seq.getUnaligned();
-        bool success = 0;	//guilty until proven innocent
+        bool success = pdiffs + 10;	//guilty until proven innocent
         int maxRevPrimerLength = revPrimer[0].length();
         
         for(int i=0;i<revPrimer.size();i++){
@@ -2249,13 +2249,13 @@ bool TrimOligos::stripReverse(Sequence& seq){
             if (oligo.length() > maxRevPrimerLength) { maxRevPrimerLength = oligo.length(); }
             
             if(rawSequence.length() < oligo.length()){
-                success = 0;
+                success = pdiffs + 10;
                 break;
             }
             
             if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
                 seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
-                success = 1;
+                success = 0;
                 break;
             }
         }	

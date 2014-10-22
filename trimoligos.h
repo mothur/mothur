@@ -34,8 +34,8 @@ class TrimOligos {
         int stripForward(Sequence&, Sequence&, QualityScores&, QualityScores&, int&);
         int stripForward(Sequence&, Sequence&, int&);
 	
-		bool stripReverse(Sequence&);
-		bool stripReverse(Sequence&, QualityScores&);
+		int stripReverse(Sequence&);
+		int stripReverse(Sequence&, QualityScores&);
     
         bool stripLinker(Sequence&);
         bool stripLinker(Sequence&, QualityScores&);

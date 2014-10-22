@@ -493,12 +493,13 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				else{ currentSeqDiffs += success;  }
 			}
 			
-			if (currentSeqDiffs > tdiffs)	{	trashCode += 't';   }
-			
 			if(numRPrimers != 0){
 				success = trimOligos->stripReverse(currSeq);
-				if(!success)				{	trashCode += 'r';	}
+                if(success > pdiffs)		{	trashCode += 'r';	}
+                else{ currentSeqDiffs += success;  }
 			}
+            
+            if (currentSeqDiffs > tdiffs)	{	trashCode += 't';   }
             
 			if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
                 int thisSuccess = 0;

@@ -358,7 +358,8 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				
 				if(pDataArray->numRPrimers != 0){
 					success = trimOligos->stripReverse(currSeq, currQual);
-					if(!success)				{	trashCode += 'r';	}
+                    if(success > pdiffs)		{	trashCode += 'r';	}
+                    else{ currentSeqsDiffs += success;  }
 				}
                 
                 if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
