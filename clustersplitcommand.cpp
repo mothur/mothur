@@ -473,10 +473,11 @@ int ClusterSplitCommand::execute(){
                 estart = time(NULL);
                 
                 if (!runCluster) { 
-                    printFile(singletonName, distName);
+                    string filename = printFile(singletonName, distName);
                     
                     m->mothurOutEndLine();
                     m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+                    m->mothurOutEndLine(); m->mothurOut(filename); m->mothurOutEndLine();
                     for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
                     m->mothurOutEndLine();
                     return 0;
@@ -1529,7 +1530,7 @@ int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbund
     
 }
 //**********************************************************************************************************************
-int ClusterSplitCommand::printFile(string singleton, vector< map<string, string> >& distName){
+string ClusterSplitCommand::printFile(string singleton, vector< map<string, string> >& distName){
     try {
         ofstream out;
         map<string, string> variables;
@@ -1538,6 +1539,7 @@ int ClusterSplitCommand::printFile(string singleton, vector< map<string, string>
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(distfile));
 		string outputFileName = getOutputFileName("file", variables);
         m->openOutputFile(outputFileName, out);
+        outputTypes["file"].push_back(outputFileName); outputNames.push_back(outputFileName);
         
         out << singleton << endl;
         if (namefile != "") { out << "name" << endl; }
@@ -1547,7 +1549,7 @@ int ClusterSplitCommand::printFile(string singleton, vector< map<string, string>
         for (int i = 0; i < distName.size(); i++) {    out << distName[i].begin()->first << '\t' << distName[i].begin()->second << endl;	}
         out.close();
         
-        return 0;
+        return outputFileName;
     }
     catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "printFile");

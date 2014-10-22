@@ -63,6 +63,7 @@ string SharedCommand::getOutputPattern(string type) {
         if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
         else if (type == "rabund") {  pattern = "[filename],[group],rabund"; } 
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
+        else if (type == "map") {  pattern = "[filename],map"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -82,6 +83,7 @@ SharedCommand::SharedCommand(){
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
+        outputTypes["map"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedCommand", "SharedCommand");
@@ -155,6 +157,7 @@ SharedCommand::SharedCommand(string option)  {
              outputTypes["rabund"] = tempOutNames;
              outputTypes["shared"] = tempOutNames;
              outputTypes["group"] = tempOutNames;
+             outputTypes["map"] = tempOutNames;
 			 
 			 //if the user changes the output directory command factory will send this info to us in the output parameter 
 			 outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -361,13 +364,14 @@ int SharedCommand::createSharedFromBiom() {
         }
         in.close();
         
+        string biomType;
         map<string, string>::iterator it;
         it = fileLines.find("type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a type provided.\n"); }
         else {
             string thisLine = it->second;
-            string type = getTag(thisLine);
-            if ((type != "OTU table") && (type != "OTUtable")) { m->mothurOut("[ERROR]: " + type + " is not a valid biom type for mothur. Only type allowed is OTU table.\n"); m->control_pressed = true;  }
+            biomType = getTag(thisLine);
+            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->control_pressed = true;  }
         }
         
         if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
@@ -397,7 +401,31 @@ int SharedCommand::createSharedFromBiom() {
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a rows provided.\n"); }
         else {
             string thisLine = it->second;
-            otuNames = readRows(thisLine, numRows);  
+            if ((biomType == "Taxon table") || (biomType == "Taxontable")) {
+                string mapFilename = getOutputFileName("map",variables);
+                outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
+                ofstream outMap;
+                m->openOutputFile(mapFilename, outMap);
+                
+                vector<string> taxonomies = readRows(thisLine, numRows);
+                
+                string snumBins = toString(numRows);
+                for (int i = 0; i < numRows; i++) {
+                    
+                    //if there is a bin label use it otherwise make one
+                    string binLabel = "OTU";
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    
+                    otuNames.push_back(binLabel);
+                    outMap << otuNames[i] << '\t' << taxonomies[i] << endl;
+                }
+                outMap.close();
+            }else{  otuNames = readRows(thisLine, numRows); }
         }
         
         if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
@@ -406,8 +434,9 @@ int SharedCommand::createSharedFromBiom() {
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
         else {
             string thisLine = it->second;
+            
             //read sample names
-            groupNames = readRows(thisLine, numCols); 
+            groupNames = readRows(thisLine, numCols);
             
             //if users selected groups, then remove the groups not wanted.
             SharedUtil util;
@@ -486,7 +515,7 @@ vector<SharedRAbundVector*> SharedCommand::readData(string matrixFormat, string 
         //creates new sharedRAbunds
         for (int i = 0; i < groupNames.size(); i++) {
             SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
-            temp->setLabel("dummy");
+            temp->setLabel("userLabel");
             temp->setGroup(groupNames[i]);
             lookup.push_back(temp);
         }
@@ -666,7 +695,16 @@ vector<string> SharedCommand::readRows(string line, int& numRows) {
          {"id":"Otu01", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Porphyromonadaceae", "unclassified"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
          {"id":"Otu02", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Rikenellaceae", "Alistipes"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
          ...
+         
+         "rows":[{"id": "k__Archaea;p__Euryarchaeota;c__Methanobacteria;o__Methanobacteriales;f__Methanobacteriaceae", "metadata": null},
+         {"id": "k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae", "metadata": null}
+         ....
+         
+         make look like above
+         
+         
          ],*/
+        
         vector<string> names;
         int countOpenBrace = 0;
         int countClosedBrace = 0;
@@ -687,7 +725,7 @@ vector<string> SharedCommand::readRows(string line, int& numRows) {
             
             //you have reached the end of the rows info
             if ((countOpenBrace == countClosedBrace) && (countClosedBrace != 0)) { end = true; break; }
-            if ((openParen == closeParen) && (closeParen != 0)) { //process row 
+            if ((openParen == closeParen) && (closeParen != 0)) { //process row
                 numRows++;
                 vector<string> items;
                 m->splitAtChar(nextRow, items, ','); //parse by comma, will return junk for metadata but we aren't using that anyway
@@ -710,6 +748,7 @@ vector<string> SharedCommand::readRows(string line, int& numRows) {
                 closeParen = 0;
             }
         }
+        
         
         return names;
     }

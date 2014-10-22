@@ -744,7 +744,8 @@ string MothurOut::getSimpleName(string longName){
 
 int MothurOut::getRandomIndex(int highest){
 	try {
-		
+        if (highest == 0) { return 0; }
+        
 		int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
 		
 		return random;

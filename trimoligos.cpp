@@ -218,7 +218,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
                 int olength = prim.length();
                 if (rawSequence.length() < olength) {} //ignore primers too long for this seq
                 else{
-                    for (int j = 0; j < rawSequence.length()-olength; j++){
+                    for (int j = 0; j < rawSequence.length()-(olength+pdiffs); j++){
                         
                         string oligo = it->first;
                         
@@ -272,10 +272,14 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
     try {
         
         string rawSequence = seq.getUnaligned();
+        int maxRevPrimerLength = revPrimer[0].length();
+        bool success = false;
         
         for(int i=0;i<revPrimer.size();i++){
             string oligo = revPrimer[i];
             if(rawSequence.length() < oligo.length()) { break; }
+            
+            if (oligo.length() > maxRevPrimerLength) { maxRevPrimerLength = oligo.length(); }
             
             //search for primer
             int olength = oligo.length();
@@ -286,14 +290,74 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
                 if(compareDNASeq(oligo, rawChunk)) {
                     primerStart = j;
                     primerEnd = primerStart + olength;
+                    //cout << primerStart << '\t' << primerEnd << endl;
                     return true;
                 }
                 
             }
         }
+        //cout << maxRevPrimerLength << endl;
+        //if you found the barcode or if you don't want to allow for diffs
+        if ((pdiffs == 0) || (success = false)) { primerStart = 0; primerEnd = 0; return false; }
+        else { //try aligning and see if you can find it
+            Alignment* alignment;
+            if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
+            else{ alignment = NULL; }
+            
+            //can you find the revPrimer
+            int minDiff = 1e6;
+            int minCount = 1;
+            
+            string rawRSequence = reverseOligo(seq.getUnaligned());
+            
+            for(int i=0;i<revPrimer.size();i++){
+                
+                for (int j = 0; j < rawRSequence.length()-(revPrimer[i].length()+pdiffs); j++){
+                    
+                    string oligo = reverseOligo(revPrimer[i]);
+                    string rawChunk = rawRSequence.substr(j,oligo.length()+pdiffs);
+                    //cout << "r before = " << oligo << '\t' << rawChunk << endl;
+                   // cout << oligo << '\t' << olength << endl;
+                    //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                    alignment->alignPrimer(oligo, rawChunk);
+                    oligo = alignment->getSeqAAln();
+                    string temp = alignment->getSeqBAln();
+                    
+                    //                    cout << endl;
+                    //                    cout << oligo << endl;
+                    //                    cout << temp << endl;
+                    //                    cout << endl;
+                    
+                    int alnLength = oligo.length();
+                    for(int k=oligo.length()-1;k>=0;k--){ if(oligo[k] != '-'){	alnLength = k+1;	break;	} }
+                    oligo = oligo.substr(0,alnLength);
+                    temp = temp.substr(0,alnLength);
+                    int numDiff = countDiffs(oligo, temp);
+                    if (alnLength == 0) { numDiff = pdiffs + 100; }
+                    
+                    //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
+                    if(numDiff < minDiff){
+                        minDiff = numDiff;
+                        minCount = 1;
+                        primerEnd = rawRSequence.length() - j;
+                        primerStart = primerEnd - alnLength;
+                    }else if(numDiff == minDiff){
+                        minCount++;
+                    }
+                }
+            }
+            
+            if (alignment != NULL) { delete alignment; }
+            
+            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; return false;	}	//no good matches
+            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; return false;	}	//can't tell the difference between multiple primers
+            else{  return true; }
+        }
         
         primerStart = 0; primerEnd = 0;
         return false;
+
+        
     }
     catch(exception& e) {
         m->errorOut(e, "PcrSeqsCommand", "findReverse");
@@ -2073,9 +2137,11 @@ bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
     try {
         string rawSequence = seq.getUnaligned();
         bool success = 0;	//guilty until proven innocent
+        int maxRevPrimerLength = revPrimer[0].length();
         
         for(int i=0;i<revPrimer.size();i++){
             string oligo = revPrimer[i];
+            if (oligo.length() > maxRevPrimerLength) { maxRevPrimerLength = oligo.length(); }
             
             if(rawSequence.length() < oligo.length()){
                 success = 0;
@@ -2091,8 +2157,78 @@ bool TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
                 break;
             }
         }	
-        return success;
+        //if you found the barcode or if you don't want to allow for diffs
+        if ((pdiffs == 0) || (success == 0)) { return success; }
         
+        else { //try aligning and see if you can find it
+            Alignment* alignment;
+            if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
+            else{ alignment = NULL; }
+        
+            //can you find the revPrimer
+            int minDiff = 1e6;
+            int minCount = 1;
+            int minGroup = -1;
+            int minPos = 0;
+        
+            string rawRSequence = reverseOligo(seq.getUnaligned());
+        
+            for(int i=0;i<revPrimer.size();i++){
+                string oligo = reverseOligo(revPrimer[i]);
+                //cout << "r before = " << reverseOligo(oligo) << '\t' << reverseOligo(rawRSequence.substr(0,oligo.length()+pdiffs)) << endl;
+                if(rawRSequence.length() < maxRevPrimerLength){	//let's just assume that the barcodes are the same length
+                    success = pdiffs + 10;
+                    break;
+                }
+            
+                //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
+                oligo = alignment->getSeqAAln();
+                string temp = alignment->getSeqBAln();
+            
+                //                    cout << endl;
+                //                    cout << oligo << endl;
+                //                    cout << temp << endl;
+                //                    cout << endl;
+            
+                int alnLength = oligo.length();
+                for(int j=oligo.length()-1;j>=0;j--){ if(oligo[j] != '-'){	alnLength = j+1;	break;	} }
+                oligo = oligo.substr(0,alnLength);
+                temp = temp.substr(0,alnLength);
+                int numDiff = countDiffs(oligo, temp);
+                if (alnLength == 0) { numDiff = pdiffs + 100; }
+            
+                //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
+                if(numDiff < minDiff){
+                    minDiff = numDiff;
+                    minCount = 1;
+                    minGroup = i;
+                    for(int j=0;j<alnLength;j++){
+                        if(temp[j] != '-'){
+                            minPos++;
+                        }
+                    }
+                }else if(numDiff == minDiff){
+                    minCount++;
+                }
+            }
+            
+            if(minDiff > pdiffs)	{	success = minDiff;	}	//no good matches
+            else if(minCount > 1)	{	success = pdiffs + 10;	}	//can't tell the difference between multiple primers
+            else{	//use the best match
+                seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
+                if(qual.getName() != ""){
+                    qual.trimQScores(-1, (rawSequence.length() - minPos));
+                }
+                success = minDiff;
+            }
+            
+            if (alignment != NULL) { delete alignment; }
+            
+        }
+    
+        return success;
+     
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "stripReverse");
@@ -2105,9 +2241,12 @@ bool TrimOligos::stripReverse(Sequence& seq){
         
         string rawSequence = seq.getUnaligned();
         bool success = 0;	//guilty until proven innocent
+        int maxRevPrimerLength = revPrimer[0].length();
         
         for(int i=0;i<revPrimer.size();i++){
             string oligo = revPrimer[i];
+            
+            if (oligo.length() > maxRevPrimerLength) { maxRevPrimerLength = oligo.length(); }
             
             if(rawSequence.length() < oligo.length()){
                 success = 0;
@@ -2121,7 +2260,75 @@ bool TrimOligos::stripReverse(Sequence& seq){
             }
         }	
         
+        //if you found the barcode or if you don't want to allow for diffs
+        if ((pdiffs == 0) || (success == 0)) { return success; }
+        
+        else { //try aligning and see if you can find it
+            Alignment* alignment;
+            if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
+            else{ alignment = NULL; }
+            
+            //can you find the revPrimer
+            int minDiff = 1e6;
+            int minCount = 1;
+            int minGroup = -1;
+            int minPos = 0;
+            
+            string rawRSequence = reverseOligo(seq.getUnaligned());
+            
+            for(int i=0;i<revPrimer.size();i++){
+                string oligo = reverseOligo(revPrimer[i]);
+                //cout << "r before = " << reverseOligo(oligo) << '\t' << reverseOligo(rawRSequence.substr(0,oligo.length()+pdiffs)) << endl;
+                if(rawRSequence.length() < maxRevPrimerLength){	//let's just assume that the barcodes are the same length
+                    success = pdiffs + 10;
+                    break;
+                }
+                
+                //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
+                oligo = alignment->getSeqAAln();
+                string temp = alignment->getSeqBAln();
+                
+                //                    cout << endl;
+                //                    cout << oligo << endl;
+                //                    cout << temp << endl;
+                //                    cout << endl;
+                
+                int alnLength = oligo.length();
+                for(int j=oligo.length()-1;j>=0;j--){ if(oligo[j] != '-'){	alnLength = j+1;	break;	} }
+                oligo = oligo.substr(0,alnLength);
+                temp = temp.substr(0,alnLength);
+                int numDiff = countDiffs(oligo, temp);
+                if (alnLength == 0) { numDiff = pdiffs + 100; }
+                
+                //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
+                if(numDiff < minDiff){
+                    minDiff = numDiff;
+                    minCount = 1;
+                    minGroup = i;
+                    for(int j=0;j<alnLength;j++){
+                        if(temp[j] != '-'){
+                            minPos++;
+                        }
+                    }
+                }else if(numDiff == minDiff){
+                    minCount++;
+                }
+            }
+            
+            if(minDiff > pdiffs)	{	success = minDiff;	}	//no good matches
+            else if(minCount > 1)	{	success = pdiffs + 10;	}	//can't tell the difference between multiple primers
+            else{	//use the best match
+                seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
+                success = minDiff;
+            }
+            
+            if (alignment != NULL) { delete alignment; }
+            
+        }
+        
         return success;
+
         
     }
     catch(exception& e) {

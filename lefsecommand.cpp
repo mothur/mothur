@@ -777,23 +777,33 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
             
             //find "good" random vector
             vector<int> rand_s;
+            int save = 0;
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
+                save = h;
                 rand_s.clear();
                 for (int k = 0; k < fractionNumGroups; k++) {  rand_s.push_back(m->getRandomIndex(numGroups-1)); }
-                if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; } //break out of loop
+                if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
             if (m->control_pressed) { return sigOTUS; }
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: after 1000. \n."); }
             
             //print data in R input format for testing
             if (false) {
                 vector<string> groups; for (int h = 0; h < rand_s.size(); h++) {  groups.push_back(lookup[rand_s[h]]->getGroup()); }
-                printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, bins, subClass2GroupIndex, groups);
+                for (int h = 0; h < groups.size(); h++) { cout << groups[h]<< endl; }
+                //printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, bins, subClass2GroupIndex, groups);
             }
-            
-            //for each pair of classes
-            vector< vector<double> > temp = lda(adjustedLookup, rand_s, indexToClass, classes); //[numComparison][numOTUs]
-            if (temp.size() != 0) { results.push_back(temp); }
+            if (save < 1000) { m->mothurOut("[WARNING]: Skipping iter " + toString(j+1) + " in LDA test. This can be caused by too few groups per class or not enough contrast within the classes. \n"); }
+            else {
+                //for each pair of classes
+                vector< vector<double> > temp = lda(adjustedLookup, rand_s, indexToClass, classes); //[numComparison][numOTUs]
+                if (temp.size() != 0) { results.push_back(temp); }
+                if (m->debug) { m->mothurOut("[DEBUG]: after lda. \n."); }
+            }
         }
+        
+        if (results.size() == 0) { return sigOTUS; }
         
         if (m->control_pressed) { return sigOTUS; }
         
@@ -903,12 +913,13 @@ vector< vector<double> > LefseCommand::lda(vector< vector<double> >& adjustedLoo
         //find means for each groups LDs
         vector<double> LDMeans; LDMeans.resize(classes.size(), 0.0); //means[0] -> average for [group0].
         for (int i = 0; i < LD.size(); i++) {  LDMeans[quickIndex[randClass[i]]] += LD[i][0]; } 
-        for (int i = 0; i < LDMeans.size(); i++) { LDMeans[i] /= (double) counts[i]; }
-    
+        for (int i = 0; i < LDMeans.size(); i++) { LDMeans[i] /= (double) counts[i];  }
+   
 		//calculate for each comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
         vector< vector<double> > results;// [numComparison][numOTUs]
 		for (int i = 0; i < LDMeans.size(); i++) {
 			for (int l = 0; l < i; l++) {
+                
                 if (m->control_pressed) { return scaling; }
                 //robjects.r('effect.size <- abs(mean(LD[sub_d[,"class"]=="'+p[0]+'"]) - mean(LD[sub_d[,"class"]=="'+p[1]+'"]))')
                 double effectSize = abs(LDMeans[i] - LDMeans[l]);

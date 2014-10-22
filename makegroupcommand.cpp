@@ -105,6 +105,9 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["group"] = tempOutNames;
 		
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+            
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -188,9 +191,6 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			output = validParameter.validFile(parameters, "output", false);			
 			if (output == "not found") { output = "";  }

@@ -48,7 +48,7 @@ private:
     int createSharedFromListGroup();
     int createSharedFromBiom();
     string getTag(string&);
-    vector<string> readRows(string, int&); 
+    vector<string> readRows(string, int&);
     int getDims(string, int&, int&);
     vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
 	

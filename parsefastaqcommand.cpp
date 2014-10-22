@@ -43,7 +43,7 @@ vector<string> ParseFastaQCommand::setParameters(){
 string ParseFastaQCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file.\n";
+		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file or can be used to parse fastq files by sample.\n";
 		helpString += "The fastq.info command parameters are file, fastq, fasta, qfile, oligos, group and format; file or fastq is required.\n";
         helpString += "The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n";
         helpString += "The oligos parameter allows you to provide an oligos file to split your fastq file into separate fastq files by barcode and primers. \n";

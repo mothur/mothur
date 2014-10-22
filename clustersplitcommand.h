@@ -65,7 +65,7 @@ private:
 	int createMergedDistanceFile(vector< map<string, string> >);
     int createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund);
     string readFile(vector< map<string, string> >&);
-    int printFile(string, vector< map<string, string> >&);
+    string printFile(string, vector< map<string, string> >&);
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////
