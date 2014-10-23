@@ -730,7 +730,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "kruskal.wallis")        {	pipecommand = new KruskalWallisCommand(optionString);           }
         else if(commandName == "make.sra")              {	pipecommand = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	pipecommand = new MergeSfffilesCommand(optionString);           }
-        //else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
+        else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
@@ -886,7 +886,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.lefse")			{	shellcommand = new MakeLefseCommand();				}
         else if(commandName == "lefse")                 {	shellcommand = new LefseCommand();                  }
         else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
-        //else if(commandName == "classify.svm")          {   shellcommand = new ClassifySvmSharedCommand();      }
+        else if(commandName == "classify.svm")          {   shellcommand = new ClassifySvmSharedCommand();      }
         else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }

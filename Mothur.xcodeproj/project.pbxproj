@@ -20,6 +20,8 @@
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
+		835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
+		835FE03E19F00A4D005AA754 /* svm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B21820117AD77BD00286E6A /* svm.cpp */; };
 		83F25B0C163B031200ABE73D /* forest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83F25B0A163B031200ABE73D /* forest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
 		A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
@@ -2413,6 +2415,7 @@
 				A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */,
 				A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */,
 				A774104814696F320098E6AC /* myseqdist.cpp in Sources */,
+				835FE03E19F00A4D005AA754 /* svm.cpp in Sources */,
 				A77410F614697C300098E6AC /* seqnoise.cpp in Sources */,
 				A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */,
 				A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */,
@@ -2454,6 +2457,7 @@
 				A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */,
 				A7386C29161A110800651424 /* decisiontree.cpp in Sources */,
 				A77E1938161B201E00DB1A2A /* randomforest.cpp in Sources */,
+				835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */,
 				A77E193B161B289600DB1A2A /* rftreenode.cpp in Sources */,
 				A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */,
 				A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */,

@@ -15,11 +15,12 @@
 #include "inputdata.h"
 #include "svm.hpp"
 
-class ClassifySvmSharedCommand : public Command, ExternalSvmTrainingInterruption { 
+class ClassifySvmSharedCommand : public Command {
 public:
   ClassifySvmSharedCommand();
   ClassifySvmSharedCommand(string);
-  ~ClassifySvmSharedCommand() throw() {};
+  //~ClassifySvmSharedCommand() throw() {};
+  ~ClassifySvmSharedCommand() {};
   
   vector<string> setParameters();
   string getCommandName()			{ return "classifysvm.shared";     }
@@ -32,10 +33,19 @@ public:
   
   void help() { m->mothurOut(getHelpString()); }
 
-  bool interruptTraining() { return m->control_pressed; }
+  void readSharedAndDesignFiles(const string&, const string&, LabeledObservationVector&, FeatureVector&);
+  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
+
+  //bool interruptTraining() { return m->control_pressed; }
+
+  vector<double>& getSmocList() { return smocList; }
+  const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
+
+  //bool interruptTraining() { return m->control_pressed; }
 
   //std::vector<double>& getSmocList() { return smocList; }
   //const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
+
 
 private:
     bool abort;
@@ -51,15 +61,15 @@ private:
 
     GroupMap designMap;
     
-    void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
-    void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
+    //void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
+    //void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
 
     // mode is either "rfe" or "classify"
     string mode;
 
     int evaluationFoldCount;
     int trainingFoldCount;
-    std::vector<double> smocList;
+    vector<double> smocList;
     KernelParameterRangeMap kernelParameterRangeMap;
 
     string transformName;
@@ -76,7 +86,7 @@ private:
     void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
     void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 
-    void getParameterValue(int& target, std::string pstring, int defaultvalue) {
+    void getParameterValue(int& target, string pstring, int defaultvalue) {
         if (pstring == "not found" or pstring == "") {
             target = defaultvalue;
         }

@@ -20,7 +20,8 @@
 #include <stack>
 #include <string>
 #include <sstream>
-#include <vector>
+#include "mothurout.h"
+
 
 // For the purpose of training a support vector machine
 // we need to calculate a dot product between two feature
@@ -28,7 +29,7 @@
 // restricted to lists of doubles, but in this implementation
 // feature vectors (or 'observations' as they will be called from here on)
 // will be vectors of doubles.
-typedef std::vector<double> Observation;
+typedef vector<double> Observation;
 
 /*
 class Observation {
@@ -37,7 +38,7 @@ public:
     ~Observation() {}
 
 private:
-    std::vector<double> obs;
+    vector<double> obs;
 };
 */
 
@@ -47,33 +48,33 @@ private:
 // datasets will be rearranged many times during cross validation.
 // Using pointers to Observations makes copying the elements of
 // an ObservationVector cheap.
-typedef std::vector<Observation*> ObservationVector;
+typedef vector<Observation*> ObservationVector;
 
 // Training a support vector machine requires labeled data.  The
 // Label typedef defines what will constitute a class 'label' in
 // this implementation.
-typedef std::string Label;
-typedef std::vector<Label> LabelVector;
-typedef std::set<Label> LabelSet;
+typedef string Label;
+typedef vector<Label> LabelVector;
+typedef set<Label> LabelSet;
 
 // Pairs of class labels are important because a support vector machine
 // can only learn two classes of data.  The LabelPair typedef is a vector
-// even though a std::pair might seem more natural, but it is useful to
+// even though a pair might seem more natural, but it is useful to
 // iterate over the pair.
-typedef std::vector<Label> LabelPair;
+typedef vector<Label> LabelPair;
 LabelPair buildLabelPair(const Label& one, const Label& two);
 
 // Learning to classify a dataset with more than two classes requires
 // training a separate support vector machine for each pair of classes.
 // The LabelPairSet typedef defines a container for the collection of
 // all unique label pairs for a set of data.
-typedef std::set<LabelPair> LabelPairSet;
+typedef set<LabelPair> LabelPairSet;
 
 // A dataset is a set of observations with associated labels.  The
 // LabeledObservation typedef is a label-observation pair intended to
 // hold one observation and its corresponding label.  Using a pointer
 // to Observation makes these objects cheap to copy.
-//typedef std::pair<Label, Observation*> LabeledObservation;
+//typedef pair<Label, Observation*> LabeledObservation;
 
 // This is a refactoring of the original LabeledObservation typedef.
 // The original typedef has been promoted to a class in order to add
@@ -108,7 +109,7 @@ public:
 
 // A LabeledObservationVector is a container for an entire dataset (or a
 // subset of an entire dataset).
-typedef std::vector<LabeledObservation> LabeledObservationVector;
+typedef vector<LabeledObservation> LabeledObservationVector;
 void buildLabelSet(LabelSet&, const LabeledObservationVector&);
 
 
@@ -122,21 +123,21 @@ void transformZeroMeanUnitVariance(LabeledObservationVector&);
 
 class Feature {
 public:
-    Feature(int i, const std::string& l) : index(i), label(l) {}
+    Feature(int i, const string& l) : index(i), label(l) {}
     Feature(const Feature& f) : index(f.index), label(f.label) {}
     ~Feature() {}
 
     int getFeatureIndex() const { return index; }
     void setFeatureIndex(int i) { index = i; }
-    std::string getFeatureLabel() const { return label; }
+    string getFeatureLabel() const { return label; }
 
 private:
     int index;
-    std::string label;
+    string label;
 };
 
-typedef std::list<Feature> FeatureList;
-typedef std::vector<Feature> FeatureVector;
+typedef list<Feature> FeatureList;
+typedef vector<Feature> FeatureVector;
 
 // might make sense for this to be a member function of SvmDataset
 FeatureVector applyStdThreshold(double, LabeledObservationVector&, FeatureVector&);
@@ -159,7 +160,7 @@ private:
     int rank;
 };
 
-typedef std::list<RankedFeature> RankedFeatureList;
+typedef list<RankedFeature> RankedFeatureList;
 
 
 // The SvmDataset class encapsulates labeled observations and feature information.
@@ -219,7 +220,7 @@ private:
 // the corresponding LabelToLabeledObservationVector looks like
 //     "blue",  [["blue",  [1.0, 2.0, 3.0]], ["blue",  [2,0, 3.0. 4.0]]]
 //     "green", [["green", [3.0, 4.0, 5.0]], ["green", [4.0, 5.0, 6.0]]]
-typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
+typedef map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
 void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, const LabeledObservationVector&);
 
 // A support vector machine uses +1 and -1 in calculations to represent
@@ -228,20 +229,20 @@ void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, cons
 // For a dataset with labels "blue" and "green" a NumericClassToLabel map looks like
 //     1, "blue"
 //    -1, "green"
-typedef std::map<int, Label> NumericClassToLabel;
+typedef map<int, Label> NumericClassToLabel;
 void buildNumericClassToLabelMap(LabelPair);
 
 typedef double Parameter;
-typedef std::string ParameterName;
-typedef std::vector<double> ParameterRange;
-typedef std::map<ParameterName, ParameterRange> ParameterRangeMap;
+typedef string ParameterName;
+typedef vector<double> ParameterRange;
+typedef map<ParameterName, ParameterRange> ParameterRangeMap;
 
-typedef std::map<std::string, ParameterRangeMap> KernelParameterRangeMap;
+typedef map<string, ParameterRangeMap> KernelParameterRangeMap;
 void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterRangeMap);
 
-typedef std::map<ParameterName, Parameter> ParameterMap;
-typedef std::vector<ParameterMap> ParameterMapVector;
-typedef std::stack<Parameter> ParameterStack;
+typedef map<ParameterName, Parameter> ParameterMap;
+typedef vector<ParameterMap> ParameterMapVector;
+typedef stack<Parameter> ParameterStack;
 
 class ParameterSetBuilder {
 public:
@@ -261,8 +262,8 @@ public:
         // a small step toward quieting down this code
         bool verbose = false;
 
-        std::stack<std::pair<ParameterName, ParameterStack> > stackOfParameterRanges;
-        std::stack<std::pair<ParameterName, ParameterStack> > stackOfEmptyParameterRanges;
+        stack<pair<ParameterName, ParameterStack> > stackOfParameterRanges;
+        stack<pair<ParameterName, ParameterStack> > stackOfEmptyParameterRanges;
         ParameterMap nextParameterSet;
         int parameterSetCount = 1;
         for ( ParameterRangeMap::const_iterator i = parameterRangeMap.begin(); i != parameterRangeMap.end(); i++ ) {
@@ -274,12 +275,12 @@ public:
         // get started
         for ( int n = 0; n < parameterSetCount; n++ ) {
 
-            if (verbose) std::cout << "n = " << n << std::endl;
+            if (verbose) m->mothurOut("n = " + toString(n) ); m->mothurOutEndLine();
 
             // pull empty stacks off until there are no empty stacks
             while ( stackOfParameterRanges.size() > 0 and stackOfParameterRanges.top().second.size() == 0 ) {
 
-                if (verbose) std::cout << "  empty parameter range: " << stackOfParameterRanges.top().first << std::endl;
+                if (verbose) m->mothurOut("  empty parameter range: " + stackOfParameterRanges.top().first); m->mothurOutEndLine();
 
                 stackOfEmptyParameterRanges.push(stackOfParameterRanges.top());
                 stackOfParameterRanges.pop();
@@ -288,18 +289,18 @@ public:
             // move to the next value for the parameter at the top of the stackOfParameterRanges
             if ( stackOfParameterRanges.size() > 0 ) {
                 if (verbose) {
-                    std::cout << "  moving to next value for parameter " << stackOfParameterRanges.top().first << std::endl;
-                    std::cout << "    next value is "  << stackOfParameterRanges.top().second.top() << std::endl;
+                    m->mothurOut( "  moving to next value for parameter " + toString(stackOfParameterRanges.top().first) ); m->mothurOutEndLine();
+                    m->mothurOut( "    next value is "  + toString(stackOfParameterRanges.top().second.top()) ); m->mothurOutEndLine();
                 }
                 ParameterName parameterName = stackOfParameterRanges.top().first;
                 nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
                 stackOfParameterRanges.top().second.pop();
             }
-            if (verbose) std::cout << "stack of empty parameter ranges has size " << stackOfEmptyParameterRanges.size() << std::endl;
+            if (verbose) m->mothurOut( "stack of empty parameter ranges has size " + toString(stackOfEmptyParameterRanges.size() ) ); m->mothurOutEndLine();
             // reset each parameter range that has been exhausted
             while ( stackOfEmptyParameterRanges.size() > 0 ) {
                 ParameterName parameterName = stackOfEmptyParameterRanges.top().first;
-                if (verbose) std::cout << "  reseting range for parameter " << stackOfEmptyParameterRanges.top().first << std::endl;
+                if (verbose) m->mothurOut( "  reseting range for parameter " + toString(stackOfEmptyParameterRanges.top().first) ); m->mothurOutEndLine();
                 stackOfParameterRanges.push(stackOfEmptyParameterRanges.top());
                 stackOfEmptyParameterRanges.pop();
                 const ParameterRange& parameterRange = parameterRangeMap.find(parameterName)->second;
@@ -317,7 +318,7 @@ public:
             // print out the next parameter set
             if (verbose) {
                 for (ParameterMap::iterator p = nextParameterSet.begin(); p != nextParameterSet.end(); p++) {
-                    std::cout << "  " << p->first << " : " << p->second << std::endl;
+                    m->mothurOut(toString(p->first) + " : " + toString(p->second) ); m->mothurOutEndLine();
                 }
             }
         }
@@ -328,6 +329,7 @@ public:
 
 private:
     ParameterMapVector parameterSetVector;
+    MothurOut* m;
 };
 
 
@@ -350,7 +352,7 @@ public:
     }
 
     void createRow(int i) {
-        cache[i] = new std::vector<double>(cache.size(), std::numeric_limits<double>::signaling_NaN());
+        cache[i] = new vector<double>(cache.size(), numeric_limits<double>::signaling_NaN());
         for ( int v = 0; v < cache.size(); v++ ) {
             cache.at(i)->at(v) = calculateValueForCache(i, v);
         }
@@ -363,7 +365,7 @@ public:
     virtual double calculateValueForCache(int, int) = 0;
 
 private:
-    std::vector<std::vector<double>* > cache;
+    vector<vector<double>* > cache;
 };
 
 
@@ -380,7 +382,7 @@ public:
     }
 
     double calculateValueForCache(int i, int j) {
-        return std::inner_product(obs[i].second->begin(), obs[i].second->end(), obs[j].second->begin(), 0.0);
+        return inner_product(obs[i].second->begin(), obs[i].second->end(), obs[j].second->begin(), 0.0);
     }
 
 private:
@@ -416,7 +418,7 @@ public:
         const int j = obs_j.datasetIndex;
 
         if ( rowNotCached(i) ) {
-            cache[i] = new std::vector<double>(obs.size(), std::numeric_limits<double>::signaling_NaN());
+            cache[i] = new vector<double>(obs.size(), numeric_limits<double>::signaling_NaN());
             for ( int v = 0; v < obs.size(); v++ ) {
                 cache.at(i)->at(v) = calculateParameterFreeSimilarity(obs[i], obs[v]);
             }
@@ -430,8 +432,8 @@ public:
 
 private:
     const LabeledObservationVector& obs;
-    //std::vector<std::vector<double> > cache;
-    std::vector<std::vector<double>* > cache;
+    //vector<vector<double> > cache;
+    vector<vector<double>* > cache;
     //InnerProductRowCache& innerProductCache;
 };
 
@@ -447,7 +449,7 @@ public:
     }
 
     double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
-        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
+        return inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     double getConstant() { return constant; }
@@ -461,8 +463,8 @@ public:
         p[MapKey_Constant] = defaultConstantRange;
     }
 
-    static const std::string MapKey;
-    static const std::string MapKey_Constant;
+    static const string MapKey;
+    static const string MapKey_Constant;
     static const ParameterRange defaultConstantRange;
 
 private:
@@ -490,9 +492,9 @@ public:
         //    sumOfSquaredDifs += pow((i.second->at(n) - j.second->at(n)), 2.0);
         //}
         double sumOfSquaredDifs =
-                      std::inner_product(i.second->begin(), i.second->end(), i.second->begin(), 0.0)
-              - 2.0 * std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0)
-              +       std::inner_product(j.second->begin(), j.second->end(), j.second->begin(), 0.0);
+                      inner_product(i.second->begin(), i.second->end(), i.second->begin(), 0.0)
+              - 2.0 * inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0)
+              +       inner_product(j.second->begin(), j.second->end(), j.second->begin(), 0.0);
         return exp(sqrt(sumOfSquaredDifs));
     }
 
@@ -507,8 +509,8 @@ public:
         p[MapKey_Gamma] = defaultGammaRange;
     }
 
-    static const std::string MapKey;
-    static const std::string MapKey_Gamma;
+    static const string MapKey;
+    static const string MapKey_Gamma;
 
     static const ParameterRange defaultGammaRange;
 
@@ -525,11 +527,11 @@ public:
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         return pow((gamma * getCachedParameterFreeSimilarity(i, j) + c), d);
-        //return pow(std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), c), d);
+        //return pow(inner_product(i.second->begin(), i.second->end(), j.second->begin(), c), d);
     }
 
     double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
-        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
+        return inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     void setParameters(const ParameterMap& p) {
@@ -544,10 +546,10 @@ public:
         p[MapKey_Degree] = defaultDegreeRange;
     }
 
-    static const std::string MapKey;
-    static const std::string MapKey_Constant;
-    static const std::string MapKey_Coefficient;
-    static const std::string MapKey_Degree;
+    static const string MapKey;
+    static const string MapKey_Constant;
+    static const string MapKey_Coefficient;
+    static const string MapKey_Degree;
 
     static const ParameterRange defaultConstantRange;
     static const ParameterRange defaultCoefficientRange;
@@ -568,11 +570,11 @@ public:
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         return tanh(alpha * getCachedParameterFreeSimilarity(i, j) + c);
-        //return tanh(alpha * std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), c));
+        //return tanh(alpha * inner_product(i.second->begin(), i.second->end(), j.second->begin(), c));
     }
 
     double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
-        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
+        return inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     void setParameters(const ParameterMap& p) {
@@ -585,9 +587,9 @@ public:
         p[MapKey_Constant] = defaultConstantRange;
     }
 
-    static const std::string MapKey;
-    static const std::string MapKey_Alpha;
-    static const std::string MapKey_Constant;
+    static const string MapKey;
+    static const string MapKey_Alpha;
+    static const string MapKey_Constant;
 
     static const ParameterRange defaultAlphaRange;
     static const ParameterRange defaultConstantRange;
@@ -599,7 +601,7 @@ private:
 
 class KernelFactory {
 public:
-    static KernelFunction* getKernelFunctionForKey(std::string kernelFunctionKey, const LabeledObservationVector& obs) {
+    static KernelFunction* getKernelFunctionForKey(string kernelFunctionKey, const LabeledObservationVector& obs) {
         if ( kernelFunctionKey == LinearKernelFunction::MapKey ) {
             return new LinearKernelFunction(obs);
         }
@@ -613,13 +615,13 @@ public:
             return new SigmoidKernelFunction(obs);
         }
         else {
-            throw new std::exception();
+            throw new exception();
         }
     }
 };
 
 
-typedef std::map<std::string, KernelFunction*> KernelFunctionMap;
+typedef map<string, KernelFunction*> KernelFunctionMap;
 
 // An instance of KernelFunctionFactory dynamically allocates kernel function
 // instances and maintains a table of pointers to them.  This allows kernel
@@ -635,10 +637,10 @@ public:
         }
     }
 
-    KernelFunction& getKernelFunctionForKey(std::string kernelFunctionKey) {
+    KernelFunction& getKernelFunctionForKey(string kernelFunctionKey) {
         if ( kernelFunctionTable.count(kernelFunctionKey) == 0 ) {
             kernelFunctionTable.insert(
-                std::make_pair(
+                make_pair(
                     kernelFunctionKey,
                     KernelFactory::getKernelFunctionForKey(kernelFunctionKey, obs)
                 )
@@ -660,7 +662,7 @@ public:
         k(_k), obs(_obs),
         cache(_obs.size(), NULL) {}
     ~KernelFunctionCache() {
-        //std::cout << "deleting KernelFunctionCache cache" << std::endl;
+        //cout << "deleting KernelFunctionCache cache" << endl;
         for (int i = 0; i < cache.size(); i++) {
             if ( !rowNotCached(i) ) {
                 delete cache[i];
@@ -673,7 +675,7 @@ public:
         const int j = obs_j.datasetIndex;
         // if the first element of row i is NaN then calculate all elements for row i
         if ( rowNotCached(i) ) {
-            cache[i] = new std::vector<double>(obs.size(), std::numeric_limits<double>::signaling_NaN());
+            cache[i] = new vector<double>(obs.size(), numeric_limits<double>::signaling_NaN());
             for ( int v = 0; v < obs.size(); v++ ) {
                 cache.at(i)->at(v) = k.similarity(
                     obs[i],
@@ -691,8 +693,8 @@ public:
 private:
     KernelFunction& k;
     const LabeledObservationVector& obs;
-    //std::vector<std::vector<double> > cache;
-    std::vector<std::vector<double>* > cache;
+    //vector<vector<double> > cache;
+    vector<vector<double>* > cache;
 };
 
 
@@ -706,7 +708,7 @@ private:
 //
 class SVM {
 public:
-    SVM(const std::vector<double>& yy, const std::vector<double>& aa, const LabeledObservationVector& oo, double bb, const NumericClassToLabel& mm) :
+    SVM(const vector<double>& yy, const vector<double>& aa, const LabeledObservationVector& oo, double bb, const NumericClassToLabel& mm) :
         y(yy), a(aa), x(oo), b(bb), discriminantToLabel(mm) {}
     ~SVM() {}
 
@@ -724,9 +726,9 @@ public:
 
 public:
     // y holds the numeric class: +1.0 or -1.0
-    const std::vector<double> y;
+    const vector<double> y;
     // a holds the optimal dual coefficients
-    const std::vector<double> a;
+    const vector<double> a;
     // x holds the support vectors
     const LabeledObservationVector x;
     const double b;
@@ -769,7 +771,7 @@ private:
 };
 
 
-class MultiClassSvmClassificationTie : public std::exception {
+class MultiClassSvmClassificationTie : public exception {
 public:
     MultiClassSvmClassificationTie(LabelVector& t, int c) : tiedLabels(t), tiedVoteCount(c) {}
     ~MultiClassSvmClassificationTie() throw() {}
@@ -783,15 +785,15 @@ private:
     const int tiedVoteCount;
 };
 
-typedef std::vector<SVM*> SvmVector;
-typedef std::map<LabelPair, SvmPerformanceSummary> SvmToSvmPerformanceSummary;
+typedef vector<SVM*> SvmVector;
+typedef map<LabelPair, SvmPerformanceSummary> SvmToSvmPerformanceSummary;
 
 // Using SVM with more than two classes requires training multiple SVMs.
 // The MultiClassSVM uses a vector of trained SVMs to do classification
 // on data having more than two classes.
 class MultiClassSVM {
 public:
-    MultiClassSVM(const std::vector<SVM*>, const LabelSet&, const SvmToSvmPerformanceSummary&, OutputFilter);
+    MultiClassSVM(const vector<SVM*>, const LabelSet&, const SvmToSvmPerformanceSummary&, OutputFilter);
     ~MultiClassSVM();
 
     // the classify method should accept a list of observations
@@ -814,42 +816,43 @@ private:
     const OutputFilter outputFilter;
 
     double accuracy;
+    MothurOut* m;
 
     // this is a map from label pairs to performance summaries
     SvmToSvmPerformanceSummary svmToSvmPerformanceSummary;
 };
 
 
-class SvmTrainingInterruptedException : public std::exception {
-public:
-    SvmTrainingInterruptedException(const std::string& m) : message(m) {}
-    ~SvmTrainingInterruptedException() throw() {}
-    virtual const char* what() const throw() {
-        return message.c_str();
-    }
+//class SvmTrainingInterruptedException : public exception {
+//public:
+//    SvmTrainingInterruptedException(const string& m) : message(m) {}
+//    ~SvmTrainingInterruptedException() throw() {}
+//    virtual const char* what() const throw() {
+//        return message.c_str();
+//    }
 
-private:
-    std::string message;
-};
+//private:
+//    string message;
+//};
 
-class SmoTrainerException : public std::exception {
+class SmoTrainerException : public exception {
 public:
-    SmoTrainerException(const std::string& m) : message(m) {}
+    SmoTrainerException(const string& m) : message(m) {}
     ~SmoTrainerException() throw() {}
     virtual const char* what() const throw() {
         return message.c_str();
     }
 
 private:
-    std::string message;
+    string message;
 };
 
-class ExternalSvmTrainingInterruption {
-public:
-    ExternalSvmTrainingInterruption() {}
-    virtual ~ExternalSvmTrainingInterruption() throw() {}
-    virtual bool interruptTraining() { return false; }
-};
+//class ExternalSvmTrainingInterruption {
+//public:
+//    ExternalSvmTrainingInterruption() {}
+//    virtual ~ExternalSvmTrainingInterruption() throw() {}
+//    virtual bool interruptTraining() { return false; }
+//};
 
 
 // SmoTrainer trains a support vector machine using Sequential
@@ -857,7 +860,7 @@ public:
 // "Support Vector Machine Solvers" by Bottou and Lin.
 class SmoTrainer {
 public:
-    SmoTrainer(ExternalSvmTrainingInterruption& e, OutputFilter of) : externalSvmTrainingInterruption(e), outputFilter(of), C(1.0) {}
+    SmoTrainer(OutputFilter of) : outputFilter(of), C(1.0) {}
 
     ~SmoTrainer() {}
 
@@ -869,16 +872,16 @@ public:
     }
 
     SVM* train(KernelFunctionCache&, const LabeledObservationVector&);
-    void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
-    void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
-        std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
+    void assignNumericLabels(vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
+    void elementwise_multiply(vector<double>& a, vector<double>& b, vector<double>& c) {
+        transform(a.begin(), a.end(), b.begin(), c.begin(), multiplies<double>());
     }
 
-    static const std::string MapKey_C;
+    static const string MapKey_C;
     static const ParameterRange defaultCRange;
 
 private:
-    ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
+    //ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
     const OutputFilter outputFilter;
 
@@ -984,7 +987,7 @@ private:
 // pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
-    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&, OutputFilter&);
+    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, OutputFilter&);
     ~OneVsOneMultiClassSvmTrainer() {}
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
@@ -1000,7 +1003,6 @@ public:
     static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
 
 private:
-    ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
     const OutputFilter outputFilter;
     //bool verbose;
