@@ -937,7 +937,8 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         
         string group = groupMap->getGroup(thisRead.seq.getName());
         if (group == "not found") {     trashCode += "g";   } //scrap for group
-                
+        else {  barcode = GroupToFile[group]; }
+    
         return trashCode.length();
     }
 	catch(exception& e) {
@@ -1586,6 +1587,7 @@ bool ParseFastaQCommand::readGroup(string groupfile){
                 ofstream temp;
                 m->openOutputFileBinary(thisFilename, temp); temp.close();
                 fastqFileNames[i].push_back(thisFilename);
+                GroupToFile[groups[i]] = i;
             }
         }
         

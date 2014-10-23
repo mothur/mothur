@@ -6,6 +6,7 @@
 .idea
 build
 xcuserdata
+project.xcworkspace
 *.xcuserdata
 TARGET_BUILD_DIRTARGET_BUILD_DIR
 *.xcuserdata

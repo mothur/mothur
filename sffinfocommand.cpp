@@ -583,6 +583,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
                 rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligosObject->getReorientedPairedPrimers(), oligosObject->getReorientedPairedBarcodes()); numBarcodes = oligosObject->getReorientedPairedBarcodes().size();
             }
         }
+        
         if (hasGroup)    {   readGroup(oligos);     split = 2;      }
         
 		ofstream outSfftxt, outFasta, outQual, outFlow;
@@ -1339,6 +1340,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         
         string group = groupMap->getGroup(header.name);
         if (group == "not found") {     trashCode += "g";   } //scrap for group
+        else {  barcode = GroupToFile[group]; }
         
         return trashCode.length();
     }
@@ -1999,7 +2001,8 @@ bool SffInfoCommand::readGroup(string oligoFile){
                 ofstream temp;
                 m->openOutputFileBinary(thisFilename, temp); temp.close();
                 filehandles[i].push_back(thisFilename);
-            }
+                GroupToFile[groups[i]] = i;
+             }
         }
         
         map<string, string> variables;

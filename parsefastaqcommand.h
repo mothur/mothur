@@ -64,6 +64,8 @@ private:
     vector<vector<string> > qualFileNames;
     string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;
+    map<string, int> GroupToFile;
+
 	
     int processFile(string inputfile, TrimOligos*&, TrimOligos*&);
     int processFile(vector<string> inputfiles, TrimOligos*&, TrimOligos*&);
