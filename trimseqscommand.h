@@ -358,7 +358,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				
 				if(pDataArray->numRPrimers != 0){
 					success = trimOligos->stripReverse(currSeq, currQual);
-                    if(success > pdiffs)		{	trashCode += 'r';	}
+                    if(success > pDataArray->pdiffs)		{	trashCode += 'r';	}
                     else{ currentSeqsDiffs += success;  }
 				}
                 

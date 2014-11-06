@@ -58,7 +58,8 @@ private:
     bool readOligos(string oligosFile);
     bool readGroup(string oligosFile);
 	
-	int printCommonHeader(ofstream&, CommonHeader&); 
+	int printCommonHeader(ofstream&, CommonHeader&);
+    int printCommonHeaderForDebug(CommonHeader&, ofstream&, int);
 	int printHeader(ofstream&, Header&);
 	int printSffTxtSeqData(ofstream&, seqRead&, Header&);
 	int printFlowSeqData(ofstream&, seqRead&, Header&);

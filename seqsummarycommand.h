@@ -154,7 +154,7 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                 if (it == pDataArray->longHomoPolymer.end()) { pDataArray->longHomoPolymer[thisHomoP] = num; } //first finding of this homop, set count.
                 else { it->second += num; } //add counts
                 
-				count++;
+				pDataArray->count++;
 				outSummary << current.getName() << '\t';
 				outSummary << thisStartPosition << '\t' << thisEndPosition << '\t';
 				outSummary << thisSeqLength << '\t' << thisAmbig << '\t';

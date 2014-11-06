@@ -243,7 +243,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
 			reorient = m->isTrue(temp);
-
+            
+            numBarcodes = 0;
 			numFPrimers = 0;
 			numRPrimers = 0;
             numLinkers = 0;
@@ -326,6 +327,7 @@ int TrimFlowsCommand::execute(){
 		
 		if(allFiles){
 			set<string> namesAlreadyProcessed;
+            set<string> namesToRemove;
 			flowFilesFileName = getOutputFileName("file",variables);
 			m->openOutputFile(flowFilesFileName, output);
 
@@ -333,32 +335,38 @@ int TrimFlowsCommand::execute(){
 				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
 					if (namesAlreadyProcessed.count(barcodePrimerComboFileNames[i][j]) == 0) {
                         if (barcodePrimerComboFileNames[i][j] != "") {
-                            FILE * pFile;
-                            unsigned long long size;
-                            
-                            //get num bytes in file
-                            pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
-                            if (pFile==NULL) perror ("Error opening file");
-                            else{
-                                fseek (pFile, 0, SEEK_END);
-                                size=ftell(pFile);
-                                fclose (pFile);
+                            if (namesToRemove.count(barcodePrimerComboFileNames[i][j]) == 0) {
+                                FILE * pFile;
+                                unsigned long long size;
+                                
+                                //get num bytes in file
+                                pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
+                                if (pFile==NULL) perror ("Error opening file");
+                                else{
+                                    fseek (pFile, 0, SEEK_END);
+                                    size=ftell(pFile);
+                                    fclose (pFile);
+                                }
+                                
+                                if(size < 10){
+                                    m->mothurRemove(barcodePrimerComboFileNames[i][j]);
+                                    namesToRemove.insert(barcodePrimerComboFileNames[i][j]);
+                                }
+                                else{
+                                    output << m->getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
+                                }
+                                namesAlreadyProcessed.insert(barcodePrimerComboFileNames[i][j]);
                             }
-                            
-                            if(size < 10){
-                                m->mothurRemove(barcodePrimerComboFileNames[i][j]);
-                            }
-                            else{
-                                output << m->getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
-                                outputNames.push_back(barcodePrimerComboFileNames[i][j]);
-                                outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
-                            }
-                            namesAlreadyProcessed.insert(barcodePrimerComboFileNames[i][j]);
                         }
 					}
 				}
 			}
 			output.close();
+            
+            //remove names for outputFileNames, just cleans up the output
+            vector<string> outputNames2;
+            for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
+            outputNames = outputNames2;
 		}
 		else{
 			flowFilesFileName = getOutputFileName("file",variables);

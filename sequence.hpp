@@ -38,6 +38,7 @@ public:
 	void setUnaligned(string);
 	void setPairwise(string);
 	void setAligned(string);
+    void setComment(string);
 	void setLength();
 	void reverseComplement();
 	void trim(int);
@@ -48,6 +49,7 @@ public:
 	string getPairwise();
 	string getUnaligned();
 	string getInlineSeq();
+    string getComment();
     int getNumNs();
 	int getNumBases();
 	int getStartPos();

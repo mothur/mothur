@@ -501,7 +501,11 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 		
 		if (myLevel != phylo->getMaxLevel()) {
 			while (myLevel != phylo->getMaxLevel()) {
-				conTax += "unclassified;";
+                if (probs) {
+                    conTax += "unclassified(100);";
+                }else{
+                    conTax += "unclassified;";
+                }
 				myLevel++;
 			}
 		}		

@@ -900,8 +900,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				}
 				
                 if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
-                
-                currSeq.setName(currSeq.getName() + '\t' + toString(obsBDiffs) + '\t' + toString(obsPDiffs));
 
 				if(trashCode.length() == 0){
                     string thisGroup = "";
@@ -919,6 +917,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							}
                         }
                     }
+                    
+                    currSeq.setComment('\t' + toString(obsBDiffs) + '\t' + toString(obsPDiffs));
                     
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {

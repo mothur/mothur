@@ -168,7 +168,10 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 			m->mothurConvert(temp, optimizegap);
             
             temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
+			//set processors to 1 until we figure out whats going on with this command.
+            temp = "1";
+            //m->setProcessors(temp);
+            m->mothurOut("Using 1 processor\n");
 			m->mothurConvert(temp, processors);
             
             string groups = validParameter.validFile(parameters, "groups", false);
