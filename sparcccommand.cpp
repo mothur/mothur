@@ -559,6 +559,7 @@ vector<vector<float> > SparccCommand::driver(vector<vector<float> >& sharedVecto
             
             for(int j=0;j<numOTUs;j++){
                 for(int k=0;k<j;k++){
+                    //cout << k << endl;
                     double randValue = permuteCorrMatrix[j][k];
                     double observedValue = origCorrMatrix[j][k];
                     if(observedValue >= 0 &&  randValue > observedValue)   { pValues[j][k]++; }//this method seems to deflate the

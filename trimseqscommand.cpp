@@ -918,7 +918,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                         }
                     }
                     
-                    currSeq.setComment('\t' + toString(obsBDiffs) + '\t' + toString(obsPDiffs));
+                    string seqComment = currSeq.getComment();
+                    currSeq.setComment('\t' + toString(obsBDiffs) + '\t' + toString(obsPDiffs) + seqComment);
                     
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {
