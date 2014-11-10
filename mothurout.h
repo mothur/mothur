@@ -116,7 +116,7 @@ class MothurOut {
         map<string, int> readNames(string, unsigned long int&);
         int readTax(string, map<string, string>&);
         vector<consTax> readConsTax(string);
-        int readConsTax(string, map<string, consTax2>&);
+        int readConsTax(string, map<int, consTax2>&);
         int readNames(string, map<string, string>&, map<string, int>&);
 		int readNames(string, map<string, string>&);
         int readNames(string, map<string, string>&, bool);

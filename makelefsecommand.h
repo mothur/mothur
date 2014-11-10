@@ -41,7 +41,7 @@ private:
     vector<string> outputNames, Groups;
     string sharedfile, designfile, constaxonomyfile, relabundfile, scale, label, inputFile;
     
-    int runRelabund(map<string, consTax2>&, vector<SharedRAbundFloatVector*>&);
+    int runRelabund(map<int, consTax2>&, vector<SharedRAbundFloatVector*>&);
     
     vector<SharedRAbundFloatVector*> getRelabund();
     vector<SharedRAbundFloatVector*> getSharedRelabund();

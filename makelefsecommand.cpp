@@ -216,7 +216,7 @@ int MakeLefseCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
       
-        map<string, consTax2> consTax;
+        map<int, consTax2> consTax;
         if (constaxonomyfile != "") {  m->readConsTax(constaxonomyfile, consTax);  }
         
         if (m->control_pressed) { return 0; }
@@ -247,7 +247,7 @@ int MakeLefseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int MakeLefseCommand::runRelabund(map<string, consTax2>& consTax, vector<SharedRAbundFloatVector*>& lookup){
+int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbundFloatVector*>& lookup){
 	try {
         if (outputDir == "") { outputDir = m->hasPath(inputFile); }
         map<string, string> variables;
@@ -290,8 +290,11 @@ int MakeLefseCommand::runRelabund(map<string, consTax2>& consTax, vector<SharedR
         for (int i = 0; i < lookup[0]->getNumBins(); i++) { //process each otu
             if (m->control_pressed) { break; }
             string nameOfOtu = m->currentSharedBinLabels[i];
+            
             if (constaxonomyfile != "") { //try to find the otuName in consTax to replace with consensus taxonomy
-                map<string, consTax2>::iterator it = consTax.find(nameOfOtu);
+                int simpleLabel;
+                m->mothurConvert(m->getSimpleLabel(nameOfOtu), simpleLabel);
+                map<int, consTax2>::iterator it = consTax.find(simpleLabel);
                 if (it != consTax.end()) {
                     nameOfOtu = it->second.taxonomy;
                     //add sanity check abundances here??

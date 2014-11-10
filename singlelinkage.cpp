@@ -16,7 +16,7 @@ string SingleLinkage::getTag() {
 	return("nn");
 }
 
-/***********************************************************************/
+/***********************************************************************
 //This function clusters based on the single linkage method.
 void SingleLinkage::update(double& cutOFF){
 	try {

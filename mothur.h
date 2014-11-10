@@ -185,8 +185,9 @@ struct consTax{
 struct consTax2{
     string taxonomy;
     int abundance;
-	consTax2() :  taxonomy("unknown"), abundance(0) {};
-	consTax2(string t, int a) :  taxonomy(t), abundance(a) {}
+    string otuName;
+	consTax2() :  otuName("OTUxxx"), taxonomy("unknown"), abundance(0) {};
+	consTax2(string n, string t, int a) :  otuName(n), taxonomy(t), abundance(a) {}
 };
 /************************************************************/
 struct clusterNode {

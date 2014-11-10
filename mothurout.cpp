@@ -1683,7 +1683,7 @@ vector<consTax> MothurOut::readConsTax(string inputfile){
 	}
 }
 //**********************************************************************************************************************
-int MothurOut::readConsTax(string inputfile, map<string, consTax2>& taxes){
+int MothurOut::readConsTax(string inputfile, map<int, consTax2>& taxes){
 	try {
         ifstream in;
         openInputFile(inputfile, in);
@@ -1699,8 +1699,11 @@ int MothurOut::readConsTax(string inputfile, map<string, consTax2>& taxes){
             int size = 0;
             
             in >> otu >> size >> tax; gobble(in);
-            consTax2 temp(tax, size);
-            taxes[otu] = temp;
+            consTax2 temp(otu, tax, size);
+            string simpleBin = getSimpleLabel(otu);
+            int bin;
+            convert(simpleBin, bin);
+            taxes[bin] = temp;
         }
         in.close();
         
