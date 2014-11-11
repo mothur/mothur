@@ -244,10 +244,15 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
                     treeCalculators.push_back(new MemEuclidean());
                 }else if (pDataArray->Estimators[i] == "mempearson") { 
                     treeCalculators.push_back(new MemPearson());
+                }else if (pDataArray->Estimators[i] == "jsd") {
+                    treeCalculators.push_back(new JSD());
+                }else if (pDataArray->Estimators[i] == "rjsd") {
+                    treeCalculators.push_back(new RJSD());
                 }
+
             }
         }
-        
+    
         pDataArray->calcDists.resize(treeCalculators.size());
         
 		vector<SharedRAbundVector*> subset;
