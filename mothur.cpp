@@ -86,6 +86,7 @@ int main(int argc, char *argv[]){
 			if (guiInput[0] == '-') { outputHeader = false; }
 		}
 		
+        
 		if (outputHeader)  {
 			//version
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -179,8 +180,27 @@ int main(int argc, char *argv[]){
 			}else if (input[0] == '+') {
 					mothur = new ScriptEngine(argv[0], argv[1]);
 					m->gui = true;
-			}else if (input == "-version") {
-				m->mothurOut("Mothur version=" + mothurVersion + "\nRelease Date=" + releaseDate); m->mothurOutEndLine(); m->mothurOutEndLine(); m->closeLog();
+			}else if ((input == "--version") || (input == "-v")) {
+                string OS = "";
+                //version
+                #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                #if defined (__APPLE__) || (__MACH__)
+                OS = "Mac ";
+                #else
+                OS = "Linux ";
+                #endif
+                
+                #else
+                OS = "Windows ";
+                #endif
+                
+                #ifdef BIT_VERSION
+                OS += "64Bit Version";
+                #else
+                OS += "32Bit Version";
+                #endif
+                
+				m->mothurOut(OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate); m->mothurOutEndLine(); m->mothurOutEndLine(); m->closeLog();
 				#ifdef USE_MPI
 					MPI_Finalize();
 				#endif

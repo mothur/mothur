@@ -2563,7 +2563,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.34.0\\\"\"",
-					"RELEASE_DATE=\"\\\"10/2/2014\\\"\"",
+					"RELEASE_DATE=\"\\\"11/18/2014\\\"\"",
 				);
 				GCC_VERSION = "/usr/bin/c++";
 				"GCC_VERSION[arch=*]" = "";
@@ -2602,7 +2602,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.34.0\\\"\"",
-					"RELEASE_DATE=\"\\\"10/16/2013\\\"\"",
+					"RELEASE_DATE=\"\\\"11/18/2013\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

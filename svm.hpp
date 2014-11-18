@@ -335,7 +335,10 @@ private:
 
 class RowCache {
 public:
-    RowCache(int d) : cache(d, NULL) {}
+    RowCache(int d)  { //: cache(d, NULL)
+        for (int i = 0; i < d; i++) {  cache.push_back(NULL);  }
+    }
+    
     virtual ~RowCache() {
         for (int i = 0; i < cache.size(); i++) {
             if ( !rowNotCached(i) ) {
