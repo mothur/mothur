@@ -853,7 +853,9 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         }
         
         if(numBarcodes != 0){
-            success = trimOligos->stripBarcode(currSeq, currQual, barcode);
+            vector<int> results = trimOligos->stripBarcode(currSeq, currQual, barcode);
+            if (pairedOligos)   {  success = results[0] + results[2];   }
+            else                { success = results[0];                 }
             if(success > bdiffs)		{	trashCode += 'b';	}
             else{ currentSeqsDiffs += success;  }
         }
@@ -866,13 +868,16 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
         }
         
         if(numPrimers != 0){
-            success = trimOligos->stripForward(currSeq, currQual, primer, true);
+            vector<int> results = trimOligos->stripForward(currSeq, currQual, primer, true);
+            if (pairedOligos)   {  success = results[0] + results[2];   }
+            else                {  success = results[0];                }
             if(success > pdiffs)		{	trashCode += 'f';	}
             else{ currentSeqsDiffs += success;  }
         }
         
         if(numRPrimers != 0){
-            success = trimOligos->stripReverse(currSeq, currQual);
+            vector<int> results = trimOligos->stripReverse(currSeq, currQual);
+            success = results[0];
             if(success > pdiffs)		{	trashCode += 'r';	}
             else{ currentSeqsDiffs += success;  }
         }
@@ -888,13 +893,17 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
             int thisPrimerIndex = 0;
             //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
             if(numBarcodes != 0){
-                thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
+                vector<int> results = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
+                if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }
+                else                {  thisSuccess = results[0];                }
                 if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                 else{ thisCurrentSeqsDiffs += thisSuccess;  }
             }
             //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
             if(numPrimers != 0){
-                thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, true);
+                vector<int> results = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, true);
+                if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }
+                else                {  thisSuccess = results[0];                }
                 if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
                 else{ thisCurrentSeqsDiffs += thisSuccess;  }
             }
@@ -965,15 +974,17 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisfRead, fastqRead2 thisrRead, in
         QualityScores rsavedQual(rcurrQual.getName(), rcurrQual.getScores());
         
         if(numBarcodes != 0){
-            success = trimOligos->stripBarcode(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, barcode);
-            
+            vector<int> results = trimOligos->stripBarcode(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, barcode);
+            if (pairedOligos)   {  success = results[0] + results[2];   }
+            else                { success = results[0];                 }
             if(success > bdiffs)		{	trashCode += 'b';	}
             else{ currentSeqsDiffs += success;  }
         }
         
         if(numPrimers != 0){
-            success = trimOligos->stripForward(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, primer);
-           
+            vector<int> results = trimOligos->stripForward(fcurrSeq, rcurrSeq, fcurrQual, rcurrQual, primer);
+            if (pairedOligos)   {  success = results[0] + results[2];   }
+            else                { success = results[0];                 }
             if(success > pdiffs)		{	trashCode += 'f';	}
             else{ currentSeqsDiffs += success;  }
         }
@@ -990,8 +1001,9 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisfRead, fastqRead2 thisrRead, in
             
             if(numBarcodes != 0){
                 
-                thisSuccess = rtrimOligos->stripBarcode(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisBarcodeIndex);
-                
+                vector<int> results = rtrimOligos->stripBarcode(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisBarcodeIndex);
+                if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }
+                else                {  thisSuccess = results[0];                 }
                 
                 if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
                 else{ thisCurrentSeqsDiffs += thisSuccess;  }
@@ -999,7 +1011,9 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisfRead, fastqRead2 thisrRead, in
             
             if(numPrimers != 0){
                 
-                thisSuccess = rtrimOligos->stripForward(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisPrimerIndex);
+                vector<int> results = rtrimOligos->stripForward(fsavedSeq, rsavedSeq, fsavedQual, rsavedQual, thisPrimerIndex);
+                if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }
+                else                {  thisSuccess = results[0];                 }
                 
                 if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
                 else{ thisCurrentSeqsDiffs += thisSuccess;  }

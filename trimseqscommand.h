@@ -310,6 +310,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			
 			int success = 1;
 			string trashCode = "";
+            string commentString = "";
 			int currentSeqsDiffs = 0;
             
 			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
@@ -336,7 +337,16 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				}
                 
 				if(numBarcodes != 0){
-					success = trimOligos->stripBarcode(currSeq, currQual, barcodeIndex);
+					vector<int> results = trimOligos->stripBarcode(currSeq, currQual, barcodeIndex);
+                    if (pDataArray->pairedOligos) {
+                        success = results[0] + results[2];
+                        commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pDataArray->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], pDataArray->bdiffs) + ") ";
+                    }
+                    else {
+                        success = results[0];
+                        commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pDataArray->bdiffs) + ") ";
+                    }
+
 					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -349,7 +359,16 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				}
                 
 				if(pDataArray->numFPrimers != 0){
-					success = trimOligos->stripForward(currSeq, currQual, primerIndex, pDataArray->keepforward);
+					vector<int> results = trimOligos->stripForward(currSeq, currQual, primerIndex, pDataArray->keepforward);
+                    if (pDataArray->pairedOligos) {
+                        success = results[0] + results[2];
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pDataArray->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], pDataArray->pdiffs) + ") ";
+                    }
+                    else {
+                        success = results[0];
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pDataArray->pdiffs) + ") ";
+                    }
+
 					if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -357,7 +376,9 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
 				
 				if(pDataArray->numRPrimers != 0){
-					success = trimOligos->stripReverse(currSeq, currQual);
+					vector<int> results = trimOligos->stripReverse(currSeq, currQual);
+                    success = results[0];
+                    commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pDataArray->pdiffs) + ") ";
                     if(success > pDataArray->pdiffs)		{	trashCode += 'r';	}
                     else{ currentSeqsDiffs += success;  }
 				}
@@ -365,19 +386,38 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                 if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
                     int thisSuccess = 0;
                     string thisTrashCode = "";
+                    string thiscommentString = "";
                     int thisCurrentSeqsDiffs = 0;
                     
                     int thisBarcodeIndex = 0;
                     int thisPrimerIndex = 0;
                     
                     if(numBarcodes != 0){
-                        thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
+                        vector<int> results = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
+                        if (pDataArray->pairedOligos) {
+                            thisSuccess = results[0] + results[2];
+                            thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pDataArray->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pDataArray->bdiffs) + ") ";
+                        }
+                        else {
+                            thisSuccess = results[0];
+                            thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pDataArray->bdiffs) + ") ";
+                        }
+
                         if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
                     if(pDataArray->numFPrimers != 0){
-                        thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, pDataArray->keepforward);
+                        vector<int> results = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, pDataArray->keepforward);
+                        if (pDataArray->pairedOligos) {
+                            thisSuccess = results[0] + results[2];
+                            thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pDataArray->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pDataArray->pdiffs) + ") ";
+                        }
+                        else {
+                            thisSuccess = results[0];
+                            thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pDataArray->pdiffs) + ") ";
+                        }
+
                         if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
@@ -387,6 +427,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                     if (thisTrashCode == "") {
                         trashCode = thisTrashCode;
                         success = thisSuccess;
+                        commentString = thiscommentString;
                         currentSeqsDiffs = thisCurrentSeqsDiffs;
                         barcodeIndex = thisBarcodeIndex;
                         primerIndex = thisPrimerIndex;
@@ -477,6 +518,9 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 					}
 				}
 				
+                string seqComment = currSeq.getComment();
+                currSeq.setComment("\t" + commentString + "\t" + seqComment);
+                
 				if(trashCode.length() == 0){
                     string thisGroup = "";
                     if (pDataArray->createGroup) {

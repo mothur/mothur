@@ -184,6 +184,7 @@ int MergeTaxSummaryCommand::execute(){
             else {  for (int j = 5; j < headers.size(); j++) { groups.insert(headers[j]); thisFilesGroups.push_back(headers[j]); } }
             
             int level, daugterLevels, total;
+            float totalFloat;
             string rankId, tax; 
             map<int, int> levelToCurrentNode;
             levelToCurrentNode[0] = 0;
@@ -191,7 +192,14 @@ int MergeTaxSummaryCommand::execute(){
                 
                 if (m->control_pressed) {   return 0;  }
                 
-                in >> level >> rankId >> tax >> daugterLevels >> total; m->gobble(in);
+                in >> level >> rankId >> tax >> daugterLevels >> totalFloat; m->gobble(in);
+                
+                if ((totalFloat < 1) && (totalFloat > 0)) {
+                    m->mothurOut("[ERROR]: cannot merge tax.summary files with relative abundances.\n"); m->control_pressed = true; in.close(); return 0;
+                }else {
+                    total = int(totalFloat);
+                }
+                
                 map<string, int> groupCounts;
                 if (thisFilesGroups.size() != 0) {  
                     for (int j = 0; j < thisFilesGroups.size(); j++) {  

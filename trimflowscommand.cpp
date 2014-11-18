@@ -453,6 +453,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			int success = 1;
 			int currentSeqDiffs = 0;
 			string trashCode = "";
+            string commentString = "";
 			
 			flowData.getNext(flowFile); 
 			flowData.capFlows(maxFlows);	
@@ -483,7 +484,15 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
             if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
             
 			if(numBarcodes != 0){
-				success = trimOligos->stripBarcode(currSeq, barcodeIndex);
+				vector<int> results = trimOligos->stripBarcode(currSeq, barcodeIndex);
+                if (pairedOligos) {
+                    success = results[0] + results[2];
+                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                }
+                else {
+                    success = results[0];
+                    commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                }
 				if(success > bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
@@ -496,13 +505,23 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
             }
             
 			if(numFPrimers != 0){
-				success = trimOligos->stripForward(currSeq, primerIndex);
+				vector<int> results = trimOligos->stripForward(currSeq, primerIndex);
+                if (pairedOligos) {
+                    success = results[0] + results[2];
+                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                }
+                else {
+                    success = results[0];
+                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                }
 				if(success > pdiffs)		{	trashCode += 'f';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
 			if(numRPrimers != 0){
-				success = trimOligos->stripReverse(currSeq);
+                vector<int> results = trimOligos->stripReverse(currSeq);
+                success = results[0];
+                commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
                 if(success > pdiffs)		{	trashCode += 'r';	}
                 else{ currentSeqDiffs += success;  }
 			}
@@ -513,18 +532,35 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 int thisSuccess = 0;
                 string thisTrashCode = "";
                 int thisCurrentSeqsDiffs = 0;
+                string thiscommentString = "";
                 
                 int thisBarcodeIndex = 0;
                 int thisPrimerIndex = 0;
                 //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numBarcodes != 0){
-                    thisSuccess = rtrimOligos->stripBarcode(savedSeq, thisBarcodeIndex);
+                    vector<int> results = rtrimOligos->stripBarcode(savedSeq, thisBarcodeIndex);
+                    if (pairedOligos) {
+                        thisSuccess = results[0] + results[2];
+                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                    }
+                    else {
+                        thisSuccess = results[0];
+                        thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                    }
                     if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
                 //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numFPrimers != 0){
-                    thisSuccess = rtrimOligos->stripForward(savedSeq, thisPrimerIndex);
+                    vector<int> results = rtrimOligos->stripForward(savedSeq, thisPrimerIndex);
+                    if (pairedOligos) {
+                        thisSuccess = results[0] + results[2];
+                        thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                    }
+                    else {
+                        thisSuccess = results[0];
+                        thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                    }
                     if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
@@ -535,12 +571,15 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                     trashCode = thisTrashCode;
                     success = thisSuccess;
                     currentSeqDiffs = thisCurrentSeqsDiffs;
+                    commentString = thiscommentString;
                     barcodeIndex = thisBarcodeIndex;
                     primerIndex = thisPrimerIndex;
                     savedSeq.reverseComplement();
                     currSeq.setAligned(savedSeq.getAligned());
                 }else { trashCode += "(" + thisTrashCode + ")";  }
             }
+            
+            currSeq.setComment(commentString);
 
 			if(trashCode.length() == 0){
                 string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);

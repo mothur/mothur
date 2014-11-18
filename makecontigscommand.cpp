@@ -959,6 +959,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             
             int success = 1;
             string trashCode = "";
+            string commentString = "";
             int currentSeqsDiffs = 0;
 
             //read seqs and quality info
@@ -991,25 +992,31 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             }
                         
             if(numBarcodes != 0){
+                vector<int> results;
                 if (thisfqualfile != "") {
                     if ((thisfindexfile != "") || (thisrindexfile != "")) {
-                        success = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
+                       results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
                     }else {
-                        success = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
+                        results = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
                     }
                 }else {
-                    success = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
+                    results = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
                 }
+                success = results[0] + results[2];
+                commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
                 if(success > bdiffs)		{	trashCode += 'b';	}
                 else{ currentSeqsDiffs += success;  }
             }
             
             if(numFPrimers != 0){
+                vector<int> results;
                 if (thisfqualfile != "") {
-                    success = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
+                    results = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
                 }else {
-                    success = trimOligos.stripForward(fSeq, rSeq, primerIndex);
+                    results = trimOligos.stripForward(fSeq, rSeq, primerIndex);
                 }
+                success = results[0] + results[2];
+                commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], pdiffs) + ") ";
                 if(success > pdiffs)		{	trashCode += 'f';	}
                 else{ currentSeqsDiffs += success;  }
             }
@@ -1019,31 +1026,38 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
                 int thisSuccess = 0;
                 string thisTrashCode = "";
+                string thiscommentString = "";
                 int thisCurrentSeqsDiffs = 0;
                 
                 int thisBarcodeIndex = 0;
                 int thisPrimerIndex = 0;
                 
                 if(numBarcodes != 0){
+                    vector<int> results;
                     if (thisfqualfile != "") {
                         if ((thisfindexfile != "") || (thisrindexfile != "")) {
-                            thisSuccess = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                            results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
                         }else {
-                            thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
+                            results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
                         }
                     }else {
-                        thisSuccess = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
+                        results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
                     }
+                    thisSuccess = results[0] + results[2];
+                    thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
                     if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
 
                 if(numFPrimers != 0){
+                    vector<int> results;
                     if (thisfqualfile != "") {
-                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
+                        results = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
                     }else {
-                        thisSuccess = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
+                        results = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
                     }
+                    thisSuccess = results[0] + results[2];
+                    thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
                     if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
@@ -1054,6 +1068,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                     trashCode = thisTrashCode;
                     success = thisSuccess;
                     currentSeqsDiffs = thisCurrentSeqsDiffs;
+                    commentString = thiscommentString;
                     barcodeIndex = thisBarcodeIndex;
                     primerIndex = thisPrimerIndex;
                     savedFSeq.reverseComplement();
@@ -1182,18 +1197,18 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                 if(allFiles && !ignore){
                     ofstream output;
                     m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
-                    output << ">" << fSeq.getName() << endl << contig << endl;
+                    output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                     output.close();
                 }
                 
                 //output
-                outFasta << ">" << fSeq.getName() << endl << contig << endl;
+                outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                 int numNs = 0;
                 for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
                 outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
             }else {
                 //output
-                outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << endl << contig << endl;
+                outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl << contig << endl;
             }
             num++;
             
