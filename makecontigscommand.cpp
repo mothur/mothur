@@ -2073,7 +2073,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                         
                         fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                         m->openOutputFile(fastaFileName, temp);		temp.close();
-                        cout << fastaFileName << endl;
+                        //cout << fastaFileName << endl;
                     }
                 }
             }

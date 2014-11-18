@@ -432,7 +432,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						
 						if (inputDir != "") {
 							string path = m->hasPath(groupfileNames[i]);
-                            cout << path << '\t' << inputDir << endl;
+                            //cout << path << '\t' << inputDir << endl;
 							//if the user has not given a path then, add inputdir. else leave path alone.
 							if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
 						}
