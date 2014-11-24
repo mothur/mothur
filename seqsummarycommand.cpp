@@ -262,41 +262,44 @@ int SeqSummaryCommand::execute(){
         else {starts[0] = (startPosition.begin())->first; }
         long long totalSoFar = 0;
         starts[0] = (startPosition.begin())->first;
-        int lastValue = starts[0];
+        int lastValue = 0;
         for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
             meanStartPosition += (value*it->second);
             totalSoFar += it->second;
-            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  starts[1] = value;  } //save value
-            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   starts[2] = value;  } //save value
+            if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  starts[1] = value;   } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) { starts[2] = value;  } //save value
             if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  starts[3] = value; } //save value
             if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  starts[4] = value; } //save value
             if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  starts[5] = value;  } //save value
             if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  starts[6] = value; } //save value
             lastValue = totalSoFar;
         }
-
+        starts[6] = (startPosition.rbegin())->first;
+        
         if ((endPosition.begin())->first == -1) { ends[0] = 0; }
         else {ends[0] = (endPosition.begin())->first; }
         totalSoFar = 0;
         ends[0] = (endPosition.begin())->first;
-        lastValue = ends[0];
+        lastValue = 0;
         for (map<int, long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
             meanEndPosition += (value*it->second);
             totalSoFar += it->second;
             
             if (((totalSoFar <= ptile0_25) && (totalSoFar > 1)) || ((lastValue < ptile0_25) && (totalSoFar > ptile0_25))){  ends[1] = value;  } //save value
-            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) {   ends[2] = value;  } //save value
+            if (((totalSoFar <= ptile25) && (totalSoFar > ptile0_25)) ||  ((lastValue < ptile25) && (totalSoFar > ptile25))) { ends[2] = value;  } //save value
             if (((totalSoFar <= ptile50) && (totalSoFar > ptile25)) ||  ((lastValue < ptile50) && (totalSoFar > ptile50))) {  ends[3] = value; } //save value
             if (((totalSoFar <= ptile75) && (totalSoFar > ptile50)) ||  ((lastValue < ptile75) && (totalSoFar > ptile75))) {  ends[4] = value; } //save value
             if (((totalSoFar <= ptile97_5) && (totalSoFar > ptile75)) ||  ((lastValue < ptile97_5) && (totalSoFar > ptile97_5))) {  ends[5] = value;  } //save value
-            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  ends[6] = value; } //save value
+            if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {   ends[6] = value; } //save value
             lastValue = totalSoFar;
         }
+        ends[6] = (endPosition.rbegin())->first;
+        
         lengths[0] = (seqLength.begin())->first;
         totalSoFar = 0;
-        lastValue = lengths[0];
+        lastValue = 0;
         for (map<int, long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++) {
             int value = it->first;
             meanSeqLength += (value*it->second);
@@ -310,10 +313,11 @@ int SeqSummaryCommand::execute(){
             if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  lengths[6] = value; } //save value
             lastValue = totalSoFar;
         }
+        lengths[6] = (seqLength.rbegin())->first;
                 
         ambigs[0] = (ambigBases.begin())->first;
         totalSoFar = 0;
-        lastValue = ambigs[0];
+        lastValue = 0;
         for (map<int, long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++) {
             int value = it->first;
             meanAmbigBases += (value*it->second);
@@ -327,10 +331,11 @@ int SeqSummaryCommand::execute(){
             if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  ambigs[6] = value; } //save value
             lastValue = totalSoFar;
         }
-
+        ambigs[6] = (ambigBases.rbegin())->first;
+        
         homops[0] = (longHomoPolymer.begin())->first;
         totalSoFar = 0;
-        lastValue = homops[0];
+        lastValue = 0;
         for (map<int, long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++) {
             int value = it->first;
             meanLongHomoPolymer += (it->first*it->second);
@@ -344,6 +349,7 @@ int SeqSummaryCommand::execute(){
             if ((totalSoFar <= ptile100) && (totalSoFar > ptile97_5)) {  homops[6] = value; } //save value
             lastValue = totalSoFar;
         }
+        homops[6] = (longHomoPolymer.rbegin())->first;
         		      
         double meanstartPosition, meanendPosition, meanseqLength, meanambigBases, meanlongHomoPolymer;
                 

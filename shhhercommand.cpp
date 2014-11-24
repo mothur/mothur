@@ -1489,16 +1489,19 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
                     }						
                 }
                 
-                for(int j=0;j<nSeqsPerOTU[i];j++){
-                    int index = cumNumSeqs[i] + j;
-                    int nI = seqIndex[index];
-                    
-                    double tauValue = singleTau[seqNumber[index]];
-                    
-                    for(int k=0;k<position;k++){
+                for(int k=0;k<position;k++){
+                    double adFk = 0;
+                    for(int j=0;j<nSeqsPerOTU[i];j++){
+                        int index = cumNumSeqs[i] + j;
+                        int nI = seqIndex[index];
+                        
+                        double tauValue = singleTau[seqNumber[index]];
+                        
+                        
                         double dist = getDistToCentroid(anL[k], nI, lengths[nI]);
-                        adF[k] += dist * tauValue;
+                        adFk += dist * tauValue;
                     }
+                    adF[k] = adFk;
                 }
                 
                 for(int j=0;j<position;j++){

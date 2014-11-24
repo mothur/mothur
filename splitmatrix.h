@@ -43,6 +43,9 @@ class SplitMatrix  {
 		int splitNames(map<string, int>& groups, int, vector<string>&);
 		int splitDistanceFileByTax(map<string, int>&, int);
 		int createDistanceFilesFromTax(map<string, int>&, int);
+        #ifdef USE_MPI
+            int createDistanceFilesFromTaxMPI(map<string, int>& seqGroup, int numGroups);
+        #endif
 };
 
 /******************************************************/

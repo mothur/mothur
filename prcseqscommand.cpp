@@ -774,13 +774,16 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     //make sure the seqs are aligned
                     if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else {
+                        
                         if (end != -1) {
                             if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
                             else {
                                 if (keepdots)   { currSeq.filterFromPos(end); }
                                 else {
+                                    
                                     string seqString = currSeq.getAligned().substr(0, end);
-                                    currSeq.setAligned(seqString); 
+                                    currSeq.setAligned(seqString);
+                                    
                                 }
                             }
                         }
@@ -788,7 +791,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                             if (keepdots)   {  currSeq.filterToPos(start);  }
                             else {
                                 string seqString = currSeq.getAligned().substr(start);
-                                currSeq.setAligned(seqString); 
+                                currSeq.setAligned(seqString);
+                                
                             }
                         }
                     }

@@ -394,20 +394,38 @@ int ClusterSplitCommand::execute(){
         string singletonName = "";
         
         double saveCutoff = cutoff;
+        
+#ifdef USE_MPI
+        int pid;
+        int tag = 2001;
+        MPI_Status status;
+        MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+            
+#endif
 
-        if (file != "") {  deleteFiles = false; estart = time(NULL); singletonName = readFile(distName); }
-        else {
+        if (file != "") {
+            deleteFiles = false; estart = time(NULL);
+            
+#ifdef USE_MPI
+            if (pid == 0) { //only process 0 converts and splits
+#endif
+
+            singletonName = readFile(distName);
+                
+#ifdef USE_MPI
+            
+        } //only process 0 reads
+        //make everyone wait
+        MPI_Barrier(MPI_COMM_WORLD);
+#endif
+            
+        }else {
 		          
             //****************** file prep work ******************************//
 #ifdef USE_MPI
-			int pid;
-			int tag = 2001;
-			MPI_Status status;
-			MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-			
 			if (pid == 0) { //only process 0 converts and splits
-                
+
 #endif
                 
                 //if user gave a phylip file convert to column file
@@ -446,16 +464,25 @@ int ClusterSplitCommand::execute(){
                 
                 estart = time(NULL);
                 m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
-                
+#ifdef USE_MPI
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+#endif
                 //split matrix into non-overlapping groups
                 SplitMatrix* split;
                 if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
                 else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
-                else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
+                else if (splitmethod == "fasta")		{   split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);  }
                 else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
+#ifdef USE_MPI
+            if ((pid == 0) || (splitmethod == "fasta")) { //only process 0 converts and splits
                 
+#endif
                 split->split();
-                
+#ifdef USE_MPI
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+#endif
                 if (m->control_pressed) { delete split; return 0; }
                 
                 singletonName = split->getSingletonNames();
@@ -471,8 +498,11 @@ int ClusterSplitCommand::execute(){
                 
                 m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
                 estart = time(NULL);
+#ifdef USE_MPI
+            if (pid == 0) { //only process 0 converts and splits
                 
-                if (!runCluster) { 
+#endif
+                if (!runCluster) {
                     string filename = printFile(singletonName, distName);
                     
                     m->mothurOutEndLine();
@@ -480,15 +510,25 @@ int ClusterSplitCommand::execute(){
                     m->mothurOutEndLine(); m->mothurOut(filename); m->mothurOutEndLine();
                     for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
                     m->mothurOutEndLine();
+#ifdef USE_MPI
+#else
                     return 0;
-                    
+#endif
                 }
                 deleteFiles = true;
+#ifdef USE_MPI
+                
+            }
+            
+            MPI_Barrier(MPI_COMM_WORLD);
+            if (!runCluster) {  return 0;  }
+#endif
+
             }
 		//****************** break up files between processes and cluster each file set ******************************//
 	#ifdef USE_MPI
 			////you are process 0 from above////
-			
+		if (pid == 0) {
 			vector < vector < map<string, string> > > dividedNames; //distNames[1] = vector of filenames for process 1...				
 			dividedNames.resize(processors);
 					
