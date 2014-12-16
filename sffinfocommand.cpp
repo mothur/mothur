@@ -508,7 +508,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 int SffInfoCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+     
 		for (int s = 0; s < filenames.size(); s++) {
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
@@ -631,7 +631,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             
             bool okay = sanityCheck(readheader, read);
             if (!okay) { break; }
-            
+            cout << readheader.name << endl;
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
@@ -662,7 +662,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		if (fasta)	{  outFasta.close();	}
 		if (qual)	{  outQual.close();		}
 		if (flow)	{  outFlow.close();		}
-		
+        
         if (split > 1) {
             //create new common headers for each file with the correct number of reads
             adjustCommonHeader(header);
@@ -814,6 +814,8 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 int SffInfoCommand::adjustCommonHeader(CommonHeader header){
 	try {
         string endian = m->findEdianness();
+        
+          cout << endian << endl;
         char* mybuffer = new char[4];
         ifstream in;
         m->openInputFileBinary(currentFileName, in);
@@ -1081,7 +1083,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
 int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads){
     try {
         string endian = m->findEdianness();
-        
+      
         ifstream in;
         m->openInputFileBinary(currentFileName, in);
         
@@ -2035,7 +2037,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligosObject->hasPairedBarcodes()) {
+        if (oligosObject->hasPairedPrimers() || oligosObject->hasPairedBarcodes()) {
             pairedOligos = true;
             m->mothurOut("[ERROR]: sffinfo does not support paired barcodes and primers, aborting.\n"); m->control_pressed = true; return true;
         }else {
@@ -2070,10 +2072,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
-                        string fastaFileName = "";
-                        string qualFileName = "";
-                        string nameFileName = "";
-                        string countFileName = "";
+                        string comboName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -2086,6 +2085,19 @@ bool SffInfoCommand::readOligos(string oligoFile){
                             }
                         }
                         
+                        if(itPrimer->first == ""){
+                            comboName = itBar->first;
+                        }else{
+                            if(itBar->first == ""){
+                                comboName = itPrimer->first;
+                            }
+                            else{
+                                comboName = itBar->first + "." + itPrimer->first;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
+                        
                         ofstream temp;
                         map<string, string> variables;
                         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
@@ -2097,7 +2109,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
                         }
                         
                         filehandles[itBar->second][itPrimer->second] = thisFilename;
-                        temp.open(thisFilename.c_str(), ios::binary);		temp.close();
+                        m->openOutputFileBinary(thisFilename, temp);		temp.close();
                     }
                 }
             }
@@ -2116,6 +2128,8 @@ bool SffInfoCommand::readOligos(string oligoFile){
             numSplitReads[i].resize(filehandles[i].size(), 0);
             for (int j = 0; j < filehandles[i].size(); j++) {
                 filehandlesHeaders[i].push_back(filehandles[i][j]+"headers");
+                ofstream temp;
+                m->openOutputFileBinary(filehandles[i][j]+"headers", temp); temp.close();
             }
         }
         
@@ -2176,6 +2190,8 @@ bool SffInfoCommand::readGroup(string oligoFile){
             for (int j = 0; j < filehandles[i].size(); j++) {
                 string thisHeader = filehandles[i][j]+"headers";
                 filehandlesHeaders[i].push_back(thisHeader);
+                ofstream temp;
+                m->openOutputFileBinary(thisHeader, temp); temp.close();
             }
         }
 		

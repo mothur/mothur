@@ -155,7 +155,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
             primers = oligos.getPrimers();
             revPrimer = oligos.getReversePrimers();
         }
-        numRPrimers = oligos.getReversePrimers().size();
+        numRPrimers = revPrimer.size();
         
         TrimOligos trim(pDataArray->pdiffs, 0, primers, barcodes, revPrimer);
 		
@@ -174,6 +174,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
             string locationsString = "";
             int thisPStart = -1;
             int thisPEnd = -1;
+            int totalDiffs = 0;
+            string commentString = "";
+
 			if (currSeq.getName() != "") {
                 
                 bool goodSeq = true;
@@ -194,7 +197,11 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     //process primers
                     if (numFPrimers != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = trim.findForward(currSeq, primerStart, primerEnd);
+                        vector<int> results = trim.findForward(currSeq, primerStart, primerEnd);
+                        bool good = true;
+                        if (results[0] > pDataArray->pdiffs) { good = false; }
+                        totalDiffs += results[0];
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pDataArray->pdiffs) + ") ";
                         
                         if(!good){	if (pDataArray->nomatch == "reject") { goodSeq = false; } trashCode += "f";	}
                         else{
@@ -239,8 +246,12 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     //process reverse primers
                     if (numRPrimers != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = trim.findReverse(currSeq, primerStart, primerEnd);
-                         
+                        vector<int> results = trim.findReverse(currSeq, primerStart, primerEnd);
+                        bool good = true;
+                        if (results[0] > pDataArray->pdiffs) { good = false; }
+                        totalDiffs += results[0];
+                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pDataArray->pdiffs) + ") ";
+                        
                         if(!good){	if (pDataArray->nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{ 
                             //are you aligned
@@ -312,6 +323,16 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         
                     }
                 }
+                
+                if (commentString != "") {
+                    string seqComment = currSeq.getComment();
+                    currSeq.setComment("\t" + commentString + "\t" + seqComment);
+                }
+                
+                if (totalDiffs > pDataArray->pdiffs) { trashCode += "t"; goodSeq = false; }
+                
+                //trimming removed all bases
+                if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
 				if(goodSeq == 1)    {
                     currSeq.printSequence(goodFile);

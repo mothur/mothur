@@ -731,6 +731,9 @@ vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(ma
         
 		in.seekg(start);
         
+        //adjust start if null strings
+        if (start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        
 		bool done = false;
 		fastaCount = 0;
         

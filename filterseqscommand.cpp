@@ -592,6 +592,9 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 		m->openInputFile(inputFilename, in);
 				
 		in.seekg(filePos->start);
+        
+        //adjust start if null strings
+        if (filePos->start == 0) {  m->zapGremlins(in); m->gobble(in);  }
 
 		bool done = false;
 		int count = 0;
@@ -980,6 +983,9 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 		m->openInputFile(filename, in);
 				
 		in.seekg(filePos->start);
+        
+        //adjust start if null strings
+        if (filePos->start == 0) {  m->zapGremlins(in); m->gobble(in);  }
 
 		bool done = false;
 		int count = 0;

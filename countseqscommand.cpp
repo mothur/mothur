@@ -542,6 +542,10 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 		m->openInputFile(namefile, in);
 		in.seekg(start);
         
+        //adjust start if null strings
+        if (start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+
+        
 		bool done = false;
         int total = 0;
 		while (!done) {

@@ -592,7 +592,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
       case NJ_PARSE_SYMMETRIC:
 	
 	if(fltcnt >= dmat->ntaxa) {
-	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row.\n");
+	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row, %s. Expected %d, and found %ld.\n", dmat->taxaname[row], fltcnt, (dmat->ntaxa));
 	  goto XIT_BAD;
 	}
 
@@ -616,7 +616,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
       case NJ_PARSE_UPPER:
 
 	if(fltcnt > dmat->ntaxa-row) {
-	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row.\n");
+	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row, %s. Expected %d, and found %ld.\n", dmat->taxaname[row], fltcnt, (dmat->ntaxa-row));
 	  goto XIT_BAD;
 	}
 	
@@ -627,7 +627,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
       case NJ_PARSE_LOWER:
 	
 	if(fltcnt > row-1) {
-	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row.\n");
+	  fprintf(stderr, "Clearcut: Incorrect number of distance values on row, %s. Expected %d, and found %d.\n", dmat->taxaname[row], fltcnt, (row-1));
 	  goto XIT_BAD;
 	}
 
@@ -676,7 +676,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
    * we would need, then there was a problem and we need to punt.
    */
   if(numvalread != expectedvalues) {
-    fprintf(stderr, "Clearcut: Incorrect number of values in the distance matrix.\n");
+    fprintf(stderr, "Clearcut: Incorrect number of values in the distance matrix. Expected %d, and found %d.\n", numvalread, expectedvalues);
     goto XIT_BAD;
   }
   

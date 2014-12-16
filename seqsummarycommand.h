@@ -101,23 +101,22 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
 		
 		ifstream in;
 		pDataArray->m->openInputFile(pDataArray->filename, in);
-
+        
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;	
-			in.seekg(0);
+			in.seekg(0); 
+            pDataArray->m->zapGremlins(in); 
 		}else { //this accounts for the difference in line endings. 
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
-			
-            pDataArray->count++;
             
 			if (pDataArray->m->control_pressed) { in.close(); outSummary.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence current(in); pDataArray->m->gobble(in); 
-			
+            
 			if (current.getName() != "") {
 				
 				int num = 1;

@@ -633,6 +633,31 @@ void MothurOut::gobble(istringstream& f){
 		exit(1);
 	}
 }
+/***********************************************************************/
+void MothurOut::zapGremlins(istream& f){
+    try {
+        
+        char d;
+        while('\0'==(d=f.get()))		{ ;}
+        if(!f.eof()) { f.putback(d); }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "zapGremlins");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void MothurOut::zapGremlins(istringstream& f){
+    try {
+        char d;
+        while('\0'==(d=f.get()))		{ ;}
+        if(!f.eof()) { f.putback(d); }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "zapGremlins");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 
@@ -904,7 +929,8 @@ bool MothurOut::isBlank(string fileName){
 			return false;
 		}else {
 			//check for blank file
-			gobble(fileHandle);
+            zapGremlins(fileHandle);
+            gobble(fileHandle);
 			if (fileHandle.eof()) { fileHandle.close(); return true;  }
 			fileHandle.close();
 		}
@@ -1084,7 +1110,8 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 				return 1;
 			}else {
 				//check for blank file
-				gobble(fileHandle);
+                zapGremlins(fileHandle);
+                gobble(fileHandle);
 				return 0;
 			}
 	}
@@ -1132,7 +1159,8 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 		}
 		else {
 			//check for blank file
-			gobble(fileHandle);
+            zapGremlins(fileHandle);
+            gobble(fileHandle);
 			if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
 			
 			return 0;
@@ -1181,7 +1209,8 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle){
 		}
 		else {
 			//check for blank file
-			gobble(fileHandle);
+            zapGremlins(fileHandle);
+            gobble(fileHandle);
 			if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
 			
 			return 0;
@@ -1230,6 +1259,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 		}
 		else {
 			//check for blank file
+            zapGremlins(fileHandle);
 			gobble(fileHandle);
 			//if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
 			
@@ -1528,8 +1558,9 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
 	try {
 			vector<unsigned long long> positions;
 			ifstream inFASTA;
-			//openInputFile(filename, inFASTA);
-			inFASTA.open(filename.c_str(), ios::binary);
+			//openInputFileBinary(filename, inFASTA);
+            string completeFileName = getFullPathName(filename);
+            inFASTA.open(completeFileName.c_str(), ios::binary);
 						
 			string input;
 			unsigned long long count = 0;
@@ -1554,7 +1585,7 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
 			unsigned long long size;
 		
 			//get num bytes in file
-			pFile = fopen (filename.c_str(),"rb");
+			pFile = fopen (completeFileName.c_str(),"rb");
 			if (pFile==NULL) perror ("Error opening file");
 			else{
 				fseek (pFile, 0, SEEK_END);
@@ -1587,12 +1618,58 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
 	}
 }
 /**************************************************************************************************/
+vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long& num, char delim) {
+    try {
+        vector<unsigned long long> positions;
+        ifstream inFASTA;
+        string completeFileName = getFullPathName(filename);
+        inFASTA.open(completeFileName.c_str(), ios::binary);
+        
+        string input;
+        unsigned long long count = 0;
+        while(!inFASTA.eof()){
+            char c = inFASTA.get(); count++;
+            if (c == delim) {
+                positions.push_back(count-1);
+                if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
+            }
+        }
+        inFASTA.close();
+        
+        num = positions.size();
+        if (debug) { mothurOut("[DEBUG]: num = " + toString(num) + ".\n"); }
+        FILE * pFile;
+        unsigned long long size;
+        
+        //get num bytes in file
+        pFile = fopen (completeFileName.c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        
+        if (debug) { mothurOut("[DEBUG]: size = " + toString(size) + ".\n"); }
+        
+        positions.push_back(size);
+        positions[0] = 0;
+        
+        return positions;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setFilePosFasta");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num) {
     try {
         vector<unsigned long long> positions;
         ifstream inFASTA;
         //openInputFile(filename, inFASTA);
-        inFASTA.open(filename.c_str(), ios::binary);
+        string completeFileName = getFullPathName(filename);
+        inFASTA.open(completeFileName.c_str(), ios::binary);
         
         string input;
         unsigned long long count = 0;
@@ -1617,7 +1694,7 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
         unsigned long long size;
         
         //get num bytes in file
-        pFile = fopen (filename.c_str(),"rb");
+        pFile = fopen (completeFileName.c_str(),"rb");
         if (pFile==NULL) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
@@ -1722,7 +1799,7 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 			vector<unsigned long long> positions;
 			ifstream in;
 			//openInputFile(filename, in);
-			in.open(filename.c_str(), ios::binary);
+			openInputFileBinary(filename, in);
 		
 			string input;
 			unsigned long long count = 0;
@@ -1772,81 +1849,160 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 /**************************************************************************************************/
 
 vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
-	try{
-		vector<unsigned long long> filePos;
-		filePos.push_back(0);
-		
-		FILE * pFile;
-		unsigned long long size;
-		
-		filename = getFullPathName(filename);
-	
-		//get num bytes in file
-		pFile = fopen (filename.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
-		else{
-			fseek (pFile, 0, SEEK_END);
-			size=ftell (pFile);
-			fclose (pFile);
-		}
-		
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				
-		//estimate file breaks
-		unsigned long long chunkSize = 0;
-		chunkSize = size / proc;
-
-		//file to small to divide by processors
-		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
-	
-		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
-		for (int i = 0; i < proc; i++) {
-			unsigned long long spot = (i+1) * chunkSize;
-			
-			ifstream in;
-			openInputFile(filename, in);
-			in.seekg(spot);
-			
-			//look for next '>'
-			unsigned long long newSpot = spot;
-			while (!in.eof()) {
-			   char c = in.get();
-				
-			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
-			   else if (int(c) == -1) { break; }
-				
-			}
-		
-			//there was not another sequence before the end of the file
-			unsigned long long sanityPos = in.tellg();
-
-			if (sanityPos == -1) {	break;  }
-			else {  filePos.push_back(newSpot);  }
-			
-			in.close();
-		}
-		
-		//save end pos
-		filePos.push_back(size);
-		
-		//sanity check filePos
-		for (int i = 0; i < (filePos.size()-1); i++) {
-			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
-		}
-
-		proc = (filePos.size() - 1);
+    try{
+        vector<unsigned long long> filePos;
+        filePos.push_back(0);
+        
+        FILE * pFile;
+        unsigned long long size;
+        
+        filename = getFullPathName(filename);
+        
+        //get num bytes in file
+        pFile = fopen (filename.c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+        //estimate file breaks
+        unsigned long long chunkSize = 0;
+        chunkSize = size / proc;
+        
+        //file to small to divide by processors
+        if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
+        
+        //for each process seekg to closest file break and search for next '>' char. make that the filebreak
+        for (int i = 0; i < proc; i++) {
+            unsigned long long spot = (i+1) * chunkSize;
+            
+            ifstream in;
+            openInputFile(filename, in);
+            in.seekg(spot);
+            
+            //look for next '>'
+            unsigned long long newSpot = spot;
+            while (!in.eof()) {
+                char c = in.get();
+                
+                if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
+                else if (int(c) == -1) { break; }
+                
+            }
+            
+            //there was not another sequence before the end of the file
+            unsigned long long sanityPos = in.tellg();
+            
+            if (sanityPos == -1) {	break;  }
+            else {  filePos.push_back(newSpot);  }
+            
+            in.close();
+        }
+        
+        //save end pos
+        filePos.push_back(size);
+        
+        //sanity check filePos
+        for (int i = 0; i < (filePos.size()-1); i++) {
+            if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+        }
+        
+        proc = (filePos.size() - 1);
 #else
-		mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
-		proc=1;
-		filePos.push_back(size);
+        mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+        proc=1;
+        filePos.push_back(size);
 #endif
-		return filePos;
-	}
-	catch(exception& e) {
-		errorOut(e, "MothurOut", "divideFile");
-		exit(1);
-	}
+        return filePos;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "divideFile");
+        exit(1);
+    }
 }
+/**************************************************************************************************/
+
+vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, char delimChar) {
+    try{
+        vector<unsigned long long> filePos;
+        filePos.push_back(0);
+        
+        FILE * pFile;
+        unsigned long long size;
+        
+        filename = getFullPathName(filename);
+        
+        //get num bytes in file
+        pFile = fopen (filename.c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+        //estimate file breaks
+        unsigned long long chunkSize = 0;
+        chunkSize = size / proc;
+        
+        //file to small to divide by processors
+        if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
+        
+        //for each process seekg to closest file break and search for next delimChar char. make that the filebreak
+        for (int i = 0; i < proc; i++) {
+            unsigned long long spot = (i+1) * chunkSize;
+            
+            ifstream in;
+            openInputFile(filename, in);
+            in.seekg(spot);
+            
+            //look for next delimChar
+            unsigned long long newSpot = spot;
+            while (!in.eof()) {
+                char c = in.get();
+                
+                if (c == delimChar) {   in.putback(c); newSpot = in.tellg(); break;  }
+                else if (int(c) == -1) { break; }
+                
+            }
+            
+            //there was not another sequence before the end of the file
+            unsigned long long sanityPos = in.tellg();
+            
+            if (sanityPos == -1) {	break;  }
+            else {  filePos.push_back(newSpot);  }
+            
+            in.close();
+        }
+        
+        //save end pos
+        filePos.push_back(size);
+        
+        //sanity check filePos
+        for (int i = 0; i < (filePos.size()-1); i++) {
+            if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+        }
+        
+        proc = (filePos.size() - 1);
+#else
+        mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+        proc=1;
+        filePos.push_back(size);
+#endif
+        return filePos;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "divideFile");
+        exit(1);
+    }
+}
+
 /**************************************************************************************************/
 
 vector<unsigned long long> MothurOut::divideFilePerLine(string filename, int& proc) {
@@ -2503,6 +2659,7 @@ map<string, int> MothurOut::readNames(string namefile) {
                     checkName(secondCol);
                     int num = getNumNames(secondCol);
                     nameMap[firstCol] = num;
+                    if (debug) { mothurOut("[DEBUG]: " + firstCol + ", " + toString(num) + ".\n"); }
                     pairDone = false;  
                 } 
             }
@@ -3152,13 +3309,16 @@ unsigned int MothurOut::fromBase36(string base36){
 string  MothurOut::findEdianness() {
     try {
         // find real endian type
-        unsigned char EndianTest[2] = {1,0};
-        short x = *(short *)EndianTest;
-        
         string endianType = "unknown";
-        if(x == 1) { endianType = "BIG_ENDIAN"; }
-        else { endianType = "LITTLE_ENDIAN";    }
-    
+        int num = 1;
+        if(*(char *)&num == 1)
+        {
+            endianType = "LITTLE_ENDIAN";
+        }
+        else
+        {
+            endianType = "BIG_ENDIAN";
+        }
         return endianType;
     }
 	catch(exception& e) {

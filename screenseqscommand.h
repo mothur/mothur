@@ -222,6 +222,7 @@ static DWORD WINAPI MySumThreadFunction(LPVOID lpParam){
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			in.seekg(0);
+            pDataArray->m->zapGremlins(in);
 		}else { //this accounts for the difference in line endings. 
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
@@ -347,7 +348,7 @@ static DWORD WINAPI MyAlignsThreadFunction(LPVOID lpParam){
         
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
-			in.seekg(0);  pDataArray->m->getline(in); pDataArray->m->gobble(in);
+			in.seekg(0);  pDataArray->m->zapGremlins(in); pDataArray->m->getline(in); pDataArray->m->gobble(in);
 		}else { //this accounts for the difference in line endings. 
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
@@ -407,6 +408,7 @@ static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			in.seekg(0);
+            pDataArray->m->zapGremlins(in);
 		}else { //this accounts for the difference in line endings. 
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}

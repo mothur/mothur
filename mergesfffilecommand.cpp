@@ -431,7 +431,10 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         
         if (!okay) { m->control_pressed = true; return 0; }
         
-        string endian = m->findEdianness();
+        string endian = "LITTLE_EDIAN";
+#ifdef SP_BIG_ENDIAN
+        endian = "BIG_ENDIAN";
+#endif
         char* mybuffer = new char[4];
         ifstream in;
         m->openInputFileBinary(currentFileName, in);

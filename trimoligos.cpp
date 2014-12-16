@@ -174,10 +174,13 @@ TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, v
 /********************************************************************/
 TrimOligos::~TrimOligos() {}
 //********************************************************************/
-bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
+vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
     try {
         
         string rawSequence = seq.getUnaligned();
+        vector<int> success;
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
+        success.push_back(1e6); //no matches found
         
         for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
             string oligo = it->first;
@@ -187,12 +190,14 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
             //search for primer
             int olength = oligo.length();
             for (int j = 0; j < rawSequence.length()-olength; j++){
-                if (m->control_pressed) { primerStart = 0; primerEnd = 0; return false; }
+                if (m->control_pressed) { primerStart = 0; primerEnd = 0; return success; }
                 string rawChunk = rawSequence.substr(j, olength);
                 if(compareDNASeq(oligo, rawChunk)) {
                     primerStart = j;
                     primerEnd = primerStart + olength;
-                    return true;
+                    success[0] = 0;
+                    success[1] = 0;
+                    return success;
                 }
                 
             }
@@ -200,7 +205,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
         
         primerStart = 0; primerEnd = 0;
         //if you don't want to allow for diffs
-        if (pdiffs == 0) { return false; }
+        if ((pdiffs == 0) || (success[0] == 0)) { return success; }
         else { //try aligning and see if you can find it
             
             //can you find the barcode
@@ -222,7 +227,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
                         
                         string oligo = it->first;
                         
-                        if (m->control_pressed) { primerStart = 0; primerEnd = 0; return false; }
+                        if (m->control_pressed) { primerStart = 0; primerEnd = 0; return success; }
                         
                         string rawChunk = rawSequence.substr(j, olength+pdiffs);
                         
@@ -253,13 +258,13 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
             
             if (alignment != NULL) { delete alignment; }
             
-            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; return false;	}	//no good matches
-            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; return false;	}	//can't tell the difference between multiple primers
-            else{ return true; }
+            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
+            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
         primerStart = 0; primerEnd = 0;
-        return false;
+        return success;
         
     }
     catch(exception& e) {
@@ -268,12 +273,14 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
     }
 }
 //******************************************************************/
-bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
+vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
     try {
         
         string rawSequence = seq.getUnaligned();
         int maxRevPrimerLength = revPrimer[0].length();
-        bool success = false;
+        vector<int> success;
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
+        success.push_back(1e6); //no matches found
         
         for(int i=0;i<revPrimer.size();i++){
             string oligo = revPrimer[i];
@@ -284,21 +291,23 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
             //search for primer
             int olength = oligo.length();
             for (int j = rawSequence.length()-olength; j >= 0; j--){
-                if (m->control_pressed) { primerStart = 0; primerEnd = 0; return false; }
+                if (m->control_pressed) { primerStart = 0; primerEnd = 0; return success; }
                 string rawChunk = rawSequence.substr(j, olength);
                 
                 if(compareDNASeq(oligo, rawChunk)) {
                     primerStart = j;
                     primerEnd = primerStart + olength;
                     //cout << primerStart << '\t' << primerEnd << endl;
-                    return true;
+                    success[0] = 0;
+                    success[1] = 0;
+                    return success;
                 }
                 
             }
         }
         //cout << maxRevPrimerLength << endl;
         //if you found the barcode or if you don't want to allow for diffs
-        if ((pdiffs == 0) || (success = false)) { primerStart = 0; primerEnd = 0; return false; }
+        if ((pdiffs == 0) || (success[0] == 0)) { return success; }
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
@@ -312,7 +321,10 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
             
             for(int i=0;i<revPrimer.size();i++){
                 
-                for (int j = 0; j < rawRSequence.length()-(revPrimer[i].length()+pdiffs); j++){
+                //undefined if not forced into an int.
+                int stopSpot = rawRSequence.length()-(revPrimer[i].length()+pdiffs);
+                
+                for (int j = 0; j < stopSpot; j++){
                     
                     string oligo = reverseOligo(revPrimer[i]);
                     string rawChunk = rawRSequence.substr(j,oligo.length()+pdiffs);
@@ -349,14 +361,13 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
             
             if (alignment != NULL) { delete alignment; }
             
-            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; return false;	}	//no good matches
-            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; return false;	}	//can't tell the difference between multiple primers
-            else{  return true; }
+            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
+            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
         primerStart = 0; primerEnd = 0;
-        return false;
-
+        return success;
         
     }
     catch(exception& e) {
@@ -389,7 +400,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
         if (paired) { success = stripPairedBarcode(seq, qual, group); return success; }
         
         string rawSequence = seq.getUnaligned();
-        success.push_back(bdiffs + 1);	//guilty until proven innocent
+        success.push_back(bdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6); //no matches found
         
         //can you find the barcode
@@ -503,9 +514,9 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
         //look for forward barcode
         string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
-        success.push_back(bdiffs + 1);	//guilty until proven innocent
+        success.push_back(bdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(bdiffs + 1);
+        success.push_back(bdiffs + 1000);
         success.push_back(1e6);
         
         //can you find the forward barcode
@@ -728,9 +739,9 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
         //look for forward barcode
         string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
-        success.push_back(bdiffs + 1);	//guilty until proven innocent
+        success.push_back(bdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(bdiffs + 1);
+        success.push_back(bdiffs + 1000);
         success.push_back(1e6);
         
         //can you find the forward barcode
@@ -958,9 +969,9 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
         //look for forward barcode
         string rawSeq = seq.getUnaligned();
         
-        success.push_back(bdiffs + 1);	//guilty until proven innocent
+        success.push_back(bdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(bdiffs + 1);
+        success.push_back(bdiffs + 1000);
         success.push_back(1e6);
         
         //cout << seq.getName() << endl;
@@ -1028,7 +1039,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
              reverse = Westcott, Schloss, Brown, Moore
              but if best match forward = 4, and reverse = 1, we want to count as a valid match because forward 1 and forward 4 are the same. so both barcodes map to same group.
              */
-            //cout << endl << forwardSeq.getName() << endl;
+            //cout << endl << seq.getName() << endl;
             for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
                 string oligo = it->first;
                 
@@ -1211,9 +1222,9 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
         string rawSeq = seq.getUnaligned();
         
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(pdiffs + 1);
+        success.push_back(pdiffs + 1000);
         success.push_back(1e6);
         
         //cout << seq.getName() << endl;
@@ -1341,7 +1352,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
             
             fMinDiff = minDiff;
 
-//            //cout << minDiff << '\t' << minCount << '\t' << endl;
+            //cout << minDiff << '\t' << minCount << '\t' << endl;
             if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward primer diffs
@@ -1476,9 +1487,9 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
         string rawRSequence = reverseSeq.getUnaligned();
         
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(pdiffs + 1);
+        success.push_back(pdiffs + 1000);
         success.push_back(1e6);
         
         //can you find the forward barcode
@@ -1706,9 +1717,9 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
         string rawRSequence = reverseSeq.getUnaligned();
         
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
-        success.push_back(pdiffs + 1);
+        success.push_back(pdiffs + 1000);
         success.push_back(1e6);
         
         //can you find the forward barcode
@@ -1931,7 +1942,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
         string rawSequence = seq.getUnaligned();
         
         vector<int> success;
-        success.push_back(bdiffs + 1);	//guilty until proven innocent
+        success.push_back(bdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
         
         //can you find the barcode
@@ -2037,7 +2048,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
         
         string rawSequence = seq.getUnaligned();
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
         
         //can you find the primer
@@ -2141,7 +2152,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
         
         if (paired) { success = stripPairedPrimers(seq, qual, group, keepForward); return success; }
         
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
         
         string rawSequence = seq.getUnaligned();
@@ -2251,7 +2262,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
         string rawSequence = seq.getUnaligned();
         
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
         
         int maxRevPrimerLength = revPrimer[0].length();
@@ -2361,7 +2372,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
         string rawSequence = seq.getUnaligned();
         
         vector<int> success;
-        success.push_back(pdiffs + 1);	//guilty until proven innocent
+        success.push_back(pdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6);
 
         int maxRevPrimerLength = revPrimer[0].length();

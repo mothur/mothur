@@ -510,6 +510,11 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
         
 		in.seekg(filePos.start);
         
+        //adjust
+        if (filePos.start == 0) {
+            m->zapGremlins(in); m->gobble(in);
+        }
+        
 		bool done = false;
         bool wroteAccnos = false;
 		int count = 0;

@@ -142,6 +142,7 @@ bool InteractEngine::getInput(){
 										
 					#ifdef USE_MPI
 						}
+                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
 					mout->mothurOut("Invalid."); 
@@ -331,6 +332,7 @@ bool BatchEngine::getInput(){
 										
 					#ifdef USE_MPI
 						}
+                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
 					mout->mothurOut("Invalid."); 
@@ -415,7 +417,7 @@ bool ScriptEngine::getInput(){
 				MPI_Comm_size(MPI_COMM_WORLD, &processors);
 				
 				if (pid == 0) {
-				
+				//cout << pid << " is here " << processors << endl;
 			#endif
 			
 			input = getNextCommand(listOfCommands);	
@@ -434,19 +436,22 @@ bool ScriptEngine::getInput(){
 			
 			#ifdef USE_MPI
 				//send commandName
-				for(int i = 1; i < processors; i++) { 
+				for(int i = 1; i < processors; i++) {
+                    //cout << pid << " is here " << input << endl;
 						int length = input.length();
 						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+                    //cout << pid << " is here " << length << '\t' << input << endl;
 						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-	
+	//cout << pid << " is here " << length << '\t' << input << endl;
 					}
 				}else {
 					int length;
 					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+                    //cout << pid << " is here " << length << endl;
 					//recieve container
 					char* tempBuf = new char[length];
 					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-					
+					//cout << pid << " is here " << length << '\t' << tempBuf << endl;
 					input = tempBuf;
 					if (input.length() > length) { input = input.substr(0, length);  }
 					delete tempBuf;	
@@ -475,7 +480,7 @@ bool ScriptEngine::getInput(){
 					
 //cout << pid << " is here " << commandName  << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-							//cout << pid << " is in execute" << endl;	
+							//cout << pid << " is in execute" << endl;
 					#endif
 					//executes valid command
                     mout->changedSeqNames = false;
@@ -504,6 +509,7 @@ bool ScriptEngine::getInput(){
 					#ifdef USE_MPI
 					//cout << pid << " is done in execute" << endl;
 						}
+                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
 					mout->mothurOut("Invalid."); 

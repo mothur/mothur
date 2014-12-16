@@ -76,10 +76,12 @@ class MothurOut {
 		//file operations
         bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
 		vector<unsigned long long> divideFile(string, int&); //divides splitting unevenness by sequence
+        vector<unsigned long long> divideFile(string filename, int& proc, char delimChar);
         vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
 		int divideFile(string, int&, vector<string>&);
 		vector<unsigned long long> setFilePosEachLine(string, int&);
 		vector<unsigned long long> setFilePosFasta(string, long long&);
+        vector<unsigned long long> setFilePosFasta(string, long long&, char);
         vector<unsigned long long> setFilePosFasta(string, int&);
 		string sortFile(string, string);
 		int appendFiles(string, string);
@@ -108,6 +110,8 @@ class MothurOut {
 		string getline(istringstream&);
 		void gobble(istream&);
 		void gobble(istringstream&);
+        void zapGremlins(istream&);
+        void zapGremlins(istringstream&);
         vector<string> splitWhiteSpace(string& rest, char[], int);
         vector<string> splitWhiteSpace(string);
         set<string> readAccnos(string);

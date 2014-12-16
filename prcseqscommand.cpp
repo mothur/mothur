@@ -651,7 +651,6 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                 primers[(it->second).forward] = it->first;
                 revPrimer.push_back((it->second).reverse);
             }
-            if (pdiffs != 0) { m->mothurOut("[WARNING]: Pcr.seqs is only designed to allow diffs in forward primers. Reverse primers must be an exact match.\n"); }
         }else{
             primers = oligos.getPrimers();
             revPrimer = oligos.getReversePrimers();
@@ -674,6 +673,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             string locationsString = "";
             int thisPStart = -1;
             int thisPEnd = -1;
+            int totalDiffs = 0;
+            string commentString = "";
+            
 			if (currSeq.getName() != "") {
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
@@ -683,10 +685,15 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     map<int, int> mapAligned;
                     bool aligned = isAligned(currSeq.getAligned(), mapAligned);
                     
+                    
                     //process primers
                     if (primers.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = trim.findForward(currSeq, primerStart, primerEnd);
+                        vector<int> results = trim.findForward(currSeq, primerStart, primerEnd);
+                        bool good = true;
+                        if (results[0] > pdiffs) { good = false; }
+                        totalDiffs += results[0];
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pdiffs) + ") ";
                         
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "f";	}
                         else{
@@ -723,7 +730,12 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     //process reverse primers
                     if (revPrimer.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = trim.findReverse(currSeq, primerStart, primerEnd);
+                        vector<int> results = trim.findReverse(currSeq, primerStart, primerEnd);
+                        bool good = true;
+                        if (results[0] > pdiffs) { good = false; }
+                        totalDiffs += results[0];
+                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pdiffs) + ") ";
+                        
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{
                             //are you aligned
@@ -797,6 +809,13 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         }
                     }
                 }
+                
+                if (commentString != "") {
+                    string seqComment = currSeq.getComment();
+                    currSeq.setComment("\t" + commentString + "\t" + seqComment);
+                }
+                
+                if (totalDiffs > pdiffs) { trashCode += "t"; goodSeq = false; }
                 
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }
@@ -1224,7 +1243,7 @@ int PcrSeqsCommand::readOligos(){
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligos.hasPairedBarcodes()) {
+        if (oligos.hasPairedPrimers()) {
             pairedOligos = true;
             numFPrimers = oligos.getPairedPrimers().size();
         }else {

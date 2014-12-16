@@ -48,8 +48,8 @@ class TrimOligos {
         bool stripSpacer(Sequence&, QualityScores&);
     
         //seq, primerStart, primerEnd
-        bool findForward(Sequence&, int&, int&);
-        bool findReverse(Sequence&, int&, int&);
+        vector<int> findForward(Sequence&, int&, int&);
+        vector<int> findReverse(Sequence&, int&, int&);
     
         string reverseOligo(string);
         string getCodeValue(int, int);

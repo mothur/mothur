@@ -36,18 +36,22 @@ public:
 	
 private:
     
-	string sharedfile, contaxonomyfile, metadatafile, groups, outputDir, format, label, referenceTax, picrustOtuFile;
+	string sharedfile, relabundfile, contaxonomyfile, metadatafile, groups, outputDir, format, label, referenceTax, picrustOtuFile, inputFileName, fileFormat;
 	vector<string> outputNames, Groups, sampleMetadata;
 	set<string> labels;
     
 	bool abort, allLines, picrust;
     
     int getBiom(vector<SharedRAbundVector*>&);
+    int getBiom(vector<SharedRAbundFloatVector*>& lookup);
     vector<string> getMetaData(vector<SharedRAbundVector*>&);
+    vector<string> getMetaData(vector<SharedRAbundFloatVector*>&);
     vector<string> parseTax(string tax, vector<string>& scores);
     int getSampleMetaData(vector<SharedRAbundVector*>&);
+    int getSampleMetaData(vector<SharedRAbundFloatVector*>&);
     //for picrust
     int getGreenGenesOTUIDs(vector<SharedRAbundVector*>&, map<string, string>&);
+    int getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>&, map<string, string>&);
     map<string, string> readGGOtuMap();
 };
 

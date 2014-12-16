@@ -293,7 +293,7 @@ void ListVector::print(ostream& output){
 		for(int i=0;i<hold.size();i++){
 			if(hold[i] != ""){
 				output << hold[i] << '\t';
-			}
+            }
 		}
 		output << endl;
 	}

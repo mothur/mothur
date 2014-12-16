@@ -193,9 +193,12 @@ int GetMIMarksPackageCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        if (oligosfile != "") { Oligos oligos(oligosfile); Groups = oligos.getGroupNames();  }
+        if (oligosfile != "") { Oligos oligos(oligosfile); createGroupNames(oligos);  } //createGroupNames fills in group names
         else if (file != "")  { readFile();     }
-        else {  GroupMap groupmap(groupfile); groupmap.readMap(); Groups = groupmap.getNamesOfGroups(); }
+        else {  GroupMap groupmap(groupfile); groupmap.readMap();
+            vector<string> tempGroups = groupmap.getNamesOfGroups();
+            for (int i = 0; i < tempGroups.size(); i++) { Groups.insert(tempGroups[i]); }
+        }
         
         if (outputDir == "") { outputDir += m->hasPath(inputfile); }
         map<string, string> variables;
@@ -313,7 +316,7 @@ int GetMIMarksPackageCommand::execute(){
             }
         }
         
-        for (int i = 0; i < Groups.size(); i++) {  out << Groups[i] << '\t' << endl; }
+        for (set<string>::iterator it = Groups.begin(); it != Groups.end(); it++) {  out << *it << '\t' << endl; }
         
         out.close();
         
@@ -357,13 +360,16 @@ int GetMIMarksPackageCommand::execute(){
 
 int GetMIMarksPackageCommand::readFile(){
 	try {
-        Oligos oligos;
+        
         inputfile = file;
+        int format = 2;
         
         ifstream in;
         m->openInputFile(file, in);
         
         while(!in.eof()) {
+            
+            Oligos oligos;
             
             if (m->control_pressed) { return 0; }
             
@@ -463,13 +469,14 @@ int GetMIMarksPackageCommand::readFile(){
                     oligosfile = thisFileName2;
                     if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
                     oligos.read(oligosfile);
+                    createGroupNames(oligos); // adding in groupNames from this file
+                format = 2;
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
-                Groups.push_back(group);
+                Groups.insert(group);
+                format = 3;
             }
         }
         in.close();
-        
-        Groups = oligos.getGroupNames();
         
         inputfile = file;
         
@@ -479,6 +486,114 @@ int GetMIMarksPackageCommand::readFile(){
 		m->errorOut(e, "GetMIMarksPackageCommand", "readFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
+    try {
+        bool pairedOligos = false;
+        
+        if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes()) {      pairedOligos = true;        }
+        
+        vector<string> groupNames = oligos.getGroupNames();
+        if (groupNames.size() == 0) { return Groups;  }
+        
+        if (pairedOligos) {
+            map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
+            map<int, oligosPair> primers = oligos.getPairedPrimers();
+            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                    
+                    string primerName = oligos.getPrimerName(itPrimer->first);
+                    string barcodeName = oligos.getBarcodeName(itBar->first);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string comboName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
+                            }
+                            else{
+                                comboGroupName = barcodeName + "." + primerName;
+                            }
+                        }
+                        
+                        if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
+                            comboName = ((itBar->second).forward+"."+(itBar->second).reverse);
+                        }else{
+                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
+                                comboName = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                            else{
+                                comboName = ((itBar->second).forward+"."+(itBar->second).reverse) + "." + (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
+                        Groups.insert(comboGroupName);
+                    }
+                }
+            }
+        }else {
+            map<string, int> barcodes = oligos.getBarcodes() ;
+            map<string, int> primers = oligos.getPrimers();
+            for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                    
+                    string primerName = oligos.getPrimerName(itPrimer->second);
+                    string barcodeName = oligos.getBarcodeName(itBar->second);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string comboName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
+                            }
+                            else{
+                                comboGroupName = barcodeName + "." + primerName;
+                            }
+                        }
+                        
+                        if(itPrimer->first == ""){
+                            comboName = itBar->first;
+                        }else{
+                            if(itBar->first == ""){
+                                comboName = itPrimer->first;
+                            }
+                            else{
+                                comboName = itBar->first + "." + itPrimer->first;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
+                        Groups.insert(comboGroupName);
+                    }
+                }
+            }
+        }
+        
+        if (Groups.size() == 0) {
+            m->mothurOut("[ERROR]: your oligos file does not contain any group names."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
+        
+        return Groups;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetMIMarksPackageCommand", "createGroupNames");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

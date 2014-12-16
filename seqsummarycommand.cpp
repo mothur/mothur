@@ -404,17 +404,18 @@ int SeqSummaryCommand::execute(){
 		
 		ofstream outSummary;
 		m->openOutputFile(sumFile, outSummary);
+        
+        ifstream in;
+        m->openInputFile(filename, in);
+        
+        in.seekg(filePos->start);
 		
 		//print header if you are process 0
 		if (filePos->start == 0) {
-			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;	
+			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;
+            m->zapGremlins(in); m->gobble(in);
 		}
 				
-		ifstream in;
-		m->openInputFile(filename, in);
-				
-		in.seekg(filePos->start);
-
 		bool done = false;
 		int count = 0;
         

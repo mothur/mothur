@@ -1380,6 +1380,9 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 			ifstream in;
 			m->openInputFile(filename, in);
 			in.seekg(fastaFilePos[i]);
+            
+            //adjust start if null strings
+            if (i == 0) {  m->zapGremlins(in); m->gobble(in);  }
 			
 			Sequence temp(in); 
 			firstSeqNames[temp.getName()] = i;

@@ -36,7 +36,9 @@ private:
     bool abort, requiredonly;
     string oligosfile, groupfile, package, inputfile, file, inputDir;
     string outputDir;
-    vector<string> outputNames, Groups;
+    vector<string> outputNames;
+    set<string> createGroupNames(Oligos& oligos);
+    set<string> Groups;
     
     int readFile();
 };

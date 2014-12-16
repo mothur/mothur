@@ -742,7 +742,7 @@ int SRACommand::readMIMarksFile(){
             if (m->control_pressed) { break; }
             
             temp = m->getline(in);  m->gobble(in);
-            cout << temp << endl;
+            //cout << temp << endl;
             if (m->debug) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             string original = temp;
@@ -1338,8 +1338,8 @@ int SRACommand::readOligos(){
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligos.hasPairedBarcodes())     {   pairedOligos = true;    libLayout = "paired"; }
-        else                                {  pairedOligos = false;    libLayout = "single"; }
+        if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes())    {  pairedOligos = true;    libLayout = "paired"; }
+        else                                                            {  pairedOligos = false;    libLayout = "single"; }
         
         vector<string> thisFilesLinkers = oligos.getLinkers();
         for (int i = 0; i < thisFilesLinkers.size(); i++) { linkers.push_back(thisFilesLinkers[i]); }
@@ -1360,6 +1360,7 @@ int SRACommand::readOligos(){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
+                        string comboName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -1371,6 +1372,19 @@ int SRACommand::readOligos(){
                                 comboGroupName = barcodeName + "." + primerName;
                             }
                         }
+                        
+                        if(((itPrimer->second).forward+"."+(itPrimer->second).reverse) == ""){
+                            comboName = ((itBar->second).forward+(itBar->second).reverse);
+                        }else{
+                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
+                                comboName = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                            else{
+                                comboName = ((itBar->second).forward+(itBar->second).reverse) + "." + (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         uniqueNames.insert(comboGroupName);
                         
                         map<string, vector<string> >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
@@ -1405,6 +1419,8 @@ int SRACommand::readOligos(){
                     else {
                         string comboGroupName = "";
                         
+                        string comboName = "";
+                        
                         if(primerName == ""){
                             comboGroupName = barcodeName;
                         }else{
@@ -1415,6 +1431,19 @@ int SRACommand::readOligos(){
                                 comboGroupName = barcodeName + "." + primerName;
                             }
                         }
+                        
+                        if(itPrimer->first == ""){
+                            comboName = itBar->first;
+                        }else{
+                            if(itBar->first == ""){
+                                comboName = itPrimer->first;
+                            }
+                            else{
+                                comboName = itBar->first + "." + itPrimer->first;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         uniqueNames.insert(comboGroupName);
                         
                         map<string, vector<string> >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);

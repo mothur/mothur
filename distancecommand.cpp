@@ -539,7 +539,9 @@ void DistanceCommand::createProcesses(string filename) {
 			pid_t pid = fork();
 			
 			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                int pidInt;
+                m->mothurConvert(m->mothurGetpid(process), pidInt);
+				processIDS.push_back(pidInt);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
 				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
@@ -660,7 +662,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			for(int j=0;j<i;j++){
 				
 				if (m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
-				
+                
 				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
 				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
 				if ((i >= numNewFasta) && (j >= numNewFasta)) { break; }
@@ -671,12 +673,12 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (output == "lt") {  outFile << dist << '\t'; }
+                if (output == "lt") {  outFile << dist << '\t'; }
 			}
 			
 			if (output == "lt") { outFile << endl; }
-			
-			if(i % 100 == 0){
+            
+            if(i % 100 == 0){
 				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			

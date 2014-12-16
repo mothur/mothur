@@ -1306,7 +1306,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligos.hasPairedBarcodes()) {
+        if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes()) {
             pairedOligos = true;
             numPrimers = oligos.getPairedPrimers().size();
             numBarcodes = oligos.getPairedBarcodes().size();
@@ -1347,6 +1347,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
+                        string comboName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -1359,6 +1360,18 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             }
                         }
                         
+                        if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
+                            comboName = ((itBar->second).forward+"."+(itBar->second).reverse);
+                        }else{
+                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
+                                comboName = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                            else{
+                                comboName = ((itBar->second).forward+"."+(itBar->second).reverse) + "." + (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         ofstream temp;
                         map<string, string> variables;
                         if (fileOption) {   variables["[tag]"] = "forward";     }
@@ -1489,6 +1502,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                     else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                     else {
                         string comboGroupName = "";
+                        string comboName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -1500,6 +1514,19 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                                 comboGroupName = barcodeName + "." + primerName;
                             }
                         }
+                        
+                        if(itPrimer->first == ""){
+                            comboName = itBar->first;
+                        }else{
+                            if(itBar->first == ""){
+                                comboName = itPrimer->first;
+                            }
+                            else{
+                                comboName = itBar->first + "." + itPrimer->first;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         
                         ofstream temp;
                         map<string, string> variables;

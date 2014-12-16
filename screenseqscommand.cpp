@@ -1369,7 +1369,7 @@ int ScreenSeqsCommand::driverContigsSummary(vector<int>& oLength, vector<int>& o
         
 		in.seekg(filePos.start);
         if (filePos.start == 0) { //read headers
-            m->getline(in); m->gobble(in);
+            m->zapGremlins(in); m->gobble(in); m->getline(in); m->gobble(in);
         }
         
 		bool done = false;
@@ -1642,7 +1642,7 @@ int ScreenSeqsCommand::driverAlignSummary(vector<float>& sims, vector<float>& sc
         
 		in.seekg(filePos.start);
         if (filePos.start == 0) { //read headers
-            m->getline(in); m->gobble(in);
+            m->zapGremlins(in); m->gobble(in); m->getline(in); m->gobble(in);
         }
         
 		bool done = false;
@@ -1922,6 +1922,11 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		m->openInputFile(filename, in);
 				
 		in.seekg(filePos.start);
+        
+        //adjust start if null strings
+        if (filePos.start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        
+        m->gobble(in);
 
 		bool done = false;
 		int count = 0;

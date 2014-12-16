@@ -159,6 +159,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			inFASTA.seekg(0);
+            pDataArray->m->zapGremlins(in);
 		}else { //this accounts for the difference in line endings. 
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
