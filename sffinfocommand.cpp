@@ -619,7 +619,11 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		//print common header
 		if (sfftxt) {	printCommonHeader(outSfftxt, header);		}
 		if (flow)	{	outFlow << header.numFlowsPerRead << endl;	}
-		
+        
+        //ofstream outtemp;
+        //m->openOutputFileBinary("./temp", outtemp);
+        //printCommonHeaderForDebug(header, outtemp, 20000);
+        //outtemp.close();
 		//read through the sff file
 		while (!in.eof()) {
 			
@@ -631,7 +635,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             
             bool okay = sanityCheck(readheader, read);
             if (!okay) { break; }
-            cout << readheader.name << endl;
+            //cout << readheader.name << endl;
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
@@ -692,7 +696,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             for (int i = 0; i < filehandles.size(); i++) {
                 for (int j = 0; j < filehandles[i].size(); j++) {
                     if (filehandles[i][j] != "") {
-                        m->appendBinaryFiles(filehandles[i][j], filehandlesHeaders[i][j]);
+                        m->appendSFFFiles(filehandles[i][j], filehandlesHeaders[i][j]);
                         m->renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
                         m->mothurRemove(filehandlesHeaders[i][j]);
                         //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
@@ -815,7 +819,6 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
 	try {
         string endian = m->findEdianness();
         
-          cout << endian << endl;
         char* mybuffer = new char[4];
         ifstream in;
         m->openInputFileBinary(currentFileName, in);
@@ -913,39 +916,27 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         delete[] mybuffer;
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                //cout << filehandlesHeaders[i][j] << '\t' << numSplitReads[i][j] << endl;
+                cout << filehandlesHeaders[i][j] << '\t' << numSplitReads[i][j] << endl;
                 char* thisbuffer = new char[4];
-                if (endian == "BIG_ENDIAN") {
-                    thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
-                    thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
-                    thisbuffer[2] = (numSplitReads[i][j] >> 8) & 0xFF;
-                    thisbuffer[3] = numSplitReads[i][j] & 0xFF;
-                }else {
-                    thisbuffer[0] = numSplitReads[i][j] & 0xFF;
-                    thisbuffer[1] = (numSplitReads[i][j] >> 8) & 0xFF;
-                    thisbuffer[2] = (numSplitReads[i][j] >> 16) & 0xFF;
-                    thisbuffer[3] = (numSplitReads[i][j] >> 24) & 0xFF;
-                 }
+                thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
+                thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
+                thisbuffer[2] = (numSplitReads[i][j] >> 8) & 0xFF;
+                thisbuffer[3] = numSplitReads[i][j] & 0xFF;
                 ofstream out;
                 int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                unsigned int numTReads = (be_int4(*(unsigned int *)(thisbuffer)));
+                //cout << "numReads = " << numTReads << endl;
                 out.write(thisbuffer, 4);
                 out.close();
                 delete[] thisbuffer;
             }
         }
         char* thisbuffer3 = new char[4];
-        if (endian == "BIG_ENDIAN") {
-            thisbuffer3[0] = (numNoMatch >> 24) & 0xFF;
-            thisbuffer3[1] = (numNoMatch >> 16) & 0xFF;
-            thisbuffer3[2] = (numNoMatch >> 8) & 0xFF;
-            thisbuffer3[3] = numNoMatch & 0xFF;
-        }else {
-            thisbuffer3[0] = numNoMatch & 0xFF;
-            thisbuffer3[1] = (numNoMatch >> 8) & 0xFF;
-            thisbuffer3[2] = (numNoMatch >> 16) & 0xFF;
-            thisbuffer3[3] = (numNoMatch >> 24) & 0xFF;
-        }
+        thisbuffer3[0] = (numNoMatch >> 24) & 0xFF;
+        thisbuffer3[1] = (numNoMatch >> 16) & 0xFF;
+        thisbuffer3[2] = (numNoMatch >> 8) & 0xFF;
+        thisbuffer3[3] = numNoMatch & 0xFF;
         outNoMatchHeader.write(thisbuffer3, 4);
         delete[] thisbuffer3;
         
@@ -1067,7 +1058,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         delete[] mybuffer;
         in.close();
         
-        m->appendBinaryFiles(noMatchFile, tempNoHeader);
+        m->appendSFFFiles(noMatchFile, tempNoHeader);
         m->renameFile(tempNoHeader, noMatchFile);
         m->mothurRemove(tempNoHeader);
         
@@ -1091,17 +1082,21 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         char* mybuffer = new char[4];
         in.read(mybuffer,4);
         out.write(mybuffer, in.gcount());
+        string contents = mybuffer;
+        m->mothurOut("magicNumber = " + contents + "\n");
         delete[] mybuffer;
         
         //version
-        mybuffer = new char[4];
-        in.read(mybuffer,4);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer1 = new char[4];
+        in.read(mybuffer1,4);
+        out.write(mybuffer1, in.gcount());
+        contents = mybuffer1;
+        m->mothurOut("version = " + contents + "\n");
+        delete[] mybuffer1;
         
         //offset
-        mybuffer = new char[8];
-        in.read(mybuffer,8);
+        char* mybuffer2 = new char[8];
+        in.read(mybuffer2,8);
         unsigned long long offset = 0;
         char* thisbuffer = new char[8];
         thisbuffer[0] = (offset >> 56) & 0xFF;
@@ -1114,11 +1109,11 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         thisbuffer[7] = offset & 0xFF;
         out.write(thisbuffer, 8);
         delete[] thisbuffer;
-        delete[] mybuffer;
+        delete[] mybuffer2;
         
         //read index length
-        mybuffer = new char[4];
-        in.read(mybuffer,4);
+        char* mybuffer3 = new char[4];
+        in.read(mybuffer3,4);
         offset = 0;
         char* thisbuffer2 = new char[4];
         thisbuffer2[0] = (offset >> 24) & 0xFF;
@@ -1127,63 +1122,82 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         thisbuffer2[3] = offset & 0xFF;
         out.write(thisbuffer2, 4);
         delete[] thisbuffer2;
-        delete[] mybuffer;
+        delete[] mybuffer3;
         
         //change num reads
-        mybuffer = new char[4];
-        in.read(mybuffer,4);
-        delete[] mybuffer;
+        char* mybuffer4 = new char[4];
+        in.read(mybuffer4,4);
         
-        thisbuffer = new char[4];
+        char* thisbuffer3 = new char[4];
         if (endian == "BIG_ENDIAN") {
-            thisbuffer[0] = (numReads >> 24) & 0xFF;
-            thisbuffer[1] = (numReads >> 16) & 0xFF;
-            thisbuffer[2] = (numReads >> 8) & 0xFF;
-            thisbuffer[3] = numReads & 0xFF;
+            thisbuffer3[0] = (numReads >> 24) & 0xFF;
+            thisbuffer3[1] = (numReads >> 16) & 0xFF;
+            thisbuffer3[2] = (numReads >> 8) & 0xFF;
+            thisbuffer3[3] = numReads & 0xFF;
         }else {
-            thisbuffer[0] = numReads & 0xFF;
-            thisbuffer[1] = (numReads >> 8) & 0xFF;
-            thisbuffer[2] = (numReads >> 16) & 0xFF;
-            thisbuffer[3] = (numReads >> 24) & 0xFF;
+            thisbuffer3[0] = numReads & 0xFF;
+            thisbuffer3[1] = (numReads >> 8) & 0xFF;
+            thisbuffer3[2] = (numReads >> 16) & 0xFF;
+            thisbuffer3[3] = (numReads >> 24) & 0xFF;
         }
-        out.write(thisbuffer, 4);
-        delete[] thisbuffer;
+        out.write(thisbuffer3, 4);
+        contents = mybuffer4;
+        m->mothurOut("numReads = " + contents + "\n");
+        unsigned int numTReads = be_int4(*(unsigned int *)(mybuffer4));
+        m->mothurOut("numReads = " + toString(numTReads) + "\n");
+        m->mothurOut("numReads = " + toString(header.numReads) + "\n");
+        delete[] thisbuffer3;
+        delete[] mybuffer4;
         
         //read header length
-        mybuffer = new char[2];
-        in.read(mybuffer,2);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer5 = new char[2];
+        in.read(mybuffer5,2);
+        out.write(mybuffer5, in.gcount());
+        contents = mybuffer5;
+        m->mothurOut("readLength = " + contents + "\n");
+        delete[] mybuffer5;
         
         //read key length
-        mybuffer = new char[2];
-        in.read(mybuffer,2);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer6 = new char[2];
+        in.read(mybuffer6,2);
+        out.write(mybuffer6, in.gcount());
+        contents = mybuffer6;
+        m->mothurOut("key length = " + contents + "\n");
+        delete[] mybuffer6;
         
         //read number of flow reads
-        mybuffer = new char[2];
-        in.read(mybuffer,2);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer7 = new char[2];
+        in.read(mybuffer7,2);
+        out.write(mybuffer7, in.gcount());
+        contents = mybuffer7;
+        m->mothurOut("num flow reads = " + contents + "\n");
+        int numFlowReads = be_int2(*(unsigned short *)(mybuffer7));
+        m->mothurOut("numReads = " + toString(numFlowReads) + "\n");
+        delete[] mybuffer7;
         
         //read format code
-        mybuffer = new char[1];
-        in.read(mybuffer,1);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer8 = new char[1];
+        in.read(mybuffer8,1);
+        out.write(mybuffer8, in.gcount());
+        contents = mybuffer8;
+        m->mothurOut("read format code = " + contents + "\n");
+        delete[] mybuffer8;
         
         //read flow chars
-        mybuffer = new char[header.numFlowsPerRead];
-        in.read(mybuffer,header.numFlowsPerRead);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer9 = new char[header.numFlowsPerRead];
+        in.read(mybuffer9,header.numFlowsPerRead);
+        out.write(mybuffer9, in.gcount());
+        contents = mybuffer9;
+        m->mothurOut("flow chars = " + contents + "\n");
+        delete[] mybuffer9;
         
         //read key
-        mybuffer = new char[header.keyLength];
-        in.read(mybuffer,header.keyLength);
-        out.write(mybuffer, in.gcount());
-        delete[] mybuffer;
+        char* mybuffer10 = new char[header.keyLength];
+        in.read(mybuffer10,header.keyLength);
+        out.write(mybuffer10, in.gcount());
+        contents = mybuffer10;
+        m->mothurOut("key = " + contents + "\n");
+        delete[] mybuffer10;
         
         
         /* Pad to 8 chars */
@@ -1191,9 +1205,9 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
         in.seekg(spot);
         
-        mybuffer = new char[spot-spotInFile];
-        out.write(mybuffer, spot-spotInFile);
-        delete[] mybuffer;
+        char* mybuffer11 = new char[spot-spotInFile];
+        out.write(mybuffer11, spot-spotInFile);
+        delete[] mybuffer11;
         in.close();
         
         return 0;

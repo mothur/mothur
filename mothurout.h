@@ -86,6 +86,7 @@ class MothurOut {
 		string sortFile(string, string);
 		int appendFiles(string, string);
         int appendBinaryFiles(string, string);
+        int appendSFFFiles(string, string);
         int appendFilesWithoutHeaders(string, string);
 		int renameFile(string, string); //oldname, newname
 		string getFullPathName(string);

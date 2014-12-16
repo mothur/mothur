@@ -1450,7 +1450,46 @@ int MothurOut::appendBinaryFiles(string temp, string filename) {
 		exit(1);
 	}	
 }
-
+/**************************************************************************************************/
+int MothurOut::appendSFFFiles(string temp, string filename) {
+    try{
+        ofstream output;
+        ifstream input;
+        int ableToOpen = 0;
+        
+        //open output file in append mode
+        string fullFileName = getFullPathName(filename);
+        
+        output.open(fullFileName.c_str(), ios::app | ios::binary);
+        if(!output) {
+            mothurOut("[ERROR]: Could not open " + fullFileName); mothurOutEndLine();
+            return 1;
+        }else {
+            //get full path name
+            string completeFileName = getFullPathName(temp);
+            
+            input.open(completeFileName.c_str(), ios::binary);
+            if(!input) {
+                mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+                return 1;
+            }else {
+                char buffer[4096];
+                while (!input.eof()) {
+                    input.read(buffer, 4096);
+                    output.write(buffer, input.gcount());
+                }
+                input.close();
+            }
+            output.close();
+        }
+        
+        return ableToOpen;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "appendSFFFiles");
+        exit(1);
+    }	
+}
 /**************************************************************************************************/
 int MothurOut::appendFilesWithoutHeaders(string temp, string filename) {
 	try{

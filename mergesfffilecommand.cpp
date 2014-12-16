@@ -431,10 +431,8 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         
         if (!okay) { m->control_pressed = true; return 0; }
         
-        string endian = "LITTLE_EDIAN";
-#ifdef SP_BIG_ENDIAN
-        endian = "BIG_ENDIAN";
-#endif
+        string endian = m->findEdianness();
+        
         char* mybuffer = new char[4];
         ifstream in;
         m->openInputFileBinary(currentFileName, in);
@@ -487,17 +485,11 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         in.read(mybuffer,4);
         delete[] mybuffer;
         thisbuffer2 = new char[4];
-        if (endian == "BIG_ENDIAN") {
-            thisbuffer2[0] = (numTotalReads >> 24) & 0xFF;
-            thisbuffer2[1] = (numTotalReads >> 16) & 0xFF;
-            thisbuffer2[2] = (numTotalReads >> 8) & 0xFF;
-            thisbuffer2[3] = numTotalReads & 0xFF;
-        }else {
-            thisbuffer2[0] = numTotalReads & 0xFF;
-            thisbuffer2[1] = (numTotalReads >> 8) & 0xFF;
-            thisbuffer2[2] = (numTotalReads >> 16) & 0xFF;
-            thisbuffer2[3] = (numTotalReads >> 24) & 0xFF;
-        }
+        thisbuffer2[0] = (numTotalReads >> 24) & 0xFF;
+        thisbuffer2[1] = (numTotalReads >> 16) & 0xFF;
+        thisbuffer2[2] = (numTotalReads >> 8) & 0xFF;
+        thisbuffer2[3] = numTotalReads & 0xFF;
+        
         out.write(thisbuffer2, 4);
         delete[] thisbuffer2;
         
@@ -549,7 +541,7 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         in.close();
         out.close();
         
-        m->appendBinaryFiles(outputFile, outputFileHeader);
+        m->appendSFFFiles(outputFile, outputFileHeader);
         m->renameFile(outputFileHeader, outputFile);
         m->mothurRemove(outputFileHeader);
         
