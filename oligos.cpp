@@ -129,12 +129,13 @@ int Oligos::readOligos(){
 					
 					//check for repeat barcodes
 					map<string, int>::iterator itPrime = primers.find(oligo);
-					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
+					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                    else {
+                        if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
                     
-					primers[oligo]=indexPrimer; indexPrimer++;
-					primerNameVector.push_back(group);
+                        primers[oligo]=indexPrimer; indexPrimer++;
+                        primerNameVector.push_back(group);
+                    }
 				}
                 else if (type == "PRIMER"){
                     m->gobble(inOligos);
@@ -162,14 +163,15 @@ int Oligos::readOligos(){
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    else { uniquePrimers.insert(tempPair); }
+                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                    else { uniquePrimers.insert(tempPair);
 					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
+                        if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
                     
-					pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
-					primerNameVector.push_back(group);
-                    hasPPrimers = true;
+                        pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
+                        primerNameVector.push_back(group);
+                        hasPPrimers = true;
+                    }
                 }
 				else if(type == "REVERSE"){
                     string oligoRC = reverseOligo(oligo);
@@ -208,17 +210,19 @@ int Oligos::readOligos(){
                         //check for repeat barcodes
                         string tempPair = oligo+reverseBarcode;
                         if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
-                        else { uniqueBarcodes.insert(tempPair); }
-                        
-                        pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
-                        barcodeNameVector.push_back(group);
+                        else {
+                            uniqueBarcodes.insert(tempPair);
+                            pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
+                            barcodeNameVector.push_back(group);
+                        }
                     }else {
                         //check for repeat barcodes
                         map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-                        
-                        barcodes[oligo]=indexBarcode; indexBarcode++;
-                        barcodeNameVector.push_back(group);
+                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                        else {
+                            barcodes[oligo]=indexBarcode; indexBarcode++;
+                            barcodeNameVector.push_back(group);
+                        }
                     }
 				}else if(type == "LINKER"){
 					linker.push_back(oligo);
@@ -356,7 +360,6 @@ int Oligos::readOligos(){
         
         
         if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
-		
         
         Groups.clear();
         for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }

@@ -138,24 +138,27 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         map<string, int> faked;
         set<int> locations; //locations = beginning locations
         
-        Oligos oligos(pDataArray->oligosfile);
-        int numFPrimers, numRPrimers;
+        Oligos oligos;
+        int numFPrimers, numRPrimers;  numFPrimers = 0; numRPrimers = 0;
         map<string, int> primers;
         map<string, int> barcodes; //not used
         vector<string> revPrimer;
-        if (oligos.hasPairedBarcodes()) {
-            numFPrimers = oligos.getPairedPrimers().size();
-            map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
-            for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
-                primers[(it->second).forward] = it->first;
-                revPrimer.push_back((it->second).reverse);
+
+        if (pDataArray->oligosfile != "") {
+            oligos.read(pDataArray->oligosfile);
+            if (oligos.hasPairedPrimers()) {
+                map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
+                for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
+                    primers[(it->second).forward] = it->first;
+                    revPrimer.push_back((it->second).reverse);
+                }
+            }else {
+                primers = oligos.getPrimers();
+                revPrimer = oligos.getReversePrimers();
             }
-        }else {
-            numFPrimers = oligos.getPrimers().size();
-            primers = oligos.getPrimers();
-            revPrimer = oligos.getReversePrimers();
+            numRPrimers = revPrimer.size();
+            numFPrimers = primers.size();
         }
-        numRPrimers = revPrimer.size();
         
         TrimOligos trim(pDataArray->pdiffs, 0, primers, barcodes, revPrimer);
 		

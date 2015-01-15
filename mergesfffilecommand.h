@@ -35,7 +35,7 @@ public:
 private:
 	string sffFilename, outputDir, file, currentFileName;
 	vector<string> filenames, outputNames;
-	bool abort;
+	bool abort, keyTrim;
     int numTotalReads, allFilesnumFlowReads, allFileskeyLength;
     string outputFile, outputFileHeader;
     vector<CommonHeader> commonHeaders;
@@ -50,6 +50,7 @@ private:
 	bool sanityCheck(Header&, seqRead&);
     int adjustCommonHeader();
     int readFile();
+    int printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads);
 };
 
 /**********************************************************/

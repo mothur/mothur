@@ -83,7 +83,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(){
 GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 	try {
         
-		abort = false; calledHelp = false;
+        abort = false; calledHelp = false; fileOption = 0;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -133,6 +133,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 				if(it != parameters.end()){
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
 				
             }
@@ -142,20 +143,17 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 			else if (groupfile == "not found") { groupfile = ""; }
             else {  m->setGroupFile(groupfile); inputfile = groupfile; }
             
+            oligosfile = validParameter.validFile(parameters, "oligos", true);
+            if (oligosfile == "not found")      {	oligosfile = "";	setOligosParameter = false; }
+            else if(oligosfile == "not open")	{	abort = true;		}
+            else {	m->setOligosFile(oligosfile); inputfile = oligosfile; setOligosParameter = true; }
+
             file = validParameter.validFile(parameters, "file", true);
 			if (file == "not open") {  file = "";  abort = true; }
 			else if (file == "not found") { file = ""; }
-            else {  inputfile = file; }
+            else {  inputfile = file;  fileOption = findFileOption();  }
             
-            oligosfile = validParameter.validFile(parameters, "oligos", true);
-			if (oligosfile == "not found")      {	oligosfile = "";	}
-			else if(oligosfile == "not open")	{	abort = true;		}
-			else {	m->setOligosFile(oligosfile); inputfile = oligosfile; }
-
-            if ((groupfile != "") && (oligosfile != "") && (file != "")) {
-                m->mothurOut("[ERROR]: You may not use a group file, file and an oligos file, only one."); m->mothurOutEndLine(); abort = true;
-            }
-
+            
             if ((groupfile == "") && (oligosfile == "") && (file == "")) {
                 oligosfile = m->getOligosFile();
                 if (oligosfile != "") { inputfile = oligosfile;  m->mothurOut("Using " + oligosfile + " as input file for the oligos parameter."); m->mothurOutEndLine(); }
@@ -193,8 +191,9 @@ int GetMIMarksPackageCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        if (oligosfile != "") { Oligos oligos(oligosfile); createGroupNames(oligos);  } //createGroupNames fills in group names
+        if ((oligosfile != "") && (file != "")) { Oligos oligos(oligosfile); createGroupNames(oligos);  }
         else if (file != "")  { readFile();     }
+        else if (oligosfile != "") { Oligos oligos(oligosfile); createGroupNames(oligos);  } //createGroupNames fills in group names
         else {  GroupMap groupmap(groupfile); groupmap.readMap();
             vector<string> tempGroups = groupmap.getNamesOfGroups();
             for (int i = 0; i < tempGroups.size(); i++) { Groups.insert(tempGroups[i]); }
@@ -219,100 +218,100 @@ int GetMIMarksPackageCommand::execute(){
         if (package == "air") {
             out << "#Environmental:MIMARKS.specimen.air.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*altitude" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*altitude" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	rel_to_oxygen	samp_collect_device	samp_mat_process	*altitude	barometric_press	carb_dioxide	carb_monoxide	chem_administration	elev	humidity	methane	organism_count	oxygen	oxy_stat_samp	perturbation	pollutants	resp_part_matter	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	solar_irradiance	temp	ventilation_rate	ventilation_type	volatile_org_comp	wind_direction	wind_speed" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\t*altitude\tbarometric_press\tcarb_dioxide\tcarb_monoxide\tchem_administration\telev\thumidity\tmethane\torganism_count\toxygen\toxy_stat_samp\tperturbation\tpollutants\tresp_part_matter\tsamp_size	samp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsolar_irradiance\ttemp\tventilation_rate\tventilation_type\tvolatile_org_comp\twind_direction\twind_speed" << endl;
             }
         }else if (package == "host_associated") {
             out << "#Environmental:MIMARKS.specimen.host-associated.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host   " << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods    rel_to_oxygen	samp_collect_device	samp_mat_process	*host	age	altitude	blood_press_diast	blood_press_syst	body_habitat	body_product	tissue	chem_administration	depth	diet	disease_stat	dry_mass	elev	family_relationship	genotype	gravidity	height_or_length	host_body_temp	host_color	host_growth_cond	host_shape	host_subject_id	host_taxid	infra_specific_name	infra_specific_rank	last_meal	life_stage	organism_count	oxy_stat_samp	perturbation	phenotype	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	substrate	temp	tot_mass" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\t*host\tage\taltitude\tblood_press_diast\tblood_press_syst\tbody_habitat\tbody_product\ttissue\tchem_administration\tdepth\tdiet\tdisease_stat\tdry_mass\telev\tfamily_relationship\tgenotype\tgravidity\theight_or_length\thost_body_temp\thost_color\thost_growth_cond\thost_shape\thost_subject_id\thost_taxid\tinfra_specific_name\tinfra_specific_rank\tlast_meal\tlife_stage\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\tsubstrate\ttemp\ttot_mass" << endl;
             }
         }else if (package == "human_associated") {
             out << "#Environmental:MIMARKS.specimen.human-associated.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	hiv_stat	ihmc_ethnicity	ihmc_medication_code	age	amniotic_fluid_color	fetal_health_stat	gestation_state	maternal_health_stat	blood_blood_disord	body_product	tissue	body_mass_index	chem_administration	diet	disease_stat	drug_usage	family_relationship	genotype	height	host_body_temp	host_subject_id	last_meal	nose_throat_disord	pulmonary_disord	diet_last_six_month	medic_hist_perform	occupation	organism_count	oxy_stat_samp	perturbation	phenotype	pet_farm_animal	pulse	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	smoker	study_complt_stat	temp	tot_mass	travel_out_six_month	twin_sibling	urine_collect_meth	kidney_disord	urogenit_tract_disor	weight_loss_3_month" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\thiv_stat\tihmc_ethnicity\tihmc_medication_code\tage\tamniotic_fluid_color\tfetal_health_stat\tgestation_state\tmaternal_health_stat\tblood_blood_disord\tbody_product\ttissue\tbody_mass_index\tchem_administration\tdiet\tdisease_stat\tdrug_usage\tfamily_relationship	genotype\theight\thost_body_temp\thost_subject_id\tlast_meal\tnose_throat_disord\tpulmonary_disord\tdiet_last_six_month\tmedic_hist_perform\toccupation\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tpet_farm_animal\tpulse\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\tsmoker\tstudy_complt_stat\ttemp\ttot_mass\ttravel_out_six_month\ttwin_sibling\turine_collect_meth\tkidney_disord\turogenit_tract_disor\tweight_loss_3_month" << endl;
             }
         }else if (package == "human_gut") {
             out << "#Environmental:MIMARKS.specimen.human-gut.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	ihmc_ethnicity	ihmc_medication_code	age	body_product	tissue	body_mass_index	chem_administration	diet	disease_stat	family_relationship	gastrointest_disord	genotype	height	host_body_temp	host_subject_id	last_meal	liver_disord	medic_hist_perform	occupation	organism_count	oxy_stat_samp	perturbation	phenotype	pulse	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	special_diet	temp	tot_mass" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\tihmc_ethnicity\tihmc_medication_code\tage	body_product\ttissue\tbody_mass_index\tchem_administration\tdiet\tdisease_stat\tfamily_relationship\tgastrointest_disord\tgenotype\theight\thost_body_temp\thost_subject_id\tlast_meal\tliver_disord\tmedic_hist_perform\toccupation\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tpulse\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\tspecial_diet\ttemp\ttot_mass" << endl;
             }
         }else if (package == "human_oral") {
             out << "#Environmental:MIMARKS.specimen.human-oral.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	ihmc_ethnicity	ihmc_medication_code	age	body_product	tissue	body_mass_index	chem_administration	diet	disease_stat	family_relationship	genotype	height	host_body_temp	host_subject_id	last_meal	medic_hist_perform	nose_mouth_teeth_throat_disord	occupation	organism_count	oxy_stat_samp	perturbation	phenotype	pulse	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	temp	time_last_toothbrush	tot_mass" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\tihmc_ethnicity\tihmc_medication_code\tage	body_product\ttissue\tbody_mass_index\tchem_administration\tdiet\tdisease_stat\tfamily_relationship\tgenotype\theight\thost_body_temp\thost_subject_id\tlast_meal\tmedic_hist_perform\tnose_mouth_teeth_throat_disord\toccupation\torganism_count\toxy_stat_samp	perturbation\tphenotype	pulse\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\ttemp\ttime_last_toothbrush\ttot_mass" << endl;
             }
         }else if (package == "human_skin") {
             out << "#Environmental:MIMARKS.specimen.human-skin.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_namev*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	ihmc_ethnicity	ihmc_medication_code	age	body_product	tissue	body_mass_index	chem_administration	dermatology_disord	diet	disease_stat	dominant_hand	family_relationship	genotype	height	host_body_temp	host_subject_id	last_meal	medic_hist_perform	occupation	organism_count	oxy_stat_samp	perturbation	phenotype	pulse	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	temp	time_since_last_wash	tot_mass" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\tihmc_ethnicity\tihmc_medication_code\tage	body_product\ttissue\tbody_mass_index\tchem_administration\tdermatology_disord\tdiet\tdisease_stat\tdominant_hand\tfamily_relationship\tgenotype\theight\thost_body_temp\thost_subject_id\tlast_meal\tmedic_hist_perform\toccupation\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tpulse\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\ttemp\ttime_since_last_wash\ttot_mass" << endl;
             }
         }else if (package == "human_vaginal") {
             out << "#Environmental:MIMARKS.specimen.human-vaginal.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	hrt	ihmc_ethnicity	ihmc_medication_code	age	birth_control	body_product	tissue	body_mass_index	chem_administration	diet	disease_stat	douche	family_relationship	genotype	gynecologic_disord	height	host_body_temp	host_subject_id	hysterectomy	last_meal	medic_hist_perform	menarche	menopause	occupation	organism_count	oxy_stat_samp	perturbation	phenotype	pregnancy	pulse	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	sex	sexual_act	temp	tot_mass	urogenit_disord" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\thrt\tihmc_ethnicity\tihmc_medication_code\tage\tbirth_control\tbody_product\ttissue\tbody_mass_index\tchem_administration\tdiet\tdisease_stat\tdouche\tfamily_relationship\tgenotype\tgynecologic_disord\theight\thost_body_temp\thost_subject_id\thysterectomy\tlast_meal\tmedic_hist_perform\tmenarche\tmenopause\toccupation\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tpregnancy\tpulse\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\tsexual_act\ttemp\ttot_mass\turogenit_disord" << endl;
             }
         }else if (package == "microbial") {
             out << "#Environmental:MIMARKS.specimen.microbial.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev	rel_to_oxygen	samp_collect_device	samp_mat_process	alkalinity	alkyl_diethers	altitude	aminopept_act	ammonium	bacteria_carb_prod	biomass	bishomohopanol	bromide	calcium	carb_nitro_ratio	chem_administration	chloride	chlorophyll	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_org_carb	diss_org_nitro	diss_oxygen	glucosidase_act	magnesium	mean_frict_vel	mean_peak_frict_vel	methane	n_alkanes	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	part_org_carb	perturbation	petroleum_hydrocarb	phaeopigments	phosphate	phosplipid_fatt_acid	potassium	pressure	redox_potential	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	silicate	sodium	sulfate	sulfide	temp	tot_carb	tot_nitro	tot_org_carb	turbidity	water_content" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\talkalinity\talkyl_diethers\taltitude\taminopept_act\tammonium\tbacteria_carb_prod\tbiomass\tbishomohopanol\tbromide\tcalcium\tcarb_nitro_ratio\tchem_administration\tchloride\tchlorophyll\tdiether_lipids\tdiss_carb_dioxide\tdiss_hydrogen\tdiss_inorg_carb\tdiss_org_carb\tdiss_org_nitro\tdiss_oxygen\tglucosidase_act\tmagnesium\tmean_frict_vel\tmean_peak_frict_vel\tmethane\tn_alkanes\tnitrate\tnitrite\tnitro\torg_carb\torg_matter\torg_nitro\torganism_count\toxy_stat_samp\tph\tpart_org_carb\tperturbation\tpetroleum_hydrocarb\tphaeopigments\tphosphate\tphosplipid_fatt_acid\tpotassium\tpressure\tredox_potential\tsalinity\tsamp_size\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsilicate\tsodium\tsulfate\tsulfide\ttemp\ttot_carb\ttot_nitro\ttot_org_carb\tturbidity\twater_content" << endl;
             }
         }else if (package == "miscellaneous") {
             out << "#Environmental:MIMARKS.specimen.miscellaneous.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name   *title  *seq_methods    *lat_lon" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	rel_to_oxygen	samp_collect_device	samp_mat_process	alkalinity	altitude	ammonium	biomass	bromide	calcium	chem_administration	chloride	chlorophyll	current	density	depth	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_org_nitro	diss_oxygen	elev	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	perturbation	phosphate	phosplipid_fatt_acid	potassium	pressure	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	silicate	sodium	sulfate	sulfide	temp" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process	alkalinity	altitude	ammonium	biomass	bromide	calcium	chem_administration	chloride	chlorophyll	current	density	depth	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_org_nitro	diss_oxygen	elev	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	perturbation	phosphate	phosplipid_fatt_acid	potassium	pressure	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	silicate	sodium	sulfate	sulfide	temp" << endl;
             }
         }else if (package == "plant_associated") {
             out << "#Environmental:MIMARKS.specimen.plant-associated.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*host	rel_to_oxygen	samp_collect_device	samp_mat_process	age	air_temp_regm	altitude	antibiotic_regm	body_product	chem_administration	chem_mutagen	climate_environment	depth	disease_stat	dry_mass	elev	fertilizer_regm	fungicide_regm	gaseous_environment	genotype	gravity	growth_hormone_regm	growth_med	height_or_length	herbicide_regm	host_taxid	humidity_regm	infra_specific_name	infra_specific_rank	life_stage	mechanical_damage	mineral_nutr_regm	non_mineral_nutr_regm	organism_count	oxy_stat_samp	ph_regm	perturbation	pesticide_regm	phenotype	tissue	plant_product	radiation_regm	rainfall_regm	salt_regm	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	season_environment	standing_water_regm	temp	tiss_cult_growth_med	tot_mass	water_temp_regm	watering_regm	wet_mass" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process	age	air_temp_regm	altitude	antibiotic_regm	body_product	chem_administration	chem_mutagen	climate_environment	depth	disease_stat	dry_mass	elev	fertilizer_regm	fungicide_regm	gaseous_environment	genotype	gravity	growth_hormone_regm	growth_med	height_or_length	herbicide_regm	host_taxid	humidity_regm	infra_specific_name	infra_specific_rank	life_stage	mechanical_damage	mineral_nutr_regm	non_mineral_nutr_regm	organism_count	oxy_stat_samp	ph_regm	perturbation	pesticide_regm	phenotype	tissue	plant_product	radiation_regm	rainfall_regm	salt_regm	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	season_environment	standing_water_regm	temp	tiss_cult_growth_med	tot_mass	water_temp_regm	watering_regm	wet_mass" << endl;
             }
         }else if (package == "sediment") {
             out << "#Environmental:MIMARKS.specimen.sediment.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev	rel_to_oxygen	samp_collect_device	samp_mat_process	alkalinity	alkyl_diethers	aminopept_act	ammonium	bacteria_carb_prod	biomass	bishomohopanol	bromide	calcium	carb_nitro_ratio	chem_administration	chloride	chlorophyll	density	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_org_carb	diss_org_nitro	diss_oxygen	glucosidase_act	magnesium	mean_frict_vel	mean_peak_frict_vel	methane	n_alkanes	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	particle_class	part_org_carb	perturbation	petroleum_hydrocarb	phaeopigments	phosphate	phosplipid_fatt_acid	porosity	potassium	pressure	redox_potential	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	sediment_type	silicate	sodium	sulfate	sulfide	temp	tidal_stage	tot_carb	tot_nitro	tot_org_carb	turbidity	water_content" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process	alkalinity	alkyl_diethers	aminopept_act	ammonium	bacteria_carb_prod	biomass	bishomohopanol	bromide	calcium	carb_nitro_ratio	chem_administration	chloride	chlorophyll	density	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_org_carb	diss_org_nitro	diss_oxygen	glucosidase_act	magnesium	mean_frict_vel	mean_peak_frict_vel	methane	n_alkanes	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	particle_class	part_org_carb	perturbation	petroleum_hydrocarb	phaeopigments	phosphate	phosplipid_fatt_acid	porosity	potassium	pressure	redox_potential	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	sediment_type	silicate	sodium	sulfate	sulfide	temp	tidal_stage	tot_carb	tot_nitro	tot_org_carb	turbidity	water_content" << endl;
             }
         }else if (package == "soil") {
             out << "#Environmental:MIMARKS.specimen.soil.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	*elev	rel_to_oxygen	samp_collect_device	samp_mat_process	altitude	sieving	cur_land_use	cur_vegetation_meth	cur_vegetation	drainage_class	al_sat	al_sat_meth	heavy_metals_meth	heavy_metals	salinity_meth	extreme_salinity	fao_class	agrochem_addition	crop_rotation	extreme_event	fire	flooding	previous_land_use_meth	previous_land_use	tillage	horizon_meth	horizon	link_class_info	link_climate_info	link_addit_analys	annual_season_precpt	annual_season_temp	microbial_biomass_meth	microbial_biomass	other	ph_meth	ph	pool_dna_extracts	profile_position	samp_size	samp_weight_dna_ext	slope_aspect	slope_gradient	soil_type_meth	soil_type	local_class_meth	local_class	store_cond	texture_meth	texture	tot_n_meth	tot_n	tot_org_c_meth	tot_org_carb	water_content_soil_meth	water_content_soil" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\t*elev\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process	altitude	sieving	cur_land_use	cur_vegetation_meth	cur_vegetation	drainage_class	al_sat	al_sat_meth	heavy_metals_meth	heavy_metals	salinity_meth	extreme_salinity	fao_class	agrochem_addition	crop_rotation	extreme_event	fire	flooding	previous_land_use_meth	previous_land_use	tillage	horizon_meth	horizon	link_class_info	link_climate_info	link_addit_analys	annual_season_precpt	annual_season_temp	microbial_biomass_meth	microbial_biomass	other	ph_meth	ph	pool_dna_extracts	profile_position	samp_size	samp_weight_dna_ext	slope_aspect	slope_gradient	soil_type_meth	soil_type	local_class_meth	local_class	store_cond	texture_meth	texture	tot_n_meth	tot_n	tot_org_c_meth	tot_org_carb	water_content_soil_meth	water_content_soil" << endl;
             }
         }else if (package == "wastewater") {
             out << "#Environmental:MIMARKS.specimen.wastewater.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	rel_to_oxygen	samp_collect_device	samp_mat_process	alkalinity	biochem_oxygen_dem	chem_administration	chem_oxygen_dem	depth	efficiency_percent	emulsions	gaseous_substances	indust_eff_percent	inorg_particles	nitrate	org_particles	organism_count	oxy_stat_samp	ph	perturbation	phosphate	pre_treatment	primary_treatment	reactor_type	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	secondary_treatment	sewage_type	sludge_retent_time	sodium	soluble_inorg_mat	soluble_org_mat	suspend_solids	temp	tertiary_treatment	tot_nitro	tot_phosphate	wastewater_type" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device	samp_mat_process	alkalinity	biochem_oxygen_dem	chem_administration	chem_oxygen_dem	depth	efficiency_percent	emulsions	gaseous_substances	indust_eff_percent	inorg_particles	nitrate	org_particles	organism_count	oxy_stat_samp	ph	perturbation	phosphate	pre_treatment	primary_treatment	reactor_type	samp_size	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	secondary_treatment	sewage_type	sludge_retent_time	sodium	soluble_inorg_mat	soluble_org_mat	suspend_solids	temp	tertiary_treatment	tot_nitro	tot_phosphate	wastewater_type" << endl;
             }
         }else if (package == "water") {
             out << "#Environmental:MIMARKS.specimen.water.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth" << endl;
             }else {
-                out << "*sample_name	*organism	*collection_date	*biome	*feature	*material	*geo_loc_name	*lat_lon    *title  *seq_methods	*depth	rel_to_oxygen	samp_collect_device	samp_mat_process	alkalinity	alkyl_diethers	aminopept_act	ammonium	atmospheric_data	bacteria_carb_prod	biomass	bishomohopanol	bromide	calcium	carb_nitro_ratio	chem_administration	chloride	chlorophyll	current	density	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_inorg_nitro	diss_inorg_phosp	diss_org_carb	diss_org_nitro	diss_oxygen	elev	glucosidase_act	light_intensity	magnesium	mean_frict_vel	mean_peak_frict_vel	n_alkanes	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	part_org_carb	part_org_nitro	perturbation	petroleum_hydrocarb	phaeopigments	phosphate	phosplipid_fatt_acid	photon_flux	potassium	pressure	primary_prod	redox_potential	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	silicate	sodium	soluble_react_phosp	sulfate	sulfide	suspend_part_matter	temp	tidal_stage	tot_depth_water_col	tot_diss_nitro	tot_inorg_nitro	tot_nitro	tot_part_carb	tot_phosp" << endl;
+                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*depth\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process	alkalinity	alkyl_diethers	aminopept_act	ammonium	atmospheric_data	bacteria_carb_prod	biomass	bishomohopanol	bromide	calcium	carb_nitro_ratio	chem_administration	chloride	chlorophyll	current	density	diether_lipids	diss_carb_dioxide	diss_hydrogen	diss_inorg_carb	diss_inorg_nitro	diss_inorg_phosp	diss_org_carb	diss_org_nitro	diss_oxygen	elev	glucosidase_act	light_intensity	magnesium	mean_frict_vel	mean_peak_frict_vel	n_alkanes	nitrate	nitrite	nitro	org_carb	org_matter	org_nitro	organism_count	oxy_stat_samp	ph	part_org_carb	part_org_nitro	perturbation	petroleum_hydrocarb	phaeopigments	phosphate	phosplipid_fatt_acid	photon_flux	potassium	pressure	primary_prod	redox_potential	salinity	samp_size	samp_store_dur	samp_store_loc	samp_store_temp	silicate	sodium	soluble_react_phosp	sulfate	sulfide	suspend_part_matter	temp	tidal_stage	tot_depth_water_col	tot_diss_nitro	tot_inorg_nitro	tot_nitro	tot_part_carb	tot_phosp" << endl;
             }
         }
         
@@ -351,10 +350,23 @@ int GetMIMarksPackageCommand::execute(){
  
  file option 3
  
- fastqfile  fastqfile   group
- fastqfile  fastqfile   group
- fastqfile  fastqfile   group
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
  ...
+ 
+ file option 4
+ 
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ ...
+ 
+ file option 5
+ 
+ My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
+ ...
+
  
  */
 
@@ -384,9 +396,13 @@ int GetMIMarksPackageCommand::readFile(){
             }else if (pieces.size() == 3) {
                 thisFileName1 = pieces[1];
                 thisFileName2 = pieces[2];
-                string group = pieces[0];
+                group = pieces[0];
+            }else if (pieces.size() == 4) {
+                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                thisFileName1 = pieces[0];
+                thisFileName2 = pieces[1];
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2 or 3 columns. The 2 column files are sff file then oligos or fastqfile then oligos. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->control_pressed = true;
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
@@ -499,6 +515,11 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
         if (groupNames.size() == 0) { return Groups;  }
         
         if (pairedOligos) {
+            //overwrite global oligos - assume fastq data like make.contigs
+            Oligos oligos;
+            if ((fileOption == 3) || (fileOption == 5)) { oligos.read(oligosfile, false);  } //like make.contigs
+            else {  oligos.read(oligosfile);  }
+            
             map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
             map<int, oligosPair> primers = oligos.getPairedPrimers();
             for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
@@ -525,18 +546,61 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
                         }
                         
                         if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
-                            comboName = ((itBar->second).forward+"."+(itBar->second).reverse);
+                            if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                            if ((itBar->second).reverse != "NONE") {
+                                if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                else {  comboName += ("."+(itBar->second).reverse);  }
+                            }
                         }else{
                             if(((itBar->second).forward+(itBar->second).reverse) == ""){
-                                comboName = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                                if ((itPrimer->second).forward != "NONE") { comboName += (itPrimer->second).forward; }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
                             }
                             else{
-                                comboName = ((itBar->second).forward+"."+(itBar->second).reverse) + "." + (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                                if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                                if ((itBar->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                    else {  comboName += ("."+(itBar->second).reverse);  }
+                                }
+                                if ((itPrimer->second).forward != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).forward; }
+                                    else {  comboName += ("."+(itPrimer->second).forward);  }
+                                }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
                             }
                         }
                         
                         if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         Groups.insert(comboGroupName);
+                        
+                        map<string, string>::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Barcode.end()) {
+                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
+                            Group2Barcode[comboGroupName] = temp;
+                        }else {
+                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
+                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
+                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
+                            }
+                        }
+                        
+                        itGroup2Barcode = Group2Primer.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Primer.end()) {
+                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
+                            Group2Primer[comboGroupName] = temp;
+                        }else {
+                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
+                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
+                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
+                            }
+                        }
+
                     }
                 }
             }
@@ -579,6 +643,29 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
                         
                         if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         Groups.insert(comboGroupName);
+                        
+                        map<string, string >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Barcode.end()) {
+                            string temp = (itBar->first);
+                            Group2Barcode[comboGroupName] = temp;
+                        }else {
+                            string temp = (itBar->first);
+                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
+                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
+                            }
+                        }
+                        
+                        itGroup2Barcode = Group2Primer.find(comboGroupName);
+                        if (itGroup2Barcode == Group2Primer.end()) {
+                            string temp = (itPrimer->first);
+                            Group2Primer[comboGroupName] = temp;
+                        }else {
+                            string temp = (itPrimer->first);
+                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
+                               m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
+                            }
+                        }
+
                     }
                 }
             }
@@ -595,6 +682,74 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
         exit(1);
     }
 }
+//**********************************************************************************************************************
+/*
+ file option 1
+ 
+ sfffile1   oligosfile1
+ sfffile2   oligosfile2
+ ...
+ 
+ file option 2
+ 
+ fastqfile1 oligosfile1
+ fastqfile2 oligosfile2
+ ...
+ 
+ file option 3
+ 
+ ffastqfile1 rfastqfile1
+ ffastqfile2 rfastqfile2
+ ...
+ 
+ file option 4
+ 
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ group fastqfile  fastqfile
+ ...
+ 
+ file option 5
+ 
+ My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
+ ...
+ */
+
+int GetMIMarksPackageCommand::findFileOption(){
+    try {
+        ifstream in;
+        m->openInputFile(file, in);
+        
+        fileOption = 0;
+        
+        while(!in.eof()) {
+            
+            if (m->control_pressed) { return 0; }
+            
+            string line = m->getline(in);  m->gobble(in);
+            vector<string> pieces = m->splitWhiteSpace(line);
+            
+            if (pieces.size() == 2) { //good pair and sff or fastq and oligos
+                if (!setOligosParameter) {
+                    fileOption = 12; //1 or 2
+                }else {  fileOption = 3; }
+            }else if(pieces.size() == 3) { //good pair and paired read
+                fileOption = 4;
+            }else if (pieces.size() == 4) {
+                fileOption = 5;
+            }
+            break;
+        }
+        in.close();
+        
+        return fileOption;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetMIMarksPackageCommand", "findFileOption");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 
 

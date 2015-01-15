@@ -36,15 +36,15 @@ public:
     
 private:
     bool abort, isSFF, pairedOligos, setOligosParameter;
-    int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;
+    int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, fileOption;
     
     string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;
     string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType, checkorient;
-    string submissionName, lastName, firstName, email, centerName, centerType, description, website, orientation, packageType;
+    string submissionName, lastName, firstName, email, centerName, centerType, ownership, description, website, orientation, packageType;
     string projectName, grantId, grantTitle, grantAgency, projectTitle, inputDir;
     vector<string> outputNames, Groups;
-    map<string, vector<string> > Group2Barcode;
-    map<string, vector<string> > Group2Primer;
+    map<string, string> Group2Barcode;
+    map<string, string> Group2Primer;
     vector<string> linkers;
     vector<string> spacers;
     map<string, string> Group2Organism;
@@ -67,6 +67,7 @@ private:
     int checkGroups(map<string, vector<string> >&);
     int mapGroupToFile(map<string, vector<string> >&, vector<string>);
     int fixMap(map<string, vector<string> >&);
+    int findFileOption();
     
 };
 

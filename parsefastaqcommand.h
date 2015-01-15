@@ -62,6 +62,8 @@ private:
     vector<vector<string> > rfastqFileNames;
     vector<vector<string> > fastaFileNames;
     vector<vector<string> > qualFileNames;
+    vector<vector<string> > rfastaFileNames;
+    vector<vector<string> > rqualFileNames;
     string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;
     map<string, int> GroupToFile;

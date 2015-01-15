@@ -14,6 +14,7 @@ vector<string> MergeSfffilesCommand::setParameters(){
 	try {
 		CommandParameter psff("sff", "InputTypes", "", "", "sffFile", "sffFile", "none","sff",false,false); parameters.push_back(psff);
         CommandParameter pfile("file", "InputTypes", "", "", "sffFile", "sffFile", "none","sff",false,false); parameters.push_back(pfile);
+        CommandParameter pkeytrim("keytrim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeytrim);
 		CommandParameter poutput("output", "String", "", "", "", "", "","",false,true,true); parameters.push_back(poutput);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -35,6 +36,7 @@ string MergeSfffilesCommand::getHelpString(){
 		helpString += "The merge.sfffiles command parameters are sff, file and output. sff or file is required. \n";
 		helpString += "The sff parameter allows you to enter the sff list of sff files separated by -'s.\n";
 		helpString += "The file parameter allows you to provide a file containing a list of sff files to merge.  \n";
+        helpString += "The keytrim parameter allows you to mergesff files with different keysequence by trimming them to the first 4 characters. Provided the first 4 match.  \n";
         helpString += "The output parameter allows you to provide an output filename.  \n";
 		helpString += "Example sffinfo(sff=mySffFile.sff-mySecond.sff).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n";
@@ -198,6 +200,9 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 			if (outputFile == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
 			if (outputDir != "") { outputFile = outputDir + m->getSimpleName(outputFile);  }
             
+            string temp = validParameter.validFile(parameters, "keytrim", false);				if (temp == "not found") { temp = "F"; }
+            keyTrim = m->isTrue(temp);
+            
 		}
 	}
 	catch(exception& e) {
@@ -304,7 +309,7 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 			
 			if (count >= header.numReads) { break; }
 		}
-		
+        
 		//report progress
 		if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
@@ -321,78 +326,82 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 	try {
         
-		if (!in.eof()) {
+        if (!in.eof()) {
             
-			//read magic number
-			char buffer[4];
-			in.read(buffer, 4);
-			header.magicNumber = be_int4(*(unsigned int *)(&buffer));
+            //read magic number
+            char buffer[4];
+            in.read(buffer, 4);
+            header.magicNumber = be_int4(*(unsigned int *)(&buffer));
             
-			//read version
-			char buffer9[4];
-			in.read(buffer9, 4);
-			header.version = "";
-			for (int i = 0; i < 4; i++) {  header.version += toString((int)(buffer9[i]));  }
+            //read version
+            char buffer9[4];
+            in.read(buffer9, 4);
+            header.version = "";
+            for (int i = 0; i < 4; i++) {  header.version += toString((int)(buffer9[i]));  }
             
-			//read offset
-			char buffer2 [8];
-			in.read(buffer2, 8);
-			header.indexOffset =  be_int8(*(unsigned long long *)(&buffer2));
-			
-			//read index length
-			char buffer3 [4];
-			in.read(buffer3, 4);
-			header.indexLength =  be_int4(*(unsigned int *)(&buffer3));
+            //read offset
+            char buffer2 [8];
+            in.read(buffer2, 8);
+            header.indexOffset =  be_int8(*(unsigned long long *)(&buffer2));
             
-			//read num reads
-			char buffer4 [4];
-			in.read(buffer4, 4);
-			header.numReads =  be_int4(*(unsigned int *)(&buffer4));
+            
+            //read index length
+            char buffer3 [4];
+            in.read(buffer3, 4);
+            header.indexLength =  be_int4(*(unsigned int *)(&buffer3));
+            
+            //read num reads
+            char buffer4 [4];
+            in.read(buffer4, 4);
+            header.numReads =  be_int4(*(unsigned int *)(&buffer4));
             
             if (m->debug) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
             
-			//read header length
-			char buffer5 [2];
-			in.read(buffer5, 2);
-			header.headerLength =  be_int2(*(unsigned short *)(&buffer5));
+            //read header length
+            char buffer5 [2];
+            in.read(buffer5, 2);
+            header.headerLength =  be_int2(*(unsigned short *)(&buffer5));
             
-			//read key length
-			char buffer6 [2];
-			in.read(buffer6, 2);
-			header.keyLength = be_int2(*(unsigned short *)(&buffer6));
-			
-			//read number of flow reads
-			char buffer7 [2];
-			in.read(buffer7, 2);
-			header.numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
+            //read key length
+            char buffer6 [2];
+            in.read(buffer6, 2);
+            header.keyLength = be_int2(*(unsigned short *)(&buffer6));
+            //cout << "header key length = " << header.keyLength << endl;
             
-			//read format code
-			char buffer8 [1];
-			in.read(buffer8, 1);
-			header.flogramFormatCode = (int)(buffer8[0]);
-			
-			//read flow chars
-			char* tempBuffer = new char[header.numFlowsPerRead];
-			in.read(&(*tempBuffer), header.numFlowsPerRead);
-			header.flowChars = tempBuffer;
-			if (header.flowChars.length() > header.numFlowsPerRead) { header.flowChars = header.flowChars.substr(0, header.numFlowsPerRead);  }
-			delete[] tempBuffer;
-			
-			//read key
-			char* tempBuffer2 = new char[header.keyLength];
-			in.read(&(*tempBuffer2), header.keyLength);
-			header.keySequence = tempBuffer2;
-			if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
-			delete[] tempBuffer2;
-			
-			/* Pad to 8 chars */
-			unsigned long long spotInFile = in.tellg();
-			unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
-			in.seekg(spot);
+            //read number of flow reads
+            char buffer7 [2];
+            in.read(buffer7, 2);
+            header.numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
+            
+            //read format code
+            char buffer8 [1];
+            in.read(buffer8, 1);
+            header.flogramFormatCode = (int)(buffer8[0]);
+            
+            //read flow chars
+            char* tempBuffer = new char[header.numFlowsPerRead];
+            in.read(&(*tempBuffer), header.numFlowsPerRead);
+            header.flowChars = tempBuffer;
+            if (header.flowChars.length() > header.numFlowsPerRead) { header.flowChars = header.flowChars.substr(0, header.numFlowsPerRead);  }
+            delete[] tempBuffer;
+            
+            //read key
+            char* tempBuffer2 = new char[header.keyLength];
+            in.read(&(*tempBuffer2), header.keyLength);
+            header.keySequence = tempBuffer2;
+            //cout << "key sequence " <<header.keySequence << endl;
+            if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
+            delete[] tempBuffer2;
+            //cout << "key sequence " <<header.keySequence << endl;
+            
+            /* Pad to 8 chars */
+            unsigned long long spotInFile = in.tellg();
+            unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
+            in.seekg(spot);
             
         }else{
-			m->mothurOut("Error reading sff common header."); m->mothurOutEndLine();
-		}
+            m->mothurOut("Error reading sff common header."); m->mothurOutEndLine();
+        }
         
 		return 0;
         
@@ -406,7 +415,14 @@ int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 int MergeSfffilesCommand::adjustCommonHeader(){
 	try {
         //sanity check
-        bool okay = true;
+        bool okayMagic = true;
+        bool okayVersion = true;
+        bool okayHeader = true;
+        bool okayKeyLength = true;
+        bool okayNumFlows = true;
+        bool okayformatCode = true;
+        bool okayflowChar = true;
+        bool okayKeySequence = true;
         if (commonHeaders.size() != 0) {
             unsigned int magicN = commonHeaders[0].magicNumber;
             string version = commonHeaders[0].version;
@@ -418,18 +434,34 @@ int MergeSfffilesCommand::adjustCommonHeader(){
             string keySeq = commonHeaders[0].keySequence;
             
             for (int i = 1; i < commonHeaders.size(); i++) {
-                if (commonHeaders[i].magicNumber != magicN)             { okay = false;  m->mothurOut("[ERROR]: merge issue with common headers. Magic numbers do not match. " + filenames[0] + " magic number is " + toString(commonHeaders[0].magicNumber) + ", but " + filenames[i] + " magic number is " + toString(commonHeaders[i].magicNumber) + ".\n");  }
-                if (commonHeaders[i].version != version)                { okay = false;   m->mothurOut("[ERROR]: merge issue with common headers. Versions do not match. " + filenames[0] + " version is " + commonHeaders[0].version + ", but " + filenames[i] + " version is " + commonHeaders[i].version + ".\n");     }
-                if (commonHeaders[i].headerLength != headerLength)      { okay = false;    m->mothurOut("[ERROR]: merge issue with common headers. Header lengths do not match. " + filenames[0] + " header length is " + toString(commonHeaders[0].headerLength) + ", but " + filenames[i] + " header length is " + toString(commonHeaders[i].headerLength) + ".\n");    }
-                if (commonHeaders[i].keyLength != keyLength)            { okay = false;  m->mothurOut("[ERROR]: merge issue with common headers. Key Lengths do not match. " + filenames[0] + " Key length is " + toString(commonHeaders[0].keyLength) + ", but " + filenames[i] + " key length is " + toString(commonHeaders[i].keyLength) + ".\n");    }
-                if (commonHeaders[i].numFlowsPerRead != numFlows)       { okay = false;   m->mothurOut("[ERROR]: merge issue with common headers. Number of flows per read do not match. " + filenames[0] + " number of flows is " + toString(commonHeaders[0].numFlowsPerRead) + ", but " + filenames[i] + " number of flows is " + toString(commonHeaders[i].numFlowsPerRead) + ".\n");     }
-                if (commonHeaders[i].flogramFormatCode != flowCode)     { okay = false;    m->mothurOut("[ERROR]: merge issue with common headers. Flow format codes do not match. " + filenames[0] + " Flow format code is " + toString(commonHeaders[0].flogramFormatCode) + ", but " + filenames[i] + " flow format code is " + toString(commonHeaders[i].flogramFormatCode) + ".\n");    }
-                if (commonHeaders[i].flowChars != flowChars)            { okay = false;   m->mothurOut("[ERROR]: merge issue with common headers. Flow characters do not match. " + filenames[0] + " Flow characters are " + commonHeaders[0].flowChars + ", but " + filenames[i] + " flow characters are " + commonHeaders[i].flowChars + ".\n");    }
-                if (commonHeaders[i].keySequence != keySeq)             { okay = false;    m->mothurOut("[ERROR]: merge issue with common headers. Key sequences do not match. " + filenames[0] + " Key sequence is " + commonHeaders[0].keySequence + ", but " + filenames[i] + " key sequence is " + commonHeaders[i].keySequence + ".\n");     }
+                if (commonHeaders[i].magicNumber != magicN)             { okayMagic = false;  m->mothurOut("[ERROR]: merge issue with common headers. Magic numbers do not match. " + filenames[0] + " magic number is " + toString(commonHeaders[0].magicNumber) + ", but " + filenames[i] + " magic number is " + toString(commonHeaders[i].magicNumber) + ".\n");  }
+                if (commonHeaders[i].version != version)                { okayVersion = false;   m->mothurOut("[ERROR]: merge issue with common headers. Versions do not match. " + filenames[0] + " version is " + commonHeaders[0].version + ", but " + filenames[i] + " version is " + commonHeaders[i].version + ".\n");     }
+                if (commonHeaders[i].headerLength != headerLength)      { okayHeader = false;    m->mothurOut("[ERROR]: merge issue with common headers. Header lengths do not match. " + filenames[0] + " header length is " + toString(commonHeaders[0].headerLength) + ", but " + filenames[i] + " header length is " + toString(commonHeaders[i].headerLength) + ".\n");    }
+                if (commonHeaders[i].keyLength != keyLength)            { okayKeyLength = false;  m->mothurOut("[ERROR]: merge issue with common headers. Key Lengths do not match. " + filenames[0] + " Key length is " + toString(commonHeaders[0].keyLength) + ", but " + filenames[i] + " key length is " + toString(commonHeaders[i].keyLength) + ".\n");    }
+                if (commonHeaders[i].numFlowsPerRead != numFlows)       { okayNumFlows = false;   m->mothurOut("[ERROR]: merge issue with common headers. Number of flows per read do not match. " + filenames[0] + " number of flows is " + toString(commonHeaders[0].numFlowsPerRead) + ", but " + filenames[i] + " number of flows is " + toString(commonHeaders[i].numFlowsPerRead) + ".\n");     }
+                if (commonHeaders[i].flogramFormatCode != flowCode)     { okayformatCode = false;    m->mothurOut("[ERROR]: merge issue with common headers. Flow format codes do not match. " + filenames[0] + " Flow format code is " + toString(commonHeaders[0].flogramFormatCode) + ", but " + filenames[i] + " flow format code is " + toString(commonHeaders[i].flogramFormatCode) + ".\n");    }
+                if (commonHeaders[i].flowChars != flowChars)            { okayflowChar = false;   m->mothurOut("[ERROR]: merge issue with common headers. Flow characters do not match. " + filenames[0] + " Flow characters are " + commonHeaders[0].flowChars + ", but " + filenames[i] + " flow characters are " + commonHeaders[i].flowChars + ".\n");    }
+                if (commonHeaders[i].keySequence != keySeq)             { okayKeySequence = false;
+                    if (keyTrim) {
+                        m->mothurOut("[WARNING]: merge issue with common headers. Key sequences do not match. " + filenames[0] + " Key sequence is " + commonHeaders[0].keySequence + ", but " + filenames[i] + " key sequence is " + commonHeaders[i].keySequence + ". We will attempt to trim them.\n");
+                    }else { m->mothurOut("[ERROR]: merge issue with common headers. Key sequences do not match. " + filenames[0] + " Key sequence is " + commonHeaders[0].keySequence + ", but " + filenames[i] + " key sequence is " + commonHeaders[i].keySequence + ".\n");
+                    }
+                }
             }
         }else { m->control_pressed = true; return 0; } //should never get here
         
-        if (!okay) { m->control_pressed = true; return 0; }
+        bool modify = false;
+        if (!okayMagic || !okayVersion || !okayHeader || !okayKeyLength || !okayNumFlows || !okayformatCode || !okayflowChar) { m->control_pressed = true; return 0; }
+        if (!okayKeySequence) {
+            bool okayKeySequence2 = true;
+            string keySeq = commonHeaders[0].keySequence.substr(0,4);
+            for (int i = 1; i < commonHeaders.size(); i++) {
+                if ((commonHeaders[i].keySequence.substr(0,4)) != keySeq)          { okayKeySequence2 = false;   }
+            }
+            if (okayKeySequence2 && keyTrim) {  modify = true;
+                m->mothurOut("We are able to trim the key sequences. Merged key seqeunce will be " + keySeq + ".\n");
+            }
+        }
         
         string endian = m->findEdianness();
         
@@ -493,17 +525,26 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         out.write(thisbuffer2, 4);
         delete[] thisbuffer2;
         
-        
         //read header length
         mybuffer = new char[2];
         in.read(mybuffer,2);
         out.write(mybuffer, in.gcount());
         delete[] mybuffer;
+       
         
         //read key length
         mybuffer = new char[2];
         in.read(mybuffer,2);
-        out.write(mybuffer, in.gcount());
+        if (modify) {
+            unsigned short fourL = 4;
+            thisbuffer2 = new char[2];
+            thisbuffer2[0] = (fourL >> 8) & 0xFF;
+            thisbuffer2[1] = fourL & 0xFF;
+            out.write(thisbuffer2, in.gcount());
+            delete[] thisbuffer2;
+        }else {
+            out.write(mybuffer, in.gcount());
+        }
         delete[] mybuffer;
         
         //read number of flow reads
@@ -527,11 +568,16 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         //read key
         mybuffer = new char[commonHeaders[0].keyLength];
         in.read(mybuffer,commonHeaders[0].keyLength);
-        out.write(mybuffer, in.gcount());
+        if (modify) {
+            out.write(mybuffer, 4);
+        }else {
+            out.write(mybuffer, in.gcount());
+        }
         delete[] mybuffer;
         
         /* Pad to 8 chars */
         unsigned long long spotInFile = in.tellg();
+        if (modify) {  spotInFile -= commonHeaders[0].keyLength - 4;  }
         unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
         in.seekg(spot);
         
@@ -768,6 +814,163 @@ int MergeSfffilesCommand::readFile(){
     }
     catch(exception& e) {
         m->errorOut(e, "MergeSfffilesCommand", "readFileNames");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+int MergeSfffilesCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads){
+    try {
+        string endian = m->findEdianness();
+        
+        ifstream in;
+        m->openInputFileBinary(currentFileName, in);
+        
+        //magic number
+        char* mybuffer = new char[4];
+        in.read(mybuffer,4);
+        out.write(mybuffer, in.gcount());
+        string contents = mybuffer;
+        m->mothurOut("magicNumber = " + contents + "\n");
+        delete[] mybuffer;
+        
+        //version
+        char* mybuffer1 = new char[4];
+        in.read(mybuffer1,4);
+        out.write(mybuffer1, in.gcount());
+        contents = mybuffer1;
+        m->mothurOut("version = " + contents + "\n");
+        m->mothurOut("version = " + header.version + "\n");
+        delete[] mybuffer1;
+        
+        //offset
+        char* mybuffer2 = new char[8];
+        in.read(mybuffer2,8);
+        unsigned long long offset = 0;
+        char* thisbuffer = new char[8];
+        thisbuffer[0] = (offset >> 56) & 0xFF;
+        thisbuffer[1] = (offset >> 48) & 0xFF;
+        thisbuffer[2] = (offset >> 40) & 0xFF;
+        thisbuffer[3] = (offset >> 32) & 0xFF;
+        thisbuffer[4] = (offset >> 24) & 0xFF;
+        thisbuffer[5] = (offset >> 16) & 0xFF;
+        thisbuffer[6] = (offset >> 8) & 0xFF;
+        thisbuffer[7] = offset & 0xFF;
+        out.write(thisbuffer, 8);
+        delete[] thisbuffer;
+        delete[] mybuffer2;
+        m->mothurOut("index offset = " + toString(header.indexOffset) + "\n");
+        
+        //read index length
+        char* mybuffer3 = new char[4];
+        in.read(mybuffer3,4);
+        offset = 0;
+        char* thisbuffer2 = new char[4];
+        thisbuffer2[0] = (offset >> 24) & 0xFF;
+        thisbuffer2[1] = (offset >> 16) & 0xFF;
+        thisbuffer2[2] = (offset >> 8) & 0xFF;
+        thisbuffer2[3] = offset & 0xFF;
+        out.write(thisbuffer2, 4);
+        delete[] thisbuffer2;
+        delete[] mybuffer3;
+        m->mothurOut("index read length = " + toString(header.indexLength) + "\n");
+        
+        //change num reads
+        char* mybuffer4 = new char[4];
+        in.read(mybuffer4,4);
+        
+        char* thisbuffer3 = new char[4];
+        if (endian == "BIG_ENDIAN") {
+            thisbuffer3[0] = (numReads >> 24) & 0xFF;
+            thisbuffer3[1] = (numReads >> 16) & 0xFF;
+            thisbuffer3[2] = (numReads >> 8) & 0xFF;
+            thisbuffer3[3] = numReads & 0xFF;
+        }else {
+            thisbuffer3[0] = numReads & 0xFF;
+            thisbuffer3[1] = (numReads >> 8) & 0xFF;
+            thisbuffer3[2] = (numReads >> 16) & 0xFF;
+            thisbuffer3[3] = (numReads >> 24) & 0xFF;
+        }
+        out.write(thisbuffer3, 4);
+        contents = mybuffer4;
+        m->mothurOut("numReads = " + contents + "\n");
+        unsigned int numTReads = be_int4(*(unsigned int *)(mybuffer4));
+        m->mothurOut("numReads = " + toString(numTReads) + "\n");
+        m->mothurOut("numReads = " + toString(header.numReads) + "\n");
+        delete[] thisbuffer3;
+        delete[] mybuffer4;
+        
+        //read header length
+        char* mybuffer5 = new char[2];
+        in.read(mybuffer5,2);
+        out.write(mybuffer5, in.gcount());
+        contents = mybuffer5;
+        m->mothurOut("readLength = " + contents + "\n");
+        m->mothurOut("readLength = " + toString(header.headerLength) + "\n");
+        delete[] mybuffer5;
+        
+        //read key length
+        char* mybuffer6 = new char[2];
+        in.read(mybuffer6,2);
+        out.write(mybuffer6, in.gcount());
+        contents = mybuffer6;
+        m->mothurOut("key length = " + contents + "\n");
+        m->mothurOut("key length = " + toString(header.keyLength) + "\n");
+        delete[] mybuffer6;
+        
+        //read number of flow reads
+        char* mybuffer7 = new char[2];
+        in.read(mybuffer7,2);
+        out.write(mybuffer7, in.gcount());
+        contents = mybuffer7;
+        m->mothurOut("num flow reads = " + contents + "\n");
+        int numFlowReads = be_int2(*(unsigned short *)(mybuffer7));
+        m->mothurOut("num flow Reads = " + toString(numFlowReads) + "\n");
+        delete[] mybuffer7;
+        
+        //read format code
+        char* mybuffer8 = new char[1];
+        in.read(mybuffer8,1);
+        out.write(mybuffer8, in.gcount());
+        contents = mybuffer8;
+        m->mothurOut("read format code = " + contents + "\n");
+        m->mothurOut("read format code = " + toString(header.flogramFormatCode) + "\n");
+        delete[] mybuffer8;
+        
+        //read flow chars
+        char* mybuffer9 = new char[header.numFlowsPerRead];
+        in.read(mybuffer9,header.numFlowsPerRead);
+        out.write(mybuffer9, in.gcount());
+        contents = mybuffer9;
+        m->mothurOut("flow chars = " + contents + "\n");
+        m->mothurOut("flow chars = " + header.flowChars + "\n");
+        delete[] mybuffer9;
+        
+        //read key
+        char* mybuffer10 = new char[header.keyLength];
+        in.read(mybuffer10,header.keyLength);
+        out.write(mybuffer10, in.gcount());
+        contents = mybuffer10;
+        m->mothurOut("key = " + contents + "\n");
+        m->mothurOut("key = " + header.keySequence + "\n");
+        delete[] mybuffer10;
+        
+        
+        /* Pad to 8 chars */
+        unsigned long long spotInFile = in.tellg();
+        unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
+        in.seekg(spot);
+        
+        char* mybuffer11 = new char[spot-spotInFile];
+        out.write(mybuffer11, spot-spotInFile);
+        delete[] mybuffer11;
+        in.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeSfffilesCommand", "printCommonHeaderForDebug");
         exit(1);
     }
 }

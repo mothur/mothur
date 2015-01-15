@@ -916,7 +916,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         delete[] mybuffer;
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                cout << filehandlesHeaders[i][j] << '\t' << numSplitReads[i][j] << endl;
+                //cout << filehandlesHeaders[i][j] << '\t' << numSplitReads[i][j] << endl;
                 char* thisbuffer = new char[4];
                 thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
                 thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
@@ -925,7 +925,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
                 ofstream out;
                 int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
-                unsigned int numTReads = (be_int4(*(unsigned int *)(thisbuffer)));
+                //unsigned int numTReads = (be_int4(*(unsigned int *)(thisbuffer)));
                 //cout << "numReads = " << numTReads << endl;
                 out.write(thisbuffer, 4);
                 out.close();
@@ -1082,7 +1082,8 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         char* mybuffer = new char[4];
         in.read(mybuffer,4);
         out.write(mybuffer, in.gcount());
-        string contents = mybuffer;
+        unsigned int magic = be_int4(*(unsigned int *)(mybuffer));
+        string contents = toString(magic);
         m->mothurOut("magicNumber = " + contents + "\n");
         delete[] mybuffer;
         
@@ -1090,7 +1091,8 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         char* mybuffer1 = new char[4];
         in.read(mybuffer1,4);
         out.write(mybuffer1, in.gcount());
-        contents = mybuffer1;
+        contents = "";
+        for (int i = 0; i < 4; i++) {  contents += toString((int)(mybuffer1[i]));  }
         m->mothurOut("version = " + contents + "\n");
         delete[] mybuffer1;
         
@@ -1142,10 +1144,10 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         }
         out.write(thisbuffer3, 4);
         contents = mybuffer4;
-        m->mothurOut("numReads = " + contents + "\n");
+        //m->mothurOut("numReads = " + contents + "\n");
         unsigned int numTReads = be_int4(*(unsigned int *)(mybuffer4));
         m->mothurOut("numReads = " + toString(numTReads) + "\n");
-        m->mothurOut("numReads = " + toString(header.numReads) + "\n");
+        //m->mothurOut("numReads = " + toString(header.numReads) + "\n");
         delete[] thisbuffer3;
         delete[] mybuffer4;
         
@@ -1153,7 +1155,8 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         char* mybuffer5 = new char[2];
         in.read(mybuffer5,2);
         out.write(mybuffer5, in.gcount());
-        contents = mybuffer5;
+        unsigned short hl = be_int2(*(unsigned short *)(mybuffer5));
+        contents = toString(hl);
         m->mothurOut("readLength = " + contents + "\n");
         delete[] mybuffer5;
         
@@ -1161,7 +1164,8 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         char* mybuffer6 = new char[2];
         in.read(mybuffer6,2);
         out.write(mybuffer6, in.gcount());
-        contents = mybuffer6;
+        unsigned short kl = be_int2(*(unsigned short *)(mybuffer6));
+        contents = toString(kl);
         m->mothurOut("key length = " + contents + "\n");
         delete[] mybuffer6;
         
@@ -1170,16 +1174,17 @@ int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& ou
         in.read(mybuffer7,2);
         out.write(mybuffer7, in.gcount());
         contents = mybuffer7;
-        m->mothurOut("num flow reads = " + contents + "\n");
+        //m->mothurOut("num flow reads = " + contents + "\n");
         int numFlowReads = be_int2(*(unsigned short *)(mybuffer7));
-        m->mothurOut("numReads = " + toString(numFlowReads) + "\n");
+        m->mothurOut("num flow Reads = " + toString(numFlowReads) + "\n");
         delete[] mybuffer7;
         
         //read format code
         char* mybuffer8 = new char[1];
         in.read(mybuffer8,1);
         out.write(mybuffer8, in.gcount());
-        contents = mybuffer8;
+        int fc = (int)(mybuffer8[0]);
+        contents = toString(fc);
         m->mothurOut("read format code = " + contents + "\n");
         delete[] mybuffer8;
         

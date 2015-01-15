@@ -320,11 +320,15 @@ int ParseFastaQCommand::execute(){
                                 if(fasta){
                                     m->mothurRemove(fastaFileNames[i][j]);
                                     namesToRemove.insert(fastaFileNames[i][j]);
+                                    
+                                    if (pairedOligos) { m->mothurRemove(rfastaFileNames[i][j]); namesToRemove.insert(rfastaFileNames[i][j]); }
                                 }
                                 
                                 if(qual){
                                     m->mothurRemove(qualFileNames[i][j]);
                                     namesToRemove.insert(qualFileNames[i][j]);
+                                    
+                                    if (pairedOligos) { m->mothurRemove(rqualFileNames[i][j]); namesToRemove.insert(rqualFileNames[i][j]); }
                                 }
                             }
                         }
@@ -337,7 +341,12 @@ int ParseFastaQCommand::execute(){
                 if (namesToRemove.count(outputNames[i]) != 0) {
                     outputNames.erase(outputNames.begin()+i);
                     i--;
-                }else { outputTypes["fastq"].push_back(outputNames[i]); }
+                }else {
+                    string ending = outputNames[i].substr(outputNames[i].length()-5);
+                    if (ending == "fastq") { outputTypes["fastq"].push_back(outputNames[i]); }
+                    else if (ending == "fasta") { outputTypes["fasta"].push_back(outputNames[i]); }
+                    else if (ending == ".qfile") { outputTypes["qfile"].push_back(outputNames[i]); }
+                }
             }
             
             //ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile
@@ -532,7 +541,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                             thisfRead.seq.printSequence(outf);
                             outf.close();
                             
-                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outr);
+                            m->openOutputFileAppend(rfastaFileNames[barcodeIndex][primerIndex], outr);
                             thisrRead.seq.printSequence(outr);
                             outr.close();
                         }
@@ -546,7 +555,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                             outq << endl;
                             outq.close();
                             
-                            m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq2);
+                            m->openOutputFileAppend(rqualFileNames[barcodeIndex][primerIndex], outq2);
                             outq2 << ">" << thisrRead.seq.getName() << endl;
                             for (int i = 0; i < rqualScores.size(); i++) { outq2 << rqualScores[i] << " "; }
                             outq2 << endl;
@@ -1302,7 +1311,9 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
 bool ParseFastaQCommand::readOligos(string oligoFile){
 	try {
         bool allBlank = false;
-        oligos.read(oligosfile);
+        
+        if (fileOption) { oligos.read(oligosfile, false);  } // like make.contigs
+        else {  oligos.read(oligosfile);  }
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
@@ -1330,8 +1341,8 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
 		}
         if (pairedOligos) { rfastqFileNames = fastqFileNames; }
         
-        if(fasta)	{	qualFileNames = fastqFileNames;	}
-        if(qual)	{	fastaFileNames = fastqFileNames;	}
+        if(qual)	{	qualFileNames = fastqFileNames;	 if (pairedOligos) { rqualFileNames = fastqFileNames; }    }
+        if(fasta)	{	fastaFileNames = fastqFileNames; if (pairedOligos) { rfastaFileNames = fastqFileNames; }	}
         
         set<string> uniqueNames; //used to cleanup outputFileNames
         if (pairedOligos) {
@@ -1361,15 +1372,36 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         }
                         
                         if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
-                            comboName = ((itBar->second).forward+"."+(itBar->second).reverse);
+                            if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                            if ((itBar->second).reverse != "NONE") {
+                                if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                else {  comboName += ("."+(itBar->second).reverse);  }
+                            }
                         }else{
                             if(((itBar->second).forward+(itBar->second).reverse) == ""){
-                                comboName = (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                                if ((itPrimer->second).forward != "NONE") { comboName += (itPrimer->second).forward; }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
                             }
                             else{
-                                comboName = ((itBar->second).forward+"."+(itBar->second).reverse) + "." + (itPrimer->second).forward+"."+(itPrimer->second).reverse;
+                                if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                                if ((itBar->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                    else {  comboName += ("."+(itBar->second).reverse);  }
+                                }
+                                if ((itPrimer->second).forward != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).forward; }
+                                    else {  comboName += ("."+(itPrimer->second).forward);  }
+                                }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
                             }
                         }
+
                         
                         if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         ofstream temp;
@@ -1422,7 +1454,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             }
                             
                             ofstream temp4;
-                            fastaFileNames[itBar->first][itPrimer->first] = fastaFileName2;
+                            rfastaFileNames[itBar->first][itPrimer->first] = fastaFileName2;
                             m->openOutputFile(fastaFileName2, temp4);		temp4.close();
                         }
                         
@@ -1448,7 +1480,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             }
                             
                             ofstream temp5;
-                            qualFileNames[itBar->first][itPrimer->first] = qualFileName2;
+                            rqualFileNames[itBar->first][itPrimer->first] = qualFileName2;
                             m->openOutputFile(qualFileName2, temp5);		temp5.close();
                         }
 

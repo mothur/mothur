@@ -1470,7 +1470,7 @@ int MothurOut::appendSFFFiles(string temp, string filename) {
             
             input.open(completeFileName.c_str(), ios::binary);
             if(!input) {
-                mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+                //mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
                 return 1;
             }else {
                 char buffer[4096];
