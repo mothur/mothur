@@ -63,8 +63,17 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
+    struct linePair {
+        unsigned long long start;
+        unsigned long long end;
+        linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
+        linePair() {}
+    };
+    
+    char delim; 
     bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
+    string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers;
     vector<string> outputNames;
@@ -77,16 +86,20 @@ private:
     
     vector<int> convertQual(string);
     fastqRead readFastq(ifstream&, bool&);
+    unsigned long long processMultipleFileOption(map<string, int>&);
+    unsigned long long processSingleFileOption(map<string, int>&);
     vector< vector< vector<string> > > preProcessData(unsigned long int&);
     vector< vector<string> > readFileNames(string);
     vector< vector<string> > readFastqFiles(unsigned long int&, string, string, string, string);
     vector< vector<string> > readFastaFiles(unsigned long int&, string, string);
     //bool checkReads(fastqRead&, fastqRead&, string, string);
-    int createProcesses(vector< vector<string> >, string, string, string, vector<vector<string> >, int);
-    int driver(vector<string>, string, string, string, vector<vector<string> >, int, string);
-    bool getOligos(vector<vector<string> >&, string, map<string, string>&);
+    unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
+    //int driver(vector<string>, string, string, string, vector<vector<string> >, vector<vector<string> >, int, string);
+    int driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
+    bool getOligos(vector<vector<string> >&, vector<vector<string> >&, string, map<string, string>&);
     vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques, bool);
     vector<pairFastqRead> mergeReads(vector<pairFastqRead> frReads, vector<pairFastqRead> friReads, map<string, pairFastqRead>& pairUniques);
+    int setLines(vector<string>, vector<string>, vector<linePair>& fastaFilePos, vector<linePair>& qfileFilePos, char delim); //the delim let you know whether this is fasta and qual, or fastq and index. linePair entries will always be in sets of two. One for the forward and one for hte reverse.  (fastaFilePos[0] - ffasta, fastaFilePos[1] - rfasta) - processor1
 };
 
 /**************************************************************************************************/

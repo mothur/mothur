@@ -350,9 +350,8 @@ int GetMIMarksPackageCommand::execute(){
  
  file option 3
  
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- group fastqfile  fastqfile
+ ffastqfile1 rfastqfile1
+ ffastqfile2 rfastqfile2
  ...
  
  file option 4
@@ -366,8 +365,6 @@ int GetMIMarksPackageCommand::execute(){
  
  My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
  ...
-
- 
  */
 
 int GetMIMarksPackageCommand::readFile(){

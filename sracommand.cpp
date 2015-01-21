@@ -330,11 +330,15 @@ int SRACommand::execute(){
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(inputfile);  }
 		map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = thisOutputDir + "submission.";
         string outputFileName = getOutputFileName("xml", variables);
         outputNames.push_back(outputFileName); outputTypes["xml"].push_back(outputFileName);
         ofstream out;
         m->openOutputFile(outputFileName, out);
+        
+        string blankFile = thisOutputDir + "submission.ready";
+        ofstream outT;
+        m->openOutputFile(blankFile, outT); outT.close();
         
         //contacts portion
         ////////////////////////////////////////////////////////

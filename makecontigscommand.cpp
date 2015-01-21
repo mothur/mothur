@@ -8,6 +8,40 @@
 
 #include "makecontigscommand.h"
 
+//********************************************************************************************************************
+//sorts biggest to smallest
+inline bool compareFileSizes(vector<string> left, vector<string> right){
+    
+    FILE * pFile;
+    long leftsize = 0;
+    
+    //get num bytes in file
+    string filename = left[0];
+    pFile = fopen (filename.c_str(),"rb");
+    string error = "Error opening " + filename;
+    if (pFile==NULL) perror (error.c_str());
+    else{
+        fseek (pFile, 0, SEEK_END);
+        leftsize=ftell (pFile);
+        fclose (pFile);
+    }
+    
+    FILE * pFile2;
+    long rightsize = 0;
+    
+    //get num bytes in file
+    filename = right[0];
+    pFile2 = fopen (filename.c_str(),"rb");
+    error = "Error opening " + filename;
+    if (pFile2==NULL) perror (error.c_str());
+    else{
+        fseek (pFile2, 0, SEEK_END);
+        rightsize=ftell (pFile2);
+        fclose (pFile2);
+    }
+    
+    return (leftsize > rightsize);
+}
 //**********************************************************************************************************************
 vector<string> MakeContigsCommand::setParameters(){	
 	try {
@@ -95,7 +129,8 @@ string MakeContigsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; } 
+        if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; }
+        else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; }
         else if (type == "group") {  pattern = "[filename],[tag],contigs.groups"; }
         else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -114,6 +149,7 @@ MakeContigsCommand::MakeContigsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
         outputTypes["report"] = tempOutNames;
     }
@@ -149,6 +185,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
+            outputTypes["qfile"] = tempOutNames;
             outputTypes["report"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
 			
@@ -400,177 +437,16 @@ int MakeContigsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        //read ffastq and rfastq files creating fasta and qual files.
-        //this function will create a forward and reverse, fasta and qual files for each processor.
-        //files has an entry for each processor. files[i][0] = forwardFasta, files[i][1] = forwardQual, files[i][2] = reverseFasta, files[i][3] = reverseQual.  filesToProcess is for each filepair in the file parameter file.  for ffastq and rfastq this will be size 1.
-        unsigned long int numReads = 0;
+        unsigned long long numReads = 0;
+        map<string, int> totalGroupCounts;
         int start = time(NULL);
         longestBase = 1000;
-        m->mothurOut("Reading fastq data...\n"); 
-        vector < vector< vector<string> > > filesToProcess = preProcessData(numReads);
-        m->mothurOut("Done.\n");
-       
-        if (m->control_pressed) { return 0; }
         
-        map<string, string> cvars;
-        string compOutputDir = outputDir;
-        if (outputDir == "") { compOutputDir = m->hasPath(file); }
-        cvars["[filename]"] = compOutputDir + m->getRootName(m->getSimpleName(file));
-        cvars["[tag]"] = "";
-        string compositeGroupFile = getOutputFileName("group",cvars);
-        cvars["[tag]"] = "trim";
-        string compositeFastaFile = getOutputFileName("fasta",cvars);
-        cvars["[tag]"] = "scrap";
-        string compositeScrapFastaFile = getOutputFileName("fasta",cvars);
-        cvars["[tag]"] = "";
-        string compositeMisMatchFile = getOutputFileName("report",cvars);
-        
-        if (filesToProcess.size() > 1) { //clear files for append below
-            ofstream outCTFasta, outCTQual, outCSFasta, outCSQual, outCMisMatch;
-            m->openOutputFile(compositeFastaFile, outCTFasta); outCTFasta.close();
-            m->openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close();
-            m->openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close();
-            outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
-            outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
-            outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
-        }
-        
-        map<string, int> totalGroupCounts;
-        
-        for (int l = 0; l < filesToProcess.size(); l++) {
-            
-            m->mothurOut("\n>>>>>\tProcessing " + filesToProcess[l][0][0] + " (file " + toString(l+1) + " of " + toString(filesToProcess.size()) + ")\t<<<<<\n");
-            
-            groupCounts.clear();
-            groupMap.clear();
-            vector<vector<string> > fastaFileNames;
-            map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
-            createOligosGroup = false;
-            oligos = new Oligos();
-            numBarcodes = 0; numFPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
-            string outputGroupFileName;
-            map<string, string> variables; 
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir = m->hasPath(filesToProcess[l][0][0]); }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(filesToProcess[l][0][0]));
-            variables["[tag]"] = "";
-            if(oligosfile != ""){  createOligosGroup = getOligos(fastaFileNames, variables["[filename]"], uniqueFastaNames);  }
-            if (createOligosGroup || createFileGroup) {
-                outputGroupFileName = getOutputFileName("group",variables);
-            }
-            
-            //give group in file file precedence
-            if (createFileGroup) {  createOligosGroup = false; }
-            
-            variables["[tag]"] = "trim";
-            string outFastaFile = getOutputFileName("fasta",variables);
-            variables["[tag]"] = "scrap";
-            string outScrapFastaFile = getOutputFileName("fasta",variables);
-            variables["[tag]"] = "";
-            string outMisMatchFile = getOutputFileName("report",variables);
-                        
-            m->mothurOut("Making contigs...\n"); 
-            createProcesses(filesToProcess[l], outFastaFile, outScrapFastaFile, outMisMatchFile, fastaFileNames, l);
-            
-            //remove temp fasta and qual files
-            for (int i = 0; i < processors; i++) { for(int j = 0; j < filesToProcess[l][i].size(); j++) { m->mothurRemove(filesToProcess[l][i][j]); }  }
-            
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
-            
-            if(allFiles){
-                // so we don't add the same groupfile multiple times
-                map<string, string>::iterator it;
-                set<string> namesToRemove;
-                for(int i=0;i<fastaFileNames.size();i++){
-                    for(int j=0;j<fastaFileNames[0].size();j++){
-                        if (fastaFileNames[i][j] != "") {
-                            if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
-                                if(m->isBlank(fastaFileNames[i][j])){
-                                    m->mothurRemove(fastaFileNames[i][j]);
-                                    namesToRemove.insert(fastaFileNames[i][j]);
-                                    uniqueFastaNames.erase(fastaFileNames[i][j]); //remove from list for group file print
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                //remove names for outputFileNames, just cleans up the output
-                vector<string> outputNames2;
-                for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
-                outputNames = outputNames2;
-                
-                for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
-                    ifstream in;
-                    m->openInputFile(it->first, in);
-                    
-                    ofstream out;
-                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
-                    string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
-                    m->openOutputFile(thisGroupName, out);
-                    
-                    while (!in.eof()){
-                        if (m->control_pressed) { break; }
-                        
-                        Sequence currSeq(in); m->gobble(in);
-                        out << currSeq.getName() << '\t' << it->second << endl;
-                    }
-                    out.close();
-                    in.close();
-                }
-            }
-            
-            if (createFileGroup || createOligosGroup) {
-                ofstream outGroup;
-                m->openOutputFile(outputGroupFileName, outGroup);
-                for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
-                    outGroup << itGroup->first << '\t' << itGroup->second << endl;
-                }
-                outGroup.close();
-            }
-            
-            if (filesToProcess.size() > 1) { //merge into large combo files
-                if (createFileGroup || createOligosGroup) {
-                    if (l == 0) {
-                        ofstream outCGroup;
-                        m->openOutputFile(compositeGroupFile, outCGroup); outCGroup.close();
-                        outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);
-                    }
-                    m->appendFiles(outputGroupFileName, compositeGroupFile);
-                    if (!allFiles) { m->mothurRemove(outputGroupFileName);  }
-                    else { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
-                    
-                    for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
-                        map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
-                        if (itTemp == totalGroupCounts.end()) { totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
-                        else { itTemp->second += itGroups->second; } //existing group, update total
-                    }
-                }
-                if (l == 0) {  m->appendFiles(outMisMatchFile, compositeMisMatchFile);  }
-                else {  m->appendFilesWithoutHeaders(outMisMatchFile, compositeMisMatchFile);  }
-                m->appendFiles(outFastaFile, compositeFastaFile);
-                m->appendFiles(outScrapFastaFile, compositeScrapFastaFile);
-                if (!allFiles) {
-                    m->mothurRemove(outMisMatchFile);
-                    m->mothurRemove(outFastaFile);
-                    m->mothurRemove(outScrapFastaFile);
-                }else {
-                    outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
-                    outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
-                    outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
-                }
-            }else {
-                totalGroupCounts = groupCounts;
-                outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
-                outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
-                outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
-                if (createFileGroup || createOligosGroup) {
-                     outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); 
-                }
-            }
-            m->mothurOut("Done.\n");
-            delete oligos;
-        }
+        if (file != "") {
+            numReads = processMultipleFileOption(totalGroupCounts);
+        }else if ((ffastqfile != "") || (ffastafile != "")) {
+            numReads = processSingleFileOption(totalGroupCounts);
+        }else {  return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
         
@@ -613,81 +489,274 @@ int MakeContigsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector< vector< vector<string> > > MakeContigsCommand::preProcessData(unsigned long int& numReads) {
-	try {
-        vector< vector< vector<string> > > filesToProcess;
+unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>& totalGroupCounts) {
+    try {
+        bool hasQual = false;
+        unsigned long long numReads = 0;
+        string inputFile = "";
+        vector<string> fileInputs;
+        vector<string> qualOrIndexInputs;
+        vector<linePair> lines;
+        vector<linePair> qLines;
+        delim = '>';
+        map<string, string> variables;
+        string thisOutputDir = outputDir;
         
-        if (ffastqfile != "") { //reading one file
-            vector< vector<string> > files = readFastqFiles(numReads, ffastqfile, rfastqfile, findexfile, rindexfile);
-            //adjust for really large processors or really small files
-            if (numReads == 0) {  m->mothurOut("[ERROR]: no good reads.\n"); m->control_pressed = true; }
-            if (numReads < processors) { 
-                for (int i = numReads; i < processors; i++) { for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } files[i].clear(); }
-                files.resize(numReads);
-                processors = numReads; 
+        if (ffastafile != "") {
+            inputFile = ffastafile;
+            if (outputDir == "") {  thisOutputDir = m->hasPath(inputFile); }
+            fileInputs.push_back(ffastafile); fileInputs.push_back(rfastafile);
+            
+            if (fqualfile != "") {
+                hasQual = true;
+                qualOrIndexInputs.push_back(fqualfile); qualOrIndexInputs.push_back(rqualfile);
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fqualfile));
+                variables["[tag]"] = "trim";
+                outQualFile = getOutputFileName("qfile",variables);
+                variables["[tag]"] = "scrap";
+                outScrapQualFile = getOutputFileName("qfile",variables);
+            }else {
+                outQualFile = ""; outScrapQualFile = "";
             }
-            filesToProcess.push_back(files);
-        }else if (file != "") { //reading multiple files
-            //return only valid pairs
-            vector< vector<string> > filePairsToProcess = readFileNames(file);
             
-            if (m->control_pressed) { return filesToProcess; }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFile));
+            delim = '>';
+        }else { //ffastqfile
+            hasQual = true;
+            inputFile = ffastqfile;
+            if (outputDir == "") {  thisOutputDir = m->hasPath(inputFile); }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFile));
+            variables["[tag]"] = "trim";
+            outQualFile = getOutputFileName("qfile",variables);
+            variables["[tag]"] = "scrap";
+            outScrapQualFile = getOutputFileName("qfile",variables);
             
-            if (filePairsToProcess.size() != 0) {
-                for (int i = 0; i < filePairsToProcess.size(); i++) {
-                    
-                    if (m->control_pressed) { for (int l = 0; l < filesToProcess.size(); l++) { for (int k = 0; k < filesToProcess[l].size(); k++) { for(int j = 0; j < filesToProcess[l][k].size(); j++) { m->mothurRemove(filesToProcess[l][k][j]); } filesToProcess[l][k].clear(); }  } return filesToProcess; }
-                    
-                    unsigned long int thisFilesReads;
-                    vector< vector<string> > files = readFastqFiles(thisFilesReads, filePairsToProcess[i][0], filePairsToProcess[i][1], filePairsToProcess[i][2], filePairsToProcess[i][3]);
-                    
-                    //adjust for really large processors or really small files
-                    if (thisFilesReads < processors) { 
-                        m->mothurOut("[ERROR]: " + filePairsToProcess[i][0] + " has less than " + toString(processors) + " good reads, skipping\n"); 
-                        for (int k = 0; k < files.size(); k++) { for(int j = 0; j < files[k].size(); j++) { m->mothurRemove(files[k][j]); } files[k].clear(); }
-                        //remove from file2Group if necassary
-                        map<int, string> cFile2Group;
-                        for (map<int, string>::iterator it = file2Group.begin(); it != file2Group.end(); it++) {
-                            if ((it->first) < i) { cFile2Group[it->first] = it->second; }
-                            else if ((it->first) == i) { } //do nothing, we removed files for i
-                            else { cFile2Group[(it->first-1)] = it->second; } //adjust files because i was removed
+            fileInputs.push_back(ffastqfile); fileInputs.push_back(rfastqfile);
+            if ((findexfile != "") || (rindexfile != "")){
+                qualOrIndexInputs.push_back("NONE"); qualOrIndexInputs.push_back("NONE");
+                if (findexfile != "") { qualOrIndexInputs[0] = findexfile; }
+                if (rindexfile != "") { qualOrIndexInputs[1] = rindexfile; }
+            }
+            delim = '@';
+        }
+        variables["[tag]"] = "trim";
+        outFastaFile = getOutputFileName("fasta",variables);
+        variables["[tag]"] = "scrap";
+        outScrapFastaFile = getOutputFileName("fasta",variables);
+        variables["[tag]"] = "";
+        outMisMatchFile = getOutputFileName("report",variables);
+        
+        //divides the files so that the processors can share the workload.
+        setLines(fileInputs, qualOrIndexInputs, lines, qLines, delim);
+        
+        vector<vector<string> > fastaFileNames, qualFileNames;
+        map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
+        createOligosGroup = false;
+        oligos = new Oligos();
+        numBarcodes = 0; numFPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
+        
+        if(oligosfile != "")                        {       createOligosGroup = getOligos(fastaFileNames, qualFileNames, variables["[filename]"], uniqueFastaNames);    }
+        if (createOligosGroup || createFileGroup)   {       outputGroupFileName = getOutputFileName("group",variables);                                                 }
+        
+        //give group in file file precedence
+        if (createFileGroup) {  createOligosGroup = false; }
+        
+        m->mothurOut("Making contigs...\n");
+        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, lines, qLines, "");
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
+        
+        if(allFiles){
+            // so we don't add the same groupfile multiple times
+            map<string, string>::iterator it;
+            set<string> namesToRemove;
+            for(int i=0;i<fastaFileNames.size();i++){
+                for(int j=0;j<fastaFileNames[0].size();j++){
+                    if (fastaFileNames[i][j] != "") {
+                        if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
+                            if(m->isBlank(fastaFileNames[i][j])){
+                                m->mothurRemove(fastaFileNames[i][j]);
+                                namesToRemove.insert(fastaFileNames[i][j]);
+                                uniqueFastaNames.erase(fastaFileNames[i][j]); //remove from list for group file print
+                                
+                                m->mothurRemove(qualFileNames[i][j]);
+                                namesToRemove.insert(qualFileNames[i][j]);
+                            }
                         }
-                        file2Group = cFile2Group;
-                    }else {
-                        filesToProcess.push_back(files);
-                        numReads += thisFilesReads;
                     }
                 }
-                //all files are bad
-                if (numReads == 0) {  m->control_pressed = true; }
             }
-        }else if (ffastafile != "") {
-            vector< vector<string> > files = readFastaFiles(numReads, ffastafile, rfastafile);
-            //adjust for really large processors or really small files
-            if (numReads == 0) {  m->mothurOut("[ERROR]: no good reads.\n"); m->control_pressed = true; }
-            if (numReads < processors) { 
-                for (int i = numReads; i < processors; i++) { for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } files[i].clear(); }
-                files.resize(numReads);
-                processors = numReads; 
+            
+            //remove names for outputFileNames, just cleans up the output
+            vector<string> outputNames2;
+            for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
+            outputNames = outputNames2;
+            
+            for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+                ifstream in;
+                m->openInputFile(it->first, in);
+                
+                ofstream out;
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
+                string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+                m->openOutputFile(thisGroupName, out);
+                
+                while (!in.eof()){
+                    if (m->control_pressed) { break; }
+                    
+                    Sequence currSeq(in); m->gobble(in);
+                    out << currSeq.getName() << '\t' << it->second << endl;
+                }
+                out.close();
+                in.close();
             }
-            filesToProcess.push_back(files);
-        }else { m->control_pressed = true; } //should not get here
+        }
         
-        return filesToProcess;
+        if (createFileGroup || createOligosGroup) {
+            ofstream outGroup;
+            m->openOutputFile(outputGroupFileName, outGroup);
+            for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                outGroup << itGroup->first << '\t' << itGroup->second << endl;
+            }
+            outGroup.close();
+        }
+        
+        if (file == "") {
+            totalGroupCounts = groupCounts;
+            outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
+            outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
+            if (hasQual) {
+                outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
+                outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
+            }
+            outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
+            if (createFileGroup || createOligosGroup) {
+                outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
+            }
+        }
+        m->mothurOut("Done.\n");
+        delete oligos;
+        
+        return numReads;
     }
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "preProcessData");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "processSingleFileOption");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
-int MakeContigsCommand::createProcesses(vector< vector<string> > files, string outputFasta, string outputScrapFasta, string outputMisMatches, vector<vector<string> > fastaFileNames, int index) {
+unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int>& totalGroupCounts) {
+    try {
+        unsigned long long numReads = 0;
+        
+        map<string, string> cvars;
+        string compOutputDir = outputDir;
+        if (outputDir == "") { compOutputDir = m->hasPath(file); }
+        cvars["[filename]"] = compOutputDir + m->getRootName(m->getSimpleName(file));
+        cvars["[tag]"] = "";
+        string compositeGroupFile = getOutputFileName("group",cvars);
+        cvars["[tag]"] = "trim";
+        string compositeFastaFile = getOutputFileName("fasta",cvars);
+        cvars["[tag]"] = "scrap";
+        string compositeScrapFastaFile = getOutputFileName("fasta",cvars);
+        cvars["[tag]"] = "";
+        string compositeQualFile = getOutputFileName("qfile",cvars);
+        cvars["[tag]"] = "scrap";
+        string compositeScrapQualFile = getOutputFileName("qfile",cvars);
+        cvars["[tag]"] = "";
+        string compositeMisMatchFile = getOutputFileName("report",cvars);
+        
+        ofstream outCTFasta, outCTQual, outCSFasta, outCSQual, outCMisMatch;
+        m->openOutputFile(compositeFastaFile, outCTFasta); outCTFasta.close();
+        m->openOutputFile(compositeQualFile, outCTQual); outCTQual.close();
+        m->openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close();
+        m->openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close();
+        m->openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close();
+        outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
+        outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
+        outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
+        outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
+        outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
+        
+        //read file
+        vector< vector<string> > fileInputs = readFileNames(file);
+        
+        for (int l = 0; l < fileInputs.size(); l++) {
+            
+            m->mothurOut("\n>>>>>\tProcessing file pair " + fileInputs[l][0] + " - " + fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(fileInputs.size()) + ")\t<<<<<\n");
+            
+            ffastqfile = fileInputs[l][0];
+            rfastqfile = fileInputs[l][1];
+            findexfile = fileInputs[l][2];
+            rindexfile = fileInputs[l][3];
+            string group = file2Group[l];
+            groupCounts.clear();
+            groupMap.clear();
+            
+            //run file as if it was a single
+            numReads += processSingleFileOption(groupCounts);
+            
+            //append to combo files
+            if (createFileGroup || createOligosGroup) {
+                if (l == 0) {
+                    ofstream outCGroup;
+                    m->openOutputFile(compositeGroupFile, outCGroup); outCGroup.close();
+                    outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);
+                }
+                m->appendFiles(outputGroupFileName, compositeGroupFile);
+                if (!allFiles) { m->mothurRemove(outputGroupFileName);  }
+                else { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
+                
+                for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
+                    map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
+                    if (itTemp == totalGroupCounts.end()) { totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
+                    else { itTemp->second += itGroups->second; } //existing group, update total
+                }
+            }
+            if (l == 0) {  m->appendFiles(outMisMatchFile, compositeMisMatchFile);  }
+            else {  m->appendFilesWithoutHeaders(outMisMatchFile, compositeMisMatchFile);  }
+            m->appendFiles(outFastaFile, compositeFastaFile);
+            m->appendFiles(outScrapFastaFile, compositeScrapFastaFile);
+            m->appendFiles(outQualFile, compositeQualFile);
+            m->appendFiles(outScrapQualFile, compositeScrapQualFile);
+            if (!allFiles) {
+                m->mothurRemove(outMisMatchFile);
+                m->mothurRemove(outFastaFile);
+                m->mothurRemove(outScrapFastaFile);
+                m->mothurRemove(outQualFile);
+                m->mothurRemove(outScrapQualFile);
+            }else {
+                outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
+                outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
+                outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
+                outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
+                outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
+            }
+        }
+        
+         return numReads;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "processMultipleFileOption");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//fileInputs[0] = forward Fasta or Forward Fastq, fileInputs[1] = reverse Fasta or reverse Fastq. if qualOrIndexFiles.size() != 0, then qualOrIndexFiles[0] = forward qual or Forward index, qualOrIndexFiles[1] = reverse qual or reverse index.
+//lines[0] - ffasta, lines[1] - rfasta) - processor1
+//lines[2] - ffasta, lines[3] - rfasta) - processor2
+//lines[4] - ffasta, lines[5] - rfasta) - processor3
+//...
+//qlines[0] - fqual or findex, qlines[1] - rqual or rindex) - processor1
+//qlines[2] - fqual or findex, qlines[3] - rqual or rindex) - processor2
+//qlines[4] - fqual or findex, qlines[5] - rqual or rindex) - processor3
+//...
+//if using index files and only have 1 then the file name = NONE, and entries are duds. Copies of other index file.
+//if no index files are given, then qualOrIndexFiles.size() == 0.
+unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<linePair> lines, vector<linePair> qLines, string group) {
 	try {
 		int num = 0;
 		vector<int> processIDS;
-        string group = "";
-        map<int, string>::iterator it = file2Group.find(index);
-        if (it != file2Group.end()) { group = it->second; }
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 0;
@@ -701,6 +770,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 				process++;
 			}else if (pid == 0){
                 vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+                vector<vector<string> > tempQUALFileNames = qualFileNames;
                 
 				if(allFiles){
 					ofstream temp;
@@ -711,15 +781,22 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 							}
+                            if (tempQUALFileNames[i][j] != "") {
+                                tempQUALFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
+                            }
 						}
 					}
 				}
                 
-				num = driver(files[process], 
+                int spot = process*2;
+				num = driver(fileInputs, qualOrIndexFiles,
                              outputFasta + m->mothurGetpid(process) + ".temp",
                              outputScrapFasta + m->mothurGetpid(process) + ".temp",
+                             outputQual + m->mothurGetpid(process) + ".temp",
+                             outputScrapQual + m->mothurGetpid(process) + ".temp",
                              outputMisMatches + m->mothurGetpid(process) + ".temp",
-                             tempFASTAFileNames, process, group);
+                             tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
 				
 				//pass groupCounts to parent
                 ofstream out;
@@ -751,9 +828,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
         ofstream temp;
 		m->openOutputFile(outputFasta, temp);		temp.close();
         m->openOutputFile(outputScrapFasta, temp);		temp.close();
-                
+    
 		//do my part
-		num = driver(files[processors-1], outputFasta, outputScrapFasta,  outputMisMatches, fastaFileNames, processors-1, group);
+        int spot = (processors-1)*2;
+		num = driver(fileInputs, qualOrIndexFiles, outputFasta, outputScrapFasta,  outputQual, outputScrapQual, outputMisMatches, fastaFileNames, qualFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -812,6 +890,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 			string extension = "";
 			if (h != 0) { extension = toString(h) + ".temp"; processIDS.push_back(h); }
             vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+            vector<vector<string> > tempQUALFileNames = qualFileNames;
                         
             if(allFiles){
                 ofstream temp;
@@ -822,17 +901,22 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                             tempFASTAFileNames[i][j] += extension;
                             m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
                         }
+                        if (tempQUALFileNames[i][j] != "") {
+                            tempQUALFileNames[i][j] += extension;
+                            m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
+                        }
                     }
                 }
             }
 			         
-			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
+			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
 		}
         
         vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+        vector<vector<string> > tempQUALFileNames = qualFileNames;
 
         if(allFiles){
             ofstream temp;
@@ -843,6 +927,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                     if (tempFASTAFileNames[i][j] != "") {
                         tempFASTAFileNames[i][j] += extension;
                         m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+                    }
+                    if (tempQUALFileNames[i][j] != "") {
+                        tempQUALFileNames[i][j] += extension;
+                        m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
                     }
                 }
             }
@@ -855,7 +943,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
         
         //do my part
         processIDS.push_back(processors-1);
-		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, processors-1, group);
+		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempQUALFileNames, processors-1, group);
         
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -889,6 +977,12 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 			m->appendFiles((outputScrapFasta + toString(processIDS[i]) + ".temp"), outputScrapFasta);
 			m->mothurRemove((outputScrapFasta + toString(processIDS[i]) + ".temp"));
             
+            m->appendFiles((outputQual + toString(processIDS[i]) + ".temp"), outputQual);
+            m->mothurRemove((outputQual + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((outputScrapQual + toString(processIDS[i]) + ".temp"), outputScrapQual);
+            m->mothurRemove((outputScrapQual + toString(processIDS[i]) + ".temp"));
+            
             m->appendFilesWithoutHeaders((outputMisMatches + toString(processIDS[i]) + ".temp"), outputMisMatches);
 			m->mothurRemove((outputMisMatches + toString(processIDS[i]) + ".temp"));
             
@@ -899,6 +993,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 							m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
 							m->mothurRemove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"));
 						}
+                        if (qualFileNames[j][k] != "") {
+                            m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
+                            m->mothurRemove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"));
+                        }
 					}
 				}
 			}
@@ -912,7 +1010,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 	}
 }
 //**********************************************************************************************************************
-int MakeContigsCommand::driver(vector<string> files, string outputFasta, string outputScrapFasta, string outputMisMatches, vector<vector<string> > fastaFileNames, int process, string group){
+int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair linesInput, linePair linesInputReverse, linePair qlinesInput, linePair qlinesInputReverse, string group){
     try {
         
         Alignment* alignment;
@@ -920,38 +1018,56 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
 		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
         
         int num = 0;
-        string thisffastafile = files[0];
-        string thisfqualfile = files[1];
-        string thisrfastafile = files[2];
-        string thisrqualfile = files[3];
-        string thisfindexfile = files[4];
-        string thisrindexfile = files[5];
-        
-        if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: fqual = " + thisfqualfile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: rqual = " + thisrqualfile + ".\n[DEBUG]: findex = " + thisfindexfile + ".\n[DEBUG]: rindex = " + thisrindexfile + ".\n"); }
-        
-        ifstream inFFasta, inRFasta, inFQual, inRQual, inFIndex, inRIndex;
-        ofstream outFasta, outMisMatch, outScrapFasta;
-        m->openInputFile(thisffastafile, inFFasta);
-        m->openInputFile(thisrfastafile, inRFasta);
-        if (thisfqualfile != "") {
-            m->openInputFile(thisfqualfile, inFQual);
-            m->openInputFile(thisrqualfile, inRQual);
+        string thisfqualindexfile, thisrqualindexfile, thisffastafile, thisrfastafile;
+        thisfqualindexfile = ""; thisrqualindexfile = "";
+        thisffastafile = inputFiles[0]; thisrfastafile = inputFiles[1];
+        if (qualOrIndexFiles.size() != 0) {
+            thisfqualindexfile = qualOrIndexFiles[0];
+            thisrqualindexfile = qualOrIndexFiles[1];
         }
         
-        if (thisfindexfile != "") { m->openInputFile(thisfindexfile, inFIndex);  }
-        if (thisrindexfile != "") { m->openInputFile(thisrindexfile, inRIndex);  }
+        if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
+        
+        ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
+        ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
+        m->openInputFile(thisffastafile, inFFasta);
+        m->openInputFile(thisrfastafile, inRFasta);
+        
+        inFFasta.seekg(linesInput.start);
+        inRFasta.seekg(linesInputReverse.start);
+        
+        if (thisfqualindexfile != "") {
+            if (thisfqualindexfile != "NONE") {
+                m->openInputFile(thisfqualindexfile, inFQualIndex);
+                inFQualIndex.seekg(qlinesInput.start);
+            }
+            else {  thisfqualindexfile = ""; }
+            if (thisrqualindexfile != "NONE") {
+                m->openInputFile(thisrqualindexfile, inRQualIndex);
+                inRQualIndex.seekg(qlinesInputReverse.start);
+            }
+            else { thisrqualindexfile = ""; }
+        }
         
         m->openOutputFile(outputFasta, outFasta);
         m->openOutputFile(outputScrapFasta, outScrapFasta);
         m->openOutputFile(outputMisMatches, outMisMatch);
-        outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  
+        bool hasQuality = false;
+        outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";
+        if (delim == '@') { //fastq files so make an output quality
+            m->openOutputFile(outputQual, outQual);
+            m->openOutputFile(outputScrapQual, outScrapQual);
+            hasQuality = true;
+        }else if ((delim == '>') && (qualOrIndexFiles.size() != 0)) { //fasta and qual files
+            m->openOutputFile(outputQual, outQual);
+            m->openOutputFile(outputScrapQual, outScrapQual);
+            hasQuality = true;
+        }
         
         TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, oligos->getPairedPrimers(), oligos->getPairedBarcodes());
         
         TrimOligos* rtrimOligos = NULL;
-        if (reorient) {
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes()); numBarcodes = oligos->getReorientedPairedBarcodes().size();
-        }
+        if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes()); numBarcodes = oligos->getReorientedPairedBarcodes().size();    }
         
         while ((!inFFasta.eof()) && (!inRFasta.eof())) {
             
@@ -961,259 +1077,292 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             string trashCode = "";
             string commentString = "";
             int currentSeqsDiffs = 0;
-
-            //read seqs and quality info
-            Sequence fSeq(inFFasta); m->gobble(inFFasta);
-            Sequence rSeq(inRFasta); m->gobble(inRFasta);
+            bool hasIndex = false;
+            
+            bool ignore; ignore = false;
+            Sequence fSeq, rSeq;
             QualityScores* fQual = NULL; QualityScores* rQual = NULL;
-            if (thisfqualfile != "") {
-                fQual = new QualityScores(inFQual); m->gobble(inFQual);
-                rQual = new QualityScores(inRQual); m->gobble(inRQual);
-            }
-            Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
-            if (thisfindexfile != "") {
-                Sequence temp(inFIndex); m->gobble(inFIndex);
-                findexBarcode.setAligned(temp.getAligned());
-            }
-            
-            if (thisrindexfile != "") {
-                Sequence temp(inRIndex); m->gobble(inRIndex);
-                rindexBarcode.setAligned(trimOligos.reverseOligo(temp.getAligned()));
-            }
-            
-            int barcodeIndex = 0;
-            int primerIndex = 0;
-            Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
-            Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
             QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
-            if (thisfqualfile != "") {
-                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
-            }
-                        
-            if(numBarcodes != 0){
-                vector<int> results;
-                if (thisfqualfile != "") {
-                    if ((thisfindexfile != "") || (thisrindexfile != "")) {
-                       results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
-                    }else {
-                        results = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
-                    }
-                }else {
-                    results = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
+            Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
+            if (delim == '@') { //fastq files
+                bool tignore;
+                fastqRead fread = readFastq(inFFasta, tignore); m->gobble(inFFasta);
+                fastqRead rread = readFastq(inRFasta, ignore); m->gobble(inRFasta);
+                if (tignore) { ignore=true; }
+                fSeq.setName(fread.name); fSeq.setAligned(fread.sequence);
+                rSeq.setName(rread.name); rSeq.setAligned(rread.sequence);
+                fQual = new QualityScores(fread.name, fread.scores);
+                rQual = new QualityScores(rread.name, rread.scores);
+                if (thisfqualindexfile != "") { //forward index file
+                    fastqRead firead = readFastq(inFQualIndex, tignore); m->gobble(inFQualIndex);
+                    if (tignore) { ignore=true; }
+                    findexBarcode.setAligned(firead.sequence);
+                    if (firead.name != fread.name) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+                    hasIndex = true;
                 }
-                success = results[0] + results[2];
-                commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
-                if(success > bdiffs)		{	trashCode += 'b';	}
-                else{ currentSeqsDiffs += success;  }
-            }
-            
-            if(numFPrimers != 0){
-                vector<int> results;
-                if (thisfqualfile != "") {
-                    results = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
-                }else {
-                    results = trimOligos.stripForward(fSeq, rSeq, primerIndex);
+                if (thisrqualindexfile != "") { //reverse index file
+                    fastqRead riread = readFastq(inRQualIndex, tignore); m->gobble(inRQualIndex);
+                    if (tignore) { ignore=true; }
+                    rindexBarcode.setAligned(riread.sequence);
+                    if (riread.name != fread.name) { m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+                    hasIndex = true;
                 }
-                success = results[0] + results[2];
-                commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], pdiffs) + ") ";
-                if(success > pdiffs)		{	trashCode += 'f';	}
-                else{ currentSeqsDiffs += success;  }
+                if (fread.name != rread.name) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+            }else { //reading fasta and maybe qual
+                Sequence tfSeq(inFFasta); m->gobble(inFFasta);
+                Sequence trSeq(inRFasta); m->gobble(inRFasta);
+                fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
+                rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
+                if (thisfqualindexfile != "") {
+                    fQual = new QualityScores(inFQualIndex); m->gobble(inFQualIndex);
+                    rQual = new QualityScores(inRQualIndex); m->gobble(inRQualIndex);
+                    savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                    savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+                    if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                    if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
+                }
+                if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
             }
             
-            if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
-            
-            if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
-                int thisSuccess = 0;
-                string thisTrashCode = "";
-                string thiscommentString = "";
-                int thisCurrentSeqsDiffs = 0;
-                
-                int thisBarcodeIndex = 0;
-                int thisPrimerIndex = 0;
+            if (!ignore) {
+                int barcodeIndex = 0;
+                int primerIndex = 0;
+                Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
+                Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
                 
                 if(numBarcodes != 0){
                     vector<int> results;
-                    if (thisfqualfile != "") {
-                        if ((thisfindexfile != "") || (thisrindexfile != "")) {
-                            results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                    if (hasQuality) {
+                        if (hasIndex) {
+                            results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
                         }else {
-                            results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
+                            results = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
                         }
                     }else {
-                        results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
+                        results = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
                     }
-                    thisSuccess = results[0] + results[2];
-                    thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
-                    if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
-                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    success = results[0] + results[2];
+                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
+                    if(success > bdiffs)		{	trashCode += 'b';	}
+                    else{ currentSeqsDiffs += success;  }
                 }
-
+                
                 if(numFPrimers != 0){
                     vector<int> results;
-                    if (thisfqualfile != "") {
-                        results = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
+                    if (hasQuality) {
+                        results = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
                     }else {
-                        results = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
+                        results = trimOligos.stripForward(fSeq, rSeq, primerIndex);
                     }
-                    thisSuccess = results[0] + results[2];
-                    thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
-                    if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
-                    else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    success = results[0] + results[2];
+                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], pdiffs) + ") ";
+                    if(success > pdiffs)		{	trashCode += 'f';	}
+                    else{ currentSeqsDiffs += success;  }
                 }
                 
-                if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+                if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
                 
-                if (thisTrashCode == "") {
-                    trashCode = thisTrashCode;
-                    success = thisSuccess;
-                    currentSeqsDiffs = thisCurrentSeqsDiffs;
-                    commentString = thiscommentString;
-                    barcodeIndex = thisBarcodeIndex;
-                    primerIndex = thisPrimerIndex;
-                    savedFSeq.reverseComplement();
-                    savedRSeq.reverseComplement();
-                    fSeq.setAligned(savedFSeq.getAligned());
-                    rSeq.setAligned(savedRSeq.getAligned());
-                    if(thisfqualfile != ""){
-                        savedFQual->flipQScores(); savedRQual->flipQScores();
-                        fQual->setScores(savedFQual->getScores()); rQual->setScores(savedRQual->getScores());
-                    }
-                }else { trashCode += "(" + thisTrashCode + ")";  }
-            }
-
-            
-            //flip the reverse reads
-            rSeq.reverseComplement();
-            if (thisfqualfile != "") { rQual->flipQScores(); }
-
-            //pairwise align
-            alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
-            map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
-            map<int, int> BBaseMap = alignment->getSeqBAlnBaseMap();
-            fSeq.setAligned(alignment->getSeqAAln());
-            rSeq.setAligned(alignment->getSeqBAln());
-            int length = fSeq.getAligned().length();
-            
-            //traverse alignments merging into one contiguous seq
-            string contig = "";
-            int numMismatches = 0;
-            string seq1 = fSeq.getAligned();
-            string seq2 = rSeq.getAligned();
-            vector<int> scores1, scores2; 
-            if (thisfqualfile != "") {
-                scores1 = fQual->getQualityScores();
-                scores2 = rQual->getQualityScores();
-                delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
-            }
-            
-            // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
-            int overlapStart = fSeq.getStartPos();
-            int seq2Start = rSeq.getStartPos();
-            
-            //bigger of the 2 starting positions is the location of the overlapping start
-            if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
-                overlapStart = seq2Start; 
-                for (int i = 0; i < overlapStart; i++) { contig += seq1[i];  }
-            }else { //seq1 starts later so take from 0 to overlapStart from seq2
-                for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; }
-            }
-            
-            int seq1End = fSeq.getEndPos();
-            int seq2End = rSeq.getEndPos();
-            int overlapEnd = seq1End;
-            if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
-            
-            int oStart = contig.length();
-            //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
-            for (int i = overlapStart; i < overlapEnd; i++) {
-                //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
-                if (seq1[i] == seq2[i]) { //match, add base and choose highest score
-                    contig += seq1[i];
-                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
-                    if (thisfqualfile != "") {
-                        if (scores2[BBaseMap[i]] <= insert) { } //
-                        else { contig += seq2[i];  }
-                    }else { contig += seq2[i]; } //with no quality info, then we keep it?
-                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
-                    if (thisfqualfile != "") {
-                        if (scores1[ABaseMap[i]] <= insert) { } //
-                        else { contig += seq1[i];  }
-                    }else { contig += seq1[i]; } //with no quality info, then we keep it?
-                }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
-                    if (thisfqualfile != "") {
-                        if (abs(scores1[ABaseMap[i]] - scores2[BBaseMap[i]]) >= deltaq) { //is the difference in qual scores >= deltaq, if yes choose base with higher score
-                            char c = seq1[i];
-                            if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
-                            contig += c;
-                        }else { //if no, base becomes n
-                            contig += 'N';
+                if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                    int thisSuccess = 0;
+                    string thisTrashCode = "";
+                    string thiscommentString = "";
+                    int thisCurrentSeqsDiffs = 0;
+                    
+                    int thisBarcodeIndex = 0;
+                    int thisPrimerIndex = 0;
+                    
+                    if(numBarcodes != 0){
+                        vector<int> results;
+                        if (hasQuality) {
+                            if (hasIndex) {
+                                results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                            }else {
+                                results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);
+                            }
+                        }else {
+                            results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
                         }
-                        numMismatches++;
-                    }else { numMismatches++; } //cant decide, so eliminate and mark as mismatch
-                }else { //should never get here
-                    m->mothurOut("[ERROR]: case I didn't think of seq1 = " + toString(seq1[i]) + " and seq2 = " + toString(seq2[i]) + "\n");
+                        thisSuccess = results[0] + results[2];
+                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                        if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
+                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    }
+                    
+                    if(numFPrimers != 0){
+                        vector<int> results;
+                        if (hasQuality) {
+                            results = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex);
+                        }else {
+                            results = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);
+                        }
+                        thisSuccess = results[0] + results[2];
+                        thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                        if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
+                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    }
+                    
+                    if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+                    
+                    if (thisTrashCode == "") {
+                        trashCode = thisTrashCode;
+                        success = thisSuccess;
+                        currentSeqsDiffs = thisCurrentSeqsDiffs;
+                        commentString = thiscommentString;
+                        barcodeIndex = thisBarcodeIndex;
+                        primerIndex = thisPrimerIndex;
+                        savedFSeq.reverseComplement();
+                        savedRSeq.reverseComplement();
+                        fSeq.setAligned(savedFSeq.getAligned());
+                        rSeq.setAligned(savedRSeq.getAligned());
+                        if(hasQuality){
+                            savedFQual->flipQScores(); savedRQual->flipQScores();
+                            fQual->setScores(savedFQual->getScores()); rQual->setScores(savedRQual->getScores());
+                        }
+                    }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
-            }
-            int oend = contig.length();
-            if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
-                for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  }
-            }else { //seq2 ends before seq1 so take from overlap to length from seq1
-                for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
-            }
-            //cout << contig << endl;
-            //exit(1);
-            if (trimOverlap) { contig = contig.substr(overlapStart-1, oend-oStart);  if (contig.length() == 0) { trashCode += "l"; } }
-            
-            if(trashCode.length() == 0){
-                bool ignore = false;
                 
-                if (m->debug) { m->mothurOut(fSeq.getName()); }
                 
-                if (createOligosGroup) {
+                //flip the reverse reads
+                rSeq.reverseComplement();
+                if (hasQuality) { rQual->flipQScores(); }
+                
+                //pairwise align
+                alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
+                map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
+                map<int, int> BBaseMap = alignment->getSeqBAlnBaseMap();
+                fSeq.setAligned(alignment->getSeqAAln());
+                rSeq.setAligned(alignment->getSeqBAln());
+                int length = fSeq.getAligned().length();
+                
+                //traverse alignments merging into one contiguous seq
+                string contig = "";
+                int numMismatches = 0;
+                string seq1 = fSeq.getAligned();
+                string seq2 = rSeq.getAligned();
+                vector<int> scores1, scores2;
+                if (hasQuality) {
+                    scores1 = fQual->getQualityScores();
+                    scores2 = rQual->getQualityScores();
+                    delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
+                }
+                
+                // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
+                int overlapStart = fSeq.getStartPos();
+                int seq2Start = rSeq.getStartPos();
+                
+                //bigger of the 2 starting positions is the location of the overlapping start
+                if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
+                    overlapStart = seq2Start;
+                    for (int i = 0; i < overlapStart; i++) { contig += seq1[i];  }
+                }else { //seq1 starts later so take from 0 to overlapStart from seq2
+                    for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; }
+                }
+                
+                int seq1End = fSeq.getEndPos();
+                int seq2End = rSeq.getEndPos();
+                int overlapEnd = seq1End;
+                if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
+                
+                int oStart = contig.length();
+                //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
+                for (int i = overlapStart; i < overlapEnd; i++) {
+                    //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
+                    if (seq1[i] == seq2[i]) { //match, add base and choose highest score
+                        contig += seq1[i];
+                    }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
+                        if (hasQuality) {
+                            if (scores2[BBaseMap[i]] <= insert) { } //
+                            else { contig += seq2[i];  }
+                        }else { contig += seq2[i]; } //with no quality info, then we keep it?
+                    }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
+                        if (hasQuality) {
+                            if (scores1[ABaseMap[i]] <= insert) { } //
+                            else { contig += seq1[i];  }
+                        }else { contig += seq1[i]; } //with no quality info, then we keep it?
+                    }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
+                        if (hasQuality) {
+                            if (abs(scores1[ABaseMap[i]] - scores2[BBaseMap[i]]) >= deltaq) { //is the difference in qual scores >= deltaq, if yes choose base with higher score
+                                char c = seq1[i];
+                                if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
+                                contig += c;
+                            }else { //if no, base becomes n
+                                contig += 'N';
+                            }
+                            numMismatches++;
+                        }else { numMismatches++; } //cant decide, so eliminate and mark as mismatch
+                    }else { //should never get here
+                        m->mothurOut("[ERROR]: case I didn't think of seq1 = " + toString(seq1[i]) + " and seq2 = " + toString(seq2[i]) + "\n");
+                    }
+                }
+                int oend = contig.length();
+                if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
+                    for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  }
+                }else { //seq2 ends before seq1 so take from overlap to length from seq1
+                    for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
+                }
+                //cout << contig << endl;
+                //exit(1);
+                if (trimOverlap) { contig = contig.substr(overlapStart-1, oend-oStart);  if (contig.length() == 0) { trashCode += "l"; } }
+                
+                if(trashCode.length() == 0){
+                    bool ignore = false;
+                    
+                    if (m->debug) { m->mothurOut(fSeq.getName()); }
+                    
+                    if (createOligosGroup) {
                         string thisGroup = oligos->getGroupName(barcodeIndex, primerIndex);
                         if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
                         
                         int pos = thisGroup.find("ignore");
                         if (pos == string::npos) {
-                            groupMap[fSeq.getName()] = thisGroup; 
-                        
+                            groupMap[fSeq.getName()] = thisGroup;
+                            
                             map<string, int>::iterator it = groupCounts.find(thisGroup);
                             if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
                             else { groupCounts[it->first] ++; }
                         }else { ignore = true; }
-                }else if (createFileGroup) {
-                    int pos = group.find("ignore");
-                    if (pos == string::npos) {
-                        groupMap[fSeq.getName()] = group;
+                    }else if (createFileGroup) { //for 3 column file option
+                        int pos = group.find("ignore");
+                        if (pos == string::npos) {
+                            groupMap[fSeq.getName()] = group;
+                            
+                            map<string, int>::iterator it = groupCounts.find(group);
+                            if (it == groupCounts.end()) {	groupCounts[group] = 1; }
+                            else { groupCounts[it->first] ++; }
+                        }else { ignore = true; }
+                    }
+                    if (m->debug) { m->mothurOut("\n"); }
+                    
+                    if(!ignore){
+                        //output
+                        outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
+                        int numNs = 0;
+                        for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
+                        outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
                         
-                        map<string, int>::iterator it = groupCounts.find(group);
-                        if (it == groupCounts.end()) {	groupCounts[group] = 1; }
-                        else { groupCounts[it->first] ++; }
-                    }else { ignore = true; }
+                        if (allFiles) {
+                            ofstream output;
+                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
+                            output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
+                            output.close();
+                        }
+                    }
+                }else {
+                    //output
+                    outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl << contig << endl;
                 }
-                if (m->debug) { m->mothurOut("\n"); }
-            
-                if(allFiles && !ignore){
-                    ofstream output;
-                    m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
-                    output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
-                    output.close();
-                }
-                
-                //output
-                outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
-                int numNs = 0;
-                for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
-                outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
-            }else {
-                //output
-                outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl << contig << endl;
             }
             num++;
             
+            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                unsigned long long pos = inFFasta.tellg();
+                if ((pos == -1) || (pos >= linesInput.end)) { break; }
+            #else
+                if (inFFasta.eof()) { break; }
+            #endif
+            
 			//report progress
-			if((num) % 1000 == 0){	m->mothurOutJustToScreen(toString(num)); m->mothurOutEndLine();		}
+            if((num) % 1000 == 0){	m->mothurOutJustToScreen(toString(num)); m->mothurOutEndLine();	 }
 		}
         
 		//report progress
@@ -1224,9 +1373,18 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
         outFasta.close();
         outScrapFasta.close();
         outMisMatch.close();
-        if (thisfqualfile != "") {
-            inFQual.close();
-            inRQual.close();
+        if (delim == '@') {
+            if (thisfqualindexfile != "") { inFQualIndex.close(); }
+            if (thisrqualindexfile != "") { inRQualIndex.close(); }
+            outQual.close();
+            outScrapQual.close();
+        }else{
+            if (hasQuality) {
+                inFQualIndex.close();
+                inRQualIndex.close();
+                outQual.close();
+                outScrapQual.close();
+            }
         }
         delete alignment;
         if (reorient) { delete rtrimOligos; }
@@ -1239,462 +1397,6 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
 		m->errorOut(e, "MakeContigsCommand", "driver");
 		exit(1);
 	}
-}
-//**********************************************************************************************************************
-vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& count, string ffastq, string rfastq, string findex, string rindex){
-    try {
-        vector< vector<string> > files;
-        //maps processors number to file pointer
-        map<int, vector<ofstream*> > tempfiles;  //tempfiles[0] = forwardFasta, [1] = forwardQual, [2] = reverseFasta, [3] = reverseQual, tempfiles[4] = forwardIndex, [4] = forwardReverse
-        map<int, vector<ofstream*> >::iterator it;
-        
-        //create files to write to
-        for (int i = 0; i < processors; i++) {
-            vector<ofstream*> temp;
-            ofstream* outFF = new ofstream;     temp.push_back(outFF);
-            ofstream* outFQ = new ofstream;     temp.push_back(outFQ);
-            ofstream* outRF = new ofstream;     temp.push_back(outRF);
-            ofstream* outRQ = new ofstream;     temp.push_back(outRQ);
-            ofstream* outFI = new ofstream;     temp.push_back(outFI);  
-            ofstream* outRI = new ofstream;     temp.push_back(outRI);  
-            tempfiles[i] = temp;
-            
-            vector<string> names;
-            string thisOutputDir = outputDir;
-            if (outputDir == "") { thisOutputDir = m->hasPath(ffastq); }
-            string ffastafilename = thisOutputDir + m->getRootName(m->getSimpleName(ffastq)) + toString(i) + "ffastatemp";
-            string rfastafilename = thisOutputDir + m->getRootName(m->getSimpleName(rfastq)) + toString(i) + "rfastatemp";
-            string fqualfilename = thisOutputDir + m->getRootName(m->getSimpleName(ffastq)) + toString(i) + "fqualtemp";
-            string rqualfilename = thisOutputDir + m->getRootName(m->getSimpleName(rfastq)) + toString(i) + "rqualtemp";
-            string findexfilename = ""; string rindexfilename = "";
-            noneOk = false; //flag to oligos file read that its okay to allow for non paired barcodes
-            if (findex != "") {  findexfilename = thisOutputDir + m->getRootName(m->getSimpleName(findex)) + toString(i) + "findextemp"; m->openOutputFile(findexfilename, *outFI);  noneOk = true; }
-            if (rindex != "") {  rindexfilename = thisOutputDir + m->getRootName(m->getSimpleName(rindex)) + toString(i) + "rindextemp";  m->openOutputFile(rindexfilename, *outRI); noneOk = true; }
-            names.push_back(ffastafilename); names.push_back(fqualfilename);
-            names.push_back(rfastafilename); names.push_back(rqualfilename);
-            names.push_back(findexfilename); names.push_back(rindexfilename);
-            files.push_back(names);
-            
-            m->openOutputFile(ffastafilename, *outFF);
-            m->openOutputFile(rfastafilename, *outRF);
-            m->openOutputFile(fqualfilename, *outFQ);
-            m->openOutputFile(rqualfilename, *outRQ);
-        }
-        
-        if (m->control_pressed) {
-            //close files, delete ofstreams
-            for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } }
-            //remove files
-            for (int i = 0; i < files.size(); i++) {  
-                for(int j = 0; j < files[i].size(); j++) { if (files[i][j] != "") {  m->mothurRemove(files[i][j]); }  }
-            }
-        }
-        
-        ifstream inForward;
-        m->openInputFile(ffastq, inForward);
-        
-        ifstream inReverse;
-        m->openInputFile(rfastq, inReverse);
-        
-        ifstream infIndex, inrIndex;
-        bool findexIsGood = false;
-        bool rindexIsGood = false;
-        if (findex != "") { m->openInputFile(findex, infIndex); findexIsGood = true; }
-        if (rindex != "") { m->openInputFile(rindex, inrIndex); rindexIsGood = true; }
-        
-        count = 0;
-        map<string, fastqRead> uniques;
-        map<string, fastqRead> iUniques;
-        map<string, pairFastqRead> pairUniques;
-        map<string, fastqRead>::iterator itUniques;
-        while ((!inForward.eof()) || (!inReverse.eof()) || (findexIsGood) || (rindexIsGood)) {
-            
-            if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { if (files[i][j] != "") { m->mothurRemove(files[i][j]); } } } inForward.close(); inReverse.close(); if (findex != "") { infIndex.close(); } if (findex != "") { inrIndex.close(); } return files; }
-            
-            //get a read from forward and reverse fastq files
-            bool ignoref, ignorer, ignorefi, ignoreri;
-            fastqRead thisFread, thisRread, thisFIread, thisRIread;
-            if (!inForward.eof()) {  thisFread = readFastq(inForward, ignoref); }
-            else { ignoref = true; }
-            if (!inReverse.eof()) { thisRread = readFastq(inReverse, ignorer);  }
-            else { ignorer = true; }
-            if (findexIsGood) { thisFIread = readFastq(infIndex, ignorefi); if (infIndex.eof()) { findexIsGood = false; } }
-            else { ignorefi = true; }
-            if (rindexIsGood) { thisRIread = readFastq(inrIndex, ignoreri);  if (inrIndex.eof()) { rindexIsGood = false; } }
-            else { ignoreri = true; }
-            
-            bool allowOne = false;
-            if ((findex == "") || (rindex == "")) { allowOne = true; }
-            vector<pairFastqRead> frReads = getReads(ignoref, ignorer, thisFread, thisRread, uniques, false);
-            vector<pairFastqRead> friReads = getReads(ignorefi, ignoreri, thisFIread, thisRIread, iUniques, allowOne);
-            
-            //add in index info if provided
-            vector<pairFastqRead> reads = frReads;
-            if ((findex != "") || (rindex != "")) {  reads = mergeReads(frReads, friReads, pairUniques); }
-            
-            for (int i = 0; i < reads.size(); i++) {
-                fastqRead fread = reads[i].forward;
-                fastqRead rread = reads[i].reverse;
-                fastqRead firead = reads[i].findex;
-                fastqRead riread = reads[i].rindex;
-                
-                if (m->debug) { m->mothurOut(toString(count) + '\t' + fread.name + '\t' + rread.name + '\n'); if (findex != "") { m->mothurOut(toString(count) + '\t' + firead.name + '\n'); } if (rindex != "") { m->mothurOut(toString(count) + '\t' + riread.name + '\n'); } }
-               
-                //if (checkReads(fread, rread, ffastq, rfastq)) {
-                    if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { if (files[i][j] != "") { m->mothurRemove(files[i][j]); } } } inForward.close(); inReverse.close(); if (findex != "") { infIndex.close(); } if (findex != "") { inrIndex.close(); } return files; }
-                    
-                    //if the reads are okay write to output files
-                    int process = count % processors;
-                    
-                    *(tempfiles[process][0]) << ">" << fread.name << endl << fread.sequence << endl;
-                    *(tempfiles[process][1]) << ">" << fread.name << endl;
-                    for (int i = 0; i < fread.scores.size(); i++) { *(tempfiles[process][1]) << fread.scores[i] << " "; }
-                    *(tempfiles[process][1]) << endl;
-                    *(tempfiles[process][2]) << ">" << rread.name << endl << rread.sequence << endl;
-                    *(tempfiles[process][3]) << ">" << rread.name << endl;
-                    for (int i = 0; i < rread.scores.size(); i++) { *(tempfiles[process][3]) << rread.scores[i] << " "; }
-                    *(tempfiles[process][3]) << endl;
-                    if (findex != "") {  *(tempfiles[process][4]) << ">" << firead.name << endl << firead.sequence << endl; }
-                    if (rindex != "") {  *(tempfiles[process][5]) << ">" << riread.name << endl << riread.sequence << endl; }
-                
-                    count++;
-                    
-                    //report progress
-                    if((count) % 10000 == 0){	m->mothurOutJustToScreen(toString(count)); m->mothurOutEndLine();		}
-                //}
-            }
-		}
-		//report progress
-		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-        
-        if (uniques.size() != 0) {
-            for (itUniques = uniques.begin(); itUniques != uniques.end(); itUniques++) {
-                if (m->control_pressed) { break; }
-                m->mothurOut("[WARNING]: did not find paired read for " + itUniques->first + ", ignoring.\n");
-            }
-            for (map<string, pairFastqRead>:: iterator it = pairUniques.begin(); it != pairUniques.end(); it++) {
-                if (m->control_pressed) { break; }
-                m->mothurOut("[WARNING]: did not find paired read for " + (it->first).substr(1) + ", ignoring.\n");
-            }
-            m->mothurOutEndLine();
-        }
-        
-        //close files, delete ofstreams
-        for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } }
-        inForward.close();
-        inReverse.close();
-        if (findex != "") { infIndex.close(); }
-        if (rindex != "") { inrIndex.close(); }
-       
-        return files;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "readFastqFiles");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-vector< vector<string> > MakeContigsCommand::readFastaFiles(unsigned long int& count, string ffasta, string rfasta){
-    try {
-        vector< vector<string> > files;
-        //maps processors number to file pointer
-        map<int, vector<ofstream*> > tempfiles;  //tempfiles[0] = forwardFasta, [1] = forwardQual, [2] = reverseFasta, [3] = reverseQual
-        map<int, vector<ofstream*> >::iterator it;
-        
-        //create files to write to
-        for (int i = 0; i < processors; i++) {
-            vector<ofstream*> temp;
-            ofstream* outFF = new ofstream;     temp.push_back(outFF);
-            ofstream* outFQ = new ofstream;     temp.push_back(outFQ);
-            ofstream* outRF = new ofstream;     temp.push_back(outRF);
-            ofstream* outRQ = new ofstream;     temp.push_back(outRQ);
-            tempfiles[i] = temp;
-            
-            vector<string> names;
-            string thisOutputDir = outputDir;
-            if (outputDir == "") { thisOutputDir = m->hasPath(ffasta); }
-            string ffastafilename = thisOutputDir + m->getRootName(m->getSimpleName(ffasta)) + toString(i) + "ffastatemp";
-            string rfastafilename = thisOutputDir + m->getRootName(m->getSimpleName(rfasta)) + toString(i) + "rfastatemp";
-            string fqualfilename = "";
-            if (fqualfile != "") { fqualfilename = thisOutputDir + m->getRootName(m->getSimpleName(fqualfile)) + toString(i) + "fqual.temp";  m->openOutputFile(fqualfilename, *outFQ); }
-            string rqualfilename = "";
-            if (rqualfile != "") { rqualfilename = thisOutputDir + m->getRootName(m->getSimpleName(rqualfile)) + toString(i) + "rqual.temp"; m->openOutputFile(rqualfilename, *outRQ); }
-            string findexfilename = ""; string rindexfilename = "";
-            names.push_back(ffastafilename); names.push_back(fqualfilename);
-            names.push_back(rfastafilename); names.push_back(rqualfilename);
-            names.push_back(findexfilename); names.push_back(rindexfilename);
-            files.push_back(names);
-            
-            m->openOutputFile(ffastafilename, *outFF);
-            m->openOutputFile(rfastafilename, *outRF);
-        }
-        
-        if (m->control_pressed) {
-            //close files, delete ofstreams
-            for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } }
-            //remove files
-            for (int i = 0; i < files.size(); i++) {  
-                for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); }
-            }
-        }
-        
-        ifstream inForwardFasta;
-        m->openInputFile(ffasta, inForwardFasta);
-        
-        ifstream inReverseFasta;
-        m->openInputFile(rfasta, inReverseFasta);
-        
-        ifstream inForwardQual, inReverseQual;
-        if (fqualfile != "") { m->openInputFile(fqualfile, inForwardQual); m->openInputFile(rqualfile, inReverseQual); }
-        
-        count = 0;
-        map<string, fastqRead> uniques;
-        map<string, fastqRead>::iterator itUniques;
-        while ((!inForwardFasta.eof()) || (!inReverseFasta.eof())) {
-            
-            if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inReverseFasta.close(); inForwardFasta.close(); if (fqualfile != "") { inReverseQual.close(); inReverseQual.close(); } return files; }
-            
-            //get a reads from forward and reverse fasta files
-            bool ignoref, ignorer;
-            fastqRead thisFread, thisRread;
-            if (!inForwardFasta.eof()) {  
-                ignoref = false; 
-                Sequence temp(inForwardFasta); m->gobble(inForwardFasta);
-                thisFread.name = temp.getName();
-                thisFread.sequence = temp.getUnaligned();
-            }else { ignoref = true; }
-            if (!inReverseFasta.eof()) {  
-                ignorer = false; 
-                Sequence temp(inReverseFasta); m->gobble(inReverseFasta);
-                thisRread.name = temp.getName();
-                thisRread.sequence = temp.getUnaligned();  
-            }else { ignorer = true; }
-            
-            //get qual reads if given
-            if (fqualfile != "") {
-                if (!inForwardQual.eof() && !ignoref) {  
-                    QualityScores temp(inForwardQual); m->gobble(inForwardQual);
-                    //if forward files dont match ignore read
-                    if (thisFread.name != temp.getName()) { ignoref = true; } 
-                    else { thisFread.scores = temp.getQualityScores(); }
-                }else { ignoref = true; }
-                if (!inReverseQual.eof() && !ignorer) {  
-                    QualityScores temp(inReverseQual); m->gobble(inReverseQual);
-                    //if reverse files dont match ignore read
-                    if (thisRread.name != temp.getName()) { ignorer = true; } 
-                    else { thisRread.scores = temp.getQualityScores(); }
-                }else { ignorer = true; }
-            }
-            
-            vector<pairFastqRead> reads = getReads(ignoref, ignorer, thisFread, thisRread, uniques, false);
-            
-            for (int i = 0; i < reads.size(); i++) {
-                fastqRead fread = reads[i].forward;
-                fastqRead rread = reads[i].reverse;
-                
-                if (m->debug) { m->mothurOut(toString(count) + '\t' + fread.name + '\t' + rread.name + '\n'); }
-                
-               // if (checkReads(fread, rread, ffasta, rfasta)) {
-                    if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inReverseFasta.close(); inForwardFasta.close(); if (fqualfile != "") { inReverseQual.close(); inReverseQual.close(); } return files; }
-                    
-                    //if the reads are okay write to output files
-                    int process = count % processors;
-                    
-                    *(tempfiles[process][0]) << ">" << fread.name << endl << fread.sequence << endl;
-                    *(tempfiles[process][2]) << ">" << rread.name << endl << rread.sequence << endl;
-                    if (fqualfile != "") { //if you have quality info, print it
-                        *(tempfiles[process][1]) << ">" << fread.name << endl;
-                        for (int i = 0; i < fread.scores.size(); i++) { *(tempfiles[process][1]) << fread.scores[i] << " "; }
-                        *(tempfiles[process][1]) << endl;
-                        *(tempfiles[process][3]) << ">" << rread.name << endl;
-                        for (int i = 0; i < rread.scores.size(); i++) { *(tempfiles[process][3]) << rread.scores[i] << " "; }
-                        *(tempfiles[process][3]) << endl;
-                    }
-                    count++;
-                    
-                    //report progress
-                    if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-                //}
-            }
-		}
-		//report progress
-		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-        
-        if (uniques.size() != 0) {
-            for (itUniques = uniques.begin(); itUniques != uniques.end(); itUniques++) {
-                m->mothurOut("[WARNING]: did not find paired read for " + itUniques->first + ", ignoring.\n");
-            }
-            m->mothurOutEndLine();
-        }
-        
-        //close files, delete ofstreams
-        for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } }
-        inReverseFasta.close(); 
-        inForwardFasta.close(); 
-        if (fqualfile != "") { inReverseQual.close(); inReverseQual.close(); }
-        
-        return files;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "readFastaFiles");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-vector<pairFastqRead> MakeContigsCommand::getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques, bool allowOne){
-    try {
-        vector<pairFastqRead> reads;
-        map<string, fastqRead>::iterator itUniques;
-            
-        if (!ignoref && !ignorer) {
-            if (forward.name == reverse.name) { 
-                pairFastqRead temp(forward, reverse);
-                reads.push_back(temp);
-            }else {
-                bool match = false;
-                //if no match are the names only different by 1 and 2?
-                string tempFRead = forward.name.substr(0, forward.name.length()-1);
-                string tempRRead = reverse.name.substr(0, reverse.name.length()-1);
-                if (tempFRead == tempRRead) {
-                    if ((forward.name[forward.name.length()-1] == '1') && (reverse.name[reverse.name.length()-1] == '2')) {
-                        forward.name = tempFRead;
-                        reverse.name = tempRRead;
-                        pairFastqRead temp(forward, reverse);
-                        reads.push_back(temp);
-                        match = true;
-                    }
-                }
-                
-                if (!match) {
-                    //look for forward pair
-                    itUniques = uniques.find(forward.name);
-                    if (itUniques != uniques.end()) {  //we have the pair for this read
-                        pairFastqRead temp(forward, itUniques->second);
-                        reads.push_back(temp);
-                        uniques.erase(itUniques);
-                    }else { //save this read for later
-                        uniques[forward.name] = forward;
-                    }
-                    
-                    //look for reverse pair
-                    itUniques = uniques.find(reverse.name);
-                    if (itUniques != uniques.end()) {  //we have the pair for this read
-                        pairFastqRead temp(itUniques->second, reverse);
-                        reads.push_back(temp);
-                        uniques.erase(itUniques);
-                    }else { //save this read for later
-                        uniques[reverse.name] = reverse;
-                    }
-                }
-                                
-            }
-        }else if (!ignoref && ignorer) { //ignore reverse keep forward
-            if (allowOne) {
-                fastqRead dummy;
-                pairFastqRead temp(forward, dummy);
-                reads.push_back(temp);
-            }else {
-                //look for forward pair
-                itUniques = uniques.find(forward.name);
-                if (itUniques != uniques.end()) {  //we have the pair for this read
-                    pairFastqRead temp(forward, itUniques->second);
-                    reads.push_back(temp);
-                    uniques.erase(itUniques);
-                }else { //save this read for later
-                    uniques[forward.name] = forward;
-                }
-            }
-        }else if (ignoref && !ignorer) { //ignore forward keep reverse
-            if (allowOne) {
-                fastqRead dummy;
-                pairFastqRead temp(dummy, reverse);
-                reads.push_back(temp);
-            }else {
-                //look for reverse pair
-                itUniques = uniques.find(reverse.name);
-                if (itUniques != uniques.end()) {  //we have the pair for this read
-                    pairFastqRead temp(itUniques->second, reverse);
-                    reads.push_back(temp);
-                    uniques.erase(itUniques);
-                }else { //save this read for later
-                    uniques[reverse.name] = reverse;
-                }
-            }
-        }//else ignore both and do nothing
-        
-        return reads;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "readFastqFiles");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-//look through the reads from the forward and reverse files and try to find matching reads from index files.
-vector<pairFastqRead> MakeContigsCommand::mergeReads(vector<pairFastqRead> thisReads, vector<pairFastqRead> indexes, map<string, pairFastqRead>& uniques){
-    try {
-        vector<pairFastqRead> reads;
-        map<string, pairFastqRead>::iterator itUniques;
-        
-        set<int> foundIndexes;
-        for (int i = 0; i < thisReads.size(); i++) {
-            bool found = false;
-            for (int j = 0; j < indexes.size(); j++) {
-                
-                //incase only one index
-                string indexName = indexes[j].forward.name;
-                if (indexName == "") { indexName = indexes[j].reverse.name; }
-                
-                if (thisReads[i].forward.name == indexName){
-                    thisReads[i].findex = indexes[j].forward;
-                    thisReads[i].rindex = indexes[j].reverse;
-                    reads.push_back(thisReads[i]);
-                    found = true;
-                    foundIndexes.insert(j);
-                }
-            }
-            
-            if (!found) {
-                //look for forward pair
-                itUniques = uniques.find('i'+thisReads[i].forward.name);
-                if (itUniques != uniques.end()) {  //we have the pair for this read
-                    thisReads[i].findex = itUniques->second.forward;
-                    thisReads[i].rindex = itUniques->second.reverse;
-                    reads.push_back(thisReads[i]);
-                    uniques.erase(itUniques);
-                }else { //save this read for later
-                    uniques['r'+thisReads[i].forward.name] = thisReads[i];
-                }
-            }
-        }
-        
-        if (foundIndexes.size() != indexes.size()) { //if we didnt match all the indexes look for them in uniques
-            for (int j = 0; j < indexes.size(); j++) {
-                if (foundIndexes.count(j) == 0) { //we didnt find this one
-                    //incase only one index
-                    string indexName = indexes[j].forward.name;
-                    if (indexName == "") { indexName = indexes[j].reverse.name; }
-                    
-                    //look for forward pair
-                    itUniques = uniques.find('r'+indexName);
-                    if (itUniques != uniques.end()) {  //we have the pair for this read
-                        pairFastqRead temp(itUniques->second.forward, itUniques->second.reverse, indexes[j].forward, indexes[j].reverse);
-                        reads.push_back(temp);
-                        uniques.erase(itUniques);
-                    }else { //save this read for later
-                        uniques['i'+indexName] = indexes[j];
-                    }
-                }
-            }
-        }
-       
-        
-        return reads;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "mergeReads");
-        exit(1);
-    }
 }
 //**********************************************************************************************************************
 fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
@@ -1747,30 +1449,332 @@ fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
         exit(1);
     }
 }
-/**********************************************************************************************************************
-bool MakeContigsCommand::checkReads(fastqRead& forward, fastqRead& reverse, string ffile, string rfile){
+/**************************************************************************************************/
+
+int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vector<linePair>& lines, vector<linePair>& qLines, char delim) {
     try {
-        bool good = true;
+        lines.clear();
+        qLines.clear();
+        vector<unsigned long long> fastaFilePos;
+        vector<unsigned long long> qfileFilePos;
+        vector<unsigned long long> temp;
         
-        //do sequence lengths match
-        if (forward.sequence.length() != reverse.sequence.length()) {
-            m->mothurOut("[WARNING]: For sequence " + forward.name + " I read a sequence of length " + toString(forward.sequence.length()) + " from " + ffile + ", but read a sequence of length " + toString(reverse.sequence.length()) + " from " + rfile + ", ignoring.\n");
-            good = false; 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        //set file positions for fasta file
+        fastaFilePos = m->divideFile(fasta[0], processors, delim);
+        
+        //get name of first sequence in each chunk
+        map<string, int> firstSeqNames;
+        for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+            ifstream in;
+            m->openInputFile(fasta[0], in);
+            in.seekg(fastaFilePos[i]);
+            string name = "";
+            
+            if (delim == '>') {
+                Sequence temp(in);
+                name = temp.getName();
+            }else {
+                string line = m->getline(in); m->gobble(in);
+                vector<string> pieces = m->splitWhiteSpace(line);
+                name = pieces[0];
+                name = name.substr(1);
+                m->checkName(name);
+            }
+            firstSeqNames[name] = i;
+            
+            in.close();
         }
         
-        //do number of qual scores match 
-        if (forward.scores.size() != reverse.scores.size()) {
-            m->mothurOut("[WARNING]: For sequence " + forward.name + " I read " + toString(forward.scores.size()) + " quality scores from " + ffile + ", but read  " + toString(reverse.scores.size()) + " quality scores from " + rfile + ", ignoring.\n");
-            good = false; 
+        map<string, int> copy;
+        if (qual.size() != 0) { copy = firstSeqNames; }
+        
+        //look for match in reverse file
+        ifstream in2;
+        m->openInputFile(fasta[1], in2);
+        
+        string input;
+        while(!in2.eof()){
+            input = m->getline(in2); m->gobble(in2);
+            
+            if (input.length() != 0) {
+                if(input[0] == delim){ //this is a name line
+                    vector<string> pieces = m->splitWhiteSpace(input);
+                    string name = pieces[0];
+                    name = name.substr(1);
+                    m->checkName(name);
+                    
+                    map<string, int>::iterator it = firstSeqNames.find(name);
+                    
+                    if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                        unsigned long long pos = in2.tellg();
+                        qfileFilePos.push_back(pos - input.length() - 1);
+                        firstSeqNames.erase(it);
+                    }
+                }
+            }
+            
+            if (firstSeqNames.size() == 0) { break; }
+        }
+        in2.close();
+        
+        //get last file position of reverse fasta[1]
+        FILE * pFile;
+        unsigned long long size;
+        
+        //get num bytes in file
+        pFile = fopen (fasta[1].c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        qfileFilePos.push_back(size);
+
+        
+        if (firstSeqNames.size() != 0) {
+            for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+                if (delim == '>') {
+                    m->mothurOut(it->first + " is in your forward fasta file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                }else {
+                    m->mothurOut(it->first + " is in your forward fastq file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                }
+            }
+            m->control_pressed = true;
+            return processors;
         }
 
-        return good;
+        //fill lines with paired forward and reverse fasta lines
+        for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+            if (m->debug) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
+            lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
+            if (m->debug) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
+            lines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));
+        }
+        
+        qfileFilePos.clear();
+        
+        if (qual.size() != 0) {
+            firstSeqNames = copy;
+            
+            if (qual[0] != "NONE") {
+                //seach for filePos of each first name in the qfile and save in qfileFilePos
+                ifstream inQual;
+                m->openInputFile(qual[0], inQual);
+                
+                string input;
+                while(!inQual.eof()){
+                    input = m->getline(inQual); m->gobble(inQual);
+                    
+                    if (input.length() != 0) {
+                        if(input[0] == delim){ //this is a sequence name line
+                            vector<string> pieces = m->splitWhiteSpace(input);
+                            string name = pieces[0];
+                            name = name.substr(1);
+                            m->checkName(name);
+                            
+                            map<string, int>::iterator it = firstSeqNames.find(name);
+                            
+                            if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                                unsigned long long pos = inQual.tellg();
+                                qfileFilePos.push_back(pos - input.length() - 1);
+                                firstSeqNames.erase(it);
+                            }
+                        }
+                    }
+                    
+                    if (firstSeqNames.size() == 0) { break; }
+                }
+                inQual.close();
+                
+                //get last file position of reverse qual[0]
+                FILE * pFile;
+                unsigned long long size;
+                
+                //get num bytes in file
+                pFile = fopen (qual[0].c_str(),"rb");
+                if (pFile==NULL) perror ("Error opening file");
+                else{
+                    fseek (pFile, 0, SEEK_END);
+                    size=ftell (pFile);
+                    fclose (pFile);
+                }
+                qfileFilePos.push_back(size);
+                
+                
+                if (firstSeqNames.size() != 0) {
+                    for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+                        if (delim == '>') {
+                            m->mothurOut(it->first + " is in your forward fasta file and reverse fasta file, but not your forward qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                        }else {
+                            m->mothurOut(it->first + " is in your forward fastq file and reverse fastq file, but not your forward index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                        }
+                    }
+                    m->control_pressed = true;
+                    return processors;
+                }
+            }
+            firstSeqNames = copy;
+            
+            if (qual[1] != "NONE") {
+                ifstream inQual2;
+                m->openInputFile(qual[1], inQual2);
+                
+                while(!inQual2.eof()){
+                    input = m->getline(inQual2); m->gobble(inQual2);
+                    
+                    if (input.length() != 0) {
+                        if(input[0] == delim){ //this is a sequence name line
+                            vector<string> pieces = m->splitWhiteSpace(input);
+                            string name = pieces[0];
+                            name = name.substr(1);
+                            
+                            m->checkName(name);
+                            
+                            map<string, int>::iterator it = firstSeqNames.find(name);
+                            
+                            if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                                unsigned long long pos = inQual2.tellg();
+                                temp.push_back(pos - input.length() - 1);
+                                firstSeqNames.erase(it);
+                            }
+                        }
+                    }
+                    
+                    if (firstSeqNames.size() == 0) { break; }
+                }
+                inQual2.close();
+                
+                //get last file position of reverse qual[1]
+                FILE * pFile2;
+                
+                //get num bytes in file
+                pFile2 = fopen (qual[1].c_str(),"rb");
+                if (pFile2==NULL) perror ("Error opening file");
+                else{
+                    fseek (pFile2, 0, SEEK_END);
+                    size=ftell (pFile2);
+                    fclose (pFile2);
+                }
+                temp.push_back(size);
+                
+                
+                if (firstSeqNames.size() != 0) {
+                    for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+                        if (delim == '>') {
+                            m->mothurOut(it->first + " is in your forward fasta file, reverse fasta file, and forward qfile but not your reverse qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                        }else {
+                            if (qual[0] != "NONE") {
+                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, and forward index but not your reverse index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                            }else {
+                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, but not your reverse index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                            }
+                        }
+                    }
+                    m->control_pressed = true;
+                    return processors;
+                }
+            }
+            
+            if (qual[0] == "NONE") { qfileFilePos = temp; } //fill with duds, if both were NONE then qual.size() == 0
+            if (qual[1] == "NONE") { temp = qfileFilePos; } //fill with duds, if both were NONE then qual.size() == 0
+            
+            
+            //fill lines with paired forward and reverse fasta lines
+            for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+                if (m->debug) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
+                qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));
+                if (m->debug) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(temp[i]) + '\t' + toString(temp[i+1]) + '\n'); }
+                qLines.push_back(linePair(temp[i], temp[(i+1)]));
+            }
+        }else {  qLines = lines;	} //files with duds
+        
+        
+        return processors;
+        
+#else
+        
+        if (processors == 1) { //save time
+            //fastaFilePos.push_back(0); qfileFilePos.push_back(0);
+            //fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
+            lines.push_back(linePair(0, 1000)); lines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
+            if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000)); } //qual[0], qual[1] - forward and reverse
+        }else{
+            unsigned long long numFastaSeqs = 0;
+            fastaFilePos = m->setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
+            if (fastaFilePos.size() < processors) { processors = fastaFilePos.size(); }
+            
+            unsigned long long numRFastaSeqs = 0;
+            qfileFilePos = m->setFilePosFasta(fasta[1], numRFastaSeqs, delim); //reverse
+            
+            if (numFastaSeqs != numRFastaSeqs) {
+                if (delim == '>') {
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, but " + toString(numRFastaSeqs) + " sequences in your reverse fasta file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                }else {
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, but " + toString(numRFastaSeqs) + " sequences in your reverse fastq file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                }
+            }
+            
+            //figure out how many sequences you have to process
+            unsigned long long numSeqsPerProcessor = numFastaSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                unsigned long long startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(fastaFilePos[startIndex], numSeqsPerProcessor)); //forward
+                lines.push_back(linePair(qfileFilePos[startIndex], numSeqsPerProcessor)); //reverse
+            }
+            
+            
+            if (qual.size() != 0) {
+                unsigned long long numFQualSeqs = 0;
+                unsigned long long numRQualSeqs = 0;
+                fastaFilePos.clear();
+                qfileFilePos.clear();
+                
+                if (qual[0] != "NONE") {  fastaFilePos = m->setFilePosFasta(qual[0], numFQualSeqs, '>');  } //forward index or qual file
+                if (qual[1] != "NONE") {  qfileFilePos = m->setFilePosFasta(qual[1], numRQualSeqs, '>');  }//reverse index or qual file
+                
+                if (qual[0] == "NONE") { fastaFilePos = qfileFilePos; numFQualSeqs = numRQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
+                if (qual[1] == "NONE") { qfileFilePos = fastaFilePos; numRQualSeqs = numFQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
+
+                
+                if ((numFQualSeqs != numRQualSeqs) || (numFQualSeqs != numFastaSeqs)){
+                    if (delim == '>') {
+                        m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                    }else {
+                        if (qual[0] != "NONE") {
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                        }else if (qual[1] != "NONE") {
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numFQualSeqs) + " sequences in your forward index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                        }else {
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file, " + toString(numFQualSeqs) + " sequences in your forward index file, " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                        }
+                    }
+                }
+                
+                //figure out how many sequences you have to process
+                unsigned long long numSeqsPerProcessor = numFQualSeqs / processors;
+                for (int i = 0; i < processors; i++) {
+                    unsigned long long startIndex =  i * numSeqsPerProcessor;
+                    if(i == (processors - 1)){	numSeqsPerProcessor = numFQualSeqs - i * numSeqsPerProcessor; 	}
+                    qLines.push_back(linePair(fastaFilePos[startIndex], numSeqsPerProcessor)); //forward
+                    qLines.push_back(linePair(qfileFilePos[startIndex], numSeqsPerProcessor)); //reverse
+                }
+  
+            }else { qLines = lines;	} //files with duds
+        }
+        if(qfilename == "")	{	qLines = lines;	} //files with duds
+        return 1;
+        
+#endif
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "checkReads");
+        m->errorOut(e, "MakeContigsCommand", "setLines");
         exit(1);
     }
-}*/
+}
+
 //***************************************************************************************************************
 //lines can be 2, 3, or 4 columns
 // forward.fastq reverse.fastq -> 2 column
@@ -1812,8 +1816,8 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 reverse = pieces[1];
                 findex = pieces[2];
                 rindex = pieces[3];
-                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
-                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
+                if ((findex == "none") || (findex == "NONE")){ findex = "NONE"; }
+                if ((rindex == "none") || (rindex == "NONE")){ rindex = "NONE"; }
             }else {
                 m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->control_pressed = true;
             }
@@ -1902,7 +1906,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }else{  in3.close();  }
             
             int openFindex = 0;
-            if (findex != "") {
+            if ((findex != "") && (findex != "NONE")){
                 ifstream in4;
                 openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
                 
@@ -1936,7 +1940,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             int openRindex = 0;
-            if (rindex != "") {
+            if ((rindex != "") && (rindex != "NONE")) {
                 ifstream in7;
                 openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
                 
@@ -1995,7 +1999,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 //BARCODE   atgcatgc   atgcatgc    groupName 
 //PRIMER   atgcatgc   atgcatgc    groupName  
 //PRIMER   atgcatgc   atgcatgc
-bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, string rootname, map<string, string>& fastaFile2Group){
+bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, string rootname, map<string, string>& fastaFile2Group){
 	try {
         if (m->debug) { m->mothurOut("[DEBUG]: oligosfile = " + oligosfile + "\n"); }
         
@@ -2027,7 +2031,9 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
 		for(int i=0;i<fastaFileNames.size();i++){
             for(int j=0;j<oligos->getPrimerNames().size();j++){  fastaFileNames[i].push_back(""); }
 		}
-    
+        
+        qualFileNames = fastaFileNames;
+        
         if (allFiles) {
             set<string> uniqueNames; //used to cleanup outputFileNames
             map<int, oligosPair> barcodes = oligos->getPairedBarcodes();
@@ -2044,8 +2050,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                         string comboGroupName = "";
                         string fastaFileName = "";
                         string qualFileName = "";
-                        string nameFileName = "";
-                        string countFileName = "";
                         
                         if(primerName == ""){
                             comboGroupName = barcodeName;
@@ -2059,21 +2063,30 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                         }
                         
                         
-                        ofstream temp;
+                        ofstream temp, temp2;
                         map<string, string> variables;
                         variables["[filename]"] = rootname;
                         variables["[tag]"] = comboGroupName;
                         fastaFileName = getOutputFileName("fasta", variables);
+                        qualFileName = getOutputFileName("qfile", variables);
                         if (uniqueNames.count(fastaFileName) == 0) {
                             outputNames.push_back(fastaFileName);
                             outputTypes["fasta"].push_back(fastaFileName);
                             uniqueNames.insert(fastaFileName);
                             fastaFile2Group[fastaFileName] = comboGroupName;
+                            
+                            outputNames.push_back(qualFileName);
+                            outputTypes["qfile"].push_back(qualFileName);
+                            uniqueNames.insert(qualFileName);
+
                         }
                         
                         fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                         m->openOutputFile(fastaFileName, temp);		temp.close();
                         //cout << fastaFileName << endl;
+                        
+                        qualFileNames[itBar->first][itPrimer->first] = qualFileName;
+                        m->openOutputFile(qualFileName, temp2);		temp2.close();
                     }
                 }
             }
@@ -2127,9 +2140,5 @@ vector<int> MakeContigsCommand::convertQual(string qual) {
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-
-
-
 

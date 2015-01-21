@@ -219,9 +219,12 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 		
 		it = container.find(parameter);
 		if(it != container.end()){ //no parameter given
-
+            
 			if(isFile == true) {
 				
+                if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
+                else {
+                
 				int pos = (it->second).find(".tx.");
 				if (pos != string::npos) { m->sharedHeaderMode = "tax"; }
 				else { m->sharedHeaderMode = "otu"; }
@@ -314,7 +317,8 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                         m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found"; 
                     }
                 }
-                    
+                }
+                
 			}
 		}else { return "not found"; }
 		
