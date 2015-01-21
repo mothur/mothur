@@ -109,11 +109,19 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct contigsData {
-	string outputFasta; 
-    string outputScrapFasta; 
+    struct linePair {
+        unsigned long long start;
+        unsigned long long end;
+        linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
+        linePair() {}
+    };
+    
+    linePair linesInput, linesInputReverse, qlinesInput, qlinesInputReverse;
+	string outputFasta, outputQual;
+    string outputScrapFasta, outputScrapQual;
 	string outputMisMatches;
 	string align, group, oligosfile;
-    vector<string> files;
+    vector<string> fileInputs;
     vector<vector<string> > fastaFileNames;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
@@ -124,10 +132,12 @@ struct contigsData {
     
 	
 	contigsData(){}
-	contigsData(string g, vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, int tid) {
-        files = f;
+	contigsData(string g, vector<string> f, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, linePair lff, linePair lrf, linePair qff, linePair qrf, int tid) {
+        fileInputs = f;
 		outputFasta = of;
         outputMisMatches = om;
+        outputQual = oq;
+        outputScrapQual = osq;
         m = mout;
 		match = ma; 
 		misMatch = misMa;
@@ -150,6 +160,10 @@ struct contigsData {
 		threadID = tid;
         deltaq = delt;
         reorient = ro;
+        linesInput = lff;
+        linesInputReverse = lrf;
+        qlinesInput = qff;
+        qlinesInputReverse = qrf;
         done=false;
 	}
 };

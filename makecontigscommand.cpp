@@ -7,7 +7,7 @@
 //
 
 #include "makecontigscommand.h"
-//test
+
 //********************************************************************************************************************
 //sorts biggest to smallest
 inline bool compareFileSizes(vector<string> left, vector<string> right){
@@ -759,10 +759,10 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 		vector<int> processIDS;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 0;
+		int process = 1;
 		
 		//loop through and create all the processes you want
-		while (process != processors-1) {
+		while (process != processors) {
 			pid_t pid = fork();
 			
 			if (pid > 0) {
@@ -828,9 +828,11 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         ofstream temp;
 		m->openOutputFile(outputFasta, temp);		temp.close();
         m->openOutputFile(outputScrapFasta, temp);		temp.close();
+        m->openOutputFile(outputQual, temp);		temp.close();
+        m->openOutputFile(outputScrapQual, temp);		temp.close();
     
 		//do my part
-        int spot = (processors-1)*2;
+        int spot = 0;
 		num = driver(fileInputs, qualOrIndexFiles, outputFasta, outputScrapFasta,  outputQual, outputScrapQual, outputMisMatches, fastaFileNames, qualFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
 		
 		//force parent to wait until all the processes are done
@@ -908,8 +910,9 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                     }
                 }
             }
-			         
-			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
+			
+            int spot = (h)*2;
+			contigsData* tempcontig = new contigsData(group, fileInputs, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -937,13 +940,17 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         }
 
 		//parent do my part
-		ofstream temp;
+		ofstream temp, temp2, temp3, temp4;
 		m->openOutputFile(outputFasta, temp);		temp.close();
-        m->openOutputFile(outputScrapFasta, temp);		temp.close();
+        m->openOutputFile(outputScrapFasta, temp2);		temp2.close();
+        m->openOutputFile(outputQual, temp3);		temp3.close();
+        m->openOutputFile(outputScrapQual, temp4);		temp4.close();
         
         //do my part
+        int spot = (processors-1)*2;
         processIDS.push_back(processors-1);
-		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempQUALFileNames, processors-1, group);
+        num = driver(fileInputs, qualOrIndexFiles, (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputQual+ toString(processors-1) + ".temp"),  (outputScrapQual+ toString(processors-1) + ".temp"), (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
+
         
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
