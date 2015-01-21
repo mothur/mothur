@@ -7,7 +7,7 @@
 //
 
 #include "makecontigscommand.h"
-
+//test
 //********************************************************************************************************************
 //sorts biggest to smallest
 inline bool compareFileSizes(vector<string> left, vector<string> right){
