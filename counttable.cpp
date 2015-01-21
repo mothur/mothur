@@ -294,8 +294,8 @@ int CountTable::printTable(string file) {
     try {
         ofstream out;
         m->openOutputFile(file, out); 
-		out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < groups.size(); i++) { out << groups[i] << '\t'; }
+		out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
@@ -305,21 +305,21 @@ int CountTable::printTable(string file) {
             map<int, string>::iterator itR = reverse.find(i);
             
             if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
-                out << itR->second << '\t' << totals[i] << '\t';
+                out << itR->second << '\t' << totals[i];
                 if (hasGroups) {
                     for (int j = 0; j < groups.size(); j++) {
-                        out << counts[i][j] << '\t';
+                        out << '\t' << counts[i][j];
                     }
                 }
                 out << endl;
             }
         }
         /*for (map<string, int>::iterator itNames = indexNameMap.begin(); itNames != indexNameMap.end(); itNames++) {
-            out << itNames->first << '\t' << totals[itNames->second] << '\t';
+            out << itNames->first << '\t' << totals[itNames->second];
             if (hasGroups) {
                 
                 for (int i = 0; i < groups.size(); i++) {
-                    out << counts[itNames->second][i] << '\t';
+                    out << '\t' << counts[itNames->second][i];
                 }
             }
             out << endl;
@@ -335,8 +335,8 @@ int CountTable::printTable(string file) {
 /************************************************************/
 int CountTable::printHeaders(ofstream& out) {
     try {
-		out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < groups.size(); i++) { out << groups[i] << '\t'; }
+		out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }
         out << endl;
         return 0;
     }
@@ -352,10 +352,10 @@ int CountTable::printSeq(ofstream& out, string seqName) {
         if (it == indexNameMap.end()) {
             m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
         }else { 
-            out << it->first << '\t' << totals[it->second] << '\t';
+            out << it->first << '\t' << totals[it->second];
             if (hasGroups) {
                 for (int i = 0; i < groups.size(); i++) {
-                    out << counts[it->second][i] << '\t';
+                    out << '\t' << counts[it->second][i];
                 }
             }
             out << endl;
