@@ -418,12 +418,6 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
 			reorient = m->isTrue(temp);
-            
-            //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
-            for (int i = -64; i < 65; i++) { 
-                char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
-                convertTable.push_back(temp);
-            }
         }
 		
 	}
@@ -912,7 +906,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             }
 			
             int spot = (h)*2;
-			contigsData* tempcontig = new contigsData(group, fileInputs, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], h);
+			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -1093,28 +1087,28 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
             Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
             if (delim == '@') { //fastq files
                 bool tignore;
-                fastqRead fread = readFastq(inFFasta, tignore); m->gobble(inFFasta);
-                fastqRead rread = readFastq(inRFasta, ignore); m->gobble(inRFasta);
+                FastqRead fread(inFFasta, tignore, format); m->gobble(inFFasta);
+                FastqRead rread(inRFasta, ignore, format); m->gobble(inRFasta);
                 if (tignore) { ignore=true; }
-                fSeq.setName(fread.name); fSeq.setAligned(fread.sequence);
-                rSeq.setName(rread.name); rSeq.setAligned(rread.sequence);
-                fQual = new QualityScores(fread.name, fread.scores);
-                rQual = new QualityScores(rread.name, rread.scores);
+                fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
+                rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
+                fQual = new QualityScores(fread.getName(), fread.getScores());
+                rQual = new QualityScores(rread.getName(), rread.getScores());
                 if (thisfqualindexfile != "") { //forward index file
-                    fastqRead firead = readFastq(inFQualIndex, tignore); m->gobble(inFQualIndex);
+                    FastqRead firead(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
-                    findexBarcode.setAligned(firead.sequence);
-                    if (firead.name != fread.name) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+                    findexBarcode.setAligned(firead.getSeq());
+                    if (firead.getName() != fread.getName()) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                     hasIndex = true;
                 }
                 if (thisrqualindexfile != "") { //reverse index file
-                    fastqRead riread = readFastq(inRQualIndex, tignore); m->gobble(inRQualIndex);
+                    FastqRead riread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
-                    rindexBarcode.setAligned(riread.sequence);
-                    if (riread.name != fread.name) { m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+                    rindexBarcode.setAligned(riread.getSeq());
+                    if (riread.getName() != fread.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                     hasIndex = true;
                 }
-                if (fread.name != rread.name) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.name + ".\n"); ignore = true; }
+                if (fread.getName() != rread.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
             }else { //reading fasta and maybe qual
                 Sequence tfSeq(inFFasta); m->gobble(inFFasta);
                 Sequence trSeq(inRFasta); m->gobble(inRFasta);
@@ -1246,7 +1240,7 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 int numMismatches = 0;
                 string seq1 = fSeq.getAligned();
                 string seq2 = rSeq.getAligned();
-                vector<int> scores1, scores2;
+                vector<int> scores1, scores2, contigScores;
                 if (hasQuality) {
                     scores1 = fQual->getQualityScores();
                     scores2 = rQual->getQualityScores();
@@ -1343,6 +1337,9 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                     if(!ignore){
                         //output
                         outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
+                        outQual << ">" << fSeq.getName() << '\t' << commentString << endl;
+                        for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << " "; }  outQual << endl;
+                        
                         int numNs = 0;
                         for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
                         outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
@@ -1352,11 +1349,19 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                             m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
                             output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                             output.close();
+                            
+                            ofstream output2;
+                            m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output2);
+                            output2 << ">" << fSeq.getName() << '\t' << commentString << endl;
+                            for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
+                            output2.close();
                         }
                     }
                 }else {
                     //output
                     outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl << contig << endl;
+                    outScrapQual << ">" << fSeq.getName() << '\t' << commentString << endl;
+                    for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << " "; }  outScrapQual << endl;
                 }
             }
             num++;
@@ -1404,57 +1409,6 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
 		m->errorOut(e, "MakeContigsCommand", "driver");
 		exit(1);
 	}
-}
-//**********************************************************************************************************************
-fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
-    try {
-        fastqRead read;
-        
-        ignore = false;
-        
-        //read sequence name
-        string line = m->getline(in); m->gobble(in);
-        vector<string> pieces = m->splitWhiteSpace(line);
-        string name = "";  if (pieces.size() != 0) { name = pieces[0]; }
-        if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
-        else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
-        else { name = name.substr(1); }
-        
-        //read sequence
-        string sequence = m->getline(in); m->gobble(in);
-        if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
-        
-        //read sequence name
-        line = m->getline(in); m->gobble(in);
-        pieces = m->splitWhiteSpace(line);
-        string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
-        if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
-        else if (name2[0] != '+') { m->mothurOut("[WARNING]: reading " + name2 + " expected a name with + as a leading character, ignoring."); ignore=true; }
-        else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
-        
-        //read quality scores
-        string quality = m->getline(in); m->gobble(in);
-        if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
-         
-        //sanity check sequence length and number of quality scores match
-        if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
-        if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
-        
-        vector<int> qualScores = convertQual(quality);
-        
-        m->checkName(name);
-        read.name = name;
-        read.sequence = sequence;
-        read.scores = qualScores;
-        
-        if (m->debug) { m->mothurOut("[DEBUG]: " + read.name + " " + read.sequence + " " + quality + "\n"); }
-
-        return read;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "readFastq");
-        exit(1);
-    }
 }
 /**************************************************************************************************/
 
@@ -1706,7 +1660,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             //fastaFilePos.push_back(0); qfileFilePos.push_back(0);
             //fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
             lines.push_back(linePair(0, 1000)); lines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
-            if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000)); } //qual[0], qual[1] - forward and reverse
+            if (qual.size() != 0) {  qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000)); } //qual[0], qual[1] - forward and reverse
         }else{
             unsigned long long numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
@@ -1734,8 +1688,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             
             
             if (qual.size() != 0) {
-                unsigned long long numFQualSeqs = 0;
-                unsigned long long numRQualSeqs = 0;
+                long long numFQualSeqs = 0;
+                long long numRQualSeqs = 0;
                 fastaFilePos.clear();
                 qfileFilePos.clear();
                 
@@ -2110,40 +2064,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeContigsCommand", "getOligos");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<int> MakeContigsCommand::convertQual(string qual) {
-	try {
-		vector<int> qualScores;
-        bool negativeScores = false;
-		
-		for (int i = 0; i < qual.length(); i++) {
-            
-            int temp = 0;
-            temp = int(qual[i]);
-            if (format == "illumina") {
-                temp -= 64; //char '@'
-            }else if (format == "illumina1.8+") {
-                    temp -= int('!'); //char '!'
-            }else if (format == "solexa") {
-                temp = int(convertTable[temp]); //convert to sanger
-                temp -= int('!'); //char '!'
-            }else {
-                temp -= int('!'); //char '!'
-            }
-            
-            if (temp < -5) { negativeScores = true; }
-			qualScores.push_back(temp);
-		}
-		
-        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
-        
-		return qualScores;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "convertQual");
 		exit(1);
 	}
 }
