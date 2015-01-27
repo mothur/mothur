@@ -117,7 +117,7 @@ struct contigsData {
     
 	
 	contigsData(){}
-	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, linePair lff, linePair lrf, linePair qff, linePair qrf, int tid) {
+	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid) {
         inputFiles = f;
         qualOrIndexFiles = qif;
 		outputFasta = of;
@@ -147,10 +147,10 @@ struct contigsData {
 		threadID = tid;
         deltaq = delt;
         reorient = ro;
-        linesInput = lff;
-        linesInputReverse = lrf;
-        qlinesInput = qff;
-        qlinesInputReverse = qrf;
+        linesInput.start = lff; linesInput.end = lff2;
+        linesInputReverse.start = lrf; linesInputReverse.end = lrf2;
+        qlinesInput.start = qff; qlinesInput.end = qff2;
+        qlinesInputReverse.start = qrf; qlinesInputReverse.end = qrf2;
         delim = d;
         format = form;
         done=false;
@@ -242,7 +242,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
         }
         
-        while ((!inFFasta.eof()) && (!inRFasta.eof())) {
+        for(int i = 0; i < pDataArray->linesInput.end; i++){ //end is the number of sequences to process
             
             if (pDataArray->m->control_pressed) { break; }
             
@@ -266,6 +266,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
                 fQual = new QualityScores(fread.getName(), fread.getScores());
                 rQual = new QualityScores(rread.getName(), rread.getScores());
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                 if (thisfqualindexfile != "") { //forward index file
                     FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
@@ -525,7 +527,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             output.close();
                             
                             ofstream output2;
-                            m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output2);
+                            pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
                             output2 << ">" << fSeq.getName() << '\t' << commentString << endl;
                             for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
                             output2.close();

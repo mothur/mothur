@@ -1664,13 +1664,30 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
         
-        string input;
         unsigned long long count = 0;
+        long long numLines = 0;
         while(!inFASTA.eof()){
             char c = inFASTA.get(); count++;
-            if (c == delim) {
-                positions.push_back(count-1);
-                if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
+            string input = ""; input += c;
+            while ((c != '\n') && (c != '\r') && (c != '\f') && (c != EOF)) {
+                c = inFASTA.get(); count++;
+                input += c;
+            }
+            numLines++;
+            //gobble
+            while(isspace(c=inFASTA.get()))		{ input += c; count++;}
+            if(!inFASTA.eof()) { inFASTA.putback(c); count--;  }
+
+            
+            if (input.length() != 0) {
+                if((input[0] == delim) && (((numLines-1)%4) == 0)){ //this is a name line
+                    //mothurOut(input + '\t' + toString(count+numLines-input.length()) + '\n');// << endl;
+                    positions.push_back(count+numLines-input.length());
+                    if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
+                }else if (int(c) == -1) { break; }
+                else {
+                    input = "";
+                }
             }
         }
         inFASTA.close();
@@ -2005,10 +2022,21 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
             unsigned long long newSpot = spot;
             while (!in.eof()) {
                 char c = in.get();
+                string input = ""; input += c;
+                while ((c != '\n') && (c != '\r') && (c != '\f') && (c != EOF)) {
+                    c = in.get();
+                    input += c;
+                }
                 
-                if (c == delimChar) {   in.putback(c); newSpot = in.tellg(); break;  }
-                else if (int(c) == -1) { break; }
-                
+                if (input.length() != 0) {
+                    if(input[0] == delimChar){ //this is a name line
+                        
+                        newSpot = in.tellg();
+                        newSpot -=input.length();
+                        break;
+                    }else if (int(c) == -1) { break; }
+                    else {  input = ""; gobble(in); }
+                }
             }
             
             //there was not another sequence before the end of the file

@@ -2526,7 +2526,7 @@
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				"PRELINK_LIBS[arch=*]" = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2550,7 +2550,7 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};

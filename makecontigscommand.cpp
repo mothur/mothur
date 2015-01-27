@@ -906,7 +906,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             }
 			
             int spot = (h)*2;
-			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], h);
+			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot].start, lines[spot].end, lines[spot+1].start, lines[spot+1].end, qLines[spot].start, qLines[spot].end, qLines[spot+1].start, qLines[spot+1].end, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -1094,6 +1094,8 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
                 fQual = new QualityScores(fread.getName(), fread.getScores());
                 rQual = new QualityScores(rread.getName(), rread.getScores());
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                 if (thisfqualindexfile != "") { //forward index file
                     FastqRead firead(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
@@ -1126,6 +1128,7 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
             }
             
             if (!ignore) {
+                
                 int barcodeIndex = 0;
                 int primerIndex = 0;
                 Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
@@ -1419,7 +1422,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> fastaFilePos;
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> temp;
-        
+
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         //set file positions for fasta file
         fastaFilePos = m->divideFile(fasta[0], processors, delim);
@@ -1662,11 +1665,11 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             lines.push_back(linePair(0, 1000)); lines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
             if (qual.size() != 0) {  qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000)); } //qual[0], qual[1] - forward and reverse
         }else{
-            unsigned long long numFastaSeqs = 0;
+            long long numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
             if (fastaFilePos.size() < processors) { processors = fastaFilePos.size(); }
             
-            unsigned long long numRFastaSeqs = 0;
+            long long numRFastaSeqs = 0;
             qfileFilePos = m->setFilePosFasta(fasta[1], numRFastaSeqs, delim); //reverse
             
             if (numFastaSeqs != numRFastaSeqs) {
@@ -1693,8 +1696,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 fastaFilePos.clear();
                 qfileFilePos.clear();
                 
-                if (qual[0] != "NONE") {  fastaFilePos = m->setFilePosFasta(qual[0], numFQualSeqs, '>');  } //forward index or qual file
-                if (qual[1] != "NONE") {  qfileFilePos = m->setFilePosFasta(qual[1], numRQualSeqs, '>');  }//reverse index or qual file
+                if (qual[0] != "NONE") {  fastaFilePos = m->setFilePosFasta(qual[0], numFQualSeqs, delim);  } //forward index or qual file
+                if (qual[1] != "NONE") {  qfileFilePos = m->setFilePosFasta(qual[1], numRQualSeqs, delim);  }//reverse index or qual file
                 
                 if (qual[0] == "NONE") { fastaFilePos = qfileFilePos; numFQualSeqs = numRQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
                 if (qual[1] == "NONE") { qfileFilePos = fastaFilePos; numRQualSeqs = numFQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
@@ -1725,7 +1728,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
   
             }else { qLines = lines;	} //files with duds
         }
-        if(qfilename == "")	{	qLines = lines;	} //files with duds
+        if(qual.size() != 0)	{	qLines = lines;	} //files with duds
         return 1;
         
 #endif
