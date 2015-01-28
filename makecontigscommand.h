@@ -20,6 +20,7 @@
 #include "trimoligos.h"
 #include "oligos.h"
 #include "fastqread.h"
+#include "kmeralign.h"
 
 struct pairFastqRead {
 	FastqRead forward;
@@ -66,7 +67,7 @@ private:
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
     string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers;
+	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers;
     vector<string> outputNames;
     Oligos* oligos;
     
@@ -110,14 +111,14 @@ struct contigsData {
     vector<vector<string> > fastaFileNames, qualFileNames;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
-	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq;
+	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq, kmerSize;
     bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
     
 	
 	contigsData(){}
-	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid) {
+	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid) {
         inputFiles = f;
         qualOrIndexFiles = qif;
 		outputFasta = of;
@@ -130,6 +131,7 @@ struct contigsData {
 		gapOpen = gapO; 
 		gapExtend = gapE; 
         insert = thr;
+        kmerSize = km;
 		align = al;
         group = g;
 		count = 0;
@@ -169,6 +171,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         Alignment* alignment;
         if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
 		else if(pDataArray->align == "needleman")	{	alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, longestBase);				}
+        else if(align == "kmer")                    {	alignment = new KmerAlign(kmerSize);                                                    }
         
         pDataArray->count = 0;
         int num = 0;
