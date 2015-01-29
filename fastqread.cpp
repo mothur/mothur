@@ -123,15 +123,15 @@ vector<int> FastqRead::convertQual(string qual) {
             if (format == "illumina") {
                 temp -= 64; //char '@'
             }else if (format == "illumina1.8+") {
-                temp -= int('!'); //char '!'
+                temp -= int('!'); //char '!' //33
             }else if (format == "solexa") {
                 temp = int(convertTable[temp]); //convert to sanger
-                temp -= int('!'); //char '!'
+                temp -= int('!'); //char '!' //33
             }else {
-                temp -= int('!'); //char '!'
+                temp -= int('!'); //char '!' //33
             }
             
-            if (temp < -5) { negativeScores = true; }
+            if (temp < 0) { negativeScores = true; temp = 0; }
             qualScores.push_back(temp);
         }
         

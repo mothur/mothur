@@ -439,7 +439,7 @@ int MakeContigsCommand::execute(){
         map<string, int> totalGroupCounts;
         int start = time(NULL);
         longestBase = 1000;
-        
+   
         if (file != "") {
             numReads = processMultipleFileOption(totalGroupCounts);
         }else if ((ffastqfile != "") || (ffastafile != "")) {
@@ -1262,9 +1262,9 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 //bigger of the 2 starting positions is the location of the overlapping start
                 if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
                     overlapStart = seq2Start;
-                    for (int i = 0; i < overlapStart; i++) { contig += seq1[i];  }
+                    for (int i = 0; i < overlapStart; i++) { contig += seq1[i];  if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
                 }else { //seq1 starts later so take from 0 to overlapStart from seq2
-                    for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; }
+                    for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); }  }
                 }
                 
                 int seq1End = fSeq.getEndPos();
@@ -1276,17 +1276,31 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
                 for (int i = overlapStart; i < overlapEnd; i++) {
                     //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
-                    if (seq1[i] == seq2[i]) { //match, add base and choose highest score
+                    if (seq1[i] == seq2[i]) { //match, add base and probability = (1-probabilty of quality in A)(1-probability in B) + ((probabilty of quality in A)(probability in B) / 3)
                         contig += seq1[i];
+                        if (hasQuality) {
+                            double p = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
+                            double q = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
+                            //(1 - (1 - q) * p / 3 - (1 - p) * q / 3 - 2 * (1 - p) * (1 - q) / 9);
+                            contigScores.push_back(convertProb((1.0 - (1.0 - q) * p / 3.0 - (1.0 - p) * q / 3.0 - 2.0 * (1.0 - p) * (1.0 - q) / 9.0)));
+                        }
                     }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
                         if (hasQuality) {
                             if (scores2[BBaseMap[i]] <= insert) { } //
-                            else { contig += seq2[i];  }
-                        }else { contig += seq2[i]; } //with no quality info, then we keep it?
+                            else {
+                                contig += seq2[i];
+                                double probsB = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
+                                contigScores.push_back(convertProb(probsB));
+                            }
+                        }else {  contig += seq2[i]; } //with no quality info, then we keep it?
                     }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
                         if (hasQuality) {
-                            if (scores1[ABaseMap[i]] <= insert) { } //
-                            else { contig += seq1[i];  }
+                            if (scores1[ABaseMap[i]] <= insert) { } //eliminate base
+                            else {
+                                contig += seq1[i];
+                                double probsA = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
+                                contigScores.push_back(convertProb(probsA));
+                            }
                         }else { contig += seq1[i]; } //with no quality info, then we keep it?
                     }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
                         if (hasQuality) {
@@ -1294,8 +1308,12 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                                 char c = seq1[i];
                                 if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
                                 contig += c;
+                                double p = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
+                                double q = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
+                                //(1 - p) * q / 3 + (1 - q) * p / 3 + p * q / 2
+                                contigScores.push_back(convertProb(((1.0 - p) * q / 3.0 + (1.0 - q) * p / 3.0 + p * q / 2.0)));
                             }else { //if no, base becomes n
-                                contig += 'N';
+                                contig += 'N'; contigScores.push_back(2);
                             }
                             numMismatches++;
                         }else { numMismatches++; } //cant decide, so eliminate and mark as mismatch
@@ -1305,9 +1323,9 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 }
                 int oend = contig.length();
                 if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
-                    for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  }
+                    for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); } }
                 }else { //seq2 ends before seq1 so take from overlap to length from seq1
-                    for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
+                    for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
                 }
                 //cout << contig << endl;
                 //exit(1);
@@ -1368,7 +1386,7 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 }else {
                     //output
                     outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl << contig << endl;
-                    outScrapQual << ">" << fSeq.getName() << '\t' << commentString << endl;
+                    outScrapQual << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl;
                     for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << " "; }  outScrapQual << endl;
                 }
             }
@@ -2074,6 +2092,39 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		m->errorOut(e, "MakeContigsCommand", "getOligos");
 		exit(1);
 	}
+}
+//***************************************************************************************************************
+/**
+ * Convert the probability to a quality score.
+ */
+int MakeContigsCommand::convertProb(double qProb){
+    try {
+        
+        int lower = 0;
+        int upper = 46;
+        
+        if (qProb < qual_score[0])  { return 1; }
+        
+        while (lower < upper) {
+            int mid = lower + (upper - lower) / 2;
+            if (qual_score[mid] == qProb) {
+                return mid;
+            }
+            if (mid == lower) {
+                return lower;
+            } else if (qual_score[mid] > qProb) {
+                upper = mid;
+            } else if (qual_score[mid] < qProb) {
+                lower = mid + 1;
+            }
+        }
+        
+        return lower;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "convertProb");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
