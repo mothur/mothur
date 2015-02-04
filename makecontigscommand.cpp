@@ -70,7 +70,8 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter pdeltaq("deltaq", "Number", "", "6", "", "", "","",false,false); parameters.push_back(pdeltaq);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
-        CommandParameter pksize("ksize", "Number", "", "7", "", "", "","",false,false); parameters.push_back(pksize);
+        CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
+        CommandParameter pkmer("kmer", "Number", "", "2", "", "", "","",false,false); parameters.push_back(pkmer);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -99,7 +100,8 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
         helpString += "The findex and rindex parameters are used to provide a forward index and reverse index files to process.  \n";
         helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: kmer, gotoh and needleman. The default is needleman.\n";
-        helpString += "The ksize parameter allows you to set the kmer size if you are doing align=kmer. Default=7.\n";
+        helpString += "The ksize parameter allows you to set the kmer size if you are doing align=kmer. Default=8.\n";
+        helpString += "The kmer parameter allows you to set the number of sequence locations for a particular k-mer. When attempting to align the sequences, mothur will store the location of every k-mer in a table. If the same k-mer is present multiple times, only the first ones will be stored until the table is full; when this occurs, an FML error is emitted. If the sequences are highly repetitive, lost positions can prevent good alignments; this can be alleviated by increasing this amount. This should be small (no more than 10; the default is 2), or the k-mer table will be extremely large, using a large amount of RAM per thread. Try increasing the value until FML errors go away.. Default=2.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -406,6 +408,10 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "ksize", false);	if (temp == "not found"){	temp = "7";			}
             m->mothurConvert(temp, kmerSize);
+            
+            temp = validParameter.validFile(parameters, "kmer", false);	if (temp == "not found"){	temp = "2";			}
+            m->mothurConvert(temp, numKmers);
+
             
             temp = validParameter.validFile(parameters, "trimoverlap", false);		if (temp == "not found") { temp = "F"; }
 			trimOverlap = m->isTrue(temp);
@@ -1017,12 +1023,6 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 //**********************************************************************************************************************
 int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair linesInput, linePair linesInputReverse, linePair qlinesInput, linePair qlinesInputReverse, string group){
     try {
-        
-        Alignment* alignment;
-        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
-        else if(align == "kmer")        {	alignment = new KmerAlign(kmerSize);                                                    }
-        
         int num = 0;
         string thisfqualindexfile, thisrqualindexfile, thisffastafile, thisrfastafile;
         thisfqualindexfile = ""; thisrqualindexfile = "";
@@ -1074,6 +1074,15 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
         
         TrimOligos* rtrimOligos = NULL;
         if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes()); numBarcodes = oligos->getReorientedPairedBarcodes().size();    }
+        
+        Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+        else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+        else if(align == "kmer")        {
+            if (hasQuality) { alignment = new KmerAlign(kmerSize, numKmers);                                            }
+            else { m->mothurOut("[ERROR]: kmerAlign requires quality data, aborting.\n"); m->control_pressed = true;    }
+        }
+
         
         while ((!inFFasta.eof()) && (!inRFasta.eof())) {
             
@@ -1232,16 +1241,21 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 
                 
                 //flip the reverse reads
+                cout << fSeq.getUnaligned() << endl << rSeq.getUnaligned() << endl;
                 rSeq.reverseComplement();
                 if (hasQuality) { rQual->flipQScores(); }
+                cout << fSeq.getUnaligned() << endl << rSeq.getUnaligned() << endl;
                 
                 //pairwise align
-                alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
+                if(align != "kmer")        {  alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());  }
+                else {  alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned(), fQual->getQualityScores(), rQual->getQualityScores());  }
+                    
                 map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
                 map<int, int> BBaseMap = alignment->getSeqBAlnBaseMap();
                 fSeq.setAligned(alignment->getSeqAAln());
                 rSeq.setAligned(alignment->getSeqBAln());
                 int length = fSeq.getAligned().length();
+                cout << fSeq.getAligned() << endl << rSeq.getAligned() << endl;
                 
                 //traverse alignments merging into one contiguous seq
                 string contig = "";

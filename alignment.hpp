@@ -22,10 +22,12 @@ class Alignment {
 	
 public:
 	Alignment(int);
+    Alignment(int, int);
 	Alignment();
 	virtual ~Alignment();
 	virtual void align(string, string) = 0;
     virtual void alignPrimer(string, string) {}
+    virtual void align(string, string, vector<int>, vector<int>) {}
 	
 	
 //	float getAlignmentScore();
