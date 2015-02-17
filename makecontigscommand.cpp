@@ -1370,8 +1370,8 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 }
                 
                 //if (num == 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; exit(1); }
-                int overlapStart = fSeq.getStartPos();
-                int seq2Start = rSeq.getStartPos();
+                int overlapStart = fSeq.getStartPos()-1;
+                int seq2Start = rSeq.getStartPos()-1;
                 
                 //bigger of the 2 starting positions is the location of the overlapping start
                 if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
@@ -1388,14 +1388,23 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 
                 int oStart = contig.length();
                 //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
+                
+                int firstForward = 0; int seq2FirstForward = 0; int lastReverse = seq1.length(); int seq2lastReverse = seq2.length(); bool firstChooseSeq1 = false; bool lastChooseSeq1 = false;
+                for (int i = 0; i < seq1.length(); i++) { if ((seq1[i] != '.') && (seq1[i] != '-')) { if (scores1[ABaseMap[i]] == 2) { firstForward++; }else { break; } } }
+                for (int i = 0; i < seq2.length(); i++) { if ((seq2[i] != '.') && (seq2[i] != '-')) { if (scores2[BBaseMap[i]] == 2) { seq2FirstForward++; }else { break; } } }
+                if (seq2FirstForward > firstForward) { firstForward = seq2FirstForward; firstChooseSeq1 = true; }
+                for (int i = seq1.length()-1; i >= 0; i--) { if ((seq1[i] != '.') && (seq1[i] != '-')) { if (scores1[ABaseMap[i]] == 2) { lastReverse--; }else { break; } } }
+                for (int i = seq2.length()-1; i >= 0; i--) { if ((seq2[i] != '.') && (seq2[i] != '-')) { if (scores2[BBaseMap[i]] == 2) { seq2lastReverse--; }else { break; } } }
+                if (lastReverse > seq2lastReverse) { lastReverse = seq2lastReverse; lastChooseSeq1 = true; }
+
+                
+                cout << firstForward << '\t' << lastReverse << endl;
+                
                 for (int i = overlapStart; i < overlapEnd; i++) {
                     //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
-                    if (seq1[i] == seq2[i]) { //match, add base and probability = (1-probabilty of quality in A)(1-probability in B) + ((probabilty of quality in A)(probability in B) / 3)
+                    if (seq1[i] == seq2[i]) {
                         contig += seq1[i];
                         if (hasQuality) {
-                            //double p = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
-                            //double q = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
-                            //(1 - (1 - q) * p / 3 - (1 - p) * q / 3 - 2 * (1 - p) * (1 - q) / 9);
                             contigScores.push_back(convertProb(qual_match_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])]));
                         }
                     }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
@@ -1403,8 +1412,7 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                             if (scores2[BBaseMap[i]] <= insert) { } //
                             else {
                                 contig += seq2[i];
-                                double probsB = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
-                                contigScores.push_back(convertProb(probsB));
+                                contigScores.push_back(scores2[BBaseMap[i]]);
                             }
                         }else {  contig += seq2[i]; } //with no quality info, then we keep it?
                     }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
@@ -1412,8 +1420,7 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                             if (scores1[ABaseMap[i]] <= insert) { } //eliminate base
                             else {
                                 contig += seq1[i];
-                                double probsA = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
-                                contigScores.push_back(convertProb(probsA));
+                                contigScores.push_back(scores1[ABaseMap[i]]);
                             }
                         }else { contig += seq1[i]; } //with no quality info, then we keep it?
                     }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
@@ -1422,10 +1429,15 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                                 char c = seq1[i];
                                 if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
                                 contig += c;
-                                //double p = qual_score[PHREDCLAMP(scores1[ABaseMap[i]])];
-                                //double q = qual_score[PHREDCLAMP(scores2[BBaseMap[i]])];
-                                //(1 - p) * q / 3 + (1 - q) * p / 3 + p * q / 2
-                                contigScores.push_back(convertProb(qual_mismatch_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])]));
+                                if ((i >= firstForward) && (i <= lastReverse)) { //in unmasked section
+                                    contigScores.push_back(convertProb(qual_mismatch_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])]));
+                                }else if (i < firstForward) {
+                                    if (firstChooseSeq1) { contigScores.push_back(scores1[ABaseMap[i]]); }
+                                    else { contigScores.push_back(scores2[BBaseMap[i]]); }
+                                }else if ((i > lastReverse)) {
+                                    if (lastChooseSeq1) { contigScores.push_back(scores1[ABaseMap[i]]);   }
+                                    else { contigScores.push_back(scores2[BBaseMap[i]]); }
+                                }else { contigScores.push_back(2); } //N
                             }else { //if no, base becomes n
                                 contig += 'N'; contigScores.push_back(2);
                             }
@@ -1434,12 +1446,17 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                     }else { //should never get here
                         m->mothurOut("[ERROR]: case I didn't think of seq1 = " + toString(seq1[i]) + " and seq2 = " + toString(seq2[i]) + "\n");
                     }
+                    printf("Overlap seq: %i, %i, %i, %c, %i\n", i, scores1[ABaseMap[i]], scores2[BBaseMap[i]], contig[contig.length()-1], contigScores[contigScores.size()-1]);
                 }
                 int oend = contig.length();
                 if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
-                    for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); } }
+                    for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); }
+                        printf("Reverse seq: %i, %c, %i\n", i, contig[contig.length()-1], contigScores[contigScores.size()-1]);
+                    }
                 }else { //seq2 ends before seq1 so take from overlap to length from seq1
-                    for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
+                    for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); }
+                    printf("Reverse seq: %i, %c, %i\n", i, contig[contig.length()-1], contigScores[contigScores.size()-1]);
+                    }
                 }
                 //cout << contig << endl;
                 //exit(1);

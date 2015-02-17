@@ -45,28 +45,34 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
         
         int kmer;
         /* Scan forward sequence building k-mers and appending the position to kmerseen[k] */
-        for(int i=1;i<nKmersA;i++){
+        for(int i=0;i<nKmersA;i++){
             kmer = kmerLibrary.getKmerNumber(A, i);
             cout << i << '\t' << kmer << endl;
-            int j;
-            for (j = 0; j < numKmers && kmerseen[kmer][j] != 0; j++) ;
-            if (j == numKmers) {
-                /* If we run out of storage, we lose k-mers. */
-                m->mothurOut("[WARNING]: Inssufficent number of kmer instances. Try increasing the kmer parameter.\n");
-            } else {
-                kmerseen[kmer][j] = i;
+            if (kmer != (maxKmer-1)) {
+                int j;
+                for (j = 0; j < numKmers && kmerseen[kmer][j] != 0; j++) ;
+                if (j == numKmers) {
+                    /* If we run out of storage, we lose k-mers. */
+                    m->mothurOut("[WARNING]: Inssufficent number of kmer instances. Try increasing the kmer parameter.\n");
+                } else {
+                    kmerseen[kmer][j] = i;
+                }
             }
         }
         int nKmersB = B.length() - kmerSize + 1;
         
         /* Scan reverse sequence building k-mers. For each position in the forward sequence for this kmer (i.e., kmerseen[k]), flag that we should check the corresponding overlap. */
         set<int> overlaps;
-        for(int i=1;i<nKmersB;i++){
+        for(int i=0;i<nKmersB;i++){
             kmer = kmerLibrary.getKmerNumber(B, i);
             for (int j = 0; j < numKmers && kmerseen[kmer][j] != 0; j++) { //for as many instances as we saw of this kmer, recoding overlap
                 int index = aLength + bLength - (bLength-i) - kmerseen[kmer][j] - 2;
                 if (index <= maxOverlap) { overlaps.insert(index); }
             }
+        }
+        
+        if (overlaps.size() == 0) { //add all possible overlaps
+            for (int i = 0; i <= maxOverlap; i++) {  overlaps.insert(i);  } //minoverlap=2
         }
         
         //find best overlap
@@ -76,18 +82,22 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
             int index = *it;
             int overlap = index + 2; //2 = minoverlap
             double probability = calcProb(A, B, overlap, AQual, BQual);
+            printf("overlap prob: %i, %f\n", overlap, probability);
             if (probability > bestProb && overlap >= 2) {
                 bestProb = probability;
                 bestOverlap = overlap;
             }
         }
-        
+        printf("best overlap prob: %i, %f\n", bestOverlap, bestProb);
         if(bestOverlap != -1){
             if((aLength-bestOverlap) > 0){ //add gaps to the start of B
                 int numGaps = (aLength-bestOverlap);
                 B = string(numGaps, '-') + B;
                 for (int i = 0; i < bLength; i++) {  BBaseMap[i+numGaps] = i;   }
                 for (int i = 0; i < aLength; i++) {  ABaseMap[i] = i;           }
+            }else {
+                for (int i = 0; i < bLength; i++) {  BBaseMap[i] = i;   }
+                for (int i = 0; i < aLength; i++) {  ABaseMap[i] = i;   }
             }
         }
         int diff = B.length() - A.length();
@@ -135,7 +145,7 @@ double KmerAlign::calcProb(string A, string B, int overlap, vector<int> forwardQ
         //ln((3 * 0.36 - 2 * 0.36 * 0.36) / 18.0)
         double pmismatch = -3.087848;
         if (overlap >= aLength && overlap >= bLength) {
-            prob = (-1.38629 * unknown + match * pmatch + mismatch * mismatch);
+            prob = (-1.38629 * unknown + match * pmatch + mismatch * pmismatch);
         } else {
             prob = (-1.38629 * (aLength + bLength - 2 * overlap + unknown) + match * pmatch + mismatch * pmismatch);
         }
