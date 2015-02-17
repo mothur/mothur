@@ -3048,6 +3048,35 @@ string MothurOut::getSimpleLabel(string label){
 	}
 }
 /***********************************************************************/
+string MothurOut::mothurFixpid(pid_t threadID){
+    try {
+        
+        string pid = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+        pid += toString(threadID); if(debug) { mothurOut("[DEBUG]: " + pid + "\n"); }
+        //remove any weird chars
+        string pid1 = "";
+        for (int i = 0; i < pid.length(); i++) {
+            if(pid[i]>47 && pid[i]<58) { //is a digit
+                pid1 += pid[i];
+            }
+        }
+        pid = pid1;
+        if(debug) { mothurOut("[DEBUG]: " + pid + "\n"); }
+#else
+        mothurOut("[DEBUG]: windows should never use this function.\n");
+#endif
+        return pid;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurFixpid");
+        exit(1);
+    }
+}
+
+
+/***********************************************************************/
 string MothurOut::mothurGetpid(int threadID){
 	try {
         
