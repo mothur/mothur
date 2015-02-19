@@ -149,6 +149,7 @@ class MothurOut {
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
 		bool isNumeric1(string);
+        bool isInteger(string);
         bool isLabelEquivalent(string, string);
         string getSimpleLabel(string);
         string findEdianness();

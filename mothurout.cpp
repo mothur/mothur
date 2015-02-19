@@ -3240,6 +3240,21 @@ bool MothurOut::isNumeric1(string stringToCheck){
 	
 }
 /***********************************************************************/
+bool MothurOut::isInteger(string stringToCheck){
+    try {
+        bool isInt = false;
+        
+        if(stringToCheck.find_first_not_of("0123456789-") == string::npos) { isInt = true; }
+        
+        return isInt;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isInteger");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
 	try {
 		bool error = false;
