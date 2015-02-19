@@ -17,6 +17,8 @@
 		48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
+		48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
@@ -426,6 +428,10 @@
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrjsd.cpp; sourceTree = "<group>"; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedrjsd.h; sourceTree = "<group>"; };
 		48705AC319BE32C50075E977 /* abstractrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = abstractrandomforest.cpp; sourceTree = "<group>"; };
+		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fastqread.h; sourceTree = "<group>"; };
+		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fastqread.cpp; sourceTree = "<group>"; };
+		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kmeralign.cpp; sourceTree = "<group>"; };
+		48C51DF21A793EFE004ECDF1 /* kmeralign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kmeralign.h; sourceTree = "<group>"; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifysvmsharedcommand.cpp; sourceTree = "<group>"; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifysvmsharedcommand.h; sourceTree = "<group>"; };
 		7B21820117AD77BD00286E6A /* svm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = svm.cpp; sourceTree = "<group>"; };
@@ -1865,6 +1871,8 @@
 				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */,
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
+				48C51DEE1A76B870004ECDF1 /* fastqread.h */,
+				48C51DEF1A76B888004ECDF1 /* fastqread.cpp */,
 				A7E9B6E812D37EC400DA6239 /* flowdata.h */,
 				A7E9B6E712D37EC400DA6239 /* flowdata.cpp */,
 				A7E9B6EE12D37EC400DA6239 /* fullmatrix.cpp */,
@@ -1873,6 +1881,8 @@
 				A7E9B71512D37EC400DA6239 /* groupmap.h */,
 				A7E9B73312D37EC400DA6239 /* kmer.cpp */,
 				A7E9B73412D37EC400DA6239 /* kmer.hpp */,
+				48C51DF21A793EFE004ECDF1 /* kmeralign.h */,
+				48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */,
 				A7E9B73512D37EC400DA6239 /* kmerdb.cpp */,
 				A7E9B73612D37EC400DA6239 /* kmerdb.hpp */,
 				A7E9B73F12D37EC400DA6239 /* listvector.cpp */,
@@ -2366,6 +2376,7 @@
 				A7E9B97B12D37EC400DA6239 /* summarycommand.cpp in Sources */,
 				A7E9B97C12D37EC400DA6239 /* summarysharedcommand.cpp in Sources */,
 				A7E9B97D12D37EC400DA6239 /* systemcommand.cpp in Sources */,
+				48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */,
 				A7E9B97E12D37EC400DA6239 /* taxonomyequalizer.cpp in Sources */,
 				A7E9B97F12D37EC400DA6239 /* tree.cpp in Sources */,
 				A7E9B98012D37EC400DA6239 /* treegroupscommand.cpp in Sources */,
@@ -2436,6 +2447,7 @@
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
 				A7EEB0F514F29BFE00344B83 /* classifytreecommand.cpp in Sources */,
+				48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */,
 				A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */,
 				A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */,
 				A76CDD821510F143004C8458 /* prcseqscommand.cpp in Sources */,
@@ -2520,7 +2532,7 @@
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				"PRELINK_LIBS[arch=*]" = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2544,7 +2556,7 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};

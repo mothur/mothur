@@ -22,6 +22,7 @@ class Alignment {
 	
 public:
 	Alignment(int);
+    Alignment(int, int);
 	Alignment();
 	virtual ~Alignment();
 	virtual void align(string, string) = 0;
