@@ -28,6 +28,7 @@ public:
 	int getLength(){    return (int)qScores.size();  }
 	vector<int> getQualityScores() { return qScores; }
 	void printQScores(ofstream&);
+    void printQScores(ostream&);
 	void trimQScores(int, int);
 	void flipQScores();
 	bool stripQualThreshold(Sequence&, double);

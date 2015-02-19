@@ -4481,6 +4481,36 @@ double MothurOut::min(vector<double>& featureVector){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+int MothurOut::max(int A, int B){
+    try {
+        
+        //finds largest
+        int largest = A;
+        if (B > A) { largest = B; }
+        
+        return largest;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "max");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+int MothurOut::min(int A, int B){
+    try {
+        
+        //finds smallest
+        int smallest = A;
+        if (B < A) { smallest = B; }
+        
+        return smallest;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "min");
+        exit(1);
+    }
+}
 
 /**************************************************************************************************/
 

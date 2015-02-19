@@ -176,6 +176,8 @@ class MothurOut {
         
 		
 		//math operation
+        int max(int, int);
+        int min(int, int);
         double max(vector<double>&); //returns largest value in vector
         double min(vector<double>&); //returns smallest value in vector
 		int factorial(int num);
