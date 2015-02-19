@@ -869,7 +869,6 @@ int SRACommand::readMIMarksFile(){
 int SRACommand::readFile(map<string, vector<string> >& files){
 	try {
         bool runParseFastqFile = false;
-        bool using3NONE = false;
         inputfile = file;
         files.clear();
         
@@ -895,8 +894,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 thisFileName2 = pieces[2];
                 group = pieces[0];
                 if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
-                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->control_pressed = true; } }
-                else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
+                libLayout = "paired";
             }else if (pieces.size() == 4) {
                 if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
                 thisFileName1 = pieces[0];
@@ -915,10 +913,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 string path = m->hasPath(thisFileName1);
                 if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
                 
-                if (thisFileName2 != "") {
-                    path = m->hasPath(thisFileName2);
-                    if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
-                }
+                path = m->hasPath(thisFileName2);
+                if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
                 
                 if (findex != "") {
                     path = m->hasPath(findex);
@@ -964,41 +960,39 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
             }else{  in2.close();  }
             
-            int openReverse = 0;
+            int openReverse = 1;
             
-            if (thisFileName2 != "") {
-                ifstream in3;
-                openReverse = m->openInputFile(thisFileName2, in3, "noerror");
-                
-                //if you can't open it, try default location
-                if (openReverse == 1) {
-                    if (m->getDefaultPath() != "") { //default path is set
-                        string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
-                        m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
-                        ifstream in3;
-                        openReverse = m->openInputFile(tryPath, in3, "noerror");
-                        in3.close();
-                        thisFileName2 = tryPath;
-                    }
+            ifstream in3;
+            openReverse = m->openInputFile(thisFileName2, in3, "noerror");
+            
+            //if you can't open it, try default location
+            if (openReverse == 1) {
+                if (m->getDefaultPath() != "") { //default path is set
+                    string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
+                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
+                    ifstream in3;
+                    openReverse = m->openInputFile(tryPath, in3, "noerror");
+                    in3.close();
+                    thisFileName2 = tryPath;
                 }
-                
-                //if you can't open it, try output location
-                if (openReverse == 1) {
-                    if (m->getOutputDir() != "") { //default path is set
-                        string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
-                        m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                        ifstream in4;
-                        openReverse = m->openInputFile(tryPath, in4, "noerror");
-                        thisFileName2 = tryPath;
-                        in4.close();
-                    }
-                }
-                
-                if (openReverse == 1) { //can't find it
-                    m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
-                }else{  in3.close();  }
             }
             
+            //if you can't open it, try output location
+            if (openReverse == 1) {
+                if (m->getOutputDir() != "") { //default path is set
+                    string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
+                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+                    ifstream in4;
+                    openReverse = m->openInputFile(tryPath, in4, "noerror");
+                    thisFileName2 = tryPath;
+                    in4.close();
+                }
+            }
+            
+            if (openReverse == 1) { //can't find it
+                m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
+            }else{  in3.close();  }
+           
             int openFindex = 0;
             if (findex != "") {
                 ifstream in4;
@@ -1094,14 +1088,13 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
+                libLayout = "paired";
                 Groups.push_back(group);
-                string thisname = thisFileName1 + " " + thisFileName2;
-                if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
                 if (it == files.end()) {
-                    vector<string> temp; temp.push_back(thisname); files[group] = temp;
+                    vector<string> temp; temp.push_back(thisFileName1 + " " + thisFileName2); files[group] = temp;
                 }else {
-                    files[group].push_back(thisname);
+                    files[group].push_back(thisFileName1 + " " + thisFileName2);
                 }
                 fileOption = 4;
             }else if ((pieces.size() == 4) && (openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) {

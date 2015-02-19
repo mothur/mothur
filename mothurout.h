@@ -149,12 +149,10 @@ class MothurOut {
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
 		bool isNumeric1(string);
-        bool isInteger(string);
         bool isLabelEquivalent(string, string);
         string getSimpleLabel(string);
         string findEdianness();
         string mothurGetpid(int);
-        string mothurFixpid(pid_t threadID);
 	
 		
 		//string manipulation
@@ -177,8 +175,6 @@ class MothurOut {
         
 		
 		//math operation
-        int max(int, int);
-        int min(int, int);
         double max(vector<double>&); //returns largest value in vector
         double min(vector<double>&); //returns smallest value in vector
 		int factorial(int num);

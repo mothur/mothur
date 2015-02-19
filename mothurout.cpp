@@ -1664,30 +1664,13 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
         
+        string input;
         unsigned long long count = 0;
-        long long numLines = 0;
         while(!inFASTA.eof()){
             char c = inFASTA.get(); count++;
-            string input = ""; input += c;
-            while ((c != '\n') && (c != '\r') && (c != '\f') && (c != EOF)) {
-                c = inFASTA.get(); count++;
-                input += c;
-            }
-            numLines++;
-            //gobble
-            while(isspace(c=inFASTA.get()))		{ input += c; count++;}
-            if(!inFASTA.eof()) { inFASTA.putback(c); count--;  }
-
-            
-            if (input.length() != 0) {
-                if((input[0] == delim) && (((numLines-1)%4) == 0)){ //this is a name line
-                    //mothurOut(input + '\t' + toString(count+numLines-input.length()) + '\n');// << endl;
-                    positions.push_back(count+numLines-input.length());
-                    if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
-                }else if (int(c) == -1) { break; }
-                else {
-                    input = "";
-                }
+            if (c == delim) {
+                positions.push_back(count-1);
+                if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
             }
         }
         inFASTA.close();
@@ -2022,21 +2005,10 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
             unsigned long long newSpot = spot;
             while (!in.eof()) {
                 char c = in.get();
-                string input = ""; input += c;
-                while ((c != '\n') && (c != '\r') && (c != '\f') && (c != EOF)) {
-                    c = in.get();
-                    input += c;
-                }
                 
-                if (input.length() != 0) {
-                    if(input[0] == delimChar){ //this is a name line
-                        
-                        newSpot = in.tellg();
-                        newSpot -=input.length();
-                        break;
-                    }else if (int(c) == -1) { break; }
-                    else {  input = ""; gobble(in); }
-                }
+                if (c == delimChar) {   in.putback(c); newSpot = in.tellg(); break;  }
+                else if (int(c) == -1) { break; }
+                
             }
             
             //there was not another sequence before the end of the file
@@ -3048,35 +3020,6 @@ string MothurOut::getSimpleLabel(string label){
 	}
 }
 /***********************************************************************/
-string MothurOut::mothurFixpid(pid_t threadID){
-    try {
-        
-        string pid = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        
-        pid += toString(threadID); if(debug) { mothurOut("[DEBUG]: " + pid + "\n"); }
-        //remove any weird chars
-        string pid1 = "";
-        for (int i = 0; i < pid.length(); i++) {
-            if(pid[i]>47 && pid[i]<58) { //is a digit
-                pid1 += pid[i];
-            }
-        }
-        pid = pid1;
-        if(debug) { mothurOut("[DEBUG]: " + pid + "\n"); }
-#else
-        mothurOut("[DEBUG]: windows should never use this function.\n");
-#endif
-        return pid;
-    }
-    catch(exception& e) {
-        errorOut(e, "MothurOut", "mothurFixpid");
-        exit(1);
-    }
-}
-
-
-/***********************************************************************/
 string MothurOut::mothurGetpid(int threadID){
 	try {
         
@@ -3238,21 +3181,6 @@ bool MothurOut::isNumeric1(string stringToCheck){
 		exit(1);
 	}
 	
-}
-/***********************************************************************/
-bool MothurOut::isInteger(string stringToCheck){
-    try {
-        bool isInt = false;
-        
-        if(stringToCheck.find_first_not_of("0123456789-") == string::npos) { isInt = true; }
-        
-        return isInt;
-    }
-    catch(exception& e) {
-        errorOut(e, "MothurOut", "isInteger");
-        exit(1);
-    }
-    
 }
 /***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
@@ -4495,36 +4423,6 @@ double MothurOut::min(vector<double>& featureVector){
 		errorOut(e, "MothurOut", "min");
 		exit(1);
 	}
-}
-/**************************************************************************************************/
-int MothurOut::max(int A, int B){
-    try {
-        
-        //finds largest
-        int largest = A;
-        if (B > A) { largest = B; }
-        
-        return largest;
-    }
-    catch(exception& e) {
-        errorOut(e, "MothurOut", "max");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-int MothurOut::min(int A, int B){
-    try {
-        
-        //finds smallest
-        int smallest = A;
-        if (B < A) { smallest = B; }
-        
-        return smallest;
-    }
-    catch(exception& e) {
-        errorOut(e, "MothurOut", "min");
-        exit(1);
-    }
 }
 
 /**************************************************************************************************/

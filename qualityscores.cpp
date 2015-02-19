@@ -157,27 +157,6 @@ void QualityScores::printQScores(ofstream& qFile){
 		exit(1);
 	}							
 }
-/**************************************************************************************************/
-
-void QualityScores::printQScores(ostream& qFile){
-    try {
-        
-        double aveQScore = calculateAverage(false);
-        
-        qFile << '>' << seqName << '\t' << aveQScore << endl;
-        
-        for(int i=0;i<seqLength;i++){
-            qFile << qScores[i] << ' ';
-        }
-        qFile << endl;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "QualityScores", "printQScores");
-        exit(1);
-    }							
-}
-
 
 /**************************************************************************************************/
 

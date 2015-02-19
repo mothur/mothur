@@ -509,7 +509,7 @@ int DistanceCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFile); m->mothurOutEndLine();
 		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - startTime) + " seconds to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 
 
 		if (m->isTrue(compress)) {
@@ -539,10 +539,11 @@ void DistanceCommand::createProcesses(string filename) {
 			pid_t pid = fork();
 			
 			if (pid > 0) {
-                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                process++;
-                if (m->debug) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
-            }else if (pid == 0){
+                int pidInt;
+                m->mothurConvert(m->mothurGetpid(process), pidInt);
+				processIDS.push_back(pidInt);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
 				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
 				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
 				exit(0);
@@ -606,8 +607,7 @@ void DistanceCommand::createProcesses(string filename) {
 #endif
 		
 		//append and remove temp files
-		for (int i=0;i<processIDS.size();i++) {
-            if (m->debug) { m->mothurOut("[DEBUG]: parent process is appending child pid " + toString(processIDS[i]) + ".\n"); }
+		for (int i=0;i<processIDS.size();i++) { 
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
 			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}

@@ -14,7 +14,6 @@ vector<string> SetDirectoryCommand::setParameters(){
 	try {
 		CommandParameter ptempdefault("tempdefault", "String", "", "", "", "", "","",false,false); parameters.push_back(ptempdefault);
         CommandParameter pdebug("debug", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdebug);
-        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pmodnames("modifynames", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmodnames);
 		CommandParameter pinput("input", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pinput);
 		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false,true); parameters.push_back(poutput);
@@ -38,11 +37,9 @@ string SetDirectoryCommand::getHelpString(){
 		helpString += "The set.dir command can also be used to specify the directory where your input files are located, the directory must exist.\n";
 		helpString += "The set.dir command can also be used to override or set the default location mothur will look for files if it is unable to find them, the directory must exist.\n";
         helpString += "The set.dir command can also be used to run mothur in debug mode.\n";
-        helpString += "The set.dir command can also be used to seed random.\n";
         helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to avoid issues while making trees.  modifynames=F will leave sequence names as they are.\n";
 		helpString += "The set.dir command parameters are input, output, tempdefault and debug and one is required.\n";
         helpString += "To run mothur in debug mode set debug=true. Default debug=false.\n";
-        helpString += "To seed random set seed=yourRandomValue. By default mothur seeds random with the start time.\n";
 		helpString += "To return the output to the same directory as the input files you may enter: output=clear.\n";
 		helpString += "To return the input to the current working directory you may enter: input=clear.\n";
 		helpString += "To set the output to the directory where mothur.exe is located you may enter: output=default.\n";
@@ -92,7 +89,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             
             bool debug = false;
             bool nodebug = false;
-            debugorSeedOnly = false;
+            debugOnly = false;
             string temp = validParameter.validFile(parameters, "debug", false);			
 			if (temp == "not found") {  debug = false;  nodebug=true; }
             else {  debug = m->isTrue(temp); }
@@ -104,24 +101,12 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             else {  modifyNames = m->isTrue(temp); }
             m->modifyNames = modifyNames;
             
-            bool seed = false;
-            temp = validParameter.validFile(parameters, "seed", false);
-            if (temp == "not found") { random = 0; }
-            else {
-                if (m->isInteger(temp)) { m->mothurConvert(temp, random); seed = true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.outdir command."); m->mothurOutEndLine(); abort = true; }
-            }
-            
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
-            if (seed)  {
-                m->mothurOut("\nRandom number(1-100) seeded with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
-                srand(random);
-                m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
-            }
             
-			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod && !seed) {
-				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, debug or modifynames for the set.outdir command."); m->mothurOutEndLine(); abort = true;
-			}else if((input == "") && (output == "") && (tempdefault == "")) { debugorSeedOnly = true; }
+				
+			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod) {
+				m->mothurOut("You must provide either an input, output, tempdefault, debug or modifynames for the set.outdir command."); m->mothurOutEndLine(); abort = true;
+			}else if((input == "") && (output == "") && (tempdefault == "")) { debugOnly = true; }
 		}
 	}
 	catch(exception& e) {
@@ -136,7 +121,7 @@ int SetDirectoryCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-        if (debugorSeedOnly) {  }
+        if (debugOnly) {  }
         else {
             commandFactory = CommandFactory::getInstance();
             
