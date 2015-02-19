@@ -12,7 +12,7 @@
 
 /**************************************************************************************************/
 
-KmerAlign::KmerAlign(int k, int nk) : numKmers(nk), kmerSize(k), kmerLibrary(k), Alignment() {
+KmerAlign::KmerAlign(int k) : kmerSize(k), kmerLibrary(k), Alignment() {
 	try {
         int power4s[14] = { 1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864 };
         //maxKmer = kmerLibrary.getMaxKmer();
@@ -29,7 +29,7 @@ KmerAlign::~KmerAlign(){	/*	do nothing	*/	}
 
 /**************************************************************************************************/
 //modelled after pandaseqs kmer align, assemble.c
-void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
+void KmerAlign::align(string A, string B){
 	try {
         int aLength = A.length();
         int bLength = B.length();
@@ -41,23 +41,13 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
         vector< vector<int> > kmerseen;
         //set all kmers to unseen
         kmerseen.resize(maxKmer);
-        for (int i = 0; i < maxKmer; i++) { kmerseen[i].resize(numKmers, 0); }
+        //for (int i = 0; i < maxKmer; i++) { kmerseen[i].resize(numKmers, 0); }
         
         int kmer;
         /* Scan forward sequence building k-mers and appending the position to kmerseen[k] */
         for(int i=0;i<nKmersA;i++){
             kmer = kmerLibrary.getKmerNumber(A, i);
-            cout << i << '\t' << kmer << endl;
-            if (kmer != (maxKmer-1)) {
-                int j;
-                for (j = 0; j < numKmers && kmerseen[kmer][j] != 0; j++) ;
-                if (j == numKmers) {
-                    /* If we run out of storage, we lose k-mers. */
-                    m->mothurOut("[WARNING]: Inssufficent number of kmer instances. Try increasing the kmer parameter.\n");
-                } else {
-                    kmerseen[kmer][j] = i;
-                }
-            }
+            if (kmer != (maxKmer-1)) {  kmerseen[kmer].push_back(i);  }
         }
         int nKmersB = B.length() - kmerSize + 1;
         
@@ -65,7 +55,7 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
         set<int> overlaps;
         for(int i=0;i<nKmersB;i++){
             kmer = kmerLibrary.getKmerNumber(B, i);
-            for (int j = 0; j < numKmers && kmerseen[kmer][j] != 0; j++) { //for as many instances as we saw of this kmer, recoding overlap
+            for (int j = 0; j < kmerseen[kmer].size(); j++) {  //for as many instances as we saw of this kmer, recoding overlap
                 int index = aLength + bLength - (bLength-i) - kmerseen[kmer][j] - 2;
                 if (index <= maxOverlap) { overlaps.insert(index); }
             }
@@ -81,14 +71,14 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
         for (set<int>::iterator it = overlaps.begin(); it != overlaps.end(); it++) {
             int index = *it;
             int overlap = index + 2; //2 = minoverlap
-            double probability = calcProb(A, B, overlap, AQual, BQual);
-            printf("overlap prob: %i, %f\n", overlap, probability);
+            double probability = calcProb(A, B, overlap);
+            //printf("overlap prob: %i, %f\n", overlap, probability);
             if (probability > bestProb && overlap >= 2) {
                 bestProb = probability;
                 bestOverlap = overlap;
             }
         }
-        printf("best overlap prob: %i, %f\n", bestOverlap, bestProb);
+        //printf("best overlap prob: %i, %f\n", bestOverlap, bestProb);
         if(bestOverlap != -1){
             if((aLength-bestOverlap) > 0){ //add gaps to the start of B
                 int numGaps = (aLength-bestOverlap);
@@ -118,7 +108,7 @@ void KmerAlign::align(string A, string B, vector<int> AQual, vector<int> BQual){
 }
 /**************************************************************************************************/
 //modelled after pandaseqs kmer align, assemble.c
-double KmerAlign::calcProb(string A, string B, int overlap, vector<int> forwardQual, vector<int> reverseQual){
+double KmerAlign::calcProb(string A, string B, int overlap){
     try {
         double prob = 0;
         int aLength = A.length();
@@ -158,20 +148,6 @@ double KmerAlign::calcProb(string A, string B, int overlap, vector<int> forwardQ
         exit(1);
     }
 }
-/**************************************************************************************************/
-
-void KmerAlign::align(string A, string B){
-    try {
-        m->mothurOut("[ERROR]: kmerAlign requires quality scores.\n");
-        m->control_pressed = true;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "KmerAlign", "align");
-        exit(1);
-    }
-    
-}
-
 /**************************************************************************************************/
 
 

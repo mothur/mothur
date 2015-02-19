@@ -26,17 +26,15 @@
 class KmerAlign : public Alignment {
 	
 public:
-	KmerAlign(int, int);
+	KmerAlign(int);
 	~KmerAlign();
     void align(string, string);
-	void align(string, string, vector<int>, vector<int>);
 	
 private:
     int kmerSize;
-    int numKmers;
     int maxKmer;
     Kmer kmerLibrary;
-    double calcProb(string A, string B, int overlap, vector<int>, vector<int>);
+    double calcProb(string A, string B, int overlap);
 };
 
 /**************************************************************************************************/
