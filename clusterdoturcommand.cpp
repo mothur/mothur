@@ -219,6 +219,7 @@ int ClusterDoturCommand::execute(){
         
         NameAssignment* nameMap = NULL;
         CountTable* ct = NULL;
+        map<string, int> counts;
         if(namefile != "") {	
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
@@ -228,6 +229,7 @@ int ClusterDoturCommand::execute(){
             ct = new CountTable();
             ct->readTable(countfile, false, false);
             cluster->readPhylipFile(phylipfile, ct);
+            counts = ct->getNameMap();
             delete ct;
         }else {
             cluster->readPhylipFile(phylipfile, nameMap);
@@ -285,10 +287,10 @@ int ClusterDoturCommand::execute(){
 			}
 
 			if(previousDist <= 0.0000 && dist != previousDist){
-				printData("unique");
+				printData("unique", counts);
 			}
 			else if(rndDist != rndPreviousDist){
-				printData(toString(rndPreviousDist,  length-1));
+				printData(toString(rndPreviousDist,  length-1), counts);
 			}
 		
 			previousDist = dist;
@@ -298,10 +300,10 @@ int ClusterDoturCommand::execute(){
 		}
 	
 		if(previousDist <= 0.0000){
-			printData("unique");
+			printData("unique", counts);
 		}
 		else if(rndPreviousDist<cutoff){
-			printData(toString(rndPreviousDist, length-1));
+			printData(toString(rndPreviousDist, length-1), counts);
 		}
 		
         if (countfile == "") {
@@ -348,7 +350,7 @@ int ClusterDoturCommand::execute(){
 
 //**********************************************************************************************************************
 
-void ClusterDoturCommand::printData(string label){
+void ClusterDoturCommand::printData(string label, map<string, int>& counts){
 	try {
         oldRAbund.setLabel(label);
         if (countfile == "") {
@@ -359,7 +361,13 @@ void ClusterDoturCommand::printData(string label){
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);
-		oldList.print(listFile);
+        
+        if(countfile != "") {
+            oldList.print(listFile, counts);
+        }else {
+            oldList.print(listFile);
+        }
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterDoturCommand", "printData");

@@ -309,6 +309,7 @@ int ClusterCommand::execute(){
 		
 		NameAssignment* nameMap = NULL;
         CountTable* ct = NULL;
+        map<string, int> counts;
 		if(namefile != ""){	
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
@@ -317,6 +318,7 @@ int ClusterCommand::execute(){
             ct = new CountTable();
             ct->readTable(countfile, false, false);
             read->read(ct);
+            counts = ct->getNameMap();
         }else { read->read(nameMap); }
 		
 		list = read->getListVector();
@@ -403,10 +405,10 @@ int ClusterCommand::execute(){
 			}
 
 			if(previousDist <= 0.0000 && dist != previousDist){
-				printData("unique");
+				printData("unique", counts);
 			}
 			else if(rndDist != rndPreviousDist){
-				printData(toString(rndPreviousDist,  length-1));
+				printData(toString(rndPreviousDist,  length-1), counts);
 			}
 		
 			previousDist = dist;
@@ -423,10 +425,10 @@ int ClusterCommand::execute(){
 		}
 		
 		if(previousDist <= 0.0000){
-			printData("unique");
+			printData("unique", counts);
 		}
 		else if(rndPreviousDist<cutoff){
-			printData(toString(rndPreviousDist, length-1));
+			printData(toString(rndPreviousDist, length-1), counts);
 		}
 		
 		delete matrix;
@@ -486,7 +488,7 @@ int ClusterCommand::execute(){
 
 //**********************************************************************************************************************
 
-void ClusterCommand::printData(string label){
+void ClusterCommand::printData(string label, map<string, int>& counts){
 	try {
 		if (m->isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
@@ -507,7 +509,11 @@ void ClusterCommand::printData(string label){
         }
         
 		oldList.setLabel(label);
-		oldList.print(listFile);
+        if(countfile != "") {
+            oldList.print(listFile, counts);
+        }else {
+            oldList.print(listFile);
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "printData");

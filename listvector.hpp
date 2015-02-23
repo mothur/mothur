@@ -36,7 +36,8 @@ public:
 	void resize(int);
 	void clear();
 	int size();
-	void print(ostream&);
+    void print(ostream&);
+	void print(ostream&, map<string, int>&);
     void printHeaders(ostream&);
 	
 	RAbundVector getRAbundVector();

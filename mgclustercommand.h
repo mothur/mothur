@@ -60,7 +60,7 @@ private:
 	int precision, length, precisionLength;
 	bool abort, minWanted, hclusterWanted, merge, hard, cutoffSet;
 	
-	void printData(ListVector*);
+	void printData(ListVector*, map<string, int>&);
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
