@@ -199,7 +199,7 @@ class MothurOut {
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&);
 
 		int control_pressed;
-		bool executing, runParse, jumble, gui, mothurCalling, debug;
+		bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
 		
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes. add a get and set function.
 		string getPhylipFile()		{ return phylipfile;		}
@@ -293,6 +293,7 @@ class MothurOut {
 			commandInputsConvertError = false;
             mothurCalling = false;
             debug = false;
+            quietMode = false;
 			sharedHeaderMode = "";
             groupMode = "group";
             changedSeqNames = false;

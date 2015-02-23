@@ -68,10 +68,7 @@ bool InteractEngine::getInput(){
                     
 			if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
                     
-			mout->mothurOutEndLine();
-			
 			input = getCommand();	
-			mout->mothurOutEndLine();	
 			
 			if (mout->control_pressed) { input = "quit()"; }
 			
@@ -135,7 +132,7 @@ bool InteractEngine::getInput(){
 					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
 
 					mout->control_pressed = 0;
 					mout->executing = false;
@@ -145,8 +142,7 @@ bool InteractEngine::getInput(){
                         MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
-					mout->mothurOut("Invalid."); 
-					mout->mothurOutEndLine();
+					mout->mothurOut("Invalid.\n");
 				}
 		}	
 		return 1;
@@ -163,30 +159,33 @@ string Engine::getCommand()  {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
-				nextCommand = readline("mothur > ");
+				nextCommand = readline("\nmothur > ");
 				
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
 					nextCommand = strdup("quit");
 					mout->mothurOut(nextCommand);
+                    mout->mothurOut("\n");
 				}	
 				
-				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
+				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
 				return nextCommand;
 			#else
 				string nextCommand = "";
-				mout->mothurOut("mothur > ");
+				mout->mothurOut("\nmothur > ");
 				getline(cin, nextCommand);
-				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
+                mout->mothurOut("\n");
+				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
 				
 				return nextCommand;
 			#endif
 		#else
 				string nextCommand = "";
 				
-				mout->mothurOut("mothur > ");
+				mout->mothurOut("\nmothur > ");
 				getline(cin, nextCommand);
-				mout->mothurOutJustToLog(toString(nextCommand));
+                mout->mothurOut("\n");
+				mout->mothurOutJustToLog(toString(nextCommand) + "\n");
 				
 				return nextCommand;
 		#endif
@@ -229,8 +228,7 @@ bool BatchEngine::getInput(){
 	try {
 		//check if this is a valid batchfile
 		if (openedBatch == 1) {  
-			mout->mothurOut("unable to open batchfile");  
-			mout->mothurOutEndLine();
+			mout->mothurOut("unable to open batchfile\n");
 			return 1; 
 		}
 	
@@ -283,9 +281,9 @@ bool BatchEngine::getInput(){
 			
 			if (input[0] != '#') {
 				if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
-				mout->mothurOutEndLine();
-				mout->mothurOut("mothur > " + input);
-				mout->mothurOutEndLine();
+				
+				mout->mothurOut("\nmothur > " + input + "\n");
+				
 							
 				if (mout->control_pressed) { input = "quit()"; }
 				
@@ -325,7 +323,7 @@ bool BatchEngine::getInput(){
 					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
 
 					mout->control_pressed = 0;
 					mout->executing = false;
@@ -335,8 +333,7 @@ bool BatchEngine::getInput(){
                         MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
-					mout->mothurOut("Invalid."); 
-					mout->mothurOutEndLine();
+					mout->mothurOut("Invalid.\n");
 				}
 				
 			}
@@ -429,9 +426,9 @@ bool ScriptEngine::getInput(){
 			if (mout->gui) {
 				if ((input.find("quit") != string::npos) || (input.find("set.logfile") != string::npos)) {}
 				else if ((input.find("get.current") != string::npos) && (!mout->hasCurrentFiles())) {}
-				else { mout->mothurOutEndLine(); mout->mothurOut("mothur > " + input); mout->mothurOutEndLine(); }
+				else {  mout->mothurOut("\nmothur > " + input + "\n");  }
 			}else{
-				mout->mothurOutEndLine(); mout->mothurOut("mothur > " + input); mout->mothurOutEndLine();
+				mout->mothurOut("\nmothur > " + input + "\n");
 			}
 			
 			#ifdef USE_MPI
@@ -501,7 +498,7 @@ bool ScriptEngine::getInput(){
 					else { quitCommandCalled = command->execute(); }
 					
 					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
 							
 					mout->control_pressed = 0;
 					mout->executing = false;
@@ -512,8 +509,7 @@ bool ScriptEngine::getInput(){
                         MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					#endif
 				}else {		
-					mout->mothurOut("Invalid."); 
-					mout->mothurOutEndLine();
+					mout->mothurOut("Invalid.\n");
 				}
 
 			
