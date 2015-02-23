@@ -182,6 +182,13 @@ struct consTax{
 	consTax(string n, string t, int a) :  name(n), taxonomy(t), abundance(a) {}
 };
 /***********************************************************************/
+struct listCt{
+    string bin;
+    int binSize;
+    listCt() :  bin(""), binSize(0) {};
+    listCt(string b, int a) :  bin(b), binSize(a) {}
+};
+/***********************************************************************/
 struct consTax2{
     string taxonomy;
     int abundance;

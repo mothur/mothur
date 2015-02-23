@@ -33,7 +33,18 @@ inline bool abundNamesSort(string left, string right){
         return true;
     }
     return false;	
+}
+//sorts highest to lowest
+/***********************************************************************/
+inline bool abundNamesSort2(listCt left, listCt right){
+    if (left.bin == "") { return false; }
+    if (right.bin == "") { return true; }
+    if (left.binSize > right.binSize) {
+        return true;
+    }
+    return false;
 } 
+
 
 /***********************************************************************/
 
@@ -283,19 +294,37 @@ void ListVector::printHeaders(ostream& output){
 
 /***********************************************************************/
 
-void ListVector::print(ostream& output){
+void ListVector::print(ostream& output, map<string, int>& ct){
 	try {
 		output << label << '\t' << numBins << '\t';
 	
-        vector<string> hold = data;
-        sort(hold.begin(), hold.end(), abundNamesSort);
         
-		for(int i=0;i<hold.size();i++){
-			if(hold[i] != ""){
-				output << hold[i] << '\t';
+        vector<listCt> hold;
+        for (int i = 0; i < data.size(); i++) {
+            if (data[i] != "") {
+                vector<string> binNames;
+                string bin = data[i];
+                m->splitAtComma(bin, binNames);
+                int total = 0;
+                for (int j = 0; j < binNames.size(); j++) {
+                    map<string, int>::iterator it = ct.find(binNames[j]);
+                    if (it == ct.end()) {
+                        m->mothurOut("[ERROR]: " + binNames[j] + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                    }else { total += ct[binNames[j]]; }
+                }
+                listCt temp(data[i], total);
+                hold.push_back(temp);
             }
-		}
-		output << endl;
+        }
+        sort(hold.begin(), hold.end(), abundNamesSort2);
+        
+        for(int i=0;i<hold.size();i++){
+            if(hold[i].bin != ""){
+                output << hold[i].bin << '\t';
+            }
+        }
+        output << endl;
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "print");
@@ -303,6 +332,27 @@ void ListVector::print(ostream& output){
 	}
 }
 
+/***********************************************************************/
+
+void ListVector::print(ostream& output){
+    try {
+        output << label << '\t' << numBins << '\t';
+        
+        vector<string> hold = data;
+        sort(hold.begin(), hold.end(), abundNamesSort);
+        
+        for(int i=0;i<hold.size();i++){
+            if(hold[i] != ""){
+                output << hold[i] << '\t';
+            }
+        }
+        output << endl;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListVector", "print");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 

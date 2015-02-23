@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> PhylotypeCommand::setParameters(){	
@@ -238,12 +239,17 @@ int PhylotypeCommand::execute(){
         if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
+        map<string, int> counts;
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	outSabund);
             m->openOutputFile(rabundFileName,	outRabund);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
+        }else {
+            CountTable ct;
+            ct.readTable(countfile, false, false);
+            counts = ct.getNameMap();
         }
 		m->openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
@@ -304,7 +310,8 @@ int PhylotypeCommand::execute(){
 				
 				//print listvector
                 if (!m->printedListHeaders) { list.printHeaders(outList); }
-                list.print(outList);
+                if (countfile == "") { list.print(outList);  }
+                else { list.print(outList, counts);  }
                 
                 if (countfile == "") {
                     //print rabund

@@ -235,6 +235,7 @@ int MGClusterCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read names file
+        map<string, int> counts;
 		if (namefile != "") {
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
@@ -244,6 +245,7 @@ int MGClusterCommand::execute(){
             nameMap= new NameAssignment();
             vector<string> tempNames = ct->getNamesOfSeqs();
             for (int i = 0; i < tempNames.size(); i++) {  nameMap->push_back(tempNames[i]);  }
+            counts = ct->getNameMap();
         }else{ nameMap= new NameAssignment(); }
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(blastfile));
@@ -352,7 +354,7 @@ int MGClusterCommand::execute(){
 				
 				if(previousDist <= 0.0000 && dist != previousDist){
 					oldList.setLabel("unique");
-					printData(&oldList);
+					printData(&oldList, counts);
 				}
 				else if(rndDist != rndPreviousDist){
 					if (merge) {
@@ -366,11 +368,11 @@ int MGClusterCommand::execute(){
 						}
 						
 						temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-						printData(temp);
+						printData(temp, counts);
 						delete temp;
 					}else{
 						oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-						printData(&oldList);
+						printData(&oldList, counts);
 					}
 				}
 	
@@ -383,7 +385,7 @@ int MGClusterCommand::execute(){
 			
 			if(previousDist <= 0.0000){
 				oldList.setLabel("unique");
-				printData(&oldList);
+				printData(&oldList, counts);
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
@@ -397,11 +399,11 @@ int MGClusterCommand::execute(){
 					}
 					
 					temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-					printData(temp);
+					printData(temp, counts);
 					delete temp;
 				}else{
 					oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-					printData(&oldList);
+					printData(&oldList, counts);
 				}
 			}
 			
@@ -485,7 +487,7 @@ int MGClusterCommand::execute(){
 												
 						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
 							oldList.setLabel("unique");
-							printData(&oldList);
+							printData(&oldList, counts);
 						}
 						else if((rndDist != rndPreviousDist)){
 							if (merge) {
@@ -501,11 +503,11 @@ int MGClusterCommand::execute(){
 								}
 
 								temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-								printData(temp);
+								printData(temp, counts);
 								delete temp;
 							}else{
 								oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-								printData(&oldList);
+								printData(&oldList, counts);
 							}
 						}
 						
@@ -521,7 +523,7 @@ int MGClusterCommand::execute(){
 			
 			if(previousDist <= 0.0000){
 				oldList.setLabel("unique");
-				printData(&oldList);
+				printData(&oldList, counts);
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
@@ -537,11 +539,11 @@ int MGClusterCommand::execute(){
 					}
 					
 					temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-					printData(temp);
+					printData(temp, counts);
 					delete temp;
 				}else{
 					oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-					printData(&oldList);
+					printData(&oldList, counts);
 				}
 			}
 			
@@ -610,9 +612,12 @@ int MGClusterCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void MGClusterCommand::printData(ListVector* mergedList){
+void MGClusterCommand::printData(ListVector* mergedList, map<string, int>& counts){
 	try {
-		mergedList->print(listFile);
+        if (countfile != "") {
+            mergedList->print(listFile, counts);
+        }else { mergedList->print(listFile); }
+        
         SAbundVector sabund = mergedList->getSAbundVector();
         
         if (countfile == "") {

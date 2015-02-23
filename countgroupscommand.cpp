@@ -289,8 +289,8 @@ int CountGroupsCommand::execute(){
 			
             map<string, string> variables; 
             string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+            if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
             ofstream out;
