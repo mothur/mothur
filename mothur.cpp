@@ -84,6 +84,25 @@ int main(int argc, char *argv[]){
 			string guiInput = argv[1];
 			if (guiInput[0] == '+') { outputHeader = false; }
 			if (guiInput[0] == '-') { outputHeader = false; }
+            
+            if (argc > 2) { //is one of these -q for quiet mode?
+                if (argc > 3) { m->mothurOut("[ERROR]: mothur only allows command inputs and the -q command line options.\n  i.e. ./mothur \"#summary.seqs(fasta=final.fasta);\" -q\n or ./mothur -q \"#summary.seqs(fasta=final.fasta);\"\n"); return 0; }
+                else {
+                    string argv1 = argv[1];
+                    string argv2 = argv[2];
+                    if ((argv1 == "--quiet") || (argv1 == "-q")) {
+                        m->quietMode = true;
+                        argv[1] = argv[2];
+                    }else if ((argv2 == "--quiet") || (argv2 == "-q")) {
+                         m->quietMode = true;
+                    }else {
+                        m->mothurOut("[ERROR]: mothur only allows command inputs and the -q command line options.\n");
+                        m->mothurOut("[ERROR]: Unrecognized options: " + argv1 + " " + argv2 + "\n");
+                        return 0;
+                    }
+                   
+                }
+            }
 		}
 		
         
@@ -205,14 +224,23 @@ int main(int argc, char *argv[]){
 					MPI_Finalize();
 				#endif
 				return 0;
+                
+            }else if ((input == "--help") || (input == "-h")) {
+                m->mothurOutJustToLog("Script Mode");
+                m->mothurOutEndLine(); m->mothurOutEndLine();
+
+                char* temp = new char[16];
+                *temp = '\0'; strncat(temp, "#help();quit();", 15);
+                
+                argv[1] = temp;
+                mothur = new ScriptEngine(argv[0], argv[1]);
 			}else{
 				m->mothurOutJustToLog("Batch Mode");
 				m->mothurOutEndLine(); m->mothurOutEndLine();
 				
 				mothur = new BatchEngine(argv[0], argv[1]);
 			}
-		}
-		else{
+		}else{
 			m->mothurOutJustToLog("Interactive Mode");
 			m->mothurOutEndLine(); m->mothurOutEndLine();
 			

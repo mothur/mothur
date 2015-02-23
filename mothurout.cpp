@@ -334,9 +334,16 @@ void MothurOut::mothurOut(string output) {
 					
 			if (pid == 0) { //only one process should output to screen
 		#endif
-		
-		out << output;
-        logger() << output;
+                if (!quietMode) {
+                    out << output;
+                    logger() << output;
+                }else {
+                    //check for this being an error
+                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                        out << output;
+                        logger() << output;
+                    }
+                }
 		
 		#ifdef USE_MPI
 			}
@@ -357,7 +364,15 @@ void MothurOut::mothurOutJustToScreen(string output) {
         
         if (pid == 0) { //only one process should output to screen
 #endif
-            logger() << output;
+            if (!quietMode) {
+                logger() << output;
+            }else {
+                //check for this being an error
+                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                    logger() << output;
+                }
+            }
+
             
 #ifdef USE_MPI
         }
@@ -377,9 +392,11 @@ void MothurOut::mothurOutEndLine() {
 					
 			if (pid == 0) { //only one process should output to screen
 		#endif
-		
-		out << endl;
-        logger() << endl;
+                
+		if (!quietMode) {
+            out << endl;
+            logger() << endl;
+        }
 		
 		#ifdef USE_MPI
 			}
@@ -400,11 +417,19 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 		
 		if (pid == 0) { //only one process should output to screen
 #endif
-			
-			
-			out << output;
-			outputFile << output;
-            logger() << output;
+            if (!quietMode) {
+                out << output;
+                outputFile << output;
+                logger() << output;
+            }else {
+                //check for this being an error
+                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                    out << output;
+                    outputFile << output;
+                    logger() << output;
+                }
+            }
+
 			
 #ifdef USE_MPI
 		}
@@ -425,10 +450,11 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 		
 		if (pid == 0) { //only one process should output to screen
 #endif
-			
-			out << endl;
-			outputFile << endl;
-            logger() << endl;
+			if (!quietMode) {
+                out << endl;
+                outputFile << endl;
+                logger() << endl;
+            }
 			
 #ifdef USE_MPI
 		}
@@ -448,8 +474,14 @@ void MothurOut::mothurOutJustToLog(string output) {
 					
 			if (pid == 0) { //only one process should output to screen
 		#endif
-		
-		out << output;
+                if (!quietMode) {
+                    out << output;
+                }else {
+                    //check for this being an error
+                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                        out << output;
+                    }
+                }
 		
 		#ifdef USE_MPI
 			}
