@@ -671,7 +671,7 @@
 		A7E9B69A12D37EC400DA6239 /* clusterclassic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterclassic.cpp; sourceTree = "<group>"; };
 		A7E9B69B12D37EC400DA6239 /* clusterclassic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterclassic.h; sourceTree = "<group>"; };
 		A7E9B69C12D37EC400DA6239 /* clustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clustercommand.cpp; path = source/commands/clustercommand.cpp; sourceTree = "<group>"; };
-		A7E9B69D12D37EC400DA6239 /* clustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = clustercommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		A7E9B69D12D37EC400DA6239 /* clustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = clustercommand.h; path = source/commands/clustercommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B69E12D37EC400DA6239 /* clusterdoturcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterdoturcommand.cpp; sourceTree = "<group>"; };
 		A7E9B69F12D37EC400DA6239 /* clusterdoturcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterdoturcommand.h; sourceTree = "<group>"; };
 		A7E9B6A012D37EC400DA6239 /* clusterfragmentscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterfragmentscommand.cpp; sourceTree = "<group>"; };
