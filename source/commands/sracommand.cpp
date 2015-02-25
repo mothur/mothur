@@ -358,6 +358,7 @@ int SRACommand::execute(){
         out << "\t</Description>\n";
         ////////////////////////////////////////////////////////
         
+        
         //bioproject
         ////////////////////////////////////////////////////////
         out << "\t<Action>\n";
@@ -375,6 +376,16 @@ int SRACommand::execute(){
             out << "\t\t\t\t\t\t\t<ExternalLink label=\"Website name\">\n";
             out << "\t\t\t\t\t\t\t\t<URL>" + website + "</URL>\n";
             out << "\t\t\t\t\t\t\t</ExternalLink>\n";
+        }
+        if (Grants.size() != 0) {
+            for (int i = 0; i < Grants.size(); i++) {
+                out << "\t\t\t\t\t\t\t<Grant GrantId=\"" + Grants[i].grantId + "\">\n";
+                out << "\t\t\t\t\t\t\t\t<Agency>" + Grants[i].grantAgency + "</Agency>\n";
+                if (Grants[i].grantTitle != "") {
+                    out << "\t\t\t\t\t\t\t\t<Title>" + Grants[i].grantTitle + "</Title>\n";
+                }
+                out << "\t\t\t\t\t\t\t</Grant>\n";
+            }
         }
         out << "\t\t\t\t\t\t</Descriptor>\n";
         out << "\t\t\t\t\t\t<ProjectType>\n";
@@ -607,7 +618,7 @@ int SRACommand::execute(){
 int SRACommand::readContactFile(){
 	try {
         lastName = ""; firstName = ""; submissionName = ""; email = ""; centerName = ""; centerType = ""; description = ""; website = ""; projectName = "";
-        projectTitle = ""; grantAgency = ""; grantId = ""; grantTitle = ""; ownership = "owner";
+        projectTitle = "";  ownership = "owner";
         
         ifstream in;
         m->openInputFile(contactfile, in);
@@ -641,9 +652,26 @@ int SRACommand::readContactFile(){
             else if (key == "WEBSITE")          {   website = value;        }
             else if (key == "PROJECTNAME")      {   projectName = value;    }
             else if (key == "PROJECTTITLE")     {   projectTitle = value;   }
-            else if (key == "GRANTID")          {   grantId = value;        }
-            else if (key == "GRANTTITLE")       {   grantTitle = value;     }
-            else if (key == "GRANTAGENCY")      {   grantAgency = value;    }
+            else if (key == "GRANT")            {
+                string temp = value;
+                vector<string> values;
+                m->splitAtComma(temp, values);
+                Grant thisGrant;
+                for (int i = 0; i < values.size(); i++) {
+                    vector<string> items;
+                    m->splitAtChar(values[i], items, '=');
+                    if (items.size() != 2) { m->mothurOut("[ERROR]: error parsing grant info for line \"" + value + "\", skipping it.\n"); break; }
+                    else {
+                        if (items[0] == "id") { thisGrant.grantId = items[1];  }
+                        else if (items[0] == "title") { thisGrant.grantTitle = items[1];  }
+                        else if (items[0] == "agency") { thisGrant.grantAgency = items[1];  }
+                        else { m->mothurOut("[ERROR]: unknown identifier '" + items[0] + "', skipping it.\n");  }
+                    }
+                }
+                if ((thisGrant.grantId == "") || (thisGrant.grantAgency == "")) { m->mothurOut("[ERROR]: Missing info for line \"" + value + "\", skipping it. Note: the id and agency fields are required. Example: Grant id=yourID, agency=yourAgency.\n"); }
+                else { Grants.push_back(thisGrant); }
+            }
+            
         }
         in.close();
         
