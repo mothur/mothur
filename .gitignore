@@ -13,6 +13,7 @@ TARGET_BUILD_DIRTARGET_BUILD_DIR
 *.xml
 nbproject/
 mothur
+Mothur.1
 
 *.stdout
 
