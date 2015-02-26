@@ -35,14 +35,21 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
+    struct Grant {
+        string grantId, grantTitle, grantAgency;
+        Grant(string i, string a) : grantId(i), grantAgency(a), grantTitle("") {}
+        Grant(string i, string a, string t) : grantId(i), grantAgency(a), grantTitle(t) {}
+        Grant() : grantId(""), grantAgency(""), grantTitle("") {}
+    };
     bool abort, isSFF, pairedOligos, setOligosParameter;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, fileOption;
     
     string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;
     string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType, checkorient;
     string submissionName, lastName, firstName, email, centerName, centerType, ownership, description, website, orientation, packageType;
-    string projectName, grantId, grantTitle, grantAgency, projectTitle, inputDir;
+    string projectName, projectTitle, inputDir;
     vector<string> outputNames, Groups;
+    vector<Grant> Grants;
     map<string, string> Group2Barcode;
     map<string, string> Group2Primer;
     vector<string> linkers;
