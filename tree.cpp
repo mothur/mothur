@@ -1112,11 +1112,11 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 				}
 			}else if (mode == "boot") {
 				//if there is a label then print it
-				if (tree[node].getLabel() != -1) {
+				if (tree[node].getLabel() != "") {
 					out << tree[node].getLabel();
 				}
 			}else if (mode == "both") {
-				if (tree[node].getLabel() != -1) {
+				if (tree[node].getLabel() != "") {
 					out << tree[node].getLabel();
 				}
 				//if there is a branch length then print it
@@ -1136,12 +1136,12 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 			}else if (mode == "boot") {
 				out << leafGroup[0]; 
 				//if there is a label then print it
-				if (tree[node].getLabel() != -1) {
+				if (tree[node].getLabel() != "") {
 					out << tree[node].getLabel();
 				}
 			}else if (mode == "both") {
 				out << tree[node].getName();
-				if (tree[node].getLabel() != -1) {
+				if (tree[node].getLabel() != "") {
 					out << tree[node].getLabel();
 				}
 				//if there is a branch length then print it
@@ -1175,11 +1175,11 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 				}
 			}else if (mode == "boot") {
 				//if there is a label then print it
-				if (theseNodes[node].getLabel() != -1) {
+				if (theseNodes[node].getLabel() != "") {
 					out << theseNodes[node].getLabel();
 				}
 			}else if (mode == "both") {
-				if (theseNodes[node].getLabel() != -1) {
+				if (theseNodes[node].getLabel() != "") {
 					out << theseNodes[node].getLabel();
 				}
 				//if there is a branch length then print it
@@ -1199,12 +1199,12 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 			}else if (mode == "boot") {
 				out << leafGroup[0]; 
 				//if there is a label then print it
-				if (theseNodes[node].getLabel() != -1) {
+				if (theseNodes[node].getLabel() != "") {
 					out << theseNodes[node].getLabel();
 				}
 			}else if (mode == "both") {
 				out << theseNodes[node].getName();
-				if (theseNodes[node].getLabel() != -1) {
+				if (theseNodes[node].getLabel() != "") {
 					out << theseNodes[node].getLabel();
 				}
 				//if there is a branch length then print it

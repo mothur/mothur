@@ -35,7 +35,7 @@ public:
 	
 	virtual void resize(int) = 0;
 	virtual int size()	= 0;
-	virtual void print(ostream&);
+	virtual void print(ostream&) = 0;
     virtual void print(ostream&, map<string, int>&) {}
 	virtual void printHeaders(ostream&) {};
 	virtual void clear() = 0;

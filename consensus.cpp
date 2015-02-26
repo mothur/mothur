@@ -145,7 +145,7 @@ int Consensus::buildConsensusTree(vector<string> nodeSet) {
 			int left = buildConsensusTree(leftChildSet);
 			int right = buildConsensusTree(rightChildSet);
 			consensusTree->tree[count].setChildren(left, right);
-			consensusTree->tree[count].setLabel((nodePairsInTree[nodeSet]/(float)numTrees)); 
+			consensusTree->tree[count].setLabel(toString(nodePairsInTree[nodeSet]/(float)numTrees));
 			consensusTree->tree[left].setParent(count);
 			consensusTree->tree[right].setParent(count);
 			count++;

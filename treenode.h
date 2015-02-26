@@ -24,7 +24,7 @@ class Node  {
 		void setName(string);
 		void setGroup(vector<string>);  
 		void setBranchLength(float);
-		void setLabel(float);
+		void setLabel(string);
 		void setParent(int);
 		void setChildren(int, int);		//leftchild, rightchild
 		void setIndex(int);
@@ -34,7 +34,7 @@ class Node  {
 		vector<string> getGroup();  
 		float getBranchLength();
 		float getLengthToLeaves();
-		float getLabel();
+		string getLabel();
 		int getParent();
 		int getLChild();
 		int getRChild();
@@ -52,9 +52,9 @@ class Node  {
 		map<string, int> pcount;	
 			
 	private:
-		string			name;
+		string			name, label;
 		vector<string>	group; 
-		float			branchLength, length2leaf, label;
+		float			branchLength, length2leaf;
 		int				parent;
 		int				lchild;
 		int				rchild;

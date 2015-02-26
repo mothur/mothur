@@ -18,6 +18,7 @@ vector<string> ClassifyTreeCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pmethod("output", "Multiple", "node-taxon", "node", "", "", "","",false,false); parameters.push_back(pmethod);
         CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "","",false,true); parameters.push_back(pcutoff);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -42,6 +43,7 @@ string ClassifyTreeCommand::getHelpString(){
 		helpString += "The summary file lists the concensus taxonomy for the descendants of each node.\n";
 		helpString += "The classify.tree command parameters are tree, group, name, count and taxonomy. The tree and taxonomy files are required.\n";
         helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
+        helpString += "The output parameter allows you to specify whether you want the tree node number displayed on the tree, or the taxonomy displayed. Default=node. Options are node or taxon.\n";
         helpString += "The classify.tree command should be used in the following format: classify.tree(tree=test.tre, group=test.group, taxonomy=test.taxonomy)\n";
 		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
 		return helpString;
@@ -201,6 +203,12 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
             
+            output = validParameter.validFile(parameters, "output", false);
+            if (output == "not found") { output = "node"; }
+            
+            if ((output == "node") || (output == "taxon")) {
+            }else { m->mothurOut("[ERROR]: " + output + "is not a valid output option.  Valid output options are node or taxon.\n");  abort = true; }
+            
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(treefile);
@@ -328,7 +336,20 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
                 out << (i+1) << '\t' << size << '\t' << tax << endl;
             }
            	
-			T->tree[i].setLabel((i+1));
+            if (output == "node") {  T->tree[i].setLabel(toString(i+1));  }
+            else {
+                string cleanedTax = tax;
+                m->removeConfidences(cleanedTax);
+                for (int j = 0; j < cleanedTax.length(); j++) {
+                    //special chars to trees -  , ) ( ; [ ] :
+                    if ((cleanedTax[j] == ',') || (cleanedTax[j] == '(') || (cleanedTax[j] == ')') || (cleanedTax[j] == ';') || (cleanedTax[j] == ':') || (cleanedTax[j] == ']') || (cleanedTax[j] == '[')) {
+                        cleanedTax[j] = '_'; //change any special chars to _ so the tree can be read by tree readers
+                    }
+                }
+                cout << tax << '\t' << cleanedTax << endl;
+                T->tree[i].setLabel(cleanedTax);
+            }
+            
 		}
 		out.close();
         

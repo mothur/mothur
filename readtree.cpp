@@ -9,6 +9,13 @@
 
 #include "readtree.h"
 
+
+/* Special characters to trees:
+ 
+ , ) ( ; [ ] :
+ 
+ 
+ */
 /***********************************************************************/
 ReadTree::ReadTree() {
 	try {

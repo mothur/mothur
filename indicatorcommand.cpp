@@ -707,7 +707,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			}
 			out << endl;
 			
-			T->tree[i].setLabel((i+1));
+			T->tree[i].setLabel(toString(i+1));
 		}
 		out.close();
 	
