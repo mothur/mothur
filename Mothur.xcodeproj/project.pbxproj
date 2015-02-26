@@ -396,7 +396,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/source/metastats/fortran/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/source/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
 		};
 /* End PBXBuildRule section */
 
@@ -1146,19 +1146,19 @@
 		A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sequenceparser.cpp; path = source/datastructures/sequenceparser.cpp; sourceTree = "<group>"; };
 		A7FA10001302E096003860FE /* mantelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mantelcommand.h; path = source/commands/mantelcommand.h; sourceTree = "<group>"; };
 		A7FA10011302E096003860FE /* mantelcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mantelcommand.cpp; path = source/commands/mantelcommand.cpp; sourceTree = "<group>"; };
-		A7FA2ABC14A0E881007C09A6 /* bsplvb.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bsplvb.f; path = source/metastats/fortran/bsplvb.f; sourceTree = "<group>"; };
-		A7FA2ABD14A0E881007C09A6 /* bsplvd.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bsplvd.f; path = source/metastats/fortran/bsplvd.f; sourceTree = "<group>"; };
-		A7FA2ABE14A0E881007C09A6 /* bvalue.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bvalue.f; path = source/metastats/fortran/bvalue.f; sourceTree = "<group>"; };
-		A7FA2ABF14A0E881007C09A6 /* daxpy.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = daxpy.f; path = source/metastats/fortran/daxpy.f; sourceTree = "<group>"; };
-		A7FA2AC014A0E881007C09A6 /* ddot.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = ddot.f; path = source/metastats/fortran/ddot.f; sourceTree = "<group>"; };
-		A7FA2AC114A0E881007C09A6 /* dpbfa.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = dpbfa.f; path = source/metastats/fortran/dpbfa.f; sourceTree = "<group>"; };
-		A7FA2AC214A0E881007C09A6 /* dpbsl.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = dpbsl.f; path = source/metastats/fortran/dpbsl.f; sourceTree = "<group>"; };
-		A7FA2AC314A0E881007C09A6 /* interv.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = interv.f; path = source/metastats/fortran/interv.f; sourceTree = "<group>"; };
-		A7FA2AC414A0E881007C09A6 /* sgram.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sgram.f; path = source/metastats/fortran/sgram.f; sourceTree = "<group>"; };
-		A7FA2AC514A0E881007C09A6 /* sinerp.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sinerp.f; path = source/metastats/fortran/sinerp.f; sourceTree = "<group>"; };
-		A7FA2AC614A0E881007C09A6 /* stxwx.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = stxwx.f; path = source/metastats/fortran/stxwx.f; sourceTree = "<group>"; };
-		A7FA2B1514A0EBEA007C09A6 /* sslvrg.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sslvrg.f; path = source/metastats/fortran/sslvrg.f; sourceTree = "<group>"; };
-		A7FA2B5A14A0F0C2007C09A6 /* intrv.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = intrv.f; path = source/metastats/fortran/intrv.f; sourceTree = "<group>"; };
+		A7FA2ABC14A0E881007C09A6 /* bsplvb.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bsplvb.f; path = source/bsplvb.f; sourceTree = "<group>"; };
+		A7FA2ABD14A0E881007C09A6 /* bsplvd.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bsplvd.f; path = source/bsplvd.f; sourceTree = "<group>"; };
+		A7FA2ABE14A0E881007C09A6 /* bvalue.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = bvalue.f; path = source/bvalue.f; sourceTree = "<group>"; };
+		A7FA2ABF14A0E881007C09A6 /* daxpy.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = daxpy.f; path = source/daxpy.f; sourceTree = "<group>"; };
+		A7FA2AC014A0E881007C09A6 /* ddot.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = ddot.f; path = source/ddot.f; sourceTree = "<group>"; };
+		A7FA2AC114A0E881007C09A6 /* dpbfa.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = dpbfa.f; path = source/dpbfa.f; sourceTree = "<group>"; };
+		A7FA2AC214A0E881007C09A6 /* dpbsl.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = dpbsl.f; path = source/dpbsl.f; sourceTree = "<group>"; };
+		A7FA2AC314A0E881007C09A6 /* interv.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = interv.f; path = source/interv.f; sourceTree = "<group>"; };
+		A7FA2AC414A0E881007C09A6 /* sgram.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sgram.f; path = source/sgram.f; sourceTree = "<group>"; };
+		A7FA2AC514A0E881007C09A6 /* sinerp.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sinerp.f; path = source/sinerp.f; sourceTree = "<group>"; };
+		A7FA2AC614A0E881007C09A6 /* stxwx.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = stxwx.f; path = source/stxwx.f; sourceTree = "<group>"; };
+		A7FA2B1514A0EBEA007C09A6 /* sslvrg.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = sslvrg.f; path = source/sslvrg.f; sourceTree = "<group>"; };
+		A7FA2B5A14A0F0C2007C09A6 /* intrv.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; name = intrv.f; path = source/intrv.f; sourceTree = "<group>"; };
 		A7FC480C12D788F20055BC5C /* linearalgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = linearalgebra.h; path = source/linearalgebra.h; sourceTree = "<group>"; };
 		A7FC480D12D788F20055BC5C /* linearalgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = linearalgebra.cpp; path = source/linearalgebra.cpp; sourceTree = "<group>"; };
 		A7FC486512D795D60055BC5C /* pcacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcacommand.h; path = source/commands/pcacommand.h; sourceTree = "<group>"; };
