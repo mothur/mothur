@@ -43,7 +43,8 @@ private:
     bool abort;
     string outputDir;
     vector<string> outputNames;
-    int samples, abund;
+    float abund;
+    int samples, factor;
     
     int createTable(vector<SharedRAbundFloatVector*>&);
 

@@ -40,7 +40,7 @@ string GetCoreMicroBiomeCommand::getHelpString(){
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
         helpString += "The output parameter is used to specify whether you would like the fraction of OTU's or OTU count outputted. Options are fraction or count. Default=fraction.\n";
-		helpString += "The abundance parameter allows you to specify an abundance you would like the OTU names outputted for. Must be an integer between 0 and 100, indicating the relative abundance. \n";
+		helpString += "The abundance parameter allows you to specify an abundance you would like the OTU names outputted for. Must be an between 0 and 100, indicating the relative abundance. Values 1 to 100, will be treated as the percentage.  For example relabund=0.01 can be set with abundance=1 or abundance=0.01.  For abundance values < 1 percent, abundance=0.001 will specify OTUs with relative abundance of 0.001.\n";
         helpString += "The samples parameter allows you to specify the minimum number of samples you would like the OTU names outputted for. Must be an interger between 1 and number of samples in your file.\n";
 		helpString += "The new command should be in the following format: get.coremicrobiome(shared=yourSharedFile)\n";
 		helpString += "get.coremicrobiom(shared=final.an.shared, abund=30)\n";
@@ -180,7 +180,24 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 			m->mothurConvert(temp, abund);
             
             if (abund != -1) { 
-                if ((abund < 0) || (abund > 100)) { m->mothurOut(toString(abund) + " is not a valid number for abund. Must be an integer between 0 and 100.\n"); }
+                if ((abund < 0) || (abund > 100)) { m->mothurOut(toString(abund) + " is not a valid number for abund. Must be between 0 and 100.\n"); }
+                if (abund < 1) { //convert
+                    string temp = toString(abund); string factorString = "1";
+                    bool found = false;
+                    for (int i = 0; i < temp.length(); i++) {
+                        if (temp[i] == '.') { found = true; }
+                        else {
+                            if (found) { factorString += "0"; }
+                        }
+                    }
+                    cout << factorString << endl;
+                    m->mothurConvert(factorString, factor);
+                }else {
+                    factor = 100;
+                    abund /= 100;
+                }
+            }else {
+                factor = 100;
             }
             
             temp = validParameter.validFile(parameters, "samples", false);	if (temp == "not found"){	temp = "-1";	}
@@ -315,7 +332,7 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         //table is 100 by numsamples
         //question we are answering is: what fraction of OTUs in a study have a relative abundance at or above %X
         //in at least %Y samples. x goes from 0 to 100, y from 1 to numSamples
-        vector< vector<double> > table; table.resize(101);
+        vector< vector<double> > table; table.resize(factor+1);
         for (int i = 0; i < table.size(); i++) { table[i].resize(numSamples, 0.0); }
         
         map<int, vector<string> > otuNames;
@@ -325,13 +342,14 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
                 otuNames[i+1] = temp;
             }
         }else if ((abund == -1) && (samples != -1)) { //fill with all relabund
-            for (int i = 0; i < 101; i++) {
+            for (int i = 0; i < factor+1; i++) {
                 vector<string> temp;
                 otuNames[i] = temp;
             }
         }else if ((abund != -1) && (samples != -1)) { //only one line is wanted
             vector<string> temp;
-            otuNames[abund] = temp;
+            int thisAbund = abund*factor;
+            otuNames[thisAbund] = temp;
         }
         
         for (int i = 0; i < numOtus; i++) {
@@ -339,11 +357,11 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
             if (m->control_pressed) { break; }
             
             //count number of samples in this otu with a relabund >= spot in count
-            vector<int> counts; counts.resize(101, 0);
+            vector<int> counts; counts.resize(factor+1, 0);
             
             for (int j = 0; j < lookup.size(); j++) {
                 double relabund = lookup[j]->getAbundance(i);
-                int wholeRelabund = (int) (floor(relabund*100));
+                int wholeRelabund = (int) (floor(relabund*factor));
                 for (int k = 0; k < wholeRelabund+1; k++) { counts[k]++; }
             }
             
@@ -354,11 +372,11 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
                 if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
                     if (counts[j] >= samples) { otuNames[j].push_back(m->currentSharedBinLabels[i]); }
                 }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
-                    if (j == abund) {  
+                    if (j == (abund*factor)) {
                         for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(m->currentSharedBinLabels[i]); }
                     }
                 }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
-                    if ((j == abund) && (counts[j] >= samples)) {  
+                    if ((j == (abund*factor)) && (counts[j] >= samples)) {
                         otuNames[j].push_back(m->currentSharedBinLabels[i]); 
                     }
                 }
@@ -370,8 +388,9 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         out << "NumSamples\t";
         
         //convert table counts to percents
+        int precisionLength = (toString(factor)).length();
         for (int i = 0; i < table.size(); i++) {
-            out << "Relabund-" << i << "%\t";
+            out << "Relabund-" << setprecision(precisionLength-1)<< (float)(i/(float)factor) << "\t";
             if (m->control_pressed) { break; }
             for (int j = 0; j < table[i].size(); j++) {  if (output == "fraction") { table[i][j] /= (double) numOtus; } }
         }
@@ -380,7 +399,7 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { break; }
             out << i+1 << '\t';
-            for (int j = 0; j < table.size(); j++) {  out << table[j][i] << '\t'; }
+            for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << table[j][i] << '\t'; }
             out << endl;
         }
 
@@ -395,11 +414,11 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
             m->openOutputFile(outputFileName2, out2);
             
             if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
-                out2 << "Relabund%\tOTUList_for_samples=" << samples << "\n";
+                out2 << "Relabund\tOTUList_for_samples=" << samples << "\n";
             }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
-                out2 << "Samples\tOTUList_for_abund=" << abund << "\n";
+                out2 << "Samples\tOTUList_for_abund=" << abund*factor << "\n";
             }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
-                out2 << "Relabund%\tOTUList_for_samples=" << samples << "\n";
+                out2 << "Relabund\tOTUList_for_samples=" << samples << "\n";
             }
 
             for (map<int, vector<string> >::iterator it = otuNames.begin(); it != otuNames.end(); it++) {
@@ -408,7 +427,11 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
                 vector<string> temp = it->second;
                 string list = m->makeList(temp);
                 
-                out2 << it->first << '\t' << list << endl;
+                if ((abund != -1) && (samples == -1)) { //fill with all samples
+                    out2 << it->first << '\t' << list << endl;
+                }else  { //fill with relabund
+                    out2 << fixed << showpoint << setprecision(precisionLength-1) << (it->first/(float)(factor)) << '\t' << list << endl;
+                }
             }
             
             out2.close();
