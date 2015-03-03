@@ -87,9 +87,9 @@ void RareDisplay::close(){
             
             sort((it->second).begin(), (it->second).end());
             
-            //lci=results[int(0.025*iter)] and hci=results[int(0.975*iter)]
-			data[0] = (it->second)[(int)(0.50*(nIters-1))];
-            //data[0] = m->getAverage(it->second);
+            vector<double> thisResults = it->second;
+            double meanResults = m->getAverage(thisResults);
+			data[0] = meanResults;
 			data[1] = (it->second)[(int)(0.025*(nIters-1))];
 			data[2] = (it->second)[(int)(0.975*(nIters-1))];
             //cout << nIters << '\t' << (int)(0.025*(nIters-1)) << '\t' << (int)(0.975*(nIters-1)) << endl;
