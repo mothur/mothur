@@ -408,7 +408,7 @@ int MakeContigsCommand::execute(){
         unsigned long long numReads = 0;
         map<string, int> totalGroupCounts;
         int start = time(NULL);
-        longestBase = 1000;
+        longestBase = 1000; group = "";
    
         if (file != "") {
             numReads = processMultipleFileOption(totalGroupCounts);
@@ -530,7 +530,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         if (createFileGroup) {  createOligosGroup = false; }
         
         m->mothurOut("Making contigs...\n");
-        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, lines, qLines, "");
+        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, lines, qLines, group);
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
         
@@ -657,7 +657,8 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
             rfastqfile = fileInputs[l][1];
             findexfile = fileInputs[l][2];
             rindexfile = fileInputs[l][3];
-            string group = file2Group[l];
+            group = file2Group[l];
+            
             groupCounts.clear();
             groupMap.clear();
             
