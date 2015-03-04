@@ -17,6 +17,7 @@
 class ReportFile {
 public:
 	ReportFile();
+    ~ReportFile() {}
 	int read(ifstream&);
 	int readHeaders(ifstream&, string);
 	

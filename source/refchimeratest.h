@@ -16,6 +16,7 @@ class RefChimeraTest {
 	
 public:
 	RefChimeraTest(){};
+    ~RefChimeraTest(){}
     RefChimeraTest(vector<Sequence>&, bool);
 	int printHeader(ofstream&);
     int analyzeQuery(string, string, ofstream&);

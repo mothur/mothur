@@ -22,6 +22,7 @@
 class QualityScores {
 public:
 	QualityScores();
+    ~QualityScores() {}
     QualityScores(string n, vector<int> qs);
 	QualityScores(ifstream&);
     int read(ifstream&);

@@ -32,7 +32,7 @@ public:
         errorRate = 1.0000;
         sequence = "";
     }
-    ~Compare(){};
+    ~Compare(){}
     
     int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
     string refName, queryName, sequence;
