@@ -41,12 +41,6 @@ public:
 	
 private:
 	
-	struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
-	
 	bool abort;
 	string outputDir, fastafile, namefile, groupfile;
 	int processors;

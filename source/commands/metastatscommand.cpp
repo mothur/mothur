@@ -373,7 +373,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 							processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 							process++;
 						}else if (pid == 0){
-							driver(lines[process].start, lines[process].num, thisLookUp);
+							driver(lines[process].start, lines[process].end, thisLookUp);
 							exit(0);
 						}else { 
 							m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -383,7 +383,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 					}
 					
 					//do my part
-					driver(lines[0].start, lines[0].num, thisLookUp);
+					driver(lines[0].start, lines[0].end, thisLookUp);
 		
 					//force parent to wait until all the processes are done
 					for (int i=0;i<(processors-1);i++) { 
@@ -463,7 +463,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 	}
 }
 //**********************************************************************************************************************
-int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& thisLookUp) { 
+int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, vector<SharedRAbundVector*>& thisLookUp) {
 	try {
 	
 		//for each combo

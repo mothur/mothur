@@ -91,11 +91,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-    
-    struct linePair {
-		int start;
-		int end;
-	};
 	vector<linePair> lines;
     
 	Tree* createTree(vector< vector<double> >&);

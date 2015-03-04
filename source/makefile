@@ -13,8 +13,8 @@ USEMPI ?= no
 USEREADLINE ?= yes
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"11/18/2014\""
-VERSION = "\"1.34.0\""
+RELEASE_DATE = "\"3/3/2014\""
+VERSION = "\"1.35.0\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS =
 
@@ -22,23 +22,23 @@ FORTRAN_FLAGS =
 CXXFLAGS += -O3
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
-#if you are using centos uncomment the following lines
-#CXX = g++44
+    #if you are using centos uncomment the following lines
+    #CXX = g++44
 
-#if you are a mac user use the following line
-TARGET_ARCH += -arch x86_64
+    #if you are a mac user use the following line
+    TARGET_ARCH += -arch x86_64
 
-#if you using cygwin to build Windows the following line
-#CXX = x86_64-w64-mingw32-g++
-#CC = x86_64-w64-mingw32-g++
-#FORTAN_COMPILER = x86_64-w64-mingw32-gfortran
-#TARGET_ARCH += -m64 -static
+    #if you using cygwin to build Windows the following line
+    #CXX = x86_64-w64-mingw32-g++
+    #CC = x86_64-w64-mingw32-g++
+    #FORTAN_COMPILER = x86_64-w64-mingw32-gfortran
+    #TARGET_ARCH += -m64 -static
 
-#if you are a linux user use the following line
-#CXXFLAGS += -mtune=native -march=native
+    #if you are a linux user use the following line
+    #CXXFLAGS += -mtune=native -march=native
 
-CXXFLAGS += -DBIT_VERSION
-FORTRAN_FLAGS = -m64
+    CXXFLAGS += -DBIT_VERSION
+    FORTRAN_FLAGS = -m64
 endif
 
 
@@ -46,7 +46,7 @@ CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
-CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
+    CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
 endif
 
 
@@ -55,16 +55,16 @@ endif
 
 
 ifeq  ($(strip $(USEREADLINE)),yes)
-CXXFLAGS += -DUSE_READLINE
-LIBS = \
--lreadline\
--lncurses
+    CXXFLAGS += -DUSE_READLINE
+    LIBS = \
+        -lreadline\
+        -lncurses
 endif
 
 
 ifeq  ($(strip $(USEMPI)),yes)
-CXX = mpic++
-CXXFLAGS += -DUSE_MPI
+    CXX = mpic++
+    CXXFLAGS += -DUSE_MPI
 endif
 
 # if you want to enable reading and writing of compressed files, set to yes.
@@ -72,19 +72,20 @@ endif
 
 
 ifeq  ($(strip $(USECOMPRESSION)),yes)
-CXXFLAGS += -DUSE_COMPRESSION
+    CXXFLAGS += -DUSE_COMPRESSION
 endif
 
 #
 # INCLUDE directories for mothur
 #
-#VPATH=calculators:chimera:classifier:clearcut:commands:communitytype:datastructures:metastats:randomforest:read:svm
-skipUchime := uchime_src/
-subdirs := $(filter-out  $(skipUchime), $(wildcard */))
-subDirIncludes = $(patsubst %, -I %, $(subdirs))
-subDirLinking =  $(patsubst %, -L %, $(subdirs))
-CXXFLAGS += -I. $(subDirIncludes)
-LDFLAGS += $(subDirLinking)
+#
+    VPATH=calculators:chimera:classifier:clearcut:commands:communitytype:datastructures:metastats:randomforest:read:svm
+    skipUchime := uchime_src/
+    subdirs := $(filter-out  $(skipUchime), $(wildcard */))
+    subDirIncludes = $(patsubst %, -I %, $(subdirs))
+    subDirLinking =  $(patsubst %, -L%, $(subdirs))
+    CXXFLAGS += -I. $(subDirIncludes)
+    LDFLAGS += $(subDirLinking)
 
 
 #
@@ -92,37 +93,37 @@ LDFLAGS += $(subDirLinking)
 #
 
 
-OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
-OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
-OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
-OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
-OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
+    OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
+    OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
+    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+    OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
+    OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
 
 mothur : fortranSource $(OBJECTS) uchime
-$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+    $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
-strip mothur
+    strip mothur
 
 uchime:
-cd uchime_src && ./mk && mv uchime .. && cd ..
+    cd uchime_src && ./mk && mv uchime .. && cd ..
 
 fortranSource:
-${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
+    ${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
 install : mothur
 #	cp mothur ../Release/mothur
 
 
 %.o : %.c %.h
-$(COMPILE.c) $(OUTPUT_OPTION) $<
+    $(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
-$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.hpp
-$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 
 
 clean :
-@rm -f $(OBJECTS)
-@rm -f uchime
+    @rm -f $(OBJECTS)
+    @rm -f uchime
 

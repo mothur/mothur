@@ -50,13 +50,6 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:
-	
-    struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
-    
 	bool abort, large;
 	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
 

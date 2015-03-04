@@ -67,13 +67,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	
-	struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
-	
     SequenceParser* parser;
     SequenceCountParser* cparser;
     CountTable ct;

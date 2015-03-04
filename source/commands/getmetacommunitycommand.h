@@ -79,11 +79,6 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    struct linePair {
-		unsigned long long start;
-		unsigned long long end;
-		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-	};
     bool abort, allLines, subsample;
     string outputDir;
     vector<string> outputNames;

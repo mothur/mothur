@@ -12,7 +12,6 @@
 
 #include "sequence.hpp"
 
-
 class RefChimeraTest {
 	
 public:
@@ -20,7 +19,7 @@ public:
     RefChimeraTest(vector<Sequence>&, bool);
 	int printHeader(ofstream&);
     int analyzeQuery(string, string, ofstream&);
-	int getClosestRefIndex();
+    int getClosestRefIndex();
     string getClosestRefAlignment();
     string getQueryAlignment();
 
@@ -44,7 +43,6 @@ private:
 	int bestMatch;
     string bestRefAlignment;
     string bestQueryAlignment;
-	//ofstream chimeraReportFile;
 	bool aligned;
     
 	MothurOut* m;

@@ -86,10 +86,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	struct linePair {
-		int start;
-		int end;
-	};
 	vector<linePair> lines;
 	
 	void printSims(ostream&, vector< vector<double> >&);

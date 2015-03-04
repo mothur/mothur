@@ -774,13 +774,13 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, scores);
+				driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, scores);
 			
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputDir + m->mothurGetpid(process) + ".weightedcommand.results.temp";
 				m->openOutputFile(tempFile, out);
-				for (int i = lines[process].start; i < (lines[process].start + lines[process].num); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
+				for (int i = lines[process].start; i < (lines[process].start + lines[process].end); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
 				out.close();
 				
 				exit(0);
@@ -791,7 +791,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			}
 		}
 		
-		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, scores);
+		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -807,7 +807,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			m->openInputFile(s, in);
 			
 			double tempScore;
-			for (int j = lines[(i+1)].start; j < (lines[(i+1)].start + lines[(i+1)].num); j++) { in >> tempScore; scores[j].push_back(tempScore); }
+			for (int j = lines[(i+1)].start; j < (lines[(i+1)].start + lines[(i+1)].end); j++) { in >> tempScore; scores[j].push_back(tempScore); }
 			in.close();
 			m->mothurRemove(s);
 		}

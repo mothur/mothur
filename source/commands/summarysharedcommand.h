@@ -80,10 +80,6 @@ public:
 	
 	
 private:
-	struct linePair {
-		int start;
-		int end;
-	};
 	vector<linePair> lines;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;

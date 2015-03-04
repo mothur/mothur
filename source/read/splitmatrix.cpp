@@ -206,7 +206,9 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
             
             m->mothurCalling = true;
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            
+            m->mothurOut("Running command: dist.seqs(" + options + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+
 			Command* command = new DistanceCommand(options);
 			
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
@@ -308,6 +310,7 @@ int SplitMatrix::createDistanceFilesFromTaxMPI(map<string, int>& seqGroup, int n
             if (outputDir != "") { options += ", outputdir=" + outputDir; }
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: dist.seqs(" + options + ")"); m->mothurOutEndLine();
             
             Command* command = new DistanceCommand(options);
             
@@ -765,35 +768,35 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             //if there are valid distances
             ifstream fileHandle;
             fileHandle.open(tempDistFile.c_str());
-            if(fileHandle) 	{	
+            if(fileHandle) 	{
                 m->gobble(fileHandle);
                 if (!fileHandle.eof()) {  //check
-				map<string, string> temp;
-                if (countfile != "") {
-                    //add header
-                    ofstream out;
-                    string newtempNameFile = tempNameFile + "2";
-                    m->openOutputFile(newtempNameFile, out);
-                    out << "Representative_Sequence\ttotal" << endl;
-                    out.close();
-                    m->appendFiles(tempNameFile, newtempNameFile);
+                    map<string, string> temp;
+                    if (countfile != "") {
+                        //add header
+                        ofstream out;
+                        string newtempNameFile = tempNameFile + "2";
+                        m->openOutputFile(newtempNameFile, out);
+                        out << "Representative_Sequence\ttotal" << endl;
+                        out.close();
+                        m->appendFiles(tempNameFile, newtempNameFile);
+                        m->mothurRemove(tempNameFile);
+                        m->renameFile(newtempNameFile, tempNameFile);
+                    }
+                    temp[tempDistFile] = tempNameFile;
+                    dists.push_back(temp);
+                }else{
+                    ifstream in;
+                    m->openInputFile(tempNameFile, in);
+                    
+                    while(!in.eof()) {
+                        in >> name >> nameList;  m->gobble(in);
+                        wroteExtra = true;
+                        remainingNames << name << '\t' << nameList << endl;
+                    }
+                    in.close();
                     m->mothurRemove(tempNameFile);
-                    m->renameFile(newtempNameFile, tempNameFile);
                 }
-				temp[tempDistFile] = tempNameFile;
-				dists.push_back(temp);
-			}else{
-				ifstream in;
-				m->openInputFile(tempNameFile, in);
-				
-				while(!in.eof()) { 
-					in >> name >> nameList;  m->gobble(in);
-					wroteExtra = true;
-					remainingNames << name << '\t' << nameList << endl;
-				}
-				in.close();
-				m->mothurRemove(tempNameFile);
-			}
             }
             fileHandle.close();
 		}

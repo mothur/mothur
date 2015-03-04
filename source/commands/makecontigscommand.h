@@ -59,13 +59,6 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    struct linePair {
-        unsigned long long start;
-        unsigned long long end;
-        linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-        linePair() {}
-    };
-    
     char delim; 
     bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;

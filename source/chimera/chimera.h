@@ -131,15 +131,6 @@ struct sim {
 		float score;  
 		int midpoint;
 };
-
-struct linePair {
-			unsigned long long start;
-			unsigned long long end;
-			linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-			linePair(){}
-};
-
-
 /***********************************************************************/
 
 class Chimera {

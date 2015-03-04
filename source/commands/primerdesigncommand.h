@@ -37,12 +37,6 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    
-    struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
     struct fastaLinePair {
 		unsigned long long start;
 		unsigned long long end;

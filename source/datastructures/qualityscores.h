@@ -24,6 +24,7 @@ public:
 	QualityScores();
     QualityScores(string n, vector<int> qs);
 	QualityScores(ifstream&);
+    int read(ifstream&);
 	string getName();
 	int getLength(){    return (int)qScores.size();  }
 	vector<int> getQualityScores() { return qScores; }

@@ -35,11 +35,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	struct linePair {
-		int start;
-		int num;
-		linePair(int i, int j) : start(i), num(j) {}
-	};
 	vector<linePair> lines;
 	
 	GroupMap* designMap;
@@ -55,7 +50,7 @@ private:
 	float threshold;
 	
 	int process(vector<SharedRAbundVector*>&);
-	int driver(int, int, vector<SharedRAbundVector*>&);
+	int driver(unsigned long long, unsigned long long, vector<SharedRAbundVector*>&);
     int convertToShared(string filename);
     int convertToInput(vector<SharedRAbundVector*>&, string);
     bool convertSharedToInput;
