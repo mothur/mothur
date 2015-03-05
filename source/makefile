@@ -110,7 +110,7 @@ fortranSource:
 	${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
 install : mothur
-#	cp mothur ../Release/mothur
+	mv mothur ../mothur
 
 
 %.o : %.c %.h
