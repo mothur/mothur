@@ -1695,6 +1695,10 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
         ifstream inFASTA;
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
+        int nameLine = 2;
+        if (delim == '@') { nameLine = 4; }
+        else if (delim == '>') { nameLine = 2; }
+        else { mothurOut("[ERROR]: unknown file deliminator, quitting.\n"); control_pressed = true; }
         
         unsigned long long count = 0;
         long long numLines = 0;
@@ -1712,7 +1716,7 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
 
             
             if (input.length() != 0) {
-                if((input[0] == delim) && (((numLines-1)%4) == 0)){ //this is a name line
+                if((input[0] == delim) && (((numLines-1)%nameLine) == 0)){ //this is a name line
                     //mothurOut(input + '\t' + toString(count+numLines-input.length()) + '\n');// << endl;
                     positions.push_back(count+numLines-input.length());
                     if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
@@ -1964,33 +1968,34 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
         //file to small to divide by processors
         if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
         
-        //for each process seekg to closest file break and search for next '>' char. make that the filebreak
-        for (int i = 0; i < proc; i++) {
-            unsigned long long spot = (i+1) * chunkSize;
-            
-            ifstream in;
-            openInputFile(filename, in);
-            in.seekg(spot);
-            
-            //look for next '>'
-            unsigned long long newSpot = spot;
-            while (!in.eof()) {
-                char c = in.get();
+        if (proc > 1) {
+            //for each process seekg to closest file break and search for next '>' char. make that the filebreak
+            for (int i = 0; i < proc; i++) {
+                unsigned long long spot = (i+1) * chunkSize;
                 
-                if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
-                else if (int(c) == -1) { break; }
+                ifstream in;
+                openInputFile(filename, in);
+                in.seekg(spot);
                 
+                //look for next '>'
+                unsigned long long newSpot = spot;
+                while (!in.eof()) {
+                    char c = in.get();
+                    
+                    if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
+                    else if (int(c) == -1) { break; }
+                    
+                }
+                
+                //there was not another sequence before the end of the file
+                unsigned long long sanityPos = in.tellg();
+                
+                if (sanityPos == -1) {	break;  }
+                else {  filePos.push_back(newSpot);  }
+                
+                in.close();
             }
-            
-            //there was not another sequence before the end of the file
-            unsigned long long sanityPos = in.tellg();
-            
-            if (sanityPos == -1) {	break;  }
-            else {  filePos.push_back(newSpot);  }
-            
-            in.close();
         }
-        
         //save end pos
         filePos.push_back(size);
         
@@ -2050,6 +2055,8 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
             openInputFile(filename, in);
             in.seekg(spot);
             
+            getline(in); //get to end of line in case you jump into middle of line where the delim char happens to fall.
+            
             //look for next delimChar
             unsigned long long newSpot = spot;
             while (!in.eof()) {
@@ -2062,7 +2069,6 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
                 
                 if (input.length() != 0) {
                     if(input[0] == delimChar){ //this is a name line
-                        
                         newSpot = in.tellg();
                         newSpot -=input.length();
                         break;

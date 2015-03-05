@@ -36,13 +36,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-    
-    struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
-    
     string inputDir;
 	string filename, outputDir, flowOrder, lookupFileName, minDelta;
 	vector<string> outputNames;

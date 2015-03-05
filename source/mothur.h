@@ -165,7 +165,14 @@ struct seqRead {
 	seqRead() { }
 	~seqRead() { }
 };
-
+/**********************************************************/
+struct linePair {
+    unsigned long long start;
+    unsigned long long end;
+    linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
+    linePair(){ start=0; end=0; }
+    ~linePair(){}
+};
 /***********************************************************************/
 struct PDistCell{
 	ull index;

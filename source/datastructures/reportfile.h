@@ -17,8 +17,9 @@
 class ReportFile {
 public:
 	ReportFile();
-	ReportFile(ifstream&);
-	ReportFile(ifstream&, string);
+    ~ReportFile() {}
+	int read(ifstream&);
+	int readHeaders(ifstream&, string);
 	
 	string getQueryName()				{	return queryName;				}
 	string getTemplateName()			{	return templateName;			}

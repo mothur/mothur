@@ -40,11 +40,6 @@ public:
 private:
 	bool abort;
 
-	struct linePair {
-		unsigned long long start;
-		unsigned long long end;
-		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-	};
 	int comboStarts;
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

@@ -40,12 +40,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
-	struct linePair {
-		int start;
-		int end;
-		linePair(int i, int j) : start(i), end(j) {}
-	};
-	
 	bool abort, hasName, hasCount, dups;
 	string fastafile, groupfile, countfile, outputDir, namefile;
 	int processors, alignLength;

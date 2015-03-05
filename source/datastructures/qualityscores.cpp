@@ -89,6 +89,57 @@ QualityScores::QualityScores(ifstream& qFile){
 	}							
 	
 }
+/**************************************************************************************************/
+
+int QualityScores::read(ifstream& qFile){
+    try {
+        int score;
+        seqName = getSequenceName(qFile); m->gobble(qFile);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
+        
+        if (!m->control_pressed) {
+            string qScoreString = m->getline(qFile); m->gobble(qFile);
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
+            
+            while(qFile.peek() != '>' && qFile.peek() != EOF){
+                if (m->control_pressed) { break; }
+                string temp = m->getline(qFile); m->gobble(qFile);
+                //if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
+                qScoreString +=  ' ' + temp;
+            }
+            //cout << "done reading " << endl;
+            istringstream qScoreStringStream(qScoreString);
+            int count = 0;
+            while(!qScoreStringStream.eof()){
+                if (m->control_pressed) { break; }
+                string temp;
+                qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                
+                //if (m->debug) { m->mothurOut("[DEBUG]: score " + toString(qScores.size()) + " = '" + temp + "'\n.");  }
+                
+                //check temp to make sure its a number
+                if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                convert(temp, score);
+                
+                //cout << count << '\t' << score << endl;
+                qScores.push_back(score);
+                count++;
+            }
+        }
+        
+        seqLength = qScores.size();
+        //cout << "seqlength = " << seqLength  << endl;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "read");
+        exit(1);
+    }							
+    
+}
+
 //********************************************************************************************************************
 string QualityScores::getSequenceName(ifstream& qFile) {
 	try {

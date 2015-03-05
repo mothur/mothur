@@ -33,6 +33,7 @@ public:
 	Sequence(string, string, string);  
 	Sequence(ifstream&, string);
 	Sequence(istringstream&, string);
+    ~Sequence() {}
 	
 	void setName(string);
 	void setUnaligned(string);

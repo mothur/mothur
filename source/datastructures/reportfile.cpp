@@ -25,12 +25,11 @@ ReportFile::ReportFile(){
 
 /**************************************************************************************************/
 
-ReportFile::ReportFile(ifstream& repFile, string repFileName){
-	try {		
-		m = MothurOut::getInstance();
-		
+int ReportFile::readHeaders(ifstream& repFile, string repFileName){
+	try {
 		m->openInputFile(repFileName, repFile);
 		m->getline(repFile);
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReportFile", "ReportFile");
@@ -41,7 +40,7 @@ ReportFile::ReportFile(ifstream& repFile, string repFileName){
 
 /**************************************************************************************************/
 
-ReportFile::ReportFile(ifstream& repFile){
+int ReportFile::read(ifstream& repFile){
 	try {
 		
 		m = MothurOut::getInstance();
@@ -71,7 +70,8 @@ ReportFile::ReportFile(ifstream& repFile){
 			searchScore = 0;
 		}
 		
-		m->gobble(repFile);		
+		m->gobble(repFile);
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReportFile", "ReportFile");

@@ -35,11 +35,6 @@ class ChopSeqsCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }		
 	
 	private:
-        struct linePair {
-            unsigned long long start;
-            unsigned long long end;
-            linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-        };
     
 		string fastafile, outputDir, keep, namefile, groupfile, countfile;
 		bool abort, countGaps, Short;

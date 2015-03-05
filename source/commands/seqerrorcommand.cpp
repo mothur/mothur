@@ -11,9 +11,6 @@
 #include "reportfile.h"
 #include "qualityscores.h"
 #include "refchimeratest.h"
-#include "myPerseus.h"
-#include "filterseqscommand.h"
-
 
 //**********************************************************************************************************************
 
@@ -29,7 +26,6 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter paligned("aligned", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(paligned);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -58,7 +54,6 @@ string SeqErrorCommand::getHelpString(){
 		helpString += "The ignorechimeras parameter...\n";
 		helpString += "The threshold parameter...\n";
 		helpString += "The processors parameter...\n";
-		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "Example seq.error(...).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
@@ -127,8 +122,7 @@ SeqErrorCommand::SeqErrorCommand(){
 SeqErrorCommand::SeqErrorCommand(string option)  {
 	try {
 		
-		abort = false; calledHelp = false;   
-		rdb = ReferenceDB::getInstance();
+		abort = false; calledHelp = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -254,40 +248,15 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			else if (reportFileName == "not open") { reportFileName = ""; abort = true; }	
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
-			if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(queryFileName); //if user entered a file with a path then preserve it	
-			}
+			if (outputDir == "not found"){ //if user entered a file with a path then preserve it
+				outputDir = m->hasPath(queryFileName); }
 			
             if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
-			m->mothurConvert(temp, threshold);  
-            
-			
-			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
-			save = m->isTrue(temp); 
-			rdb->save = save; 
-			if (save) { //clear out old references
-				rdb->clearMemory();	
-			}
-			
-			//this has to go after save so that if the user sets save=t and provides no reference we abort
-			referenceFileName = validParameter.validFile(parameters, "reference", true);
-			if (referenceFileName == "not found") { 
-				//check for saved reference sequences
-				if (rdb->referenceSeqs.size() != 0) {
-					referenceFileName = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					abort = true; 
-				}
-			}else if (referenceFileName == "not open") { abort = true; }	
-			else {	if (save) {	rdb->setSavedReference(referenceFileName);	}	}
-			
+			m->mothurConvert(temp, threshold);
 			
 			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "T"; }
 			ignoreChimeras = m->isTrue(temp);
@@ -299,9 +268,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
 
-			substitutionMatrix.resize(6);
-			for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
-			
 			if ((namesFileName == "") && (queryFileName != "")){
 				vector<string> files; files.push_back(queryFileName); 
 				parser.getNameFile(files);
@@ -340,6 +306,8 @@ int SeqErrorCommand::execute(){
 		maxLength = 5000;
 		totalBases = 0;
 		totalMatches = 0;
+        substitutionMatrix.resize(6);
+        for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
 		
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
         map<string, string> variables; 
@@ -353,31 +321,22 @@ int SeqErrorCommand::execute(){
 		string errorChimeraFileName = getOutputFileName("errorchimera",variables);
 		outputNames.push_back(errorChimeraFileName); outputTypes["errorchimera"].push_back(errorChimeraFileName);
 		
-		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
-
-		if(namesFileName != "")     {	weights = getWeights();         }
+		setLines(queryFileName, qualFileName, reportFileName);
+		
+		if (m->control_pressed) { return 0; }
+        
+        getReferences();	//read in reference sequences - make sure there's no ambiguous bases
+        
+        if(namesFileName != "")     {	weights = getWeights();         }
         else if (countfile != "")   {
             CountTable ct;
             ct.readTable(countfile, false, false);
             weights = ct.getNameMap();
         }
-		
-		vector<unsigned long long> fastaFilePos;
-		vector<unsigned long long> qFilePos;
-		vector<unsigned long long> reportFilePos;
-		
-		setLines(queryFileName, qualFileName, reportFileName, fastaFilePos, qFilePos, reportFilePos);
-		
+        
 		if (m->control_pressed) { return 0; }
-		
-		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
-			if (qualFileName != "") {  qLines.push_back(linePair(qFilePos[i], qFilePos[(i+1)]));  }
-			if (reportFileName != "" && aligned == true) {  rLines.push_back(linePair(reportFilePos[i], reportFilePos[(i+1)]));  }
-		}	
-		if(qualFileName == "")	{	qLines = lines;	rLines = lines; } //fills with duds
-        if(aligned == false){   rLines = lines; }
-		int numSeqs = 0;
+        
+        int numSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		if(processors == 1){
 			numSeqs = driver(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, lines[0], qLines[0], rLines[0]);
@@ -688,7 +647,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 int SeqErrorCommand::driver(string filename, string qFileName, string rFileName, string summaryFileName, string errorOutputFileName, string chimeraOutputFileName, linePair line, linePair qline, linePair rline) {	
 	
 	try {
-		ReportFile report;
+        ReportFile report;
 		QualityScores quality;
 		
 		misMatchCounts.resize(11, 0);
@@ -726,7 +685,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			qualFile.seekg(qline.start);  
 			
 			//gobble headers
-			if (rline.start == 0) {  report = ReportFile(reportFile, rFileName); } 
+			if (rline.start == 0) {  report.readHeaders(reportFile, rFileName); }
 			else{
 				m->openInputFile(rFileName, reportFile);
 				reportFile.seekg(rline.start); 
@@ -755,13 +714,9 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		ofstream outChimeraReport;
 		m->openOutputFile(chimeraOutputFileName, outChimeraReport);
 		
-        
-        RefChimeraTest chimeraTest;
-        
-        chimeraTest = RefChimeraTest(referenceSeqs, aligned);
+        RefChimeraTest chimeraTest = RefChimeraTest(referenceSeqs, aligned);
         if (line.start == 0) { chimeraTest.printHeader(outChimeraReport); }        
         
-		
 		ofstream errorSummaryFile;
 		m->openOutputFile(summaryFileName, errorSummaryFile);
 		if (line.start == 0) { printErrorHeader(errorSummaryFile); }
@@ -778,7 +733,6 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		while (moreSeqs) {
 						
 			Sequence query(queryFile);
-			Sequence reference;
             int numParentSeqs = -1;
             int closestRefIndex = -1;
                         
@@ -789,7 +743,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
             
             closestRefIndex = chimeraTest.getClosestRefIndex();
             
-            reference = referenceSeqs[closestRefIndex];
+            Sequence reference = referenceSeqs[closestRefIndex];
             
             reference.setAligned(chimeraTest.getClosestRefAlignment());
             query.setAligned(chimeraTest.getQueryAlignment());
@@ -797,9 +751,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
             else											{	ignoreSeq = 0;	}
 
-			Compare minCompare;
-            
-            getErrors(query, reference, minCompare);
+			Compare minCompare = getErrors(query, reference);
 			
 			if((namesFileName != "") || (countfile != "")){
 				it = weights.find(query.getName());
@@ -821,13 +773,13 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			}
 			
 			if(aligned && qualFileName != "" && reportFileName != ""){
-				report = ReportFile(reportFile);
+				report.read(reportFile);
 				
 				//				int origLength = report.getQueryLength();
 				int startBase = report.getQueryStart();
 				int endBase = report.getQueryEnd();
 				
-				quality = QualityScores(qualFile);
+				quality.read(qualFile);
 				
 				if(!ignoreSeq){
 					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
@@ -837,7 +789,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			}
             else if(aligned == false && qualFileName != ""){
 
-                quality = QualityScores(qualFile);
+                quality.read(qualFile);
                 int qualityLength = quality.getLength();
                 
                 if(qualityLength != query.getNumBases()){   cout << "warning - quality and fasta sequence files do not match at " << query.getName() << '\t' << qualityLength <<'\t' << query.getNumBases() << endl;   }
@@ -904,59 +856,34 @@ void SeqErrorCommand::getReferences(){
 		int maxStartPos = 0;
 		int minEndPos = 100000;
 		
-		if (referenceFileName == "saved") {
-			int start = time(NULL);
-			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
-			
-			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
-				int numAmbigs = rdb->referenceSeqs[i].getAmbigBases();
-				if(numAmbigs > 0){	numAmbigSeqs++;	}
-				
-				//			int startPos = rdb->referenceSeqs[i].getStartPos();
-				//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
-				//
-				//			int endPos = rdb->referenceSeqs[i].getEndPos();
-				//			if(endPos < minEndPos)		{	minEndPos = endPos;		}				
-				if (rdb->referenceSeqs[i].getNumBases() == 0) {
-                    m->mothurOut("[WARNING]: " + rdb->referenceSeqs[i].getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
-                }else {
-                    referenceSeqs.push_back(rdb->referenceSeqs[i]);
-                }
-				
-			}
-			referenceFileName = rdb->getSavedReference();
-			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
 		
-		}else {
-			int start = time(NULL);
-
-			ifstream referenceFile;
-			m->openInputFile(referenceFileName, referenceFile);
-			
-			while(referenceFile){
-				Sequence currentSeq(referenceFile);
-				int numAmbigs = currentSeq.getAmbigBases();
-				if(numAmbigs > 0){	numAmbigSeqs++;	}
-				
-	//			int startPos = currentSeq.getStartPos();
-	//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
-	//
-	//			int endPos = currentSeq.getEndPos();
-	//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
-                if (currentSeq.getNumBases() == 0) {
-                    m->mothurOut("[WARNING]: " + currentSeq.getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
-                }else {
-                    referenceSeqs.push_back(currentSeq);
-                    if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
-                }
-					
-				m->gobble(referenceFile);
-			}
-			referenceFile.close();
-			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to read " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
-		}
+        int start = time(NULL);
+        
+        ifstream referenceFile;
+        m->openInputFile(referenceFileName, referenceFile);
+        
+        while(referenceFile){
+            Sequence currentSeq(referenceFile);
+            int numAmbigs = currentSeq.getAmbigBases();
+            if(numAmbigs > 0){	numAmbigSeqs++;	}
+            
+            //			int startPos = currentSeq.getStartPos();
+            //			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+            //
+            //			int endPos = currentSeq.getEndPos();
+            //			if(endPos < minEndPos)		{	minEndPos = endPos;		}
+            if (currentSeq.getNumBases() == 0) {
+                m->mothurOut("[WARNING]: " + currentSeq.getName() + " is blank, ignoring.");m->mothurOutEndLine();
+            }else {
+                referenceSeqs.push_back(currentSeq);
+            }
+            
+            m->gobble(referenceFile);
+        }
+        referenceFile.close();
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " to read " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();
+        
 		
 		numRefs = referenceSeqs.size();
 		
@@ -978,8 +905,10 @@ void SeqErrorCommand::getReferences(){
 
 //***************************************************************************************************************
 
-int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& errors){
+Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 	try {
+        Compare errors;
+        
 		if(query.getAlignLength() != reference.getAlignLength()){
 			m->mothurOut("Warning: " + toString(query.getName()) + " and " + toString(reference.getName()) + " are different lengths\n");
 		}
@@ -989,7 +918,6 @@ int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& erro
 		string r = reference.getAligned();
 
 		int started = 0;
-		//Compare errors;
         
         errors.sequence = "";
 		for(int i=0;i<alignLength;i++){
@@ -1069,7 +997,7 @@ int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& erro
 		errors.queryName = query.getName();
 		errors.refName = reference.getName();
 
-        return 0;
+        return errors;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "getErrors");
@@ -1366,150 +1294,157 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 
 /**************************************************************************************************/
 
-int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename, vector<unsigned long long>& fastaFilePos, vector<unsigned long long>& qfileFilePos, vector<unsigned long long>& rfileFilePos) {
+int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename) {
 	try {
+        
+        vector<unsigned long long> fastaFilePos;
+        vector<unsigned long long> qfileFilePos;
+        vector<unsigned long long> rfileFilePos;
+
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
 		
-		if (qfilename == "") { return processors; }
-		
-		//get name of first sequence in each chunk
-		map<string, int> firstSeqNames;
-		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-			ifstream in;
-			m->openInputFile(filename, in);
-			in.seekg(fastaFilePos[i]);
-            
-            //adjust start if null strings
-            if (i == 0) {  m->zapGremlins(in); m->gobble(in);  }
-			
-			Sequence temp(in); 
-			firstSeqNames[temp.getName()] = i;
-			
-			in.close();
-		}
-		
-		//make copy to use below
-		map<string, int> firstSeqNamesReport = firstSeqNames;
-		
-		//seach for filePos of each first name in the qfile and save in qfileFilePos
-		ifstream inQual;
-		m->openInputFile(qfilename, inQual);
-		
-		string input;
-		while(!inQual.eof()){	
-			input = m->getline(inQual);
-			
-			if (input.length() != 0) {
-				if(input[0] == '>'){ //this is a sequence name line
-					istringstream nameStream(input);
-					
-					string sname = "";  nameStream >> sname;
-					sname = sname.substr(1);
-                    
-                    m->checkName(sname);
-					
-					map<string, int>::iterator it = firstSeqNames.find(sname);
-					
-					if(it != firstSeqNames.end()) { //this is the start of a new chunk
-						unsigned long long pos = inQual.tellg(); 
-						qfileFilePos.push_back(pos - input.length() - 1);	
-						firstSeqNames.erase(it);
-					}
-				}
-			}
-			
-			if (firstSeqNames.size() == 0) { break; }
-		}
-		inQual.close();
-		
-		if (firstSeqNames.size() != 0) { 
-			for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
-				m->mothurOut(it->first + " is in your fasta file and not in your quality file, aborting."); m->mothurOutEndLine();
-			}
-			m->control_pressed = true;
-			return processors;
-		}
-		
-		//get last file position of qfile
-		FILE * pFile;
-		unsigned long long size;
-		
-		//get num bytes in file
-		pFile = fopen (qfilename.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
-		else{
-			fseek (pFile, 0, SEEK_END);
-			size=ftell (pFile);
-			fclose (pFile);
-		}
-		
-		qfileFilePos.push_back(size);
-		
-        if(aligned){
-            //seach for filePos of each first name in the rfile and save in rfileFilePos
-            string junk;
-            ifstream inR;
-
-            m->openInputFile(rfilename, inR);
-
-            //read column headers
-            for (int i = 0; i < 16; i++) {  
-                if (!inR.eof())	{	inR >> junk;	}
-                else			{	break;			}
+		if (qfilename == "") { }
+        else {
+            //get name of first sequence in each chunk
+            map<string, int> firstSeqNames;
+            for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+                ifstream in;
+                m->openInputFile(filename, in);
+                in.seekg(fastaFilePos[i]);
+                
+                //adjust start if null strings
+                if (i == 0) {  m->zapGremlins(in); m->gobble(in);  }
+                
+                Sequence temp(in);
+                firstSeqNames[temp.getName()] = i;
+                
+                in.close();
             }
             
-            while(!inR.eof()){
+            //make copy to use below
+            map<string, int> firstSeqNamesReport = firstSeqNames;
+            
+            
+            if (qfilename != "") {
+                //seach for filePos of each first name in the qfile and save in qfileFilePos
+                ifstream inQual;
+                m->openInputFile(qfilename, inQual);
                 
-                input = m->getline(inR);	
-                
-                if (input.length() != 0) {
+                string input;
+                while(!inQual.eof()){
+                    input = m->getline(inQual);
                     
-                    istringstream nameStream(input);
-                    string sname = "";  nameStream >> sname;
-                    
-                    m->checkName(sname);
-                    
-                    map<string, int>::iterator it = firstSeqNamesReport.find(sname);
-                
-                    if(it != firstSeqNamesReport.end()) { //this is the start of a new chunk
-                        unsigned long long pos = inR.tellg(); 
-                        rfileFilePos.push_back(pos - input.length() - 1);	
-                        firstSeqNamesReport.erase(it);
+                    if (input.length() != 0) {
+                        if(input[0] == '>'){ //this is a sequence name line
+                            istringstream nameStream(input);
+                            
+                            string sname = "";  nameStream >> sname;
+                            sname = sname.substr(1);
+                            
+                            m->checkName(sname);
+                            
+                            map<string, int>::iterator it = firstSeqNames.find(sname);
+                            
+                            if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                                unsigned long long pos = inQual.tellg();
+                                qfileFilePos.push_back(pos - input.length() - 1);
+                                firstSeqNames.erase(it);
+                            }
+                        }
                     }
+                    
+                    if (firstSeqNames.size() == 0) { break; }
+                }
+                inQual.close();
+                
+                if (firstSeqNames.size() != 0) {
+                    for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+                        m->mothurOut(it->first + " is in your fasta file and not in your quality file, aborting."); m->mothurOutEndLine();
+                    }
+                    m->control_pressed = true;
+                    return processors;
                 }
                 
-                if (firstSeqNamesReport.size() == 0) { break; }
-                m->gobble(inR);
-            }
-            inR.close();
-            
-            if (firstSeqNamesReport.size() != 0) { 
-                for (map<string, int>::iterator it = firstSeqNamesReport.begin(); it != firstSeqNamesReport.end(); it++) {
-                    m->mothurOut(it->first + " is in your fasta file and not in your report file, aborting."); m->mothurOutEndLine();
+                //get last file position of qfile
+                FILE * pFile;
+                unsigned long long size;
+                
+                //get num bytes in file
+                pFile = fopen (qfilename.c_str(),"rb");
+                if (pFile==NULL) perror ("Error opening file");
+                else{
+                    fseek (pFile, 0, SEEK_END);
+                    size=ftell (pFile);
+                    fclose (pFile);
                 }
-                m->control_pressed = true;
-                return processors;
+                
+                qfileFilePos.push_back(size);
             }
             
-            //get last file position of qfile
-            FILE * rFile;
-            unsigned long long sizeR;
-            
-            //get num bytes in file
-            rFile = fopen (rfilename.c_str(),"rb");
-            if (rFile==NULL) perror ("Error opening file");
-            else{
-                fseek (rFile, 0, SEEK_END);
-                sizeR=ftell (rFile);
-                fclose (rFile);
+            if(aligned){
+                //seach for filePos of each first name in the rfile and save in rfileFilePos
+                string junk, input;
+                ifstream inR;
+                
+                m->openInputFile(rfilename, inR);
+                
+                //read column headers
+                for (int i = 0; i < 16; i++) {
+                    if (!inR.eof())	{	inR >> junk;	}
+                    else			{	break;			}
+                }
+                
+                while(!inR.eof()){
+                    
+                    input = m->getline(inR);
+                    
+                    if (input.length() != 0) {
+                        
+                        istringstream nameStream(input);
+                        string sname = "";  nameStream >> sname;
+                        
+                        m->checkName(sname);
+                        
+                        map<string, int>::iterator it = firstSeqNamesReport.find(sname);
+                        
+                        if(it != firstSeqNamesReport.end()) { //this is the start of a new chunk
+                            unsigned long long pos = inR.tellg();
+                            rfileFilePos.push_back(pos - input.length() - 1);
+                            firstSeqNamesReport.erase(it);
+                        }
+                    }
+                    
+                    if (firstSeqNamesReport.size() == 0) { break; }
+                    m->gobble(inR);
+                }
+                inR.close();
+                
+                if (firstSeqNamesReport.size() != 0) {
+                    for (map<string, int>::iterator it = firstSeqNamesReport.begin(); it != firstSeqNamesReport.end(); it++) {
+                        m->mothurOut(it->first + " is in your fasta file and not in your report file, aborting."); m->mothurOutEndLine();
+                    }
+                    m->control_pressed = true;
+                    return processors;
+                }
+                
+                //get last file position of qfile
+                FILE * rFile;
+                unsigned long long sizeR;
+                
+                //get num bytes in file
+                rFile = fopen (rfilename.c_str(),"rb");
+                if (rFile==NULL) perror ("Error opening file");
+                else{
+                    fseek (rFile, 0, SEEK_END);
+                    sizeR=ftell (rFile);
+                    fclose (rFile);
+                }
+                
+                rfileFilePos.push_back(sizeR);
             }
-            
-            rfileFilePos.push_back(sizeR);
-		}
-		return processors;
-		
+        }
 #else
 		
 		fastaFilePos.push_back(0); qfileFilePos.push_back(0);
@@ -1527,22 +1462,54 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		}
 		fastaFilePos.push_back(size);
 		
-		//get last file position of fastafile
-		FILE * qFile;
-		
-		//get num bytes in file
-		qFile = fopen (qfilename.c_str(),"rb");
-		if (qFile==NULL) perror ("Error opening file");
-		else{
-			fseek (qFile, 0, SEEK_END);
-			size=ftell (qFile);
-			fclose (qFile);
-		}
-		qfileFilePos.push_back(size);
-		
-		return 1;
-		
+        if (qfilename != "") {
+            //get last file position of qualfile
+            FILE * qFile;
+            
+            //get num bytes in file
+            qFile = fopen (qfilename.c_str(),"rb");
+            if (qFile==NULL) perror ("Error opening file");
+            else{
+                fseek (qFile, 0, SEEK_END);
+                size=ftell (qFile);
+                fclose (qFile);
+            }
+            qfileFilePos.push_back(size);
+        }
+        
+         if (reportFileName != "" && aligned == true) {
+             rfileFilePos.push_back(0);
+             
+             //get last file position of qualfile
+             FILE * rFile;
+             
+             //get num bytes in file
+             rFile = fopen (rfilename.c_str(),"rb");
+             if (rFile==NULL) perror ("Error opening file");
+             else{
+                 fseek (rFile, 0, SEEK_END);
+                 size=ftell (rFile);
+                 fclose (rFile);
+             }
+             rfileFilePos.push_back(size);
+         }
+        
+        processors = 1;
 #endif
+        
+        if (m->control_pressed) { return 0; }
+        
+        for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+            lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
+            if (qualFileName != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
+            if (reportFileName != "" && aligned == true) {  rLines.push_back(linePair(rfileFilePos[i], rfileFilePos[(i+1)]));  }
+        }
+        if(qualFileName == "")	{	qLines = lines;	rLines = lines; } //fills with duds
+        if(aligned == false){   rLines = lines; }
+        
+        
+        return processors;
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "setLines");

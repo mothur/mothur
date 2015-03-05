@@ -8,7 +8,6 @@
  */
 
 #include "refchimeratest.h"
-#include "myPerseus.h"
 #include "mothur.h"
 
 int MAXINT = numeric_limits<int>::max();
@@ -30,6 +29,7 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(a
 	}
 	
 	alignLength = referenceSeqs[0].length();
+    bestMatch = 0;
 
 }
 //***************************************************************************************************************
@@ -39,7 +39,7 @@ int RefChimeraTest::printHeader(ofstream& chimeraReportFile){
 		chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents" << endl;
 		return 0; 
 	}catch(exception& e) {
-		m->errorOut(e, "RefChimeraTest", "execute");
+		m->errorOut(e, "RefChimeraTest", "printHeader");
 		exit(1);
 	}
 }
@@ -65,19 +65,18 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& ch
 
 int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstream& chimeraReportFile){
 	
-	vector<vector<int> > left(numRefSeqs);
+    vector<vector<int> > left; left.resize(numRefSeqs);
+    vector<vector<int> > right; right.resize(numRefSeqs);
 	vector<int> singleLeft, bestLeft;
 	vector<int> singleRight, bestRight;
 	
-	vector<vector<int> > right(numRefSeqs);
 	for(int i=0;i<numRefSeqs;i++){
 		left[i].assign(alignLength, 0);
+        right[i].assign(alignLength, 0);
 	}
-	right = left;
 	
-	int bestSequenceMismatch = getAlignedMismatches(querySeq, left, right, bestMatch);
-    
-    
+    int bestMatchIndex;
+	int bestSequenceMismatch = getAlignedMismatches(querySeq, left, right, bestMatchIndex);
 	
 	int leftParentBi, rightParentBi, breakPointBi;
 	int minMismatchToChimera = getChimera(left, right, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight);
@@ -91,7 +90,7 @@ int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstr
 	}
 	else{
 		nMera = 1;
-		chimeraRefSeq = referenceSeqs[bestMatch];
+		chimeraRefSeq = referenceSeqs[bestMatchIndex];
 	}
 	
 	bestRefAlignment = chimeraRefSeq;
@@ -99,10 +98,12 @@ int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstr
     
 	double distToChimera = calcDistToChimera(bestQueryAlignment, bestRefAlignment);
 	
-	chimeraReportFile << queryName << '\t' << referenceNames[bestMatch] << '\t' << bestSequenceMismatch << '\t';
+	chimeraReportFile << queryName << '\t' << referenceNames[bestMatchIndex] << '\t' << bestSequenceMismatch << '\t';
 	chimeraReportFile << referenceNames[leftParentBi] << ',' << referenceNames[rightParentBi] << '\t' << breakPointBi << '\t';
 	chimeraReportFile << minMismatchToChimera << '\t';
     chimeraReportFile << '\t' << distToChimera << '\t' << nMera << endl;
+    
+    bestMatch = bestMatchIndex;
 		
 	return nMera;
 }
@@ -115,13 +116,13 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
     
     int seqLength = querySeq.length();
     
-    vector<string> queryAlign(numRefSeqs);
-    vector<string> refAlign(numRefSeqs);
+    vector<string> queryAlign; queryAlign.resize(numRefSeqs);
+    vector<string> refAlign; refAlign.resize(numRefSeqs);
 
-    vector<vector<int> > leftDiffs(numRefSeqs);
-    vector<vector<int> > rightDiffs(numRefSeqs);
-    vector<vector<int> > leftMaps(numRefSeqs);
-    vector<vector<int> > rightMaps(numRefSeqs);
+    vector<vector<int> > leftDiffs; leftDiffs.resize(numRefSeqs);
+    vector<vector<int> > rightDiffs; rightDiffs.resize(numRefSeqs);
+    vector<vector<int> > leftMaps; leftMaps.resize(numRefSeqs);
+    vector<vector<int> > rightMaps; rightMaps.resize(numRefSeqs);
     
     int bestRefIndex = -1;
     int bestRefDiffs = numeric_limits<int>::max();
@@ -260,8 +261,8 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
 		int queryLength = query.length();
 		int refLength = reference.length();
 		
-		vector<vector<double> > alignMatrix(queryLength + 1);
-		vector<vector<char> > alignMoves(queryLength + 1);
+        vector<vector<double> > alignMatrix; alignMatrix.resize(queryLength + 1);
+        vector<vector<char> > alignMoves; alignMoves.resize(queryLength + 1);
 		
 		for(int i=0;i<=queryLength;i++){
 			if (m->control_pressed) { return 0; }
@@ -574,8 +575,8 @@ int RefChimeraTest::getTrimera(vector<vector<int> >& left, vector<vector<int> >&
 	breakPointA = -1;
 	breakPointB = -1;
 	
-	vector<vector<int> > minDelta(alignLength);
-	vector<vector<int> > minDeltaSeq(alignLength);
+    vector<vector<int> > minDelta; minDelta.resize(alignLength);
+    vector<vector<int> > minDeltaSeq; minDeltaSeq.resize(alignLength);
 	
 	for(int i=0;i<alignLength;i++){
 		minDelta[i].assign(alignLength, MAXINT);

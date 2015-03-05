@@ -41,12 +41,6 @@ private:
 	map<string, int> nameMap;
 	int processors;
 	
-	struct linePair {
-		unsigned long long start;
-		unsigned long long end;
-		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
-	};
-	
 	vector<linePair> lines;
 	vector<int> processIDS;
 	

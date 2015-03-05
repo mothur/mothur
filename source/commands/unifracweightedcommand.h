@@ -38,11 +38,6 @@ class UnifracWeightedCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }
 	
 	private:
-		struct linePair {
-			int start;
-			int num;
-			linePair(int i, int j) : start(i), num(j) {}
-		};
 		vector<linePair> lines;
         CountTable* ct;
 		FileOutput* output;
