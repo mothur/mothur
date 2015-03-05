@@ -1695,6 +1695,10 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
         ifstream inFASTA;
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
+        int nameLine = 2;
+        if (delim == '@') { nameLine = 4; }
+        else if (delim == '>') { nameLine = 2; }
+        else { mothurOut("[ERROR]: unknown file deliminator, quitting.\n"); control_pressed = true; }
         
         unsigned long long count = 0;
         long long numLines = 0;
@@ -1712,7 +1716,7 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
 
             
             if (input.length() != 0) {
-                if((input[0] == delim) && (((numLines-1)%4) == 0)){ //this is a name line
+                if((input[0] == delim) && (((numLines-1)%nameLine) == 0)){ //this is a name line
                     //mothurOut(input + '\t' + toString(count+numLines-input.length()) + '\n');// << endl;
                     positions.push_back(count+numLines-input.length());
                     if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
@@ -2051,6 +2055,8 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
             openInputFile(filename, in);
             in.seekg(spot);
             
+            getline(in); //get to end of line in case you jump into middle of line where the delim char happens to fall.
+            
             //look for next delimChar
             unsigned long long newSpot = spot;
             while (!in.eof()) {
@@ -2063,7 +2069,6 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
                 
                 if (input.length() != 0) {
                     if(input[0] == delimChar){ //this is a name line
-                        
                         newSpot = in.tellg();
                         newSpot -=input.length();
                         break;
