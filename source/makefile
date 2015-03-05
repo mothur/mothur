@@ -109,8 +109,9 @@ uchime:
 fortranSource:
 	${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
-install : mothur
-	mv mothur ../mothur
+install : mothur uchime
+	mv mothur ..
+	mv uchime ..
 
 
 %.o : %.c %.h
