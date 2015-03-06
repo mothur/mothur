@@ -235,6 +235,8 @@ int Oligos::readOligos(){
 		}
 		inOligos.close();
 		
+        if ((linker.size() == 0) && (spacer.size() == 0) && (pairedBarcodes.size() == 0) && (barcodes.size() == 0) && (pairedPrimers.size() == 0) && (primers.size() == 0) && (revPrimer.size() == 0)) { m->mothurOut("[ERROR]: invalid oligos file, quitting.\n"); m->control_pressed = true; return 0; }
+        
         if (hasPBarcodes || hasPPrimers) {
             pairedOligos = true;
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
