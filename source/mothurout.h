@@ -154,7 +154,6 @@ class MothurOut {
         string getSimpleLabel(string);
         string findEdianness();
         string mothurGetpid(int);
-        string mothurFixpid(pid_t threadID);
 	
 		
 		//string manipulation
