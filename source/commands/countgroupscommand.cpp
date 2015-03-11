@@ -301,8 +301,8 @@ int CountGroupsCommand::execute(){
                 int num = lookup[i]->getNumSeqs();
                 total += num;
 				m->mothurOut(lookup[i]->getGroup() + " contains " + toString(num) + "."); m->mothurOutEndLine();
-				delete lookup[i];
                 out << lookup[i]->getGroup() << '\t' << num << endl;
+                delete lookup[i];
 			}
             out.close();
 			
