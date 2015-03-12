@@ -91,7 +91,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 				f22 = total2 - fish2[i];
 				
 				MothurFisher fisher;
-				double pre = fisher.fexact(f11, f12, f21, f22);
+				double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
 				if (pre > 0.999999999)	{ pre = 1.0; }
                 
 				if (m->control_pressed) { return 1; }
@@ -185,7 +185,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                     f22 = total2 - fish2[i];
 				
                     MothurFisher fisher;
-                    double pre = fisher.fexact(f11, f12, f21, f22);
+                    double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
                     if (pre > 0.999999999)	{ pre = 1.0; }
                 
                     if (m->control_pressed) { return 1; }

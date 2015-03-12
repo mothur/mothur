@@ -11,15 +11,16 @@
 
 #include "mothurfisher.h"
 /***********************************************************/
-double MothurFisher::fexact(double n11_, double n12_, double n21_, double n22_) {
+double MothurFisher::fexact(double n11_, double n12_, double n21_, double n22_, string o)  {
 	try {
 		sleft = 0.0; sright = 0.0; sless = 0.0; slarg = 0.0;
+        otuLabel = o;
 		
 		if(n11_<0) n11_ *= -1;
 		if(n12_<0) n12_ *= -1;
 		if(n21_<0) n21_ *= -1;
 		if(n22_<0) n22_ *= -1; 
-		
+        
 		double n1_ = n11_+n12_;
 		double n_1 = n11_+n21_;
 		double n   = n11_ +n12_ +n21_ +n22_;
@@ -166,6 +167,10 @@ double MothurFisher::exact(double n11, double n1_, double n_1, double n){
 		{
 			sright += p;
 			p=myhyper(j);
+            if (j < 0) {
+                m->mothurOut("[WARNING]: j value too low. Take a closer look at the pvalue for " + otuLabel + ".\n");
+                break;
+            }
 		}
 		j++;
 		if(p<1.00000001*prob) sright += p;

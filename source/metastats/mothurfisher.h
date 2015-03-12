@@ -16,10 +16,10 @@
 class MothurFisher {
 	
 public:
-	MothurFisher(){}
+	MothurFisher(){otuLabel = ""; m = MothurOut::getInstance(); }
 	~MothurFisher(){}
 	
-	double fexact(double, double, double, double);
+	double fexact(double, double, double, double, string);
 	
 private:
 	MothurOut* m;
@@ -32,6 +32,7 @@ private:
 	double myhyper(double);
 	double hyper0(double, double, double, double);
 	double exact(double, double, double, double);
+    string otuLabel;
 };
 
 
