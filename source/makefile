@@ -26,7 +26,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
     #CXX = g++44
 
     #if you are a mac user use the following line
-    TARGET_ARCH += -arch x86_64
+#    TARGET_ARCH += -arch x86_64
 
     #if you using cygwin to build Windows the following line
     #CXX = x86_64-w64-mingw32-g++
@@ -100,30 +100,30 @@ endif
     OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
 
 mothur : fortranSource $(OBJECTS) uchime
-    $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
-
-    strip mothur
+	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+	strip mothur
 
 uchime:
-    cd uchime_src && ./mk && mv uchime .. && cd ..
+	cd uchime_src && ./mk && mv uchime .. && cd ..
 
 fortranSource:
-    ${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
+	${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
-install : mothur
-#	cp mothur ../Release/mothur
+install : mothur uchime
+	mv mothur ..
+	mv uchime ..
 
 
 %.o : %.c %.h
-    $(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
-    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.hpp
-    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 
 
 clean :
-    @rm -f $(OBJECTS)
-    @rm -f uchime
+	@rm -f $(OBJECTS)
+	@rm -f uchime
 
