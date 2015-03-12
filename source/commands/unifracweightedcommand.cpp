@@ -831,14 +831,14 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
             
             vector< vector<double> > copyScores = rScores;
             
-            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores);
+            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores);
 			pDataArray.push_back(tempweighted);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedRandomThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, scores);
+		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

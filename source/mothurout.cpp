@@ -2038,6 +2038,9 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
             fclose (pFile);
         }
         
+        char secondaryDelim = '>';
+        if (delimChar == '@') { secondaryDelim = '+'; }
+        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
         //estimate file breaks
@@ -2068,10 +2071,18 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc, cha
                 }
                 
                 if (input.length() != 0) {
-                    if(input[0] == delimChar){ //this is a name line
+                    if(input[0] == delimChar){ //this is a potential name line
                         newSpot = in.tellg();
                         newSpot -=input.length();
-                        break;
+                        //get two lines and look for secondary delim
+                        //inf a fasta file this would be a new sequence, in fastq it will be the + line, if this was a nameline.
+                        getline(in); gobble(in);
+                        if (!in.eof()) {
+                            string secondInput = getline(in); gobble(in);
+                            if (debug) { mothurOut("[DEBUG]: input= " + input + "\n secondaryInput = " + secondInput + "\n"); }
+                            if (secondInput[0] == secondaryDelim) { break; } //yes, it was a nameline so stop
+                            else { input = ""; gobble(in); } //nope it was a delim at the beginning of a non nameline, keep looking.
+                        }
                     }else if (int(c) == -1) { break; }
                     else {  input = ""; gobble(in); }
                 }
@@ -3074,6 +3085,9 @@ string MothurOut::getSimpleLabel(string label){
         }
         
         int num1;
+        
+        if (debug) { mothurOut("[DEBUG]: " + newLabel1 + "\n"); }
+            
         mothurConvert(newLabel1, num1);
         
         simple = toString(num1);
@@ -3081,7 +3095,7 @@ string MothurOut::getSimpleLabel(string label){
 		return simple;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "isLabelEquivalent");
+		errorOut(e, "MothurOut", "getSimpleLabel");
 		exit(1);
 	}
 }

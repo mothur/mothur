@@ -423,7 +423,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
                         }
                         
                         // Allocate memory for thread data.
-                        metastatsData* tempSum = new metastatsData(sharedfile, outputDir, m, lines[i].start, lines[i].num, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
+                        metastatsData* tempSum = new metastatsData(sharedfile, outputDir, m, lines[i].start, lines[i].end, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
                         pDataArray.push_back(tempSum);
                         processIDS.push_back(i);
                         
@@ -431,7 +431,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
                     }
                     
                     //do my part
-					driver(lines[0].start, lines[0].num, thisLookUp);
+					driver(lines[0].start, lines[0].end, thisLookUp);
                     
                     //Wait until all threads have terminated.
                     WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

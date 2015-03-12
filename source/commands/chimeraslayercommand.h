@@ -209,7 +209,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			chimera->printHeader(out); 
 			inFASTA.seekg(0);
-            pDataArray->m->zapGremlins(in);
+            pDataArray->m->zapGremlins(inFASTA);
 		}else { //this accounts for the difference in line endings. 
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}

@@ -956,11 +956,13 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 			m->appendFiles((outputScrapFasta + toString(processIDS[i]) + ".temp"), outputScrapFasta);
 			m->mothurRemove((outputScrapFasta + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((outputQual + toString(processIDS[i]) + ".temp"), outputQual);
-            m->mothurRemove((outputQual + toString(processIDS[i]) + ".temp"));
+            if (outputQual != "") {
+                m->appendFiles((outputQual + toString(processIDS[i]) + ".temp"), outputQual);
+                m->mothurRemove((outputQual + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((outputScrapQual + toString(processIDS[i]) + ".temp"), outputScrapQual);
-            m->mothurRemove((outputScrapQual + toString(processIDS[i]) + ".temp"));
+                m->appendFiles((outputScrapQual + toString(processIDS[i]) + ".temp"), outputScrapQual);
+                m->mothurRemove((outputScrapQual + toString(processIDS[i]) + ".temp"));
+            }
             
             m->appendFilesWithoutHeaders((outputMisMatches + toString(processIDS[i]) + ".temp"), outputMisMatches);
 			m->mothurRemove((outputMisMatches + toString(processIDS[i]) + ".temp"));
