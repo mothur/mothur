@@ -221,7 +221,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                 string prim = it->first;
                 //search for primer
                 int olength = prim.length();
-                if (rawSequence.length() < olength) {} //ignore primers too long for this seq
+                if (rawSequence.length() < olength+pdiffs) {} //ignore primers too long for this seq
                 else{
                     for (int j = 0; j < rawSequence.length()-(olength+pdiffs); j++){
                         
@@ -321,40 +321,43 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             
             for(int i=0;i<revPrimer.size();i++){
                 
-                //undefined if not forced into an int.
-                int stopSpot = rawRSequence.length()-(revPrimer[i].length()+pdiffs);
-                
-                for (int j = 0; j < stopSpot; j++){
+                if (rawSequence.length() < revPrimer[i].length()+pdiffs) {} //ignore primers too long for this seq
+                else{
+                    //undefined if not forced into an int.
+                    int stopSpot = rawRSequence.length()-(revPrimer[i].length()+pdiffs);
                     
-                    string oligo = reverseOligo(revPrimer[i]);
-                    string rawChunk = rawRSequence.substr(j,oligo.length()+pdiffs);
-                    //cout << "r before = " << oligo << '\t' << rawChunk << endl;
-                   // cout << oligo << '\t' << olength << endl;
-                    //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawChunk);
-                    oligo = alignment->getSeqAAln();
-                    string temp = alignment->getSeqBAln();
-                    
-                    //                    cout << endl;
-                    //                    cout << oligo << endl;
-                    //                    cout << temp << endl;
-                    //                    cout << endl;
-                    
-                    int alnLength = oligo.length();
-                    for(int k=oligo.length()-1;k>=0;k--){ if(oligo[k] != '-'){	alnLength = k+1;	break;	} }
-                    oligo = oligo.substr(0,alnLength);
-                    temp = temp.substr(0,alnLength);
-                    int numDiff = countDiffs(oligo, temp);
-                    if (alnLength == 0) { numDiff = pdiffs + 1000; }
-                    
-                    //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
-                    if(numDiff < minDiff){
-                        minDiff = numDiff;
-                        minCount = 1;
-                        primerEnd = rawRSequence.length() - j;
-                        primerStart = primerEnd - alnLength;
-                    }else if(numDiff == minDiff){
-                        minCount++;
+                    for (int j = 0; j < stopSpot; j++){
+                        
+                        string oligo = reverseOligo(revPrimer[i]);
+                        string rawChunk = rawRSequence.substr(j,oligo.length()+pdiffs);
+                        //cout << "r before = " << oligo << '\t' << rawChunk << endl;
+                        // cout << oligo << '\t' << olength << endl;
+                        //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                        alignment->alignPrimer(oligo, rawChunk);
+                        oligo = alignment->getSeqAAln();
+                        string temp = alignment->getSeqBAln();
+                        
+                        //                    cout << endl;
+                        //                    cout << oligo << endl;
+                        //                    cout << temp << endl;
+                        //                    cout << endl;
+                        
+                        int alnLength = oligo.length();
+                        for(int k=oligo.length()-1;k>=0;k--){ if(oligo[k] != '-'){	alnLength = k+1;	break;	} }
+                        oligo = oligo.substr(0,alnLength);
+                        temp = temp.substr(0,alnLength);
+                        int numDiff = countDiffs(oligo, temp);
+                        if (alnLength == 0) { numDiff = pdiffs + 1000; }
+                        
+                        //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
+                        if(numDiff < minDiff){
+                            minDiff = numDiff;
+                            minCount = 1;
+                            primerEnd = rawRSequence.length() - j;
+                            primerStart = primerEnd - alnLength;
+                        }else if(numDiff == minDiff){
+                            minCount++;
+                        }
                     }
                 }
             }

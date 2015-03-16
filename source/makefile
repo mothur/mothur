@@ -13,7 +13,7 @@ USEMPI ?= no
 USEREADLINE ?= yes
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/3/2014\""
+RELEASE_DATE = "\"3/13/2014\""
 VERSION = "\"1.35.0\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS =
@@ -26,7 +26,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
     #CXX = g++44
 
     #if you are a mac user use the following line
-#    TARGET_ARCH += -arch x86_64
+    TARGET_ARCH += -arch x86_64
 
     #if you using cygwin to build Windows the following line
     #CXX = x86_64-w64-mingw32-g++
