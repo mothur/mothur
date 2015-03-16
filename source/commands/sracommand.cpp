@@ -255,7 +255,7 @@ SRACommand::SRACommand(string option)  {
             //turn _ to spaces mothur's work around
             for (int i = 0; i < libSelection.length(); i++) { if (libSelection[i] == '_') { libSelection[i] = ' '; }  }
             
-            dataType = validParameter.validFile(parameters, "datatype", false);         if (dataType == "not found") { dataType = "METAGENOME"; }
+            dataType = validParameter.validFile(parameters, "datatype", false);         if (dataType == "not found") { dataType = "metagenome"; }
             if (!checkCasesDataType(dataType)) { abort = true; } //error message in function
             
             //turn _ to spaces mothur's work around
@@ -1774,7 +1774,8 @@ bool SRACommand::checkCasesDataType(string& dataType){
         //remove users possible case errors
         for (int i = 0; i < dataType.size(); i++) { dataType[i] = toupper(dataType[i]); }
         
-        if ((dataType == "METAGENOME") || (dataType == "GENOME_SEQUENCING") || (dataType == "METAGENOMIC_ASSEMBLY") || (dataType == "ASSEMBLY") || (dataType == "TRANSCRIPTOME") || (dataType == "PROTEOMIC") || (dataType == "MAP") || (dataType == "CLONE_ENDS") || (dataType == "TARGETED_LOCI") || (dataType == "RANDOM_SURVEY") || (dataType == "EXOME") || (dataType == "VARIATION") || (dataType == "EPIGENOMICS") || (dataType == "PHENOTYPE") || (dataType == "GENOTYPE") || (dataType == "OTHER")) { }
+        if ((dataType == "METAGENOME") || (dataType == "GENOME_SEQUENCING") || (dataType == "METAGENOMIC_ASSEMBLY") || (dataType == "ASSEMBLY") || (dataType == "TRANSCRIPTOME") || (dataType == "PROTEOMIC") || (dataType == "MAP") || (dataType == "CLONE_ENDS") || (dataType == "TARGETED_LOCI") || (dataType == "RANDOM_SURVEY") || (dataType == "EXOME") || (dataType == "VARIATION") || (dataType == "EPIGENOMICS") || (dataType == "PHENOTYPE") || (dataType == "GENOTYPE") || (dataType == "OTHER"))
+        { dataType = original; }
         else { isOkay = false; }
         
         if (isOkay) {
