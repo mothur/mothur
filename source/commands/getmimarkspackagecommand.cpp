@@ -223,14 +223,14 @@ int GetMIMarksPackageCommand::execute(){
                 out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\t*altitude\tbarometric_press\tcarb_dioxide\tcarb_monoxide\tchem_administration\telev\thumidity\tmethane\torganism_count\toxygen\toxy_stat_samp\tperturbation\tpollutants\tresp_part_matter\tsamp_size	samp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsolar_irradiance\ttemp\tventilation_rate\tventilation_type\tvolatile_org_comp\twind_direction\twind_speed" << endl;
             }
         }else if (package == "host_associated") {
-            out << "#Environmental:MIMARKS.specimen.host-associated.4.0" << endl;
+            out << "#Environmental:MIMS.me.host-associated.4.0" << endl;
             if (requiredonly) {
-                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
+                out << "*sample_name	*description	*sample_title	*organism	*collection_date	*env_biome	*env_feature	*env_material	*geo_loc_name	*lat_lon	*host" << endl;
             }else {
-                out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\trel_to_oxygen\tsamp_collect_device\tsamp_mat_process\t*host\tage\taltitude\tblood_press_diast\tblood_press_syst\tbody_habitat\tbody_product\ttissue\tchem_administration\tdepth\tdiet\tdisease_stat\tdry_mass\telev\tfamily_relationship\tgenotype\tgravidity\theight_or_length\thost_body_temp\thost_color\thost_growth_cond\thost_shape\thost_subject_id\thost_taxid\tinfra_specific_name\tinfra_specific_rank\tlast_meal\tlife_stage\torganism_count\toxy_stat_samp\tperturbation\tphenotype\tsamp_size\tsamp_salinity\tsamp_store_dur\tsamp_store_loc\tsamp_store_temp\tsex\tsubstrate\ttemp\ttot_mass" << endl;
+                out << "*sample_name	*description	*sample_title	*organism	*collection_date	*env_biome	*env_feature	*env_material	*geo_loc_name	*lat_lon	*host	ref_biomaterial	rel_to_oxygen	samp_collect_device	samp_mat_process	samp_size	samp_vol_we_dna_ext	source_material_id	altitude	chem_administration	depth	elev	gravidity	host_age	host_blood_press_diast	host_blood_press_syst	host_body_habitat	host_body_product	host_body_temp	host_color	host_diet	host_disease	host_dry_mass	host_family_relationship	host_genotype	host_growth_cond	host_height	host_infra_specific_name	host_infra_specific_rank	host_last_meal	host_length	host_life_stage	host_phenotype	host_sex	host_shape	host_subject_id	host_substrate	host_taxid	host_tissue_sampled	host_tot_mass	misc_param	organism_count	oxy_stat_samp	perturbation	samp_salinity	samp_store_dur	samp_store_loc	samp_store_temp	temp" << endl;
             }
         }else if (package == "human_associated") {
-            out << "#Environmental:MIMARKS.specimen.human-associated.4.0" << endl;
+            out << "#MIMARKS.survey.human-associated.4.0" << endl;
             if (requiredonly) {
                 out << "*sample_name\t*organism\t*collection_date\t*biome\t*feature\t*material\t*geo_loc_name\t*lat_lon\t*title\t*seq_methods\t*host" << endl;
             }else {

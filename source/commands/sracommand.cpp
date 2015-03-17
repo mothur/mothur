@@ -425,8 +425,8 @@ int SRACommand::execute(){
             out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
             out << "\t\t\t\t\t\t</Organism>\n";
             out << "\t\t\t\t\t\t<Descriptor>\n";
-            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["title"] + "</Title> \n";
-            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["seq_methods"] + "</p></Description> \n";
+            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
+            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["description"] + "</p></Description> \n";
             out << "\t\t\t\t\t\t</Descriptor>\n";
             out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
             out << "\t\t\t\t\t\t<Attributes>\n";
@@ -532,7 +532,7 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["description"] + "</Attribute>\n";
 
                 }else { //single
                     out << "\t\t\t<File file_path=\"" + m->getSimpleName(thisGroupsFiles[j]) + "\">\n";
@@ -571,7 +571,7 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["description"] + "</Attribute>\n";
 
                 }
                 ///////////////////bioProject info
@@ -716,7 +716,7 @@ int SRACommand::readMIMarksFile(){
         requiredFieldsForPackage.push_back("collection_date"); requiredFieldsForPackage.push_back("biome");
         requiredFieldsForPackage.push_back("feature"); requiredFieldsForPackage.push_back("material");
         requiredFieldsForPackage.push_back("geo_loc_name"); requiredFieldsForPackage.push_back("lat_lon");
-        requiredFieldsForPackage.push_back("seq_methods"); requiredFieldsForPackage.push_back("title");
+        requiredFieldsForPackage.push_back("description"); requiredFieldsForPackage.push_back("sample_title");
         //vector<string> chooseAtLeastOneForPackage;
         
         ifstream in;
@@ -843,8 +843,8 @@ int SRACommand::readMIMarksFile(){
         for (int i = 1; i < headers.size(); i++) {
             categories[headers[i]] = "NA";
             if (headers[i] == "organism")       { categories[headers[i]] = "metagenome"; }
-            if (headers[i] == "seq_methods")    { categories[headers[i]] = "these sequences were scrapped"; }
-            if (headers[i] == "title")          { categories[headers[i]] = "these sequences were scrapped"; }
+            if (headers[i] == "description")    { categories[headers[i]] = "these sequences were scrapped"; }
+            if (headers[i] == "sample_title")          { categories[headers[i]] = "these sequences were scrapped"; }
         }
         mimarks["scrap"] = categories;
         Group2Organism["scrap"] = "metagenome";

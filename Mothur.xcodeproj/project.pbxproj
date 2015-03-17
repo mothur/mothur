@@ -15,6 +15,7 @@
 		48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */; };
 		48705AC719BE32C50075E977 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC119BE32C50075E977 /* sharedrjsd.cpp */; };
 		48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
+		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
@@ -428,6 +429,8 @@
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = "<group>"; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = "<group>"; };
 		48705AC319BE32C50075E977 /* abstractrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abstractrandomforest.cpp; path = source/randomforest/abstractrandomforest.cpp; sourceTree = "<group>"; };
+		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = "<group>"; };
+		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = "<group>"; };
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = "<group>"; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = "<group>"; };
 		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastqread.cpp; path = source/datastructures/fastqread.cpp; sourceTree = "<group>"; };
@@ -1560,6 +1563,8 @@
 				A7E9B75712D37EC400DA6239 /* metastatscommand.cpp */,
 				A7E9B75A12D37EC400DA6239 /* mgclustercommand.h */,
 				A7E9B75912D37EC400DA6239 /* mgclustercommand.cpp */,
+				487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */,
+				487C5A861AB88B93002AF48A /* mimarksattributescommand.h */,
 				A7E9B76A12D37EC400DA6239 /* nocommands.h */,
 				A7E9B76912D37EC400DA6239 /* nocommands.cpp */,
 				A7E9B76C12D37EC400DA6239 /* normalizesharedcommand.h */,
@@ -2360,6 +2365,7 @@
 				A7E9B96A12D37EC400DA6239 /* soergel.cpp in Sources */,
 				A7E9B96B12D37EC400DA6239 /* solow.cpp in Sources */,
 				A7E9B96C12D37EC400DA6239 /* sparsematrix.cpp in Sources */,
+				487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */,
 				A7E9B96D12D37EC400DA6239 /* spearman.cpp in Sources */,
 				48705AC519BE32C50075E977 /* oligos.cpp in Sources */,
 				A7E9B96E12D37EC400DA6239 /* speciesprofile.cpp in Sources */,

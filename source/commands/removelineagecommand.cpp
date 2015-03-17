@@ -1086,7 +1086,7 @@ int RemoveLineageCommand::readTax(){
 						newtax = noQuotesTax;
 						m->removeConfidences(newtax);
 					}
-					
+                    
 					int pos = newtax.find(noConfidenceTaxons[j]);
 					
 					if (pos == string::npos) { 
@@ -1119,7 +1119,6 @@ int RemoveLineageCommand::readTax(){
 							noNewTax = noQuotesTax;
 							m->removeConfidences(noNewTax);
 						}
-						
 						int pos = noNewTax.find(noConfidenceTaxons[j]);
 						
 						if (pos != string::npos) { //if yes, then are the confidences okay
@@ -1146,7 +1145,6 @@ int RemoveLineageCommand::readTax(){
 							}
 							
 							for (int i = 0; i < searchTaxons[j].size(); i++) {
-								
 								if ((i+index) < usersTaxon.size()) { //just in case, should never be false
 									if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
 										remove = true;

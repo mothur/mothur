@@ -152,6 +152,7 @@
 #include "sracommand.h"
 #include "mergesfffilecommand.h"
 #include "getmimarkspackagecommand.h"
+#include "mimarksattributescommand.h"
 
 /*******************************************************/
 
@@ -327,6 +328,7 @@ CommandFactory::CommandFactory(){
     commands["make.sra"]            = "make.sra";
     commands["merge.sfffiles"]      = "merge.sfffiles";
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
+    commands["mimarks.attributes"]  = "mimarks.attributes";
     
 
 }
@@ -560,6 +562,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.sra")              {	command = new SRACommand(optionString);                     }
         else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
         else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
+        else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -732,6 +735,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "merge.sfffiles")        {	pipecommand = new MergeSfffilesCommand(optionString);           }
         else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
+        else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -890,6 +894,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
+        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();       }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

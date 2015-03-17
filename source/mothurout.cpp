@@ -3848,6 +3848,23 @@ void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 //This function splits up the various option parameters
 void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
 	try {
+        
+        string individual = "";
+        int estimLength = prefix.size();
+        for(int i=0;i<estimLength;i++){
+            if(prefix[i] == c){
+                suffix = prefix.substr(i+1);
+                prefix = individual;
+                break;
+            }
+            else{
+                individual += prefix[i];
+            }
+        }
+        
+        
+        /*
+        
 		prefix = suffix.substr(0,suffix.find_first_of(c));
 		if ((suffix.find_first_of(c)+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
 			suffix = suffix.substr(suffix.find_first_of(c)+1, suffix.length());
@@ -3855,6 +3872,7 @@ void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
 			while(suffix.at(0) == ' ')
 				suffix = suffix.substr(1, suffix.length());
 		}else {  suffix = "";  }
+         */
         
     }
 	catch(exception& e) {

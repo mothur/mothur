@@ -167,6 +167,7 @@ class MothurOut {
         void splitAtChar(string&, string&, char);
         int removeBlanks(vector<string>&);
         vector<string> splitWhiteSpaceWithQuotes(string);
+        int splitWhiteSpaceWithQuotes(string, vector<string>&);
 		int removeConfidences(string&);
         string removeQuotes(string);
         string makeList(vector<string>&);
