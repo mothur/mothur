@@ -37,7 +37,7 @@ class ChopSeqsCommand : public Command {
 	private:
     
 		string fastafile, outputDir, keep, namefile, groupfile, countfile;
-		bool abort, countGaps, Short;
+		bool abort, countGaps, Short, keepN;
 		int numbases, processors;
 		vector<string> outputNames;
 		
@@ -56,14 +56,14 @@ struct chopData {
 	unsigned long long start;
 	unsigned long long end;
 	int numbases, count;
-    bool countGaps, Short, wroteAccnos;
+    bool countGaps, Short, wroteAccnos, keepN;
 	MothurOut* m;
 	string namefile;
 	map<string, int> nameMap;
 	
 	
 	chopData(){}
-	chopData(string f, string ff, string a, MothurOut* mout, unsigned long long st, unsigned long long en, string k, bool cGaps, int nbases, bool S) {
+	chopData(string f, string ff, string a, MothurOut* mout, unsigned long long st, unsigned long long en, string k, bool cGaps, int nbases, bool S, bool kn) {
 		filename = f;
 		outFasta = ff;
         outAccnos = a;
@@ -75,6 +75,8 @@ struct chopData {
         numbases = nbases;
         Short = S;
 		wroteAccnos = false;
+        keepN = kn;
+        
 	}
 };
 
@@ -130,7 +132,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             
                             for (int i = 0; i < temp.length(); i++) {
                                 //eliminate N's
-                                if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
+                                if (!pDataArray->keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
                                 
                                 numBasesCounted++; 
                                 
@@ -152,7 +154,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             
                             for (int i = (temp.length()-1); i >= 0; i--) {
                                 //eliminate N's
-                                if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
+                                if (!pDataArray->keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
                                 
                                 numBasesCounted++; 
                                 
@@ -178,13 +180,14 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             int numBasesCounted = 0;
                             
                             for (int i = 0; i < temp.length(); i++) {
-                                //eliminate N's
-                                if (toupper(temp[i]) == 'N') { 
-                                    temp[i] = '.'; 
-                                    tempLength--;
-                                    if (tempLength < pDataArray->numbases) { stopSpot = 0; break; }
+                                if (!pDataArray->keepN) {
+                                    //eliminate N's
+                                    if (toupper(temp[i]) == 'N') {
+                                        temp[i] = '.';
+                                        tempLength--;
+                                        if (tempLength < pDataArray->numbases) { stopSpot = 0; break; }
+                                    }
                                 }
-                                
                                 if(isalpha(temp[i])) { numBasesCounted++; }
                                 
                                 if (numBasesCounted >= pDataArray->numbases) { stopSpot = i; break; }
@@ -204,13 +207,14 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             int numBasesCounted = 0;
                             
                             for (int i = (temp.length()-1); i >= 0; i--) {
-                                //eliminate N's
-                                if (toupper(temp[i]) == 'N') { 
-                                    temp[i] = '.'; 
-                                    tempLength--;
-                                    if (tempLength < pDataArray->numbases) { stopSpot = 0; break; }
+                                if (!pDataArray->keepN) {
+                                    //eliminate N's
+                                    if (toupper(temp[i]) == 'N') {
+                                        temp[i] = '.';
+                                        tempLength--;
+                                        if (tempLength < pDataArray->numbases) { stopSpot = 0; break; }
+                                    }
                                 }
-                                
                                 if(isalpha(temp[i])) { numBasesCounted++; }
                                 
                                 if (numBasesCounted >= pDataArray->numbases) { stopSpot = i; break; }

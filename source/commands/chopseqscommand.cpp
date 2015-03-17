@@ -23,6 +23,7 @@ vector<string> ChopSeqsCommand::setParameters(){
 		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcountgaps);
 		CommandParameter pshort("short", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshort);
 		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "","",false,false); parameters.push_back(pkeep);
+        CommandParameter pkeepn("keepn", "Boolean", "", "f", "", "", "","",false,false); parameters.push_back(pkeepn);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -47,6 +48,7 @@ string ChopSeqsCommand::getHelpString(){
 		helpString += "The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n";
 		helpString += "The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n";
 		helpString += "The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n";
+        helpString += "The keepn parameter allows you to specify you want to keep ambigous bases, default=false.\n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n";
 		helpString += "Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n";
@@ -209,7 +211,10 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			countGaps = m->isTrue(temp);  
 			
 			temp = validParameter.validFile(parameters, "short", false);	if (temp == "not found") { temp = "f"; } 
-			Short = m->isTrue(temp);   
+			Short = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "keepn", false);	if (temp == "not found") { temp = "f"; }
+            keepN = m->isTrue(temp);
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -583,7 +588,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					for (int i = 0; i < temp.length(); i++) {
 						//eliminate N's
-						if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
+                        if (!keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
 						
 						numBasesCounted++; 
 						
@@ -605,7 +610,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					for (int i = (temp.length()-1); i >= 0; i--) {
 						//eliminate N's
-						if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
+                        if (!keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
 						
 						numBasesCounted++; 
 
@@ -632,12 +637,13 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					for (int i = 0; i < temp.length(); i++) {
 						//eliminate N's
-						if (toupper(temp[i]) == 'N') { 
-							temp[i] = '.'; 
-							tempLength--;
-							if (tempLength < numbases) { stopSpot = 0; break; }
-						}
-						
+                        if (!keepN) {
+                            if (toupper(temp[i]) == 'N') {
+                                temp[i] = '.';
+                                tempLength--;
+                                if (tempLength < numbases) { stopSpot = 0; break; }
+                            }
+                        }
 						if(isalpha(temp[i])) { numBasesCounted++; }
 						
 						if (numBasesCounted >= numbases) { stopSpot = i; break; }
@@ -657,13 +663,14 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					int numBasesCounted = 0;
 					
 					for (int i = (temp.length()-1); i >= 0; i--) {
-						//eliminate N's
-						if (toupper(temp[i]) == 'N') { 
-							temp[i] = '.'; 
-							tempLength--;
-							if (tempLength < numbases) { stopSpot = 0; break; }
-						}
-						
+                        if (!keepN) {
+                            //eliminate N's
+                            if (toupper(temp[i]) == 'N') {
+                                temp[i] = '.';
+                                tempLength--;
+                                if (tempLength < numbases) { stopSpot = 0; break; }
+                            }
+                        }
 						if(isalpha(temp[i])) { numBasesCounted++; }
 
 						if (numBasesCounted >= numbases) { stopSpot = i; break; }
