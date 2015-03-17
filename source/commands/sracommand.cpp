@@ -424,6 +424,10 @@ int SRACommand::execute(){
             if (itOrganism != Group2Organism.end()) { organismName = itOrganism->second; } //user supplied acceptable organism, so use it.
             out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
             out << "\t\t\t\t\t\t</Organism>\n";
+            out << "\t\t\t\t\t\t<Descriptor>\n";
+            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["title"] + "</Title> \n";
+            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["seq_methods"] + "</p></Description> \n";
+            out << "\t\t\t\t\t\t</Descriptor>\n";
             out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
             out << "\t\t\t\t\t\t<Attributes>\n";
             //add biosample required attributes
@@ -483,7 +487,6 @@ int SRACommand::execute(){
                     out << "\t\t\t</File>\n";
                     
                     //attributes
-                    out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
                     if (linkers.size() != 0) {
                         string linkerString = "";
                         //linker size forced to 1
@@ -536,7 +539,6 @@ int SRACommand::execute(){
                     out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                     out << "\t\t\t</File>\n";
                     //attributes
-                    out << "\t\t\t<Attribute name=\"title\">" + mimarks[Groups[i]]["title"] + "</Attribute>\n";
                     //linkers -> barcodes -> spacers -> primers
                    
                     if (linkers.size() != 0) {
@@ -807,6 +809,10 @@ int SRACommand::readMIMarksFile(){
                             if (!m->inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
                                 organismError = true;
                                 m->mothurOut("[WARNING]: " + linePieces[i]+ " is not an acceptable organism, changing to acceptable 'metagenome'. NCBI will allow you to modify the organism after submission.\n"); linePieces[i] = "metagenome"; categories[headers[i]] = linePieces[i];
+                            }else {
+                                if (linePieces[i] == "metagenome") {
+                                    m->mothurOut("[WARNING]: metagenome is an acceptable organism, but NCBI would prefer a more specific choice if possible. Here is a link to the organism choices and descriptions, http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=408169&lvl=3&keep=1&srchmode=1&unlock. To request the addition of a taxonomy to the list, please contact Anjanette Johnston at johnston@ncbi.nlm.nih.gov.\n");
+                                }
                             }
                             Group2Organism[linePieces[0]] = linePieces[i];
                         }
