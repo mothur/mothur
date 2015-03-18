@@ -27,9 +27,19 @@ struct Package {
     }
 };
 
+struct Value {
+    bool required;
+    string format, description;
+    
+    Value() { format=""; description=""; required=false; }
+    Value(bool r, string d, string f) : format(f), description(d), required(r) {}
+    ~Value() {}
+
+};
+
 struct Group {
     string packageName;
-    map<string, bool> values;
+    map<string, Value> values;
     
     Group() { packageName = ""; }
     Group(string p) :  packageName(p) {}

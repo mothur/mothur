@@ -2110,7 +2110,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
         
         if (m->control_pressed) { return false; } //error in reading oligos
         
-        if (oligos->hasPairedBarcodes()) {
+        if (oligos->hasPairedBarcodes() || oligos->hasPairedPrimers()) {
             numFPrimers = oligos->getPairedPrimers().size();
             numBarcodes = oligos->getPairedBarcodes().size();
         }else {

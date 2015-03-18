@@ -151,17 +151,39 @@ int MimarksAttributesCommand::execute(){
                     m->mothurOut("[DEBUG]: name=" + attribute.name + " harmonizedName=" + attribute.harmonizedName + " format=" + attribute.format + " description=" + attribute.description + " package=" + attribute.getPackagesString() + "\n");
                 }
                 
+                if (attribute.format == "") { attribute.format = "{none}"; }
+                if (attribute.description == "") { attribute.description = "none"; }
+                
+                
                 for (int i = 0; i < attribute.packages.size(); i++) {
+                    for (int j = 0; j < attribute.packages[i].groupName.length(); j++) {
+                        if (attribute.packages[i].groupName[j] == '-') { attribute.packages[i].groupName[j] = '_'; }
+                    }
+                    
                     it = categories.find(attribute.packages[i].groupName);
                     if (it != categories.end()) { //we already have this category, ie air, soil...
                         if (attribute.packages[i].name == (it->second).packageName) { //add attribute to category
-                            (it->second).values[attribute.harmonizedName] = attribute.packages[i].required;
+                            (it->second).values[attribute.harmonizedName].required = attribute.packages[i].required;
+                            (it->second).values[attribute.harmonizedName].format = attribute.format;
+                            string newDescription = "";
+                            for (int j = 0; j < attribute.description.length(); j++) {
+                                if (attribute.description[j] == '"') { newDescription += "\\\""; }
+                                else { newDescription += attribute.description[j]; }
+                            }
+                            (it->second).values[attribute.harmonizedName].description = newDescription;
                         }
                     }else {
-                        if ((attribute.packages[i].groupName == "\"Built\"")) {}
+                        if ((attribute.packages[i].groupName == "\"Built\"") || (attribute.packages[i].groupName == "\"Nucleic Acid Sequence Source\"")) {}
                         else {
                             Group thisGroup(attribute.packages[i].name);
-                            thisGroup.values[attribute.harmonizedName] = attribute.packages[i].required;
+                            thisGroup.values[attribute.harmonizedName].required = attribute.packages[i].required;
+                            thisGroup.values[attribute.harmonizedName].format = attribute.format;
+                            string newDescription = "";
+                            for (int j = 0; j < attribute.description.length(); j++) {
+                                if (attribute.description[j] == '"') { newDescription += "\\\""; }
+                                else { newDescription += attribute.description[j]; }
+                            }
+                            thisGroup.values[attribute.harmonizedName].description = newDescription;
                             categories[attribute.packages[i].groupName] = thisGroup;
                         }
                     }
@@ -170,15 +192,26 @@ int MimarksAttributesCommand::execute(){
         }
         in.close();
         
-        string requiredByALL = "*sample_name    *description	*sample_title";
+        string requiredByALL = "*sample_name\t*description\t*sample_title";
+        string rFormatALL = "#{text}\t{text}\t{text}";
+        string rDescriptionALL = "#{sample name}\t{description of sample}\t{sample title}";
         string environment = "\"Environment\"";
         it = categories.find(environment);
         if (it != categories.end()) {
-            map<string, bool>::iterator itValue = (it->second).values.begin();
-            if (itValue->second) { requiredByALL += "\t*" + itValue->first; }
+            map<string, Value>::iterator itValue = (it->second).values.begin();
+            if (itValue->second.required) {
+                requiredByALL += "\t*" + itValue->first;
+                rFormatALL += "\t{" + (itValue->second.format) + "}";
+                 rDescriptionALL += "\t{" + (itValue->second.description) + "}";
+            }
             itValue++;
+            
             for (; itValue != (it->second).values.end(); itValue++) {
-                if (itValue->second) { requiredByALL += "\t*" + itValue->first; }
+                if (itValue->second.required) {
+                    requiredByALL += "\t*" + itValue->first;
+                    rFormatALL += "\t{" + (itValue->second.format)  + "}";
+                    rDescriptionALL += "\t{" + (itValue->second.description) + "}";
+                }
             }
         }
         
@@ -189,31 +222,101 @@ int MimarksAttributesCommand::execute(){
         outputNames.push_back(outputFileName); outputTypes["source"].push_back(outputFileName);
         m->openOutputFile(outputFileName, out);
         
-        for (it = categories.begin(); it != categories.end(); it++) {
+        //create outputs
+        string requiredValues = requiredByALL; string nonRequiredValues = "";
+        string rFormat = rFormatALL; string nonRFormat = "";
+        string rDescription = rDescriptionALL; string nonRDescription = "";
+        it = categories.begin();
+        map<string, Value>::iterator itValue = (it->second).values.begin();
+        if (itValue->second.required) {
+            requiredValues += "\t*" + itValue->first;
+            rFormat += "\t{" + (itValue->second.format) + "}";
+            rDescription += "\t{" + (itValue->second.description) + "}";
+        }else {
+            nonRequiredValues += itValue->first;
+            nonRFormat += "{" + itValue->second.format + "}";
+            nonRDescription += "{" + (itValue->second.description) + "}";
+        }
+        itValue++;
+        for (; itValue != (it->second).values.end(); itValue++) {
+            if (itValue->second.required) {
+                requiredValues += "\t*" + itValue->first;
+                rFormat += "\t{" + (itValue->second.format) + "}";
+                rDescription += "\t{" + (itValue->second.description) + "}";
+            }else {
+                nonRequiredValues += "\t" + itValue->first;
+                nonRFormat += "\t{" + itValue->second.format + "}";
+                nonRDescription += "\t{" + (itValue->second.description) + "}";
+            }
+        }
+        
+        out << "if (package == " + it->first + ") {\n";
+        out << "\tout << \"#" + it->second.packageName + "\" << endl;\n";
+        out << "\t if (requiredonly) {\n";
+        out << "\t\tout << \"" + rDescription + "\" << endl;\n";
+        out << "\t\tout << \"" + rFormat + "\" << endl;\n";
+        out << "\t\tout << \"" + requiredValues + "\" << endl;\n";
+        out << "\t}else {\n";
+        out << "\t\tout << \"" + rDescription + '\t' + nonRDescription + "\" << endl;\n";
+        out << "\t\tout << \"" + rFormat + '\t' + nonRFormat + "\" << endl;\n";
+        out << "\t\tout << \"" + requiredValues + '\t' + nonRequiredValues + "\" << endl;\n";
+        out << "\t}\n";
+        out << "}";
+        
+        it++;
+        for (; it != categories.end(); it++) {
             if ((it->first  == "\"Environment\"")) {}
             else {
                 //create outputs
                 string requiredValues = requiredByALL; string nonRequiredValues = "";
-                map<string, bool>::iterator itValue = (it->second).values.begin();
-                if (itValue->second) { requiredValues += "\t*" + itValue->first; }
-                else { nonRequiredValues += itValue->first; }
+                string rFormat = rFormatALL; string nonRFormat = "";
+                string rDescription = rDescriptionALL; string nonRDescription = "";
+                map<string, Value>::iterator itValue = (it->second).values.begin();
+                if (itValue->second.required) {
+                    requiredValues += "\t*" + itValue->first;
+                    rFormat += "\t{" + (itValue->second.format)+ "}";
+                    rDescription += "\t{" + (itValue->second.description) + "}";
+                }else {
+                    nonRequiredValues += itValue->first;
+                    nonRFormat += "{" + itValue->second.format+ "}";
+                    nonRDescription += "{" + (itValue->second.description) + "}";
+                }
                 itValue++;
                 for (; itValue != (it->second).values.end(); itValue++) {
-                    if (itValue->second) { requiredValues += "\t*" + itValue->first; }
-                    else { nonRequiredValues += "\t" + itValue->first; }
+                    if (itValue->second.required) {
+                        requiredValues += "\t*" + itValue->first;
+                        rFormat += "\t{" + (itValue->second.format)+ "}";
+                        rDescription += "\t{" + (itValue->second.description) + "}";
+                    }else {
+                        nonRequiredValues += "\t" + itValue->first;
+                        nonRFormat +=  "\t{" + itValue->second.format+ "}";
+                        nonRDescription += "\t{" + (itValue->second.description) + "}";
+                    }
                 }
                 
                 out << "else if (package == " + it->first + ") {\n";
                 out << "\tout << \"#" + it->second.packageName + "\" << endl;\n";
                 out << "\t if (requiredonly) {\n";
+                out << "\t\tout << \"" + rDescription + "\" << endl;\n";
+                out << "\t\tout << \"" + rFormat + "\" << endl;\n";
                 out << "\t\tout << \"" + requiredValues + "\" << endl;\n";
-                out << "}else {\n";
+                out << "\t}else {\n";
+                out << "\t\tout << \"" + rDescription + '\t' + nonRDescription + "\" << endl;\n";
+                out << "\t\tout << \"" + rFormat + '\t' + nonRFormat + "\" << endl;\n";
                 out << "\t\tout << \"" + requiredValues + '\t' + nonRequiredValues + "\" << endl;\n";
                 out << "\t}\n";
                 out << "}";
             }
         }
         
+        out << endl << endl;
+        it = categories.begin();
+        out << "if ((package == " << it->first << ") ";
+        it++;
+        for (; it != categories.end(); it++) {
+            out << "|| (package == " << it->first << ") ";
+        }
+        out << ") {}\n\n";
         out.close();
         
         m->mothurOutEndLine();

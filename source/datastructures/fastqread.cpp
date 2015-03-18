@@ -82,7 +82,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         //read sequence
         sequence = m->getline(in); m->gobble(in);
         if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
-        
+
         //read sequence name
         line = m->getline(in); m->gobble(in);
         pieces = m->splitWhiteSpace(line);
