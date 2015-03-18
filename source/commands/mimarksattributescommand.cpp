@@ -112,7 +112,7 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             else if (xmlFile == "not found") {  xmlFile = ""; abort=true; m->mothurOut("You must provide an xml file. It is required."); m->mothurOutEndLine();  }
             
             selectedPackage = validParameter.validFile(parameters, "package", false);
-            if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey"; }
+            if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey."; }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(xmlFile);		}
@@ -317,6 +317,25 @@ int MimarksAttributesCommand::execute(){
             out << "|| (package == " << it->first << ") ";
         }
         out << ") {}\n\n";
+        
+        out << "vector<string> requiredFieldsForPackage;\n";
+        vector<string> rAll;
+        m->splitAtChar(requiredByALL, rAll, '\t');
+        for (int i = 0; i < rAll.size(); i++) {
+            out << "requiredFieldsForPackage.push_back(\"" + rAll[i].substr(1) + "\");\n";
+        }
+        out << "\n\n";
+        
+        
+        for (it = categories.begin(); it != categories.end(); it++) {
+            out << "if (packageType == \"" << it->second.packageName << "\") {";
+            for (map<string, Value>::iterator itValue = (it->second).values.begin(); itValue != (it->second).values.end(); itValue++) {
+                if (itValue->second.required) {
+                    out << "\trequiredFieldsForPackage.push_back(\"" +  itValue->first + "\");";
+                }
+            }
+            out << "}\n";
+        }
         out.close();
         
         m->mothurOutEndLine();
@@ -457,12 +476,13 @@ Package MimarksAttributesCommand::parsePackage(string package){
             m->mothurOut("[ERROR]: parsing error - " + openingTag + ". Expeacted something like <Package use=\"optional\" group_name=\"Air\"> in file.\n"); m->control_pressed = true;  return thispackage;
         }
         
-        pos = openingTag.find("group_name");
+        //selectedPackage = MIMARKS.survey.
+        pos = package.find(selectedPackage);
         if (pos != string::npos) {
             //read groupname
-            string group = openingTag.substr(pos);
-            group = group.substr(group.find_first_of("\""), (group.find_last_of("\"")-group.find_first_of("\""))+1);
-            thispackage.groupName = group;
+            string group = package.substr(pos+15);
+            group = group.substr(0, (group.find_first_of(".")));
+            thispackage.groupName = "\"" + group + "\"";
         }else {
              thispackage.groupName = "ignore";
         }

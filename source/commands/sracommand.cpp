@@ -712,12 +712,15 @@ int SRACommand::readMIMarksFile(){
         acceptableOrganisms.push_back("algae metagenome"); acceptableOrganisms.push_back("ant metagenome"); acceptableOrganisms.push_back("bat metagenome"); acceptableOrganisms.push_back("beetle metagenome"); acceptableOrganisms.push_back("bovine gut metagenome"); acceptableOrganisms.push_back("bovine metagenome"); acceptableOrganisms.push_back("chicken gut metagenome"); acceptableOrganisms.push_back("coral metagenome"); acceptableOrganisms.push_back("echinoderm metagenome"); acceptableOrganisms.push_back("endophyte metagenome"); acceptableOrganisms.push_back("epibiont metagenome"); acceptableOrganisms.push_back("fish metagenome"); acceptableOrganisms.push_back("fossil metagenome"); acceptableOrganisms.push_back("gill metagenome"); acceptableOrganisms.push_back("gut metagenome"); acceptableOrganisms.push_back("honeybee metagenome"); acceptableOrganisms.push_back("human gut metagenome"); acceptableOrganisms.push_back("human lung metagenome"); acceptableOrganisms.push_back("human metagenome"); acceptableOrganisms.push_back("human nasal/pharyngeal metagenome"); acceptableOrganisms.push_back("human oral metagenome"); acceptableOrganisms.push_back("human skin metagenome"); acceptableOrganisms.push_back("insect gut metagenome"); acceptableOrganisms.push_back("insect metagenome"); acceptableOrganisms.push_back("mollusc metagenome"); acceptableOrganisms.push_back("mosquito metagenome"); acceptableOrganisms.push_back("mouse gut metagenome"); acceptableOrganisms.push_back("mouse metagenome"); acceptableOrganisms.push_back("mouse skin metagenome"); acceptableOrganisms.push_back("nematode metagenome"); acceptableOrganisms.push_back("oral metagenome"); acceptableOrganisms.push_back("phyllosphere metagenome"); acceptableOrganisms.push_back("pig metagenome"); acceptableOrganisms.push_back("plant metagenome"); acceptableOrganisms.push_back("primate metagenome"); acceptableOrganisms.push_back("rat metagenome"); acceptableOrganisms.push_back("root metagenome"); acceptableOrganisms.push_back("sea squirt metagenome"); acceptableOrganisms.push_back("seed metagenome"); acceptableOrganisms.push_back("shoot metagenome"); acceptableOrganisms.push_back("skin metagenome"); acceptableOrganisms.push_back("snake metagenome"); acceptableOrganisms.push_back("sponge metagenome"); acceptableOrganisms.push_back("stomach metagenome"); acceptableOrganisms.push_back("symbiont metagenome"); acceptableOrganisms.push_back("termite gut metagenome"); acceptableOrganisms.push_back("termite metagenome"); acceptableOrganisms.push_back("upper respiratory tract metagenome"); acceptableOrganisms.push_back("urine metagenome"); acceptableOrganisms.push_back("viral metagenome"); acceptableOrganisms.push_back("wallaby gut metagenome"); acceptableOrganisms.push_back("wasp metagenome"); acceptableOrganisms.push_back("sythetic metagenome"); acceptableOrganisms.push_back("metagenome");
         
         vector<string> requiredFieldsForPackage;
-        requiredFieldsForPackage.push_back("sample_name"); requiredFieldsForPackage.push_back("organism");
-        requiredFieldsForPackage.push_back("collection_date"); requiredFieldsForPackage.push_back("biome");
-        requiredFieldsForPackage.push_back("feature"); requiredFieldsForPackage.push_back("material");
-        requiredFieldsForPackage.push_back("geo_loc_name"); requiredFieldsForPackage.push_back("lat_lon");
-        requiredFieldsForPackage.push_back("description"); requiredFieldsForPackage.push_back("sample_title");
-        //vector<string> chooseAtLeastOneForPackage;
+        requiredFieldsForPackage.push_back("sample_name");
+        requiredFieldsForPackage.push_back("description");
+        requiredFieldsForPackage.push_back("sample_title");
+        requiredFieldsForPackage.push_back("collection_date");
+        requiredFieldsForPackage.push_back("env_biome");
+        requiredFieldsForPackage.push_back("env_feature");
+        requiredFieldsForPackage.push_back("env_material");
+        requiredFieldsForPackage.push_back("geo_loc_name");
+        requiredFieldsForPackage.push_back("lat_lon");
         
         ifstream in;
         m->openInputFile(mimarksfile, in);
@@ -732,38 +735,41 @@ int SRACommand::readMIMarksFile(){
             if (m->debug) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             if (temp[0] == '#') {
-                int pos = temp.find("Environmental");
+                int pos = temp.find("MIMARKS.survey");
                 if (pos != string::npos) {
-                    for (int i = pos+14; i < temp.length(); i++) {
-                        if (!isspace(temp[i])) { packageType += temp[i]; }
-                        else { i+= temp.length(); }
-                    }
+                    packageType = temp.substr(1);
                 }
             }
             else{ break; } //hit headers line
          }
+        
+        //in future may want to add parsing of format header....
         
         vector<string> headers; m->splitAtChar(temp, headers, '\t');
         m->removeBlanks(headers);
         //remove * from required's
         for (int i = 0; i < headers.size(); i++) {
             if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); }
-            //if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); chooseAtLeastOneForPackage.push_back(headers[i]); }  //secondary condition
             if (m->debug) { m->mothurOut("[DEBUG]: " + headers[i] + "\n"); }
         }
         
         if (m->debug) {  m->mothurOut("[DEBUG]: packageType = '" + packageType + "'\n");   }
         
-        //check to make sure package has all its required parts
-        //MIMARKS.specimen.water.3.0
-        if (packageType == "MIMARKS.specimen.air.4.0") {   requiredFieldsForPackage.push_back("altitude");  }
-        else if ((packageType == "MIMARKS.specimen.host-associated.4.0") || (packageType == "MIMARKS.specimen.human-associated.4.0") || (packageType == "MIMARKS.specimen.human-gut.4.0") || (packageType == "MIMARKS.specimen.human-oral.4.0") || (packageType == "MIMARKS.specimen.human-skin.4.0") || (packageType == "MIMARKS.specimen.human-vaginal.4.0") || (packageType == "MIMARKS.specimen.plant-associated.4.0")) {  requiredFieldsForPackage.push_back("host");  }
-        else if ((packageType == "MIMARKS.specimen.microbial.4.0") || (packageType == "MIMARKS.specimen.sediment.4.0") || (packageType == "soil")) {   requiredFieldsForPackage.push_back("depth");  requiredFieldsForPackage.push_back("elev"); }
-        else if (packageType == "MIMARKS.specimen.water.4.0") {   requiredFieldsForPackage.push_back("depth");  }
-        else if ((packageType == "MIMARKS.specimen.miscellaneous.4.0") || (packageType == "wastewater")) { }
-        else {
-            m->mothurOut("[ERROR]: unknown package " + packageType + ", please correct.\n"); m->control_pressed = true; in.close(); return 0;
-        }
+        if (packageType == "MIMARKS.survey.air.4.0") {	requiredFieldsForPackage.push_back("altitude");	}
+        if (packageType == "MIMARKS.survey.host-associated.4.0") {		requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.human-associated.4.0") {		requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.human-gut.4.0") {		requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.human-oral.4.0") {		requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.human-skin.4.0") {	requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.human-vaginal.4.0") {	requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.microbial.4.0") {	requiredFieldsForPackage.push_back("depth");  requiredFieldsForPackage.push_back("elev");	}
+        if (packageType == "MIMARKS.survey.miscellaneous.4.0") {}
+        if (packageType == "MIMARKS.survey.plant-associated.4.0") {	requiredFieldsForPackage.push_back("host");	}
+        if (packageType == "MIMARKS.survey.sediment.4.0") {	requiredFieldsForPackage.push_back("depth");	requiredFieldsForPackage.push_back("elev");	}
+        if (packageType == "MIMARKS.survey.soil.4.0") {	requiredFieldsForPackage.push_back("depth");	requiredFieldsForPackage.push_back("elev");	}
+        if (packageType == "MIMARKS.survey.wastewater.4.0") {}
+        if (packageType == "MIMARKS.survey.water.4.0") {	requiredFieldsForPackage.push_back("depth"); }
+
         
         if (!m->isSubset(headers, requiredFieldsForPackage)){
             string requiredFields = "";
@@ -816,7 +822,7 @@ int SRACommand::readMIMarksFile(){
                             }
                             Group2Organism[linePieces[0]] = linePieces[i];
                         }
-                        if (linePieces[i] != "NA") {  allNA[headers[i]] = false;     }
+                        if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
                     }
                     
                     //does this sample already match an existing sample?
@@ -841,7 +847,7 @@ int SRACommand::readMIMarksFile(){
         map<string, string> categories;
         //start after *sample_name
         for (int i = 1; i < headers.size(); i++) {
-            categories[headers[i]] = "NA";
+            categories[headers[i]] = "missing";
             if (headers[i] == "organism")       { categories[headers[i]] = "metagenome"; }
             if (headers[i] == "description")    { categories[headers[i]] = "these sequences were scrapped"; }
             if (headers[i] == "sample_title")          { categories[headers[i]] = "these sequences were scrapped"; }
