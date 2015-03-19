@@ -336,7 +336,7 @@ int SRACommand::execute(){
         ofstream out;
         m->openOutputFile(outputFileName, out);
         
-        string blankFile = thisOutputDir + "submission.ready";
+        string blankFile = thisOutputDir + "submit.ready";
         ofstream outT;
         m->openOutputFile(blankFile, outT); outT.close();
         
