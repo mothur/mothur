@@ -192,9 +192,9 @@ int MimarksAttributesCommand::execute(){
         }
         in.close();
         
-        string requiredByALL = "*sample_name\t*description\t*sample_title";
-        string rFormatALL = "#{text}\t{text}\t{text}";
-        string rDescriptionALL = "#{sample name}\t{description of sample}\t{sample title}";
+        string requiredByALL = "*sample_name\t*description\t*sample_title\t*seq_methods\t*organism";
+        string rFormatALL = "#{text}\t{text}\t{text}\t{text}\t{controlled vacabulary}";
+        string rDescriptionALL = "#{sample name}\t{description of sample}\t{sample title}\t{description of library_construction_protocol}\t{http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=408169&lvl=3&keep=1&srchmode=1&unlock}";
         string environment = "\"Environment\"";
         it = categories.find(environment);
         if (it != categories.end()) {

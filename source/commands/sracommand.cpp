@@ -532,7 +532,7 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["description"] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
 
                 }else { //single
                     out << "\t\t\t<File file_path=\"" + m->getSimpleName(thisGroupsFiles[j]) + "\">\n";
@@ -571,7 +571,7 @@ int SRACommand::execute(){
                     out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
                     out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["description"] + "</Attribute>\n";
+                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
 
                 }
                 ///////////////////bioProject info
@@ -664,6 +664,11 @@ int SRACommand::readContactFile(){
                     m->splitAtChar(values[i], items, '=');
                     if (items.size() != 2) { m->mothurOut("[ERROR]: error parsing grant info for line \"" + value + "\", skipping it.\n"); break; }
                     else {
+                        //remove any leading spaces in tag
+                        int i;
+                        for (i = 0; i < items[0].length(); i++) {  if (isspace(items[0][i])) {}else {break;} }
+                        items[0] = items[0].substr(i);
+                        
                         if (items[0] == "id") { thisGrant.grantId = items[1];  }
                         else if (items[0] == "title") { thisGrant.grantTitle = items[1];  }
                         else if (items[0] == "agency") { thisGrant.grantAgency = items[1];  }
@@ -721,6 +726,8 @@ int SRACommand::readMIMarksFile(){
         requiredFieldsForPackage.push_back("env_material");
         requiredFieldsForPackage.push_back("geo_loc_name");
         requiredFieldsForPackage.push_back("lat_lon");
+        requiredFieldsForPackage.push_back("seq_methods");
+        requiredFieldsForPackage.push_back("organism");
         
         ifstream in;
         m->openInputFile(mimarksfile, in);
