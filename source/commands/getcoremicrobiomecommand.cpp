@@ -40,7 +40,7 @@ string GetCoreMicroBiomeCommand::getHelpString(){
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
         helpString += "The output parameter is used to specify whether you would like the fraction of OTU's or OTU count outputted. Options are fraction or count. Default=fraction.\n";
-		helpString += "The abundance parameter allows you to specify an abundance you would like the OTU names outputted for. Must be an between 0 and 100, indicating the relative abundance. Values 1 to 100, will be treated as the percentage.  For example relabund=0.01 can be set with abundance=1 or abundance=0.01.  For abundance values < 1 percent, abundance=0.001 will specify OTUs with relative abundance of 0.001.\n";
+		helpString += "The abundance parameter allows you to specify an abundance you would like the OTU names outputted for. Values 1 to 100, will be treated as the percentage.  For example relabund=0.01 can be set with abundance=1 or abundance=0.01.  For abundance values < 1 percent, abundance=0.001 will specify OTUs with relative abundance of 0.001.\n";
         helpString += "The samples parameter allows you to specify the minimum number of samples you would like the OTU names outputted for. Must be an interger between 1 and number of samples in your file.\n";
 		helpString += "The new command should be in the following format: get.coremicrobiome(shared=yourSharedFile)\n";
 		helpString += "get.coremicrobiom(shared=final.an.shared, abund=30)\n";

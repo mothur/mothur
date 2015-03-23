@@ -418,17 +418,17 @@ int SRACommand::execute(){
             out << "\t\t\t\t\t\t<SampleId>\n";
             out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID> \n";
             out << "\t\t\t\t\t\t</SampleId>\n";
+            out << "\t\t\t\t\t\t<Descriptor>\n";
+            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
+            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["description"] + "</p></Description> \n";
+            out << "\t\t\t\t\t\t</Descriptor>\n";
             out << "\t\t\t\t\t\t<Organism>\n";
             string organismName = "metagenome";
             map<string, string>::iterator itOrganism = Group2Organism.find(Groups[i]);
             if (itOrganism != Group2Organism.end()) { organismName = itOrganism->second; } //user supplied acceptable organism, so use it.
             out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
             out << "\t\t\t\t\t\t</Organism>\n";
-            out << "\t\t\t\t\t\t<Descriptor>\n";
-            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
-            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["description"] + "</p></Description> \n";
-            out << "\t\t\t\t\t\t</Descriptor>\n";
-            out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
+                        out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
             out << "\t\t\t\t\t\t<Attributes>\n";
             //add biosample required attributes
             map<string, map<string, string> >:: iterator it = mimarks.find(Groups[i]);
