@@ -444,7 +444,7 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
             string extension = "";
             if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short);
+			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short, keepN);
 			pDataArray.push_back(tempChop);
 			
 			//MyChopThreadFunction is in header. It must be global or static to work with the threads.
