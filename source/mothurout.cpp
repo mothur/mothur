@@ -9,6 +9,7 @@
 
 #include "mothurout.h"
 
+MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
