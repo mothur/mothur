@@ -31,7 +31,8 @@ vector<string> LibShuffCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pform("form", "Multiple", "discrete-integral", "integral", "", "", "","",false,false); parameters.push_back(pform);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

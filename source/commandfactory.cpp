@@ -153,6 +153,10 @@
 #include "mergesfffilecommand.h"
 #include "getmimarkspackagecommand.h"
 #include "mimarksattributescommand.h"
+#include "setseedcommand.h"
+
+//needed for testing project
+//CommandFactory* CommandFactory::_uniqueInstance;
 
 /*******************************************************/
 
@@ -329,6 +333,7 @@ CommandFactory::CommandFactory(){
     commands["merge.sfffiles"]      = "merge.sfffiles";
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     commands["mimarks.attributes"]  = "mimarks.attributes";
+    commands["set.seed"] = "set.seed";
     
 
 }
@@ -389,6 +394,35 @@ int CommandFactory::checkForRedirects(string optionString) {
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
             }
         }
+        
+        pos = optionString.find("seed");
+        if (pos != string::npos) { //user has set inputdir in command option string
+            string intputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   intputOption += optionString[i]; }
+            }
+            if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
+            bool seed = false; int random;
+            if (intputOption == "clear") {
+                random = time(NULL);
+                seed = true;
+            }else {
+                if (m->isInteger(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
+            }
+            
+            if (seed)  {
+                srand(time(NULL));
+                m->mothurOut("\nRandom number(1-100) with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
+                srand(random);
+                m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
+            }
+
+        }
+
         
         return 0;
 	}
@@ -563,6 +597,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
         else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
+        else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -736,6 +771,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
+        else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -894,7 +930,8 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
-        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();       }
+        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
+        else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

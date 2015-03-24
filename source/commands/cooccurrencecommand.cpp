@@ -16,7 +16,8 @@ vector<string> CooccurrenceCommand::setParameters() {
 		CommandParameter pmetric("metric", "Multiple", "cscore-checker-combo-vratio", "cscore", "", "", "","",false,false); parameters.push_back(pmetric);
 		CommandParameter pmatrix("matrixmodel", "Multiple", "sim1-sim2-sim3-sim4-sim5-sim6-sim7-sim8-sim9", "sim2", "", "", "","",false,false); parameters.push_back(pmatrix);
         CommandParameter pruns("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(pruns);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);

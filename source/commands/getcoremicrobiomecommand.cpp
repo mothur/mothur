@@ -19,7 +19,8 @@ vector<string> GetCoreMicroBiomeCommand::setParameters(){
 		CommandParameter poutput("output", "Multiple", "fraction-count", "fraction", "", "", "","",false,false); parameters.push_back(poutput);
         CommandParameter pabund("abundance", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pabund);
 		CommandParameter psamples("samples", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(psamples);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

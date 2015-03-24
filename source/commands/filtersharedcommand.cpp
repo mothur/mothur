@@ -22,7 +22,8 @@ vector<string> FilterSharedCommand::setParameters(){
         CommandParameter pminpercentsamples("minpercentsamples", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminpercentsamples);
         CommandParameter pkeepties("keepties", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pkeepties);
 		CommandParameter pmakerare("makerare", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pmakerare);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
