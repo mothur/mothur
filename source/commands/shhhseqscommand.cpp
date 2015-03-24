@@ -18,7 +18,8 @@ vector<string> ShhhSeqsCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","name",false,true,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter psigma("sigma", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(psigma);
 		

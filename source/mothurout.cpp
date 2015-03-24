@@ -9,7 +9,8 @@
 
 #include "mothurout.h"
 
-MothurOut* MothurOut::_uniqueInstance;
+//needed for testing project
+//MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {

@@ -2070,6 +2070,7 @@ test15()
 
 }
 
+/*
 int
 main()
 {
@@ -2096,4 +2097,7 @@ main()
 
     return 0;
 }
+ 
+ */
+
 #endif

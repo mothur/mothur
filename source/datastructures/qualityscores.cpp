@@ -132,6 +132,8 @@ int QualityScores::read(ifstream& qFile){
         seqLength = qScores.size();
         //cout << "seqlength = " << seqLength  << endl;
         
+        return seqLength;
+        
     }
     catch(exception& e) {
         m->errorOut(e, "QualityScores", "read");

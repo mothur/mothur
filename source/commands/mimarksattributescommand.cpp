@@ -13,6 +13,7 @@ vector<string> MimarksAttributesCommand::setParameters(){
     try {
         CommandParameter pxml("xml", "InputTypes", "", "", "none", "none", "none","summary",false,false,true); parameters.push_back(pxml);
         CommandParameter psets("package", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         

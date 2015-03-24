@@ -19,7 +19,7 @@
 // OutputFilter constants
 const int OutputFilter::QUIET  = 0;
 const int OutputFilter::INFO   = 1;
-const int OutputFilter::DEBUG  = 2;
+const int OutputFilter::mDEBUG  = 2;
 const int OutputFilter::TRACE  = 3;
 
 
