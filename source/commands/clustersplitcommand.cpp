@@ -1016,7 +1016,7 @@ void ClusterSplitCommand::printData(ListVector* oldList){
 //**********************************************************************************************************************
 vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string> > distName, set<string>& labels){
 	try {
-        
+        bool recalc = false;
         vector<string> listFiles;
         vector < vector < map<string, string> > > dividedNames; //distNames[1] = vector of filenames for process 1...
         dividedNames.resize(processors);
@@ -1076,12 +1076,79 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 				outLabels.close();
 
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
+
 		}
+        
+        if (recalc) {
+            listFiles.clear();
+            dividedNames.clear(); //distNames[1] = vector of filenames for process 1...
+            dividedNames.resize(processors);
+            
+            //for each file group figure out which process will complete it
+            //want to divide the load intelligently so the big files are spread between processes
+            for (int i = 0; i < distName.size(); i++) {
+                //cout << i << endl;
+                int processToAssign = (i+1) % processors;
+                if (processToAssign == 0) { processToAssign = processors; }
+                
+                dividedNames[(processToAssign-1)].push_back(distName[i]);
+                if ((processToAssign-1) == 1) { m->mothurOut(distName[i].begin()->first + "\n"); }
+            }
+            
+            //now lets reverse the order of ever other process, so we balance big files running with little ones
+            for (int i = 0; i < processors; i++) {
+                //cout << i << endl;
+                int remainder = ((i+1) % processors);
+                if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    set<string> labels;
+                    vector<string> listFileNames = cluster(dividedNames[process], labels);
+                    
+                    //write out names to file
+                    string filename = m->mothurGetpid(process) + ".temp";
+                    ofstream out;
+                    m->openOutputFile(filename, out);
+                    out << tag << endl;
+                    for (int j = 0; j < listFileNames.size(); j++) { out << listFileNames[j] << endl;  }
+                    out.close();
+                    
+                    //print out labels
+                    ofstream outLabels;
+                    filename = m->mothurGetpid(process) + ".temp.labels";
+                    m->openOutputFile(filename, outLabels);
+                    
+                    outLabels << cutoff << endl;
+                    for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {
+                        outLabels << (*it) << endl;
+                    }
+                    outLabels.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
         //do your part
         listFiles = cluster(dividedNames[0], labels);
