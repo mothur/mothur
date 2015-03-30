@@ -1876,6 +1876,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
                 recalc = true;
                 break;
+            }
 
 		}
 		
