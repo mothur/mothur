@@ -631,6 +631,7 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 0;
 		int num = 0;
+        bool recalc = false;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -650,12 +651,49 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
 				out.close();
 
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
 		}
+        
+        if (recalc) {
+            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+            vector<unsigned long long> positions;
+            positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp");
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processors;i++) { 

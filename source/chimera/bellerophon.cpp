@@ -360,6 +360,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
 		int process = 0;
 		int exitCommand = 1;
 		vector<int> processIDS;
+         bool recalc = false;
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -373,12 +374,48 @@ int Bellerophon::createProcesses(vector<int> mid) {
 				string tempOut = outputDir + toString(m->mothurGetpid(process)) + ".temp";
 				writePrefs(tempOut, lines[process]);
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
 		}
+        
+        if (recalc) {
+            lines.clear();
+            int numSeqsPerProcessor = iters / processors;
+            
+            for (int i = 0; i < processors; i++) {
+                unsigned long long startPos = i * numSeqsPerProcessor;
+                if(i == processors - 1){
+                    numSeqsPerProcessor = iters - i * numSeqsPerProcessor;
+                }
+                lines.push_back(linePair(startPos, numSeqsPerProcessor));
+            }
+
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    exitCommand = driverChimeras(mid, lines[process]);
+                    string tempOut = outputDir + toString(m->mothurGetpid(process)) + ".temp";
+                    writePrefs(tempOut, lines[process]);
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processors;i++) { 
