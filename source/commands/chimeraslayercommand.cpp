@@ -1548,6 +1548,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		int process = 1;
 		int num = 0;
 		processIDS.clear();
+        bool recalc = false;
 		
 		if (fileToPriority.size() < processors) { processors = fileToPriority.size(); }
         
@@ -1593,13 +1594,63 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 				out << num << endl;
 				out.close();
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
 		}
 		
+        if (recalc) {
+            groupsPerProcessor = fileToPriority.size() / processors;
+            remainder = fileToPriority.size() % processors;
+            breakUp.clear();
+            
+            for (int i = 0; i < processors; i++) {
+                map<string, map<string, int> > thisFileToPriority;
+                map<string, map<string, int> >::iterator itFile;
+                int count = 0;
+                int enough = groupsPerProcessor;
+                if (i == 0) { enough = groupsPerProcessor + remainder; }
+                
+                for (itFile = fileToPriority.begin(); itFile != fileToPriority.end();) {
+                    thisFileToPriority[itFile->first] = itFile->second;
+                    fileToPriority.erase(itFile++);
+                    count++;
+                    if (count == enough) { break; }
+                }	
+                breakUp.push_back(thisFileToPriority);
+            }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + m->mothurGetpid(process) + ".temp", fasta + toString(m->mothurGetpid(process)) + ".temp", breakUp[process], fileGroup, accnos + toString(m->mothurGetpid(process)) + ".byCount");
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup, accnos + ".byCount");
 
 		//force parent to wait until all the processes are done
@@ -2001,6 +2052,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		int process = 0;
 		int num = 0;
 		processIDS.clear();
+        bool recalc = false;
         
         if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
 		
@@ -2022,12 +2074,47 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				out << num << endl;
 				out.close();
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
 		}
+        
+        if (recalc) {
+            lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 0;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp", fasta + toString(m->mothurGetpid(process)) + ".temp", thisPriority);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processors;i++) { 

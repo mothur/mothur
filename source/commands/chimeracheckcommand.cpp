@@ -656,7 +656,7 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
             }
             num = 0;
             processIDS.resize(0);
-            process = 1;
+            process = 0;
             
             while (process != processors) {
                 pid_t pid = fork();
