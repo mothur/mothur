@@ -969,6 +969,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		
 		int num = 0;
 		processIDS.clear();
+        bool recalc = false;
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -991,12 +992,48 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 				out.close();
 
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                recalc = true;
+                break;
+            }
 		}
+        
+        if (recalc) {
+            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(lines[process], taxFileName + m->mothurGetpid(process) + ".temp", tempTaxFile + m->mothurGetpid(process) + ".temp", accnos + m->mothurGetpid(process) + ".temp", filename);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//parent does its part
 		num = driver(lines[0], taxFileName, tempTaxFile, accnos, filename);
