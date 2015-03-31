@@ -13,8 +13,8 @@ USEMPI ?= no
 USEREADLINE ?= yes
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/23/2014\""
-VERSION = "\"1.35.0\""
+RELEASE_DATE = "\"3/31/2015\""
+VERSION = "\"1.35.1\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS =
 
