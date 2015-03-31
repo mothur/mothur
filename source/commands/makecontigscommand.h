@@ -73,6 +73,7 @@ private:
     map<int, string> file2Group;
     vector<double> qual_score;
     
+    bool checkName(FastqRead& forward, FastqRead& reverse);
     unsigned long long processMultipleFileOption(map<string, int>&);
     unsigned long long processSingleFileOption(map<string, int>&);
     
@@ -465,6 +466,29 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 bool tignore;
                 FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
                 FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                if (fread.getName() != rread.getName()) {
+                    ///bool fixed = checkName(fread, rread);
+                    //////////////////////////////////////////////////////////////
+                    bool fixed = false;
+                    if (fread.getName() == rread.getName()) {
+                        fixed = true;
+                    }else {
+                        //if no match are the names only different by 1 and 2?
+                        string tempFRead = fread.getName().substr(0, fread.getName().length()-1);
+                        string tempRRead = rread.getName().substr(0, rread.getName().length()-1);
+                        if (tempFRead == tempRRead) {
+                            if ((fread.getName()[fread.getName().length()-1] == '1') && (rread.getName()[rread.getName().length()-1] == '2')) {
+                                fread.setName(tempFRead);
+                                rread.setName(tempRRead);
+                                fixed = true;
+                            }
+                        }
+                    }
+
+                    /////////////////////////////////////////////////////////////
+                    if (!fixed) {
+                        pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                }
                 if (tignore) { ignore=true; }
                 fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
@@ -476,17 +500,45 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
                     findexBarcode.setAligned(firead.getSeq());
-                    if (firead.getName() != fread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    if (firead.getName() != fread.getName()) {
+                        ///bool fixed = checkName(fread, rread);
+                        //////////////////////////////////////////////////////////////
+                        bool fixed = false;
+                
+                        //if no match are the names only different by 1 and 2?
+                        string tempFRead = fread.getName();
+                        string tempRRead = firead.getName().substr(0, firead.getName().length()-1);
+                        if (tempFRead == tempRRead) {
+                            firead.setName(tempRRead);
+                            fixed = true;
+                        }
+                        /////////////////////////////////////////////////////////////
+                        if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    }
                     hasIndex = true;
                 }
                 if (thisrqualindexfile != "") { //reverse index file
                     FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     rindexBarcode.setAligned(riread.getSeq());
-                    if (riread.getName() != fread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    if (riread.getName() != fread.getName()) {
+                        ///bool fixed = checkName(fread, rread);
+                        //////////////////////////////////////////////////////////////
+                        bool fixed = false;
+                        
+                        //if no match are the names only different by 1 and 2?
+                        string tempFRead = fread.getName();
+                        string tempRRead = riread.getName().substr(0, riread.getName().length()-1);
+                        if (tempFRead == tempRRead) {
+                            riread.setName(tempRRead);
+                            fixed = true;
+                        }
+                        /////////////////////////////////////////////////////////////
+                        if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    }
                     hasIndex = true;
                 }
-                if (fread.getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                
             }else { //reading fasta and maybe qual
                 Sequence tfSeq(inFFasta); pDataArray->m->gobble(inFFasta);
                 Sequence trSeq(inRFasta); pDataArray->m->gobble(inRFasta);

@@ -33,6 +33,7 @@ public:
     ~FastqRead() {}
     
     string getName() { return name; }
+    void setName(string n) { name = n; }
     string getSeq() { return sequence; }
     vector<int> getScores() { return scores; }
     
