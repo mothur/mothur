@@ -360,7 +360,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
 		int process = 0;
 		int exitCommand = 1;
 		vector<int> processIDS;
-         bool recalc = false;
+        bool recalc = false;
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -377,12 +377,21 @@ int Bellerophon::createProcesses(vector<int> mid) {
             }else {
                 m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                m->control_pressed = false;
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
                 recalc = true;
                 break;
             }
 		}
         
         if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); }  m->control_pressed = false; processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
             lines.clear();
             int numSeqsPerProcessor = iters / processors;
             
@@ -394,7 +403,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
                 lines.push_back(linePair(startPos, numSeqsPerProcessor));
             }
 
-            processIDS.resize(0);
+            processIDS.clear();
             process = 0;
             
             while (process != processors) {
@@ -418,7 +427,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
 
 		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<processIDS.size();i++) {
 			int temp = processIDS[i];
 			wait(&temp);
 		}
@@ -526,12 +535,12 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 			if (m->control_pressed) { return 0; }
 			
 			//report progress
-			if((h+1) % 10 == 0){	cout << "Processing sliding window: " << toString(h+1) <<  "\n";  m->mothurOutJustToLog("Processing sliding window: " + toString(h+1) + "\n") ;		}
+			if((h+1) % 10 == 0){ m->mothurOutJustToScreen("Processing sliding window: " + toString(h+1) + "\n") ;		}
 			
 		}
 		
 		//report progress
-		if((line.start + line.num) % 10 != 0){	cout << "Processing sliding window: " << toString(line.start + line.num) <<  "\n";  m->mothurOutJustToLog("Processing sliding window: " + toString(line.start + line.num) + "\n") ;		}
+		if((line.start + line.num) % 10 != 0){  m->mothurOutJustToScreen("Processing sliding window: " + toString(line.start + line.num) + "\n") ;		}
 
 		return 0;
 		
