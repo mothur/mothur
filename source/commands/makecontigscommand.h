@@ -74,6 +74,9 @@ private:
     vector<double> qual_score;
     
     bool checkName(FastqRead& forward, FastqRead& reverse);
+    bool checkName(Sequence& forward, Sequence& reverse);
+    bool checkName(QualityScores& forward, QualityScores& reverse);
+    bool checkName(Sequence& forward, QualityScores& reverse);
     unsigned long long processMultipleFileOption(map<string, int>&);
     unsigned long long processSingleFileOption(map<string, int>&);
     
@@ -542,11 +545,59 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             }else { //reading fasta and maybe qual
                 Sequence tfSeq(inFFasta); pDataArray->m->gobble(inFFasta);
                 Sequence trSeq(inRFasta); pDataArray->m->gobble(inRFasta);
+                if (tfSeq.getName() != trSeq.getName()) {
+                    ///bool fixed = checkName(fread, rread);
+                    //////////////////////////////////////////////////////////////
+                    bool fixed = false;
+                    if (tfSeq.getName() == trSeq.getName()) {
+                        fixed = true;
+                    }else {
+                        //if no match are the names only different by 1 and 2?
+                        string tempFRead = tfSeq.getName().substr(0, tfSeq.getName().length()-1);
+                        string tempRRead = trSeq.getName().substr(0, trSeq.getName().length()-1);
+                        if (tempFRead == tempRRead) {
+                            if ((tfSeq.getName()[tfSeq.getName().length()-1] == '1') && (trSeq.getName()[trSeq.getName().length()-1] == '2')) {
+                                tfSeq.setName(tempFRead);
+                                trSeq.setName(tempRRead);
+                                fixed = true;
+                            }
+                        }
+                    }
+                    
+                    /////////////////////////////////////////////////////////////
+                    if (!fixed) {
+                        pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                }
+
                 fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
                 rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
+                    if (fQual->getName() != rQual->getName()) {
+                        ///bool fixed = checkName(fread, rread);
+                        //////////////////////////////////////////////////////////////
+                        bool fixed = false;
+                        if (fQual->getName() == rQual->getName()) {
+                            fixed = true;
+                        }else {
+                            //if no match are the names only different by 1 and 2?
+                            string tempFRead = fQual->getName().substr(0, fQual->getName().length()-1);
+                            string tempRRead = rQual->getName().substr(0, rQual->getName().length()-1);
+                            if (tempFRead == tempRRead) {
+                                if ((fQual->getName()[fQual->getName().length()-1] == '1') && (rQual->getName()[rQual->getName().length()-1] == '2')) {
+                                    fQual->setName(tempFRead);
+                                    rQual->setName(tempRRead);
+                                    fixed = true;
+                                }
+                            }
+                        }
+                        
+                        /////////////////////////////////////////////////////////////
+                        if (!fixed) {
+                            pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse qfile file. Ignoring, " + fQual->getName() + ".\n"); ignore = true; }
+                    }
+
                     savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                     savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                     if (fQual->getName() != tfSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }

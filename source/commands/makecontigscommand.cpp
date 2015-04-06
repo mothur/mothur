@@ -1211,11 +1211,19 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
             }else { //reading fasta and maybe qual
                 Sequence tfSeq(inFFasta); m->gobble(inFFasta);
                 Sequence trSeq(inRFasta); m->gobble(inRFasta);
+                if (tfSeq.getName() != trSeq.getName()) {
+                    bool fixed = checkName(tfSeq, trSeq);
+                    if (!fixed) {  m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                }
                 fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
                 rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); m->gobble(inRQualIndex);
+                    if (fQual->getName() != rQual->getName()) {
+                        bool fixed = checkName(*fQual, *rQual);
+                        if (!fixed) {  m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true; }
+                    }
                     savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                     savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                     if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
@@ -2270,6 +2278,116 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
         exit(1);
     }
 }
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+
 
 //***************************************************************************************************************
 /**
