@@ -410,36 +410,7 @@ int DistanceCommand::execute(){
 			if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
 			else { driver(0, numSeqs, outputFile, "square");  }
 		}else{ //you have multiple processors
-			
-			unsigned long long numDists = 0;
-			
-			if (output == "square") {
-				 numDists = numSeqs * numSeqs;
-			}else {
-				for(int i=0;i<numSeqs;i++){
-					for(int j=0;j<i;j++){
-						numDists++;
-						if (numDists > processors) { break; }
-					}
-				}
-			}
-			
-			if (numDists < processors) { processors = numDists; }
-			
-			for (int i = 0; i < processors; i++) {
-				distlinePair tempLine;
-				lines.push_back(tempLine);
-				if (output != "square") {
-					lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
-					lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
-				}else{
-					lines[i].start = int ((float(i)/float(processors)) * numSeqs);
-					lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
-				}
-				
-			}
-			
-			createProcesses(outputFile); 
+			createProcesses(outputFile, numSeqs);
 		}
 	//#else
 		//ifstream inFASTA;
@@ -529,11 +500,40 @@ int DistanceCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-void DistanceCommand::createProcesses(string filename) {
+void DistanceCommand::createProcesses(string filename, int numSeqs) {
 	try {
+        unsigned long long numDists = 0;
+        
+        if (output == "square") {
+            numDists = numSeqs * numSeqs;
+        }else {
+            for(int i=0;i<numSeqs;i++){
+                for(int j=0;j<i;j++){
+                    numDists++;
+                    if (numDists > processors) { break; }
+                }
+            }
+        }
+        
+        if (numDists < processors) { processors = numDists; }
+        
+        for (int i = 0; i < processors; i++) {
+            distlinePair tempLine;
+            lines.push_back(tempLine);
+            if (output != "square") {
+                lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+                lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+            }else{
+                lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+                lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
+            }
+            
+        }
+
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		processIDS.clear();
+        bool recalc = false;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -548,12 +548,62 @@ void DistanceCommand::createProcesses(string filename) {
 				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine(); 
-				perror(" : ");
-				for (int i=0;i<processIDS.size();i++) {  int temp = processIDS[i]; kill (temp, SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            processIDS.resize(0);
+            process = 1;
+            lines.clear();
+            
+            for (int i = 0; i < processors; i++) {
+                distlinePair tempLine;
+                lines.push_back(tempLine);
+                if (output != "square") {
+                    lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+                }else{
+                    lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
+                }
+            }
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                    if (m->debug) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
+                }else if (pid == 0){
+                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
+                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine();
+                    perror(" : ");
+                    for (int i=0;i<processIDS.size();i++) {  int temp = processIDS[i]; kill (temp, SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		//parent does its part
 		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }

@@ -208,7 +208,7 @@ private:
 	vector<string>  Estimators, outputNames; //holds estimators to be used
 	
 	//void m->appendFiles(string, string);
-	void createProcesses(string);
+	void createProcesses(string, int);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
 	int driver(int, int, string, string);
 	
