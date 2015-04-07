@@ -449,6 +449,16 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
             }else {
                 m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                m->control_pressed = false;
                 recalc = true;
                 break;
             }
@@ -456,6 +466,9 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 		
         
         if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
             positions.clear();
             lines.clear();
             positions = m->divideFilePerLine(namefile, processors);
