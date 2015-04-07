@@ -2062,7 +2062,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		int process = 0;
 		int num = 0;
 		processIDS.clear();
-        bool recalc = true;
+        bool recalc = false;
         
         if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
 		
@@ -2100,7 +2100,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
         
         if (recalc) {
             //test line, also set recalc to true.
-            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             lines.clear();
             vector<unsigned long long> positions = m->divideFile(filename, processors);
             for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}

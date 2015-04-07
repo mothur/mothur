@@ -1625,7 +1625,6 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		int process = 1;
 		int num = 0;
 		vector<string> files;
-        bool recalc = false;
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		//break up file into multiple files
@@ -1653,46 +1652,11 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 				
 				exit(0);
             }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            m->divideFile(filename, processors, files);
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(outputFileName + toString(m->mothurGetpid(process)) + ".temp", files[process], accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", numChimeras);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out << numChimeras << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
+                exit(0);
             }
-        }
-
+		}
 		
 		//do my part
 		num = driver(outputFileName, files[0], accnos, alns, numChimeras);
@@ -1831,7 +1795,6 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		processIDS.clear();
 		int process = 1;
 		int num = 0;
-        bool recalc = false;
         
         CountTable newCount;
         if (hasCount && dups) { newCount.readTable(nameFile, true, false); }
@@ -1872,56 +1835,13 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				
 				exit(0);
             }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                recalc = true;
-                break;
+                exit(0);
             }
 
 		}
-		
-            
-        if (recalc) {
-            //divide the groups between the processors
-            lines.clear();
-            int remainingPairs = groups.size();
-            int startIndex = 0;
-            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                int numPairs = remainingPairs; //case for last processor
-                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
-                startIndex = startIndex + numPairs;
-                remainingPairs = remainingPairs - numPairs;
-            }
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", filename + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
+		m->mothurOut(toString( getpid() ) + " here\n");
             
 		//do my part
 		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
