@@ -727,6 +727,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 	try {
 		int num = 0;
 		vector<int> processIDS;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -789,12 +790,100 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            setLines(fileInputs, qualOrIndexFiles, lines, qLines, delim);
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+                    vector<vector<string> > tempQUALFileNames = qualFileNames;
+                    
+                    if(allFiles){
+                        ofstream temp;
+                        
+                        for(int i=0;i<tempFASTAFileNames.size();i++){
+                            for(int j=0;j<tempFASTAFileNames[i].size();j++){
+                                if (tempFASTAFileNames[i][j] != "") {
+                                    tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                    m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+                                }
+                                if (tempQUALFileNames[i][j] != "") {
+                                    tempQUALFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                    m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
+                                }
+                            }
+                        }
+                    }
+                    
+                    int spot = process*2;
+                    num = driver(fileInputs, qualOrIndexFiles,
+                                 outputFasta + m->mothurGetpid(process) + ".temp",
+                                 outputScrapFasta + m->mothurGetpid(process) + ".temp",
+                                 outputQual + m->mothurGetpid(process) + ".temp",
+                                 outputScrapQual + m->mothurGetpid(process) + ".temp",
+                                 outputMisMatches + m->mothurGetpid(process) + ".temp",
+                                 tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
+                    
+                    //pass groupCounts to parent
+                    ofstream out;
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    if (createFileGroup || createOligosGroup) {
+                        out << groupCounts.size() << endl;
+                        
+                        for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                        
+                        out << groupMap.size() << endl;
+                        for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                    }
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
         ofstream temp;
 		m->openOutputFile(outputFasta, temp);		temp.close();
         m->openOutputFile(outputScrapFasta, temp);		temp.close();
