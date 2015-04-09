@@ -1429,6 +1429,7 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
         int process = 1;
 		int num = 0;
 		vector<int> processIDS;
+        bool recalc = true;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
