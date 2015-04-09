@@ -873,6 +873,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 		vector<int> processIDS;
 		int process = 1;
         unsigned long int fastaCount = 0;
+        bool recalc = false;
  		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
@@ -913,11 +914,72 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));
+                }
+                recalc = true;
+                break;
+
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            positions.clear(); lines.clear();
+            positions = m->divideFile(fastafile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(fastaLinePair(positions[i], positions[(i+1)]));	}
+            
+            counts.clear(); otuCounts.clear(); processIDS.clear();
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".cons_counts.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << fastaCount << endl;
+                    //pass counts
+                    outTemp << counts.size() << endl;
+                    for (int i = 0; i < counts.size(); i++) {
+                        outTemp << counts[i].size() << endl;
+                        for (int j = 0; j < counts[i].size(); j++) {
+                            for (int k = 0; k < 5; k++) {  outTemp << counts[i][j][k] << '\t'; }
+                            outTemp << endl;
+                        }
+                    }
+                    //pass otuCounts
+                    outTemp << otuCounts.size() << endl;
+                    for (int i = 0; i < otuCounts.size(); i++) { outTemp << otuCounts[i] << '\t'; }
+                    outTemp << endl;
+                    outTemp.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		//do my part
 		counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[0].start, lines[0].end);
