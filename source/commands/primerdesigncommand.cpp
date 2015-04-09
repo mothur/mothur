@@ -542,6 +542,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		int process = 1;
         set<int> otusToRemove;
         int numBinsProcessed = 0;
+        bool recalc = false;
 		
 		//sanity check
         int numBins = conSeqs.size();
@@ -583,11 +584,70 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) { m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            lines.clear();
+            int numOtusPerProcessor = numBins / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numOtusPerProcessor;
+                int endIndex = (i+1) * numOtusPerProcessor;
+                if(i == (processors - 1)){	endIndex = numBins; 	}
+                lines.push_back(linePair(startIndex, endIndex));
+            }
+            
+            processIDS.clear();
+            process = 1;
+            otusToRemove.clear();
+            numBinsProcessed = 0;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    //clear old file because we append in driver
+                    m->mothurRemove(newSummaryFile + m->mothurGetpid(process) + ".temp");
+                    
+                    otusToRemove = driver(newSummaryFile + m->mothurGetpid(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".otus2Remove.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << numBinsProcessed << endl;
+                    outTemp << otusToRemove.size() << endl;
+                    for (set<int>::iterator it = otusToRemove.begin(); it != otusToRemove.end(); it++) { outTemp << *it << endl; }
+                    outTemp.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		//do my part
 		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
