@@ -148,6 +148,7 @@ class MothurOut {
 		int getNumChar(string, char);
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
+        bool containsAlphas(string);
 		bool isNumeric1(string);
         bool isInteger(string);
         bool isLabelEquivalent(string, string);

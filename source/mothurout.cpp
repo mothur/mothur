@@ -3278,6 +3278,21 @@ bool MothurOut::isInteger(string stringToCheck){
     
 }
 /***********************************************************************/
+bool MothurOut::containsAlphas(string stringToCheck){
+    try {
+        bool containsAlpha = false;
+        
+        if(stringToCheck.find_first_of("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOopPQqRrSsTtUuVvWwXxYyZz") != string::npos) { containsAlpha = true; }
+        
+        return containsAlpha;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "containsAlphas");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
 	try {
 		bool error = false;
