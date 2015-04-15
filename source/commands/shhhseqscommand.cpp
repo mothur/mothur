@@ -372,6 +372,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		vector<int> processIDS;
 		int process = 1;
 		vector<string> mapfileNames;
+        bool recalc = false;
 		
 		//sanity check
 		if (groups.size() < processors) { processors = groups.size(); }
@@ -413,12 +414,73 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(newFName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(newNName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(newMName + (toString(processIDS[i]) + ".temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            lines.clear();
+            int remainingPairs = groups.size();
+            int startIndex = 0;
+            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                int numPairs = remainingPairs; //case for last processor
+                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+                startIndex = startIndex + numPairs;
+                remainingPairs = remainingPairs - numPairs;
+            }
+            
+            mapfileNames.clear();
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
+                    
+                    //pass filenames to parent
+                    ofstream out;
+                    string tempFile = newMName + m->mothurGetpid(process) + ".temp";
+                    m->openOutputFile(tempFile, out);
+                    out << mapfileNames.size() << endl;
+                    for (int i = 0; i < mapfileNames.size(); i++) {
+                        out << mapfileNames[i] << endl;
+                    }
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		//do my part
 		mapfileNames = driverGroups(parser, newFName, newNName, newMName, lines[0].start, lines[0].end, groups);
 		
