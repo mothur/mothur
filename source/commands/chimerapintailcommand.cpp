@@ -718,7 +718,7 @@ int ChimeraPintailCommand::createProcesses(string outputFileName, string filenam
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 0;
 		int num = 0;
-        bool recalc = true;
+        bool recalc = false;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -754,7 +754,7 @@ int ChimeraPintailCommand::createProcesses(string outputFileName, string filenam
 
         if (recalc) {
             //test line, also set recalc to true.
-            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
 
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             
