@@ -543,6 +543,7 @@ int SeqSummaryCommand::execute(){
                 m->control_pressed = false;
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));
+                    m->mothurRemove(sumFile + (toString(processIDS[i]) + ".temp"));
                 }
                 recalc = true;
                 break;

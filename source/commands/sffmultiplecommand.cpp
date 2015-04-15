@@ -731,6 +731,7 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
         vector<int> processIDS;
 		int process = 1;
 		int num = 0;
+        bool recalc = false;
 				
 		//divide the groups between the processors
 		vector<linePair> lines;
@@ -766,11 +767,71 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            numFilesToComplete.clear();
+            int numFilesPerProcessor = sffFiles.size() / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numFilesPerProcessor;
+                int endIndex = (i+1) * numFilesPerProcessor;
+                if(i == (processors - 1)){	endIndex = sffFiles.size(); 	}
+                lines.push_back(linePair(startIndex, endIndex));
+                numFilesToComplete.push_back((endIndex-startIndex));
+            }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + m->mothurGetpid(process) + ".temp", name  + m->mothurGetpid(process) + ".temp", group  + m->mothurGetpid(process) + ".temp");
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << '\t' << outputNames.size() << endl;
+                    for (int i = 0; i < outputNames.size(); i++) {  out << outputNames[i] << endl;  }
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//do my part
 		num = driver(sffFiles, oligosFiles, lines[0].start, lines[0].end, fasta, name, group);
