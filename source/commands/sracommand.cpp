@@ -816,7 +816,6 @@ int SRACommand::readMIMarksFile(){
                     map<string, string> categories;
                     //start after *sample_name
                     for (int i = 1; i < headers.size(); i++) {
-                        categories[headers[i]] = linePieces[i];
                         //check the users inputs for appropriate organisms
                         if (headers[i] == "organism") {
                             if (!m->inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
@@ -837,6 +836,7 @@ int SRACommand::readMIMarksFile(){
                             if (!okay) { m->control_pressed = true; }
                         }
                         if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
+                        categories[headers[i]] = linePieces[i];
                     }
                     
                     //does this sample already match an existing sample?
@@ -1148,11 +1148,11 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
-                Groups.push_back(group);
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
                 if (it == files.end()) {
+                    Groups.push_back(group);
                     vector<string> temp; temp.push_back(thisname); files[group] = temp;
                 }else {
                     files[group].push_back(thisname);
@@ -1383,7 +1383,7 @@ int SRACommand::fixMap(map<string, vector<string> >& files){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "SRACommand", "mapGroupToFile");
+        m->errorOut(e, "SRACommand", "fixMap");
         exit(1);
     }
 }
@@ -2011,10 +2011,8 @@ bool SRACommand::checkDateFormat(string& date){
                 }else {
                     m->mothurOut("[ERROR]: " + pieces[0] + " and " + pieces[1] + " are both > 12.  No valid date. \n"); isOkay = false;
                 }
-                
             }
         }
-       
         if (!isOkay) { m->mothurOut("[ERROR]: The date must be in one of the following formats: Date of sampling, in ""DD-Mmm-YYYY/"", ""Mmm-YYYY/"" or ""YYYY/"" format (eg., 30-Oct-1990, Oct-1990 or 1990) or ISO 8601 standard ""YYYY-mm-dd/"", ""YYYY-mm/""  (eg., 1990-10-30, 1990-10/"")"); }
         
         if (m->debug) {  m->mothurOut("[DEBUG]: date = " + date + "\n"); }
