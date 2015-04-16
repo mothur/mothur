@@ -65,6 +65,7 @@ private:
     bool checkCasesLibSelection(string&);
     bool checkCasesDataType(string&);
     bool sanityCheckMiMarksGroups();
+    bool checkDateFormat(string& date);
     int readFile(map<string, vector<string> >&);
     int readContactFile();
     int readMIMarksFile();

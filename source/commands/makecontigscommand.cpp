@@ -1178,6 +1178,10 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                 bool tignore;
                 FastqRead fread(inFFasta, tignore, format); m->gobble(inFFasta);
                 FastqRead rread(inRFasta, ignore, format); m->gobble(inRFasta);
+                if (fread.getName() != rread.getName()) {
+                    bool fixed = checkName(fread, rread);
+                    if (!fixed) {  m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                }
                 if (tignore) { ignore=true; }
                 fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
@@ -1189,25 +1193,38 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                     FastqRead firead(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
                     findexBarcode.setAligned(firead.getSeq());
-                    if (firead.getName() != fread.getName()) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    if (firead.getName() != fread.getName()) {
+                        bool fixed = checkName(fread, firead);
+                        if (!fixed) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    }
                     hasIndex = true;
                 }
                 if (thisrqualindexfile != "") { //reverse index file
                     FastqRead riread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     rindexBarcode.setAligned(riread.getSeq());
-                    if (riread.getName() != fread.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    if (riread.getName() != fread.getName()) {
+                        bool fixed = checkName(fread, riread);
+                        if (!fixed) { m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true; };
+                    }
                     hasIndex = true;
                 }
-                if (fread.getName() != rread.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
             }else { //reading fasta and maybe qual
                 Sequence tfSeq(inFFasta); m->gobble(inFFasta);
                 Sequence trSeq(inRFasta); m->gobble(inRFasta);
+                if (tfSeq.getName() != trSeq.getName()) {
+                    bool fixed = checkName(tfSeq, trSeq);
+                    if (!fixed) {  m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                }
                 fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
                 rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); m->gobble(inRQualIndex);
+                    if (fQual->getName() != rQual->getName()) {
+                        bool fixed = checkName(*fQual, *rQual);
+                        if (!fixed) {  m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true; }
+                    }
                     savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                     savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                     if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
@@ -1567,7 +1584,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         fastaFilePos = m->divideFile(fasta[0], processors, delim);
         
         //get name of first sequence in each chunk
-        map<string, int> firstSeqNames;
+        map<string, int> firstSeqNames; map<string, int> trimmedNames;
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
             ifstream in;
             m->openInputFile(fasta[0], in);
@@ -1585,12 +1602,12 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 m->checkName(name);
             }
             firstSeqNames[name] = i;
-            
+            trimmedNames[name.substr(0, name.length()-1)];
             in.close();
         }
         
-        map<string, int> copy;
-        if (qual.size() != 0) { copy = firstSeqNames; }
+        map<string, int> copy;  map<string, int> tcopy;
+        if (qual.size() != 0) { copy = firstSeqNames; tcopy = trimmedNames; }
         
         //look for match in reverse file
         ifstream in2;
@@ -1608,16 +1625,21 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     m->checkName(name);
                     
                     map<string, int>::iterator it = firstSeqNames.find(name);
+                    map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                     
-                    if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                    if (it != firstSeqNames.end())  { //this is the start of a new chunk
                         unsigned long long pos = in2.tellg();
                         qfileFilePos.push_back(pos - input.length() - 1);
                         firstSeqNames.erase(it);
+                    }else if (itTrimmed != trimmedNames.end()) {
+                        unsigned long long pos = in2.tellg();
+                        qfileFilePos.push_back(pos - input.length() - 1);
+                        trimmedNames.erase(itTrimmed);
                     }
                 }
             }
             
-            if (firstSeqNames.size() == 0) { break; }
+            if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
         }
         in2.close();
         
@@ -1636,7 +1658,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         qfileFilePos.push_back(size);
 
         
-        if (firstSeqNames.size() != 0) {
+        if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
             for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                 if (delim == '>') {
                     m->mothurOut(it->first + " is in your forward fasta file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -1660,6 +1682,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         
         if (qual.size() != 0) {
             firstSeqNames = copy;
+            trimmedNames = tcopy;
             
             if (qual[0] != "NONE") {
                 //seach for filePos of each first name in the qfile and save in qfileFilePos
@@ -1678,16 +1701,21 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             m->checkName(name);
                             
                             map<string, int>::iterator it = firstSeqNames.find(name);
+                            map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                             
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
                                 unsigned long long pos = inQual.tellg();
                                 qfileFilePos.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
+                            }else if (itTrimmed != trimmedNames.end()) {
+                                unsigned long long pos = inQual.tellg();
+                                qfileFilePos.push_back(pos - input.length() - 1);
+                                trimmedNames.erase(itTrimmed);
                             }
                         }
                     }
                     
-                    if (firstSeqNames.size() == 0) { break; }
+                    if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
                 }
                 inQual.close();
                 
@@ -1706,7 +1734,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 qfileFilePos.push_back(size);
                 
                 
-                if (firstSeqNames.size() != 0) {
+                if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
                             m->mothurOut(it->first + " is in your forward fasta file and reverse fasta file, but not your forward qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -1719,6 +1747,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 }
             }
             firstSeqNames = copy;
+            trimmedNames = tcopy;
             
             if (qual[1] != "NONE") {
                 ifstream inQual2;
@@ -1736,16 +1765,21 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             m->checkName(name);
                             
                             map<string, int>::iterator it = firstSeqNames.find(name);
+                            map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                             
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
                                 unsigned long long pos = inQual2.tellg();
                                 temp.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
+                            }else if (itTrimmed != trimmedNames.end()) {
+                                unsigned long long pos = inQual2.tellg();
+                                qfileFilePos.push_back(pos - input.length() - 1);
+                                trimmedNames.erase(itTrimmed);
                             }
                         }
                     }
                     
-                    if (firstSeqNames.size() == 0) { break; }
+                    if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
                 }
                 inQual2.close();
                 
@@ -1763,7 +1797,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 temp.push_back(size);
                 
                 
-                if (firstSeqNames.size() != 0) {
+                if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
                             m->mothurOut(it->first + " is in your forward fasta file, reverse fasta file, and forward qfile but not your reverse qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -2209,6 +2243,153 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
+    try {
+        if (forward.getName() == reverse.getName()) {
+            return true;
+        }else {
+            //if no match are the names only different by 1 and 2?
+            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
+            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+            if (tempFRead == tempRRead) {
+                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
+                    forward.setName(tempFRead);
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }else {
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.getName();
+                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
+                if (tempFRead == tempRRead) {
+                    reverse.setName(tempRRead);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "ckeckName");
+        exit(1);
+    }
+}
+
+
 //***************************************************************************************************************
 /**
  * Convert the probability to a quality score.

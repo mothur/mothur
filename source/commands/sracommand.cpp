@@ -113,7 +113,7 @@ SRACommand::SRACommand(string option)  {
 	try {
         abort = false; calledHelp = false; fileOption = 0;
         libLayout = "single"; //controlled vocab
-		
+        
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -817,7 +817,6 @@ int SRACommand::readMIMarksFile(){
                     map<string, string> categories;
                     //start after *sample_name
                     for (int i = 1; i < headers.size(); i++) {
-                        categories[headers[i]] = linePieces[i];
                         //check the users inputs for appropriate organisms
                         if (headers[i] == "organism") {
                             if (!m->inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
@@ -830,7 +829,15 @@ int SRACommand::readMIMarksFile(){
                             }
                             Group2Organism[linePieces[0]] = linePieces[i];
                         }
+                        //check date format
+                       // BioSample has several accepted date formats like "DD-Mmm-YYYY" (eg., 30-Oct-2010) or standard "YYYY-mm-dd" or "YYYY-mm" (eg 2010-10-30, 2010-10).
+                        if (headers[i] == "collection_date") {
+                            //will autocorrect if possible
+                            bool okay = checkDateFormat(linePieces[i]);
+                            if (!okay) { m->control_pressed = true; }
+                        }
                         if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
+                        categories[headers[i]] = linePieces[i];
                     }
                     
                     //does this sample already match an existing sample?
@@ -1142,11 +1149,11 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
-                Groups.push_back(group);
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
                 if (it == files.end()) {
+                    Groups.push_back(group);
                     vector<string> temp; temp.push_back(thisname); files[group] = temp;
                 }else {
                     files[group].push_back(thisname);
@@ -1377,7 +1384,7 @@ int SRACommand::fixMap(map<string, vector<string> >& files){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "SRACommand", "mapGroupToFile");
+        m->errorOut(e, "SRACommand", "fixMap");
         exit(1);
     }
 }
@@ -1835,6 +1842,190 @@ bool SRACommand::sanityCheckMiMarksGroups(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+//BioSample has several accepted date formats like "DD-Mmm-YYYY" (eg., 30-Oct-2010) or standard "YYYY-mm-dd" or "YYYY-mm" (eg 2010-10-30, 2010-10).
+bool SRACommand::checkDateFormat(string& date){
+    try {
+        
+        for (int i = 0; i < date.length(); i++) {
+            if (date[i] == '/') { date[i] = '-'; }
+        }
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: date = " + date + "\n"); }
+        
+        map<string, int> months; months["Jan"] = 31; months["Feb"] = 29; months["Mar"] = 31; months["Apr"] = 30; months["Jun"] = 30; months["May"] = 31; months["Jul"] = 31; months["Aug"] = 31; months["Sep"] = 30;months["Oct"] = 31; months["Nov"] = 30; months["Dec"] = 31;
+        map<string, int> monthsN; monthsN["01"] = 31; monthsN["02"] = 29; monthsN["03"] = 31; monthsN["04"] = 30; monthsN["06"] = 30; monthsN["05"] = 31; monthsN["07"] = 31; monthsN["08"] = 31; monthsN["09"] = 30;monthsN["10"] = 31; monthsN["11"] = 30; monthsN["12"] = 31;
+        
+        bool isOkay = true;
+        if (m->containsAlphas(date)) { // then format == "DD-Mmm-YYYY", "Mmm-YYYY"
+            vector<string> pieces;
+            if (date.find_first_of('-') != string::npos) { m->splitAtDash(date, pieces); }
+            else { pieces = m->splitWhiteSpace(date);  }
+             
+            if (m->debug) { m->mothurOut("[DEBUG]: in alpha\n"); }
+            //check "Mmm-YYYY"
+            if (pieces.size() == 2) { //"Mmm-YYYY"
+                if (m->debug) { m->mothurOut("[DEBUG]: pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
+                map<string, int>::iterator it;
+                it = months.find(pieces[0]);  //is this a valid month
+                if (it != months.end()) {
+                    if (pieces[1].size() != 4) { m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                }else {
+                    //see if we can correct if
+                    pieces[0][0] = toupper(pieces[0][0]);
+                    for (int i = 1; i < pieces[0].size(); i++) { pieces[0][i] = tolower(pieces[0][i]); }
+                    
+                    //look again
+                    it = months.find(pieces[0]);  //is this a valid month
+                    if (it == months.end()) { m->mothurOut("[ERROR] " + pieces[0] + " is not a valid month. Looking for ""Mmm-YYYY\" format.\n"); isOkay = false; }
+                    else {
+                        if (pieces[1].size() != 4) { m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    }
+                }
+                if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
+            }else if (pieces.size() == 3) { //DD-Mmm-YYYY"
+                if (m->debug) { m->mothurOut("[DEBUG]: pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                map<string, int>::iterator it;
+                it = months.find(pieces[1]);  //is this a valid month
+                if (it != months.end()) {
+                    if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                }else {
+                    //see if we can correct if
+                    pieces[1][0] = toupper(pieces[1][0]);
+                    for (int i = 1; i < pieces[1].size(); i++) { pieces[1][i] = tolower(pieces[1][i]); }
+                    
+                    //look again
+                    it = months.find(pieces[1]);  //is this a valid month
+                    if (it == months.end()) { m->mothurOut("[ERROR] " + pieces[1] + " is not a valid month. Looking for ""Mmm-YYYY\" format.\n"); isOkay = false; }
+                    else {
+                        if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    }
+                }
+                
+                if (isOkay) { //check to make sure day is correct for month chosen
+                    int dayNumber;  m->mothurConvert(pieces[0], dayNumber);
+                    if (dayNumber <= it->second) {
+                        if (dayNumber < 10) { //add leading 0.
+                            if (pieces[0].length() == 1) { pieces[0] = '0'+ pieces[0]; }
+                        }
+                    }
+                }
+                
+                if (isOkay) { date = pieces[0] + "-" + pieces[1] + "-" + pieces[2]; }
+            }
+        }else { // no alpha months "YYYY" or "YYYY-mm-dd" or "YYYY-mm"
+             if (m->debug) { m->mothurOut("[DEBUG]: in nonAlpha\n"); }
+            vector<string> pieces;
+            if (date.find_first_of('-') != string::npos) { m->splitAtDash(date, pieces); }
+            else { pieces = m->splitWhiteSpace(date);  }
+            
+            string format = "yearFirst";
+            
+            if (pieces[0].length() == 4) { format = "yearFirst"; }
+            else if (pieces[pieces.size()-1].length() == 4) { format = "yearLast"; }
+            
+            if (format == "yearFirst" ) {
+                if (m->debug) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                //just year
+                if (pieces.size() == 1) {
+                    if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    else { date= pieces[0]; }
+                }else if (pieces.size() == 2) { //"YYYY-mm"
+                    if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    
+                    //perhaps needs leading 0
+                    if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
+                    map<string, int>::iterator it = monthsN.find(pieces[1]);
+                    if (it == monthsN.end()) {
+                        m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
+                    }
+                    if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
+                }else if (pieces.size() == 3) { //"YYYY-mm-dd"
+                    if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    //perhaps needs leading 0
+                    if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
+                    map<string, int>::iterator it = monthsN.find(pieces[1]);
+                    if (it == monthsN.end()) {
+                        m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
+                    }else {
+                        //is the day in range
+                        int maxDays = it->second;
+                        //perhaps needs leading 0
+                        if (pieces[2].length() < 2) { pieces[2] = "0" + pieces[2]; }
+                        int day; m->mothurConvert(pieces[2], day);
+                        if (day <= maxDays) {}
+                        else {
+                            m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false;
+                        }
+                    }
+                    if (isOkay) {  date = pieces[0] + "-" + pieces[1] + "-" + pieces[2]; }
+                }
+            }else { // year last, try to fix format
+                //if year last, then it could be dd-mm-yyyy or mm-dd-yyyy -> yyyy-mm-dd
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: yearLast pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                
+                if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                
+                int first, second;
+                m->mothurConvert(pieces[0], first);
+                m->mothurConvert(pieces[1], second);
+                
+                if ((first <= 12) && (second <= 12)) { //we can't figure out which is the day and which is the month
+                    m->mothurOut("[ERROR]: " + pieces[0] + " and " + pieces[1] + " are both <= 12.  Cannot determine which is the day and which is the month. \n"); isOkay = false; }
+                else if ((first <= 12) && (second >= 12)) { //first=month and second = day, check valid date
+                    //perhaps needs leading 0
+                    if (pieces[0].length() < 2) { pieces[0] = "0" + pieces[0]; }
+                    map<string, int>::iterator it = monthsN.find(pieces[0]);
+                    if (it == monthsN.end()) {
+                        m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
+                    }else {
+                        //is the day in range
+                        int maxDays = it->second;
+                        if (second <= maxDays) { //reformat to acceptable format
+                            //perhaps needs leading 0
+                            if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
+                            date = pieces[2] + "-" + pieces[0] + "-" + pieces[1];
+                        }
+                        else {
+                            m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid day for the month " + pieces[0]+ ". \n"); isOkay = false;
+                        }
+                    }
+                }else if ((second <= 12) && (first >= 12)) { //second=month and first = day, check valid date
+                    if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
+                    map<string, int>::iterator it = monthsN.find(pieces[1]);
+                    if (it == monthsN.end()) {
+                        m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
+                    }else {
+                        //is the day in range
+                        int maxDays = it->second;
+                        if (first <= maxDays) { //reformat to acceptable format
+                            //perhaps needs leading 0
+                            if (pieces[0].length() < 2) { pieces[0] = "0" + pieces[0]; }
+                            date = pieces[2] + "-" + pieces[1] + "-" + pieces[0];
+                        }
+                        else {
+                            m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false;
+                        }
+                    }
+
+                }else {
+                    m->mothurOut("[ERROR]: " + pieces[0] + " and " + pieces[1] + " are both > 12.  No valid date. \n"); isOkay = false;
+                }
+            }
+        }
+        if (!isOkay) { m->mothurOut("[ERROR]: The date must be in one of the following formats: Date of sampling, in ""DD-Mmm-YYYY/"", ""Mmm-YYYY/"" or ""YYYY/"" format (eg., 30-Oct-1990, Oct-1990 or 1990) or ISO 8601 standard ""YYYY-mm-dd/"", ""YYYY-mm/""  (eg., 1990-10-30, 1990-10/"")"); }
+        
+        if (m->debug) {  m->mothurOut("[DEBUG]: date = " + date + "\n"); }
+            
+        return isOkay;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SRACommand", "checkDateFormat");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 /*
  file option 1
