@@ -517,6 +517,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
         int process = 1;
 		processIDS.clear();
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
@@ -533,12 +534,62 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            int numSeqs = alignDB.getNumSeqs();
+            lines.clear();
+            for (int i = 0; i < processors; i++) {
+                distlinePair tempLine;
+                lines.push_back(tempLine);
+                if (output != "square") {
+                    lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+                }else{
+                    lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
+                }
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);
+                    process++;
+                }else if (pid == 0){
+                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
+                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		//parent do my part
 		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
 		else { driver(lines[0].start, lines[0].end, filename, "square"); }

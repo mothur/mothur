@@ -1651,11 +1651,11 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 				out.close();
 				
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                exit(0);
+            }
 		}
 		
 		//do my part
@@ -1834,13 +1834,15 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				out.close();
 				
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                exit(0);
+            }
+
 		}
-		
+		m->mothurOut(toString( getpid() ) + " here\n");
+            
 		//do my part
 		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
 		

@@ -46,7 +46,7 @@ private:
 	vector<string> outputNames;
 
 	char trump;
-	bool abort;
+	bool abort, recalced;
 	float soft;
 	int numSeqs;
 	

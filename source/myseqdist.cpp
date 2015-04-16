@@ -149,6 +149,7 @@ int correctDist::createProcess(string distanceFileName){
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDs;
+        bool recalc = false;
 		
 		while(process != processors){
 			
@@ -163,12 +164,49 @@ int correctDist::createProcess(string distanceFileName){
 				exit(0);
 			}
 			else{
-				cout << "Doh!" << endl;
-				for (int i=0;i<processIDs.size();i++) {  int temp = processIDs[i]; kill(temp, SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDs.size(); i++) { kill (processIDs[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDs.size();i++) {
+                    int temp = processIDs[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            start.clear(); end.clear();
+            for(int i=0;i<processors;i++){
+                start.push_back(int (sqrt(float(i)/float(processors)) * numSeqs));
+                end.push_back(int (sqrt(float(i+1)/float(processors)) * numSeqs));
+            }
+            
+            processIDs.resize(0);
+            process = 1;
+            
+            while(process != processors){
+                
+                pid_t pid = fork();
+                
+                if(pid > 0){
+                    processIDs.push_back(pid);
+                    process++;
+                }
+                else if(pid == 0){
+                    driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
+                    exit(0);
+                }
+                else{
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i=0;i<processIDs.size();i++) {  int temp = processIDs[i]; kill(temp, SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
 		driver(start[0], end[0], distanceFileName);
 		
 		for (int i=0;i<processIDs.size();i++) { 

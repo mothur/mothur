@@ -2032,6 +2032,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
         vector<int> processIDS;
 		int process = 1;
 		int num = 0;
+        bool recalc = false;
 		
 		//sanity check
 		if (filenames.size() < processors) { processors = filenames.size(); }
@@ -2057,18 +2058,6 @@ int ShhherCommand::createProcesses(vector<string> filenames){
             if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
         }
         
-          		
-		//divide the groups between the processors
-		/*vector<linePair> lines;
-        vector<int> numFilesToComplete;
-		int numFilesPerProcessor = filenames.size() / processors;
-		for (int i = 0; i < processors; i++) {
-			int startIndex =  i * numFilesPerProcessor;
-			int endIndex = (i+1) * numFilesPerProcessor;
-			if(i == (processors - 1)){	endIndex = filenames.size(); 	}
-			lines.push_back(linePair(startIndex, endIndex));
-            numFilesToComplete.push_back((endIndex-startIndex));
-		}*/
 		
         #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
@@ -2091,12 +2080,77 @@ int ShhherCommand::createProcesses(vector<string> filenames){
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
+
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            dividedFiles.clear(); //dividedFiles[1] = vector of filenames for process 1...
+            dividedFiles.resize(processors);
+            
+            //for each file, figure out which process will complete it
+            //want to divide the load intelligently so the big files are spread between processes
+            for (int i = 0; i < filenames.size(); i++) {
+                int processToAssign = (i+1) % processors;
+                if (processToAssign == 0) { processToAssign = processors; }
+                
+                dividedFiles[(processToAssign-1)].push_back(filenames[i]);
+            }
+            
+            //now lets reverse the order of ever other process, so we balance big files running with little ones
+            for (int i = 0; i < processors; i++) {
+                int remainder = ((i+1) % processors);
+                if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
+            }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(dividedFiles[process], compositeFASTAFileName + m->mothurGetpid(process) + ".temp", compositeNamesFileName  + m->mothurGetpid(process) + ".temp");
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = compositeFASTAFileName + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		//do my part
 		driver(dividedFiles[0], compositeFASTAFileName, compositeNamesFileName);
 		

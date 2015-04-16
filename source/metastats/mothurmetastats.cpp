@@ -29,6 +29,7 @@ MothurMetastats::~MothurMetastats() {}
  //main metastats function
 int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secGroupingStart) {
     try {
+         
         row = data.size();		 //numBins
 		column = data[0].size(); //numGroups in subset
         secondGroupingStart = secGroupingStart; //g number of samples in group 1

@@ -102,6 +102,7 @@ endif
 mothur : fortranSource $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 	strip mothur
+    mv mothur ..
 
 uchime:
 	cd uchime_src && ./mk && mv uchime .. && cd ..

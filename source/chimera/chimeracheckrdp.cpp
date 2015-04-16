@@ -166,16 +166,16 @@ vector<sim> ChimeraCheckRDP::findIS() {
 		//find total kmers you have in common with closest[query] by looking at the last entry in the vector of maps for each
 		int nTotal = calcKmers(queryKmerInfo[(queryKmerInfo.size()-1)], subjectKmerInfo[(subjectKmerInfo.size()-1)]);
 
-		//you don't want the starting point to be virtually at hte end so move it in 10%
+		//you don't want the starting point to be virtually at the end so move it in 10%
 		int start = seq.length() / 10;
-			
+        
 		//for each window
 		for (int f = start; f < (seq.length() - start); f+=increment) {
 		
-			if (m->control_pressed) { return isValues; }
+            if ((f - kmerSize) < 0)  { m->mothurOut("[ERROR]: Sequence " + querySeq->getName() + " is too short for your kmerSize, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
 			
-			if ((f - kmerSize) < 0)  { m->mothurOut("Your sequence is too short for your kmerSize."); m->mothurOutEndLine(); exit(1); }
-			
+            if (m->control_pressed) { return isValues; }
+            
 			sim temp;
 			
 			string fragLeft = seq.substr(0, f);  //left side of breakpoint

@@ -40,7 +40,7 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 						procIters.push_back(numItersPerProcessor);
 					}
 					
-					createProcesses(procIters, rcd, increment); 
+					createProcesses(procIters, rcd, increment, nIters);
 				}
 
 		#else
@@ -112,12 +112,12 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 }
 /**************************************************************************************************/
 
-int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd, int increment) {
+int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd, int increment, int nIters) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
-		
 		vector<int> processIDS;
+        bool recalc = false;
 		
 		EstOutput results;
 		
@@ -138,12 +138,65 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 				}
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    for(int j=0;j<displays.size();j++){
+                        m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");
+                    }
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            vector<int> procIters;
+            int numItersPerProcessor = nIters / processors;
+            //divide iters between processes
+            for (int i = 0; i < processors; i++) {
+                if(i == processors - 1){
+                    numItersPerProcessor = nIters - i * numItersPerProcessor;
+                }
+                procIters.push_back(numItersPerProcessor);
+            }
+
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    driver(rcd, increment, procIters[process]);
+                    
+                    //pass numSeqs to parent
+                    for(int i=0;i<displays.size();i++){
+                        string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
+                        displays[i]->outputTempFiles(tempFile);
+                    }
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
 		driver(rcd, increment, procIters[0]);
 		
 		//force parent to wait until all the processes are done
