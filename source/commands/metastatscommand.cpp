@@ -340,7 +340,7 @@ int MetaStatsCommand::execute(){
 		delete input; 
 		delete designMap;
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+        if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -365,6 +365,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 				}else{
 					int process = 1;
 					vector<int> processIDS;
+                    bool recalc = false;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 					//loop through and create all the processes you want
 					while (process != processors) {
@@ -377,12 +378,57 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 							driver(lines[process].start, lines[process].end, thisLookUp);
 							exit(0);
 						}else { 
-							m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-							for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-							exit(0);
+                            m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                            //wait to die
+                            for (int i=0;i<processIDS.size();i++) {
+                                int temp = processIDS[i];
+                                wait(&temp);
+                            }
+                            m->control_pressed = false;
+                            recalc = true;
+                            break;
 						}
 					}
 					
+                    if (recalc) {
+                        //test line, also set recalc to true.
+                        //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                        
+                        //redo file divide
+                        lines.clear();
+                        int remainingPairs = namesOfGroupCombos.size();
+                        int startIndex = 0;
+                        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                            int numPairs = remainingPairs; //case for last processor
+                            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+                            startIndex = startIndex + numPairs;
+                            remainingPairs = remainingPairs - numPairs;
+                        }
+                        
+                        processIDS.resize(0);
+                        process = 1;
+                        
+                        //loop through and create all the processes you want
+                        while (process != processors) {
+                            pid_t pid = fork();
+                            
+                            if (pid > 0) {
+                                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                                process++;
+                            }else if (pid == 0){
+                                driver(lines[process].start, lines[process].end, thisLookUp);
+                                exit(0);
+                            }else {
+                                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                                exit(0);
+                            }
+                        }
+                    }
+
+                    
 					//do my part
 					driver(lines[0].start, lines[0].end, thisLookUp);
 		

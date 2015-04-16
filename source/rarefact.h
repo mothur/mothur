@@ -30,7 +30,7 @@ private:
 	vector<SharedRAbundVector*> lookup; 
 	MothurOut* m;
 	
-	int createProcesses(vector<int>&, RarefactionCurveData*, int);
+	int createProcesses(vector<int>&, RarefactionCurveData*, int, int);
 	int driver(RarefactionCurveData*, int, int);
 
 };

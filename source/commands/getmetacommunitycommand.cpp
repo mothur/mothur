@@ -354,10 +354,11 @@ int GetMetaCommunityCommand::execute(){
 int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislookup){
 	try {
         
-        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        #else 
+        //#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+       // #else
+        //until bug is resolved
         processors=1; //qFinderDMM not thread safe
-        #endif
+        //#endif
         
         vector<int> processIDS;
 		int process = 1;
