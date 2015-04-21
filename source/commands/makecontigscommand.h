@@ -79,6 +79,8 @@ private:
     bool checkName(Sequence& forward, QualityScores& reverse);
     unsigned long long processMultipleFileOption(map<string, int>&);
     unsigned long long processSingleFileOption(map<string, int>&);
+    int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);
+    vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, bool, Alignment*& alignment, string& contig, string&, int&, int&, int&);
     
     //main processing functions
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
