@@ -44,7 +44,8 @@ vector<string> TrimSeqsCommand::setParameters(){
 		CommandParameter pqwindowsize("qwindowsize", "Number", "", "50", "", "", "","",false,false); parameters.push_back(pqwindowsize);
 		CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pkeepfirst);
 		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "","",false,false); parameters.push_back(premovelast);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 			
 		vector<string> myArray;
@@ -1094,6 +1095,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
         int process = 1;
 		int exitCommand = 1;
 		processIDS.clear();
+        bool recalc = false;
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				//loop through and create all the processes you want
@@ -1170,12 +1172,147 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(trimFASTAFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(scrapFASTAFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(trimQualFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(scrapQualFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(trimNameFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(scrapNameFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(trimCountFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(scrapCountFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(groupFile + (toString(processIDS[i]) + ".temp"));
+                    if (createGroup) {
+                        string tempFile = filename + (toString(processIDS[i])) + ".num.temp";
+                        m->mothurRemove(tempFile);
+                    }
+                    if(allFiles){
+                        for(int i=0;i<fastaFileNames.size();i++){
+                            for(int j=0;j<fastaFileNames[0].size();j++){
+                                if (fastaFileNames[i][j] != "") {
+                                    string tempFile = fastaFileNames[i][j] +(toString(processIDS[i])) + ".temp";
+                                    m->mothurRemove(tempFile);
+                                    
+                                    if(qFileName != ""){
+                                        string tempFile = qualFileNames[i][j] +(toString(processIDS[i])) + ".temp";
+                                        m->mothurRemove(tempFile);
+                                    }
+                                    if(nameFile != ""){
+                                        string tempFile = nameFileNames[i][j] +(toString(processIDS[i])) + ".temp";
+                                        m->mothurRemove(tempFile);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            setLines(fastaFile, qFileName);
+            
+            exitCommand = 1;
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                int pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    
+                    vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+                    vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
+                    vector<vector<string> > tempNameFileNames = nameFileNames;
+                    
+                    if(allFiles){
+                        ofstream temp;
+                        
+                        for(int i=0;i<tempFASTAFileNames.size();i++){
+                            for(int j=0;j<tempFASTAFileNames[i].size();j++){
+                                if (tempFASTAFileNames[i][j] != "") {
+                                    tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
+                                    m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+                                    
+                                    if(qFileName != ""){
+                                        tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
+                                        m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                                    }
+                                    if(nameFile != ""){
+                                        tempNameFileNames[i][j] += toString(getpid()) + ".temp";
+                                        m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    driverCreateTrim(filename,
+                                     qFileName,
+                                     (trimFASTAFileName + toString(getpid()) + ".temp"),
+                                     (scrapFASTAFileName + toString(getpid()) + ".temp"),
+                                     (trimQualFileName + toString(getpid()) + ".temp"),
+                                     (scrapQualFileName + toString(getpid()) + ".temp"),
+                                     (trimNameFileName + toString(getpid()) + ".temp"),
+                                     (scrapNameFileName + toString(getpid()) + ".temp"),
+                                     (trimCountFileName + toString(getpid()) + ".temp"),
+                                     (scrapCountFileName + toString(getpid()) + ".temp"),
+                                     (groupFile + toString(getpid()) + ".temp"),
+                                     tempFASTAFileNames,
+                                     tempPrimerQualFileNames,
+                                     tempNameFileNames,
+                                     lines[process],
+                                     qLines[process]);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
+                    
+                    //pass groupCounts to parent
+                    if(createGroup){
+                        ofstream out;
+                        string tempFile = filename + toString(getpid()) + ".num.temp";
+                        m->openOutputFile(tempFile, out);
+                        
+                        out << groupCounts.size() << endl;
+                        
+                        for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                        
+                        out << groupMap.size() << endl;
+                        for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                        out.close();
+                    }
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }            
+        }
+
+        
 		//parent do my part
 		ofstream temp;
 		m->openOutputFile(trimFASTAFileName, temp);		temp.close();

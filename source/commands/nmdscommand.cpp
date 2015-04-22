@@ -20,7 +20,8 @@ vector<string> NMDSCommand::setParameters(){
 		CommandParameter piters("iters", "Number", "", "10", "", "", "","",false,false); parameters.push_back(piters);
 		CommandParameter pmaxiters("maxiters", "Number", "", "500", "", "", "","",false,false); parameters.push_back(pmaxiters);
 		CommandParameter pepsilon("epsilon", "Number", "", "0.000000000001", "", "", "","",false,false); parameters.push_back(pepsilon);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

@@ -196,12 +196,12 @@ public:
     ~OutputFilter() {}
 
     bool info()  const { return verbosity >= INFO; }
-    bool debug() const { return verbosity >= DEBUG; }
+    bool debug() const { return verbosity >= mDEBUG; }
     bool trace() const { return verbosity >= TRACE; }
 
     static const int QUIET;
     static const int INFO;
-    static const int DEBUG;
+    static const int mDEBUG;
     static const int TRACE;
 
 private:

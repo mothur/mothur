@@ -18,7 +18,7 @@ vector<string> SetDirectoryCommand::setParameters(){
         CommandParameter pmodnames("modifynames", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmodnames);
 		CommandParameter pinput("input", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pinput);
 		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false,true); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -109,7 +109,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             if (temp == "not found") { random = 0; }
             else {
                 if (m->isInteger(temp)) { m->mothurConvert(temp, random); seed = true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.outdir command."); m->mothurOutEndLine(); abort = true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command."); m->mothurOutEndLine(); abort = true; }
             }
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
@@ -120,7 +120,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             }
             
 			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod && !seed) {
-				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, debug or modifynames for the set.outdir command."); m->mothurOutEndLine(); abort = true;
+				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, debug or modifynames for the set.dir command."); m->mothurOutEndLine(); abort = true;
 			}else if((input == "") && (output == "") && (tempdefault == "")) { debugorSeedOnly = true; }
 		}
 	}

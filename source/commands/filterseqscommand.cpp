@@ -20,7 +20,8 @@ vector<string> FilterSeqsCommand::setParameters(){
 		CommandParameter psoft("soft", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psoft);
 		CommandParameter pvertical("vertical", "Boolean", "", "T", "", "", "","",false,false, true); parameters.push_back(pvertical);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false, true); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -89,7 +90,7 @@ FilterSeqsCommand::FilterSeqsCommand(){
 /**************************************************************************************/
 FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;  recalced = false;
 		filterFileName = "";
 		
 		//allow user to run help
@@ -650,6 +651,7 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, strin
         int process = 1;
 		int num = 0;
 		processIDS.clear();
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
@@ -674,11 +676,63 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, strin
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(new linePair(positions[i], positions[(i+1)]));  }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    string filteredFasta = filename + m->mothurGetpid(process) + ".temp";
+                    num = driverRunFilter(F, filteredFasta, filename, lines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = filename +  m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+
+        }
 		
         num = driverRunFilter(F, filteredFastaName, filename, lines[0]);
         
@@ -878,7 +932,7 @@ string FilterSeqsCommand::createFilter() {
                 }
 		#endif
                 //save the file positions so we can reuse them in the runFilter function
-                savedPositions[s] = positions;
+                if (!recalced) {  savedPositions[s] = positions; }
                 
 				if (m->control_pressed) {  return filterString; }
 #endif
@@ -1080,6 +1134,7 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
         int process = 1;
 		int num = 0;
 		processIDS.clear();
+        bool recalc = false;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -1118,12 +1173,80 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(filename + (toString(processIDS[i]) + "filterValues.temp"));
+                }
+                recalc = true;
+                break;
+
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + "filterValues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(new linePair(positions[i], positions[(i+1)]));  }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            recalced = true;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    //reset child's filter counts to 0;
+                    F.a.clear(); F.a.resize(alignmentLength, 0);
+                    F.t.clear(); F.t.resize(alignmentLength, 0);
+                    F.g.clear(); F.g.resize(alignmentLength, 0);
+                    F.c.clear(); F.c.resize(alignmentLength, 0);
+                    F.gap.clear(); F.gap.resize(alignmentLength, 0);
+                    
+                    num = driverCreateFilter(F, filename, lines[process]);
+                    
+                    //write out filter counts to file
+                    filename += m->mothurGetpid(process) + "filterValues.temp";
+                    ofstream out;
+                    m->openOutputFile(filename, out);
+                    
+                    out << num << endl;
+                    out << F.getFilter() << endl;
+                    for (int k = 0; k < alignmentLength; k++) {		out << F.a[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < alignmentLength; k++) {		out << F.t[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < alignmentLength; k++) {		out << F.g[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
+                    
+                    //cout << F.getFilter() << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		//parent do your part
 		num = driverCreateFilter(F, filename, lines[0]);
 		

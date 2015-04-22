@@ -21,7 +21,8 @@ vector<string> CountSeqsCommand::setParameters(){
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -401,6 +402,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
         vector<unsigned long long> positions;
         vector<linePair> lines;
         int numSeqs = 0;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFilePerLine(namefile, processors);
@@ -444,13 +446,65 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
                 outTemp.close();
                 
 				exit(0);
-			}else {
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+            }
 		}
 		
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            positions.clear();
+            lines.clear();
+            positions = m->divideFilePerLine(namefile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
+            
+            numSeqs = 0;
+            processIDS.resize(0);
+            process = 0;
+            
+            while (process != processors-1) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    string filename = m->mothurGetpid(process) + ".temp";
+                    numSeqs = driver(lines[process].start, lines[process].end, filename, groupMap);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << numSeqs << endl;
+                    outTemp.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		string filename = m->mothurGetpid(process) + ".temp";
         numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
         

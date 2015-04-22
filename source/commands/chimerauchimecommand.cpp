@@ -24,7 +24,8 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pstrand("strand", "String", "", "", "", "", "","",false,false); parameters.push_back(pstrand);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "","",false,false); parameters.push_back(pabskew);
 		CommandParameter pchimealns("chimealns", "Boolean", "", "F", "", "", "","alns",false,false); parameters.push_back(pchimealns);
@@ -1650,11 +1651,11 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 				out.close();
 				
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                exit(0);
+            }
 		}
 		
 		//do my part
@@ -1833,13 +1834,15 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				out.close();
 				
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                exit(0);
+            }
+
 		}
-		
+		m->mothurOut(toString( getpid() ) + " here\n");
+            
 		//do my part
 		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
 		

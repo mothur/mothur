@@ -26,7 +26,8 @@ vector<string> PhyloDiversityCommand::setParameters(){
 		CommandParameter psummary("summary", "Boolean", "", "T", "", "", "","summary",false,false); parameters.push_back(psummary);
 		CommandParameter pcollect("collect", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcollect);
 		CommandParameter pscale("scale", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pscale);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -407,6 +408,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		
 		vector<int> processIDS;
 		map< string, vector<float> >::iterator itSum;
+        bool recalc = false;
 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -437,12 +439,71 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //divide iters between processes
+            procIters.clear();
+            int numItersPerProcessor = iters / processors;
+            for (int h = 0; h < processors; h++) {
+                if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
+                procIters.push_back(numItersPerProcessor);
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
+                    
+                    string outTemp = outputDir + m->mothurGetpid(process) + ".sumDiv.temp";
+                    ofstream out;
+                    m->openOutputFile(outTemp, out);
+                    
+                    //output the sumDIversity
+                    for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
+                        out << itSum->first << '\t' << (itSum->second).size() << '\t';
+                        for (int k = 0; k < (itSum->second).size(); k++) {
+                            out << (itSum->second)[k] << '\t';
+                        }
+                        out << endl;
+                    }
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
 		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
 		
 		//force parent to wait until all the processes are done

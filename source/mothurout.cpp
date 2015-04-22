@@ -9,6 +9,8 @@
 
 #include "mothurout.h"
 
+//needed for testing project
+//MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
@@ -428,6 +430,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
                     outputFile << output;
                     logger() << output;
                 }
+                
             }
 
 			
@@ -3191,6 +3194,9 @@ int MothurOut::mothurRemove(string filename){
 	try {
 		filename = getFullPathName(filename);
 		int error = remove(filename.c_str());
+        if (debug) {
+            mothurOut("[DEBUG]: removed " + filename + "\n");
+        }
 		//if (error != 0) { 
 		//	if (errno != ENOENT) { //ENOENT == file does not exist
 		//		string message = "Error deleting file " + filename;

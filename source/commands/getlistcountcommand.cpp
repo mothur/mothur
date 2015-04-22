@@ -15,7 +15,8 @@ vector<string> GetListCountCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","otu",false,true, true); parameters.push_back(plist);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter parasort("sort", "Multiple", "name-otu", "otu", "", "", "","",false,false); parameters.push_back(parasort);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

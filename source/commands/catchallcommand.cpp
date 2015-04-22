@@ -16,7 +16,8 @@ vector<string> CatchAllCommand::setParameters(){
 		//can choose shared or sabund not both, so put them in the same chooseOnlyOneGroup
 		CommandParameter pshared("shared", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none","analysis-bestanalysis-models-bubble-summary",false,false,true); parameters.push_back(pshared);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none","analysis-bestanalysis-models-bubble-summary",false,false,true); parameters.push_back(psabund);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

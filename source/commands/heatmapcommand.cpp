@@ -23,7 +23,8 @@ vector<string> HeatMapCommand::setParameters(){
 		CommandParameter pnumotu("numotu", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pnumotu);
 		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

@@ -24,7 +24,8 @@ vector<string> ListSeqsCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(palignreport);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
