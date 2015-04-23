@@ -25,6 +25,7 @@ public:
     ~QualityScores() {}
     QualityScores(string n, vector<int> qs);
 	QualityScores(ifstream&);
+    QualityScores(boost::iostreams::filtering_istream&);
     int read(ifstream&);
 	string getName();
 	int getLength(){    return (int)qScores.size();  }
@@ -54,6 +55,7 @@ private:
 	int seqLength;
     
     string getSequenceName(ifstream&);
+    string getSequenceName(boost::iostreams::filtering_istream&);
 };
 	
 /**************************************************************************************************/
