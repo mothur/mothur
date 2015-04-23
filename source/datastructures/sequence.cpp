@@ -190,6 +190,52 @@ Sequence::Sequence(ifstream& fastaFile){
 }
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+Sequence::Sequence(boost::iostreams::filtering_istream& fastaFile){
+    try {
+        m = MothurOut::getInstance();
+        initialize();
+        name = getSequenceName(fastaFile);
+        
+        if (!m->control_pressed) {
+            
+            string sequence;
+            
+            //read comments
+            while ((name[0] == '#') && fastaFile) {
+                while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+                sequence = getCommentString(fastaFile);
+                
+                if (fastaFile) {
+                    fastaFile >> name;
+                    name = name.substr(1);
+                }else {
+                    name = "";
+                    break;
+                }
+            }
+            
+            //while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){  break;	}	} // get rest of line if there's any crap there
+            comment = getCommentString(fastaFile);
+            
+            int numAmbig = 0;
+            sequence = getSequenceString(fastaFile, numAmbig);
+            
+            setAligned(sequence);
+            //setUnaligned removes any gap characters for us
+            setUnaligned(sequence);
+            
+            if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+            
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "Sequence");
+        exit(1);
+    }							
+}
+//********************************************************************************************************************
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 	try {
 		m = MothurOut::getInstance();
@@ -307,6 +353,28 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
 	}
 }
 //********************************************************************************************************************
+string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile) {
+    try {
+        string name = "";
+        
+        fastaFile >> name;
+        
+        if (name.length() != 0) {
+            
+            name = name.substr(1);
+            
+            m->checkName(name);
+            
+        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+        return name;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getSequenceName");
+        exit(1);
+    }
+}
+//********************************************************************************************************************
 string Sequence::getSequenceName(istringstream& fastaFile) {
 	try {
 		string name = "";
@@ -360,6 +428,37 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	}
 }
 //********************************************************************************************************************
+string Sequence::getSequenceString(boost::iostreams::filtering_istream& fastaFile, int& numAmbig) {
+    try {
+        char letter;
+        string sequence = "";
+        numAmbig = 0;
+        
+        while(fastaFile){
+            letter= fastaFile.get();
+            if(letter == '>'){
+                fastaFile.putback(letter);
+                break;
+            }else if (letter == ' ') {;}
+            else if(isprint(letter)){
+                letter = toupper(letter);
+                if(letter == 'U'){letter = 'T';}
+                if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
+                    letter = 'N';
+                    numAmbig++;
+                }
+                sequence += letter;
+            }
+        }
+        
+        return sequence;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getSequenceString");
+        exit(1);
+    }
+}
+//********************************************************************************************************************
 //comment can contain '>' so we need to account for that
 string Sequence::getCommentString(ifstream& fastaFile) {
 	try {
@@ -382,6 +481,30 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		m->errorOut(e, "Sequence", "getCommentString");
 		exit(1);
 	}
+}
+//********************************************************************************************************************
+//comment can contain '>' so we need to account for that
+string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile) {
+    try {
+        char letter;
+        string temp = "";
+        
+        while(fastaFile){
+            letter=fastaFile.get();
+            if((letter == '\r') || (letter == '\n') || letter == -1){
+                m->gobble(fastaFile);  //in case its a \r\n situation
+                break;
+            }else {
+                temp += letter;
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getCommentString");
+        exit(1);
+    }
 }
 //********************************************************************************************************************
 string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {

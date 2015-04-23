@@ -19,6 +19,9 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 
 /**************************************************************************************************/
 
@@ -33,6 +36,7 @@ public:
 	Sequence(string, string, string);  
 	Sequence(ifstream&, string);
 	Sequence(istringstream&, string);
+    Sequence(boost::iostreams::filtering_istream&);
     ~Sequence() {}
 	
 	void setName(string);
@@ -70,10 +74,13 @@ private:
 	MothurOut* m;
 	void initialize();
 	string getSequenceString(ifstream&, int&);
+    string getSequenceString(boost::iostreams::filtering_istream&, int&);
 	string getCommentString(ifstream&);
+    string getCommentString(boost::iostreams::filtering_istream&);
 	string getSequenceString(istringstream&, int&);
 	string getCommentString(istringstream&);
     string getSequenceName(ifstream&);
+    string getSequenceName(boost::iostreams::filtering_istream&);
     string getSequenceName(istringstream&);
 	string name;
 	string unaligned;
