@@ -7,8 +7,6 @@
 //
 
 #include "makecontigscommand.h"
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 //**********************************************************************************************************************
 vector<string> MakeContigsCommand::setParameters(){	

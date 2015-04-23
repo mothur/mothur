@@ -13,6 +13,9 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "qualityscores.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 
 /* This class is a representation of a fastqread.  If no format is given, defaults to illumina1.8+.
  
@@ -30,6 +33,7 @@ public:
     FastqRead(string f); 
     FastqRead(string f, string n, string s, vector<int> sc); 
     FastqRead(ifstream&, bool&, string f);
+    FastqRead(boost::iostreams::filtering_istream&, bool&, string f);
     ~FastqRead() {}
     
     string getName() { return name; }
