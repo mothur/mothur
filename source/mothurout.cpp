@@ -1306,6 +1306,63 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 		exit(1);
 	}
 }
+/***********************************************************************/
+int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filtering_istream& in){
+    try {
+        
+        //get full path name
+        string completeFileName = getFullPathName(fileName);
+        
+        std::ifstream file(completeFileName.c_str(), std::ios_base::in | std::ios_base::binary);
+        
+        if(!file) {
+            mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+            return 1;
+        }
+        else {
+            //check for blank file
+            in.push(boost::iostreams::gzip_decompressor());
+            in.push(file);
+            zapGremlins(file);
+            gobble(file);
+            if (file.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
+            
+            return 0;
+        }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "openInputFileGZBinary");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filtering_istream& in, string noerror){
+    try {
+        
+        //get full path name
+        string completeFileName = getFullPathName(fileName);
+        
+        std::ifstream file(completeFileName.c_str(), std::ios_base::in | std::ios_base::binary);
+        
+        if(!file) {
+            return 1;
+        }
+        else {
+            //check for blank file
+            in.push(boost::iostreams::gzip_decompressor());
+            in.push(file);
+            zapGremlins(file);
+            gobble(file);
+            
+            return 0;
+        }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "openInputFileGZBinary - no error");
+        exit(1);
+    }
+}
+
 
 /***********************************************************************/
 

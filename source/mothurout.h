@@ -104,6 +104,8 @@ class MothurOut {
 		int openInputFile(string, ifstream&);
         int openInputFileBinary(string, ifstream&);
         int openInputFileBinary(string, ifstream&, string);
+        int openInputFileGZBinary(string, boost::iostreams::filtering_istream&);
+        int openInputFileGZBinary(string, boost::iostreams::filtering_istream&, string);
 		int openInputFile(string, ifstream&, string); //no error given
     
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
