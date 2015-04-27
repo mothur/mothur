@@ -3455,8 +3455,9 @@
 				OTHER_LDFLAGS = (
 					"-lncurses",
 					"-lreadline",
+					"-lboost_iostreams",
 				);
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
@@ -3501,8 +3502,9 @@
 				OTHER_LDFLAGS = (
 					"-lncurses",
 					"-lreadline",
+					"-lboost_iostreams",
 				);
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};

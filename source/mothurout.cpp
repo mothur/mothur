@@ -1323,8 +1323,6 @@ int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filterin
             //check for blank file
             in.push(boost::iostreams::gzip_decompressor());
             in.push(file);
-            zapGremlins(file);
-            gobble(file);
             if (file.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
             
             return 0;
@@ -1351,9 +1349,6 @@ int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filterin
             //check for blank file
             in.push(boost::iostreams::gzip_decompressor());
             in.push(file);
-            zapGremlins(file);
-            gobble(file);
-            
             return 0;
         }
     }
