@@ -628,7 +628,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
         string compositeFastaFile = getOutputFileName("fasta",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapFastaFile = getOutputFileName("fasta",cvars);
-        cvars["[tag]"] = "";
+        cvars["[tag]"] = "trim";
         string compositeQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapQualFile = getOutputFileName("qfile",cvars);
