@@ -1105,13 +1105,27 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
         
         if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
         
-        ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
-        ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
-        m->openInputFile(thisffastafile, inFFasta);
-        m->openInputFile(thisrfastafile, inRFasta);
+//        std::filebuf fb;
+//        std::istream inFFasta(&fb);
         
-        inFFasta.seekg(linesInput.start);
-        inRFasta.seekg(linesInputReverse.start);
+        //iostream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
+        if (m->areGZFiles(inputFiles)) {
+            inFFasta = new boost::iostreams::filtering_istream;
+//            inRFasta = new boost::iostreams::filtering_istream;
+//            inFQualIndex = new boost::iostreams::filtering_istream;
+//            inRQualIndex = new boost::iostreams::filtering_istream;
+        }else {
+              inFFasta = new ifstream;
+//            inRFasta = new ifstream;
+//            inFQualIndex = new ifstream;
+//            inRQualIndex = new ifstream;
+        }
+        ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
+        m->openInputFileBinary(thisffastafile, *inFFasta);
+        m->openInputFileBinary(thisrfastafile, *inRFasta);
+        
+        inFFasta->seekg(linesInput.start);
+        inRFasta->seekg(linesInputReverse.start);
         
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {

@@ -1307,7 +1307,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 	}
 }
 /***********************************************************************/
-int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filtering_istream& in){
+int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_istream& in){
     try {
         
         //get full path name
@@ -1334,7 +1334,7 @@ int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filterin
     }
 }
 /***********************************************************************/
-int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filtering_istream& in, string noerror){
+int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_istream& in, string noerror){
     try {
         
         //get full path name
@@ -1358,6 +1358,24 @@ int MothurOut::openInputFileGZBinary(string fileName, boost::iostreams::filterin
     }
 }
 
+/***********************************************************************/
+bool MothurOut::areGZFiles(vector<string> & files){
+    try {
+        bool gz = false;
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (control_pressed) { break; }
+            
+            if (getExtension(files[i]) == ".gz") { gz = true; break; }
+        }
+        
+        return gz;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "areGZFiles");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 
@@ -3266,7 +3284,7 @@ int MothurOut::mothurRemove(string filename){
 bool MothurOut::mothurConvert(string item, int& num){
 	try {
 		bool error = false;
-
+        
 		if (isNumeric1(item)) {
 			convert(item, num);
 		}else {
