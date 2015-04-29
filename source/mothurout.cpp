@@ -1371,7 +1371,7 @@ vector<bool> MothurOut::allGZFiles(vector<string> & files){
             
             //ignore none and blank filenames
             if ((files[i] != "") || (files[i] != "NONE")) {
-                if (getExtension(files[i]) == ".gz") { allNOTGZ = false;  }
+                if (isGZ(files[i])) { allNOTGZ = false;  }
                 else {  allGZ = false;  }
             }
         }
@@ -1390,7 +1390,35 @@ vector<bool> MothurOut::allGZFiles(vector<string> & files){
         exit(1);
     }
 }
-
+/***********************************************************************/
+bool MothurOut::isGZ(string filename){
+    try {
+        ifstream fileHandle;
+        boost::iostreams::filtering_istream gzin;
+        
+        int ableToOpen = openInputFileBinary(filename, fileHandle, gzin);
+        
+        if (ableToOpen == 1) { return false; }
+        
+        char c;
+        try
+        {
+            gzin >> c;
+        }
+        catch ( boost::iostreams::gzip_error & e )
+        {
+            gzin.pop();
+            fileHandle.close();
+            return false;
+        }
+        fileHandle.close();
+        return true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isGZ");
+        exit(1);
+    }
+}
 /***********************************************************************/
 
 int MothurOut::renameFile(string oldName, string newName){

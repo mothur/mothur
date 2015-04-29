@@ -1177,8 +1177,8 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
         else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
         else if(align == "kmer")        {   alignment = new KmerAlign(kmerSize);                                                    }
 
-        
-        while ((!inFFasta.eof()) && (!inRFasta.eof())) {
+        bool good = true;
+        while (good) {
             
             if (m->control_pressed) { break; }
             
@@ -1186,87 +1186,19 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
             string trashCode = "";
             string commentString = "";
             int currentSeqsDiffs = 0;
-            bool hasIndex = false;
             
-            bool ignore; ignore = false;
+            bool hasIndex = false;
+            bool ignore = false;
             Sequence fSeq, rSeq;
             QualityScores* fQual = NULL; QualityScores* rQual = NULL;
             QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
             Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
-            if (delim == '@') { //fastq files
-                bool tignore;
-                FastqRead fread(inFFasta, tignore, format); m->gobble(inFFasta);
-                FastqRead rread(inRFasta, ignore, format); m->gobble(inRFasta);
-                if (!checkName(fread, rread)) {
-                    FastqRead f2read(inFFasta, tignore, format); m->gobble(inFFasta);
-                    if (!checkName(f2read, rread)) {
-                        FastqRead r2read(inRFasta, ignore, format); m->gobble(inRFasta);
-                        if (!checkName(fread, r2read)) {
-                            m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
-                        }else { rread = r2read; }
-                    }else { fread = f2read; }
-                }
-                if (tignore) { ignore=true; }
-                fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
-                rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
-                fQual = new QualityScores(fread.getName(), fread.getScores());
-                rQual = new QualityScores(rread.getName(), rread.getScores());
-                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
-                if (thisfqualindexfile != "") { //forward index file
-                    FastqRead firead(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
-                    if (tignore) { ignore=true; }
-                    findexBarcode.setAligned(firead.getSeq());
-                    if (!checkName(fread, firead)) {
-                        FastqRead f2iread(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
-                        if (tignore) { ignore=true; }
-                        if (!checkName(fread, f2iread)) {
-                            m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
-                        }else { firead = f2iread; findexBarcode.setAligned(firead.getSeq()); }
-                    }
-                    hasIndex = true;
-                }
-                if (thisrqualindexfile != "") { //reverse index file
-                    FastqRead riread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
-                    if (tignore) { ignore=true; }
-                    rindexBarcode.setAligned(riread.getSeq());
-                    if (!checkName(fread, riread)) {
-                        FastqRead r2iread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
-                        if (tignore) { ignore=true; }
-                        if (!checkName(fread, r2iread)) {
-                            m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
-                        }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
-                    }
-                    hasIndex = true;
-                }
-            }else { //reading fasta and maybe qual
-                Sequence tfSeq(inFFasta); m->gobble(inFFasta);
-                Sequence trSeq(inRFasta); m->gobble(inRFasta);
-                if (!checkName(tfSeq, trSeq)) {
-                    Sequence t2fSeq(inFFasta); m->gobble(inFFasta);
-                    if (!checkName(t2fSeq, trSeq)) {
-                        Sequence t2rSeq(inRFasta); m->gobble(inRFasta);
-                        if (!checkName(tfSeq, t2rSeq)) {
-                            m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true;
-                        }else { trSeq = t2fSeq; }
-                    }else { tfSeq = t2fSeq; }
-                }
-                fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
-                rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
-                if (thisfqualindexfile != "") {
-                    fQual = new QualityScores(inFQualIndex); m->gobble(inFQualIndex);
-                    rQual = new QualityScores(inRQualIndex); m->gobble(inRQualIndex);
-                    if (!checkName(*fQual, *rQual)) {
-                         m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
-                    }
-                    savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-                    savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
-                    if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-                    if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
-                }
-                if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-            }
             
+            //read from input files
+            if (gz) {   ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile); }
+            else    {   ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile); }
+            
+            //remove primers and barcodes if neccessary
             if (!ignore) {
                 
                 int barcodeIndex = 0;
@@ -1365,11 +1297,13 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
                     }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
                 
+                //assemble reads
                 string contig = "";
                 int oend, oStart;
                 int numMismatches = 0;
                 vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches);
                 
+                //prints results to outputs files
                 if(trashCode.length() == 0){
                     bool ignore = false;
                     
@@ -1437,10 +1371,18 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
             num++;
             
             #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                unsigned long long pos = inFFasta.tellg();
-                if ((pos == -1) || (pos >= linesInput.end)) { break; }
+                if (!gz) {
+                    unsigned long long pos = inFFasta.tellg();
+                    if ((pos == -1) || (pos >= linesInput.end)) { good = false; break; }
+                }else {
+                    
+                }
             #else
-                if (inFFasta.eof()) { break; }
+                if (!gz) {
+                    if ((inFFasta.eof()) || (inRFasta.eof())) { good = false; break; }
+                }else {
+                             
+                }
             #endif
             
 			//report progress
@@ -1450,24 +1392,29 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
 		//report progress
 		if((num) % 1000 != 0){	m->mothurOut(toString(num)); m->mothurOutEndLine();		}
         
+        //close files
         inFFasta.close();
         inRFasta.close();
+        if (gz) { inFF.pop(); inRF.pop(); }
         outFasta.close();
         outScrapFasta.close();
         outMisMatch.close();
         if (delim == '@') {
-            if (thisfqualindexfile != "") { inFQualIndex.close(); }
-            if (thisrqualindexfile != "") { inRQualIndex.close(); }
+            if (thisfqualindexfile != "") { inFQualIndex.close(); if (gz) { inFQ.pop(); } }
+            if (thisrqualindexfile != "") { inRQualIndex.close(); if (gz) { inRQ.pop(); } }
             outQual.close();
             outScrapQual.close();
         }else{
             if (hasQuality) {
                 inFQualIndex.close();
                 inRQualIndex.close();
+                if (gz) { inFQ.pop(); inRQ.pop(); }
                 outQual.close();
                 outScrapQual.close();
             }
         }
+        
+        //cleanup memory
         delete alignment;
         if (reorient) { delete rtrimOligos; }
         
@@ -1485,7 +1432,6 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
 }
 /**************************************************************************************************/
 //vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, alignment, contig);
-
 vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, bool hasQuality, Alignment*& alignment, string& contig, string& trashCode, int& oend, int& oStart, int& numMismatches) {
     try {
         vector<int> contigScores;
@@ -1616,6 +1562,182 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "assembleFragments");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+//ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ);
+bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile) {
+    try {
+        bool ignore = false;
+        
+        if (delim == '@') { //fastq files
+            bool tignore;
+            FastqRead fread(inFF, tignore, format);
+            FastqRead rread(inRF, ignore, format);
+            if (!checkName(fread, rread)) {
+                FastqRead f2read(inFF, tignore, format);
+                if (!checkName(f2read, rread)) {
+                    FastqRead r2read(inRF, ignore, format);
+                    if (!checkName(fread, r2read)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { rread = r2read; }
+                }else { fread = f2read; }
+            }
+            if (tignore) { ignore=true; }
+            fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
+            rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
+            fQual = new QualityScores(fread.getName(), fread.getScores());
+            rQual = new QualityScores(rread.getName(), rread.getScores());
+            savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+            savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+            if (thisfqualindexfile != "") { //forward index file
+                FastqRead firead(inFQ, tignore, format);
+                if (tignore) { ignore=true; }
+                findexBarcode.setAligned(firead.getSeq());
+                if (!checkName(fread, firead)) {
+                    FastqRead f2iread(inFQ, tignore, format);
+                    if (tignore) { ignore=true; }
+                    if (!checkName(fread, f2iread)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { firead = f2iread; findexBarcode.setAligned(firead.getSeq()); }
+                }
+                hasIndex = true;
+            }
+            if (thisrqualindexfile != "") { //reverse index file
+                FastqRead riread(inRQ, tignore, format);
+                if (tignore) { ignore=true; }
+                rindexBarcode.setAligned(riread.getSeq());
+                if (!checkName(fread, riread)) {
+                    FastqRead r2iread(inRQ, tignore, format); m->gobble(inRQ);
+                    if (tignore) { ignore=true; }
+                    if (!checkName(fread, r2iread)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
+                }
+                hasIndex = true;
+            }
+        }else { //reading fasta and maybe qual
+            Sequence tfSeq(inFF);
+            Sequence trSeq(inRF);
+            if (!checkName(tfSeq, trSeq)) {
+                Sequence t2fSeq(inFF);
+                if (!checkName(t2fSeq, trSeq)) {
+                    Sequence t2rSeq(inRF);
+                    if (!checkName(tfSeq, t2rSeq)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true;
+                    }else { trSeq = t2fSeq; }
+                }else { tfSeq = t2fSeq; }
+            }
+            fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
+            rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
+            if (thisfqualindexfile != "") {
+                fQual = new QualityScores(inFQ); m->gobble(inFQ);
+                rQual = new QualityScores(inRQ); m->gobble(inRQ);
+                if (!checkName(*fQual, *rQual)) {
+                    m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
+                }
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+                if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
+            }
+            if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+        }
+
+        return ignore;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "read");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
+bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile) {
+    try {
+        bool ignore = false;
+        
+        if (delim == '@') { //fastq files
+            bool tignore;
+            FastqRead fread(inFFasta, tignore, format); m->gobble(inFFasta);
+            FastqRead rread(inRFasta, ignore, format); m->gobble(inRFasta);
+            if (!checkName(fread, rread)) {
+                FastqRead f2read(inFFasta, tignore, format); m->gobble(inFFasta);
+                if (!checkName(f2read, rread)) {
+                    FastqRead r2read(inRFasta, ignore, format); m->gobble(inRFasta);
+                    if (!checkName(fread, r2read)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { rread = r2read; }
+                }else { fread = f2read; }
+            }
+            if (tignore) { ignore=true; }
+            fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
+            rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
+            fQual = new QualityScores(fread.getName(), fread.getScores());
+            rQual = new QualityScores(rread.getName(), rread.getScores());
+            savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+            savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+            if (thisfqualindexfile != "") { //forward index file
+                FastqRead firead(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
+                if (tignore) { ignore=true; }
+                findexBarcode.setAligned(firead.getSeq());
+                if (!checkName(fread, firead)) {
+                    FastqRead f2iread(inFQualIndex, tignore, format); m->gobble(inFQualIndex);
+                    if (tignore) { ignore=true; }
+                    if (!checkName(fread, f2iread)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { firead = f2iread; findexBarcode.setAligned(firead.getSeq()); }
+                }
+                hasIndex = true;
+            }
+            if (thisrqualindexfile != "") { //reverse index file
+                FastqRead riread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
+                if (tignore) { ignore=true; }
+                rindexBarcode.setAligned(riread.getSeq());
+                if (!checkName(fread, riread)) {
+                    FastqRead r2iread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
+                    if (tignore) { ignore=true; }
+                    if (!checkName(fread, r2iread)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                    }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
+                }
+                hasIndex = true;
+            }
+        }else { //reading fasta and maybe qual
+            Sequence tfSeq(inFFasta); m->gobble(inFFasta);
+            Sequence trSeq(inRFasta); m->gobble(inRFasta);
+            if (!checkName(tfSeq, trSeq)) {
+                Sequence t2fSeq(inFFasta); m->gobble(inFFasta);
+                if (!checkName(t2fSeq, trSeq)) {
+                    Sequence t2rSeq(inRFasta); m->gobble(inRFasta);
+                    if (!checkName(tfSeq, t2rSeq)) {
+                        m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true;
+                    }else { trSeq = t2fSeq; }
+                }else { tfSeq = t2fSeq; }
+            }
+            fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
+            rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
+            if (thisfqualindexfile != "") {
+                fQual = new QualityScores(inFQualIndex); m->gobble(inFQualIndex);
+                rQual = new QualityScores(inRQualIndex); m->gobble(inRQualIndex);
+                if (!checkName(*fQual, *rQual)) {
+                    m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
+                }
+                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
+                if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
+            }
+            if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+        }
+        
+        return ignore;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "read");
         exit(1);
     }
 }
