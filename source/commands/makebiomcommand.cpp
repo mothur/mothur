@@ -837,7 +837,14 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                     binLabel += sbinNumber;
                     binLabel = m->getSimpleLabel(binLabel);
                     labelTaxMap[binLabel] = taxs[i];
-                }else {  labelTaxMap[m->getSimpleLabel(otuLabels[i])] = taxs[i]; }
+                }else {
+                    map<string, string>::iterator it = labelTaxMap.find(m->getSimpleLabel(otuLabels[i]));
+                    if (it == labelTaxMap.end()) {
+                        labelTaxMap[m->getSimpleLabel(otuLabels[i])] = taxs[i];
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  otuLabels[i] + " because it's simple label " + m->getSimpleLabel(otuLabels[i]) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->control_pressed = true;
+                    }
+                }
             }
             
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
