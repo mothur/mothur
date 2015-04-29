@@ -728,7 +728,17 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 		int num = 0;
 		vector<int> processIDS;
         bool recalc = false;
+        vector<string> gztest;
+        for (int i = 0; i < fileInputs.size(); i++) { gztest.push_back(fileInputs[i]); }
+        for (int i = 0; i < qualOrIndexFiles.size(); i++) { gztest.push_back(qualOrIndexFiles[i]); }
+        vector<bool> results = m->allGZFiles(gztest);
         
+        if (m->control_pressed) { return 0; }
+        
+        if (results[0]) { gz = true; }
+        else { gz = false; }
+        
+       
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		
@@ -761,14 +771,15 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 				}
                 
                 int spot = process*2;
-				num = driver(fileInputs, qualOrIndexFiles,
+                
+                num = driver(fileInputs, qualOrIndexFiles,
                              outputFasta + m->mothurGetpid(process) + ".temp",
                              outputScrapFasta + m->mothurGetpid(process) + ".temp",
                              outputQual + m->mothurGetpid(process) + ".temp",
                              outputScrapQual + m->mothurGetpid(process) + ".temp",
                              outputMisMatches + m->mothurGetpid(process) + ".temp",
                              tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
-				
+                
 				//pass groupCounts to parent
                 ofstream out;
                 string tempFile = m->mothurGetpid(process) + ".num.temp";
@@ -847,6 +858,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                     }
                     
                     int spot = process*2;
+                    
                     num = driver(fileInputs, qualOrIndexFiles,
                                  outputFasta + m->mothurGetpid(process) + ".temp",
                                  outputScrapFasta + m->mothurGetpid(process) + ".temp",
@@ -893,8 +905,9 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         }
 		//do my part
         int spot = 0;
-		num = driver(fileInputs, qualOrIndexFiles, outputFasta, outputScrapFasta,  outputQual, outputScrapQual, outputMisMatches, fastaFileNames, qualFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
-		
+        
+        num = driver(fileInputs, qualOrIndexFiles, outputFasta, outputScrapFasta,  outputQual, outputScrapQual, outputMisMatches, fastaFileNames, qualFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
+        
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
@@ -1011,8 +1024,9 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         int spot = (processors-1)*2;
         processIDS.push_back(processors-1);
         
+        
         num = driver(fileInputs, qualOrIndexFiles, (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputQual+ toString(processors-1) + ".temp"),  (outputScrapQual+ toString(processors-1) + ".temp"), (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
-
+        
         
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -1105,37 +1119,33 @@ int MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrI
         
         if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
         
-//        std::filebuf fb;
-//        std::istream inFFasta(&fb);
-        
-        //iostream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
-        if (m->areGZFiles(inputFiles)) {
-            inFFasta = new boost::iostreams::filtering_istream;
-//            inRFasta = new boost::iostreams::filtering_istream;
-//            inFQualIndex = new boost::iostreams::filtering_istream;
-//            inRQualIndex = new boost::iostreams::filtering_istream;
-        }else {
-              inFFasta = new ifstream;
-//            inRFasta = new ifstream;
-//            inFQualIndex = new ifstream;
-//            inRQualIndex = new ifstream;
+        ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
+        boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
+        if (!gz) { //plain text files
+            m->openInputFile(thisffastafile, inFFasta);
+            m->openInputFile(thisrfastafile, inRFasta);
+            
+            inFFasta.seekg(linesInput.start);
+            inRFasta.seekg(linesInputReverse.start);
+        }else { //compressed files - no need to seekg because compressed files divide workload differently
+            m->openInputFileBinary(thisffastafile, inFFasta, inFF);
+            m->openInputFileBinary(thisrfastafile, inRFasta, inRF);
         }
+        
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
-        m->openInputFileBinary(thisffastafile, *inFFasta);
-        m->openInputFileBinary(thisrfastafile, *inRFasta);
-        
-        inFFasta->seekg(linesInput.start);
-        inRFasta->seekg(linesInputReverse.start);
-        
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {
-                m->openInputFile(thisfqualindexfile, inFQualIndex);
-                inFQualIndex.seekg(qlinesInput.start);
+                if (!gz) { //plain text files
+                    m->openInputFile(thisfqualindexfile, inFQualIndex);
+                    inFQualIndex.seekg(qlinesInput.start);
+                }else { m->openInputFileBinary(thisfqualindexfile, inFQualIndex, inFQ); } //compressed files - no need to seekg because compressed files divide workload differently
             }
             else {  thisfqualindexfile = ""; }
             if (thisrqualindexfile != "NONE") {
-                m->openInputFile(thisrqualindexfile, inRQualIndex);
-                inRQualIndex.seekg(qlinesInputReverse.start);
+                if (!gz) { //plain text files
+                    m->openInputFile(thisrqualindexfile, inRQualIndex);
+                    inRQualIndex.seekg(qlinesInputReverse.start);
+                }else { m->openInputFileBinary(thisrqualindexfile, inRQualIndex, inRQ); } //compressed files - no need to seekg because compressed files divide workload differently
             }
             else { thisrqualindexfile = ""; }
         }

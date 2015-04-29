@@ -1307,13 +1307,13 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 	}
 }
 /***********************************************************************/
-int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_istream& in){
+int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostreams::filtering_istream& in){
     try {
         
         //get full path name
         string completeFileName = getFullPathName(fileName);
         
-        std::ifstream file(completeFileName.c_str(), std::ios_base::in | std::ios_base::binary);
+        file.open(completeFileName.c_str(), ios_base::in | ios_base::binary);
         
         if(!file) {
             mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1334,13 +1334,13 @@ int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_
     }
 }
 /***********************************************************************/
-int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_istream& in, string noerror){
+int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostreams::filtering_istream& in, string noerror){
     try {
         
         //get full path name
         string completeFileName = getFullPathName(fileName);
         
-        std::ifstream file(completeFileName.c_str(), std::ios_base::in | std::ios_base::binary);
+        file.open(completeFileName.c_str(), ios_base::in | ios_base::binary);
         
         if(!file) {
             return 1;
@@ -1359,17 +1359,31 @@ int MothurOut::openInputFileBinary(string fileName, boost::iostreams::filtering_
 }
 
 /***********************************************************************/
-bool MothurOut::areGZFiles(vector<string> & files){
+//results[0] = allGZ, results[1] = allNotGZ
+vector<bool> MothurOut::allGZFiles(vector<string> & files){
     try {
-        bool gz = false;
+        vector<bool> results;
+        bool allGZ = true;
+        bool allNOTGZ = true;
         
         for (int i = 0; i < files.size(); i++) {
             if (control_pressed) { break; }
             
-            if (getExtension(files[i]) == ".gz") { gz = true; break; }
+            //ignore none and blank filenames
+            if ((files[i] != "") || (files[i] != "NONE")) {
+                if (getExtension(files[i]) == ".gz") { allNOTGZ = false;  }
+                else {  allGZ = false;  }
+            }
         }
         
-        return gz;
+        if (!allGZ && !allNOTGZ) { //mixed bag
+            mothurOut("[ERROR]: Cannot mix .gz and non compressed files. Please decompress your files and rerun.\n"); control_pressed = true; 
+        }
+        
+        results.push_back(allGZ);
+        results.push_back(allNOTGZ);
+        
+        return results;
     }
     catch(exception& e) {
         errorOut(e, "MothurOut", "areGZFiles");

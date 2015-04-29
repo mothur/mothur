@@ -60,7 +60,7 @@ public:
     
 private:
     char delim; 
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
     string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName, group;
 	float match, misMatch, gapOpen, gapExtend;
