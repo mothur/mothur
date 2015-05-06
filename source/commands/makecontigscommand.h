@@ -86,7 +86,7 @@ private:
     
     //main processing functions
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
-    unsigned long long createProcessesGroups();
+    unsigned long long createProcessesGroups(vector< vector<string> >, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts);
     unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&);
     unsigned long long driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
     int convertProb(double qProb);

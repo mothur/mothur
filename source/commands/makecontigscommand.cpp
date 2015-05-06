@@ -651,21 +651,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
         vector< vector<string> > fileInputs = readFileNames(file);
         
         if (gz) {
-            
-            //create another create processes function that divides the work by files.
-            
-            //create driverGroups that calls driver
-            
-            
-            
-            //look at what else single file option sets up
-            
-            //assemble output of each process
-            
-            
-            //test timing, perhaps this would be a better route for non compressed files as well??
-            
-            
+            numReads = createProcessesGroups(fileInputs, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
         }else {
             for (int l = 0; l < fileInputs.size(); l++) {
                 
@@ -731,9 +717,216 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
     }
 }
 //**********************************************************************************************************************
-unsigned long long MakeContigsCommand::createProcessesGroups() {
+unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
     try {
+        unsigned long long num = 0;
+        vector<int> processIDS;
+        bool recalc = false;
         
+        vector<linePair> startEndIndexes;
+        
+        //divide files between processors
+        int remainingPairs = fileInputs.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            startEndIndexes.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
+        }
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        int process = 1;
+        
+        //loop through and create all the processes you want
+        while (process != processors) {
+            pid_t pid = fork();
+            
+            if (pid > 0) {
+                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                process++;
+            }else if (pid == 0){
+                
+                num = driverGroups(fileInputs, startEndIndexes[process].start, startEndIndexes[process].end,
+                                   compositeGroupFile + m->mothurGetpid(process) + ".temp",
+                                   compositeFastaFile + m->mothurGetpid(process) + ".temp",
+                                   compositeScrapFastaFile + m->mothurGetpid(process) + ".temp",
+                                   compositeQualFile + m->mothurGetpid(process) + ".temp",
+                                   compositeScrapQualFile + m->mothurGetpid(process) + ".temp",
+                                   compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts);
+                
+                //pass groupCounts to parent
+                ofstream out;
+                string tempFile = m->mothurGetpid(process) + ".num.temp";
+                m->openOutputFile(tempFile, out);
+                out << num << endl;
+                if (createFileGroup || createOligosGroup) {
+                    out << totalGroupCounts.size() << endl;
+                    
+                    for (map<string, int>::iterator it = totalGroupCounts.begin(); it != totalGroupCounts.end(); it++) {
+                        out << it->first << '\t' << it->second << endl;
+                    }
+                    
+                    out << groupMap.size() << endl;
+                    for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
+                        out << it->first << '\t' << it->second << endl;
+                    }
+                }
+                out.close();
+                
+                exit(0);
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
+            }
+        }
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            vector<linePair> startEndIndexes;
+            
+            //divide files between processors
+            int remainingPairs = fileInputs.size();
+            int startIndex = 0;
+            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                int numPairs = remainingPairs; //case for last processor
+                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                startEndIndexes.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+                startIndex = startIndex + numPairs;
+                remainingPairs = remainingPairs - numPairs;
+            }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    
+                    num = driverGroups(fileInputs, startEndIndexes[process].start, startEndIndexes[process].end,
+                                       compositeGroupFile + m->mothurGetpid(process) + ".temp",
+                                       compositeFastaFile + m->mothurGetpid(process) + ".temp",
+                                       compositeScrapFastaFile + m->mothurGetpid(process) + ".temp",
+                                       compositeQualFile + m->mothurGetpid(process) + ".temp",
+                                       compositeScrapQualFile + m->mothurGetpid(process) + ".temp",
+                                       compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts);
+                    
+                    //pass groupCounts to parent
+                    ofstream out;
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    if (createFileGroup || createOligosGroup) {
+                        out << totalGroupCounts.size() << endl;
+                        
+                        for (map<string, int>::iterator it = totalGroupCounts.begin(); it != totalGroupCounts.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                        
+                        out << groupMap.size() << endl;
+                        for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                    }
+                    out.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
+        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
+        
+        
+        //force parent to wait until all the processes are done
+        for (int i=0;i<processIDS.size();i++) {
+            int temp = processIDS[i];
+            wait(&temp);
+        }
+        
+        for (int i = 0; i < processIDS.size(); i++) {
+            ifstream in;
+            string tempFile = toString(processIDS[i]) + ".num.temp";
+            m->openInputFile(tempFile, in);
+            int tempNum;
+            in >> tempNum; num += tempNum; m->gobble(in);
+            
+            if (createFileGroup || createOligosGroup) {
+                string group;
+                in >> tempNum; m->gobble(in);
+                
+                if (tempNum != 0) {
+                    for (int j = 0; j < tempNum; j++) {
+                        int groupNum;
+                        in >> group >> groupNum; m->gobble(in);
+                        
+                        map<string, int>::iterator it = totalGroupCounts.find(group);
+                        if (it == totalGroupCounts.end()) {	totalGroupCounts[group] = groupNum; }
+                        else { totalGroupCounts[it->first] += groupNum; }
+                    }
+                }
+                in >> tempNum; m->gobble(in);
+                if (tempNum != 0) {
+                    for (int j = 0; j < tempNum; j++) { 
+                        string group, seqName;
+                        in >> seqName >> group; m->gobble(in);
+                        
+                        map<string, string>::iterator it = groupMap.find(seqName);
+                        if (it == groupMap.end()) {	groupMap[seqName] = group; }
+                        else { m->mothurOut("[ERROR]: " + seqName + " is in your fasta file more than once. Sequence names must be unique. please correct.\n");  }
+                    }
+                }
+            }
+            in.close(); m->mothurRemove(tempFile);
+            
+            m->appendFiles((compositeGroupFile + toString(processIDS[i]) + ".temp"), compositeGroupFile);
+            m->mothurRemove((compositeGroupFile + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((compositeFastaFile + toString(processIDS[i]) + ".temp"), compositeFastaFile);
+            m->mothurRemove((compositeFastaFile + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((compositeScrapFastaFile + toString(processIDS[i]) + ".temp"), compositeScrapFastaFile);
+            m->mothurRemove((compositeScrapFastaFile + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((compositeQualFile + toString(processIDS[i]) + ".temp"), compositeQualFile);
+            m->mothurRemove((compositeQualFile + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((compositeScrapQualFile + toString(processIDS[i]) + ".temp"), compositeScrapQualFile);
+            m->mothurRemove((compositeScrapQualFile + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((compositeMisMatchFile + toString(processIDS[i]) + ".temp"), compositeMisMatchFile);
+            m->mothurRemove((compositeMisMatchFile + toString(processIDS[i]) + ".temp"));
+        }
+
+        
+#else
+        //to be continued...
+#endif
+        return num;
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "createProcessesGroups");
@@ -743,8 +936,6 @@ unsigned long long MakeContigsCommand::createProcessesGroups() {
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
     try {
-        //create output file names, vectors, "faked" out linePair vectors and other needed input for driver function
-        bool hasQual = true;
         unsigned long long numReads = 0;
         delim = '@';
         
