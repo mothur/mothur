@@ -86,7 +86,9 @@ private:
     
     //main processing functions
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
-    int driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
+    unsigned long long createProcessesGroups();
+    unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&);
+    unsigned long long driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
     int convertProb(double qProb);
     vector< vector<string> > readFileNames(string);
     bool getOligos(vector<vector<string> >&, vector<vector<string> >&, string, map<string, string>&);

@@ -1371,7 +1371,7 @@ vector<bool> MothurOut::allGZFiles(vector<string> & files){
             
             //ignore none and blank filenames
             if ((files[i] != "") || (files[i] != "NONE")) {
-                if (isGZ(files[i])) { allNOTGZ = false;  }
+                if (isGZ(files[i])[1]) { allNOTGZ = false;  }
                 else {  allGZ = false;  }
             }
         }
@@ -1391,28 +1391,31 @@ vector<bool> MothurOut::allGZFiles(vector<string> & files){
     }
 }
 /***********************************************************************/
-bool MothurOut::isGZ(string filename){
+vector<bool> MothurOut::isGZ(string filename){
     try {
+        vector<bool> results; results.resize(2, false);
         ifstream fileHandle;
         boost::iostreams::filtering_istream gzin;
         
-        int ableToOpen = openInputFileBinary(filename, fileHandle, gzin);
+        int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         
-        if (ableToOpen == 1) { return false; }
+        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        else {  results[0] = true;  }
         
         char c;
         try
         {
             gzin >> c;
+            results[1] = true;
         }
         catch ( boost::iostreams::gzip_error & e )
         {
             gzin.pop();
             fileHandle.close();
-            return false;
+            return results;  // results[0] = true; results[1] = false;
         }
         fileHandle.close();
-        return true;
+        return results; //results[0] = true; results[1] = true;
     }
     catch(exception& e) {
         errorOut(e, "MothurOut", "isGZ");
