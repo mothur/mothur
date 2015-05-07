@@ -11,8 +11,11 @@
 USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
+USEBOOST ?= yes
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
+BOOST_INCLUDE_DIR="/usr/local/include/"
+BOOST_LIBRARY_DIR="/usr/local/lib/"
 RELEASE_DATE = "\"4/22/2015\""
 VERSION = "\"1.35.1\""
 FORTAN_COMPILER = gfortran
@@ -59,6 +62,15 @@ ifeq  ($(strip $(USEREADLINE)),yes)
     LIBS = \
         -lreadline\
         -lncurses
+endif
+
+ifeq  ($(strip $(USEBOOST)),yes)
+    LDFLAGS += -L ${BOOST_LIBRARY_DIR}
+    CXXFLAGS += -I ${BOOST_INCLUDE_DIR}
+
+    LIBS += \
+        -lboost_iostreams
+
 endif
 
 

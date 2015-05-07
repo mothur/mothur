@@ -654,6 +654,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
             numReads = createProcessesGroups(fileInputs, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
         }else {
             for (int l = 0; l < fileInputs.size(); l++) {
+                int startTime = time(NULL);
                 
                 if (m->control_pressed) { break; }
                 
@@ -669,7 +670,8 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
                 groupMap.clear();
                 
                 //run file as if it was a single
-                numReads += processSingleFileOption(groupCounts);
+                int thisNumReads = processSingleFileOption(groupCounts);
+                numReads += thisNumReads;
                 
                 //append to combo files
                 if (createFileGroup || createOligosGroup) {
@@ -707,6 +709,8 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
                     outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
                     outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
                 }
+                
+                m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n");	m->mothurOutEndLine();
             }
         }
         return numReads;
