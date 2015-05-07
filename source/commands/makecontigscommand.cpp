@@ -428,7 +428,7 @@ int MakeContigsCommand::execute(){
 		for (map<string, int>::iterator it = totalGroupCounts.begin(); it != totalGroupCounts.end(); it++) {
             total += it->second; m->mothurOut(it->first + "\t" + toString(it->second)); m->mothurOutEndLine(); 
 		}
-		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
+		if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
 		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
         
@@ -1773,13 +1773,13 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                     unsigned long long pos = inFFasta.tellg();
                     if ((pos == -1) || (pos >= linesInput.end)) { good = false; break; }
                 }else {
-                    //end of file
+                    if (inFF.eof() || inRF.eof()) { good = false; break; }
                 }
             #else
                 if (!gz) {
                     if ((inFFasta.eof()) || (inRFasta.eof())) { good = false; break; }
                 }else {
-                    //end of file
+                    if (inFF.eof() || inRF.eof()) { good = false; break; }
                 }
             #endif
             

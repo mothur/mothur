@@ -1397,6 +1397,8 @@ vector<bool> MothurOut::isGZ(string filename){
         ifstream fileHandle;
         boost::iostreams::filtering_istream gzin;
         
+        if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
+        
         int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         
         if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
