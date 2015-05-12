@@ -11,7 +11,6 @@
 USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
-USEBOOST ?= yes
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 BOOST_INCLUDE_DIR="/usr/local/include/"
@@ -64,14 +63,48 @@ ifeq  ($(strip $(USEREADLINE)),yes)
         -lncurses
 endif
 
-ifeq  ($(strip $(USEBOOST)),yes)
-    LDFLAGS += -L ${BOOST_LIBRARY_DIR}
-    CXXFLAGS += -I ${BOOST_INCLUDE_DIR}
+#statically link boost libraries
+LDFLAGS += -L ${BOOST_LIBRARY_DIR}
+CXXFLAGS += -I ${BOOST_INCLUDE_DIR}
 
-    LIBS += \
-        -lboost_iostreams
-
-endif
+LIBS += \
+    ${BOOST_LIBRARY_DIR}libboost_atomic.a\
+    ${BOOST_LIBRARY_DIR}libboost_iostreams.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1l.a\
+    ${BOOST_LIBRARY_DIR}libboost_test_exec_monitor.a\
+    ${BOOST_LIBRARY_DIR}libboost_chrono.a\
+    ${BOOST_LIBRARY_DIR}libboost_locale.a\
+    ${BOOST_LIBRARY_DIR}libboost_prg_exec_monitor.a\
+    ${BOOST_LIBRARY_DIR}libboost_thread.a\
+    ${BOOST_LIBRARY_DIR}libboost_container.a\
+    ${BOOST_LIBRARY_DIR}libboost_log.a\
+    ${BOOST_LIBRARY_DIR}libboost_program_options.a\
+    ${BOOST_LIBRARY_DIR}libboost_timer.a\
+    ${BOOST_LIBRARY_DIR}libboost_context.a\
+    ${BOOST_LIBRARY_DIR}libboost_log_setup.a\
+    ${BOOST_LIBRARY_DIR}libboost_python.a\
+    ${BOOST_LIBRARY_DIR}libboost_unit_test_framework.a\
+    ${BOOST_LIBRARY_DIR}libboost_coroutine.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_c99.a\
+    ${BOOST_LIBRARY_DIR}libboost_random.a\
+    ${BOOST_LIBRARY_DIR}libboost_wave.a\
+    ${BOOST_LIBRARY_DIR}libboost_date_time.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_c99f.a\
+    ${BOOST_LIBRARY_DIR}libboost_regex.a\
+    ${BOOST_LIBRARY_DIR}libboost_wserialization.a\
+    ${BOOST_LIBRARY_DIR}libboost_exception.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_c99l.a\
+    ${BOOST_LIBRARY_DIR}libboost_serialization.a\
+    ${BOOST_LIBRARY_DIR}libpandaseq.a\
+    ${BOOST_LIBRARY_DIR}libboost_filesystem.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1.a\
+    ${BOOST_LIBRARY_DIR}libboost_signals.a\
+    ${BOOST_LIBRARY_DIR}libtclstub8.6.a\
+    ${BOOST_LIBRARY_DIR}libboost_graph.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1f.a\
+    ${BOOST_LIBRARY_DIR}libboost_system.a\
+    ${BOOST_LIBRARY_DIR}libtkstub8.6.a\
+    ${BOOST_LIBRARY_DIR}zlib.a
 
 
 ifeq  ($(strip $(USEMPI)),yes)
