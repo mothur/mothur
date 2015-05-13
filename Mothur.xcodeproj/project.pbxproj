@@ -397,6 +397,7 @@
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
 		48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */; };
+		48D6F3921B03AC0800B80B94 /* gzip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6F3911B03AC0800B80B94 /* gzip.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
@@ -837,6 +838,7 @@
 		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastqread.cpp; path = source/datastructures/fastqread.cpp; sourceTree = "<group>"; };
 		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kmeralign.cpp; path = source/datastructures/kmeralign.cpp; sourceTree = "<group>"; };
 		48C51DF21A793EFE004ECDF1 /* kmeralign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kmeralign.h; path = source/datastructures/kmeralign.h; sourceTree = "<group>"; };
+		48D6F3911B03AC0800B80B94 /* gzip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gzip.cpp; path = source/gzip.cpp; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/completelinkage.cpp; sourceTree = "<absolute>"; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/classifysvmsharedcommand.cpp; sourceTree = "<absolute>"; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/classifysvmsharedcommand.h; sourceTree = "<absolute>"; };
@@ -1648,6 +1650,7 @@
 				A7E9B6E112D37EC400DA6239 /* fileoutput.h */,
 				A7E9B71112D37EC400DA6239 /* gotohoverlap.hpp */,
 				A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */,
+				48D6F3911B03AC0800B80B94 /* gzip.cpp */,
 				A7E9B71812D37EC400DA6239 /* hcluster.cpp */,
 				A7E9B71912D37EC400DA6239 /* hcluster.h */,
 				A7E9B71C12D37EC400DA6239 /* heatmap.cpp */,
@@ -3182,6 +3185,7 @@
 				A7E9B94D12D37EC400DA6239 /* sharedjest.cpp in Sources */,
 				A7E9B94E12D37EC400DA6239 /* sharedkstest.cpp in Sources */,
 				A7E9B94F12D37EC400DA6239 /* sharedkulczynski.cpp in Sources */,
+				48D6F3921B03AC0800B80B94 /* gzip.cpp in Sources */,
 				A7E9B95012D37EC400DA6239 /* sharedkulczynskicody.cpp in Sources */,
 				48705AC419BE32C50075E977 /* getmimarkspackagecommand.cpp in Sources */,
 				A7E9B95112D37EC400DA6239 /* sharedlennon.cpp in Sources */,

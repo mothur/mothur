@@ -95,16 +95,19 @@ LIBS += \
     ${BOOST_LIBRARY_DIR}libboost_exception.a\
     ${BOOST_LIBRARY_DIR}libboost_math_c99l.a\
     ${BOOST_LIBRARY_DIR}libboost_serialization.a\
-    ${BOOST_LIBRARY_DIR}libpandaseq.a\
     ${BOOST_LIBRARY_DIR}libboost_filesystem.a\
     ${BOOST_LIBRARY_DIR}libboost_math_tr1.a\
     ${BOOST_LIBRARY_DIR}libboost_signals.a\
-    ${BOOST_LIBRARY_DIR}libtclstub8.6.a\
     ${BOOST_LIBRARY_DIR}libboost_graph.a\
     ${BOOST_LIBRARY_DIR}libboost_math_tr1f.a\
     ${BOOST_LIBRARY_DIR}libboost_system.a\
-    ${BOOST_LIBRARY_DIR}libtkstub8.6.a\
+
+    #OSX
     ${BOOST_LIBRARY_DIR}zlib.a
+
+    #Unix / Linux / Centos
+    ${BOOST_LIBRARY_DIR}libz.a
+
 
 
 ifeq  ($(strip $(USEMPI)),yes)
