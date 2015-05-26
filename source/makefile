@@ -15,8 +15,6 @@ USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 RELEASE_DATE = "\"3/31/2015\""
 VERSION = "\"1.35.1\""
-FORTAN_COMPILER = gfortran
-FORTRAN_FLAGS =
 
 # Optimize to level 3:
 CXXFLAGS += -O3
@@ -31,14 +29,12 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
     #if you using cygwin to build Windows the following line
     #CXX = x86_64-w64-mingw32-g++
     #CC = x86_64-w64-mingw32-g++
-    #FORTAN_COMPILER = x86_64-w64-mingw32-gfortran
     #TARGET_ARCH += -m64 -static
 
     #if you are a linux user use the following line
     #CXXFLAGS += -mtune=native -march=native
 
     CXXFLAGS += -DBIT_VERSION
-    FORTRAN_FLAGS = -m64
 endif
 
 
@@ -97,9 +93,8 @@ endif
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
-    OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
 
-mothur : fortranSource $(OBJECTS) uchime
+mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 	strip mothur
     mv mothur ..
@@ -107,8 +102,6 @@ mothur : fortranSource $(OBJECTS) uchime
 uchime:
 	cd uchime_src && ./mk && mv uchime .. && cd ..
 
-fortranSource:
-	${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
 install : mothur uchime
 	mv mothur ..
