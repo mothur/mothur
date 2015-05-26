@@ -345,7 +345,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "classic", false);			if (temp == "not found") { temp = "F"; }
 			classic = m->isTrue(temp);
             
-            if ((splitmethod != "fasta") && classic) { m->mothurOut("splitmethod must be fasta to use cluster.classic.\n"); abort=true; }
+            //not using file option and don't have fasta method with classic
+            if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
 
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
 			m->mothurConvert(temp, cutoff); 
