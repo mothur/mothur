@@ -69,7 +69,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],[tag],pick,[extension]-[filename],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
