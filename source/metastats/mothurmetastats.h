@@ -35,10 +35,6 @@ class MothurMetastats {
 		int permute_matrix(vector<double>&, vector<double>&, int, vector<double>&, vector<double>&, vector<double>&);
 		int permute_array(vector<int>&);
 		int calc_twosample_ts(vector<double>&, int, vector<double>&, vector<double>&, vector<double>&);
-		double smoothSpline(vector<double>&, vector<double>&, int);
-		vector<double> calc_qvalues(vector<double>&);
-		vector<double> sknot1(double*, int);
-		int nkn(int);
 		int OrderPValues(int, int, vector<double>&, vector<int>&);
 		int swapElements(int, int, vector<double>&, vector<int>&);
 		vector<int> getSequence(int, int, int);
