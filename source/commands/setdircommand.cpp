@@ -114,9 +114,8 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
             if (seed)  {
-                m->mothurOut("\nRandom number(1-100) seeded with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
                 srand(random);
-                m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
+                m->mothurOut("Setting random seed to" + toString(random) + ".\n\n");
             }
             
 			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod && !seed) {
