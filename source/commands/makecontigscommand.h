@@ -116,6 +116,11 @@ struct contigsData {
     bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
+    vector< vector<string> > fileInputs;
+    int start,end;
+    string compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile;
+    map<string, int> totalGroupCounts;
+    map<int, string> file2Group;
     
 	
 	contigsData(){}
@@ -158,11 +163,258 @@ struct contigsData {
         format = form;
         done=false;
 	}
+    contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup) {
+        inputFiles = f;
+        qualOrIndexFiles = qif;
+        outputFasta = of;
+        outputMisMatches = om;
+        outputQual = oq;
+        outputScrapQual = osq;
+        m = mout;
+        match = ma;
+        misMatch = misMa;
+        gapOpen = gapO;
+        gapExtend = gapE;
+        insert = thr;
+        kmerSize = km;
+        align = al;
+        group = g;
+        count = 0;
+        outputScrapFasta = osf;
+        fastaFileNames = ffn;
+        qualFileNames = qfn;
+        oligosfile = olig;
+        pdiffs = pdf;
+        bdiffs = bdf;
+        tdiffs = tdf;
+        allFiles = all;
+        trimOverlap = to;
+        createOligosGroup = cg;
+        createFileGroup = cfg;
+        threadID = tid;
+        deltaq = delt;
+        reorient = ro;
+        linesInput_start = lff; linesInput_end = lff2;
+        linesInputReverse_start = lrf; linesInputReverse_end = lrf2;
+        qlinesInput_start = qff; qlinesInput_end = qff2;
+        qlinesInputReverse_start = qrf; qlinesInputReverse_end = qrf2;
+        delim = d;
+        format = form;
+        done=false;
+        fileInputs = fileI;
+        start = st;
+        end= ed;
+        compositeGroupFile = compGroupFile;
+        compositeFastaFile = compFastaFile;
+        compositeMisMatchFile = compMisMatchFile;
+        compositeQualFile = compQualFile;
+        compositeScrapFastaFile = compScrapFastaFile;
+        compositeScrapQualFile = compScrapQualFile;
+        totalGroupCounts = tGroupCounts;
+        file2Group = fGroup;
+    }
 };
-
 /**************************************************************************************************/
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
+
+//**********************************************************************************************************************
+//unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
+static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
+    contigsData* pDataArray;
+    pDataArray = (contigsData*)lpParam;
+    
+    try {
+        unsigned long long numReads = 0;
+        pDataArray->delim = '@';
+        
+        for (int l = pDataArray->start; l < pDataArray->end; l++) {
+            int startTime = time(NULL);
+            
+            if (pDataArray->m->control_pressed) { break; }
+            
+            pDataArray->m->mothurOut("\n>>>>>\tProcessing file pair " + pDataArray->fileInputs[l][0] + " - " + pDataArray->fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(pDataArray->fileInputs.size()) + ")\t<<<<<\n");
+            
+            string ffastqfile = pDataArray->fileInputs[l][0];
+            string rfastqfile = pDataArray->fileInputs[l][1];
+            string findexfile = pDataArray->fileInputs[l][2];
+            string rindexfile = pDataArray->fileInputs[l][3];
+            pDataArray->group = pDataArray->file2Group[l];
+            
+            pDataArray->groupCounts.clear();
+            pDataArray->groupMap.clear();
+            
+            vector<string> thisFileInputs;
+            vector<string> thisQualOrIndexInputs;
+            vector<linePair> thisLines;
+            vector<linePair> thisQLines;
+            map<string, string> variables;
+            string thisOutputDir = outputDir;
+            
+            string inputFile = ffastqfile;
+            if (outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
+            //variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFile));
+            //variables["[tag]"] = "trim";
+            //outQualFile = getOutputFileName("qfile",variables);
+            pDataArray->outQualFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
+            //variables["[tag]"] = "scrap";
+            //pDataArray->outScrapQualFile = getOutputFileName("qfile",variables);
+            pDataArray->outScrapQualFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
+            
+            thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
+            if ((findexfile != "") || (rindexfile != "")){
+                thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
+                if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
+                if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
+            }
+            
+            //variables["[tag]"] = "trim";
+            //outFastaFile = getOutputFileName("fasta",variables);
+            //variables["[tag]"] = "scrap";
+            //outScrapFastaFile = getOutputFileName("fasta",variables);
+            //variables["[tag]"] = "";
+            //outMisMatchFile = getOutputFileName("report",variables);
+            pDataArray->outFastaFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
+            pDataArray->outScrapFastaFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
+            pDataArray->outMisMatchFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
+            
+            //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
+            //thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
+            //thisQLines.push_back(linePair(0, 1000)); thisQLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
+            pDataArray->linesInput_start = 0; pDataArray->linesInput_end = 1000; pDataArray->linesInputReverse_start = 1; pDataArray->qlinesInput_start = 0; pDataArray->qlinesInputReverse_start =0; pDataArray->linesInputReverse_end =1000; pDataArray->qlinesInput_end =1000; pDataArray->qlinesInputReverse_end=1000;
+            
+            map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
+            createOligosGroup = false;
+            oligos = new Oligos();
+            
+            if(oligosfile != "")                        {       createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);    }
+            if (createOligosGroup || createFileGroup)   {       outputGroupFileName = getOutputFileName("group",variables);                                                 }
+            
+            //give group in file file precedence
+            if (createFileGroup) {  createOligosGroup = false; }
+            
+            ofstream temp;
+            m->openOutputFile(outFastaFile, temp);		temp.close();
+            m->openOutputFile(outScrapFastaFile, temp);		temp.close();
+            m->openOutputFile(outQualFile, temp);		temp.close();
+            m->openOutputFile(outScrapQualFile, temp);		temp.close();
+            
+            m->mothurOut("Making contigs...\n");
+            
+            unsigned long long thisNumReads = driver(thisFileInputs, thisQualOrIndexInputs, outFastaFile, outScrapFastaFile,  outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1], group);
+            
+            numReads += thisNumReads;
+            
+            m->mothurOut("Done.\n");
+            
+            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
+            
+            if(allFiles){
+                // so we don't add the same groupfile multiple times
+                map<string, string>::iterator it;
+                set<string> namesToRemove;
+                for(int i=0;i<fastaFileNames.size();i++){
+                    for(int j=0;j<fastaFileNames[0].size();j++){
+                        if (fastaFileNames[i][j] != "") {
+                            if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
+                                if(m->isBlank(fastaFileNames[i][j])){
+                                    m->mothurRemove(fastaFileNames[i][j]);
+                                    namesToRemove.insert(fastaFileNames[i][j]);
+                                    uniqueFastaNames.erase(fastaFileNames[i][j]); //remove from list for group file print
+                                    
+                                    m->mothurRemove(qualFileNames[i][j]);
+                                    namesToRemove.insert(qualFileNames[i][j]);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //remove names for outputFileNames, just cleans up the output
+                vector<string> outputNames2;
+                for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
+                outputNames = outputNames2;
+                
+                for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+                    ifstream in;
+                    m->openInputFile(it->first, in);
+                    
+                    ofstream out;
+                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
+                    string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+                    m->openOutputFile(thisGroupName, out);
+                    
+                    while (!in.eof()){
+                        if (m->control_pressed) { break; }
+                        
+                        Sequence currSeq(in); m->gobble(in);
+                        out << currSeq.getName() << '\t' << it->second << endl;
+                    }
+                    out.close();
+                    in.close();
+                }
+            }
+            
+            //append to combo files
+            if (createFileGroup || createOligosGroup) {
+                ofstream outCGroup;
+                if (l == 0) {   m->openOutputFile(compositeGroupFile, outCGroup);  outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);         }
+                else {          m->openOutputFileAppend(compositeGroupFile, outCGroup);     }
+                
+                if (!allFiles) {
+                    m->mothurRemove(outputGroupFileName);
+                }else {
+                    ofstream outGroup;
+                    m->openOutputFile(outputGroupFileName, outGroup);
+                    
+                    for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                        outCGroup << itGroup->first << '\t' << itGroup->second << endl;
+                        outGroup << itGroup->first << '\t' << itGroup->second << endl;
+                    }
+                    outGroup.close();
+                }
+                outCGroup.close();
+                
+                for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
+                    map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
+                    if (itTemp == totalGroupCounts.end()) { totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
+                    else { itTemp->second += itGroups->second; } //existing group, update total
+                }
+            }
+            if (l == 0) {  m->appendFiles(outMisMatchFile, compositeMisMatchFile);  }
+            else {  m->appendFilesWithoutHeaders(outMisMatchFile, compositeMisMatchFile);  }
+            m->appendFiles(outFastaFile, compositeFastaFile);
+            m->appendFiles(outScrapFastaFile, compositeScrapFastaFile);
+            m->appendFiles(outQualFile, compositeQualFile);
+            m->appendFiles(outScrapQualFile, compositeScrapQualFile);
+            if (!allFiles) {
+                m->mothurRemove(outMisMatchFile);
+                m->mothurRemove(outFastaFile);
+                m->mothurRemove(outScrapFastaFile);
+                m->mothurRemove(outQualFile);
+                m->mothurRemove(outScrapQualFile);
+            }else {
+                outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
+                outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
+                outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
+                outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
+                outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
+            }
+            
+            m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n");	m->mothurOutEndLine();
+        }
+        
+        return numReads;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "driverGroups");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+
 static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
     contigsData* pDataArray;
     pDataArray = (contigsData*)lpParam;

@@ -70,7 +70,6 @@ CXXFLAGS += -I ${BOOST_INCLUDE_DIR}
 LIBS += \
     ${BOOST_LIBRARY_DIR}libboost_atomic.a\
     ${BOOST_LIBRARY_DIR}libboost_iostreams.a\
-    ${BOOST_LIBRARY_DIR}libboost_math_tr1l.a\
     ${BOOST_LIBRARY_DIR}libboost_test_exec_monitor.a\
     ${BOOST_LIBRARY_DIR}libboost_chrono.a\
     ${BOOST_LIBRARY_DIR}libboost_locale.a\
@@ -90,25 +89,19 @@ LIBS += \
     ${BOOST_LIBRARY_DIR}libboost_wave.a\
     ${BOOST_LIBRARY_DIR}libboost_date_time.a\
     ${BOOST_LIBRARY_DIR}libboost_math_c99f.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1l.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_c99l.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1.a\
+    ${BOOST_LIBRARY_DIR}libboost_math_tr1f.a\
     ${BOOST_LIBRARY_DIR}libboost_regex.a\
     ${BOOST_LIBRARY_DIR}libboost_wserialization.a\
     ${BOOST_LIBRARY_DIR}libboost_exception.a\
-    ${BOOST_LIBRARY_DIR}libboost_math_c99l.a\
     ${BOOST_LIBRARY_DIR}libboost_serialization.a\
     ${BOOST_LIBRARY_DIR}libboost_filesystem.a\
-    ${BOOST_LIBRARY_DIR}libboost_math_tr1.a\
     ${BOOST_LIBRARY_DIR}libboost_signals.a\
     ${BOOST_LIBRARY_DIR}libboost_graph.a\
-    ${BOOST_LIBRARY_DIR}libboost_math_tr1f.a\
     ${BOOST_LIBRARY_DIR}libboost_system.a\
-
-    #OSX
     ${BOOST_LIBRARY_DIR}zlib.a
-
-    #Unix / Linux / Centos
-    ${BOOST_LIBRARY_DIR}libz.a
-
-
 
 ifeq  ($(strip $(USEMPI)),yes)
     CXX = mpic++
