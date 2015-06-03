@@ -373,7 +373,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
-            if(m->dirCheck(outputOption)){ 
+            if(m->mkDir(outputOption)){
                 setOutputDirectory(outputOption); 
                 m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
             }
@@ -389,7 +389,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            if(m->dirCheck(intputOption)){ 
+            if(m->mkDir(intputOption)){
                 setInputDirectory(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
             }
