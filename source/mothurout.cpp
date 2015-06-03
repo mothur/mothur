@@ -911,7 +911,7 @@ map<string, vector<string> > MothurOut::parseClasses(string classes){
 		errorOut(e, "MothurOut", "parseClasses");
 		exit(1);
 	}
-}
+}cd .
 /***********************************************************************/
 
 string MothurOut::hasPath(string longName){
