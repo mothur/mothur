@@ -132,7 +132,6 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 
 int SetDirectoryCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         if (debugorSeedOnly) {  }
@@ -150,7 +149,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                 commandFactory->setOutputDirectory(output);
             }else {
-                if (m->dirCheck(output)) {
+                if (m->mkDir(output)) {
                     m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                     commandFactory->setOutputDirectory(output);
                 }
@@ -165,7 +164,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
                 commandFactory->setInputDirectory(input);
             }else {
-                if (m->dirCheck(input)) {
+                if (m->mkDir(input)) {
                     m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
                     commandFactory->setInputDirectory(input);
                 }
@@ -190,7 +189,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                 m->setDefaultPath(tempdefault);
             }else {
-                if (m->dirCheck(tempdefault)) {
+                if (m->mkDir(tempdefault)) {
                     m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                     m->setDefaultPath(tempdefault); 
                 }

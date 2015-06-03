@@ -879,6 +879,81 @@ bool MothurOut::dirCheck(string& dirName){
 	}	
     
 }
+/***********************************************************************/
+
+bool MothurOut::dirCheck(string& dirName, string noError){
+    try {
+        
+        if (dirName == "") { return false; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        //add / to name if needed
+        string lastChar = dirName.substr(dirName.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { dirName += "/"; }
+#else
+        if (lastChar != "\\") { dirName += "\\"; }
+#endif
+        
+        //test to make sure directory exists
+        dirName = getFullPathName(dirName);
+        string outTemp = dirName + tag + "temp"+ toString(time(NULL));
+        ofstream out;
+        out.open(outTemp.c_str(), ios::trunc);
+        if(!out) {
+            //mothurOut(dirName + " directory does not exist or is not writable."); mothurOutEndLine();
+        }else{
+            out.close();
+            mothurRemove(outTemp);
+            return true;
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "dirCheck - noError");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+//returns true it exits or if we can make it
+bool MothurOut::mkDir(string& dirName){
+    try {
+        
+        bool dirExist = dirCheck(dirName, "noError");
+        
+        if (dirExist) { return true; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        string makeDirectoryCommand = "";
+
+        makeDirectoryCommand += "mkdir -p \"" + dirName + "\"";
+        system(makeDirectoryCommand.c_str());
+        if (dirCheck(dirName)) { return true; }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mkDir");
+        exit(1);
+    }
+    
+}
 //**********************************************************************************************************************
 
 map<string, vector<string> > MothurOut::parseClasses(string classes){

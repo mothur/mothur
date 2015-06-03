@@ -75,6 +75,8 @@ class MothurOut {
 		//functions from mothur.h
 		//file operations
         bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
+        bool dirCheck(string&, string); //completes path, appends appropriate / or \, makes sure dir is writable. - no error
+        bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
 		vector<unsigned long long> divideFile(string, int&); //divides splitting unevenness by sequence
         vector<unsigned long long> divideFile(string filename, int& proc, char delimChar);
         vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
