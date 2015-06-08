@@ -902,9 +902,11 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
         }else {
-            CountTable ct;
-            ct.readTable(countfile, false, false);
-            counts = ct.getNameMap();
+            if (file == "") {
+                CountTable ct;
+                ct.readTable(countfile, false, false);
+                counts = ct.getNameMap();
+            }
         }
         
 		m->openOutputFile(listFileName,	outList);
@@ -971,7 +973,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			//outList << endl;
             if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); completeList.printHeaders(outList); }
             if (countfile == "") { completeList.print(outList); }
-            else { completeList.print(outList, counts);   }
+            else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);   }
+            else { completeList.print(outList); }
 			
 			if (rabund != NULL) { delete rabund; }
 		}
