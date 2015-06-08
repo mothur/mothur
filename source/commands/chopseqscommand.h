@@ -36,14 +36,14 @@ class ChopSeqsCommand : public Command {
 	
 	private:
     
-		string fastafile, outputDir, keep, namefile, groupfile, countfile;
+		string fastafile, outputDir, keep, namefile, groupfile, countfile, qualfile;
 		bool abort, countGaps, Short, keepN;
 		int numbases, processors;
 		vector<string> outputNames;
 		
 		string getChopped(Sequence);
-        bool driver (linePair, string, string, string);
-        bool createProcesses(vector<linePair>, string, string, string);
+        bool driver (linePair, string, string, string, string);
+        bool createProcesses(vector<linePair>, string, string, string, string);
 };
 
 /**************************************************************************************************/

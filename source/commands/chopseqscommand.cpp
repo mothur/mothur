@@ -15,6 +15,7 @@
 vector<string> ChopSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+        CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","group",false,false,true); parameters.push_back(pgroup);
@@ -45,6 +46,7 @@ string ChopSeqsCommand::getHelpString(){
 		helpString += "The chop.seqs command parameters are fasta, name, group, count, numbases, countgaps and keep. fasta is required unless you have a valid current fasta file. numbases is required.\n";
 		helpString += "The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n";
         helpString += "If you provide a name, group or count file any sequences removed from the fasta file will also be removed from those files.\n";
+        helpString += "The qfile parameter allows you to provide a quality file.\n";
 		helpString += "The numbases parameter allows you to specify the number of bases you want to keep.\n";
 		helpString += "The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n";
 		helpString += "The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n";
@@ -67,6 +69,7 @@ string ChopSeqsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],chop.fasta"; }
+        else if (type == "qfile") {  pattern = "[filename],chop.qual"; }
         else if (type == "name") {  pattern = "[filename],chop.names"; }
         else if (type == "group") {  pattern = "[filename],chop.groups"; }
         else if (type == "count") {  pattern = "[filename],chop.count_table"; } 
@@ -87,6 +90,7 @@ ChopSeqsCommand::ChopSeqsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
@@ -127,6 +131,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             outputTypes["name"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["qfile"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -140,6 +145,14 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("qfile");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+                }
                 
                 it = parameters.find("name");
 				//user has given a template file
@@ -179,6 +192,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            qualfile = validParameter.validFile(parameters, "qfile", true);
+            if (qualfile == "not open") { qualfile = ""; abort = true; }
+            else if (qualfile == "not found") { qualfile = ""; }
+            else { m->setQualFile(qualfile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
@@ -214,8 +232,10 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "short", false);	if (temp == "not found") { temp = "f"; } 
 			Short = m->isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "keepn", false);	if (temp == "not found") { temp = "f"; }
+            temp = validParameter.validFile(parameters, "keepn", false);	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
             keepN = m->isTrue(temp);
+            
+            if ((!keepN) && (qualfile!= "")) { m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file."); m->mothurOutEndLine(); abort = true;  }
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -241,7 +261,10 @@ int ChopSeqsCommand::execute(){
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
         string outputFileName = getOutputFileName("fasta", variables);
         outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
-        string outputFileNameAccnos = getOutputFileName("accnos", variables);        
+        string outputFileNameAccnos = getOutputFileName("accnos", variables);
+        
+        string fastafileTemp = "";
+        if (qualfile != "") {  fastafileTemp = outputFileName + ".qualFile.Positions.temp"; }
         
         vector<unsigned long long> positions; 
         vector<linePair> lines;
@@ -263,10 +286,21 @@ int ChopSeqsCommand::execute(){
 #endif
         
         bool wroteAccnos = false;
-        if(processors == 1) {   wroteAccnos = driver(lines[0], fastafile, outputFileName, outputFileNameAccnos);        }
-        else                {   wroteAccnos = createProcesses(lines, fastafile, outputFileName, outputFileNameAccnos);  }
+        if(processors == 1) {   wroteAccnos = driver(lines[0], fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);        }
+        else                {   wroteAccnos = createProcesses(lines, fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);  }
         
         if (m->control_pressed) {  return 0; }
+        
+        if (qualfile != "") {
+            thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
+            string outputQualFileName = getOutputFileName("fasta", variables);
+            outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
+            
+            processQual(outputQualFileName, fastafileTemp);
+            m->mothurRemove(fastafileTemp);
+        }
 		
         if (wroteAccnos) {
             outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos);
@@ -367,7 +401,7 @@ int ChopSeqsCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, string outFasta, string outAccnos) {
+bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, string outFasta, string outAccnos, string fastafileTemp) {
 	try {
 		int process = 1;
 		bool wroteAccnos = false;
@@ -385,7 +419,9 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp");
+                string fastafileTempThisProcess = fastafileTemp;
+                if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + m->mothurGetpid(process) + ".temp"; }
+				wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp", fastafileTempThisProcess);
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -425,7 +461,9 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp");
+                    string fastafileTempThisProcess = fastafileTemp;
+                    if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + m->mothurGetpid(process) + ".temp"; }
+                    wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp", fastafileTempThisProcess);
                     
                     //pass numSeqs to parent
                     ofstream out;
@@ -444,7 +482,7 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
         }
         
 		//do your part
-		wroteAccnos = driver(lines[0], filename, outFasta, outAccnos);
+		wroteAccnos = driver(lines[0], filename, outFasta, outAccnos, fastafileTemp);
         
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -496,7 +534,9 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 		}
 		
         //do your part
-		wroteAccnos = driver(lines[processors-1], filename, (outFasta + toString(processors-1) + ".temp"), (outAccnos + toString(processors-1) + ".temp"));
+        string fastafileTempThisProcess = fastafileTemp;
+        if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + toString(processors-1) + ".temp"; }
+		wroteAccnos = driver(lines[processors-1], filename, (outFasta + toString(processors-1) + ".temp"), (outAccnos + toString(processors-1) + ".temp"), fastafileTempThisProcess);
         processIDS.push_back(processors-1);
         
 		//Wait until all threads have terminated.
@@ -519,6 +559,10 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 #endif		
                 
 		for (int i = 0; i < processIDS.size(); i++) {
+            if (fastafileTemp != "") {
+                m->appendFiles((fastafileTemp + toString(processIDS[i]) + ".temp"), fastafileTemp);
+                m->mothurRemove((fastafileTemp + toString(processIDS[i]) + ".temp"));
+            }
 			m->appendFiles((outFasta + toString(processIDS[i]) + ".temp"), outFasta);
 			m->mothurRemove((outFasta + toString(processIDS[i]) + ".temp"));
 		}
@@ -544,7 +588,7 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 	}
 }
 /**************************************************************************************/
-bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta, string outAccnos) {	
+bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta, string outAccnos, string fastaFileTemp) {
 	try {
 		
 		ofstream out;
