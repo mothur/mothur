@@ -24,6 +24,8 @@ double MothurFisher::fexact(double n11_, double n12_, double n21_, double n22_, 
 		double n1_ = n11_+n12_;
 		double n_1 = n11_+n21_;
 		double n   = n11_ +n12_ +n21_ +n22_;
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: fisher:fexact n11_, n1_, n_1, n " + toString(n11_) + " " + toString(n1_) + " " + toString(n_1) + " " + toString(n) + " \n"); }
 		exact(n11_,n1_,n_1,n);
 		double twotail = sleft+sright;
 		
@@ -157,6 +159,10 @@ double MothurFisher::exact(double n11, double n1_, double n_1, double n){
 		{
 			sleft += p;
 			p=myhyper(i);
+            if (i > max) {
+                m->mothurOut("[WARNING]: i value too high. Take a closer look at the pvalue for " + otuLabel + ".\n");
+                break;
+            }
 		}
 		i--;
 		if(p<1.00000001*prob) sleft += p;

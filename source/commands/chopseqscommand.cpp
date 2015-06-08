@@ -298,7 +298,7 @@ int ChopSeqsCommand::execute(){
             string outputQualFileName = getOutputFileName("fasta", variables);
             outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
             
-            processQual(outputQualFileName, fastafileTemp);
+            //processQual(outputQualFileName, fastafileTemp);
             m->mothurRemove(fastafileTemp);
         }
 		
