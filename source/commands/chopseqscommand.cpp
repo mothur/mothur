@@ -46,7 +46,7 @@ string ChopSeqsCommand::getHelpString(){
 		helpString += "The chop.seqs command parameters are fasta, name, group, count, numbases, countgaps and keep. fasta is required unless you have a valid current fasta file. numbases is required.\n";
 		helpString += "The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n";
         helpString += "If you provide a name, group or count file any sequences removed from the fasta file will also be removed from those files.\n";
-        helpString += "The qfile parameter allows you to provide a quality file.\n";
+        helpString += "The qfile parameter allows you to provide a quality file associated with the fastafile.\n";
 		helpString += "The numbases parameter allows you to specify the number of bases you want to keep.\n";
 		helpString += "The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n";
 		helpString += "The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n";
