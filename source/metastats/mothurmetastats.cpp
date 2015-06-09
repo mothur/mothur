@@ -132,24 +132,27 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                 T_statistics[i] = xbar_diff/denom;  // calculate two sample t-statistic
             }
             
-           /*for (int i = 0; i < row; i++) {
-                for (int j = 0; j < 3; j++) {
-                    cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
-                    cout << "C2[" << i+1 << "," << j+1 << "]=" << C2[i][j] << ";" << endl;
+            if (m->debug) {
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
+                        cout << "C2[" << i+1 << "," << j+1 << "]=" << C2[i][j] << ";" << endl;
+                    }
+                    cout << "T_statistics[" << i+1 << "]=" << T_statistics[i] << ";" << endl;
                 }
-                cout << "T_statistics[" << i+1 << "]=" << T_statistics[i] << ";" << endl;
+                
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < column; j++) {
+                        cout << "Fmatrix[" << i+1 << "," << j+1 << "]=" << data[i][j] << ";" << endl;
+                    }
+                }
             }
-            
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < column; j++) {
-                    cout << "Fmatrix[" << i+1 << "," << j+1 << "]=" << data[i][j] << ";" << endl;
-                }
-            }*/
-
             //#*************************************
             //# generate initial permuted p-values
             //#*************************************
             pvalues = permuted_pvalues(Pmatrix, T_statistics, data);
+            
+            if (m->debug) {  for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + m->currentSharedBinLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
             
             //#*************************************
             //#  generate p values for sparse data 
@@ -179,7 +182,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                     f22 = total2 - fish2[i];
 				
                     MothurFisher fisher;
+                    if (m->debug) {   m->mothurOut("[DEBUG]: about to run fisher for Otu " + m->currentSharedBinLabels[i] + " F11, F12, F21, F22 = " + toString(f11) + " " + toString(f12) + " " + toString(f21) + " " + toString(f22) + " " + "\n"); }
                     double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
+                    if (m->debug) {   m->mothurOut("[DEBUG]: about to completed fisher for Otu " + m->currentSharedBinLabels[i] + " pre = " + toString(pre) + "\n"); }
+                    
                     if (pre > 0.999999999)	{ pre = 1.0; }
                 
                     if (m->control_pressed) { return 1; }

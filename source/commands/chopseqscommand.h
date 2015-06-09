@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "sequence.hpp"
+#include "qualityscores.h"
 
 class ChopSeqsCommand : public Command {
 	
@@ -36,14 +37,15 @@ class ChopSeqsCommand : public Command {
 	
 	private:
     
-		string fastafile, outputDir, keep, namefile, groupfile, countfile;
+		string fastafile, outputDir, keep, namefile, groupfile, countfile, qualfile;
 		bool abort, countGaps, Short, keepN;
 		int numbases, processors;
 		vector<string> outputNames;
 		
-		string getChopped(Sequence);
-        bool driver (linePair, string, string, string);
-        bool createProcesses(vector<linePair>, string, string, string);
+		string getChopped(Sequence, string&);
+        bool driver (linePair, string, string, string, string);
+        bool createProcesses(vector<linePair>, string, string, string, string);
+        int processQual(string, string);
 };
 
 /**************************************************************************************************/
@@ -52,7 +54,7 @@ class ChopSeqsCommand : public Command {
 // that can be passed using a single void pointer (LPVOID).
 struct chopData {
 	string filename; 
-	string outFasta, outAccnos, keep; 
+	string outFasta, outAccnos, keep, qualfile, fastaFileTemp;
 	unsigned long long start;
 	unsigned long long end;
 	int numbases, count;
@@ -63,7 +65,7 @@ struct chopData {
 	
 	
 	chopData(){}
-	chopData(string f, string ff, string a, MothurOut* mout, unsigned long long st, unsigned long long en, string k, bool cGaps, int nbases, bool S, bool kn) {
+	chopData(string f, string ff, string a, MothurOut* mout, unsigned long long st, unsigned long long en, string k, bool cGaps, int nbases, bool S, bool kn, string qu, string ft) {
 		filename = f;
 		outFasta = ff;
         outAccnos = a;
@@ -76,6 +78,8 @@ struct chopData {
         Short = S;
 		wroteAccnos = false;
         keepN = kn;
+        qualfile = qu;
+        fastaFileTemp = ft;
         
 	}
 };
@@ -97,6 +101,10 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 		ifstream in;
 		pDataArray->m->openInputFile(pDataArray->filename, in);
         
+        ofstream outfTemp;
+        if (pDataArray->fastaFileTemp != "") { pDataArray->m->openOutputFile(pDataArray->fastaFileTemp, outfTemp); }
+
+        
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			in.seekg(0);
             pDataArray->m->zapGremlins(in);
@@ -110,13 +118,14 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 						
-			if (pDataArray->m->control_pressed) {  in.close(); out.close(); outAcc.close(); pDataArray->m->mothurRemove(pDataArray->outFasta); pDataArray->m->mothurRemove(pDataArray->outAccnos); return 0;  }
+			if (pDataArray->m->control_pressed) {  in.close(); out.close(); outAcc.close(); pDataArray->m->mothurRemove(pDataArray->outFasta); pDataArray->m->mothurRemove(pDataArray->outAccnos); if (pDataArray->fastaFileTemp != "") { outfTemp.close(); pDataArray->m->mothurRemove(pDataArray->fastaFileTemp); } return 0;  }
             
             Sequence seq(in); pDataArray->m->gobble(in);
 			
 			if (seq.getName() != "") {
 				//string newSeqString = getChopped(seq);
                 ///////////////////////////////////////////////////////////////////////
+                string qualValues = "";
                 string temp = seq.getAligned();
                 string tempUnaligned = seq.getUnaligned();
                 
@@ -196,8 +205,11 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             if (stopSpot == 0) { temp = ""; }
                             else {  temp = temp.substr(0, stopSpot+1);  }
 							
+                            qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(stopSpot+1) + '\n';
+                            
                         }else { 
-                            if (!pDataArray->Short) { temp = ""; } //sequence too short
+                            if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                            else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
                         }				
                     }else { //you are keeping the back
                         int tempLength = tempUnaligned.length();
@@ -222,8 +234,12 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             
                             if (stopSpot == 0) { temp = ""; }
                             else {  temp = temp.substr(stopSpot);  }
-                        }else { 
-                            if (!pDataArray->Short) { temp = ""; } //sequence too short
+                            
+                            qualValues = seq.getName() +'\t' + toString(stopSpot) + '\t' + toString(temp.length()-1) + '\n';
+                            
+                        }else {
+                            if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                            else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
                         }
                     }
                 }
@@ -238,6 +254,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 					outAcc << seq.getName() << endl;
 					pDataArray->wroteAccnos = true;
 				}
+                if (pDataArray->fastaFileTemp != "") {  outfTemp << qualValues << endl;  }
                 pDataArray->count++;
 			}
             //report progress
@@ -251,6 +268,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 		in.close();
         out.close();
         outAcc.close();
+        if (pDataArray->fastaFileTemp != "") { outfTemp.close(); }
 				
 		return 0;
 		

@@ -164,7 +164,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
                 commandFactory->setInputDirectory(input);
             }else {
-                if (m->mkDir(input)) {
+                if (m->dirCheck(input)) {
                     m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
                     commandFactory->setInputDirectory(input);
                 }
