@@ -235,7 +235,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             temp = validParameter.validFile(parameters, "keepn", false);	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
             keepN = m->isTrue(temp);
             
-            if ((!keepN) && (qualfile!= "")) { m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file."); m->mothurOutEndLine(); abort = true;  }
+            if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true."); m->mothurOutEndLine(); abort = true;  }
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -295,13 +295,15 @@ int ChopSeqsCommand::execute(){
             thisOutputDir = outputDir;
             if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
             variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
-            string outputQualFileName = getOutputFileName("fasta", variables);
+            string outputQualFileName = getOutputFileName("qfile", variables);
             outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
             
-            //processQual(outputQualFileName, fastafileTemp);
+            processQual(outputQualFileName, fastafileTemp);
             m->mothurRemove(fastafileTemp);
         }
 		
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        
         if (wroteAccnos) {
             outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos);
             
@@ -358,6 +360,8 @@ int ChopSeqsCommand::execute(){
         }
 		else {  m->mothurRemove(outputFileNameAccnos);  }
 		
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        
 		//set fasta file as new current fastafile
 		string current = "";
 		itTypes = outputTypes.find("fasta");
@@ -386,6 +390,8 @@ int ChopSeqsCommand::execute(){
                 if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
             }
 		}
+        
+        
 		
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -525,7 +531,9 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
             string extension = "";
             if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short, keepN);
+            string fastafileTempThisProcess = fastafileTemp;
+            if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + extension; }
+			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short, keepN, qualfile, fastafileTempThisProcess);
 			pDataArray.push_back(tempChop);
 			
 			//MyChopThreadFunction is in header. It must be global or static to work with the threads.
@@ -597,6 +605,9 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
         ofstream outAcc;
 		m->openOutputFile(outAccnos, outAcc);
         
+        ofstream outfTemp;
+        if (fastaFileTemp != "") { m->openOutputFile(fastaFileTemp, outfTemp); }
+        
 		ifstream in;
 		m->openInputFile(filename, in);
         
@@ -617,10 +628,11 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
             
 			Sequence seq(in); m->gobble(in);
 			
-			if (m->control_pressed) {  in.close(); out.close(); outAcc.close(); m->mothurRemove(outFasta); m->mothurRemove(outAccnos); return 0;  }
+			if (m->control_pressed) {  in.close(); out.close(); outAcc.close(); m->mothurRemove(outFasta); m->mothurRemove(outAccnos); if (fastaFileTemp != "") { outfTemp.close(); m->mothurRemove(fastaFileTemp); } return 0;  }
 			
 			if (seq.getName() != "") {
-				string newSeqString = getChopped(seq);
+                string qualValues = "";
+				string newSeqString = getChopped(seq, qualValues);
 				
 				//output trimmed sequence
 				if (newSeqString != "") {
@@ -629,6 +641,7 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
 					outAcc << seq.getName() << endl;
 					wroteAccnos = true;
 				}
+                if (fastaFileTemp != "") {  outfTemp << qualValues << endl;  }
                 count++;
 			}
 			
@@ -639,16 +652,17 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
             if (in.eof()) { break; }
 #endif
             //report progress
-			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 
 		
 		in.close();
         out.close();
         outAcc.close();
+        if (fastaFileTemp != "") { outfTemp.close(); }
 		
 		return wroteAccnos;
 	}
@@ -658,7 +672,7 @@ bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta,
 	}
 }
 //**********************************************************************************************************************
-string ChopSeqsCommand::getChopped(Sequence seq) {
+string ChopSeqsCommand::getChopped(Sequence seq, string& qualValues) {
 	try {
 		string temp = seq.getAligned();
 		string tempUnaligned = seq.getUnaligned();
@@ -738,9 +752,12 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(0, stopSpot+1);  }
-							
+                    
+					qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(stopSpot+1) + '\n';
+                    
 				}else { 
-					if (!Short) { temp = ""; } //sequence too short
+					if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                    else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
 				}				
 			}else { //you are keeping the back
 				int tempLength = tempUnaligned.length();
@@ -765,8 +782,12 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 				
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(stopSpot);  }
+                    
+                    qualValues = seq.getName() +'\t' + toString(stopSpot) + '\t' + toString(temp.length()-1) + '\n';
+                    
 				}else { 
-					if (!Short) { temp = ""; } //sequence too short
+					if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                    else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
 				}
 			}
 		}
@@ -777,6 +798,60 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 		m->errorOut(e, "ChopSeqsCommand", "getChopped");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
+    try {
+        ofstream out;
+        m->openOutputFile(outputFile, out);
+        
+        ifstream in;
+        m->openInputFile(inputFile, in);
+        
+        ifstream inQual;
+        m->openInputFile(qualfile, inQual);
+
+        m->mothurOut("Processing the quality file.\n");
+        
+        int count = 0;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            
+            QualityScores qual(inQual);
+            
+            string name = "";
+            int start = 0; int end = 0;
+            in >> name >> start >> end; m->gobble(in);
+            
+            if (qual.getName() != "") {
+                if (qual.getName() != name) { start = 0; end = 0; }
+                else if (start != 0) {
+                    qual.trimQScores(start, -1);
+                    qual.printQScores(out);
+                }else if ((start == 0) && (end == 0)) {}
+                else if ((start == 0) && (end != 0)) {
+                    qual.trimQScores(-1, end);
+                    qual.printQScores(out);
+                }
+            }
+            count++;
+            //report progress
+            if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+            
+        }
+        //report progress
+        if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+        
+        in.close();
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "processQual");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
