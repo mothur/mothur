@@ -389,7 +389,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            if(m->mkDir(intputOption)){
+            if(m->dirCheck(intputOption)){
                 setInputDirectory(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
             }
