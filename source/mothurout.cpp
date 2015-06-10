@@ -2440,7 +2440,7 @@ vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	}
 }
 //**********************************************************************************************************************
-int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
+int MothurOut::readTax(string namefile, map<string, string>& taxMap, bool removeConfidence) {
 	try {
         //open input file
 		ifstream in;
@@ -2466,7 +2466,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) { if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {
@@ -2494,7 +2494,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) {  if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {
