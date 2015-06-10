@@ -123,7 +123,7 @@ PhyloSummary::PhyloSummary(GroupMap* g, bool r){
 int PhyloSummary::summarize(string userTfile){
 	try {
 		map<string, string> temp;
-        m->readTax(userTfile, temp);
+        m->readTax(userTfile, temp, true);
         
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
             addSeqToTree(itTemp->first, itTemp->second);

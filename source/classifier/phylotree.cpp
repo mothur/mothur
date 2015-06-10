@@ -179,7 +179,7 @@ PhyloTree::PhyloTree(string tfile){
 		
 		#else
             map<string, string> temp;
-            m->readTax(tfile, temp);
+            m->readTax(tfile, temp, true);
         
             for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
                 addSeqToTree(itTemp->first, itTemp->second);
