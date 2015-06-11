@@ -336,14 +336,18 @@ void ListVector::print(ostream& output, map<string, int>& ct){
 
 void ListVector::print(ostream& output){
     try {
-        output << label << '\t' << numBins << '\t';
+        output << label << '\t' << numBins;
         
         vector<string> hold = data;
         sort(hold.begin(), hold.end(), abundNamesSort);
         
-        for(int i=0;i<hold.size();i++){
+        //find first non blank otu
+        int start = 0;
+        for(int i=0;i<hold.size();i++){  if(hold[i] != ""){  start = i; break; } }
+        
+        for(int i=start;i<hold.size();i++){
             if(hold[i] != ""){
-                output << hold[i] << '\t';
+                output << '\t' << hold[i];
             }
         }
         output << endl;
