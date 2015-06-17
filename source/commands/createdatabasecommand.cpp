@@ -333,7 +333,7 @@ int CreateDatabaseCommand::execute(){
         ofstream out;
         m->openOutputFile(outputFileName, out);
         
-        string header = "OTUNumber\tAbundance\t";
+        string header = "OTUNumber\tAbundance";
 
         
         if (listfile != "") {
@@ -354,15 +354,15 @@ int CreateDatabaseCommand::execute(){
             if (m->control_pressed) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
             
             if (groupfile != "") { 
-                header = "OTUNumber\t";
-                for (int i = 0; i < groupmap->getNamesOfGroups().size(); i++) { header += (groupmap->getNamesOfGroups())[i] + '\t'; }
+                header = "OTUNumber";
+                for (int i = 0; i < groupmap->getNamesOfGroups().size(); i++) { header += '\t' + (groupmap->getNamesOfGroups())[i]; }
             }else if (countfile != "") {
                 if (ct.hasGroupInfo()) {
-                    header = "OTUNumber\t";
-                    for (int i = 0; i < ct.getNamesOfGroups().size(); i++) { header += (ct.getNamesOfGroups())[i] + '\t'; }
+                    header = "OTUNumber";
+                    for (int i = 0; i < ct.getNamesOfGroups().size(); i++) { header += '\t' + (ct.getNamesOfGroups())[i]; }
                 }
             }
-            header += "repSeqName\trepSeq\tOTUConTaxonomy";
+            header += "\trepSeqName\trepSeq\tOTUConTaxonomy";
             out << header << endl;
             
             vector<string> binLabels = list->getLabels();
@@ -373,7 +373,7 @@ int CreateDatabaseCommand::execute(){
                 
                 if (m->control_pressed) { break; }
                 
-                out << otuLabels[index] << '\t';
+                out << otuLabels[index];
                 
                 vector<string> binNames;
                 string bin = list->get(i);
@@ -437,18 +437,18 @@ int CreateDatabaseCommand::execute(){
                     }
                     
                     //output counts
-                    for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << counts[(groupmap->getNamesOfGroups())[j]] << '\t';  }
+                    for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << '\t' << counts[(groupmap->getNamesOfGroups())[j]];  }
                     
                     if (error) { m->control_pressed = true; }
                 }else if (countfile != "") {
                     if (ct.hasGroupInfo()) {
                         vector<int> groupCounts = ct.getGroupCounts(seqRepName);
-                        for (int j = 0; j < groupCounts.size(); j++) { out << groupCounts[j] << '\t';  }
-                    }else { out << numSeqsRep << '\t'; }
-                }else { out << numSeqsRep << '\t'; }
+                        for (int j = 0; j < groupCounts.size(); j++) { out << '\t' << groupCounts[j];  }
+                    }else { out << '\t' << numSeqsRep; }
+                }else { out << '\t' << numSeqsRep; }
                 
                 //output repSeq
-                out << seqRepName << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
+                out << '\t' << seqRepName << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
             }
             
             
@@ -458,9 +458,9 @@ int CreateDatabaseCommand::execute(){
         }else {
             vector<SharedRAbundVector*> lookup = getShared();
             
-            header = "OTUNumber\t";
-            for (int i = 0; i < lookup.size(); i++) { header += lookup[i]->getGroup() + '\t'; }
-            header += "repSeqName\trepSeq\tOTUConTaxonomy";
+            header = "OTUNumber";
+            for (int i = 0; i < lookup.size(); i++) { header += '\t' + lookup[i]->getGroup(); }
+            header += "\trepSeqName\trepSeq\tOTUConTaxonomy";
             out << header << endl;
             
             for (int h = 0; h < lookup[0]->getNumBins(); h++) {
@@ -472,13 +472,13 @@ int CreateDatabaseCommand::execute(){
                 
                 if (m->control_pressed) { break; }
                 
-                out << otuLabels[index] << '\t';
+                out << otuLabels[index];
                 
                 int totalAbund = 0;
                 for (int i = 0; i < lookup.size(); i++) { 
                     int abund = lookup[i]->getAbundance(h);
                     totalAbund += abund; 
-                    out << abund << '\t';
+                    out  << '\t' << abund;
                 }
                 
                 //sanity check
@@ -487,7 +487,7 @@ int CreateDatabaseCommand::execute(){
                 }
                 
                 //output repSeq
-                out << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
+                out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
             }
         }
         out.close();
