@@ -510,11 +510,11 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
 			m->openOutputFile(abund+".temp", aout);
 			outputNames.push_back(abund); outputTypes["list"].push_back(abund);
 
-			if (rareNames.size() != 0)	{  rout << thisList->getLabel() << '\t' << numRareBins << '\t';		}
-			if (abundNames.size() != 0) {	aout << thisList->getLabel() << '\t' << numAbundBins << '\t';	}
+			if (rareNames.size() != 0)	{  rout << thisList->getLabel() << '\t' << numRareBins;		}
+			if (abundNames.size() != 0) {	aout << thisList->getLabel() << '\t' << numAbundBins;	}
             
             vector<string> binLabels = thisList->getLabels();
-            string rareHeader = "label\tnumOtus\t"; string abundHeader = "label\tnumOtus\t";
+            string rareHeader = "label\tnumOtus"; string abundHeader = "label\tnumOtus";
 			for (int i = 0; i < thisList->getNumBins(); i++) {
 				if (m->control_pressed) { break; }
 			
@@ -528,8 +528,8 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
                     for (int j = 0; j < names.size(); j++) {  size += ct.getNumSeqs(names[j]); }
                 }
 			
-				if (size <= cutoff) {  rout << bin << '\t';  rareHeader += binLabels[i] + '\t'; }
-				else				{  aout << bin << '\t';  abundHeader += binLabels[i] + '\t'; }
+				if (size <= cutoff) {  rout  << '\t' << bin;  rareHeader += '\t' + binLabels[i]; }
+				else				{  aout  << '\t' << bin;  abundHeader += '\t' + binLabels[i]; }
 			}
 			
 			if (rareNames.size() != 0)	{ rout << endl; }
@@ -589,7 +589,7 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 				groupNumBins[it3->first] = 0;
 				groupVector[it3->first] = "";
-                groupLabels[it3->first] = "label\tnumOtus\t";
+                groupLabels[it3->first] = "label\tnumOtus";
 			}
             vector<string> binLabels = thisList->getLabels();
 			for (int i = 0; i < thisList->getNumBins(); i++) {
@@ -642,15 +642,15 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
 			
 			
 				for (itGroup = groupBins.begin(); itGroup != groupBins.end(); itGroup++) {
-					groupVector[itGroup->first] +=  itGroup->second + '\t';
-                    groupLabels[itGroup->first] += binLabels[i] + '\t';
+					groupVector[itGroup->first] +=  '\t' + itGroup->second;
+                    groupLabels[itGroup->first] += '\t' + binLabels[i];
 				}
 			}
 			
 			//end list vector
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
                 (*(filehandles[it3->first])) << groupLabels[it3->first] << endl;
-				(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << '\t' << groupVector[it3->first] << endl;  // label numBins  listvector for that group
+				(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
 				(*(filehandles[it3->first])).close();
 				delete it3->second;
 			}

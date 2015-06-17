@@ -421,7 +421,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 		//end list vector
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
             (*(filehandles[it3->first])) << groupLabels[it3->first] << endl;
-			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << '\t' << groupVector[it3->first] << endl;  // label numBins  listvector for that group
+			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
             (*(filehandles[it3->first])).close();
             delete it3->second;
 		}
