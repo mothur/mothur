@@ -270,14 +270,14 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 			m->mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); m->mothurOutEndLine();
 			outAcc << querySeq->getName() << endl;
 		}
-		out << "Observed\t";
+		out << "Observed";
 		
-		for (int j = 0; j < obsDistance.size(); j++) {  out << obsDistance[j] << '\t';  }
+		for (int j = 0; j < obsDistance.size(); j++) {  out  << '\t' << obsDistance[j];  }
 		out << endl;
 		
-		out << "Expected\t";
+		out << "Expected";
 		
-		for (int m = 0; m < expectedDistance.size(); m++) {  out << expectedDistance[m] << '\t';  }
+		for (int m = 0; m < expectedDistance.size(); m++) {  out << '\t' << expectedDistance[m] ;  }
 		out << endl;
 		
 		return *querySeq;
@@ -552,9 +552,9 @@ void Pintail::createProcessesQuan() {
 								
 				//output observed distances
 				for (int i = 0; i < quantilesMembers.size(); i++) {
-					out << quantilesMembers[i].size() << '\t';
+					out << quantilesMembers[i].size();
 					for (int j = 0; j < quantilesMembers[i].size(); j++) {
-						out << quantilesMembers[i][j] << '\t';
+						out << '\t' << quantilesMembers[i][j];
 					}
 					out << endl;
 				}
@@ -612,9 +612,9 @@ void Pintail::createProcessesQuan() {
                     
                     //output observed distances
                     for (int i = 0; i < quantilesMembers.size(); i++) {
-                        out << quantilesMembers[i].size() << '\t';
+                        out << quantilesMembers[i].size();
                         for (int j = 0; j < quantilesMembers[i].size(); j++) {
-                            out << quantilesMembers[i][j] << '\t';
+                            out << '\t' << quantilesMembers[i][j];
                         }
                         out << endl;
                     }
