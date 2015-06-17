@@ -285,7 +285,7 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 	try {
 		
 		 for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
+			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins();
 			
 			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
 			
@@ -313,7 +313,7 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 					relabund = abund / (float) averageOtu;
 				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
 				
-				out << relabund << '\t';
+				out  << '\t' << relabund;
 			}
 			out << endl;
 		 }
