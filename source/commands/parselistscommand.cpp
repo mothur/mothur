@@ -358,7 +358,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			groupNumBins[it3->first] = 0;
 			groupVector[it3->first] = "";
-            groupLabels[it3->first] = "label\tnumOtus\t";
+            groupLabels[it3->first] = "label\tnumOtus";
 		}
 
 		vector<string> binLabels = thisList->getLabels();
@@ -404,8 +404,8 @@ int ParseListCommand::parse(ListVector* thisList) {
 			
 			//print parsed bin info to files
 			for (itGroup = groupBins.begin(); itGroup != groupBins.end(); itGroup++) {
-				groupVector[itGroup->first] +=  itGroup->second + '\t';
-                groupLabels[itGroup->first] +=  binLabels[i] + '\t';
+				groupVector[itGroup->first] +=  '\t' + itGroup->second;
+                groupLabels[itGroup->first] +=  '\t' + binLabels[i];
 			}
 		
 		}
