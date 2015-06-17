@@ -138,9 +138,9 @@ static DWORD WINAPI MyCountThreadFunction(LPVOID lpParam){
 				}
 				
 				if (total != 0) {
-					out << firstCol << '\t' << total << '\t';
+					out << firstCol << '\t' << total;
 					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << it->second << '\t';
+						out << '\t' << it->second;
 					}
 					out << endl;
 				}

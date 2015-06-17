@@ -321,14 +321,14 @@ int RemoveDistsCommand::readPhylip(){
                 bool ignoreRow = false;
                 
                 if (names.count(name) != 0) { ignoreRow = true; count++; }
-                else{ out << name << '\t'; keptCount++; }
+                else{ out << name; keptCount++; }
                 
                 for(int j=0;j<i;j++){
                     if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
-                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
                     }
                 }
                 if (!ignoreRow) { out << endl; }
@@ -341,14 +341,14 @@ int RemoveDistsCommand::readPhylip(){
                 bool ignoreRow = false;
                 
                 if (names.count(name) != 0) { ignoreRow = true; count++; }
-                else{ out << name << '\t'; keptCount++; }
+                else{ out << name; keptCount++; }
                 
                 for(int j=0;j<nseqs;j++){
                     if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
-                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
                     }
                 }
                 if (!ignoreRow) { out << endl; }

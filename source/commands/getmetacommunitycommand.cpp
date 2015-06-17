@@ -442,8 +442,8 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
 		//do my part
         if (method == "dmm") {  m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");  }
         else {
-            m->mothurOut("K\tCH\t");
-            for (int i = 0; i < thislookup.size(); i++) {  m->mothurOut(thislookup[i]->getGroup() + '\t'); }
+            m->mothurOut("K\tCH");
+            for (int i = 0; i < thislookup.size(); i++) {  m->mothurOut('\t' + thislookup[i]->getGroup()); }
             m->mothurOut("\n");
         }
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
@@ -563,8 +563,8 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
             m->openOutputFile(outputFileName, silData);
             silData.setf(ios::fixed, ios::floatfield);
             silData.setf(ios::showpoint);
-            silData << "K\tCH\t";
-            for (int i = 0; i < thislookup.size(); i++) { silData << thislookup[i]->getGroup() << '\t';  }
+            silData << "K\tCH";
+            for (int i = 0; i < thislookup.size(); i++) { silData  << '\t' << thislookup[i]->getGroup();  }
             silData << endl;
         } 
         

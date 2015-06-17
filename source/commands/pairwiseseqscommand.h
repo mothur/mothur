@@ -169,7 +169,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 			//pad with spaces to make compatible
 			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
             
-			outFile << name << '\t';	
+			outFile << name;
 			
 			for(int j=0;j<pDataArray->alignDB.getNumSeqs();j++){
 				
@@ -195,7 +195,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
                 
                 if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
                 
-				outFile << dist << '\t'; 
+				outFile  << '\t' << dist;
 			}
 			
 			outFile << endl; 
@@ -269,7 +269,7 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
 				}
-				outFile << name << '\t';	
+				outFile << name;
 			}
 
 			
@@ -300,7 +300,7 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 				if(dist <= pDataArray->cutoff){
 					if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (pDataArray->output == "lt") {  outFile << dist << '\t'; }
+				if (pDataArray->output == "lt") {  outFile << '\t' << dist; }
 			}
 			
 			if (pDataArray->output == "lt") { outFile << endl; }

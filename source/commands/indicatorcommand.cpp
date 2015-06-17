@@ -686,22 +686,22 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			/******************************************************/
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
-			out << (i+1) << '\t';
+			out << (i+1);
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				if (pValues[j] < (1/(float)iters)) {
-					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters) << '\t';
+					out  << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters);
 				}else {
-					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << pValues[j] << '\t';
+					out  << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << pValues[j];
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
-					string pValueString = "<" + toString((1/(float)iters)); 
-					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
-					else { cout << "<" << (1/(float)iters); }
+					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j];
+					string pValueString = "\t<" + toString((1/(float)iters));
+					if (pValues[j] > (1/(float)iters)) { pValueString = toString('\t' + pValues[j]); cout << '\t' << pValues[j];}
+					else { cout << "\t<" << (1/(float)iters); }
 					m->mothurOutJustToLog(toString(i) + "\t" + m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 					m->mothurOutEndLine(); 
 				}

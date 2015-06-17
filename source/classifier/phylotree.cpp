@@ -558,11 +558,11 @@ void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 				
 		for (int i = 0; i < copy.size(); i++) {
 				
-			out << copy[i].level << '\t'<< copy[i].name << '\t' << copy[i].children.size() << '\t';
+			out << copy[i].level << '\t'<< copy[i].name << '\t' << copy[i].children.size();
 			
 			map<string,int>::iterator it;
 			for(it=copy[i].children.begin();it!=copy[i].children.end();it++){
-				out << it->first << '\t' << it->second << '\t';
+				out << '\t' << it->first << '\t' << it->second;
 			}
 			out << endl;
 		}

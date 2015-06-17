@@ -629,13 +629,13 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				temp.close();
 				m->mothurRemove(thisfilename);
 			}
-			
+    
             //output new labels line
-            out << fileLabels[combineFileName][0][0] << '\t';
+            out << fileLabels[combineFileName][0][0];
             for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                 for (int n = 0; n < groupNames.size(); n++) { // for each group
                     for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                        out << fileLabels[combineFileName][k][l] << '-' << groupNames[n] << '\t';
+                        out << '\t' << fileLabels[combineFileName][k][l] << '-' << groupNames[n];
                     }
                 }
             }
@@ -644,7 +644,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			//for each label
 			for (set<int>::iterator itNumSampled = numSampledSet.begin(); itNumSampled != numSampledSet.end(); itNumSampled++) {
 				
-                out << (*itNumSampled) << '\t';
+                out << (*itNumSampled);
                                
                 if (m->control_pressed) { break; }
                 
@@ -656,12 +656,12 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                         map<int, vector< vector<string> > >::iterator itLine = files[group].find(*itNumSampled);
                         if (itLine != files[group].end()) { 
                             for (int l = 0; l < (itLine->second)[k].size(); l++) { 
-                                out << (itLine->second)[k][l] << '\t';
+                                out  << '\t' << (itLine->second)[k][l];
                                
                             }                             
                         }else { 
                             for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { 
-                                out << "NA" << '\t';
+                                out << "\tNA";
                             } 
                         }
                     }

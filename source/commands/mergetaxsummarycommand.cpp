@@ -310,8 +310,8 @@ int MergeTaxSummaryCommand::print(ofstream& out, vector<rawTaxNode>& tree, set<s
 		assignRank(0, tree); 
         vector<string> mGroups;
 		//print labels
-		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
-		for (set<string>::iterator it = groups.begin(); it != groups.end(); it++) { out << (*it) << '\t'; }		
+		out << "taxlevel\trankID\ttaxon\tdaughterlevels\ttotal";
+		for (set<string>::iterator it = groups.begin(); it != groups.end(); it++) { out << '\t' << (*it) ; }
 		out << endl;
         
         for (set<string>::iterator it2 = groups.begin(); it2 != groups.end(); it2++) {  tree[0].groupCount[*it2] = 0;  }
@@ -329,13 +329,13 @@ int MergeTaxSummaryCommand::print(ofstream& out, vector<rawTaxNode>& tree, set<s
 
 		
 		//print root
-		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << tree[0].children.size() << "\t" << tree[0].total << "\t";
+		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << tree[0].children.size() << "\t" << tree[0].total;
 		
         for (set<string>::iterator it = groups.begin(); it != groups.end(); it++) { 
             map<string, int>:: iterator itGroups = tree[0].groupCount.find(*it);
             int num = 0;
             if (itGroups != tree[0].groupCount.end()) { num = itGroups->second; }
-            out << num << '\t';
+            out << '\t' << num;
         }
         out << endl;
 		
@@ -357,13 +357,13 @@ int MergeTaxSummaryCommand::print(int i, ofstream& out, vector<rawTaxNode>& tree
 		for(it=tree[i].children.begin();it!=tree[i].children.end();it++){
 			
             //print root
-            out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << tree[it->second].children.size() << "\t" << tree[it->second].total << "\t";
+            out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << tree[it->second].children.size() << "\t" << tree[it->second].total;
             
             for (set<string>::iterator it2 = groups.begin(); it2 != groups.end(); it2++) { 
                 map<string, int>:: iterator itGroups = tree[it->second].groupCount.find(*it2);
                 int num = 0;
                 if (itGroups != tree[it->second].groupCount.end()) { num = itGroups->second; }
-                out << num << '\t';
+                out << '\t' << num ;
             }
             out << endl;
 

@@ -230,11 +230,11 @@ void SharedListVector::clear(){
 
 void SharedListVector::print(ostream& output){
 	try {
-		output << label << '\t' << numBins << '\t';
+		output << label << '\t' << numBins;
 	
 		for(int i=0;i<data.size();i++){
 			if(data[i] != ""){
-				output << data[i] << '\t';
+				output << '\t' << data[i];
 			}
 		}
 		output << endl;

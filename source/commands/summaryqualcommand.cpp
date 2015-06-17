@@ -546,8 +546,8 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 		outputNames.push_back(sumFile); outputTypes["summary"].push_back(sumFile);
 		
 		//print headings
-		out << "Position\tnumSeqs\tAverageQ\t";
-		for (int i = 0; i < 41; i++) { out << "q" << i << '\t'; }
+		out << "Position\tnumSeqs\tAverageQ";
+		for (int i = 0; i < 41; i++) { out << '\t' << "q" << i; }
 		out << endl;
 		
 		for (int i = 0; i < position.size(); i++) {
@@ -555,10 +555,10 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 			if (m->control_pressed) { out.close(); return 0; }
 			
 			double average = averageQ[i] / (float) position[i];
-			out << i << '\t' << position[i] << '\t' << average << '\t';
+			out << i << '\t' << position[i] << '\t' << average;
 			
 			for (int j = 0; j < 41; j++) {
-				out << scores[i][j] << '\t';
+				out  << '\t' << scores[i][j];
 			}
 			out << endl;
 		}
