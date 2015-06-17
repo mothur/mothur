@@ -533,18 +533,18 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
             }
             
             if (outputForm == "lt") {
-                out << name << '\t';
-                outStd << name << '\t';
+                out << name;
+                outStd << name;
                 
                 //output distances
-                for (int l = 0; l < r; l++) {	out  << avedists[r][l] << '\t';  outStd  << stddists[r][l] << '\t';}
+                for (int l = 0; l < r; l++) {	out  << '\t' << avedists[r][l];  outStd   << '\t' << stddists[r][l];}
                 out << endl;  outStd << endl;
             }else if (outputForm == "square") {
-                out << name << '\t';
-                outStd << name << '\t';
+                out << name;
+                outStd << name;
                 
                 //output distances
-                for (int l = 0; l < m->getNumGroups(); l++) {	out  << avedists[r][l] << '\t'; outStd  << stddists[r][l] << '\t'; }
+                for (int l = 0; l < m->getNumGroups(); l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }
                 out << endl; outStd << endl;
             }else{
                 //output distances
@@ -554,8 +554,8 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
                         while (otherName.length() < 10) {  otherName += " ";  }
                     }
                     
-                    out  << name << '\t' << otherName << avedists[r][l] << endl;  
-                    outStd  << name << '\t' << otherName << stddists[r][l] << endl; 
+                    out  << name << '\t' << otherName  << '\t' << avedists[r][l] << endl;
+                    outStd  << name << '\t' << otherName  << '\t' << stddists[r][l] << endl;
                 }
             }
         }
@@ -1074,16 +1074,16 @@ void UnifracWeightedCommand::createPhylipFile() {
 				}
 				
 				if (outputForm == "lt") {
-					out << name << '\t';
+					out << name;
 					
 					//output distances
-					for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
+					for (int l = 0; l < r; l++) {	out   << '\t' << dists[r][l];  }
 					out << endl;
 				}else if (outputForm == "square") {
-					out << name << '\t';
+					out << name;
 					
 					//output distances
-					for (int l = 0; l < m->getNumGroups(); l++) {	out  << dists[r][l] << '\t';  }
+					for (int l = 0; l < m->getNumGroups(); l++) {	out   << '\t' << dists[r][l];  }
 					out << endl;
 				}else{
 					//output distances
@@ -1093,7 +1093,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 							while (otherName.length() < 10) {  otherName += " ";  }
 						}
 						
-						out  << name << '\t' << otherName << dists[r][l] << endl;  
+						out  << name << '\t' << otherName  << '\t' << dists[r][l] << endl;  
 					}
 				}
 			}

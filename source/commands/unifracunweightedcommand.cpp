@@ -886,7 +886,7 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 						while (otherName.length() < 10) {  otherName += " ";  }
 					}
 					
-					out  << name << '\t' << otherName << '\t' << dists[r][l] << endl;  
+					out  << name << '\t' << otherName << '\t' << dists[r][l] << endl;
 				}
 			}
 		}
