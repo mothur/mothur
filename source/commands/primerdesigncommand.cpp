@@ -353,14 +353,14 @@ int PrimerDesignCommand::execute(){
         ofstream outListTemp;
         m->openOutputFile(newListFile+".temp", outListTemp);
         
-        outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size()) << '\t';
-        string headers = "label\tnumOtus\t";
+        outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size());
+        string headers = "label\tnumOtus";
         for (int j = 0; j < list->getNumBins(); j++) {
             if (m->control_pressed) { break; }
             //good otus
             if (otuToRemove.count(j) == 0) {  
                 string bin = list->get(j);
-                if (bin != "") {  outListTemp << bin << '\t';  headers += binLabels[j] + '\t'; }
+                if (bin != "") {  outListTemp << '\t' << bin;  headers += '\t' + binLabels[j]; }
             }
         }
         outListTemp << endl;
