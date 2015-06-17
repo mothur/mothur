@@ -455,7 +455,6 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			}
 			
 			printBlock(chimeraResults[0], chimeraFlag, out);
-			out << endl;
 		}else {  
 			out << querySeq.getName() << "\tno" << endl; 
 		}
@@ -558,7 +557,6 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPi
 			}
 			
 			printBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag, out);
-			out << endl;
 		}else {  
 			out << querySeq.getName() << "\tno" << endl;  
 		}
@@ -682,7 +680,6 @@ Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results left
 			}
 			
 			outputString = getBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag);
-			outputString += "\n";
 		
 			//write to output file
 			int length = outputString.length();
@@ -762,7 +759,6 @@ Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			}
 			
 			outputString = getBlock(chimeraResults[0], chimeraFlag);
-			outputString += "\n";
 			
 			//write to output file
 			int length = outputString.length();
@@ -934,13 +930,13 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 //***************************************************************************************************************
 void ChimeraSlayer::printBlock(data_struct data, string flag, ostream& out){
 	try {
-		out << querySeq.getName() << '\t';
-		out << data.parentA.getName() << "\t" << data.parentB.getName()  << '\t';
+		out << querySeq.getName();
+		out << '\t' << data.parentA.getName() << "\t" << data.parentB.getName();
 	
-		out << data.divr_qla_qrb << '\t' << data.qla_qrb << '\t' << data.bsa << '\t';
-		out << data.divr_qlb_qra << '\t' << data.qlb_qra << '\t' << data.bsb << '\t';
+		out << '\t' <<  data.divr_qla_qrb << '\t' << data.qla_qrb << '\t' << data.bsa;
+		out << '\t' <<  data.divr_qlb_qra << '\t' << data.qlb_qra << '\t' << data.bsb ;
 		
-		out << flag << '\t' << data.winLStart << "-" << data.winLEnd << '\t' << data.winRStart << "-" << data.winREnd << '\t';
+		out << '\t' <<  flag << '\t' << data.winLStart << "-" << data.winLEnd << '\t' << data.winRStart << "-" << data.winREnd << '\n';
 		
 	}
 	catch(exception& e) {
@@ -953,44 +949,34 @@ void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bo
 	try {
 		
 		if ((leftChimeric) && (!rightChimeric)) { //print left
-			out << querySeq.getName() << '\t';
-			out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
-			
-			out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
-			out << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb << '\t';
-		
-			out << flag << '\t' << leftdata.results[0].winLStart << "-" << leftdata.results[0].winLEnd << '\t' << leftdata.results[0].winRStart << "-" << leftdata.results[0].winREnd << '\t';
+			out << querySeq.getName();
+			out << '\t' << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName();
+			out << '\t' << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa;
+			out << '\t' << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb;
+            out << '\t' << flag << '\t' << leftdata.results[0].winLStart << "-" << leftdata.results[0].winLEnd << '\t' << leftdata.results[0].winRStart << "-" << leftdata.results[0].winREnd << endl;
 		
 		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
-			out << querySeq.getName() << '\t';
-			out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
-			
-			out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
-			out << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb << '\t';
-			
-			out << flag << '\t' << rightdata.results[0].winLStart << "-" << rightdata.results[0].winLEnd << '\t' << rightdata.results[0].winRStart << "-" << rightdata.results[0].winREnd << '\t';			
+			out << querySeq.getName();
+			out << '\t' << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName();
+			out << '\t' << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa;
+			out << '\t' << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb;
+			out << '\t' << flag << '\t' << rightdata.results[0].winLStart << "-" << rightdata.results[0].winLEnd << '\t' << rightdata.results[0].winRStart << "-" << rightdata.results[0].winREnd << endl;
 			
 		}else  { //print both results
 			if (leftdata.flag == "yes") {
-				out << querySeq.getName() + "_LEFT" << '\t';
-				out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
-				
-				out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
-				out << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb << '\t';
-				
-				out << flag << '\t' << leftdata.results[0].winLStart << "-" << leftdata.results[0].winLEnd << '\t' << leftdata.results[0].winRStart << "-" << leftdata.results[0].winREnd << '\t';
+				out << querySeq.getName() + "_LEFT";
+				out << '\t' << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName();
+				out << '\t' << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa;
+				out << '\t' << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb;
+                out << '\t' << flag << '\t' << leftdata.results[0].winLStart << "-" << leftdata.results[0].winLEnd << '\t' << leftdata.results[0].winRStart << "-" << leftdata.results[0].winREnd << endl;
 			}
 			
 			if (rightdata.flag == "yes") {
-				if (leftdata.flag == "yes") { out << endl; }
-				
-				out << querySeq.getName() + "_RIGHT"<< '\t';
-				out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
-				
-				out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
-				out << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb << '\t';
-				
-				out << flag << '\t' << rightdata.results[0].winLStart << "-" << rightdata.results[0].winLEnd << '\t' << rightdata.results[0].winRStart << "-" << rightdata.results[0].winREnd << '\t';			
+				out << querySeq.getName() + "_RIGHT";
+				out << '\t' << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName();
+				out << '\t' << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa;
+				out << '\t' << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb;
+				out << '\t' << flag << '\t' << rightdata.results[0].winLStart << "-" << rightdata.results[0].winLEnd << '\t' << rightdata.results[0].winRStart << "-" << rightdata.results[0].winREnd << '\n';
 		
 			}
 		}
@@ -1007,44 +993,34 @@ string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bo
 		string out = "";
 		
 		if ((leftChimeric) && (!rightChimeric)) { //get left
-			out += querySeq.getName() + "\t";
-			out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
-			
-			out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
-			out += toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb) + "\t";
-			
-			out += flag + "\t" + toString(leftdata.results[0].winLStart) + "-" + toString(leftdata.results[0].winLEnd) + "\t" + toString(leftdata.results[0].winRStart) + "-" + toString(leftdata.results[0].winREnd) + "\t";
+			out += querySeq.getName();
+			out += "\t" + leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName();
+			out += "\t" + toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa);
+			out += "\t" + toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb);
+			out += "\t" + flag + "\t" + toString(leftdata.results[0].winLStart) + "-" + toString(leftdata.results[0].winLEnd) + "\t" + toString(leftdata.results[0].winRStart) + "-" + toString(leftdata.results[0].winREnd) + "\n";
 			
 		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
-			out += querySeq.getName() + "\t";
-			out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
-			
-			out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
-			out += toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb) + "\t";
-			
-			out += flag + "\t" + toString(rightdata.results[0].winLStart) + "-" + toString(rightdata.results[0].winLEnd) + "\t" + toString(rightdata.results[0].winRStart) + "-" + toString(rightdata.results[0].winREnd) + "\t";			
+			out += querySeq.getName();
+			out += "\t" + rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName();
+			out += "\t" + toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa);
+			out += "\t" + toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb);
+			out += "\t" + flag + "\t" + toString(rightdata.results[0].winLStart) + "-" + toString(rightdata.results[0].winLEnd) + "\t" + toString(rightdata.results[0].winRStart) + "-" + toString(rightdata.results[0].winREnd) + "\n";
 			
 		}else  { //print both results
-			
 			if (leftdata.flag == "yes") {
-				out += querySeq.getName() + "_LEFT\t";
-				out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
-				
-				out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
-				out += toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb) + "\t";
-				
-				out += flag + "\t" + toString(leftdata.results[0].winLStart) + "-" + toString(leftdata.results[0].winLEnd) + "\t" + toString(leftdata.results[0].winRStart) + "-" + toString(leftdata.results[0].winREnd) + "\t";
+				out += querySeq.getName() + "_LEFT";
+				out += "\t" + leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName();
+				out += "\t" + toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa);
+				out += "\t" + toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb);
+				out += "\t" + flag + "\t" + toString(leftdata.results[0].winLStart) + "-" + toString(leftdata.results[0].winLEnd) + "\t" + toString(leftdata.results[0].winRStart) + "-" + toString(leftdata.results[0].winREnd) + "\n";
 			}
 			
 			if (rightdata.flag == "yes") {
-				if (leftdata.flag == "yes") { out += "\n"; }
-				out +=  querySeq.getName() + "_RIGHT\t";
-				out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
-				
-				out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
-				out += toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb) + "\t";
-				
-				out += flag + "\t" + toString(rightdata.results[0].winLStart) + "-" + toString(rightdata.results[0].winLEnd) + "\t" + toString(rightdata.results[0].winRStart) + "-" + toString(rightdata.results[0].winREnd) + "\t";			
+				out +=  querySeq.getName() + "_RIGHT";
+				out += "\t" + rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName();
+				out += "\t" + toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa);
+				out += "\t" + toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb);
+				out += "\t" + flag + "\t" + toString(rightdata.results[0].winLStart) + "-" + toString(rightdata.results[0].winLEnd) + "\t" + toString(rightdata.results[0].winRStart) + "-" + toString(rightdata.results[0].winREnd) + "\n";
 			}
 		}
 		
@@ -1061,14 +1037,11 @@ string ChimeraSlayer::getBlock(data_struct data, string flag){
 	try {
 		
 		string outputString = "";
-		
-		outputString += querySeq.getName() + "\t";
-		outputString += data.parentA.getName() + "\t" + data.parentB.getName()  + "\t";
-			
-		outputString += toString(data.divr_qla_qrb) + "\t" + toString(data.qla_qrb) + "\t" + toString(data.bsa) + "\t";
-		outputString += toString(data.divr_qlb_qra) + "\t" + toString(data.qlb_qra) + "\t" + toString(data.bsb) + "\t";
-		
-		outputString += flag + "\t" + toString(data.winLStart) + "-" + toString(data.winLEnd) + "\t" + toString(data.winRStart) + "-" + toString(data.winREnd) + "\t";
+		outputString += querySeq.getName();
+		outputString +=  "\t" + data.parentA.getName() + "\t" + data.parentB.getName();
+		outputString +=  "\t" + toString(data.divr_qla_qrb) + "\t" + toString(data.qla_qrb) + "\t" + toString(data.bsa);
+		outputString +=  "\t" + toString(data.divr_qlb_qra) + "\t" + toString(data.qlb_qra) + "\t" + toString(data.bsb);
+		outputString +=  "\t" + flag + "\t" + toString(data.winLStart) + "-" + toString(data.winLEnd) + "\t" + toString(data.winRStart) + "-" + toString(data.winREnd) + "\n";
 		
 		return outputString;
 	}

@@ -650,7 +650,7 @@ int MetaStatsCommand::convertToShared(string filename) {
         ofstream out;
         m->openOutputFile(filename+".shared", out);
         
-        out << "label\tgroup\tnumOTUs\t";
+        out << "label\tgroup\tnumOTUs";
         
         string snumBins = toString(otuCount);
         for (int i = 0; i < otuCount; i++) {
@@ -661,7 +661,7 @@ int MetaStatsCommand::convertToShared(string filename) {
                 for (int h = 0; h < diff; h++) { binLabel += "0"; }
             }
             binLabel += sbinNumber;
-            out << binLabel << '\t';
+            out << '\t' << binLabel;
         }
         out << endl;
         
@@ -687,18 +687,17 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string
         ofstream out;
         m->openOutputFile(thisfilename+".matrix", out);
         
-        out << "\t";
-        for (int i = 0; i < subset.size()-1; i++) {
-            out << subset[i]->getGroup() << '\t';
+        for (int i = 0; i < subset.size(); i++) {
+            out << '\t' << subset[i]->getGroup();
         }
-        out << subset[subset.size()-1]->getGroup() << endl;
+        out << endl;
         
         for (int i = 0; i < subset[0]->getNumBins(); i++) {
-            out << m->currentSharedBinLabels[i] << '\t';
-            for (int j = 0; j < subset.size()-1; j++) {
-                out << subset[j]->getAbundance(i) << '\t';
+            out << m->currentSharedBinLabels[i];
+            for (int j = 0; j < subset.size(); j++) {
+                out  << '\t' << subset[j]->getAbundance(i);
             }
-            out << subset[subset.size()-1]->getAbundance(i) << endl;
+            out << endl;
         }
         out.close();
         

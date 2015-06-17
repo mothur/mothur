@@ -268,25 +268,25 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
             if (categories.size() > 3) {  m->mothurOut("\n[NOTE]: LEfSe input files allow for a class, subclass and subject.  More than 3 categories can cause formatting errors.\n\n"); }
             
             for (int j = 0; j < categories.size(); j++) {
-                out << categories[j] << "\t";
+                out << categories[j];
                 for (int i = 0; i < lookup.size()-1; i++) {
                     if (m->control_pressed) { out.close(); delete designMap; return 0; }
                     string value = designMap->get(lookup[i]->getGroup(), categories[j]);
                     if (value == "not found") {
                         m->mothurOut("[ERROR]: " + lookup[i]->getGroup() + " is not in your design file, please correct.\n"); m->control_pressed = true;
-                    }else { out << value << '\t'; }
+                    }else { out  << '\t' << value; }
                 }
                 string value = designMap->get(lookup[lookup.size()-1]->getGroup(), categories[j]);
                 if (value == "not found") {
                     m->mothurOut("[ERROR]: " + lookup[lookup.size()-1]->getGroup() + " is not in your design file, please correct.\n"); m->control_pressed = true;
-                }else { out << value; }
+                }else { out << '\t' << value; }
                 out << endl;
             }
         }
         
-        out << "group\t";
-        for (int i = 0; i < lookup.size()-1; i++) {  out << lookup[i]->getGroup() << '\t'; }
-        out << lookup[lookup.size()-1]->getGroup() << endl;
+        out << "group";
+        for (int i = 0; i < lookup.size(); i++) {  out  << '\t' << lookup[i]->getGroup(); }
+        out << endl;
         
         for (int i = 0; i < lookup[0]->getNumBins(); i++) { //process each otu
             if (m->control_pressed) { break; }
@@ -313,12 +313,11 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
                 
             }
             //print name
-            out << nameOfOtu << '\t';
+            out << nameOfOtu;
             
             //print out relabunds for each otu
-            for (int j = 0; j < lookup.size()-1; j++) { out << lookup[j]->getAbundance(i) << '\t'; }
-            
-            out << lookup[lookup.size()-1]->getAbundance(i)<< endl;
+            for (int j = 0; j < lookup.size(); j++) { out  << '\t' << lookup[j]->getAbundance(i); }
+            out << endl;
         }
         out.close();
 

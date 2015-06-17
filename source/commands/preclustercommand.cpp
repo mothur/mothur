@@ -698,7 +698,7 @@ int PreClusterCommand::process(string newMapFile){
                     //remove from active list 
                     alignSeqs[i].active = 0;
                     
-                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
+                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
                     
                 }//end if active i
                 if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}

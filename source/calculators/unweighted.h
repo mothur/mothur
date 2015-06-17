@@ -324,13 +324,13 @@ static DWORD WINAPI MyUnWeightedRandomThreadFunction(LPVOID lpParam){
 					}
 					
 				}
-				cout << h << '\t' << UniqueBL << '\t' << totalBL << endl;
+				//cout << h << '\t' << UniqueBL << '\t' << totalBL << endl;
 				UW = (UniqueBL / totalBL);
 				
 				if (isnan(UW) || isinf(UW)) { UW = 0; }
 				
 				pDataArray->results[count] = UW;
-                cout << h << '\t' << UW << endl;
+                //cout << h << '\t' << UW << endl;
 			}
 			count++;
 			

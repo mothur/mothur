@@ -434,8 +434,8 @@ vector<string> DesignMap::getNames(string category, string value) {
 int DesignMap::print(ofstream& out) {
     try {
        
-		out << "group\t";
-        for (int i = 0; i < namesOfCategories.size(); i++) { out << namesOfCategories[i] << '\t'; }
+		out << "group";
+        for (int i = 0; i < namesOfCategories.size(); i++) { out << '\t' << namesOfCategories[i]; }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
@@ -445,10 +445,10 @@ int DesignMap::print(ofstream& out) {
             map<int, string>::iterator itR = reverse.find(i);
             
             if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
-                out << itR->second  << '\t';
+                out << itR->second;
                 
                 for (int j = 0; j < namesOfCategories.size(); j++) {
-                    out << designMap[i][j] << '\t';
+                    out  << '\t' << designMap[i][j];
                 }
                 out << endl;
             }
@@ -467,8 +467,8 @@ int DesignMap::print(ofstream& out) {
 int DesignMap::print(ofstream& out, vector<string> cats) {
     try {
         
-		out << "group\t";
-        for (int i = 0; i < namesOfCategories.size(); i++) { if (m->inUsersGroups(namesOfCategories[i], cats)) { out << namesOfCategories[i] << '\t'; } }
+		out << "group";
+        for (int i = 0; i < namesOfCategories.size(); i++) { if (m->inUsersGroups(namesOfCategories[i], cats)) { out  << '\t' << namesOfCategories[i]; } }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
@@ -478,11 +478,11 @@ int DesignMap::print(ofstream& out, vector<string> cats) {
             map<int, string>::iterator itR = reverse.find(i);
             
             if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
-                out << itR->second  << '\t';
+                out << itR->second;
                 
                 for (int j = 0; j < namesOfCategories.size(); j++) {
                     if (m->inUsersGroups(namesOfCategories[i], cats)) {
-                        out << designMap[i][j] << '\t';
+                        out  << '\t' << designMap[i][j];
                     }
                 }
                 out << endl;

@@ -710,9 +710,9 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> >& div, ofstream& out, int numIters){
 	try {
 		
-		out << "numSampled\t";
+		out << "numSampled";
 		vector<string> mGroups = m->getGroups();
-		for (int i = 0; i < mGroups.size(); i++) { out << mGroups[i] << '\t';  }
+		for (int i = 0; i < mGroups.size(); i++) { out << '\t' << mGroups[i];  }
 		out << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -720,7 +720,7 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 		for (set<int>::iterator it = num.begin(); it != num.end(); it++) {  
 			int numSampled = *it;
 			
-			out << numSampled << '\t';  
+			out << numSampled;
 		
 			for (int j = 0; j < mGroups.size(); j++) {
 				if (numSampled < div[mGroups[j]].size()) { 
@@ -728,8 +728,8 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 					if (scale)	{  score = (div[mGroups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
 					else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
 
-					out << setprecision(4) << score << '\t';
-				}else { out << "NA" << '\t'; }
+					out << '\t' << setprecision(4) << score ;
+				}else { out << "\tNA" ; }
 			}
 			out << endl;
 		}
