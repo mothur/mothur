@@ -97,7 +97,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 					if (name.length() < 10) { //pad with spaces to make compatible
 						while (name.length() < 10) {  name += " ";  }
 					}
-					outFile << name << '\t';	
+					outFile << name;
 				}
 				for(int j=0;j<i;j++){
 					
@@ -113,7 +113,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 					if(dist <= pDataArray->cutoff){
 						if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }
 					}
-					if (pDataArray->output == "lt") {  outFile << dist << '\t'; }
+					if (pDataArray->output == "lt") {  outFile  << '\t' << dist; }
 				}
 				
 				if (pDataArray->output == "lt") { outFile << endl; }
@@ -132,7 +132,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				//pad with spaces to make compatible
 				if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
 				
-				outFile << name << '\t';	
+				outFile << name;
 				
 				for(int j=0;j<pDataArray->alignDB.getNumSeqs();j++){
 					
@@ -141,7 +141,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 					distCalculator->calcDist(pDataArray->alignDB.get(i), pDataArray->alignDB.get(j));
 					double dist = distCalculator->getDist();
 					
-					outFile << dist << '\t'; 
+					outFile  << '\t' << dist;
 				}
 				
 				outFile << endl; 

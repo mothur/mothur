@@ -214,8 +214,8 @@ int Pintail::doPrep() {
 				}
 				
 				//output quan value
-				outputString += toString(i+1) + "\t";				
-				for (int u = 0; u < temp.size(); u++) {   outputString += toString(temp[u]) + "\t"; }
+				outputString += toString(i+1);
+				for (int u = 0; u < temp.size(); u++) {   outputString += "\t" + toString(temp[u]); }
 				outputString += "\n";
 				
 				quantiles[i] = temp;
@@ -322,14 +322,14 @@ Sequence Pintail::print(MPI_File& out, MPI_File& outAcc) {
 
 			return *querySeq;
 		}
-		outputString += "Observed\t";
+		outputString += "Observed";
 		
-		for (int j = 0; j < obsDistance.size(); j++) {  outputString += toString(obsDistance[j]) + "\t";  }
+		for (int j = 0; j < obsDistance.size(); j++) {  outputString +=  "\t" + toString(obsDistance[j]);  }
 		outputString += "\n";
 		
-		outputString += "Expected\t";
+		outputString += "Expected";
 		
-		for (int m = 0; m < expectedDistance.size(); m++) {  outputString += toString(expectedDistance[m]) + "\t";  }
+		for (int m = 0; m < expectedDistance.size(); m++) {  outputString += "\t" +  toString(expectedDistance[m]);  }
 		outputString += "\n";
 		
 		MPI_Status status;
