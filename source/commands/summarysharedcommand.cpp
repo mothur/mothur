@@ -552,19 +552,19 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 		
 		if (output == "lt") {
 			for (int b = 0; b < simMatrix.size(); b++)	{
-				out << lookup[b]->getGroup() << '\t';
+				out << lookup[b]->getGroup();
 				for (int n = 0; n < b; n++)	{
                     if (m->control_pressed) { return 0; }
-					out << simMatrix[b][n] << '\t'; 
+					out << '\t' << simMatrix[b][n];
 				}
 				out << endl;
 			}
 		}else{
 			for (int b = 0; b < simMatrix.size(); m++)	{
-				out << lookup[b]->getGroup() << '\t';
+				out << lookup[b]->getGroup();
 				for (int n = 0; n < simMatrix[b].size(); n++)	{
                     if (m->control_pressed) { return 0; }
-					out << simMatrix[b][n] << '\t'; 
+					out << '\t' << simMatrix[b][n];
 				}
 				out << endl;
 			}
