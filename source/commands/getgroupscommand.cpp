@@ -837,8 +837,8 @@ int GetGroupsCommand::readCount(){
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  GroupIndexes[groups[i]] = i; }
         sort(Groups.begin(), Groups.end());
-        out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < Groups.size(); i++) { out << Groups[i] << '\t'; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
+        out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < Groups.size(); i++) { out  << '\t' << Groups[i]; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
         out << endl;
         
         string name; int oldTotal;
@@ -860,8 +860,8 @@ int GetGroupsCommand::readCount(){
                     }
                 }
 
-                out << name << '\t' << thisTotal << '\t';
-                for (int i = 0; i < selectedCounts.size(); i++) {  out << selectedCounts[i] << '\t'; }
+                out << name << '\t' << thisTotal;
+                for (int i = 0; i < selectedCounts.size(); i++) {  out  << '\t' << selectedCounts[i]; }
                 out << endl;
                 
                 wroteSomething = true;

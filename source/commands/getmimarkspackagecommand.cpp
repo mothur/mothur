@@ -388,7 +388,7 @@ int GetMIMarksPackageCommand::execute(){
             }
         }
         
-        for (set<string>::iterator it = Groups.begin(); it != Groups.end(); it++) {  out << *it << '\t' << endl; }
+        for (set<string>::iterator it = Groups.begin(); it != Groups.end(); it++) {  out << *it << endl; }
         
         out.close();
         
