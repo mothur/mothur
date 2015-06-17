@@ -274,12 +274,12 @@ void ListVector::printHeaders(ostream& output){
 		string snumBins = toString(numBins);
         string tagHeader = "Otu";
         if (m->sharedHeaderMode == "tax") { tagHeader = "PhyloType"; }
-		output << "label\tnum" + tagHeader + "s\t";
+		output << "label\tnum" + tagHeader + "s";
         
         vector<string> theseLabels = getLabels();
         
         for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
-            output << theseLabels[i] << '\t';
+            output  << '\t' << theseLabels[i];
         }
 					
         output << endl;
@@ -296,7 +296,7 @@ void ListVector::printHeaders(ostream& output){
 
 void ListVector::print(ostream& output, map<string, int>& ct){
 	try {
-		output << label << '\t' << numBins << '\t';
+		output << label << '\t' << numBins;
 	
         
         vector<listCt> hold;
@@ -320,7 +320,7 @@ void ListVector::print(ostream& output, map<string, int>& ct){
         
         for(int i=0;i<hold.size();i++){
             if(hold[i].bin != ""){
-                output << hold[i].bin << '\t';
+                output  << '\t' << hold[i].bin;
             }
         }
         output << endl;
