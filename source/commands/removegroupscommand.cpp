@@ -885,8 +885,8 @@ int RemoveGroupsCommand::readCount(){
 			if (!m->inUsersGroups(groups[i], Groups)) { groupsToKeep.push_back(groups[i]); }
 		}
         sort(groupsToKeep.begin(), groupsToKeep.end());
-        out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < groupsToKeep.size(); i++) { out << groupsToKeep[i] << '\t'; indexOfGroupsChosen.insert(GroupIndexes[groupsToKeep[i]]); }
+        out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < groupsToKeep.size(); i++) { out  << '\t' << groupsToKeep[i]; indexOfGroupsChosen.insert(GroupIndexes[groupsToKeep[i]]); }
         out << endl;
         
         string name; int oldTotal;
@@ -908,8 +908,8 @@ int RemoveGroupsCommand::readCount(){
                     }
                 }
                 
-                out << name << '\t' << thisTotal << '\t';
-                for (int i = 0; i < selectedCounts.size(); i++) {  out << selectedCounts[i] << '\t'; }
+                out << name << '\t' << thisTotal;
+                for (int i = 0; i < selectedCounts.size(); i++) {  out << '\t' << selectedCounts[i]; }
                 out << endl;
                 
                 wroteSomething = true;
