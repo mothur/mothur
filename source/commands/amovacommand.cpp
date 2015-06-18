@@ -9,7 +9,7 @@
 
 #include "amovacommand.h"
 #include "readphylipvector.h"
-#include "groupmap.h"
+#include "designmap.h"
 #include "sharedutilities.h"
 
 
@@ -181,8 +181,7 @@ int AmovaCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new GroupMap(designFileName);
-		designMap->readDesignMap();
+		designMap = new DesignMap(designFileName);
 
 		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
 						

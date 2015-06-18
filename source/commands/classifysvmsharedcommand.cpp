@@ -465,7 +465,7 @@ int ClassifySvmSharedCommand::execute() {
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 
     //read design file
-    designMap.readDesignMap(designfile);
+    designMap.read(designfile);
 
     string lastLabel = lookup[0]->getLabel();
     set<string> processedLabels;
@@ -563,8 +563,8 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     InputData input(sharedFilePath, "sharedfile");
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 
-    GroupMap designMap;
-    designMap.readDesignMap(designFilePath);
+    DesignMap designMap;
+    designMap.read(designFilePath);
 
     while ( lookup[0] != NULL ) {
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
@@ -572,7 +572,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     }
 }
 
-void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
+void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
     for ( int j = 0; j < lookup.size(); j++ ) {
         //i++;
         vector<individual> data = lookup[j]->getData();

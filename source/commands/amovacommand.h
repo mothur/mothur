@@ -11,7 +11,7 @@
  */
 
 #include "command.hpp"
-class GroupMap;
+class DesignMap;
 
 class AmovaCommand : public Command {
 	
@@ -42,7 +42,7 @@ private:
 	vector<string> outputNames, Sets;
 
 	string outputDir, inputDir, designFileName, phylipFileName;
-	GroupMap* designMap;
+	DesignMap* designMap;
 	vector< vector<double> > distanceMatrix;
 	int iters;
 	double experimentwiseAlpha;

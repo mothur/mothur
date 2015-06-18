@@ -10,6 +10,7 @@
 #include "anosimcommand.h"
 #include "inputdata.h"
 #include "readphylipvector.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> AnosimCommand::setParameters(){	
@@ -173,8 +174,7 @@ int AnosimCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new GroupMap(designFileName);
-		designMap->readDesignMap();
+		designMap = new DesignMap(designFileName);
 		
 		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
 		
