@@ -208,7 +208,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(stopSpot+1) + '\n';
                             
                         }else { 
-                            if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                            if (!pDataArray->Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
                             else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
                         }				
                     }else { //you are keeping the back
@@ -238,7 +238,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
                             qualValues = seq.getName() +'\t' + toString(stopSpot) + '\t' + toString(temp.length()-1) + '\n';
                             
                         }else {
-                            if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                            if (!pDataArray->Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
                             else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
                         }
                     }
