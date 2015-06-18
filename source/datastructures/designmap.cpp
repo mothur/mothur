@@ -505,7 +505,7 @@ int DesignMap::print(ofstream& out) {
 }
 /************************************************************/
 //print specific categories
-int DesignMap::print(ofstream& out, vector<string> cats) {
+int DesignMap::printCategories(ofstream& out, vector<string> cats) {
     try {
         
 		out << "group";
@@ -534,7 +534,7 @@ int DesignMap::print(ofstream& out, vector<string> cats) {
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "print");
+		m->errorOut(e, "DesignMap", "printCategories");
 		exit(1);
 	}
 }

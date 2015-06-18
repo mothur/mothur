@@ -52,8 +52,8 @@ public:
     //  map<treatment - > early, late>, <sex -> male> would return F000132, F000142, F000138. All three group have are either male or from early or late.
 
     int print(ofstream&);
-    int print(ofstream&, vector<string>); //print certain categories
-    int printGroups(ofstream&, vector<string>); //print certain categories
+    int printCategories(ofstream&, vector<string>); //print certain categories
+    int printGroups(ofstream&, vector<string>); //print certain Groups
     
     string getDefaultClass() { return defaultClass; }
     
