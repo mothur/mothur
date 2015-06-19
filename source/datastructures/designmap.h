@@ -32,11 +32,11 @@ public:
     
     //like groupMap getGroup
     string get(string, string); //groupName, category returns value. example F000132, sex -> male
-    string get(string); //groupName, returns default class categories value. example F000132, -> late
+    string get(string); //groupName, returns default categories value. example F000132, -> late
     
     //like groupMap getNamesOfGroups
     vector<string> getCategory(string); //categoryName, returns values. example treatment, -> early,late,mid
-    vector<string> getCategory(); //returns default class categories values. example treatment, -> early,late,mid
+    vector<string> getCategory(); //returns default categories values. example treatment, -> early,late,mid
 	
     int set(string, map<string, string>); //groupName, map<category, value>
     int push_back(string, vector<string>); //groupName, vector<value> - assumes you put values in order of getNamesOfCategories
@@ -59,7 +59,7 @@ public:
     //options to select groups based on values
     vector<string> getNamesGroups() { return groups; }
     vector<string> getNamesGroups(string, string); //get names groups with category and value.
-    vector<string> getNamesGroups(vector<string>); //assume default class category and get names groups that match any values in vector passed in.  <early, late> = F000142, F000132.
+    vector<string> getNamesGroups(vector<string>); //assume default category and get names groups that match any values in vector passed in.  <early, late> = F000142, F000132.
 	
     //options to selects - may want to expand on these
     int getNumUnique(map<string, vector<string> >); //get number of groups belonging to a category or set of categories, with value or a set of values. Must have all categories and values. Example:

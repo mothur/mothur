@@ -13,6 +13,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "sharedrabundvector.h"
+#include "designmap.h"
 
 class MergeGroupsCommand : public Command {
 	
@@ -35,7 +36,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GroupMap* designMap;
+	DesignMap* designMap;
 	vector<SharedRAbundVector*> lookup;
 	
 	bool abort, allLines, pickedGroups;
@@ -44,8 +45,8 @@ private:
 	vector<string> Groups, outputNames;
 		
 	int process(vector<SharedRAbundVector*>&, ofstream&);
-	int processSharedFile(GroupMap*&);
-	int processGroupFile(GroupMap*&);
+	int processSharedFile(DesignMap*&);
+	int processGroupFile(DesignMap*&);
 };
 
 #endif
