@@ -224,9 +224,8 @@ int MetaStatsCommand::execute(){
         if (convertInputToShared) { convertToShared(sharedfile); return 0; }
         /****************************************************/
 		
-		designMap = new GroupMap(designfile);
-		designMap->readDesignMap();
-	
+		designMap = new DesignMap(designfile);
+
 		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
@@ -239,7 +238,7 @@ int MetaStatsCommand::execute(){
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		//make sure sets are all in designMap
 		SharedUtil* util = new SharedUtil(); 
-		vector<string> dGroups = designMap->getNamesOfGroups();
+		vector<string> dGroups = designMap->getCategory();
 		util->setGroups(Sets, dGroups);  
 		delete util;
 		
@@ -545,15 +544,14 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 				
 				//is this group for a set we want to compare??
 				//sorting the sets by putting setB at the back and setA in the front
-				if ((designMap->getGroup(thisGroup) == setB)) {  
+				if ((designMap->get(thisGroup) == setB)) {
 					subset.push_back(thisLookUp[i]);
 					setBCount++;
-				}else if ((designMap->getGroup(thisGroup) == setA)) {
+				}else if ((designMap->get(thisGroup) == setA)) {
 					subset.insert(subset.begin()+setACount, thisLookUp[i]);
 					setACount++;
 				}
 			}
-						
 			if ((setACount == 0) || (setBCount == 0))  { 
 				m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison."); m->mothurOutEndLine(); 
 				outputNames.pop_back();

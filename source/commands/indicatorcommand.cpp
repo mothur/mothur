@@ -247,16 +247,14 @@ int IndicatorCommand::execute(){
 	
 		//read designfile if given and set up groups for read of sharedfiles
 		if (designfile != "") {
-			designMap = new GroupMap(designfile);
-			designMap->readDesignMap();
+			designMap = new DesignMap(designfile);
 			
 			//fill Groups - checks for "all" and for any typo groups
 			SharedUtil util;
-			vector<string> nameGroups = designMap->getNamesOfGroups();
+			vector<string> nameGroups = designMap->getCategory();
 			util.setGroups(Groups, nameGroups);
-			designMap->setNamesOfGroups(nameGroups);
 			
-			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
+			vector<string> namesSeqs = designMap->getNamesGroups(Groups);
 			m->setGroups(namesSeqs);
 		}
 	
@@ -301,7 +299,7 @@ int IndicatorCommand::execute(){
 					groupMap[m->Treenames[i]] = "Group1"; 
 				}else{
 					vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
-					vector<string> myNames = designMap->getNamesSeqs(myGroups);
+					vector<string> myNames = designMap->getNamesGroups(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
 						if (!(m->inUsersGroups(myNames[k], m->getAllGroups()))) {
@@ -437,11 +435,11 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
+			for (int i = 0; i < (designMap->getCategory()).size(); i++) {
 				
 				for (int k = 0; k < lookup.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookup[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
+					if (designMap->get(lookup[k]->getGroup()) == (designMap->getCategory())[i]) {
 						subset.push_back(lookup[k]);
 						groupsAlreadyAdded.insert(lookup[k]->getGroup());
 					}
@@ -461,10 +459,10 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundFloatVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
+			for (int i = 0; i < (designMap->getCategory()).size(); i++) {
 				for (int k = 0; k < lookupFloat.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookupFloat[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
+					if (designMap->get(lookupFloat[k]->getGroup()) == (designMap->getCategory())[i]) {
 						subset.push_back(lookupFloat[k]);
 						groupsAlreadyAdded.insert(lookupFloat[k]->getGroup());
 					}
@@ -963,7 +961,7 @@ set<string> IndicatorCommand::getDescendantList(Tree*& T, int i, map<int, set<st
 				names.insert(T->tree[i].getName());
 			}else {
 				vector<string> myGroup; myGroup.push_back(T->tree[i].getName());
-				vector<string> myReps = designMap->getNamesSeqs(myGroup);
+				vector<string> myReps = designMap->getNamesGroups(myGroup);
 				for (int k = 0; k < myReps.size(); k++) {
 					names.insert(myReps[k]);
 				}

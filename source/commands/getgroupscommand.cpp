@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "sharedutilities.h"
 #include "inputdata.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> GetGroupsCommand::setParameters(){	
@@ -895,40 +896,24 @@ int GetGroupsCommand::readDesign(){
         variables["[extension]"] = m->getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		m->openInputFile(designfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
-		
-		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
-			
-			in >> name;				//read from first column
-			in >> group;			//read from second column
-			
-			//if this name is in the accnos file
-			if (m->inUsersGroups(name, Groups)) {
-				wroteSomething = true;
-				out << name << '\t' << group << endl;
-                selectedCount++;
-			}
-			
-			m->gobble(in);
-		}
-		in.close();
-		out.close();
+        DesignMap designMap(designfile);
+        
+        bool wroteSomething = false;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+
+        int numGroupsFound = designMap.printGroups(out, Groups);
+        
+        if (numGroupsFound > 0) { wroteSomething = true; }
+				
+        out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain groups from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " groups from your design file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(numGroupsFound) + " groups from your design file."); m->mothurOutEndLine();
         
-		
 		return 0;
 	}
 	catch(exception& e) {
