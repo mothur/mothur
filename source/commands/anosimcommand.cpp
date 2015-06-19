@@ -191,7 +191,7 @@ int AnosimCommand::execute(){
 		//link designMap to rows/columns in distance matrix
 		map<string, vector<int> > origGroupSampleMap;
 		for(int i=0;i<sampleNames.size();i++){
-			string group = designMap->getGroup(sampleNames[i]);
+			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
 				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;

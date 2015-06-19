@@ -346,7 +346,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
   
         map<string, int> treatmentToIntMap;
         map<int, string> intToTreatmentMap;
-        vector<string> groups = designMap.getNamesOfGroups();
+        vector<string> groups = designMap.getNamesGroups();
         for (int  i = 0; i < groups.size(); i++) {
             string treatmentName = groups[i];
             treatmentToIntMap[treatmentName] = i;
@@ -366,7 +366,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         for (int i = 0; i < lookup.size(); i++) {
             string sharedGroupName = lookup[i]->getGroup();
             names.push_back(sharedGroupName);
-            string treatmentName = designMap.getGroup(sharedGroupName);
+            string treatmentName = designMap.get(sharedGroupName);
             
             int j = 0;
             for (; j < lookup[i]->getNumBins(); j++) {

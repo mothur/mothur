@@ -578,7 +578,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
         vector<individual> data = lookup[j]->getData();
         Observation* observation = new Observation(data.size(), 0.0);
         string sharedGroupName = lookup[j]->getGroup();
-        string treatmentName = designMap.getGroup(sharedGroupName);
+        string treatmentName = designMap.get(sharedGroupName);
         //cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << endl;
         //labeledObservationVector.push_back(make_pair(treatmentName, observation));
         labeledObservationVector.push_back(LabeledObservation(j, treatmentName, observation));

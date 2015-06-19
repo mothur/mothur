@@ -140,8 +140,8 @@ int DesignMap::read(string file) {
 	}
 }
 /************************************************************/
-////groupName, returns first categories value. 
-string DesignMap::getGroup(string groupName) {
+////groupName, returns default categories value.
+string DesignMap::get(string groupName) {
     try {
         string value = "not found";
         
@@ -149,7 +149,7 @@ string DesignMap::getGroup(string groupName) {
         if (it2 == indexGroupNameMap.end()) {
             m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
         }else {
-            return designMap[it2->second][0];
+            return designMap[it2->second][indexCategoryMap[defaultClass]];
         }
        
         return value;
@@ -160,8 +160,26 @@ string DesignMap::getGroup(string groupName) {
 	}
 }
 /************************************************************/
+////groupName, returns default categories value.
+vector<string> DesignMap::getCategory() {
+    try {
+        //oldStyle design file  group -> treatment. returns treatments
+        vector<string> namesOfGroups;
+        
+        for (int i = 0; i < groups.size(); i++) {
+            namesOfGroups.push_back(get(groups[i]));
+        }
+        
+        return namesOfGroups;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "getCategory");
+        exit(1);
+    }
+}
+/************************************************************/
 ////categoryName, returns category values.
-vector<string> DesignMap::getCategoryValues(string catName) {
+vector<string> DesignMap::getCategory(string catName) {
     try {
         vector<string> values;
         
@@ -177,7 +195,7 @@ vector<string> DesignMap::getCategoryValues(string catName) {
         return values;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "getValues");
+		m->errorOut(e, "DesignMap", "getCategory");
 		exit(1);
 	}
 }
@@ -269,6 +287,21 @@ int DesignMap::set(string group, map<string, string> values) {
 		m->errorOut(e, "DesignMap", "set");
 		exit(1);
 	}
+}
+/************************************************************/
+//set defaultclass
+void DesignMap::setDefaultClass(string dClass) {
+    try {
+        if (m->inUsersGroups(dClass, namesOfCategories)) {
+            defaultClass = dClass;
+        }else{
+            m->mothurOut("[WARNING]: Your design file does not contain a category named " + dClass + ". Using default class " + defaultClass + " .\n\n");
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "setDefaultClass");
+        exit(1);
+    }
 }
 /************************************************************/
 //get number of groups belonging to a category or set of categories, with value or a set of values. Must have all categories and values. Example:
@@ -437,7 +470,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
 //get names of groups belonging to a category or set of categories, with value or a set of values. Must have at least one categories and values. Example:
 //  map<treatment - > early, late>, <sex -> male> would return F000132, F000142, F000138. All three group have are either male or from early or late.
 
-vector<string> DesignMap::getNames(string category, string value) {
+vector<string> DesignMap::getNamesGroups(string category, string value) {
     try {
         vector<string> names;
         
@@ -466,9 +499,32 @@ vector<string> DesignMap::getNames(string category, string value) {
         
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "getNames");
+		m->errorOut(e, "DesignMap", "getNamesGroups");
 		exit(1);
 	}
+}
+/************************************************************/
+//assume default category and get names groups that match any values in vector passed in.  <early, late> = F000142, F000132.
+
+vector<string> DesignMap::getNamesGroups(vector<string> sets) {
+    try {
+        vector<string> names;
+        
+        if (sets.size() == 0) { return names; }
+        
+        map<string, vector<string> > temp;
+        
+        temp[defaultClass] = sets;
+        
+        names = getNamesShared(temp);
+        
+        return names;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "getNamesGroups");
+        exit(1);
+    }
 }
 
 /************************************************************/
