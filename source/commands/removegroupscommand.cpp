@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "sharedutilities.h"
 #include "inputdata.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveGroupsCommand::setParameters(){	
@@ -943,33 +944,29 @@ int RemoveGroupsCommand::readDesign(){
         variables["[extension]"] = m->getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
+        DesignMap designMap(designfile);
+        
+        vector<string> groupsToKeep;
+        vector<string> allGroups = designMap.getNamesGroups();
+        for(int i = 0; i < allGroups.size(); i++) {
+            if (!m->inUsersGroups(allGroups[i], Groups)) {
+                groupsToKeep.push_back(allGroups[i]);
+            }
+        }
+        
+        bool wroteSomething = false;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        int numGroupsFound = designMap.printGroups(out, groupsToKeep);
+        
+        if (numGroupsFound > 0) { wroteSomething = true; }
+        
+        out.close();
 		
-		ifstream in;
-		m->openInputFile(designfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		int removedCount = 0;
-		
-		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
-			
-			in >> name;				//read from first column
-			in >> group;			//read from second column
-			
-			//if this name is in the accnos file
-			if (!(m->inUsersGroups(name, Groups))) {
-				wroteSomething = true;
-				out << name << '\t' << group << endl;
-			}else {  removedCount++;  }
-			
-			m->gobble(in);
-		}
-		in.close();
-		out.close();
-		
+        int removedCount = allGroups.size() - numGroupsFound;
+        
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only groups from the groups you wish to remove."); m->mothurOutEndLine();  }
 		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
