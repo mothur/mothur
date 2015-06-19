@@ -13,6 +13,7 @@
 #include "sharedutilities.h"
 #include "subsample.h"
 
+
 //**********************************************************************************************************************
 vector<string> RareFactSharedCommand::setParameters(){	
 	try {
@@ -248,15 +249,15 @@ int RareFactSharedCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        GroupMap designMap;
+        DesignMap designMap;
         if (designfile == "") { //fake out designMap to run with process
             process(designMap, "");
         }else {
-            designMap.readDesignMap(designfile);
+            designMap.read(designfile);
             
             //fill Sets - checks for "all" and for any typo groups
 			SharedUtil util;
-			vector<string> nameSets = designMap.getNamesOfGroups();
+			vector<string> nameSets = designMap.getCategory();
 			util.setGroups(Sets, nameSets);
             
             for (int i = 0; i < Sets.size(); i++) {
@@ -282,7 +283,7 @@ int RareFactSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
+int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 	try {
         Rarefact* rCurve;
         vector<Display*> rDisplays;
@@ -300,7 +301,7 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
         vector<string> newGroups = m->getGroups();
         if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
             vector<string> thisSets; thisSets.push_back(thisSet);
-            newGroups = designMap.getNamesSeqs(thisSets);
+            newGroups = designMap.getNamesGroups(thisSets);
             fileNameRoot += thisSet + ".";
         }
         

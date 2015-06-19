@@ -552,7 +552,6 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 					setACount++;
 				}
 			}
-						
 			if ((setACount == 0) || (setBCount == 0))  { 
 				m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison."); m->mothurOutEndLine(); 
 				outputNames.pop_back();

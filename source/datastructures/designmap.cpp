@@ -50,6 +50,9 @@ int DesignMap::read(string file) {
         map<int, string> originalGroupIndexes;
         for (int i = 1; i < columnHeaders.size(); i++) {  namesOfCategories.push_back(columnHeaders[i]);  originalGroupIndexes[i-1] = columnHeaders[i]; }
         if (columnHeaders.size() > 1) { defaultClass = columnHeaders[1]; }
+        else {
+            m->mothurOut("[ERROR]: Your design file contains only one column. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
         
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(namesOfCategories.begin(), namesOfCategories.end());
@@ -164,13 +167,14 @@ string DesignMap::get(string groupName) {
 vector<string> DesignMap::getCategory() {
     try {
         //oldStyle design file  group -> treatment. returns treatments
-        vector<string> namesOfGroups;
+        set<string> uniqueNames;
         
-        for (int i = 0; i < groups.size(); i++) {
-            namesOfGroups.push_back(get(groups[i]));
-        }
+        for (int i = 0; i < groups.size(); i++) {  uniqueNames.insert(get(groups[i]));  }
         
-        return namesOfGroups;
+        vector<string> values;
+        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  values.push_back(*it); }
+        
+        return values;
     }
     catch(exception& e) {
         m->errorOut(e, "DesignMap", "getCategory");
@@ -253,7 +257,7 @@ int DesignMap::push_back(string group, vector<string> values) {
 }
 /************************************************************/
 //set values for group, does not need to set all values. assumes group is in table already
-int DesignMap::set(string group, map<string, string> values) {
+int DesignMap::setValues(string group, map<string, string> values) {
     try {
         map<string, int>::iterator it = indexGroupNameMap.find(group);
         if (it != indexGroupNameMap.end()) {

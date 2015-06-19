@@ -38,7 +38,7 @@ public:
     vector<string> getCategory(string); //categoryName, returns values. example treatment, -> early,late,mid
     vector<string> getCategory(); //returns default categories values. example treatment, -> early,late,mid
 	
-    int set(string, map<string, string>); //groupName, map<category, value>
+    int setValues(string, map<string, string>); //groupName, map<category, value>
     int push_back(string, vector<string>); //groupName, vector<value> - assumes you put values in order of getNamesOfCategories
     
     //refers to header labels
