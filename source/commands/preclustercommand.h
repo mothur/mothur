@@ -16,6 +16,12 @@
 #include "sequence.hpp"
 #include "sequenceparser.h"
 #include "sequencecountparser.h"
+#include "alignment.hpp"
+#include "gotohoverlap.hpp"
+#include "needlemanoverlap.hpp"
+#include "blastalign.hpp"
+#include "noalign.hpp"
+
 
 /************************************************************/
 struct seqPNode {
@@ -70,10 +76,12 @@ private:
     SequenceParser* parser;
     SequenceCountParser* cparser;
     CountTable ct;
+    Alignment* alignment;
     
 	int diffs, length, processors;
+    float match, misMatch, gapOpen, gapExtend;
 	bool abort, bygroup, topdown;
-	string fastafile, namefile, outputDir, groupfile, countfile;
+	string fastafile, namefile, outputDir, groupfile, countfile, method, align;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
@@ -101,7 +109,7 @@ struct preClusterData {
 	string fastafile; 
 	string namefile; 
 	string groupfile, countfile;
-	string newFName, newNName, newMName;
+	string newFName, newNName, newMName, method, align;
 	MothurOut* m;
 	int start;
 	int end, count;
@@ -109,9 +117,10 @@ struct preClusterData {
 	vector<string> groups;
 	vector<string> mapFileNames;
     bool topdown;
-	
+	float match, misMatch, gapOpen, gapExtend;
+    
 	preClusterData(){}
-	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, bool td, int tid) {
+	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, bool td, int tid, string me, string al, float ma, float misma, float gpOp, float gpEx) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -127,6 +136,12 @@ struct preClusterData {
         countfile = c;
         topdown = td;
         count=0;
+        method = me;
+        align = al;
+        match = ma;
+        misMatch = misma;
+        gapExtend = gpEx;
+        gapOpen = gpOp;
 	}
 };
 
@@ -138,7 +153,19 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 	pDataArray = (preClusterData*)lpParam;
 	
 	try {
-		
+        
+        Alignment* alignment;
+        
+        if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, 1000);	}
+        else if(pDataArray->align == "needleman")	{	alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, 1000);			}
+        else if(pDataArray->align == "blast")		{	alignment = new BlastAlignment(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch);		}
+        else if(pDataArray->align == "noalign")		{	alignment = new NoAlign();													}
+        else {
+            pDataArray->m->mothurOut(pDataArray->align + " is not a valid alignment option. I will run the command using needleman.");
+            pDataArray->m->mothurOutEndLine();
+            alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, 1000);
+        }
+        
 		//parse fasta and name file by group
 		SequenceParser* parser;
         SequenceCountParser* cparser;
@@ -162,7 +189,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             
 			int start = time(NULL);
 			
-			if (pDataArray->m->control_pressed) {  delete parser; return 0; }
+            if (pDataArray->m->control_pressed) {  delete parser; delete alignment;return 0; }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Processing group " + pDataArray->groups[k] + ":"); pDataArray->m->mothurOutEndLine();
 			
@@ -180,6 +207,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			//numSeqs = loadSeqs(thisNameMap, thisSeqs); same function below
 			
 			int length = 0;
+            set<int> lengths;
 			alignSeqs.clear();
 			map<string, string>::iterator it;
 			bool error = false;
@@ -189,7 +217,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 		 	
 			for (int i = 0; i < thisSeqs.size(); i++) {
 				
-				if (pDataArray->m->control_pressed) { delete parser; return 0; }
+				if (pDataArray->m->control_pressed) { delete parser; delete alignment; return 0; }
 				
 				if (pDataArray->namefile != "") {
 					it = thisNameMap.find(thisSeqs[i].getName());
@@ -205,7 +233,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 						
 						seqPNode tempNode(numReps, thisSeqs[i], it->second);
 						alignSeqs.push_back(tempNode);
-						if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+						lengths.insert(thisSeqs[i].getAligned().length());
 					}	
 				}else { //no names file, you are identical to yourself 
 					int numRep = 1;
@@ -218,10 +246,14 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                     }
                     seqPNode tempNode(numRep, thisSeqs[i], thisSeqs[i].getName());
                     alignSeqs.push_back(tempNode);
-					if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+					lengths.insert(thisSeqs[i].getAligned().length());
 				}
 			}
 			
+            if (lengths.size() > 1) { pDataArray->method = "unaligned"; }
+            else if (lengths.size() == 1) {  pDataArray->method = "aligned"; }
+            
+            length = *(lengths.begin());
 			//sanity check
 			if (error) { pDataArray->m->control_pressed = true; }
 			
@@ -230,9 +262,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			
 			////////////////////////////////////////////////////
 			
-			if (pDataArray->m->control_pressed) {   delete parser; return 0; }
+			if (pDataArray->m->control_pressed) {   delete parser; delete alignment; return 0; }
 			
-			if (pDataArray->diffs > length) { pDataArray->m->mothurOut("Error: diffs is greater than your sequence length."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; return 0;  }
+            if (pDataArray->method == "aligned") { if (pDataArray->diffs > length) { pDataArray->m->mothurOut("Error: diffs is greater than your sequence length."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; delete alignment; return 0;  } }
 			
 			////////////////////////////////////////////////////
 			//int count = process(); - same function below
@@ -261,18 +293,43 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                         //try to merge it with all smaller seqs
                         for (int j = i+1; j < numSeqs; j++) {
                             
-                            if (pDataArray->m->control_pressed) { delete parser; return 0; }
+                            if (pDataArray->m->control_pressed) { delete parser; delete alignment; return 0; }
                             
                             if (alignSeqs[j].active) {  //this sequence has not been merged yet
                                 //are you within "diff" bases
                                 //int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                                ////////////////////////////////////////////////////
                                 int mismatch = 0;
                                 
-                                for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
-                                    //do they match
-                                    if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
-                                    if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                                if (pDataArray->method == "unaligned") {
+                                    //align to eachother
+                                    Sequence seqI("seq1", alignSeqs[i].seq.getAligned());
+                                    Sequence seqJ("seq2", alignSeqs[j].seq.getAligned());
+                                    
+                                    //align seq2 to seq1 - less abundant to more abundant
+                                    alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
+                                    string seq2 = alignment->getSeqAAln();
+                                    string seq1 = alignment->getSeqBAln();
+                                    
+                                    //chop gap ends
+                                    int startPos = 0;
+                                    int endPos = seq2.length()-1;
+                                    for (int i = 0; i < seq2.length(); i++) {  if (isalpha(seq2[i])) { startPos = i; break; } }
+                                    for (int i = seq2.length()-1; i >= 0; i--) {  if (isalpha(seq2[i])) { endPos = i; break; } }
+                                    
+                                    //count number of diffs
+                                    for (int i = startPos; i <= endPos; i++) {
+                                        if (seq2[i] != seq1[i]) { mismatch++; }
+                                        if (mismatch > pDataArray->diffs) { mismatch = length; break;  } //to far to cluster
+                                    }
+                                }else {
+                                    for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                        //do they match
+                                        if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                        if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                                    }
                                 }
+                                ////////////////////////////////////////////////////
                                 
                                 if (mismatch <= pDataArray->diffs) {
                                     //merge
@@ -309,19 +366,42 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                     //try to merge it into larger seqs
                     for (int j = i+1; j < numSeqs; j++) {
                         
-                        if (pDataArray->m->control_pressed) { out.close(); return 0; }
+                        if (pDataArray->m->control_pressed) { out.close(); delete alignment; return 0; }
                         
                         if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
                             //are you within "diff" bases
                             //int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
                             int mismatch = 0;
                             
-                            for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
-                                //do they match
-                                if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
-                                if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                            if (pDataArray->method == "unaligned") {
+                                //align to eachother
+                                Sequence seqI("seq1", alignSeqs[i].seq.getAligned());
+                                Sequence seqJ("seq2", alignSeqs[j].seq.getAligned());
+                                
+                                //align seq2 to seq1 - less abundant to more abundant
+                                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+                                string seq2 = alignment->getSeqAAln();
+                                string seq1 = alignment->getSeqBAln();
+                                
+                                //chop gap ends
+                                int startPos = 0;
+                                int endPos = seq2.length()-1;
+                                for (int i = 0; i < seq2.length(); i++) {  if (isalpha(seq2[i])) { startPos = i; break; } }
+                                for (int i = seq2.length()-1; i >= 0; i--) {  if (isalpha(seq2[i])) { endPos = i; break; } }
+                                
+                                //count number of diffs
+                                for (int i = startPos; i <= endPos; i++) {
+                                    if (seq2[i] != seq1[i]) { mismatch++; }
+                                    if (mismatch > pDataArray->diffs) { mismatch = length; break;  } //to far to cluster
+                                }
+                            }else {
+
+                                for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                    //do they match
+                                    if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                    if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                                }
                             }
-                            
                             if (mismatch <= pDataArray->diffs) {
                                 //merge
                                 alignSeqs[j].names += ',' + alignSeqs[i].names;
@@ -381,6 +461,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			
 		}
 		
+        delete alignment;
+        
 		return numSeqs;
 		
 

@@ -13,6 +13,7 @@
 #include "sharedutilities.h"
 #include "subsample.h"
 
+
 //**********************************************************************************************************************
 vector<string> RareFactSharedCommand::setParameters(){	
 	try {
@@ -248,15 +249,15 @@ int RareFactSharedCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        GroupMap designMap;
+        DesignMap designMap;
         if (designfile == "") { //fake out designMap to run with process
             process(designMap, "");
         }else {
-            designMap.readDesignMap(designfile);
+            designMap.read(designfile);
             
             //fill Sets - checks for "all" and for any typo groups
 			SharedUtil util;
-			vector<string> nameSets = designMap.getNamesOfGroups();
+			vector<string> nameSets = designMap.getCategory();
 			util.setGroups(Sets, nameSets);
             
             for (int i = 0; i < Sets.size(); i++) {
@@ -282,7 +283,7 @@ int RareFactSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
+int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 	try {
         Rarefact* rCurve;
         vector<Display*> rDisplays;
@@ -300,7 +301,7 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
         vector<string> newGroups = m->getGroups();
         if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
             vector<string> thisSets; thisSets.push_back(thisSet);
-            newGroups = designMap.getNamesSeqs(thisSets);
+            newGroups = designMap.getNamesGroups(thisSets);
             fileNameRoot += thisSet + ".";
         }
         
@@ -605,8 +606,8 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
                 m->openOutputFile(outputFile, out);
                 outputNames.push_back(outputFile); outputTypes[it->first].push_back(outputFile);
                 
-                out << columnHeaders[0] << '\t' << "method\t";
-                for (int i = 1; i < columnHeaders.size(); i++) { out << columnHeaders[i] << '\t'; }
+                out << columnHeaders[0] << '\t' << "method";
+                for (int i = 1; i < columnHeaders.size(); i++) { out  << '\t' << columnHeaders[i]; }
                 out << endl;
             
                 vector< vector<double> > aveResults; aveResults.resize(results[0].size());
@@ -641,14 +642,14 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
                 }
                 
                 for (int i = 0; i < stdResults.size(); i++) {  //finds average.
-                    out << aveResults[i][0] << '\t' << "ave\t";
-                    for (int j = 1; j < aveResults[i].size(); j++) { out << aveResults[i][j] << '\t'; }
+                    out << aveResults[i][0] << '\t' << "ave";
+                    for (int j = 1; j < aveResults[i].size(); j++) { out  << '\t' << aveResults[i][j]; }
                     out << endl;
-                    out << stdResults[i][0] << '\t' << "std\t";
+                    out << stdResults[i][0] << '\t' << "std";
                     for (int j = 1; j < stdResults[i].size(); j++) {
                         stdResults[i][j] /= (float) iters;
                         stdResults[i][j] = sqrt(stdResults[i][j]);
-                        out << stdResults[i][j] << '\t';
+                        out << '\t' << stdResults[i][j];
                     }
                     out << endl;
                 }
@@ -772,11 +773,11 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 			}
 			
             //output new labels line
-            out << fileLabels[combineFileName][0][0] << '\t';
+            out << fileLabels[combineFileName][0][0];
             for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                 for (int n = 0; n < groupNames.size(); n++) { // for each group
                     for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                        out << fileLabels[combineFileName][k][l] << '-' << groupNames[n] << '\t';
+                        out  << '\t' << fileLabels[combineFileName][k][l] << '-' << groupNames[n];
                     }
                 }
             }
@@ -785,7 +786,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 			//for each label
 			for (set<int>::iterator itNumSampled = numSampledSet.begin(); itNumSampled != numSampledSet.end(); itNumSampled++) {
 				
-                out << (*itNumSampled) << '\t';
+                out << (*itNumSampled);
                 
                 if (m->control_pressed) { break; }
                 
@@ -798,12 +799,12 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                         map<int, vector< vector<string> > >::iterator itLine = files[group].find(*itNumSampled);
                         if (itLine != files[group].end()) { 
                             for (int l = 0; l < (itLine->second)[k].size(); l++) { 
-                                out << (itLine->second)[k][l] << '\t';
+                                out  << '\t' << (itLine->second)[k][l];
                                 
                             }                             
                         }else { 
                             for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { 
-                                out << "NA" << '\t';
+                                out << "\tNA";
                             } 
                         }
                     }

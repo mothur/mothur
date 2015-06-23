@@ -255,8 +255,8 @@ int NMDSCommand::execute(){
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//output results
-				out << "Config" << (j+1) << '\t';
-				for (int k = 0; k < i; k++) { out << "axis" << (k+1) << '\t'; }
+				out << "Config" << (j+1);
+				for (int k = 0; k < i; k++) { out  << '\t' << "axis" << (k+1); }
 				out << endl;
 				out2 << i << '\t' << (j+1) << '\t' << stress << '\t' << rsquared << endl;
 				
@@ -289,8 +289,8 @@ int NMDSCommand::execute(){
 		outBest.setf(ios::fixed, ios::floatfield);
 		outBest.setf(ios::showpoint);
 		
-		outBest << "group" << '\t';
-		for (int k = 0; k < bestConfig.size(); k++) { outBest << "axis" << (k+1) << '\t'; }
+		outBest << "group";
+		for (int k = 0; k < bestConfig.size(); k++) { outBest << '\t' << "axis" << (k+1); }
 		outBest << endl;
 		
 		output(bestConfig, names, outBest);
@@ -498,10 +498,10 @@ int NMDSCommand::output(vector< vector<double> >& config, vector<string>& names,
 		
 		for (int i = 0; i < names.size(); i++) {
 			
-			out << names[i] << '\t';
+			out << names[i];
 			
 			for (int j = 0; j < config.size(); j++) {
-				out << config[j][i] << '\t';
+				out  << '\t' << config[j][i];
 			}
 			
 			out << endl;

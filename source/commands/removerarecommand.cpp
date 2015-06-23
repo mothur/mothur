@@ -884,8 +884,8 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 		
 		//do we have any otus above the rare cutoff
 		if (newRabunds[0].getNumBins() != 0) {
-            out << "label\tGroup\tnumOtus\t";
-            for (int j = 0; j < headers.size(); j++) { out << headers[j] << '\t'; }
+            out << "label\tGroup\tnumOtus";
+            for (int j = 0; j < headers.size(); j++) { out << '\t' << headers[j]; }
             out << endl;
 			for (int j = 0; j < newRabunds.size(); j++) { 
 				out << newRabunds[j].getLabel() << '\t' << newRabunds[j].getGroup() << '\t';

@@ -628,7 +628,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
         string compositeFastaFile = getOutputFileName("fasta",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapFastaFile = getOutputFileName("fasta",cvars);
-        cvars["[tag]"] = "";
+        cvars["[tag]"] = "trim";
         string compositeQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapQualFile = getOutputFileName("qfile",cvars);
@@ -1523,7 +1523,9 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
         
         ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
+        #ifdef USE_BOOST
         boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
+        #endif
         if (!gz) { //plain text files
             m->openInputFile(thisffastafile, inFFasta);
             m->openInputFile(thisrfastafile, inRFasta);
@@ -1531,8 +1533,10 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             inFFasta.seekg(linesInput.start);
             inRFasta.seekg(linesInputReverse.start);
         }else { //compressed files - no need to seekg because compressed files divide workload differently
+            #ifdef USE_BOOST
             m->openInputFileBinary(thisffastafile, inFFasta, inFF);
             m->openInputFileBinary(thisrfastafile, inRFasta, inRF);
+            #endif
         }
         
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
@@ -1541,14 +1545,22 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                 if (!gz) { //plain text files
                     m->openInputFile(thisfqualindexfile, inFQualIndex);
                     inFQualIndex.seekg(qlinesInput.start);
-                }else { m->openInputFileBinary(thisfqualindexfile, inFQualIndex, inFQ); } //compressed files - no need to seekg because compressed files divide workload differently
+                }else {
+                    #ifdef USE_BOOST
+                    m->openInputFileBinary(thisfqualindexfile, inFQualIndex, inFQ);
+                    #endif
+                } //compressed files - no need to seekg because compressed files divide workload differently
             }
             else {  thisfqualindexfile = ""; }
             if (thisrqualindexfile != "NONE") {
                 if (!gz) { //plain text files
                     m->openInputFile(thisrqualindexfile, inRQualIndex);
                     inRQualIndex.seekg(qlinesInputReverse.start);
-                }else { m->openInputFileBinary(thisrqualindexfile, inRQualIndex, inRQ); } //compressed files - no need to seekg because compressed files divide workload differently
+                }else {
+                    #ifdef USE_BOOST
+                    m->openInputFileBinary(thisrqualindexfile, inRQualIndex, inRQ);
+                    #endif
+                } //compressed files - no need to seekg because compressed files divide workload differently
             }
             else { thisrqualindexfile = ""; }
         }
@@ -1598,8 +1610,13 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
             
             //read from input files
-            if (gz) {   ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile); }
-            else    {   ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile); }
+            if (gz) {
+                #ifdef USE_BOOST
+                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile);
+                #endif
+            }else    {
+                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile);
+            }
             
             //remove primers and barcodes if neccessary
             if (!ignore) {
@@ -1778,7 +1795,9 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                     unsigned long long pos = inFFasta.tellg();
                     if ((pos == -1) || (pos >= linesInput.end)) { good = false; break; }
                 }else {
+                    #ifdef USE_BOOST
                     if (inFF.eof() || inRF.eof()) { good = false; break; }
+                    #endif
                 }
             #else
                 if (!gz) {
@@ -1798,20 +1817,40 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         //close files
         inFFasta.close();
         inRFasta.close();
-        if (gz) { inFF.pop(); inRF.pop(); }
+        if (gz) {
+            #ifdef USE_BOOST
+            inFF.pop(); inRF.pop();
+            #endif
+        }
         outFasta.close();
         outScrapFasta.close();
         outMisMatch.close();
         if (delim == '@') {
-            if (thisfqualindexfile != "") { inFQualIndex.close(); if (gz) { inFQ.pop(); } }
-            if (thisrqualindexfile != "") { inRQualIndex.close(); if (gz) { inRQ.pop(); } }
+            if (thisfqualindexfile != "") { inFQualIndex.close();
+                if (gz) {
+                    #ifdef USE_BOOST
+                    inFQ.pop();
+                    #endif
+                }
+            }
+            if (thisrqualindexfile != "") { inRQualIndex.close();
+                if (gz) {
+                    #ifdef USE_BOOST
+                    inRQ.pop();
+                    #endif
+                }
+            }
             outQual.close();
             outScrapQual.close();
         }else{
             if (hasQuality) {
                 inFQualIndex.close();
                 inRQualIndex.close();
-                if (gz) { inFQ.pop(); inRQ.pop(); }
+                if (gz) {
+                    #ifdef USE_BOOST
+                    inFQ.pop(); inRQ.pop();
+                    #endif
+                }
                 outQual.close();
                 outScrapQual.close();
             }
@@ -1969,6 +2008,7 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
     }
 }
 /**************************************************************************************************/
+#ifdef USE_BOOST
 //ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ);
 bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile) {
     try {
@@ -2056,6 +2096,7 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
         exit(1);
     }
 }
+#endif
 /**************************************************************************************************/
 
 bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile) {

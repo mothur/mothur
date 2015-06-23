@@ -329,8 +329,8 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
         ofstream out;
         m->openOutputFile(outputFileName, out);
         
-        out << "OTU_Label\ttotal\t";
-        for (int i = 0; i < lookup.size(); i++) { out << lookup[i]->getGroup() << '\t'; } out << endl;
+        out << "OTU_Label\ttotal";
+        for (int i = 0; i < lookup.size(); i++) { out << '\t' << lookup[i]->getGroup(); } out << endl;
         
         for (int j = 0; j < lookup[0]->getNumBins(); j++) {
             if (m->control_pressed) { break; }
@@ -339,9 +339,9 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
             string output = "";
             for (int i = 0; i < lookup.size(); i++) {
                 total += lookup[i]->getAbundance(j);
-                output += toString(lookup[i]->getAbundance(j)) + '\t';
+                output += '\t' + toString(lookup[i]->getAbundance(j));
             }
-            out << m->currentSharedBinLabels[j] << '\t' << total << '\t' << output << endl;
+            out << m->currentSharedBinLabels[j] << '\t' << total << output << endl;
         }
         out.close();
         
@@ -359,7 +359,7 @@ int CountSeqsCommand::processSmall(string outputFileName){
         ofstream out;
         m->openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal\t";
+		out << "Representative_Sequence\ttotal";
         
         GroupMap* groupMap;
 		if (groupfile != "") { 
@@ -376,7 +376,7 @@ int CountSeqsCommand::processSmall(string outputFileName){
 			
 			//print groupNames
 			for (int i = 0; i < Groups.size(); i++) {
-				out << Groups[i] << '\t';
+				out << '\t' << Groups[i];
 			}
 		}
 		out << endl;
@@ -638,9 +638,9 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 				}
 				
 				if (total != 0) {
-					out << firstCol << '\t' << total << '\t';
+					out << firstCol << '\t' << total;
 					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << it->second << '\t';
+						out << '\t' << it->second;
 					}
 					out << endl;
 				}
@@ -679,7 +679,7 @@ int CountSeqsCommand::processLarge(string outputFileName){
         ofstream out;
         m->openOutputFile(outputFileName, out); 
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal\t";
+		out << "Representative_Sequence\ttotal";
         if (groupfile == "") { out << endl; }
         
         map<string, unsigned long long> namesToIndex;
@@ -770,9 +770,9 @@ int CountSeqsCommand::processLarge(string outputFileName){
                 int seqTotal = 0;
                 for (int j = 0; j < nameMapCount[i].size(); j++) {
                     seqTotal += nameMapCount[i][j];
-                    totalsLine += toString(nameMapCount[i][j]) + '\t';
+                    totalsLine += '\t' + toString(nameMapCount[i][j]);
                 }
-                out << indexToName[i] << '\t' << seqTotal << '\t' << totalsLine << endl;
+                out << indexToName[i] << '\t' << seqTotal << totalsLine << endl;
             }
         }
         

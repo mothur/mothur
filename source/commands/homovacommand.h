@@ -13,8 +13,7 @@
 
 #include "command.hpp"
 
-//class GlobalData;
-class GroupMap;
+class DesignMap;
 
 class HomovaCommand : public Command {
 	
@@ -45,7 +44,7 @@ private:
 	vector<string> outputNames, Sets;
 
 	string outputDir, inputDir, designFileName, phylipFileName;
-	GroupMap* designMap;
+	DesignMap* designMap;
 	vector< vector<double> > distanceMatrix;
 	int iters;
 	double experimentwiseAlpha;

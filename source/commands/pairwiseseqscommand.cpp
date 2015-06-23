@@ -702,7 +702,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
 				}
-				outFile << name << '\t';	
+				outFile << name;
 			}
 			
 			for(int j=0;j<i;j++){
@@ -732,7 +732,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (output == "lt") {  outFile << dist << '\t'; }
+				if (output == "lt") {  outFile << '\t' << dist; }
 			}
 			
 			if (output == "lt") { outFile << endl; }
@@ -802,7 +802,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 			//pad with spaces to make compatible
 			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
 				
-			outFile << name << '\t';	
+			outFile << name;
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
@@ -826,7 +826,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
 								
-				outFile << dist << '\t';
+				outFile << '\t' << dist;
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 			}
@@ -998,7 +998,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
-			outputString += name + "\t";	
+			outputString += name;
 			
 			for(int j=0;j<i;j++){
 				
@@ -1024,7 +1024,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
                 
                 if (m->debug) { cout << ("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 				
-				outputString += toString(dist) + "\t"; 
+				outputString +=  + "\t" + toString(dist);
 			}
 			
 			outputString += "\n"; 
@@ -1103,7 +1103,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
-			outputString += name + "\t";	
+			outputString += name;
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
@@ -1127,7 +1127,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
 				
-				outputString += toString(dist) + "\t";
+				outputString +=  + "\t" + toString(dist);
                 
                 if (m->debug) { cout << ("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 			}

@@ -16,6 +16,7 @@
 #include "sharedrabundvector.h"
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
+#include "designmap.h"
 
 class IndicatorCommand : public Command {
 public:
@@ -38,7 +39,7 @@ public:
 private:
 	ReadTree* read;
 	CountTable* ct;
-	GroupMap* designMap;
+	DesignMap* designMap;
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;
 	int iters, processors;

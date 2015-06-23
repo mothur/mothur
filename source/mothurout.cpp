@@ -879,6 +879,81 @@ bool MothurOut::dirCheck(string& dirName){
 	}	
     
 }
+/***********************************************************************/
+
+bool MothurOut::dirCheck(string& dirName, string noError){
+    try {
+        
+        if (dirName == "") { return false; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        //add / to name if needed
+        string lastChar = dirName.substr(dirName.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { dirName += "/"; }
+#else
+        if (lastChar != "\\") { dirName += "\\"; }
+#endif
+        
+        //test to make sure directory exists
+        dirName = getFullPathName(dirName);
+        string outTemp = dirName + tag + "temp"+ toString(time(NULL));
+        ofstream out;
+        out.open(outTemp.c_str(), ios::trunc);
+        if(!out) {
+            //mothurOut(dirName + " directory does not exist or is not writable."); mothurOutEndLine();
+        }else{
+            out.close();
+            mothurRemove(outTemp);
+            return true;
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "dirCheck - noError");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+//returns true it exits or if we can make it
+bool MothurOut::mkDir(string& dirName){
+    try {
+        
+        bool dirExist = dirCheck(dirName, "noError");
+        
+        if (dirExist) { return true; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        string makeDirectoryCommand = "";
+
+        makeDirectoryCommand += "mkdir -p \"" + dirName + "\"";
+        system(makeDirectoryCommand.c_str());
+        if (dirCheck(dirName)) { return true; }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mkDir");
+        exit(1);
+    }
+    
+}
 //**********************************************************************************************************************
 
 map<string, vector<string> > MothurOut::parseClasses(string classes){
@@ -911,7 +986,7 @@ map<string, vector<string> > MothurOut::parseClasses(string classes){
 		errorOut(e, "MothurOut", "parseClasses");
 		exit(1);
 	}
-}cd .
+}
 /***********************************************************************/
 
 string MothurOut::hasPath(string longName){
@@ -1307,6 +1382,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 	}
 }
 /***********************************************************************/
+#ifdef USE_BOOST
 int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostreams::filtering_istream& in){
     try {
         
@@ -1357,7 +1433,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostr
         exit(1);
     }
 }
-
+#endif
 /***********************************************************************/
 //results[0] = allGZ, results[1] = allNotGZ
 vector<bool> MothurOut::allGZFiles(vector<string> & files){
@@ -1390,10 +1466,12 @@ vector<bool> MothurOut::allGZFiles(vector<string> & files){
         exit(1);
     }
 }
+
 /***********************************************************************/
 vector<bool> MothurOut::isGZ(string filename){
     try {
         vector<bool> results; results.resize(2, false);
+        #ifdef USE_BOOST
         ifstream fileHandle;
         boost::iostreams::filtering_istream gzin;
         
@@ -1417,6 +1495,9 @@ vector<bool> MothurOut::isGZ(string filename){
             return results;  // results[0] = true; results[1] = false;
         }
         fileHandle.close();
+        #else
+        mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); control_pressed = true;
+        #endif
         return results; //results[0] = true; results[1] = true;
     }
     catch(exception& e) {
@@ -1424,6 +1505,7 @@ vector<bool> MothurOut::isGZ(string filename){
         exit(1);
     }
 }
+
 /***********************************************************************/
 
 int MothurOut::renameFile(string oldName, string newName){
@@ -2482,7 +2564,7 @@ vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	}
 }
 //**********************************************************************************************************************
-int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
+int MothurOut::readTax(string namefile, map<string, string>& taxMap, bool removeConfidence) {
 	try {
         //open input file
 		ifstream in;
@@ -2508,7 +2590,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) { if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {
@@ -2536,7 +2618,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) {  if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {

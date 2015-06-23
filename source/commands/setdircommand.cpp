@@ -114,9 +114,8 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
             if (seed)  {
-                m->mothurOut("\nRandom number(1-100) seeded with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
                 srand(random);
-                m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
+                m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
             
 			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod && !seed) {
@@ -133,7 +132,6 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 
 int SetDirectoryCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         if (debugorSeedOnly) {  }
@@ -151,7 +149,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                 commandFactory->setOutputDirectory(output);
             }else {
-                if (m->dirCheck(output)) {
+                if (m->mkDir(output)) {
                     m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                     commandFactory->setOutputDirectory(output);
                 }
@@ -191,7 +189,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                 m->setDefaultPath(tempdefault);
             }else {
-                if (m->dirCheck(tempdefault)) {
+                if (m->mkDir(tempdefault)) {
                     m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                     m->setDefaultPath(tempdefault); 
                 }

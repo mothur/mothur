@@ -86,10 +86,8 @@ int SetSeedCommand::execute(){
         
         if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        srand(time(NULL));
-        m->mothurOut("\nRandom number(1-100) with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
         srand(random);
-        m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
+        m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
        
         return 0;
     }

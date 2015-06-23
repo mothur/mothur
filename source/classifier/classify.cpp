@@ -309,7 +309,7 @@ int Classify::readTaxonomy(string file) {
 #else	
         
         taxonomy.clear(); 
-        m->readTax(file, taxonomy);
+        m->readTax(file, taxonomy, true);
         
         //commented out to save time with large templates. 6/12/13
         //map<string, string> tempTaxonomy;

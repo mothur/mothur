@@ -209,8 +209,7 @@ int MergeGroupsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
-		designMap = new GroupMap(designfile);
-		designMap->readDesignMap();
+		designMap = new DesignMap(designfile);
 		
 		if (groupfile != "") { processGroupFile(designMap); }
 		if (sharedfile != "") { processSharedFile(designMap); }
@@ -259,7 +258,7 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
 			if (m->control_pressed) { return 0; }
 			
 			//what grouping does this group belong to
-			string grouping = designMap->getGroup(thisLookUp[i]->getGroup());
+			string grouping = designMap->get(thisLookUp[i]->getGroup());
 			if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
 			
 			else {
@@ -297,7 +296,7 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::processSharedFile(GroupMap*& designMap){
+int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 	try {
 		
 		string thisOutputDir = outputDir;
@@ -403,7 +402,7 @@ int MergeGroupsCommand::processSharedFile(GroupMap*& designMap){
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::processGroupFile(GroupMap*& designMap){
+int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 	try {
 		
 		string thisOutputDir = outputDir;
@@ -438,7 +437,7 @@ int MergeGroupsCommand::processGroupFile(GroupMap*& designMap){
 			
 			//are you in a group the user wants
 			if (m->inUsersGroups(thisGroup, Groups)) {
-				string thisGrouping = designMap->getGroup(thisGroup);
+				string thisGrouping = designMap->get(thisGroup);
 				
 				if (thisGrouping == "not found") { m->mothurOut("[ERROR]: " + namesOfSeqs[i] + " is from group " + thisGroup + " which is not in your design file, please correct."); m->mothurOutEndLine();  error = true; }
 				else {

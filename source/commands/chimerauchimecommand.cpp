@@ -109,10 +109,10 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "chimera") {  pattern = "[filename],uchime.chimeras"; } 
-        else if (type == "accnos") {  pattern = "[filename],uchime.accnos"; } 
-        else if (type == "alns") {  pattern = "[filename],uchime.alns"; }
-        else if (type == "count") {  pattern = "[filename],uchime.pick.count_table"; } 
+        if (type == "chimera") {  pattern = "[filename],[tag],uchime.chimeras"; }
+        else if (type == "accnos") {  pattern = "[filename],[tag],uchime.accnos"; }
+        else if (type == "alns") {  pattern = "[filename],[tag],uchime.alns"; }
+        else if (type == "count") {  pattern = "[filename],[tag],uchime.pick.count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -644,6 +644,8 @@ int ChimeraUchimeCommand::execute(){
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
 			map<string, string> variables; 
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            variables["[tag]"] = "denovo";
+            if (templatefile != "self") { variables["[tag]"] = "ref"; }
 			string outputFileName = getOutputFileName("chimera", variables);
 			string accnosFileName = getOutputFileName("accnos", variables);
 			string alnsFileName = getOutputFileName("alns", variables);

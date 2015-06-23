@@ -190,6 +190,7 @@ Sequence::Sequence(ifstream& fastaFile){
 }
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+#ifdef USE_BOOST
 Sequence::Sequence(boost::iostreams::filtering_istream& fastaFile){
     try {
         m = MothurOut::getInstance();
@@ -234,6 +235,7 @@ Sequence::Sequence(boost::iostreams::filtering_istream& fastaFile){
         exit(1);
     }							
 }
+#endif
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
@@ -353,6 +355,7 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
 	}
 }
 //********************************************************************************************************************
+#ifdef USE_BOOST
 string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile) {
     try {
         string name = "";
@@ -374,6 +377,7 @@ string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile)
         exit(1);
     }
 }
+#endif
 //********************************************************************************************************************
 string Sequence::getSequenceName(istringstream& fastaFile) {
 	try {
@@ -428,6 +432,7 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	}
 }
 //********************************************************************************************************************
+#ifdef USE_BOOST
 string Sequence::getSequenceString(boost::iostreams::filtering_istream& fastaFile, int& numAmbig) {
     try {
         char letter;
@@ -458,6 +463,7 @@ string Sequence::getSequenceString(boost::iostreams::filtering_istream& fastaFil
         exit(1);
     }
 }
+#endif
 //********************************************************************************************************************
 //comment can contain '>' so we need to account for that
 string Sequence::getCommentString(ifstream& fastaFile) {
@@ -483,6 +489,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 	}
 }
 //********************************************************************************************************************
+#ifdef USE_BOOST
 //comment can contain '>' so we need to account for that
 string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile) {
     try {
@@ -506,6 +513,7 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
         exit(1);
     }
 }
+#endif
 //********************************************************************************************************************
 string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 	try {

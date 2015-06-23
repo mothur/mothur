@@ -399,8 +399,8 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { break; }
-            out << i+1 << '\t';
-            for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << table[j][i] << '\t'; }
+            out << i+1;
+            for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << '\t' << table[j][i]; }
             out << endl;
         }
 

@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "sharedutilities.h"
 #include "inputdata.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveGroupsCommand::setParameters(){	
@@ -69,7 +70,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],[tag],pick,[extension]-[filename],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -885,8 +886,8 @@ int RemoveGroupsCommand::readCount(){
 			if (!m->inUsersGroups(groups[i], Groups)) { groupsToKeep.push_back(groups[i]); }
 		}
         sort(groupsToKeep.begin(), groupsToKeep.end());
-        out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < groupsToKeep.size(); i++) { out << groupsToKeep[i] << '\t'; indexOfGroupsChosen.insert(GroupIndexes[groupsToKeep[i]]); }
+        out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < groupsToKeep.size(); i++) { out  << '\t' << groupsToKeep[i]; indexOfGroupsChosen.insert(GroupIndexes[groupsToKeep[i]]); }
         out << endl;
         
         string name; int oldTotal;
@@ -908,8 +909,8 @@ int RemoveGroupsCommand::readCount(){
                     }
                 }
                 
-                out << name << '\t' << thisTotal << '\t';
-                for (int i = 0; i < selectedCounts.size(); i++) {  out << selectedCounts[i] << '\t'; }
+                out << name << '\t' << thisTotal;
+                for (int i = 0; i < selectedCounts.size(); i++) {  out << '\t' << selectedCounts[i]; }
                 out << endl;
                 
                 wroteSomething = true;
@@ -943,33 +944,29 @@ int RemoveGroupsCommand::readDesign(){
         variables["[extension]"] = m->getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
+        DesignMap designMap(designfile);
+        
+        vector<string> groupsToKeep;
+        vector<string> allGroups = designMap.getNamesGroups();
+        for(int i = 0; i < allGroups.size(); i++) {
+            if (!m->inUsersGroups(allGroups[i], Groups)) {
+                groupsToKeep.push_back(allGroups[i]);
+            }
+        }
+        
+        bool wroteSomething = false;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        int numGroupsFound = designMap.printGroups(out, groupsToKeep);
+        
+        if (numGroupsFound > 0) { wroteSomething = true; }
+        
+        out.close();
 		
-		ifstream in;
-		m->openInputFile(designfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		int removedCount = 0;
-		
-		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
-			
-			in >> name;				//read from first column
-			in >> group;			//read from second column
-			
-			//if this name is in the accnos file
-			if (!(m->inUsersGroups(name, Groups))) {
-				wroteSomething = true;
-				out << name << '\t' << group << endl;
-			}else {  removedCount++;  }
-			
-			m->gobble(in);
-		}
-		in.close();
-		out.close();
-		
+        int removedCount = allGroups.size() - numGroupsFound;
+        
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only groups from the groups you wish to remove."); m->mothurOutEndLine();  }
 		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		

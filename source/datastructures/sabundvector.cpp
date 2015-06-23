@@ -145,10 +145,10 @@ int SAbundVector::size(){
 /***********************************************************************/
 void SAbundVector::print(string prefix, ostream& output){
 	
-	output << prefix << '\t' << maxRank << '\t';
+	output << prefix << '\t' << maxRank;
 	
 	for(int i=1;i<=maxRank;i++){
-		output << data[i] << '\t';
+		output  << '\t' << data[i];
 	}
 	output << endl;
 }
@@ -162,10 +162,10 @@ void SAbundVector::clear(){
 /***********************************************************************/
 void SAbundVector::print(ostream& output){
 	try {
-		output << label << '\t' << maxRank << '\t';
+		output << label << '\t' << maxRank;
 	
 		for(int i=1;i<=maxRank;i++){
-			output << data[i] << '\t';
+			output << '\t' << data[i];
 		}
 		output << endl;
 	}

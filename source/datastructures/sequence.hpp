@@ -34,7 +34,9 @@ public:
 	Sequence(string, string, string);  
 	Sequence(ifstream&, string);
 	Sequence(istringstream&, string);
+    #ifdef USE_BOOST
     Sequence(boost::iostreams::filtering_istream&);
+    #endif
     ~Sequence() {}
 	
 	void setName(string);
@@ -72,13 +74,15 @@ private:
 	MothurOut* m;
 	void initialize();
 	string getSequenceString(ifstream&, int&);
-    string getSequenceString(boost::iostreams::filtering_istream&, int&);
 	string getCommentString(ifstream&);
-    string getCommentString(boost::iostreams::filtering_istream&);
 	string getSequenceString(istringstream&, int&);
 	string getCommentString(istringstream&);
     string getSequenceName(ifstream&);
+    #ifdef USE_BOOST
+    string getCommentString(boost::iostreams::filtering_istream&);
+    string getSequenceString(boost::iostreams::filtering_istream&, int&);
     string getSequenceName(boost::iostreams::filtering_istream&);
+    #endif
     string getSequenceName(istringstream&);
 	string name;
 	string unaligned;

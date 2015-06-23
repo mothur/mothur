@@ -90,7 +90,7 @@ QualityScores::QualityScores(ifstream& qFile){
 	
 }
 /**************************************************************************************************/
-
+#ifdef USE_BOOST
 QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
     try {
         
@@ -142,6 +142,7 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
     }							
     
 }
+#endif
 /**************************************************************************************************/
 
 int QualityScores::read(ifstream& qFile){
@@ -219,6 +220,7 @@ string QualityScores::getSequenceName(ifstream& qFile) {
 	}
 }
 //********************************************************************************************************************
+#ifdef USE_BOOST
 string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile) {
     try {
         string name = "";
@@ -241,6 +243,7 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
         exit(1);
     }
 }
+#endif
 //********************************************************************************************************************
 void QualityScores::setName(string name) {
 	try {

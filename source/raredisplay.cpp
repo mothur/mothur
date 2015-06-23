@@ -159,9 +159,9 @@ void RareDisplay::outputTempFiles(string filename){
 		out << nIters-1 << '\t' << results.size() << endl;
 		
 		for (map<int, vector<double> >::iterator it = results.begin(); it != results.end(); it++) {
-            out << it->first << '\t';
+            out << it->first;
             for(int i = 0; i < (it->second).size(); i++) {
-                out << (it->second)[i] << '\t';
+                out << '\t' << (it->second)[i];
             }
             out << endl;
 		}

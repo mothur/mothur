@@ -112,7 +112,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
     }
 }
 //**********************************************************************************************************************
-
+#ifdef USE_BOOST
 FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, string f) {
     try {
         m = MothurOut::getInstance();
@@ -164,6 +164,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
         exit(1);
     }
 }
+#endif
 //**********************************************************************************************************************
 vector<int> FastqRead::convertQual(string qual) {
     try {

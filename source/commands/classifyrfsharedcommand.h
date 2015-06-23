@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
+#include "designmap.h"
 
 class ClassifyRFSharedCommand : public Command {
 public:
@@ -41,7 +42,7 @@ private:
     int processors;
     bool useTiming;
 
-    GroupMap designMap;
+    DesignMap designMap;
   
     int numDecisionTrees;
     string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;

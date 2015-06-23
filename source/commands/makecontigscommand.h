@@ -80,7 +80,9 @@ private:
     unsigned long long processMultipleFileOption(map<string, int>&);
     unsigned long long processSingleFileOption(map<string, int>&);
     int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);
+    #ifdef USE_BOOST
     bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, bool&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, string, string);
+    #endif
     bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, bool&, ifstream&, ifstream&, ifstream&, ifstream&, string, string);
     vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, bool, Alignment*& alignment, string& contig, string&, int&, int&, int&);
     

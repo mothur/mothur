@@ -31,7 +31,9 @@ public:
     FastqRead(string f); 
     FastqRead(string f, string n, string s, vector<int> sc); 
     FastqRead(ifstream&, bool&, string f);
+    #ifdef USE_BOOST
     FastqRead(boost::iostreams::filtering_istream&, bool&, string f);
+    #endif
     ~FastqRead() {}
     
     string getName() { return name; }
