@@ -154,6 +154,7 @@
 #include "getmimarkspackagecommand.h"
 #include "mimarksattributescommand.h"
 #include "setseedcommand.h"
+#include "makefilecommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -333,7 +334,8 @@ CommandFactory::CommandFactory(){
     commands["merge.sfffiles"]      = "merge.sfffiles";
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     commands["mimarks.attributes"]  = "mimarks.attributes";
-    commands["set.seed"] = "set.seed";
+    commands["make.file"]           = "make.file";
+    commands["set.seed"]            = "set.seed";
 
 
 }
@@ -596,6 +598,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
+        else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -770,6 +773,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
+        else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -930,6 +934,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
         else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
+        else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
