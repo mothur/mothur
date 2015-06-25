@@ -110,6 +110,7 @@ MakeFileCommand::MakeFileCommand(string option)  {
             if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting."); m->mothurOutEndLine(); abort = true;	}
             else {
                 if (m->dirCheck(inputDir)) {} // all set
+                else { abort = true; }
             }
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
@@ -161,9 +162,15 @@ int MakeFileCommand::execute(){
                 }
                 if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
                 else { //only one diff = paired files
-                    vector<string> temp; temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
-                    paired.push_back(temp);
-                    i++;
+                    int pos = simpleName1.find("R1");
+                    int pos2 = simpleName2.find("R2");
+                    if ((pos != string::npos) && (pos2 != string::npos)){
+                        vector<string> temp; temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        paired.push_back(temp);
+                        i++;
+                    }else {
+                        singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                    }
                 }
             }else{
                 singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
