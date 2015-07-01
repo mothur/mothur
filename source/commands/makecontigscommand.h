@@ -106,11 +106,11 @@ private:
 struct contigsData {
     char delim;
     unsigned long long linesInput_start, linesInput_end, linesInputReverse_start, qlinesInput_start, qlinesInputReverse_start, linesInputReverse_end, qlinesInput_end, qlinesInputReverse_end;
-	string outputFasta, outputQual;
+	string outputFasta, outputQual, outputDir;
     string outputScrapFasta, outputScrapQual;
 	string outputMisMatches;
 	string align, group, oligosfile, format;
-    vector<string> inputFiles, qualOrIndexFiles;
+    vector<string> inputFiles, qualOrIndexFiles, outputNames;
     vector<vector<string> > fastaFileNames, qualFileNames;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
@@ -165,7 +165,7 @@ struct contigsData {
         format = form;
         done=false;
 	}
-    contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup) {
+    contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup) {
         inputFiles = f;
         qualOrIndexFiles = qif;
         outputFasta = of;
@@ -190,6 +190,7 @@ struct contigsData {
         bdiffs = bdf;
         tdiffs = tdf;
         allFiles = all;
+        outputDir = opd;
         trimOverlap = to;
         createOligosGroup = cg;
         createFileGroup = cfg;
@@ -254,14 +255,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             string thisOutputDir = outputDir;
             
             string inputFile = ffastqfile;
-            if (outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
+            if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
             //variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFile));
             //variables["[tag]"] = "trim";
             //outQualFile = getOutputFileName("qfile",variables);
-            pDataArray->outQualFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
+            pDataArray->outQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
             //variables["[tag]"] = "scrap";
             //pDataArray->outScrapQualFile = getOutputFileName("qfile",variables);
-            pDataArray->outScrapQualFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
+            pDataArray->outScrapQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
             
             thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
             if ((findexfile != "") || (rindexfile != "")){
@@ -276,9 +277,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             //outScrapFastaFile = getOutputFileName("fasta",variables);
             //variables["[tag]"] = "";
             //outMisMatchFile = getOutputFileName("report",variables);
-            pDataArray->outFastaFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
-            pDataArray->outScrapFastaFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
-            pDataArray->outMisMatchFile = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
+            pDataArray->outFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
+            pDataArray->outScrapFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
+            pDataArray->outMisMatch= thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
             
             //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
             //thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
@@ -286,22 +287,122 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             pDataArray->linesInput_start = 0; pDataArray->linesInput_end = 1000; pDataArray->linesInputReverse_start = 1; pDataArray->qlinesInput_start = 0; pDataArray->qlinesInputReverse_start =0; pDataArray->linesInputReverse_end =1000; pDataArray->qlinesInput_end =1000; pDataArray->qlinesInputReverse_end=1000;
             
             map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
-            createOligosGroup = false;
-            oligos = new Oligos();
+            pDataArray->createOligosGroup = false;
+            Oligos* oligos = new Oligos();
             
-            if(oligosfile != "")                        {       createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);    }
-            if (createOligosGroup || createFileGroup)   {       outputGroupFileName = getOutputFileName("group",variables);                                                 }
+            if(pDataArray->oligosfile != "")                        {
+                //createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);
+                ///////////////////////////////////////////////////////////////////////////////////////
+                string rootname = pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile));
+                bool allBlank = false;
+                int numFPrimers, numBarcodes, numLinkers, numSpacers, numRPrimers;
+                numRPrimers = 0; numSpacers = 0; numLinkers = 0; numBarcodes = 0; numFPrimers = 0;
+                oligos->read(pDataArray->oligosfile, false);
+                
+                if (pDataArray->m->control_pressed) { break; } //error in reading oligos
+                
+                if (oligos->hasPairedBarcodes() || oligos->hasPairedPrimers()) {
+                    numFPrimers = oligos->getPairedPrimers().size();
+                    numBarcodes = oligos->getPairedBarcodes().size();
+                }else {
+                    pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->control_pressed = true;
+                }
+                
+                if (pDataArray->m->control_pressed) { break; }
+                
+                numLinkers = oligos->getLinkers().size();
+                numSpacers = oligos->getSpacers().size();
+                numRPrimers = oligos->getReversePrimers().size();
+                if (numLinkers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n"); }
+                if (numSpacers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n"); }
+                
+                vector<string> groupNames = oligos->getGroupNames();
+                if (groupNames.size() == 0) { pDataArray->allFiles = 0; allBlank = true;  }
+                
+                pDataArray->fastaFileNames.clear();
+                pDataArray->fastaFileNames.resize(oligos->getBarcodeNames().size());
+                for(int i=0;i<pDataArray->fastaFileNames.size();i++){
+                    for(int j=0;j<oligos->getPrimerNames().size();j++){  pDataArray->fastaFileNames[i].push_back(""); }
+                }
+                
+                pDataArray->qualFileNames = pDataArray->fastaFileNames;
+                
+                if (pDataArray->allFiles) {
+                    set<string> uniqueNames; //used to cleanup outputFileNames
+                    map<int, oligosPair> barcodes = oligos->getPairedBarcodes();
+                    map<int, oligosPair> primers = oligos->getPairedPrimers();
+                    for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                        for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                            
+                            string primerName = oligos->getPrimerName(itPrimer->first);
+                            string barcodeName = oligos->getBarcodeName(itBar->first);
+                            
+                            if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                            else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                            else {
+                                string comboGroupName = "";
+                                string fastaFileName = "";
+                                string qualFileName = "";
+                                
+                                if(primerName == ""){
+                                    comboGroupName = barcodeName;
+                                }else{
+                                    if(barcodeName == ""){
+                                        comboGroupName = primerName;
+                                    }
+                                    else{
+                                        comboGroupName = barcodeName + "." + primerName;
+                                    }
+                                }
+                                contigs.fasta
+                                
+                                ofstream temp, temp2;
+                                fastaFileName = rootname + "." + comboGroupName + ".contigs.fasta";
+                                qualFileName = rootname + "." + comboGroupName + ".contigs.qual";
+                                if (uniqueNames.count(fastaFileName) == 0) {
+                                    pDataArray->outputNames.push_back(fastaFileName);
+                                    uniqueNames.insert(fastaFileName);
+                                    pDataArray->fastaFile2Group[fastaFileName] = comboGroupName;
+                                    
+                                    pDataArray->outputNames.push_back(qualFileName);
+                                    uniqueNames.insert(qualFileName);
+                                }
+                                
+                                pDataArray->fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
+                                pDataArray->m->openOutputFile(fastaFileName, temp);		temp.close();
+                                //cout << fastaFileName << endl;
+                                
+                                pDataArray->qualFileNames[itBar->first][itPrimer->first] = qualFileName;
+                                pDataArray->m->openOutputFile(qualFileName, temp2);		temp2.close();
+                            }
+                        }
+                    }
+                }
+                
+                if (allBlank) {
+                    pDataArray->m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); pDataArray->m->mothurOutEndLine();
+                    allFiles = false;
+                    pDataArray->createOligosGroup = false;
+                }
+                
+                pDataArray->createOligosGroup = true;
+                
+                ///////////////////////////////////////////////////////////////////////////////////////
+            }
+            
+            string outputGroupFileName = "";
+            if (pDataArray->createOligosGroup || pDataArray->createFileGroup)   {       outputGroupFileName += thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile))   + ".trim.groups";                                 }
             
             //give group in file file precedence
-            if (createFileGroup) {  createOligosGroup = false; }
+            if (pDataArray->createFileGroup) {  pDataArray->createOligosGroup = false; }
             
             ofstream temp;
-            m->openOutputFile(outFastaFile, temp);		temp.close();
-            m->openOutputFile(outScrapFastaFile, temp);		temp.close();
-            m->openOutputFile(outQualFile, temp);		temp.close();
-            m->openOutputFile(outScrapQualFile, temp);		temp.close();
+            pDataArray->m->openOutputFile(outFastaFile, temp);		temp.close();
+            pDataArray->m->openOutputFile(outScrapFastaFile, temp);		temp.close();
+            pDataArray->m->openOutputFile(outQualFile, temp);		temp.close();
+            pDataArray->m->openOutputFile(outScrapQualFile, temp);		temp.close();
             
-            m->mothurOut("Making contigs...\n");
+            pDataArray->m->mothurOut("Making contigs...\n");
             
             unsigned long long thisNumReads = driver(thisFileInputs, thisQualOrIndexInputs, outFastaFile, outScrapFastaFile,  outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1], group);
             

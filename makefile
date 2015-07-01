@@ -109,7 +109,8 @@ endif
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
-mothur : $(OBJECTS) uchime $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+mothur : $(OBJECTS) uchime
+    $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
     strip mothur
     mv mothur ..
 
