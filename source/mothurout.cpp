@@ -2141,6 +2141,62 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 	}
 }
 /**************************************************************************************************/
+vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, unsigned long long& num) {
+    try {
+        filename = getFullPathName(filename);
+        
+        vector<unsigned long long> positions;
+        ifstream in;
+        //openInputFile(filename, in);
+        openInputFileBinary(filename, in);
+        
+        string input;
+        unsigned long long count = 0;
+        positions.push_back(0);
+        
+        while(!in.eof()){
+            //getline counting reads
+            char d = in.get(); count++;
+            while ((d != '\n') && (d != '\r') && (d != '\f') && (d != in.eof()))	{
+                //get next character
+                d = in.get();
+                count++;
+            }
+            
+            if (!in.eof()) {
+                d=in.get(); count++;
+                while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
+            }
+            positions.push_back(count-1);
+            //cout << count-1 << endl;
+        }
+        in.close();
+        
+        num = positions.size()-1;
+        
+        FILE * pFile;
+        unsigned long long size;
+        
+        //get num bytes in file
+        pFile = fopen (filename.c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        
+        positions[(positions.size()-1)] = size;
+        
+        return positions;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setFilePosEachLine");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
 
 vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
     try{
@@ -3174,6 +3230,7 @@ set<string> MothurOut::readAccnos(string accnosfile){
         string rest = "";
         char buffer[4096];
         
+        unsigned long long count = 0;
 		while (!in.eof()) {
 			if (control_pressed) { break; }
 			
@@ -3182,14 +3239,16 @@ set<string> MothurOut::readAccnos(string accnosfile){
             
             for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]);
                 names.insert(pieces[i]);
+                count++;
             }
         }
 		in.close();	
 		
         if (rest != "") {
             vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  } 
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  count++; }
         }
+        cout << count << endl;
 		return names;
 	}
 	catch(exception& e) {

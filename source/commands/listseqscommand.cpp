@@ -427,7 +427,7 @@ int ListSeqsCommand::readName(){
 		
 			if (m->control_pressed) { in.close(); return 0; }
 
-			in >> firstCol;				
+			in >> firstCol;	m->gobble(in);
 			in >> secondCol;			
 			
 			//parse second column saving each name

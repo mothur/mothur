@@ -508,6 +508,39 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
             }
             delim = '@';
         }
+        
+        bool allGZ = true;
+#ifdef USE_BOOST
+        bool allPlainTxt = true;
+        if (m->isGZ(fileInputs[0])[1]) { allPlainTxt = false;  }
+        else {   allGZ = false;  }
+        if (m->isGZ(fileInputs[1])[1]) { allPlainTxt = false;  }
+        else {   allGZ = false;  }
+        if (qualOrIndexInputs.size() != 0) {
+            if (qualOrIndexInputs[0] != "NONE") {
+                if (m->isGZ(qualOrIndexInputs[0])[1]) { allPlainTxt = false;  }
+                else {   allGZ = false;  }
+            }
+            if (qualOrIndexInputs[1] != "NONE") {
+                if (m->isGZ(qualOrIndexInputs[1])[1]) { allPlainTxt = false;  }
+                else {   allGZ = false;  }
+            }
+            if (!allGZ && !allPlainTxt) { //mixed bag of files, uh oh...
+                m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->control_pressed = true;
+            }
+        }
+#else
+        allGZ = false;
+#endif
+        
+        if (allGZ) {
+            gz = true;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+            processors=1;
+#endif
+        }else { gz = false; }
+        
         variables["[tag]"] = "trim";
         outFastaFile = getOutputFileName("fasta",variables);
         variables["[tag]"] = "scrap";
@@ -2734,6 +2767,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             if ((openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) { //good pair
                 file2Group[files.size()] = group;
                 vector<string> pair;
+#ifdef USE_BOOST
                 if (m->isGZ(forward)[1]) { allPlainTxt = false;  }
                 else {   allGZ = false;  }
                 if (m->isGZ(reverse)[1]) { allPlainTxt = false;  }
@@ -2749,6 +2783,9 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 if (!allGZ && !allPlainTxt) { //mixed bag of files, uh oh...
                     m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->control_pressed = true;
                 }
+#else
+                allGZ=false;
+#endif
                 pair.push_back(forward);
                 pair.push_back(reverse);
                 pair.push_back(findex);
