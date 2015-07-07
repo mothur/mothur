@@ -1063,11 +1063,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			#endif
 			
 			//report progress
-			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count)+"\n");		}
 		
 		delete trimOligos;
         if (reorient) { delete rtrimOligos; }

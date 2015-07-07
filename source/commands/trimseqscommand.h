@@ -628,11 +628,11 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			}
 			
 			//report progress
-			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(count)+"\n");		}
 			
 		}
 		//report progress
-		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(count)+"\n");		}
 		
         if (pDataArray->reorient) { delete rtrimOligos; }
 		delete trimOligos;
