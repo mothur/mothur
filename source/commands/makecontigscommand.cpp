@@ -131,7 +131,7 @@ MakeContigsCommand::MakeContigsCommand(){
 MakeContigsCommand::MakeContigsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;
-        createFileGroup = false; createOligosGroup = false;
+        createFileGroup = false; createOligosGroup = false; gz = false;
         
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -535,10 +535,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         
         if (allGZ) {
             gz = true;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-            processors=1;
-#endif
         }else { gz = false; }
         
         variables["[tag]"] = "trim";
@@ -754,6 +750,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
     }
 }
 //**********************************************************************************************************************
+//only getting here is gz=true
 unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
     try {
         unsigned long long num = 0;
@@ -940,6 +937,58 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             }
             in.close(); m->mothurRemove(tempFile);
             
+        }
+        
+#else
+      
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Windows version shared memory, so be careful when passing variables through the contigsData struct.
+        //Above fork() will clone, so memory is separate, but that's not the case with windows,
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        vector<contigsData*> pDataArray;
+        DWORD   dwThreadIdArray[processors-1];
+        HANDLE  hThreadArray[processors-1];
+        
+        //Create processor worker threads.
+        for(int h=1; h<processors; h++ ){
+            string extension = toString(h) + ".temp"; processIDS.push_back(h);
+            
+            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz);
+            pDataArray.push_back(tempcontig);
+            
+            hThreadArray[h-1] = CreateThread(NULL, 0, MyGroupContigsThreadFunction, pDataArray[h-1], 0, &dwThreadIdArray[h-1]);
+        }
+        
+       
+        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
+        
+        //Wait until all threads have terminated.
+        WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+        
+        //Close all thread handles and free memory allocations.
+        for(int i=0; i < pDataArray.size(); i++){
+            num += pDataArray[i]->count;
+            if (pDataArray[i]->createFileGroup || pDataArray[i]->createOligosGroup) {
+                for (map<string, int>::iterator it = pDataArray[i]->totalGroupCounts.begin(); it != pDataArray[i]->totalGroupCounts.end(); it++) {
+                    map<string, int>::iterator it2 = totalGroupCounts.find(it->first);
+                    if (it2 == totalGroupCounts.end()) {	totalGroupCounts[it->first] = it->second; }
+                    else { totalGroupCounts[it->first] += it->second; }
+                }
+                for (map<string, string>::iterator it = pDataArray[i]->groupMap.begin(); it != pDataArray[i]->groupMap.end(); it++) {
+                    map<string, string>::iterator it2 = groupMap.find(it->first);
+                    if (it2 == groupMap.end()) {	groupMap[it->first] = it->second; }
+                    else { m->mothurOut("[ERROR]: " + it->first + " is in your fasta file more than once. Sequence names must be unique. please correct.\n");  }
+                }
+            }
+            CloseHandle(hThreadArray[i]);
+            delete pDataArray[i];
+        }
+
+  
+#endif
+        
+        for (int i = 0; i < processIDS.size(); i++) {
             m->appendFiles((compositeGroupFile + toString(processIDS[i]) + ".temp"), compositeGroupFile);
             m->mothurRemove((compositeGroupFile + toString(processIDS[i]) + ".temp"));
             
@@ -959,11 +1008,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             m->mothurRemove((compositeMisMatchFile + toString(processIDS[i]) + ".temp"));
         }
 
-        
-#else
-      processors = 1;
-      num = driverGroups(fileInputs, 0, fileInputs.size(), compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
-#endif
+            
         return num;
     }
     catch(exception& e) {
@@ -1602,11 +1647,18 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         m->openOutputFile(outputScrapFasta, outScrapFasta);
         m->openOutputFile(outputMisMatches, outMisMatch);
         bool hasQuality = false;
+        bool hasIndex = false;
         outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";
         if (delim == '@') { //fastq files so make an output quality
             m->openOutputFile(outputQual, outQual);
             m->openOutputFile(outputScrapQual, outScrapQual);
             hasQuality = true;
+            if (thisfqualindexfile != "") {
+                if (thisfqualindexfile != "NONE") {  hasIndex = true; }
+            }
+            if (thisrqualindexfile != "") {
+                if (thisrqualindexfile != "NONE") {  hasIndex = true; }
+            }
         }else if ((delim == '>') && (qualOrIndexFiles.size() != 0)) { //fasta and qual files
             m->openOutputFile(outputQual, outQual);
             m->openOutputFile(outputScrapQual, outScrapQual);
@@ -1615,10 +1667,10 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         
         if (m->debug) { if (hasQuality) { m->mothurOut("[DEBUG]: hasQuality = true\n");  } else { m->mothurOut("[DEBUG]: hasQuality = false\n"); } }
         
-        TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, oligos->getPairedPrimers(), oligos->getPairedBarcodes());
+        TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, oligos->getPairedPrimers(), oligos->getPairedBarcodes(), hasIndex);
 
         TrimOligos* rtrimOligos = NULL;
-        if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes()); numBarcodes = oligos->getReorientedPairedBarcodes().size();    }
+        if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos->getReorientedPairedPrimers(), oligos->getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos->getReorientedPairedBarcodes().size();    }
         
         Alignment* alignment;
         if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
@@ -1635,7 +1687,6 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             string commentString = "";
             int currentSeqsDiffs = 0;
             
-            bool hasIndex = false;
             bool ignore = false;
             Sequence fSeq, rSeq;
             QualityScores* fQual = NULL; QualityScores* rQual = NULL;
@@ -1645,10 +1696,10 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             //read from input files
             if (gz) {
                 #ifdef USE_BOOST
-                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile);
+                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile);
                 #endif
             }else    {
-                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile);
+                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile);
             }
             
             //remove primers and barcodes if neccessary
@@ -2042,8 +2093,8 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
 }
 /**************************************************************************************************/
 #ifdef USE_BOOST
-//ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim, hasIndex, inFF, inRF, inFQ, inRQ);
-bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile) {
+//ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim,  inFF, inRF, inFQ, inRQ);
+bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile) {
     try {
         bool ignore = false;
         
@@ -2078,7 +2129,6 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                         m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { firead = f2iread; findexBarcode.setAligned(firead.getSeq()); }
                 }
-                hasIndex = true;
             }
             if (thisrqualindexfile != "") { //reverse index file
                 FastqRead riread(inRQ, tignore, format);
@@ -2091,7 +2141,6 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                         m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                 }
-                hasIndex = true;
             }
         }else { //reading fasta and maybe qual
             Sequence tfSeq(inFF);
@@ -2132,7 +2181,7 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
 #endif
 /**************************************************************************************************/
 
-bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, bool& hasIndex, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile) {
+bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile) {
     try {
         bool ignore = false;
         
@@ -2167,7 +2216,6 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                         m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { firead = f2iread; findexBarcode.setAligned(firead.getSeq()); }
                 }
-                hasIndex = true;
             }
             if (thisrqualindexfile != "") { //reverse index file
                 FastqRead riread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
@@ -2180,7 +2228,6 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                         m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                 }
-                hasIndex = true;
             }
         }else { //reading fasta and maybe qual
             Sequence tfSeq(inFFasta); m->gobble(inFFasta);
@@ -2798,10 +2845,6 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
         
         if (allGZ) {
             gz = true;
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            #else
-                processors=1;
-            #endif
         }else { gz = false; }
         
         return files;

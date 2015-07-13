@@ -81,9 +81,9 @@ private:
     unsigned long long processSingleFileOption(map<string, int>&);
     int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);
     #ifdef USE_BOOST
-    bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, bool&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, string, string);
+    bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, string, string);
     #endif
-    bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, bool&, ifstream&, ifstream&, ifstream&, ifstream&, string, string);
+    bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, ifstream&, ifstream&, ifstream&, ifstream&, string, string);
     vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, bool, Alignment*& alignment, string& contig, string&, int&, int&, int&);
     
     //main processing functions
@@ -165,13 +165,7 @@ struct contigsData {
         format = form;
         done=false;
 	}
-    contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb) {
-        inputFiles = f;
-        qualOrIndexFiles = qif;
-        outputFasta = of;
-        outputMisMatches = om;
-        outputQual = oq;
-        outputScrapQual = osq;
+    contigsData(string form, char d, string g, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb) {
         m = mout;
         match = ma;
         misMatch = misMa;
@@ -182,9 +176,6 @@ struct contigsData {
         align = al;
         group = g;
         count = 0;
-        outputScrapFasta = osf;
-        fastaFileNames = ffn;
-        qualFileNames = qfn;
         oligosfile = olig;
         pdiffs = pdf;
         bdiffs = bdf;
@@ -197,10 +188,6 @@ struct contigsData {
         threadID = tid;
         deltaq = delt;
         reorient = ro;
-        linesInput_start = lff; linesInput_end = lff2;
-        linesInputReverse_start = lrf; linesInputReverse_end = lrf2;
-        qlinesInput_start = qff; qlinesInput_end = qff2;
-        qlinesInputReverse_start = qrf; qlinesInputReverse_end = qrf2;
         delim = d;
         format = form;
         done=false;
@@ -556,10 +543,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
             pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
             bool hasQuality = false;
+            bool hasIndex = false;
             outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";
             if (pDataArray->delim == '@') { //fastq files so make an output quality
                 pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
                 pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+                if (thisfqualindexfile != "") {
+                    if (thisfqualindexfile != "NONE") {  hasIndex = true; }
+                }
+                if (thisrqualindexfile != "") {
+                    if (thisrqualindexfile != "NONE") {  hasIndex = true; }
+                }
                 hasQuality = true;
             }else if ((pDataArray->delim == '>') && (pDataArray->qualOrIndexFiles.size() != 0)) { //fasta and qual files
                 pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
@@ -585,10 +579,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             int numBarcodes = oligos.getPairedBarcodes().size();
             
             
-            TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes());
+            TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), hasIndex);
             TrimOligos* rtrimOligos = NULL;
             if (pDataArray->reorient) {
-                rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+                rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
             }
             
             //for(int i = 0; i < pDataArray->linesInput_end; i++){ //end is the number of sequences to process
@@ -601,7 +595,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 string trashCode = "";
                 string commentString = "";
                 int currentSeqsDiffs = 0;
-                bool hasIndex = false;
                 
                 bool ignore; ignore = false;
                 Sequence fSeq, rSeq;
@@ -734,7 +727,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                                 }else { firead = f2iread; findexBarcode.setAligned(f2iread.getSeq()); }
                             }
-                            hasIndex = true;
                         }
                         if (thisrqualindexfile != "") { //reverse index file
                             FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
@@ -782,7 +774,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                                 }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                             }
-                            hasIndex = true;
                         }
                         
                     }else { //reading fasta and maybe qual
@@ -1019,7 +1010,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                                 }else { firead = f2iread; findexBarcode.setAligned(f2iread.getSeq()); }
                             }
-                            hasIndex = true;
                         }
                         if (thisrqualindexfile != "") { //reverse index file
                             FastqRead riread(inRQ, tignore, pDataArray->format);
@@ -1067,7 +1057,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                                 }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                             }
-                            hasIndex = true;
                         }
                         
                     }else { //reading fasta and maybe qual
