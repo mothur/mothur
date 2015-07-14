@@ -24,7 +24,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 #CXX = g++44
 
 #if you are a mac user use the following line
-TARGET_ARCH += -arch x86_64
+#TARGET_ARCH += -arch x86_64
 
 #if you using cygwin to build Windows the following line
 #CXX = x86_64-w64-mingw32-g++
@@ -32,7 +32,7 @@ TARGET_ARCH += -arch x86_64
 #TARGET_ARCH += -m64 -static
 
 #if you are a linux user use the following line
-#CXXFLAGS += -mtune=native -march=native
+CXXFLAGS += -mtune=native -march=native
 
 CXXFLAGS += -DBIT_VERSION
 endif
@@ -95,29 +95,29 @@ OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
 mothur : $(OBJECTS) uchime
-$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
-strip mothur
-mv mothur ..
+	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+	strip mothur
+#	mv mothur ..
 
 uchime:
-cd source/uchime_src && ./mk && mv uchime .. && cd ..
+	cd source/uchime_src && ./mk && mv uchime .. && cd ..
 
 
 install : mothur uchime
-mv mothur ..
-mv uchime ..
+#	mv mothur ..
+#	mv uchime ..
 
 
 %.o : %.c %.h
-$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
-$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.hpp
-$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 
 
 clean :
-@rm -f $(OBJECTS)
-@rm -f uchime
+	@rm -f $(OBJECTS)
+	@rm -f uchime
 
