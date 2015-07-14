@@ -161,7 +161,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
         else if(pDataArray->align == "blast")		{	alignment = new BlastAlignment(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch);		}
         else if(pDataArray->align == "noalign")		{	alignment = new NoAlign();													}
         else {
-            pDataArray->m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+            pDataArray->m->mothurOut(pDataArray->align + " is not a valid alignment option. I will run the command using needleman.");
             pDataArray->m->mothurOutEndLine();
             alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, 1000);
         }

@@ -95,7 +95,7 @@ int SplitMatrix::splitClassify(){
 		PhyloTree* phylo = new PhyloTree();
 		
         map<string, string> temp;
-        m->readTax(taxFile, temp);
+        m->readTax(taxFile, temp, true);
         
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
             phylo->addSeqToTree(itTemp->first, itTemp->second);

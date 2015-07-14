@@ -111,10 +111,10 @@ void OrderVector::push_back(int index){
 
 void OrderVector::print(ostream& output){
 	try {
-		output << label << '\t' << numSeqs << '\t';
+		output << label << '\t' << numSeqs;
 	
 		for(int i=0;i<data.size();i++){
-			output << data[i] << '\t';
+			output  << '\t' << data[i];
 		}
 		output << endl;
 	}
@@ -128,10 +128,10 @@ void OrderVector::print(ostream& output){
 
 void OrderVector::print(string prefix, ostream& output){
 	try {
-		output << prefix << '\t' << numSeqs << '\t';
+		output << prefix << '\t' << numSeqs;
 	
 		for(int i=0;i<numSeqs;i++){
-			output << data[i] << '\t';
+			output  << '\t' << data[i];
 		}
 		output << endl;
 	}

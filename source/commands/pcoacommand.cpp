@@ -276,9 +276,9 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 		pcaData << endl;
 		
 		for(int i=0;i<rank;i++){
-			pcaData << name_list[i] << '\t';
+			pcaData << name_list[i];
 			for(int j=0;j<rank;j++){
-				pcaData << G[i][j] << '\t';
+				pcaData  << '\t' << G[i][j];
 			}
 			pcaData << endl;
 		}

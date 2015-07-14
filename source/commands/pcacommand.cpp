@@ -452,10 +452,8 @@ void PCACommand::output(string fbase, string label, vector<string> name_list, ve
 		pcaData << endl;
 		
 		for(int i=0;i<name_list.size();i++){
-			pcaData << name_list[i] << '\t';
-			for(int j=0;j<numEigenValues;j++){
-				pcaData << G[i][j] << '\t';
-			}
+			pcaData << name_list[i];
+			for(int j=0;j<numEigenValues;j++){  pcaData << '\t' << G[i][j];  }
 			pcaData << endl;
 		}
 	}

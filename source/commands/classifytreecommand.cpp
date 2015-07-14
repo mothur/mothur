@@ -249,7 +249,7 @@ int ClassifyTreeCommand::execute(){
                         
         if (m->control_pressed) { delete tmap;  delete outputTree;  return 0; }
 		
-        m->readTax(taxonomyfile, taxMap);
+        m->readTax(taxonomyfile, taxMap, true);
         
         /***************************************************/
         //		get concensus taxonomies                    //

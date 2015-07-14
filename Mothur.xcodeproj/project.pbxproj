@@ -383,6 +383,8 @@
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
 		48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */; };
+		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
+		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
@@ -809,6 +811,8 @@
 		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastqread.cpp; path = source/datastructures/fastqread.cpp; sourceTree = "<group>"; };
 		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kmeralign.cpp; path = source/datastructures/kmeralign.cpp; sourceTree = "<group>"; };
 		48C51DF21A793EFE004ECDF1 /* kmeralign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kmeralign.h; path = source/datastructures/kmeralign.h; sourceTree = "<group>"; };
+		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = "<group>"; };
+		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/completelinkage.cpp; sourceTree = "<absolute>"; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/classifysvmsharedcommand.cpp; sourceTree = "<absolute>"; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/classifysvmsharedcommand.h; sourceTree = "<absolute>"; };
@@ -826,7 +830,7 @@
 		A70056E8156A93E300924A2D /* getotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getotulabelscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getotulabelscommand.h; sourceTree = "<absolute>"; };
 		A70056E9156AB6D400924A2D /* removeotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removeotulabelscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeotulabelscommand.h; sourceTree = "<absolute>"; };
 		A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = removeotulabelscommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeotulabelscommand.cpp; sourceTree = "<absolute>"; };
-		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = makefile; path = source/makefile; sourceTree = "<group>"; };
+		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A7128B1A16B7001200723BE4 /* getdistscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getdistscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getdistscommand.h; sourceTree = "<absolute>"; };
 		A7128B1C16B7002600723BE4 /* getdistscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getdistscommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getdistscommand.cpp; sourceTree = "<absolute>"; };
 		A7132EAE184E76EB00AAA402 /* communitytype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = communitytype.h; path = source/communitytype/communitytype.h; sourceTree = "<group>"; };
@@ -1918,6 +1922,8 @@
 				A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */,
 				A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */,
 				A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */,
+				48DB37B21B3B27E000C372A4 /* makefilecommand.h */,
+				48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
 				A7E9B74312D37EC400DA6239 /* makegroupcommand.cpp */,
 				A741744B175CD9B1007DF49B /* makelefsecommand.h */,
@@ -2769,6 +2775,7 @@
 				481FB5BA1AC1B74F0076CFF3 /* getdistscommand.cpp in Sources */,
 				481FB6191AC1B7AC0076CFF3 /* systemcommand.cpp in Sources */,
 				481FB6611AC1B8450076CFF3 /* nastreport.cpp in Sources */,
+				48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				481FB6181AC1B7AC0076CFF3 /* summarytaxcommand.cpp in Sources */,
 				481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */,
 				481FB6451AC1B7EA0076CFF3 /* sharedrabundvector.cpp in Sources */,
@@ -3054,6 +3061,7 @@
 				A7E9B91A12D37EC400DA6239 /* phylotypecommand.cpp in Sources */,
 				A7E9B91B12D37EC400DA6239 /* pintail.cpp in Sources */,
 				A7E9B91C12D37EC400DA6239 /* pipelinepdscommand.cpp in Sources */,
+				48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				A7E9B91D12D37EC400DA6239 /* preclustercommand.cpp in Sources */,
 				A7E9B91E12D37EC400DA6239 /* prng.cpp in Sources */,
 				A7E9B91F12D37EC400DA6239 /* progress.cpp in Sources */,

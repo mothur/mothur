@@ -205,9 +205,9 @@ vector<int>::reverse_iterator RAbundVector::rend(){
 /***********************************************************************/
 void RAbundVector::nonSortedPrint(ostream& output){
 	try {	
-		output << label << '\t' << numBins << '\t';
+		output << label << '\t' << numBins;
 	
-		for(int i=0;i<numBins;i++){		output << data[i] << '\t';		}
+		for(int i=0;i<numBins;i++){		output  << '\t' << data[i];		}
 		output << endl;
 	}
 	catch(exception& e) {
@@ -218,12 +218,12 @@ void RAbundVector::nonSortedPrint(ostream& output){
 /***********************************************************************/
 void RAbundVector::print(string prefix, ostream& output){
 	try {	
-		output << prefix << '\t' << numBins << '\t';
+		output << prefix << '\t' << numBins;
 	
 		vector<int> hold = data;
 		sort(hold.rbegin(), hold.rend());
 	
-		for(int i=0;i<numBins;i++){		output << hold[i] << '\t';		}
+		for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
 		output << endl;
 	}
 	catch(exception& e) {
@@ -236,12 +236,12 @@ void RAbundVector::print(string prefix, ostream& output){
 /***********************************************************************/
 void RAbundVector::print(ostream& output){
 	try {
-		output << label << '\t' << numBins << '\t';
+		output << label << '\t' << numBins;
 	
 		vector<int> hold = data;
 		sort(hold.rbegin(), hold.rend());
 		
-		for(int i=0;i<numBins;i++){		output << hold[i] << '\t';		}
+		for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
 		output << endl;
 	}
 	catch(exception& e) {

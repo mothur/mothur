@@ -26,16 +26,33 @@ int DesignMap::read(string file) {
         ifstream in;
         m->openInputFile(file, in);
         
-        string headers = m->getline(in); m->gobble(in);
-        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        string temp = "";
+        in >> temp; m->gobble(in);
+        
+        vector<string> columnHeaders;
+        vector<string> tempColumnHeaders;
+        if (temp == "group") {
+            string headers = m->getline(in); m->gobble(in);
+            columnHeaders = m->splitWhiteSpace(headers);
+            columnHeaders.insert(columnHeaders.begin(), "group");
+        }else {
+            string headers = m->getline(in); m->gobble(in);
+            tempColumnHeaders = m->splitWhiteSpace(headers);
+            int num = tempColumnHeaders.size();
+            columnHeaders.push_back("group");
+            for (int i = 0; i < num; i++) { columnHeaders.push_back("value" + toString(i)); }
+        }
         
         namesOfCategories.clear();
         indexCategoryMap.clear();
-        indexNameMap.clear();
+        indexGroupNameMap.clear();
         designMap.clear();
         map<int, string> originalGroupIndexes;
         for (int i = 1; i < columnHeaders.size(); i++) {  namesOfCategories.push_back(columnHeaders[i]);  originalGroupIndexes[i-1] = columnHeaders[i]; }
         if (columnHeaders.size() > 1) { defaultClass = columnHeaders[1]; }
+        else {
+            m->mothurOut("[ERROR]: Your design file contains only one column. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
         
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(namesOfCategories.begin(), namesOfCategories.end());
@@ -46,6 +63,40 @@ int DesignMap::read(string file) {
         string group;
         totalCategories.resize(numCategories);
         int count = 0;
+        
+        //file without headers, fix it
+        if (temp != "group") {
+            group = temp;
+            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
+            
+            //if group info, then read it
+            vector<string> categoryValues; categoryValues.resize(numCategories, "not found");
+            for (int i = 0; i < numCategories; i++) {
+                int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
+                string temp = tempColumnHeaders[i];
+                categoryValues[thisIndex] = temp;
+            
+                if (m->debug) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
+                
+                //do we have this value for this category already
+                map<string, int>::iterator it = totalCategories[thisIndex].find(temp);
+                if (it == totalCategories[thisIndex].end()) { totalCategories[thisIndex][temp] = 1; }
+                else {  totalCategories[thisIndex][temp]++; }
+            }
+            
+            
+            map<string, int>::iterator it = indexGroupNameMap.find(group);
+            if (it == indexGroupNameMap.end()) {
+                groups.push_back(group);
+                indexGroupNameMap[group] = count;
+                designMap.push_back(categoryValues);
+                count++;
+            }else {
+                error = true;
+                m->mothurOut("[ERROR]: Your design file contains more than 1 group named " + group + ", group names must be unique. Please correct."); m->mothurOutEndLine();
+            }
+        }
+        
         while (!in.eof()) {
             
             if (m->control_pressed) { break; }
@@ -69,9 +120,10 @@ int DesignMap::read(string file) {
             }
                            
             
-            map<string, int>::iterator it = indexNameMap.find(group);
-            if (it == indexNameMap.end()) {
-                indexNameMap[group] = count;
+            map<string, int>::iterator it = indexGroupNameMap.find(group);
+            if (it == indexGroupNameMap.end()) {
+                groups.push_back(group);
+                indexGroupNameMap[group] = count;
                 designMap.push_back(categoryValues);
                 count++;
             }else {
@@ -80,14 +132,6 @@ int DesignMap::read(string file) {
             }
         }
         in.close();
-        
-        //sanity check
-        for (int i = 0; i < totalCategories.size(); i++) {
-            map<string, int>::iterator it = totalCategories[i].find(namesOfCategories[i]);
-            if (it != totalCategories[i].end()) { //we may have an old style design file since category name matches a value
-                m->mothurOut("\n[WARNING]: Your design file has a category and value for that category named " + namesOfCategories[i] + ". Perhaps you are using an old style design file without headers? If so, please correct."); m->mothurOutEndLine();
-            }
-        }
         
         if (error) { m->control_pressed = true; }
         
@@ -99,16 +143,16 @@ int DesignMap::read(string file) {
 	}
 }
 /************************************************************/
-////groupName, returns first categories value. 
+////groupName, returns default categories value.
 string DesignMap::get(string groupName) {
     try {
         string value = "not found";
         
-        map<string, int>::iterator it2 = indexNameMap.find(groupName);
-        if (it2 == indexNameMap.end()) {
+        map<string, int>::iterator it2 = indexGroupNameMap.find(groupName);
+        if (it2 == indexGroupNameMap.end()) {
             m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
         }else {
-            return designMap[it2->second][0];
+            return designMap[it2->second][indexCategoryMap[defaultClass]];
         }
        
         return value;
@@ -119,8 +163,27 @@ string DesignMap::get(string groupName) {
 	}
 }
 /************************************************************/
+////groupName, returns default categories value.
+vector<string> DesignMap::getCategory() {
+    try {
+        //oldStyle design file  group -> treatment. returns treatments
+        set<string> uniqueNames;
+        
+        for (int i = 0; i < groups.size(); i++) {  uniqueNames.insert(get(groups[i]));  }
+        
+        vector<string> values;
+        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  values.push_back(*it); }
+        
+        return values;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "getCategory");
+        exit(1);
+    }
+}
+/************************************************************/
 ////categoryName, returns category values.
-vector<string> DesignMap::getValues(string catName) {
+vector<string> DesignMap::getCategory(string catName) {
     try {
         vector<string> values;
         
@@ -136,7 +199,7 @@ vector<string> DesignMap::getValues(string catName) {
         return values;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "getValues");
+		m->errorOut(e, "DesignMap", "getCategory");
 		exit(1);
 	}
 }
@@ -150,8 +213,8 @@ string DesignMap::get(string groupName, string categoryName) {
         if (it == indexCategoryMap.end()) {
             m->mothurOut("[ERROR]: category " + categoryName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
         }else {
-            map<string, int>::iterator it2 = indexNameMap.find(groupName);
-            if (it2 == indexNameMap.end()) {
+            map<string, int>::iterator it2 = indexGroupNameMap.find(groupName);
+            if (it2 == indexGroupNameMap.end()) {
                 m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
             }else {
                 return designMap[it2->second][it->second];
@@ -168,8 +231,8 @@ string DesignMap::get(string groupName, string categoryName) {
 //add group, assumes order is correct
 int DesignMap::push_back(string group, vector<string> values) {
     try {
-        map<string, int>::iterator it = indexNameMap.find(group);
-        if (it == indexNameMap.end()) {
+        map<string, int>::iterator it = indexGroupNameMap.find(group);
+        if (it == indexGroupNameMap.end()) {
             if (values.size() != getNumCategories()) {  m->mothurOut("[ERROR]: Your design file has a " + toString(getNumCategories()) + " categories and " + group + " has " + toString(values.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
             
             for (int i = 0; i < values.size(); i++) {
@@ -178,8 +241,8 @@ int DesignMap::push_back(string group, vector<string> values) {
                 if (it == totalCategories[i].end()) { totalCategories[i][values[i]] = 1; }
                 else {  totalCategories[i][values[i]]++; }
             }
-            int count = indexNameMap.size();
-            indexNameMap[group] = count;
+            int count = indexGroupNameMap.size();
+            indexGroupNameMap[group] = count;
             designMap.push_back(values);
         }else {
             m->mothurOut("[ERROR]: Your design file contains more than 1 group named " + group + ", group names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
@@ -194,10 +257,10 @@ int DesignMap::push_back(string group, vector<string> values) {
 }
 /************************************************************/
 //set values for group, does not need to set all values. assumes group is in table already
-int DesignMap::set(string group, map<string, string> values) {
+int DesignMap::setValues(string group, map<string, string> values) {
     try {
-        map<string, int>::iterator it = indexNameMap.find(group);
-        if (it != indexNameMap.end()) {
+        map<string, int>::iterator it = indexGroupNameMap.find(group);
+        if (it != indexGroupNameMap.end()) {
             for (map<string, string>::iterator it2 = values.begin(); it2 != values.end(); it2++) {
                 
                 map<string, int>::iterator it3 = indexCategoryMap.find(it2->first); //do we have this category
@@ -228,6 +291,21 @@ int DesignMap::set(string group, map<string, string> values) {
 		m->errorOut(e, "DesignMap", "set");
 		exit(1);
 	}
+}
+/************************************************************/
+//set defaultclass
+void DesignMap::setDefaultClass(string dClass) {
+    try {
+        if (m->inUsersGroups(dClass, namesOfCategories)) {
+            defaultClass = dClass;
+        }else{
+            m->mothurOut("[WARNING]: Your design file does not contain a category named " + dClass + ". Using default class " + defaultClass + " .\n\n");
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "setDefaultClass");
+        exit(1);
+    }
 }
 /************************************************************/
 //get number of groups belonging to a category or set of categories, with value or a set of values. Must have all categories and values. Example:
@@ -317,7 +395,7 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
         
         //map int to name
         map<int, string> reverse;
-        for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) {
+        for (map<string, int>::iterator it = indexGroupNameMap.begin(); it != indexGroupNameMap.end(); it++) {
             reverse[it->second] = it->first;
         }
         
@@ -363,7 +441,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
         
         //map int to name
         map<int, string> reverse;
-        for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) {
+        for (map<string, int>::iterator it = indexGroupNameMap.begin(); it != indexGroupNameMap.end(); it++) {
             reverse[it->second] = it->first;
         }
         
@@ -396,7 +474,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
 //get names of groups belonging to a category or set of categories, with value or a set of values. Must have at least one categories and values. Example:
 //  map<treatment - > early, late>, <sex -> male> would return F000132, F000142, F000138. All three group have are either male or from early or late.
 
-vector<string> DesignMap::getNames(string category, string value) {
+vector<string> DesignMap::getNamesGroups(string category, string value) {
     try {
         vector<string> names;
         
@@ -408,7 +486,7 @@ vector<string> DesignMap::getNames(string category, string value) {
             
             //map int to name
             map<int, string> reverse;
-            for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 != indexNameMap.end(); it2++) {
+            for (map<string, int>::iterator it2 = indexGroupNameMap.begin(); it2 != indexGroupNameMap.end(); it2++) {
                 reverse[it2->second] = it2->first;
             }
             
@@ -425,30 +503,53 @@ vector<string> DesignMap::getNames(string category, string value) {
         
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "getNames");
+		m->errorOut(e, "DesignMap", "getNamesGroups");
 		exit(1);
 	}
+}
+/************************************************************/
+//assume default category and get names groups that match any values in vector passed in.  <early, late> = F000142, F000132.
+
+vector<string> DesignMap::getNamesGroups(vector<string> sets) {
+    try {
+        vector<string> names;
+        
+        if (sets.size() == 0) { return names; }
+        
+        map<string, vector<string> > temp;
+        
+        temp[defaultClass] = sets;
+        
+        names = getNamesShared(temp);
+        
+        return names;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "getNamesGroups");
+        exit(1);
+    }
 }
 
 /************************************************************/
 int DesignMap::print(ofstream& out) {
     try {
        
-		out << "group\t";
-        for (int i = 0; i < namesOfCategories.size(); i++) { out << namesOfCategories[i] << '\t'; }
+		out << "group";
+        for (int i = 0; i < namesOfCategories.size(); i++) { out << '\t' << namesOfCategories[i]; }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
-        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+        for (map<string, int>::iterator it = indexGroupNameMap.begin(); it !=indexGroupNameMap.end(); it++) { reverse[it->second] = it->first;  }
         
         for (int i = 0; i < designMap.size(); i++) {
             map<int, string>::iterator itR = reverse.find(i);
             
             if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
-                out << itR->second  << '\t';
+                out << itR->second;
                 
                 for (int j = 0; j < namesOfCategories.size(); j++) {
-                    out << designMap[i][j] << '\t';
+                    out  << '\t' << designMap[i][j];
                 }
                 out << endl;
             }
@@ -464,25 +565,25 @@ int DesignMap::print(ofstream& out) {
 }
 /************************************************************/
 //print specific categories
-int DesignMap::print(ofstream& out, vector<string> cats) {
+int DesignMap::printCategories(ofstream& out, vector<string> cats) {
     try {
         
-		out << "group\t";
-        for (int i = 0; i < namesOfCategories.size(); i++) { if (m->inUsersGroups(namesOfCategories[i], cats)) { out << namesOfCategories[i] << '\t'; } }
+		out << "group";
+        for (int i = 0; i < namesOfCategories.size(); i++) { if (m->inUsersGroups(namesOfCategories[i], cats)) { out  << '\t' << namesOfCategories[i]; } }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
-        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+        for (map<string, int>::iterator it = indexGroupNameMap.begin(); it !=indexGroupNameMap.end(); it++) { reverse[it->second] = it->first;  }
         
         for (int i = 0; i < designMap.size(); i++) {
             map<int, string>::iterator itR = reverse.find(i);
             
             if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
-                out << itR->second  << '\t';
+                out << itR->second;
                 
                 for (int j = 0; j < namesOfCategories.size(); j++) {
                     if (m->inUsersGroups(namesOfCategories[i], cats)) {
-                        out << designMap[i][j] << '\t';
+                        out  << '\t' << designMap[i][j];
                     }
                 }
                 out << endl;
@@ -493,9 +594,49 @@ int DesignMap::print(ofstream& out, vector<string> cats) {
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "print");
+		m->errorOut(e, "DesignMap", "printCategories");
 		exit(1);
 	}
+}
+/************************************************************/
+//print specific groups
+int DesignMap::printGroups(ofstream& out, vector<string> groups) {
+    try {
+        int numSelected = 0;
+        
+        out << "group";
+        for (int i = 0; i < namesOfCategories.size(); i++) {  out  << '\t' << namesOfCategories[i];  }
+        out << endl;
+        
+        map<int, string> reverse; //use this to preserve order
+        for (map<string, int>::iterator it = indexGroupNameMap.begin(); it !=indexGroupNameMap.end(); it++) { reverse[it->second] = it->first;  }
+        
+        for (int i = 0; i < designMap.size(); i++) {
+            map<int, string>::iterator itR = reverse.find(i);
+            
+            if (itR != reverse.end()) { //will equal end if groups were removed because remove just removes from indexNameMap
+                
+                if (m->inUsersGroups(itR->second, groups)) {
+                    out << itR->second;
+                
+                    for (int j = 0; j < namesOfCategories.size(); j++) {
+                        out  << '\t' << designMap[i][j];
+                    }
+                    out << endl;
+                    
+                    numSelected++;
+                }
+            }
+        }
+        
+        out.close();
+        
+        return numSelected;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DesignMap", "printGroups");
+        exit(1);
+    }
 }
 
 /************************************************************/

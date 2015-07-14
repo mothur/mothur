@@ -15,6 +15,7 @@
 #include "sharedutilities.h"
 #include "tree.h"
 
+
 class PhyloDiversityCommand : public Command {
 	
 	public:
@@ -36,8 +37,8 @@ class PhyloDiversityCommand : public Command {
 private:
 		CountTable* ct;
 		float freq;
-		int iters, processors, numUniquesInName;  
-		bool abort, rarefy, summary, collect, scale;
+		int iters, processors, numUniquesInName, subsampleSize;
+		bool abort, rarefy, summary, collect, scale, subsample;
 		string groups, outputDir, treefile, groupfile, namefile, countfile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
@@ -60,14 +61,14 @@ struct phylodivData {
     map<string, int> rootForGroup;
     vector<int> randomLeaf;
     set<int> numSampledList;
-    int increment;
+    int increment, subsampleSize;
     Tree* t;
     CountTable* ct;
-    bool includeRoot;
+    bool includeRoot, subsample;
 	
    
 	phylodivData(){}
-	phylodivData(MothurOut* mout, int ni,  map< string, vector<float> > cd, map< string, vector<float> > csd, Tree* tree, CountTable* count, int incre, vector<int> crl, set<int> nsl, map<string, int> rfg) {
+	phylodivData(MothurOut* mout, int ni,  map< string, vector<float> > cd, map< string, vector<float> > csd, Tree* tree, CountTable* count, int incre, vector<int> crl, set<int> nsl, map<string, int> rfg, bool su, int suS) {
         m = mout;
         t = tree;
         ct = count;
@@ -78,6 +79,8 @@ struct phylodivData {
         randomLeaf = crl;
         numSampledList = nsl;
         rootForGroup = rfg;
+        subsample = su;
+        subsampleSize = suS;
 	}
 };
 
@@ -105,6 +108,8 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
             
             for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = 0;   }
             
+            map<string, int> metCount; bool allDone = false;
+            for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = false;   }
             for(int k = 0; k < numLeafNodes; k++){
                 
                 if (pDataArray->m->control_pressed) { return 0; }
@@ -167,6 +172,15 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
                             pDataArray->div[groups[j]][s] = pDataArray->div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
                         }
                         counts[groups[j]] += numSeqsInGroupJ;
+                        if (pDataArray->subsample) {
+                            if (counts[groups[j]] >= pDataArray->subsampleSize) { metCount[groups[j]] = true; }
+                            bool allTrue = true;
+                            for (int h = 0; h < mGroups.size(); h++) {
+                                if (!metCount[mGroups[h]]) { allTrue = false; }
+                            }
+                            if (allTrue) { allDone = true; }
+                        }
+                        if (allDone) { j+=groups.size(); k+=numLeafNodes; }
                     }
                 }
             }

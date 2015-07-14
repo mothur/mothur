@@ -42,13 +42,14 @@ private:
 	InputData* input;
 	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile;
 	bool abort, allLines, probs, persample;
-	int cutoff;
+	int cutoff, threshold;
 	set<string> labels; //holds labels to be used
 	vector<string> outputNames, groups;
 	map<string, string> nameMap;
 	map<string, string> taxMap;
 
 	int process(ListVector*);
+    int processTaxMap();
 	string addUnclassifieds(string, int);
 	vector<string> findConsensusTaxonomy(vector<string>, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
 	

@@ -10,6 +10,7 @@
 #include "anosimcommand.h"
 #include "inputdata.h"
 #include "readphylipvector.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> AnosimCommand::setParameters(){	
@@ -173,8 +174,7 @@ int AnosimCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new GroupMap(designFileName);
-		designMap->readDesignMap();
+		designMap = new DesignMap(designFileName);
 		
 		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
 		
@@ -191,7 +191,7 @@ int AnosimCommand::execute(){
 		//link designMap to rows/columns in distance matrix
 		map<string, vector<int> > origGroupSampleMap;
 		for(int i=0;i<sampleNames.size();i++){
-			string group = designMap->getGroup(sampleNames[i]);
+			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
 				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;

@@ -242,7 +242,7 @@ int ClassifyRFSharedCommand::execute() {
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
         
     //read design file
-    designMap.readDesignMap(designfile);
+    designMap.read(designfile);
     
     string lastLabel = lookup[0]->getLabel();
     set<string> processedLabels;
@@ -346,8 +346,9 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
   
         map<string, int> treatmentToIntMap;
         map<int, string> intToTreatmentMap;
-        for (int  i = 0; i < designMap.getNumGroups(); i++) {
-            string treatmentName = designMap.getNamesOfGroups()[i];
+        vector<string> groups = designMap.getNamesGroups();
+        for (int  i = 0; i < groups.size(); i++) {
+            string treatmentName = groups[i];
             treatmentToIntMap[treatmentName] = i;
             intToTreatmentMap[i] = treatmentName;
         }
@@ -365,7 +366,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         for (int i = 0; i < lookup.size(); i++) {
             string sharedGroupName = lookup[i]->getGroup();
             names.push_back(sharedGroupName);
-            string treatmentName = designMap.getGroup(sharedGroupName);
+            string treatmentName = designMap.get(sharedGroupName);
             
             int j = 0;
             for (; j < lookup[i]->getNumBins(); j++) {

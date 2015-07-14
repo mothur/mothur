@@ -83,9 +83,9 @@ static double hzeta_c[15] = {
 /**************************************************************************************************/
 void CommunityTypeFinder::printSilData(ofstream& out, double chi, vector<double> sils){
     try {
-        out << setprecision (6) << numPartitions << '\t'  << chi << '\t';
+        out << setprecision (6) << numPartitions << '\t'  << chi;
         for (int i = 0; i < sils.size(); i++) {
-            out << sils[i] << '\t';
+            out << '\t' << sils[i];
         }
         out << endl;
         
@@ -99,11 +99,11 @@ void CommunityTypeFinder::printSilData(ofstream& out, double chi, vector<double>
 /**************************************************************************************************/
 void CommunityTypeFinder::printSilData(ostream& out, double chi, vector<double> sils){
     try {
-        out << setprecision (6) << numPartitions << '\t'  << chi << '\t';
-        m->mothurOutJustToLog(toString(numPartitions) + '\t' + toString(chi) + '\t');
+        out << setprecision (6) << numPartitions << '\t'  << chi;
+        m->mothurOutJustToLog(toString(numPartitions) + '\t' + toString(chi));
         for (int i = 0; i < sils.size(); i++) {
-            out << sils[i] << '\t';
-            m->mothurOutJustToLog(toString(sils[i]) + '\t');
+            out << '\t' << sils[i];
+            m->mothurOutJustToLog("\t" + toString(sils[i]));
         }
         out << endl;
         m->mothurOutJustToLog("\n");

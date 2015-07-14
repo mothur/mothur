@@ -527,7 +527,7 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         string spaces = "      ";
         
         //standard 
-        out << "{\n" + spaces + "\"id\":\"" + sharedfile + "-" + lookup[0]->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
+        out << "{\n" + spaces + "\"id\":\"" + m->getSimpleName(sharedfile) + "-" + lookup[0]->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
         out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
         
