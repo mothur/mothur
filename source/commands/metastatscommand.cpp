@@ -459,7 +459,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
                             temp->setLabel(thisLookUp[k]->getLabel());
                             temp->setGroup(thisLookUp[k]->getGroup());
                             newLookup.push_back(temp);
-                            designMapGroups.push_back(designMap->getGroup(thisLookUp[k]->getGroup()));
+                            designMapGroups.push_back(designMap->get(thisLookUp[k]->getGroup()));
                         }
                         
                         //for each bin

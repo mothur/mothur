@@ -9,6 +9,7 @@
 #include "catch.hpp"
 #include "sequence.hpp"
 
+#define private public
 
 TEST_CASE("Testing Sequence Class") {
     Sequence seq;
@@ -44,6 +45,15 @@ TEST_CASE("Testing Sequence Class") {
         
         CHECK(seq.getUnaligned() == "atgcatgc");
     }
+    
+    SECTION("test initialize") {
+        INFO("No data") // Only appears on a FAIL
+        seq.initialize();
+        CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
+        
+        CHECK(seq.getUnaligned() == "");
+    }
+    
     
    //more tests need to be added - just a start to set up testing project and model
 }

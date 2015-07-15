@@ -43,14 +43,14 @@ private:
     int processors;
     set<string> labels;
     
-    int processSmall(string);
-    int processLarge(string);
+    unsigned long long processSmall(string);
+    unsigned long long processLarge(string);
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     
-    int createProcesses(GroupMap*&, string);
-    int driver(unsigned long long, unsigned long long, string, GroupMap*&);
-    int processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
+    unsigned long long createProcesses(GroupMap*&, string);
+    unsigned long long driver(unsigned long long, unsigned long long, string, GroupMap*&);
+    unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
 
     
 };

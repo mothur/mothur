@@ -21,7 +21,7 @@ class TrimOligos {
 	public:
         TrimOligos(int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers
         TrimOligos(int,int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
-        TrimOligos(int,int, int, int, map<int, oligosPair>, map<int, oligosPair>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes
+        TrimOligos(int,int, int, int, map<int, oligosPair>, map<int, oligosPair>, bool); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, hasIndex
 		~TrimOligos();
 	
     
@@ -56,7 +56,7 @@ class TrimOligos {
 	
 	private:
 		int pdiffs, bdiffs, ldiffs, sdiffs;
-        bool paired;
+        bool paired, hasIndex;
 	
 		map<string, int> barcodes;
 		map<string, int> primers;

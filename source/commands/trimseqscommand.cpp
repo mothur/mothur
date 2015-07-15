@@ -682,7 +682,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		bool moreSeqs = 1;
         int numBarcodes = barcodes.size();
 		TrimOligos* trimOligos = NULL;
-        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes); numBarcodes = pairedBarcodes.size(); }
+        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, false); numBarcodes = pairedBarcodes.size(); }
         else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);  }
         
         TrimOligos* rtrimOligos = NULL;
@@ -713,7 +713,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
             }
 
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size(); 
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes, false); numBarcodes = rpairedBarcodes.size();
         }
         
 		while (moreSeqs) {
@@ -1063,11 +1063,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			#endif
 			
 			//report progress
-			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count)+"\n");		}
 		
 		delete trimOligos;
         if (reorient) { delete rtrimOligos; }

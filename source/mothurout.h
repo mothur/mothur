@@ -82,6 +82,7 @@ class MothurOut {
         vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
 		int divideFile(string, int&, vector<string>&);
 		vector<unsigned long long> setFilePosEachLine(string, int&);
+        vector<unsigned long long> setFilePosEachLine(string, unsigned long long&);
 		vector<unsigned long long> setFilePosFasta(string, long long&);
         vector<unsigned long long> setFilePosFasta(string, long long&, char);
         vector<unsigned long long> setFilePosFasta(string, int&);
@@ -106,7 +107,13 @@ class MothurOut {
 		int openInputFile(string, ifstream&);
         int openInputFileBinary(string, ifstream&);
         int openInputFileBinary(string, ifstream&, string);
+    #ifdef USE_BOOST
+        int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
+        int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    #endif
 		int openInputFile(string, ifstream&, string); //no error given
+        vector<bool> allGZFiles(vector<string>&);
+        vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
     
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);

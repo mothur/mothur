@@ -217,7 +217,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
             temp = validParameter.validFile(parameters, "maxtm", false);  if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, maxTM); 
             
-            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { temp = ""; }
+            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { otulabel = ""; }
             if (otulabel == "") {  m->mothurOut("[ERROR]: You must provide an OTU label, aborting.\n"); abort = true; }
             
             temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}

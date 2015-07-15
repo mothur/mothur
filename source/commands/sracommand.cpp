@@ -1267,7 +1267,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         inputfile = fastqfile;
         
         //run sffinfo to parse sff file into individual sampled sff files
-        string commandString = "fastq=" + fastqfile;
+        string commandString = "fasta=f, qfile=f, fastq=" + fastqfile;
         
         commandString += ", oligos=" + oligosfile;
         //add in pdiffs, bdiffs, ldiffs, sdiffs, tdiffs

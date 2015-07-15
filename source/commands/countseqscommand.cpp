@@ -200,7 +200,7 @@ int CountSeqsCommand::execute(){
         map<string, string> variables;
 
         if (namefile != "") {
-            int total = 0;
+            unsigned long long total = 0;
             int start = time(NULL);
             if (outputDir == "") { outputDir = m->hasPath(namefile); }
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
@@ -320,7 +320,7 @@ int CountSeqsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
+unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
     try {
         variables["[distance]"] = lookup[0]->getLabel();
         string outputFileName = getOutputFileName("count", variables);
@@ -354,7 +354,7 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processSmall(string outputFileName){
+unsigned long long CountSeqsCommand::processSmall(string outputFileName){
 	try {
         ofstream out;
         m->openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
@@ -382,7 +382,7 @@ int CountSeqsCommand::processSmall(string outputFileName){
 		out << endl;
         out.close();
         
-        int total = createProcesses(groupMap, outputFileName);
+        unsigned long long total = createProcesses(groupMap, outputFileName);
         
         if (groupfile != "") { delete groupMap; }
         
@@ -394,14 +394,14 @@ int CountSeqsCommand::processSmall(string outputFileName){
 	}
 }
 /**************************************************************************************************/
-int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
+unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
 	try {
 		
 		vector<int> processIDS;
 		int process = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        int numSeqs = 0;
+        unsigned long long numSeqs = 0;
         bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -410,7 +410,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 #else
 		if(processors == 1){ lines.push_back(linePair(0, 1000));  }
         else {
-            int numSeqs = 0;
+            unsigned long long numSeqs = 0;
             positions = m->setFilePosEachLine(namefile, numSeqs);
             if (positions.size() < processors) { processors = positions.size(); }
             
@@ -586,7 +586,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 	}
 }
 /**************************************************************************************************/
-int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
+unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
 	try {
         
         ofstream out;
@@ -601,7 +601,7 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 
         
 		bool done = false;
-        int total = 0;
+        unsigned long long total = 0;
 		while (!done) {
 			if (m->control_pressed) { break; }
 			
@@ -671,7 +671,7 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processLarge(string outputFileName){
+unsigned long long CountSeqsCommand::processLarge(string outputFileName){
 	try {
         set<string> namesOfGroups;
         map<string, int> initial;
@@ -722,7 +722,7 @@ int CountSeqsCommand::processLarge(string outputFileName){
         //open input file
 		ifstream in2;
 		
-		int total = 0;
+		unsigned long long total = 0;
         vector< vector<int> > nameMapCount;
         if (groupfile != "") {
             m->openInputFile(outfile, in2);

@@ -18,6 +18,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
     try {
         m = MothurOut::getInstance();
         paired = false;
+        hasIndex = false;
         
         pdiffs = p;
         bdiffs = b;
@@ -64,7 +65,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
 }
 /********************************************************************/
 //strip, pdiffs, bdiffs, primers, barcodes, revPrimers
-TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br){
+TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br, bool hi){
     try {
         m = MothurOut::getInstance();
         
@@ -73,6 +74,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
         ldiffs = l;
         sdiffs = s;
         paired = true;
+        hasIndex = hi;
         
         maxFBarcodeLength = 0;
         for(map<int,oligosPair>::iterator it=br.begin();it!=br.end();it++){
@@ -147,6 +149,7 @@ TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, v
         primers = pr;
         revPrimer = r;
         paired = false;
+        hasIndex = false;
         
         maxFBarcodeLength = 0;
         for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
@@ -767,10 +770,12 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             
             if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
                 group = it->first;
-                forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
-                forwardQual.trimQScores(foligo.length(), -1);
-                reverseQual.trimQScores(roligo.length(), -1);
+                if (!hasIndex) { //if you are using index file then just matching
+                    forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
+                    reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
+                    forwardQual.trimQScores(foligo.length(), -1);
+                    reverseQual.trimQScores(roligo.length(), -1);
+                }
                 success[0] = 0; success[1] = 0; success[2] = 0; success[3] = 0;
                 break;
             }
@@ -942,10 +947,12 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                     //we have an acceptable match for the forward and reverse, but do they match?
                     if (foundMatch) {
-                        forwardSeq.setUnaligned(rawFSequence.substr(fStart));
-                        reverseSeq.setUnaligned(rawRSequence.substr(rStart));
-                        forwardQual.trimQScores(fStart, -1);
-                        reverseQual.trimQScores(rStart, -1);
+                        if (!hasIndex) { //if you are using index file then just matching
+                            forwardSeq.setUnaligned(rawFSequence.substr(fStart));
+                            reverseSeq.setUnaligned(rawRSequence.substr(rStart));
+                            forwardQual.trimQScores(fStart, -1);
+                            reverseQual.trimQScores(rStart, -1);
+                        }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
                     }else { success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
                 }
