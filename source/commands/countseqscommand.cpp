@@ -196,6 +196,11 @@ int CountSeqsCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        processors=1;
+#endif
 		
         map<string, string> variables;
 
