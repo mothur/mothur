@@ -530,6 +530,23 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
             }
         }
 #else
+        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        #else
+        string extension = m->getExtension(fileInputs[0]);
+        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+        extension = m->getExtension(fileInputs[1]);
+        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+        if (qualOrIndexInputs.size() != 0) {
+            if (qualOrIndexInputs[0] != "NONE") {
+                extension = m->getExtension(qualOrIndexInputs[0]);
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+            }
+            if (qualOrIndexInputs[1] != "NONE") {
+                extension = m->getExtension(qualOrIndexInputs[1]);
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+            }
+        }
+        #endif
         allGZ = false;
 #endif
         
@@ -2834,6 +2851,23 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 }
 #else
                 allGZ=false;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+                string extension = m->getExtension(forward);
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                extension = m->getExtension(reverse);
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                if ((findex != "") && (findex != "NONE")) {
+                        extension = m->getExtension(findex);
+                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                }
+                if ((rindex != "") && (rindex != "NONE")) {
+                        extension = m->getExtension(rindex);
+                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                }
+                
+#endif
+
 #endif
                 pair.push_back(forward);
                 pair.push_back(reverse);
