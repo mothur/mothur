@@ -21,7 +21,8 @@ vector<string> SparccCommand::setParameters(){
         CommandParameter pmethod("method", "Multiple", "relabund-dirichlet", "dirichlet", "", "", "","",false,false); parameters.push_back(pmethod);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors); 
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -406,6 +407,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 	try {
         int numOTUs = sharedVector[0].size();
         vector<vector<float> > pValues;
+        bool recalc = false;
         
         if(processors == 1){
 			pValues = driver(sharedVector, origCorrMatrix, numPermutations);
@@ -453,12 +455,75 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 					
 					exit(0);
 				}else {
-					m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-					for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-					exit(0);
+                    m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    //wait to die
+                    for (int i=0;i<processIDS.size();i++) {
+                        int temp = processIDS[i];
+                        wait(&temp);
+                    }
+                    m->control_pressed = false;
+                    for (int i=0;i<processIDS.size();i++) {
+                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                    }
+                    recalc = true;
+                    break;
 				}
 			}
 			
+            if (recalc) {
+                //test line, also set recalc to true.
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                
+                procIters.clear();
+                int numItersPerProcessor = numPermutations / processors;
+                
+                //divide iters between processes
+                for (int h = 0; h < processors; h++) {
+                    if(h == processors - 1){ numItersPerProcessor = numPermutations - h * numItersPerProcessor; }
+                    procIters.push_back(numItersPerProcessor);
+                }
+                
+                pValues.clear();
+                processIDS.resize(0);
+                process = 1;
+                
+                //loop through and create all the processes you want
+                while (process != processors) {
+                    pid_t pid = fork();
+                    
+                    if (pid > 0) {
+                        processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                        process++;
+                    }else if (pid == 0){
+                        pValues = driver(sharedVector, origCorrMatrix, procIters[process]);
+                        
+                        //pass pvalues to parent
+                        ofstream out;
+                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
+                        m->openOutputFile(tempFile, out);
+                        
+                        //pass values
+                        for (int i = 0; i < pValues.size(); i++) {
+                            for (int j = 0; j < pValues[i].size(); j++) {
+                                out << pValues[i][j] << '\t';
+                            }
+                            out << endl;
+                        }
+                        out << endl;
+                        
+                        out.close();
+                        
+                        exit(0);
+                    }else {
+                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                        exit(0);
+                    }
+                }
+            }
+
+            
 			//do my part
 			pValues = driver(sharedVector, origCorrMatrix, procIters[0]);
 			

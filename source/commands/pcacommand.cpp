@@ -18,7 +18,8 @@ vector<string> PCACommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmetric);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -451,10 +452,8 @@ void PCACommand::output(string fbase, string label, vector<string> name_list, ve
 		pcaData << endl;
 		
 		for(int i=0;i<name_list.size();i++){
-			pcaData << name_list[i] << '\t';
-			for(int j=0;j<numEigenValues;j++){
-				pcaData << G[i][j] << '\t';
-			}
+			pcaData << name_list[i];
+			for(int j=0;j<numEigenValues;j++){  pcaData << '\t' << G[i][j];  }
 			pcaData << endl;
 		}
 	}

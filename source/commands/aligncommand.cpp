@@ -33,7 +33,8 @@ vector<string> AlignCommand::setParameters(){
 		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pflip);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(pthreshold);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
 		vector<string> myArray;
@@ -886,12 +887,20 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
                 recalc = true;
 				break;
 			}
 		}
 		
         if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             vector<unsigned long long> positions;
 			positions = m->divideFile(filename, processors);

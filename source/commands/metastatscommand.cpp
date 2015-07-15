@@ -23,7 +23,8 @@ vector<string> MetaStatsCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -223,9 +224,8 @@ int MetaStatsCommand::execute(){
         if (convertInputToShared) { convertToShared(sharedfile); return 0; }
         /****************************************************/
 		
-		designMap = new GroupMap(designfile);
-		designMap->readDesignMap();
-	
+		designMap = new DesignMap(designfile);
+
 		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
@@ -238,7 +238,7 @@ int MetaStatsCommand::execute(){
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		//make sure sets are all in designMap
 		SharedUtil* util = new SharedUtil(); 
-		vector<string> dGroups = designMap->getNamesOfGroups();
+		vector<string> dGroups = designMap->getCategory();
 		util->setGroups(Sets, dGroups);  
 		delete util;
 		
@@ -339,7 +339,7 @@ int MetaStatsCommand::execute(){
 		delete input; 
 		delete designMap;
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+        if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -364,6 +364,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 				}else{
 					int process = 1;
 					vector<int> processIDS;
+                    bool recalc = false;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 					//loop through and create all the processes you want
 					while (process != processors) {
@@ -376,12 +377,57 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 							driver(lines[process].start, lines[process].end, thisLookUp);
 							exit(0);
 						}else { 
-							m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-							for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-							exit(0);
+                            m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                            //wait to die
+                            for (int i=0;i<processIDS.size();i++) {
+                                int temp = processIDS[i];
+                                wait(&temp);
+                            }
+                            m->control_pressed = false;
+                            recalc = true;
+                            break;
 						}
 					}
 					
+                    if (recalc) {
+                        //test line, also set recalc to true.
+                        //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                        
+                        //redo file divide
+                        lines.clear();
+                        int remainingPairs = namesOfGroupCombos.size();
+                        int startIndex = 0;
+                        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                            int numPairs = remainingPairs; //case for last processor
+                            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+                            startIndex = startIndex + numPairs;
+                            remainingPairs = remainingPairs - numPairs;
+                        }
+                        
+                        processIDS.resize(0);
+                        process = 1;
+                        
+                        //loop through and create all the processes you want
+                        while (process != processors) {
+                            pid_t pid = fork();
+                            
+                            if (pid > 0) {
+                                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                                process++;
+                            }else if (pid == 0){
+                                driver(lines[process].start, lines[process].end, thisLookUp);
+                                exit(0);
+                            }else {
+                                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                                exit(0);
+                            }
+                        }
+                    }
+
+                    
 					//do my part
 					driver(lines[0].start, lines[0].end, thisLookUp);
 		
@@ -413,7 +459,7 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
                             temp->setLabel(thisLookUp[k]->getLabel());
                             temp->setGroup(thisLookUp[k]->getGroup());
                             newLookup.push_back(temp);
-                            designMapGroups.push_back(designMap->getGroup(thisLookUp[k]->getGroup()));
+                            designMapGroups.push_back(designMap->get(thisLookUp[k]->getGroup()));
                         }
                         
                         //for each bin
@@ -498,15 +544,14 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 				
 				//is this group for a set we want to compare??
 				//sorting the sets by putting setB at the back and setA in the front
-				if ((designMap->getGroup(thisGroup) == setB)) {  
+				if ((designMap->get(thisGroup) == setB)) {
 					subset.push_back(thisLookUp[i]);
 					setBCount++;
-				}else if ((designMap->getGroup(thisGroup) == setA)) {
+				}else if ((designMap->get(thisGroup) == setA)) {
 					subset.insert(subset.begin()+setACount, thisLookUp[i]);
 					setACount++;
 				}
 			}
-						
 			if ((setACount == 0) || (setBCount == 0))  { 
 				m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison."); m->mothurOutEndLine(); 
 				outputNames.pop_back();
@@ -603,7 +648,7 @@ int MetaStatsCommand::convertToShared(string filename) {
         ofstream out;
         m->openOutputFile(filename+".shared", out);
         
-        out << "label\tgroup\tnumOTUs\t";
+        out << "label\tgroup\tnumOTUs";
         
         string snumBins = toString(otuCount);
         for (int i = 0; i < otuCount; i++) {
@@ -614,7 +659,7 @@ int MetaStatsCommand::convertToShared(string filename) {
                 for (int h = 0; h < diff; h++) { binLabel += "0"; }
             }
             binLabel += sbinNumber;
-            out << binLabel << '\t';
+            out << '\t' << binLabel;
         }
         out << endl;
         
@@ -640,18 +685,17 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string
         ofstream out;
         m->openOutputFile(thisfilename+".matrix", out);
         
-        out << "\t";
-        for (int i = 0; i < subset.size()-1; i++) {
-            out << subset[i]->getGroup() << '\t';
+        for (int i = 0; i < subset.size(); i++) {
+            out << '\t' << subset[i]->getGroup();
         }
-        out << subset[subset.size()-1]->getGroup() << endl;
+        out << endl;
         
         for (int i = 0; i < subset[0]->getNumBins(); i++) {
-            out << m->currentSharedBinLabels[i] << '\t';
-            for (int j = 0; j < subset.size()-1; j++) {
-                out << subset[j]->getAbundance(i) << '\t';
+            out << m->currentSharedBinLabels[i];
+            for (int j = 0; j < subset.size(); j++) {
+                out  << '\t' << subset[j]->getAbundance(i);
             }
-            out << subset[subset.size()-1]->getAbundance(i) << endl;
+            out << endl;
         }
         out.close();
         

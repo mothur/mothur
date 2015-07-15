@@ -41,7 +41,8 @@ vector<string> LefseCommand::setParameters(){
 
         
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -1159,12 +1160,12 @@ int LefseCommand::makeShared(int numDesignLines) {
         }
         
         ofstream out;
-        m->openOutputFile(sharedfile+".design", out); out << "group" << '\t';
-        for (int j = 0; j < lines.size(); j++) { out << lines[j][0] << '\t'; } out << endl;
+        m->openOutputFile(sharedfile+".design", out); out << "group";
+        for (int j = 0; j < lines.size(); j++) { out  << '\t' << lines[j][0]; } out << endl;
         for (int j = 1; j < lines[0].size(); j++) {
-            out <<(j-1) << '\t';
+            out <<(j-1);
             for (int i = 0; i < lines.size(); i++) {
-                 out << lines[i][j] << '\t';
+                 out  << '\t' << lines[i][j];
             }
             out << endl;
         }

@@ -14,7 +14,8 @@ vector<string> RemoveDistsCommand::setParameters(){
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "PhylipColumn", "none","phylip",false,false,true); parameters.push_back(pphylip);
         CommandParameter pcolumn("column", "InputTypes", "", "", "none", "PhylipColumn", "none","column",false,false,true); parameters.push_back(pcolumn);	
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -320,14 +321,14 @@ int RemoveDistsCommand::readPhylip(){
                 bool ignoreRow = false;
                 
                 if (names.count(name) != 0) { ignoreRow = true; count++; }
-                else{ out << name << '\t'; keptCount++; }
+                else{ out << name; keptCount++; }
                 
                 for(int j=0;j<i;j++){
                     if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
-                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
                     }
                 }
                 if (!ignoreRow) { out << endl; }
@@ -340,14 +341,14 @@ int RemoveDistsCommand::readPhylip(){
                 bool ignoreRow = false;
                 
                 if (names.count(name) != 0) { ignoreRow = true; count++; }
-                else{ out << name << '\t'; keptCount++; }
+                else{ out << name; keptCount++; }
                 
                 for(int j=0;j<nseqs;j++){
                     if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
-                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
                     }
                 }
                 if (!ignoreRow) { out << endl; }

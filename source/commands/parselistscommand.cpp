@@ -16,7 +16,8 @@ vector<string> ParseListCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "CountGroup", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -357,7 +358,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			groupNumBins[it3->first] = 0;
 			groupVector[it3->first] = "";
-            groupLabels[it3->first] = "label\tnumOtus\t";
+            groupLabels[it3->first] = "label\tnumOtus";
 		}
 
 		vector<string> binLabels = thisList->getLabels();
@@ -403,8 +404,8 @@ int ParseListCommand::parse(ListVector* thisList) {
 			
 			//print parsed bin info to files
 			for (itGroup = groupBins.begin(); itGroup != groupBins.end(); itGroup++) {
-				groupVector[itGroup->first] +=  itGroup->second + '\t';
-                groupLabels[itGroup->first] +=  binLabels[i] + '\t';
+				groupVector[itGroup->first] +=  '\t' + itGroup->second;
+                groupLabels[itGroup->first] +=  '\t' + binLabels[i];
 			}
 		
 		}
@@ -420,7 +421,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 		//end list vector
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
             (*(filehandles[it3->first])) << groupLabels[it3->first] << endl;
-			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << '\t' << groupVector[it3->first] << endl;  // label numBins  listvector for that group
+			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
             (*(filehandles[it3->first])).close();
             delete it3->second;
 		}

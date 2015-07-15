@@ -23,7 +23,8 @@ vector<string> PrimerDesignCommand::setParameters(){
         CommandParameter potunumber("otulabel", "String", "", "", "", "", "","",false,true,true); parameters.push_back(potunumber);
         CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
         CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -216,7 +217,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
             temp = validParameter.validFile(parameters, "maxtm", false);  if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, maxTM); 
             
-            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { temp = ""; }
+            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { otulabel = ""; }
             if (otulabel == "") {  m->mothurOut("[ERROR]: You must provide an OTU label, aborting.\n"); abort = true; }
             
             temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
@@ -352,14 +353,14 @@ int PrimerDesignCommand::execute(){
         ofstream outListTemp;
         m->openOutputFile(newListFile+".temp", outListTemp);
         
-        outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size()) << '\t';
-        string headers = "label\tnumOtus\t";
+        outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size());
+        string headers = "label\tnumOtus";
         for (int j = 0; j < list->getNumBins(); j++) {
             if (m->control_pressed) { break; }
             //good otus
             if (otuToRemove.count(j) == 0) {  
                 string bin = list->get(j);
-                if (bin != "") {  outListTemp << bin << '\t';  headers += binLabels[j] + '\t'; }
+                if (bin != "") {  outListTemp << '\t' << bin;  headers += '\t' + binLabels[j]; }
             }
         }
         outListTemp << endl;
@@ -541,6 +542,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		int process = 1;
         set<int> otusToRemove;
         int numBinsProcessed = 0;
+        bool recalc = false;
 		
 		//sanity check
         int numBins = conSeqs.size();
@@ -582,11 +584,70 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) { m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            lines.clear();
+            int numOtusPerProcessor = numBins / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numOtusPerProcessor;
+                int endIndex = (i+1) * numOtusPerProcessor;
+                if(i == (processors - 1)){	endIndex = numBins; 	}
+                lines.push_back(linePair(startIndex, endIndex));
+            }
+            
+            processIDS.clear();
+            process = 1;
+            otusToRemove.clear();
+            numBinsProcessed = 0;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    //clear old file because we append in driver
+                    m->mothurRemove(newSummaryFile + m->mothurGetpid(process) + ".temp");
+                    
+                    otusToRemove = driver(newSummaryFile + m->mothurGetpid(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".otus2Remove.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << numBinsProcessed << endl;
+                    outTemp << otusToRemove.size() << endl;
+                    for (set<int>::iterator it = otusToRemove.begin(); it != otusToRemove.end(); it++) { outTemp << *it << endl; }
+                    outTemp.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		//do my part
 		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
@@ -812,6 +873,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 		vector<int> processIDS;
 		int process = 1;
         unsigned long int fastaCount = 0;
+        bool recalc = false;
  		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
@@ -852,11 +914,72 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
                 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));
+                }
+                recalc = true;
+                break;
+
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            positions.clear(); lines.clear();
+            positions = m->divideFile(fastafile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(fastaLinePair(positions[i], positions[(i+1)]));	}
+            
+            counts.clear(); otuCounts.clear(); processIDS.clear();
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".cons_counts.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << fastaCount << endl;
+                    //pass counts
+                    outTemp << counts.size() << endl;
+                    for (int i = 0; i < counts.size(); i++) {
+                        outTemp << counts[i].size() << endl;
+                        for (int j = 0; j < counts[i].size(); j++) {
+                            for (int k = 0; k < 5; k++) {  outTemp << counts[i][j][k] << '\t'; }
+                            outTemp << endl;
+                        }
+                    }
+                    //pass otuCounts
+                    outTemp << otuCounts.size() << endl;
+                    for (int i = 0; i < otuCounts.size(); i++) { outTemp << otuCounts[i] << '\t'; }
+                    outTemp << endl;
+                    outTemp.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		//do my part
 		counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[0].start, lines[0].end);

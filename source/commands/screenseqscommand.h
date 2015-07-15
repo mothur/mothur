@@ -353,7 +353,7 @@ static DWORD WINAPI MyAlignsThreadFunction(LPVOID lpParam){
 			if (pDataArray->m->control_pressed) { in.close();  pDataArray->count = 1; return 1; }
 
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; pDataArray->m->gobble(in);
-            cout << i << '\t' << name << endl;
+            //cout << i << '\t' << name << endl;
             int num = 1;
             if ((pDataArray->namefile != "") || (pDataArray->countfile !="")){
                 //make sure this sequence is in the namefile, else error 

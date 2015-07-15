@@ -25,8 +25,10 @@ vector<string> ClassifyOtuCommand::setParameters(){
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
 		CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "","",false,true); parameters.push_back(pcutoff);
+        CommandParameter pthreshold("threshold", "Number", "", "0", "", "", "","",false,true); parameters.push_back(pthreshold);
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pprobs);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -55,9 +57,10 @@ string ClassifyOtuCommand::getHelpString(){
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
         helpString += "The persample parameter allows you to find a consensus taxonomy for each group. Default=f\n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
-		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
+		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your otu taxonomy output.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
 		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";
-		helpString += "The classify.otu command should be in the following format: classify.otu(taxonomy=yourTaxonomyFile, list=yourListFile, name=yourNamesFile, label=yourLabels).\n";
+        helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
+        helpString += "The classify.otu command should be in the following format: classify.otu(taxonomy=yourTaxonomyFile, list=yourListFile, name=yourNamesFile, label=yourLabels).\n";
 		helpString += "Example classify.otu(taxonomy=abrecovery.silva.full.taxonomy, list=abrecovery.fn.list, label=0.10).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n";
 		return helpString;
@@ -249,7 +252,10 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "51"; }
-			m->mothurConvert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff);
+            
+            temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0"; }
+            m->mothurConvert(temp, threshold);
 			
 			temp = validParameter.validFile(parameters, "probs", false);					if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
@@ -297,7 +303,11 @@ int ClassifyOtuCommand::execute(){
         else {  ct = NULL;    }
         
 		//read taxonomy file and save in map for easy access in building bin trees
-		m->readTax(taxfile, taxMap);
+        bool removeConfidences = false;
+        if (threshold == 0) { removeConfidences = true; }
+		m->readTax(taxfile, taxMap, removeConfidences);
+        
+        if (threshold != 0) {  processTaxMap();  }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -755,6 +765,75 @@ string ClassifyOtuCommand::addUnclassifieds(string tax, int maxlevel) {
 		m->errorOut(e, "ClassifyOtuCommand", "addUnclassifieds");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+int ClassifyOtuCommand::processTaxMap() {
+    try{
+        
+        for (map<string, string>::iterator it = taxMap.begin(); it != taxMap.end(); it++) {
+            
+            if (m->control_pressed) { break; }
+            
+            vector<string> taxons;
+            string tax = it->second;
+            int taxLength = tax.length();
+            string taxon = "";
+            int spot = 0;
+            
+            for(int i=0;i<taxLength;i++){
+                
+                
+                if(tax[i] == ';'){
+                    
+                    int openParen = taxon.find_last_of('(');
+                    int closeParen = taxon.find_last_of(')');
+                    
+                    string newtaxon, confidence;
+                    if ((openParen != string::npos) && (closeParen != string::npos)) {
+                        string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
+                        if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                            newtaxon = taxon.substr(0, openParen); //rip off confidence
+                            confidence = taxon.substr((openParen+1), (closeParen-openParen-1));
+                        }else { //its part of the taxon
+                            newtaxon = taxon;
+                            confidence = "0";
+                        }
+                    }else{
+                        newtaxon = taxon;
+                        confidence = "-1";
+                    }
+                    float con = 0;
+                    convert(confidence, con);
+                    
+                    if (con == -1) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
+                    else if ( con < threshold)  { spot = i; break; } //below threshold, set all to unclassified
+                    else {} //acceptable, move on
+                    taxons.push_back(taxon);
+                    
+                    taxon = "";
+                }
+                else{
+                    taxon += tax[i];
+                }
+                
+            }
+            
+            if (spot != 0) {
+                string newTax = "";
+                for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
+                for (int i = spot; i < taxLength; i++) {
+                    if(tax[i] == ';'){   newTax += "unclassified;"; }
+                    m->removeConfidences(newTax);
+                    it->second = newTax;
+                }
+            }else { m->removeConfidences(tax); it->second = tax; } //leave tax alone
+        }
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifyOtuCommand", "processTaxMap");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

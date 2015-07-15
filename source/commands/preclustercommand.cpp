@@ -19,9 +19,16 @@ vector<string> PreClusterCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+        CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+        CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+        CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+        CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+
         CommandParameter ptopdown("topdown", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptopdown);
 
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -45,6 +52,11 @@ string PreClusterCommand::getHelpString(){
         helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
         helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meaning largest to smallest.\n";
+        helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+        helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
+        helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+        helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
+        helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
@@ -216,6 +228,25 @@ PreClusterCommand::PreClusterCommand(string option) {
             temp = validParameter.validFile(parameters, "topdown", false);		if(temp == "not found"){  temp = "T"; }
 			topdown = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
+            m->mothurConvert(temp, match);
+            
+            temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
+            m->mothurConvert(temp, misMatch);
+            if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
+            
+            temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
+            m->mothurConvert(temp, gapOpen);
+            if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
+            
+            temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
+            m->mothurConvert(temp, gapExtend);
+            if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
+
+            align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
+            
+            method = "unaligned";
+            
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
@@ -238,6 +269,16 @@ int PreClusterCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
+        
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 1000);	}
+        else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);			}
+        else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+        else if(align == "noalign")		{	alignment = new NoAlign();													}
+        else {
+            m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+            m->mothurOutEndLine();
+            alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
+        }
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
         map<string, string> variables; 
@@ -296,7 +337,7 @@ int PreClusterCommand::execute(){
                 m->renameFile(filenames["fasta"][0], newFastaFile);
                 m->renameFile(filenames["name"][0], newNamesFile); 
 			}
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}	 return 0; }
+            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}	 delete alignment; return 0; }
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
 				
 		}else {
@@ -306,15 +347,15 @@ int PreClusterCommand::execute(){
 			//reads fasta file and return number of seqs
 			int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 		
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
 	
-			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
-			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); return 0;  }
+			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); delete alignment; return 0;  }
+			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); delete alignment; return 0;  }
 			
 			int count = process(newMapFile);
 			outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }	
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
 			
 			m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
@@ -324,7 +365,9 @@ int PreClusterCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
 		}
 				
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
+        
+        delete alignment;
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -403,14 +446,26 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
                 
 				exit(0);
 			}else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process; //successful fork()'s
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".outputNames.temp"));
+                }
                 recalc = true;
-				break;
+                break;
 			}
 		}
         
         if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".outputNames.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
             lines.clear();
             num = 0;
             processIDS.resize(0);
@@ -495,7 +550,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, topdown, i);
+			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, topdown, i, method, align, match, misMatch, gapOpen, gapExtend);
 			pDataArray.push_back(tempPreCluster);
 			processIDS.push_back(i);
 			
@@ -574,7 +629,7 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			
 			if (m->control_pressed) {   return 0; }
 			
-			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); m->control_pressed = true; return 0;  }
+            if (method == "aligned") { if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); m->control_pressed = true; return 0;  } }
 			
 			int count= process(newMFile+groups[i]+".map");
 			outputNames.push_back(newMFile+groups[i]+".map"); outputTypes["map"].push_back(newMFile+groups[i]+".map");
@@ -643,7 +698,7 @@ int PreClusterCommand::process(string newMapFile){
                     //remove from active list 
                     alignSeqs[i].active = 0;
                     
-                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
+                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
                     
                 }//end if active i
                 if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
@@ -739,8 +794,10 @@ int PreClusterCommand::readFASTA(){
 		}
 		inFasta.close();
         
-        if (lengths.size() > 1) { m->control_pressed = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
-        else if (lengths.size() == 1) { length = *(lengths.begin()); }
+        if (lengths.size() > 1) { method = "unaligned"; }
+        else if (lengths.size() == 1) {  method = "aligned"; }
+        
+        length = *(lengths.begin());
         
 		return alignSeqs.size();
 	}
@@ -795,8 +852,10 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 			}
 		}
     
-        if (lengths.size() > 1) { error = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
-        else if (lengths.size() == 1) { length = *(lengths.begin()); }
+        if (lengths.size() > 1) { method = "unaligned"; }
+        else if (lengths.size() == 1) {  method = "aligned"; }
+        
+        length = *(lengths.begin());
         
 		//sanity check
 		if (error) { m->control_pressed = true; }
@@ -818,12 +877,36 @@ int PreClusterCommand::calcMisMatches(string seq1, string seq2){
 	try {
 		int numBad = 0;
 		
-		for (int i = 0; i < seq1.length(); i++) {
-			//do they match
-			if (seq1[i] != seq2[i]) { numBad++; }
-			if (numBad > diffs) { return length;  } //to far to cluster
-		}
-		
+        if (method == "unaligned") {
+            //align to eachother
+            Sequence seqI("seq1", seq1);
+            Sequence seqJ("seq2", seq2);
+            
+            //align seq2 to seq1 - less abundant to more abundant
+            alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
+            seq2 = alignment->getSeqAAln();
+            seq1 = alignment->getSeqBAln();
+            
+            //chop gap ends
+            int startPos = 0;
+            int endPos = seq2.length()-1;
+            for (int i = 0; i < seq2.length(); i++) {  if (isalpha(seq2[i])) { startPos = i; break; } }
+            for (int i = seq2.length()-1; i >= 0; i--) {  if (isalpha(seq2[i])) { endPos = i; break; } }
+            
+            //count number of diffs
+            for (int i = startPos; i <= endPos; i++) {
+                if (seq2[i] != seq1[i]) { numBad++; }
+                if (numBad > diffs) { return length;  } //to far to cluster
+            }
+
+        }else {
+            //count diffs
+            for (int i = 0; i < seq1.length(); i++) {
+                //do they match
+                if (seq1[i] != seq2[i]) { numBad++; }
+                if (numBad > diffs) { return length;  } //to far to cluster
+            }
+        }
 		return numBad;
 	}
 	catch(exception& e) {

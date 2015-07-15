@@ -11,6 +11,7 @@
 #include "groupmap.h"
 #include "readphylipvector.h"
 #include "sharedutilities.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> HomovaCommand::setParameters(){	
@@ -20,7 +21,8 @@ vector<string> HomovaCommand::setParameters(){
         CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
 		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -182,8 +184,7 @@ int HomovaCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new GroupMap(designFileName);
-		designMap->readDesignMap();
+		designMap = new DesignMap(designFileName);
 		
 		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
 		
@@ -193,14 +194,14 @@ int HomovaCommand::execute(){
 		
         if (Sets.size() != 0) { //user selected sets, so we want to remove the samples not in those sets
             SharedUtil util; 
-            vector<string> dGroups = designMap->getNamesOfGroups();
+            vector<string> dGroups = designMap->getCategory();
             util.setGroups(Sets, dGroups);  
             
             for(int i=0;i<distanceMatrix.size();i++){
                 
                 if (m->control_pressed) { delete designMap; return 0; }
                 
-                string group = designMap->getGroup(sampleNames[i]);
+                string group = designMap->get(sampleNames[i]);
                 
                 if (group == "not found") {
                     m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
@@ -225,7 +226,7 @@ int HomovaCommand::execute(){
 		//link designMap to rows/columns in distance matrix
 		map<string, vector<int> > origGroupSampleMap;
 		for(int i=0;i<sampleNames.size();i++){
-			string group = designMap->getGroup(sampleNames[i]);
+			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
 				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;

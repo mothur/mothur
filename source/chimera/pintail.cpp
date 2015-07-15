@@ -214,8 +214,8 @@ int Pintail::doPrep() {
 				}
 				
 				//output quan value
-				outputString += toString(i+1) + "\t";				
-				for (int u = 0; u < temp.size(); u++) {   outputString += toString(temp[u]) + "\t"; }
+				outputString += toString(i+1);
+				for (int u = 0; u < temp.size(); u++) {   outputString += "\t" + toString(temp[u]); }
 				outputString += "\n";
 				
 				quantiles[i] = temp;
@@ -270,14 +270,14 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 			m->mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); m->mothurOutEndLine();
 			outAcc << querySeq->getName() << endl;
 		}
-		out << "Observed\t";
+		out << "Observed";
 		
-		for (int j = 0; j < obsDistance.size(); j++) {  out << obsDistance[j] << '\t';  }
+		for (int j = 0; j < obsDistance.size(); j++) {  out  << '\t' << obsDistance[j];  }
 		out << endl;
 		
-		out << "Expected\t";
+		out << "Expected";
 		
-		for (int m = 0; m < expectedDistance.size(); m++) {  out << expectedDistance[m] << '\t';  }
+		for (int m = 0; m < expectedDistance.size(); m++) {  out << '\t' << expectedDistance[m] ;  }
 		out << endl;
 		
 		return *querySeq;
@@ -322,14 +322,14 @@ Sequence Pintail::print(MPI_File& out, MPI_File& outAcc) {
 
 			return *querySeq;
 		}
-		outputString += "Observed\t";
+		outputString += "Observed";
 		
-		for (int j = 0; j < obsDistance.size(); j++) {  outputString += toString(obsDistance[j]) + "\t";  }
+		for (int j = 0; j < obsDistance.size(); j++) {  outputString +=  "\t" + toString(obsDistance[j]);  }
 		outputString += "\n";
 		
-		outputString += "Expected\t";
+		outputString += "Expected";
 		
-		for (int m = 0; m < expectedDistance.size(); m++) {  outputString += toString(expectedDistance[m]) + "\t";  }
+		for (int m = 0; m < expectedDistance.size(); m++) {  outputString += "\t" +  toString(expectedDistance[m]);  }
 		outputString += "\n";
 		
 		MPI_Status status;
@@ -532,6 +532,7 @@ void Pintail::createProcessesQuan() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
+        bool recalc = false;
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -551,9 +552,9 @@ void Pintail::createProcessesQuan() {
 								
 				//output observed distances
 				for (int i = 0; i < quantilesMembers.size(); i++) {
-					out << quantilesMembers[i].size() << '\t';
+					out << quantilesMembers[i].size();
 					for (int j = 0; j < quantilesMembers[i].size(); j++) {
-						out << quantilesMembers[i][j] << '\t';
+						out << '\t' << quantilesMembers[i][j];
 					}
 					out << endl;
 				}
@@ -562,11 +563,73 @@ void Pintail::createProcessesQuan() {
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            for (int i = 0; i < templateLines.size(); i++) {  delete templateLines[i];  }  templateLines.clear();
+            for (int i = 0; i < processors; i++) {
+                templateLines.push_back(new linePair());
+                templateLines[i]->start = int (sqrt(float(i)/float(processors)) * templateSeqs.size());
+                templateLines[i]->end = int (sqrt(float(i+1)/float(processors)) * templateSeqs.size());
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);
+                    process++;
+                }else if (pid == 0){
+                    
+                    quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
+                    
+                    //write out data to file so parent can read it
+                    ofstream out;
+                    string s = m->mothurGetpid(process) + ".temp";
+                    m->openOutputFile(s, out);
+                    
+                    //output observed distances
+                    for (int i = 0; i < quantilesMembers.size(); i++) {
+                        out << quantilesMembers[i].size();
+                        for (int j = 0; j < quantilesMembers[i].size(); j++) {
+                            out << '\t' << quantilesMembers[i][j];
+                        }
+                        out << endl;
+                    }
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//parent does its part
 		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[0]->start, templateLines[0]->end);

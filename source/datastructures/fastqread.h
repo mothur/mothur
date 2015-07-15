@@ -14,6 +14,7 @@
 #include "sequence.hpp"
 #include "qualityscores.h"
 
+
 /* This class is a representation of a fastqread.  If no format is given, defaults to illumina1.8+.
  
  @M00704:50:000000000-A3G0K:1:1101:15777:1541 2:N:0:0
@@ -30,6 +31,9 @@ public:
     FastqRead(string f); 
     FastqRead(string f, string n, string s, vector<int> sc); 
     FastqRead(ifstream&, bool&, string f);
+    #ifdef USE_BOOST
+    FastqRead(boost::iostreams::filtering_istream&, bool&, string f);
+    #endif
     ~FastqRead() {}
     
     string getName() { return name; }

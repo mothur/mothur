@@ -9,6 +9,9 @@
 
 #include "referencedb.h"
 
+//needed for testing project
+//ReferenceDB* ReferenceDB::myInstance;
+
 /******************************************************/
 ReferenceDB* ReferenceDB::getInstance()  {
 	 if(myInstance == NULL) {

@@ -1,6 +1,6 @@
 /*
  *  commandfactory.cpp
- *  
+ *
  *
  *  Created by Pat Schloss on 10/25/08.
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
@@ -153,6 +153,11 @@
 #include "mergesfffilecommand.h"
 #include "getmimarkspackagecommand.h"
 #include "mimarksattributescommand.h"
+#include "setseedcommand.h"
+#include "makefilecommand.h"
+
+//needed for testing project
+//CommandFactory* CommandFactory::_uniqueInstance;
 
 /*******************************************************/
 
@@ -167,39 +172,39 @@ CommandFactory* CommandFactory::getInstance() {
 
 /***********************************************************/
 //note: This class is resposible for knowing which commands are mpiEnabled,
-//If a command is not enabled only process 0 will execute the command. 
-//This avoids redundant outputs on pieces of code we have not paralellized. 
-//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open. 
+//If a command is not enabled only process 0 will execute the command.
+//This avoids redundant outputs on pieces of code we have not paralellized.
+//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open.
 //example:  commands["dist.seqs"] = "MPIEnabled";
 
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
-	
+
 	command = new NoCommand(s);
 	shellcommand = new NoCommand(s);
 	pipecommand = new NoCommand(s);
-	
+
 	outputDir = ""; inputDir = "";
 	logFileName = "";
 	append = false;
-	
+
 	//initialize list of valid commands
-	commands["make.shared"]			= "make.shared"; 
-	commands["bin.seqs"]			= "bin.seqs"; 
+	commands["make.shared"]			= "make.shared";
+	commands["bin.seqs"]			= "bin.seqs";
 	commands["get.oturep"]			= "get.oturep";
-	commands["cluster"]				= "cluster"; 
-	commands["unique.seqs"]			= "unique.seqs"; 
+	commands["cluster"]				= "cluster";
+	commands["unique.seqs"]			= "unique.seqs";
 	commands["dist.shared"]			= "dist.shared";
-	commands["collect.single"]		= "collect.single"; 
-	commands["collect.shared"]		= "collect.shared"; 
-	commands["rarefaction.single"]	= "rarefaction.single"; 
-	commands["rarefaction.shared"]	= "rarefaction.shared"; 
-	commands["summary.single"]		= "summary.single"; 
-	commands["summary.shared"]		= "summary.shared"; 
+	commands["collect.single"]		= "collect.single";
+	commands["collect.shared"]		= "collect.shared";
+	commands["rarefaction.single"]	= "rarefaction.single";
+	commands["rarefaction.shared"]	= "rarefaction.shared";
+	commands["summary.single"]		= "summary.single";
+	commands["summary.shared"]		= "summary.shared";
 	commands["parsimony"]			= "parsimony";
-	commands["unifrac.weighted"]	= "unifrac.weighted"; 
-	commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
+	commands["unifrac.weighted"]	= "unifrac.weighted";
+	commands["unifrac.unweighted"]	= "unifrac.unweighted";
 	commands["libshuff"]			= "libshuff";
 	commands["tree.shared"]			= "tree.shared";
 	commands["heatmap.bin"]			= "heatmap.bin";
@@ -220,7 +225,7 @@ CommandFactory::CommandFactory(){
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.otulist"]			= "get.otulist";
-	commands["hcluster"]			= "hcluster"; 
+	commands["hcluster"]			= "hcluster";
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
@@ -275,7 +280,7 @@ CommandFactory::CommandFactory(){
 	commands["clear.memory"]		= "clear.memory";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
-	commands["classify.seqs"]		= "MPIEnabled"; 
+	commands["classify.seqs"]		= "MPIEnabled";
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
 	commands["align.seqs"]			= "MPIEnabled";
@@ -310,10 +315,10 @@ CommandFactory::CommandFactory(){
     commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
-	commands["quit"]				= "MPIEnabled"; 
+	commands["quit"]				= "MPIEnabled";
     commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
-    commands["filter.shared"]		= "filter.shared"; 
+    commands["filter.shared"]		= "filter.shared";
     commands["primer.design"]		= "primer.design";
     commands["get.dists"]           = "get.dists";
     commands["remove.dists"]        = "remove.dists";
@@ -329,7 +334,9 @@ CommandFactory::CommandFactory(){
     commands["merge.sfffiles"]      = "merge.sfffiles";
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     commands["mimarks.attributes"]  = "mimarks.attributes";
-    
+    commands["make.file"]           = "make.file";
+    commands["set.seed"]            = "set.seed";
+
 
 }
 /***********************************************************/
@@ -338,7 +345,7 @@ CommandFactory::CommandFactory(){
 bool CommandFactory::MPIEnabled(string commandName) {
 	bool mpi = false;
 	it = commands.find(commandName);
-	if (it != commands.end()) { 
+	if (it != commands.end()) {
 		if (it->second == "MPIEnabled") { return true; }
 	}
 	return mpi;
@@ -357,39 +364,66 @@ CommandFactory::~CommandFactory(){
 /***********************************************************/
 int CommandFactory::checkForRedirects(string optionString) {
     try {
-        
+
         int pos = optionString.find("outputdir");
         if (pos != string::npos) { //user has set outputdir in command option string
             string outputOption = "";
             bool foundEquals = false;
             for(int i=pos;i<optionString.length();i++){
-                if(optionString[i] == ',')       { break;               }		
+                if(optionString[i] == ',')       { break;               }
                 else if(optionString[i] == '=')  { foundEquals = true;	}
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
-            if(m->dirCheck(outputOption)){ 
+            if(m->mkDir(outputOption)){
                 setOutputDirectory(outputOption); 
                 m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
             }
         }
-        
+
         pos = optionString.find("inputdir");
         if (pos != string::npos) { //user has set inputdir in command option string
             string intputOption = "";
             bool foundEquals = false;
             for(int i=pos;i<optionString.length();i++){
-                if(optionString[i] == ',')       { break;               }		
+                if(optionString[i] == ',')       { break;               }
                 else if(optionString[i] == '=')  { foundEquals = true;	}
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            if(m->dirCheck(intputOption)){ 
+            if(m->dirCheck(intputOption)){
                 setInputDirectory(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
             }
         }
-        
+
+        pos = optionString.find("seed");
+        if (pos != string::npos) { //user has set inputdir in command option string
+            string intputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   intputOption += optionString[i]; }
+            }
+            if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
+            bool seed = false; int random;
+            if (intputOption == "clear") {
+                random = time(NULL);
+                seed = true;
+            }else {
+                if (m->isInteger(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
+            }
+
+            if (seed)  {
+                srand(random);
+                m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
+            }
+
+        }
+
+
         return 0;
 	}
 	catch(exception& e) {
@@ -403,23 +437,23 @@ int CommandFactory::checkForRedirects(string optionString) {
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
-        
+
 		delete command;   //delete the old command
-        
+
         checkForRedirects(optionString);
-        		
+
 		//user has opted to redirect output from dir where input files are located to some other place
-		if (outputDir != "") { 
+		if (outputDir != "") {
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
 			else { optionString += "outputdir=" + outputDir; }
 		}
-		
+
 		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (inputDir != "") { 
+		if (inputDir != "") {
 			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
 			else { optionString += "inputdir=" + inputDir; }
 		}
-		
+
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
@@ -563,6 +597,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
         else if(commandName == "get.mimarkspackage")    {	command = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
+        else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
+        else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -579,21 +615,21 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
 		delete pipecommand;   //delete the old command
-		
+
         checkForRedirects(optionString);
-        
+
 		//user has opted to redirect output from dir where input files are located to some other place
-		if (outputDir != "") { 
+		if (outputDir != "") {
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
 			else { optionString += "outputdir=" + outputDir; }
 		}
-		
+
 		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (inputDir != "") { 
+		if (inputDir != "") {
 			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
 			else { optionString += "inputdir=" + inputDir; }
 		}
-		
+
 		if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	pipecommand = new ParsimonyCommand(optionString);				}
@@ -736,6 +772,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "classify.svm")          {   pipecommand = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "get.mimarkspackage")    {	pipecommand = new GetMIMarksPackageCommand(optionString);       }
         else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
+        else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
+        else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -752,7 +790,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete shellcommand;   //delete the old command
-		
+
 		if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
 		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
 		else if(commandName == "parsimony")				{	shellcommand = new ParsimonyCommand();				}
@@ -894,7 +932,9 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
         else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
         else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
-        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();       }
+        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
+        else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
+        else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
@@ -912,7 +952,7 @@ Command* CommandFactory::getCommand(){
 
 		string s = "";
 	    command = new NoCommand(s);
-	
+
 		return command;
 	}
 	catch(exception& e) {
@@ -922,8 +962,8 @@ Command* CommandFactory::getCommand(){
 }
 ***********************************************************************/
 bool CommandFactory::isValidCommand(string command) {
-	try {	
-	
+	try {
+
 		//is the command in the map
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
@@ -935,7 +975,7 @@ bool CommandFactory::isValidCommand(string command) {
 			m->mothurOutEndLine();
 			return false;
 		}
-		
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CommandFactory", "isValidCommand");
@@ -944,15 +984,15 @@ bool CommandFactory::isValidCommand(string command) {
 }
 /***********************************************************************/
 bool CommandFactory::isValidCommand(string command, string noError) {
-	try {	
-	
+	try {
+
 		//is the command in the map
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
 			return false;
 		}
-		
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CommandFactory", "isValidCommand");
@@ -961,7 +1001,7 @@ bool CommandFactory::isValidCommand(string command, string noError) {
 }
 /***********************************************************************/
 void CommandFactory::printCommands(ostream& out) {
-	try {	
+	try {
 		out << "Valid commands are: ";
 		for (it = commands.begin(); it != commands.end(); it++) {
 			out << it->first << ",";
@@ -983,9 +1023,9 @@ void CommandFactory::printCommandsCategories(ostream& out) {
         map<string, string>::iterator itCat;
         //loop through each command outputting info
         for (it = commands.begin(); it != commands.end(); it++) {
-    
+
             Command* thisCommand = getCommand(it->first);
-    
+
             //don't add hidden commands
             if (thisCommand->getCommandCategory() != "Hidden") {
                 itCat = categories.find(thisCommand->getCommandCategory());
@@ -996,7 +1036,7 @@ void CommandFactory::printCommandsCategories(ostream& out) {
                 }
             }
         }
-        
+
         for (itCat = categories.begin(); itCat != categories.end(); itCat++) {
             out << itCat->first << " commmands include: " << itCat->second << endl;
         }
@@ -1006,10 +1046,6 @@ void CommandFactory::printCommandsCategories(ostream& out) {
 		m->errorOut(e, "CommandFactory", "printCommandsCategories");
 		exit(1);
 	}
-}      
+}
 
 /***********************************************************************/
-
-
-
-

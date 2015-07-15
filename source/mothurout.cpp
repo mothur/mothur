@@ -9,6 +9,8 @@
 
 #include "mothurout.h"
 
+//needed for testing project
+//MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
@@ -428,6 +430,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
                     outputFile << output;
                     logger() << output;
                 }
+                
             }
 
 			
@@ -876,6 +879,81 @@ bool MothurOut::dirCheck(string& dirName){
 	}	
     
 }
+/***********************************************************************/
+
+bool MothurOut::dirCheck(string& dirName, string noError){
+    try {
+        
+        if (dirName == "") { return false; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        //add / to name if needed
+        string lastChar = dirName.substr(dirName.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { dirName += "/"; }
+#else
+        if (lastChar != "\\") { dirName += "\\"; }
+#endif
+        
+        //test to make sure directory exists
+        dirName = getFullPathName(dirName);
+        string outTemp = dirName + tag + "temp"+ toString(time(NULL));
+        ofstream out;
+        out.open(outTemp.c_str(), ios::trunc);
+        if(!out) {
+            //mothurOut(dirName + " directory does not exist or is not writable."); mothurOutEndLine();
+        }else{
+            out.close();
+            mothurRemove(outTemp);
+            return true;
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "dirCheck - noError");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+//returns true it exits or if we can make it
+bool MothurOut::mkDir(string& dirName){
+    try {
+        
+        bool dirExist = dirCheck(dirName, "noError");
+        
+        if (dirExist) { return true; }
+        
+        string tag = "";
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        tag = toString(pid);
+#endif
+        
+        string makeDirectoryCommand = "";
+
+        makeDirectoryCommand += "mkdir -p \"" + dirName + "\"";
+        system(makeDirectoryCommand.c_str());
+        if (dirCheck(dirName)) { return true; }
+        
+        return false;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mkDir");
+        exit(1);
+    }
+    
+}
 //**********************************************************************************************************************
 
 map<string, vector<string> > MothurOut::parseClasses(string classes){
@@ -1302,6 +1380,130 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
 		errorOut(e, "MothurOut", "openInputFileBinary - no error");
 		exit(1);
 	}
+}
+/***********************************************************************/
+#ifdef USE_BOOST
+int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostreams::filtering_istream& in){
+    try {
+        
+        //get full path name
+        string completeFileName = getFullPathName(fileName);
+        
+        file.open(completeFileName.c_str(), ios_base::in | ios_base::binary);
+        
+        if(!file) {
+            mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+            return 1;
+        }
+        else {
+            //check for blank file
+            in.push(boost::iostreams::gzip_decompressor());
+            in.push(file);
+            if (file.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
+            
+            return 0;
+        }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "openInputFileGZBinary");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int MothurOut::openInputFileBinary(string fileName, ifstream& file, boost::iostreams::filtering_istream& in, string noerror){
+    try {
+        
+        //get full path name
+        string completeFileName = getFullPathName(fileName);
+        
+        file.open(completeFileName.c_str(), ios_base::in | ios_base::binary);
+        
+        if(!file) {
+            return 1;
+        }
+        else {
+            //check for blank file
+            in.push(boost::iostreams::gzip_decompressor());
+            in.push(file);
+            return 0;
+        }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "openInputFileGZBinary - no error");
+        exit(1);
+    }
+}
+#endif
+/***********************************************************************/
+//results[0] = allGZ, results[1] = allNotGZ
+vector<bool> MothurOut::allGZFiles(vector<string> & files){
+    try {
+        vector<bool> results;
+        bool allGZ = true;
+        bool allNOTGZ = true;
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (control_pressed) { break; }
+            
+            //ignore none and blank filenames
+            if ((files[i] != "") || (files[i] != "NONE")) {
+                if (isGZ(files[i])[1]) { allNOTGZ = false;  }
+                else {  allGZ = false;  }
+            }
+        }
+        
+        if (!allGZ && !allNOTGZ) { //mixed bag
+            mothurOut("[ERROR]: Cannot mix .gz and non compressed files. Please decompress your files and rerun.\n"); control_pressed = true; 
+        }
+        
+        results.push_back(allGZ);
+        results.push_back(allNOTGZ);
+        
+        return results;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "areGZFiles");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+vector<bool> MothurOut::isGZ(string filename){
+    try {
+        vector<bool> results; results.resize(2, false);
+        #ifdef USE_BOOST
+        ifstream fileHandle;
+        boost::iostreams::filtering_istream gzin;
+        
+        if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
+        
+        int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
+        
+        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        else {  results[0] = true;  }
+        
+        char c;
+        try
+        {
+            gzin >> c;
+            results[1] = true;
+        }
+        catch ( boost::iostreams::gzip_error & e )
+        {
+            gzin.pop();
+            fileHandle.close();
+            return results;  // results[0] = true; results[1] = false;
+        }
+        fileHandle.close();
+        #else
+        mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); control_pressed = true;
+        #endif
+        return results; //results[0] = true; results[1] = true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isGZ");
+        exit(1);
+    }
 }
 
 /***********************************************************************/
@@ -1939,6 +2141,62 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 	}
 }
 /**************************************************************************************************/
+vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, unsigned long long& num) {
+    try {
+        filename = getFullPathName(filename);
+        
+        vector<unsigned long long> positions;
+        ifstream in;
+        //openInputFile(filename, in);
+        openInputFileBinary(filename, in);
+        
+        string input;
+        unsigned long long count = 0;
+        positions.push_back(0);
+        
+        while(!in.eof()){
+            //getline counting reads
+            char d = in.get(); count++;
+            while ((d != '\n') && (d != '\r') && (d != '\f') && (d != in.eof()))	{
+                //get next character
+                d = in.get();
+                count++;
+            }
+            
+            if (!in.eof()) {
+                d=in.get(); count++;
+                while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
+            }
+            positions.push_back(count-1);
+            //cout << count-1 << endl;
+        }
+        in.close();
+        
+        num = positions.size()-1;
+        
+        FILE * pFile;
+        unsigned long long size;
+        
+        //get num bytes in file
+        pFile = fopen (filename.c_str(),"rb");
+        if (pFile==NULL) perror ("Error opening file");
+        else{
+            fseek (pFile, 0, SEEK_END);
+            size=ftell (pFile);
+            fclose (pFile);
+        }
+        
+        positions[(positions.size()-1)] = size;
+        
+        return positions;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setFilePosEachLine");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
 
 vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
     try{
@@ -2362,7 +2620,7 @@ vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	}
 }
 //**********************************************************************************************************************
-int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
+int MothurOut::readTax(string namefile, map<string, string>& taxMap, bool removeConfidence) {
 	try {
         //open input file
 		ifstream in;
@@ -2388,7 +2646,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) { if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {
@@ -2416,7 +2674,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     checkName(firstCol);
                     //are there confidence scores, if so remove them
-                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    if (removeConfidence) {  if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
                     
                     if(itTax == taxMap.end()) {
@@ -2972,6 +3230,7 @@ set<string> MothurOut::readAccnos(string accnosfile){
         string rest = "";
         char buffer[4096];
         
+        unsigned long long count = 0;
 		while (!in.eof()) {
 			if (control_pressed) { break; }
 			
@@ -2980,14 +3239,16 @@ set<string> MothurOut::readAccnos(string accnosfile){
             
             for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]);
                 names.insert(pieces[i]);
+                count++;
             }
         }
 		in.close();	
 		
         if (rest != "") {
             vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  } 
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  count++; }
         }
+        cout << count << endl;
 		return names;
 	}
 	catch(exception& e) {
@@ -3191,6 +3452,9 @@ int MothurOut::mothurRemove(string filename){
 	try {
 		filename = getFullPathName(filename);
 		int error = remove(filename.c_str());
+        if (debug) {
+            mothurOut("[DEBUG]: removed " + filename + "\n");
+        }
 		//if (error != 0) { 
 		//	if (errno != ENOENT) { //ENOENT == file does not exist
 		//		string message = "Error deleting file " + filename;
@@ -3208,7 +3472,7 @@ int MothurOut::mothurRemove(string filename){
 bool MothurOut::mothurConvert(string item, int& num){
 	try {
 		bool error = false;
-
+        
 		if (isNumeric1(item)) {
 			convert(item, num);
 		}else {

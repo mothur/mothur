@@ -16,7 +16,8 @@ vector<string> GetRelAbundCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pscale("scale", "Multiple", "totalgroup-totalotu-averagegroup-averageotu", "totalgroup", "", "", "","",false,false); parameters.push_back(pscale);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -284,7 +285,7 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 	try {
 		
 		 for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
+			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins();
 			
 			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
 			
@@ -312,7 +313,7 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 					relabund = abund / (float) averageOtu;
 				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
 				
-				out << relabund << '\t';
+				out  << '\t' << relabund;
 			}
 			out << endl;
 		 }

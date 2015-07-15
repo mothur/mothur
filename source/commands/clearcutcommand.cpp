@@ -24,7 +24,7 @@ vector<string> ClearcutCommand::setParameters(){
 		CommandParameter pverbose("verbose", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pverbose);
 		CommandParameter pquiet("quiet", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pquiet);
 		CommandParameter pversion("version", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pversion);
-		CommandParameter pseed("seed", "String", "", "", "*", "", "","",false,false); parameters.push_back(pseed);
+		CommandParameter prseed("rseed", "String", "", "", "*", "", "","",false,false); parameters.push_back(prseed);
 		CommandParameter pnorandom("norandom", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnorandom);
 		CommandParameter pshuffle("shuffle", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshuffle);
 		CommandParameter pneighbor("neighbor", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pneighbor);
@@ -37,7 +37,8 @@ vector<string> ClearcutCommand::setParameters(){
 		CommandParameter pstdout("stdout", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pstdout);
 		CommandParameter pntrees("ntrees", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pntrees);
 		CommandParameter pmatrixout("matrixout", "String", "", "", "", "", "","",false,false); parameters.push_back(pmatrixout);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -62,7 +63,7 @@ string ClearcutCommand::getHelpString(){
 		helpString += "The version parameter prints out the version of clearcut you are using, default=F. \n";
 		helpString += "The verbose parameter prints out more output from clearcut, default=F. \n";
 		helpString += "The quiet parameter turns on silent operation mode, default=F. \n";
-		helpString += "The seed parameter allows you to explicitly set the PRNG seed to a specific value. \n";
+		helpString += "The rseed parameter allows you to explicitly set the PRNG seed to a specific value. \n";
 		helpString += "The norandom parameter allows you to attempt joins deterministically, default=F. \n";
 		helpString += "The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n";
 		helpString += "The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=T. \n";
@@ -207,7 +208,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			temp = validParameter.validFile(parameters, "quiet", false);		if (temp == "not found"){	temp = "F";			}
 			quiet = m->isTrue(temp); 
 			
-			seed = validParameter.validFile(parameters, "seed", false);			if (seed == "not found"){	seed = "*";			}
+			seed = validParameter.validFile(parameters, "rseed", false);			if (seed == "not found"){	seed = "*";			}
 			
 			temp = validParameter.validFile(parameters, "norandom", false);		if (temp == "not found"){	temp = "F";			}
 			norandom = m->isTrue(temp); 

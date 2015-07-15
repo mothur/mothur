@@ -31,7 +31,8 @@ vector<string> SffInfoCommand::setParameters(){
         CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
 		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -580,7 +581,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             if (m->control_pressed) { delete oligosObject; return 0; }
             trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligosObject->getPrimers(), oligosObject->getBarcodes(), oligosObject->getReversePrimers(), oligosObject->getLinkers(), oligosObject->getSpacers());  numFPrimers = oligosObject->getPrimers().size(); numBarcodes = oligosObject->getBarcodes().size();
             if (reorient) {
-                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligosObject->getReorientedPairedPrimers(), oligosObject->getReorientedPairedBarcodes()); numBarcodes = oligosObject->getReorientedPairedBarcodes().size();
+                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligosObject->getReorientedPairedPrimers(), oligosObject->getReorientedPairedBarcodes(), false); numBarcodes = oligosObject->getReorientedPairedBarcodes().size();
             }
         }
         
@@ -654,7 +655,6 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			if (m->control_pressed) { count = 0; break;   }
 			
 			if (count >= header.numReads) { break; }
-        
 		}
 		
 		//report progress
@@ -1252,14 +1252,12 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
 			char buffer4 [2];
 			in.read(buffer4, 2);
 			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
-			header.clipQualLeft = 5;
-            
+			//header.clipQualLeft = 5;
 			
 			//read clip qual right
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
-           
             
 			//read clipAdapterLeft
 			char buffer6 [2];
@@ -1395,7 +1393,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
                 }
             }
             else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
-                seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
+                seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
             }
             else {
                 seq = seq.substr(header.clipQualLeft-1);
@@ -1685,7 +1683,7 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& hea
 int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
 		string seq = read.bases;
-		
+        
         if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
 				if (header.clipQualRight == 0) { //don't trim right
@@ -1695,7 +1693,7 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
                 }
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
-				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
+				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
 			}
 			else {
 				seq = seq.substr(header.clipQualLeft-1);
@@ -1738,8 +1736,8 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
                 }
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
-				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
-				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';	}
+				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft+1) << endl;
+				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight); i++) {   out << read.qualScores[i] << '\t';	}
 			}
 			else{
 				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;

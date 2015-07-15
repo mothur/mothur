@@ -22,7 +22,8 @@ vector<string> ChimeraPerseusCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
 
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter palpha("alpha", "Number", "", "-5.54", "", "", "","",false,false); parameters.push_back(palpha);
@@ -1068,6 +1069,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 		vector<int> processIDS;
 		int process = 1;
 		int num = 0;
+        bool recalc = false;
 		
         CountTable newCount;
         if (hasCount && dups) { newCount.readTable(name, true, false); }
@@ -1108,12 +1110,62 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 				out.close();
 				
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+            }
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            lines.clear();
+            remainingPairs = groups.size();
+            int startIndex = 0;
+            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                int numPairs = remainingPairs; //case for last processor
+                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+                startIndex = startIndex + numPairs;
+                remainingPairs = remainingPairs - numPairs;
+            }
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		//do my part
 		num = driverGroups(outputFName, accnos, accnos + ".byCount", lines[0].start, lines[0].end, groups);

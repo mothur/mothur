@@ -75,11 +75,14 @@ class MothurOut {
 		//functions from mothur.h
 		//file operations
         bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
+        bool dirCheck(string&, string); //completes path, appends appropriate / or \, makes sure dir is writable. - no error
+        bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
 		vector<unsigned long long> divideFile(string, int&); //divides splitting unevenness by sequence
         vector<unsigned long long> divideFile(string filename, int& proc, char delimChar);
         vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
 		int divideFile(string, int&, vector<string>&);
 		vector<unsigned long long> setFilePosEachLine(string, int&);
+        vector<unsigned long long> setFilePosEachLine(string, unsigned long long&);
 		vector<unsigned long long> setFilePosFasta(string, long long&);
         vector<unsigned long long> setFilePosFasta(string, long long&, char);
         vector<unsigned long long> setFilePosFasta(string, int&);
@@ -104,7 +107,13 @@ class MothurOut {
 		int openInputFile(string, ifstream&);
         int openInputFileBinary(string, ifstream&);
         int openInputFileBinary(string, ifstream&, string);
+    #ifdef USE_BOOST
+        int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
+        int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    #endif
 		int openInputFile(string, ifstream&, string); //no error given
+        vector<bool> allGZFiles(vector<string>&);
+        vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
     
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
@@ -119,7 +128,7 @@ class MothurOut {
         int readAccnos(string, vector<string>&);
         map<string, int> readNames(string);
         map<string, int> readNames(string, unsigned long int&);
-        int readTax(string, map<string, string>&);
+        int readTax(string, map<string, string>&, bool);
         vector<consTax> readConsTax(string);
         int readConsTax(string, map<int, consTax2>&);
         int readNames(string, map<string, string>&, map<string, int>&);

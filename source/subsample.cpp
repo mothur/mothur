@@ -14,7 +14,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
         
         //remove seqs not in sample from counttable
         vector<string> Groups = ct->getNamesOfGroups();
-        newCt->copy(ct); 
+        newCt->copy(ct);
         newCt->addGroup("doNotIncludeMe");
         
         map<string, int> doNotIncludeTotals; 
@@ -54,6 +54,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
             newCt->setAbund(it->first, "doNotIncludeMe", it->second);
         } 
         
+       
         newTree = new Tree(newCt);
         newTree->getCopy(T, true);
         

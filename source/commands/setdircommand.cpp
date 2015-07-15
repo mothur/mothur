@@ -18,7 +18,7 @@ vector<string> SetDirectoryCommand::setParameters(){
         CommandParameter pmodnames("modifynames", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmodnames);
 		CommandParameter pinput("input", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pinput);
 		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false,true); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -109,18 +109,17 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             if (temp == "not found") { random = 0; }
             else {
                 if (m->isInteger(temp)) { m->mothurConvert(temp, random); seed = true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.outdir command."); m->mothurOutEndLine(); abort = true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command."); m->mothurOutEndLine(); abort = true; }
             }
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
             if (seed)  {
-                m->mothurOut("\nRandom number(1-100) seeded with mothur's default of current time: " + toString(rand()%100 + 1) + ".\n");
                 srand(random);
-                m->mothurOut("Random number(1-100) seeded with " + toString(random) + ": " + toString(rand()%100 + 1) + ".\n\n");
+                m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
             
 			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod && !seed) {
-				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, debug or modifynames for the set.outdir command."); m->mothurOutEndLine(); abort = true;
+				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, debug or modifynames for the set.dir command."); m->mothurOutEndLine(); abort = true;
 			}else if((input == "") && (output == "") && (tempdefault == "")) { debugorSeedOnly = true; }
 		}
 	}
@@ -133,7 +132,6 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 
 int SetDirectoryCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         if (debugorSeedOnly) {  }
@@ -151,7 +149,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                 commandFactory->setOutputDirectory(output);
             }else {
-                if (m->dirCheck(output)) {
+                if (m->mkDir(output)) {
                     m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
                     commandFactory->setOutputDirectory(output);
                 }
@@ -191,7 +189,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                 m->setDefaultPath(tempdefault);
             }else {
-                if (m->dirCheck(tempdefault)) {
+                if (m->mkDir(tempdefault)) {
                     m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
                     m->setDefaultPath(tempdefault); 
                 }

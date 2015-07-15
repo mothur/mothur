@@ -31,8 +31,10 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false); parameters.push_back(pmethod);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+        CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 			
 		vector<string> myArray;
@@ -157,7 +159,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 				//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
@@ -344,7 +346,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "classic", false);			if (temp == "not found") { temp = "F"; }
 			classic = m->isTrue(temp);
             
-            if ((splitmethod != "fasta") && classic) { m->mothurOut("splitmethod must be fasta to use cluster.classic.\n"); abort=true; }
+            //not using file option and don't have fasta method with classic
+            if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
 
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
 			m->mothurConvert(temp, cutoff); 
@@ -368,6 +371,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "cluster", false);  if (temp == "not found") { temp = "T"; }
             runCluster = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "islist", false);  if (temp == "not found") { temp = "F"; }
+            isList = m->isTrue(temp);
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
@@ -419,7 +425,23 @@ int ClusterSplitCommand::execute(){
         //make everyone wait
         MPI_Barrier(MPI_COMM_WORLD);
 #endif
-            
+            if (isList) {
+                
+                //set list file as new current listfile
+                string current = "";
+                itTypes = outputTypes.find("list");
+                if (itTypes != outputTypes.end()) {
+                    if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+                }
+                
+                m->mothurOutEndLine();
+                m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+                for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+                m->mothurOutEndLine();
+                
+                return 0;
+            }
+                    
         }else {
 		          
             //****************** file prep work ******************************//
@@ -811,7 +833,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			
 		//get the list info from each file
 		for (int k = 0; k < listNames.size(); k++) {
-	
+            
 			if (m->control_pressed) {  
 				if (listSingle != NULL) { delete listSingle; listSingle = NULL; m->mothurRemove(singleton);  }
 				for (int i = 0; i < listNames.size(); i++) {   m->mothurRemove(listNames[i]);  }
@@ -821,7 +843,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			InputData* input = new InputData(listNames[k], "list");
 			ListVector* list = input->getListVector();
 			string lastLabel = list->getLabel();
-			
+            
 			string filledInList = listNames[k] + "filledInTemp";
 			ofstream outFilled;
 			m->openOutputFile(filledInList, outFilled);
@@ -900,9 +922,11 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
         }else {
-            CountTable ct;
-            ct.readTable(countfile, false, false);
-            counts = ct.getNameMap();
+            if (file == "") {
+                CountTable ct;
+                ct.readTable(countfile, false, false);
+                counts = ct.getNameMap();
+            }
         }
         
 		m->openOutputFile(listFileName,	outList);
@@ -969,7 +993,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			//outList << endl;
             if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); completeList.printHeaders(outList); }
             if (countfile == "") { completeList.print(outList); }
-            else { completeList.print(outList, counts);   }
+            else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);   }
+            else { completeList.print(outList); }
 			
 			if (rabund != NULL) { delete rabund; }
 		}
@@ -1015,7 +1040,8 @@ void ClusterSplitCommand::printData(ListVector* oldList){
 //**********************************************************************************************************************
 vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string> > distName, set<string>& labels){
 	try {
-        
+        deleteFiles = false; //so if we need to recalc the processors the files are still there
+        bool recalc = false;
         vector<string> listFiles;
         vector < vector < map<string, string> > > dividedNames; //distNames[1] = vector of filenames for process 1...
         dividedNames.resize(processors);
@@ -1075,12 +1101,92 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 				outLabels.close();
 
 				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove((toString(processIDS[i]) + ".temp.labels"));
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+            }
+
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".temp.labels"));} processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            listFiles.clear();
+            dividedNames.clear(); //distNames[1] = vector of filenames for process 1...
+            dividedNames.resize(processors);
+            
+            //for each file group figure out which process will complete it
+            //want to divide the load intelligently so the big files are spread between processes
+            for (int i = 0; i < distName.size(); i++) {
+                //cout << i << endl;
+                int processToAssign = (i+1) % processors;
+                if (processToAssign == 0) { processToAssign = processors; }
+                
+                dividedNames[(processToAssign-1)].push_back(distName[i]);
+                if ((processToAssign-1) == 1) { m->mothurOut(distName[i].begin()->first + "\n"); }
+            }
+            
+            //now lets reverse the order of ever other process, so we balance big files running with little ones
+            for (int i = 0; i < processors; i++) {
+                //cout << i << endl;
+                int remainder = ((i+1) % processors);
+                if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    set<string> labels;
+                    vector<string> listFileNames = cluster(dividedNames[process], labels);
+                    
+                    //write out names to file
+                    string filename = m->mothurGetpid(process) + ".temp";
+                    ofstream out;
+                    m->openOutputFile(filename, out);
+                    out << tag << endl;
+                    for (int j = 0; j < listFileNames.size(); j++) { out << listFileNames[j] << endl;  }
+                    out.close();
+                    
+                    //print out labels
+                    ofstream outLabels;
+                    filename = m->mothurGetpid(process) + ".temp.labels";
+                    m->openOutputFile(filename, outLabels);
+                    
+                    outLabels << cutoff << endl;
+                    for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {
+                        outLabels << (*it) << endl;
+                    }
+                    outLabels.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
         //do your part
         listFiles = cluster(dividedNames[0], labels);
@@ -1125,54 +1231,18 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             m->mothurRemove((toString(processIDS[i]) + ".temp.labels"));
         }
         
+        deleteFiles = true;
+        
+        //delete the temp files now that we are done
+        for (int i = 0; i < distName.size(); i++) {
+            string thisNamefile = distName[i].begin()->second;
+            string thisDistFile = distName[i].begin()->first;
+            m->mothurRemove(thisNamefile);
+            m->mothurRemove(thisDistFile);
+        }
 
     #else
-       
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the clusterData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add labels.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<clusterData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-			// Allocate memory for thread data.
-			clusterData* tempCluster = new clusterData(dividedNames[i], m, cutoff, method, outputDir, hard, precision, length, i);
-			pDataArray.push_back(tempCluster);
-			processIDS.push_back(i);
-            
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyClusterThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);  
-            
-		}
-        
-        //do your part
-        listFiles = cluster(dividedNames[0], labels);
-        
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            //get tag
-            tag = pDataArray[i]->tag;
-            //get listfiles created
-            for(int j=0; j < pDataArray[i]->listFiles.size(); j++){ listFiles.push_back(pDataArray[i]->listFiles[j]); }
-            //get labels
-            set<string>::iterator it;
-            for(it = pDataArray[i]->labels.begin(); it != pDataArray[i]->labels.end(); it++){ labels.insert(*it); }
-			//check cutoff
-            if (pDataArray[i]->cutoff < cutoff) { cutoff = pDataArray[i]->cutoff; }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-*/
-	#endif		
+    #endif
         
         return listFiles;
 	
@@ -1606,29 +1676,60 @@ string ClusterSplitCommand::printFile(string singleton, vector< map<string, stri
 //**********************************************************************************************************************
 string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
     try {
+        
         string singleton, thiscolumn, thisname, type;
         
         ifstream in;
         m->openInputFile(file, in);
         
         in >> singleton; m->gobble(in);
+        
+        string path = m->hasPath(singleton);
+        if (path == "") {  singleton = inputDir + singleton;  }
+        
         in >> type; m->gobble(in);
         
         if (type == "name") { namefile = "name"; }
         else if (type == "count") { countfile = "count"; }
         else {  m->mothurOut("[ERROR]: unknown file type. Are the files in column 2 of the file name files or count files? Please change unknown to name or count.\n"); m->control_pressed = true; }
         
+        if (isList) {
+
+            vector<string> listFileNames;
+            string thisListFileName = "";
+            set<string> listLabels;
+            
+            while(!in.eof()) {
+                if (m->control_pressed) { break; }
+                
+                in >> thisListFileName; m->gobble(in);
+                
+                string path = m->hasPath(thisListFileName);
+                if (path == "") {  thisListFileName = inputDir + thisListFileName;  }
+                
+                getLabels(thisListFileName, listLabels);
+                listFileNames.push_back(thisListFileName);
+            }
+            
+            ListVector* listSingle;
+            map<float, int> labelBins = completeListFile(listFileNames, singleton, listLabels, listSingle);
+            
+            mergeLists(listFileNames, labelBins, listSingle);
         
-        while(!in.eof()) {
-            if (m->control_pressed) { break; }
+        }else {
             
-            in >> thiscolumn; m->gobble(in);
-            in >> thisname; m->gobble(in);
-            
-            map<string, string> temp;
-            temp[thiscolumn] = thisname;
-            distName.push_back(temp);
+            while(!in.eof()) {
+                if (m->control_pressed) { break; }
+                
+                in >> thiscolumn; m->gobble(in);
+                in >> thisname; m->gobble(in);
+                
+                map<string, string> temp;
+                temp[thiscolumn] = thisname;
+                distName.push_back(temp);
+            }
         }
+        
         in.close();
         
         return singleton;
@@ -1637,6 +1738,34 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
 		m->errorOut(e, "ClusterCommand", "readFile");
 		exit(1);
 	}
+    
+}
+//**********************************************************************************************************************
+int ClusterSplitCommand::getLabels(string file, set<string>& listLabels){
+    try {
+        ifstream in;
+        m->openInputFile(file, in);
+
+        //read headers
+        m->getline(in); m->gobble(in);
+        
+        string label;
+        while(!in.eof()) {
+            if (m->control_pressed) { break; }
+            
+            in >> label; m->getline(in); m->gobble(in);
+            
+            listLabels.insert(label);
+        }
+        
+        in.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "getLabels");
+        exit(1);
+    }
     
 }
 //**********************************************************************************************************************

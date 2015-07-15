@@ -20,7 +20,8 @@ vector<string> ConsensusSeqsCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","fasta-name",false,false,true); parameters.push_back(plist);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

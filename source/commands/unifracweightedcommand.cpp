@@ -27,7 +27,8 @@ vector<string> UnifracWeightedCommand::setParameters(){
         CommandParameter prandom("random", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prandom);
 		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false); parameters.push_back(pdistance);
 		CommandParameter proot("root", "Boolean", "F", "", "", "", "","",false,false); parameters.push_back(proot);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -532,18 +533,18 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
             }
             
             if (outputForm == "lt") {
-                out << name << '\t';
-                outStd << name << '\t';
+                out << name;
+                outStd << name;
                 
                 //output distances
-                for (int l = 0; l < r; l++) {	out  << avedists[r][l] << '\t';  outStd  << stddists[r][l] << '\t';}
+                for (int l = 0; l < r; l++) {	out  << '\t' << avedists[r][l];  outStd   << '\t' << stddists[r][l];}
                 out << endl;  outStd << endl;
             }else if (outputForm == "square") {
-                out << name << '\t';
-                outStd << name << '\t';
+                out << name;
+                outStd << name;
                 
                 //output distances
-                for (int l = 0; l < m->getNumGroups(); l++) {	out  << avedists[r][l] << '\t'; outStd  << stddists[r][l] << '\t'; }
+                for (int l = 0; l < m->getNumGroups(); l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }
                 out << endl; outStd << endl;
             }else{
                 //output distances
@@ -553,8 +554,8 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
                         while (otherName.length() < 10) {  otherName += " ";  }
                     }
                     
-                    out  << name << '\t' << otherName << avedists[r][l] << endl;  
-                    outStd  << name << '\t' << otherName << stddists[r][l] << endl; 
+                    out  << name << '\t' << otherName  << '\t' << avedists[r][l] << endl;
+                    outStd  << name << '\t' << otherName  << '\t' << stddists[r][l] << endl;
                 }
             }
         }
@@ -708,22 +709,10 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
             startIndex = startIndex + numPairs;
             remainingPairs = remainingPairs - numPairs;
         }
-
-        
-        
+       
         //get scores for random trees
         for (int j = 0; j < iters; j++) {
-//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            //if(processors == 1){
-              //  driver(thisTree,  namesOfGroupCombos, 0, namesOfGroupCombos.size(),  rScores);
-           // }else{
-                createProcesses(thisTree,  namesOfGroupCombos, rScores);
-           // }
-//#else
-            //driver(thisTree, namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
-//#endif
- 
-            
+            createProcesses(thisTree,  namesOfGroupCombos, rScores);
             if (m->control_pressed) { delete ct;  for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
             
         }
@@ -764,6 +753,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
         int process = 1;
 		vector<int> processIDS;
 		EstOutput results;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
@@ -785,12 +775,69 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            lines.clear();
+            
+            //breakdown work between processors
+            int remainingPairs = namesOfGroupCombos.size();
+            int startIndex = 0;
+            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+                int numPairs = remainingPairs; //case for last processor
+                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+                lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+                startIndex = startIndex + numPairs;
+                remainingPairs = remainingPairs - numPairs;
+            }
+            
+            results.clear();
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, scores);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = outputDir + m->mothurGetpid(process) + ".weightedcommand.results.temp";
+                    m->openOutputFile(tempFile, out);
+                    for (int i = lines[process].start; i < (lines[process].start + lines[process].end); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
 		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
 		
 		//force parent to wait until all the processes are done
@@ -1027,16 +1074,16 @@ void UnifracWeightedCommand::createPhylipFile() {
 				}
 				
 				if (outputForm == "lt") {
-					out << name << '\t';
+					out << name;
 					
 					//output distances
-					for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
+					for (int l = 0; l < r; l++) {	out   << '\t' << dists[r][l];  }
 					out << endl;
 				}else if (outputForm == "square") {
-					out << name << '\t';
+					out << name;
 					
 					//output distances
-					for (int l = 0; l < m->getNumGroups(); l++) {	out  << dists[r][l] << '\t';  }
+					for (int l = 0; l < m->getNumGroups(); l++) {	out   << '\t' << dists[r][l];  }
 					out << endl;
 				}else{
 					//output distances
@@ -1046,7 +1093,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 							while (otherName.length() < 10) {  otherName += " ";  }
 						}
 						
-						out  << name << '\t' << otherName << dists[r][l] << endl;  
+						out  << name << '\t' << otherName  << '\t' << dists[r][l] << endl;  
 					}
 				}
 			}
