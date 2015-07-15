@@ -255,7 +255,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		
         TrimOligos* trimOligos = NULL;
         int numBarcodes = pDataArray->barcodes.size();
-        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes);   numBarcodes = pDataArray->pairedBarcodes.size(); pDataArray->numFPrimers = pDataArray->pairedPrimers.size(); }
+        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes, false);   numBarcodes = pDataArray->pairedBarcodes.size(); pDataArray->numFPrimers = pDataArray->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);  }
         
         TrimOligos* rtrimOligos = NULL;
@@ -283,7 +283,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                 rpairedPrimers[index] = tempPair; index++;
             }
 
-            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
+            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes, false); numBarcodes = rpairedBarcodes.size();
         }
         
 		pDataArray->count = 0;
@@ -628,11 +628,11 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			}
 			
 			//report progress
-			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(count)+"\n");		}
+			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n");		}
 			
 		}
 		//report progress
-		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(count)+"\n");		}
+		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n");		}
 		
         if (pDataArray->reorient) { delete rtrimOligos; }
 		delete trimOligos;

@@ -211,6 +211,8 @@ struct contigsData {
 
 //**********************************************************************************************************************
 //unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
+
+//ONLY GETS HERE WITH BOOST OPTION
 static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
     contigsData* pDataArray;
     pDataArray = (contigsData*)lpParam;
@@ -243,69 +245,70 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             string inputFile = ffastqfile;
             if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
-            pDataArray->outQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
-            pDataArray->outScrapQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
+            pDataArray->outputQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
+            pDataArray->outputScrapQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
             pDataArray->inputFiles.push_back(ffastqfile); pDataArray->inputFiles.push_back(rfastqfile);
             if ((findexfile != "") || (rindexfile != "")){
                 pDataArray->qualOrIndexFiles.push_back("NONE"); pDataArray->qualOrIndexFiles.push_back("NONE");
                 if (findexfile != "") { pDataArray->qualOrIndexFiles[0] = findexfile; }
                 if (rindexfile != "") { pDataArray->qualOrIndexFiles[1] = rindexfile; }
             }
-            pDataArray->outFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
-            pDataArray->outScrapFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
-            pDataArray->outMisMatch= thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report"
+            pDataArray->outputFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
+            pDataArray->outputScrapFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
+            pDataArray->outputMisMatches= thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
             pDataArray->linesInput_start = 0; pDataArray->linesInput_end = 1000; pDataArray->linesInputReverse_start = 1; pDataArray->qlinesInput_start = 0; pDataArray->qlinesInputReverse_start =0; pDataArray->linesInputReverse_end =1000; pDataArray->qlinesInput_end =1000; pDataArray->qlinesInputReverse_end=1000;
             
             map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
             pDataArray->createOligosGroup = false;
-            Oligos* oligos = new Oligos();
             
-            if(pDataArray->oligosfile != "")                        {
+            
+            if(pDataArray->oligosfile != "") {
+                Oligos oligos;
                 //createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);
                 ///////////////////////////////////////////////////////////////////////////////////////
                 string rootname = pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile));
                 bool allBlank = false;
                 int numFPrimers, numBarcodes, numLinkers, numSpacers, numRPrimers;
                 numRPrimers = 0; numSpacers = 0; numLinkers = 0; numBarcodes = 0; numFPrimers = 0;
-                oligos->read(pDataArray->oligosfile, false);
+                oligos.read(pDataArray->oligosfile, false);
                 
                 if (pDataArray->m->control_pressed) { break; } //error in reading oligos
                 
-                if (oligos->hasPairedBarcodes() || oligos->hasPairedPrimers()) {
-                    numFPrimers = oligos->getPairedPrimers().size();
-                    numBarcodes = oligos->getPairedBarcodes().size();
+                if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
+                    numFPrimers = oligos.getPairedPrimers().size();
+                    numBarcodes = oligos.getPairedBarcodes().size();
                 }else {
                     pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->control_pressed = true;
                 }
                 
                 if (pDataArray->m->control_pressed) { break; }
                 
-                numLinkers = oligos->getLinkers().size();
-                numSpacers = oligos->getSpacers().size();
-                numRPrimers = oligos->getReversePrimers().size();
+                numLinkers = oligos.getLinkers().size();
+                numSpacers = oligos.getSpacers().size();
+                numRPrimers = oligos.getReversePrimers().size();
                 if (numLinkers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n"); }
                 if (numSpacers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n"); }
                 
-                vector<string> groupNames = oligos->getGroupNames();
+                vector<string> groupNames = oligos.getGroupNames();
                 if (groupNames.size() == 0) { pDataArray->allFiles = 0; allBlank = true;  }
                 
                 pDataArray->fastaFileNames.clear();
-                pDataArray->fastaFileNames.resize(oligos->getBarcodeNames().size());
+                pDataArray->fastaFileNames.resize(oligos.getBarcodeNames().size());
                 for(int i=0;i<pDataArray->fastaFileNames.size();i++){
-                    for(int j=0;j<oligos->getPrimerNames().size();j++){  pDataArray->fastaFileNames[i].push_back(""); }
+                    for(int j=0;j<oligos.getPrimerNames().size();j++){  pDataArray->fastaFileNames[i].push_back(""); }
                 }
                 
                 pDataArray->qualFileNames = pDataArray->fastaFileNames;
                 
                 if (pDataArray->allFiles) {
                     set<string> uniqueNames; //used to cleanup outputFileNames
-                    map<int, oligosPair> barcodes = oligos->getPairedBarcodes();
-                    map<int, oligosPair> primers = oligos->getPairedPrimers();
+                    map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
+                    map<int, oligosPair> primers = oligos.getPairedPrimers();
                     for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
                         for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
                             
-                            string primerName = oligos->getPrimerName(itPrimer->first);
-                            string barcodeName = oligos->getBarcodeName(itBar->first);
+                            string primerName = oligos.getPrimerName(itPrimer->first);
+                            string barcodeName = oligos.getBarcodeName(itBar->first);
                             
                             if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
                             else if ((primerName == "") && (barcodeName == "")) { } //do nothing
@@ -324,7 +327,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         comboGroupName = barcodeName + "." + primerName;
                                     }
                                 }
-                                contigs.fasta
                                 
                                 ofstream temp, temp2;
                                 fastaFileName = rootname + "." + comboGroupName + ".contigs.fasta";
@@ -332,7 +334,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 if (uniqueNames.count(fastaFileName) == 0) {
                                     pDataArray->outputNames.push_back(fastaFileName);
                                     uniqueNames.insert(fastaFileName);
-                                    pDataArray->fastaFile2Group[fastaFileName] = comboGroupName;
+                                    uniqueFastaNames[fastaFileName] = comboGroupName;
                                     
                                     pDataArray->outputNames.push_back(qualFileName);
                                     uniqueNames.insert(qualFileName);
@@ -351,7 +353,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 
                 if (allBlank) {
                     pDataArray->m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); pDataArray->m->mothurOutEndLine();
-                    allFiles = false;
+                    pDataArray->allFiles = false;
                     pDataArray->createOligosGroup = false;
                 }
                 
@@ -366,17 +368,18 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             //give group in file file precedence
             if (pDataArray->createFileGroup) {  pDataArray->createOligosGroup = false; }
             
-            ofstream temp;
-            pDataArray->m->openOutputFile(outFastaFile, temp);		temp.close();
-            pDataArray->m->openOutputFile(outScrapFastaFile, temp);		temp.close();
-            pDataArray->m->openOutputFile(outQualFile, temp);		temp.close();
-            pDataArray->m->openOutputFile(outScrapQualFile, temp);		temp.close();
+            ofstream temp, temp1, temp2, temp3;
+            pDataArray->m->openOutputFile(pDataArray->outputFasta, temp); temp.close();
+            pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, temp1); temp1.close();
+            pDataArray->m->openOutputFile(pDataArray->outputQual, temp2); temp2.close();
+            pDataArray->m->openOutputFile(pDataArray->outputScrapQual, temp3); temp3.close();
             
             pDataArray->m->mothurOut("Making contigs...\n");
-            
+            unsigned long long thisNumReads = 0;
+            if (true) { //resolve local variable issues
             //unsigned long long thisNumReads = driver(thisFileInputs, thisQualOrIndexInputs, outFastaFile, outScrapFastaFile,  outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1], group);
             ///////////////////////////////////////////////////////////////////////////////////////
-            unsigned long long thisNumReads = 0;
+            
             vector< vector<double> > qual_match_simple_bayesian;
             qual_match_simple_bayesian.resize(47);
             for (int i = 0; i < qual_match_simple_bayesian.size(); i++) { qual_match_simple_bayesian[i].resize(47);  }
@@ -1509,7 +1512,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 if (!pDataArray->gz) {
                     if ((inFFasta.eof()) || (inRFasta.eof())) { good = false; break; }
                 }else {
+                    #ifdef USE_BOOST
                     if (inFF.eof() || inRF.eof()) { good = false; break; }
+                    #endif
                 }
                 
                 thisNumReads++;
@@ -1571,7 +1576,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
                 if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
             }
-
+            }
             
             ///////////////////////////////////////////////////////////////////////////////////////
             
@@ -1579,7 +1584,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             pDataArray->m->mothurOut("Done.\n");
             
-            if (pDataArray->m->control_pressed) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }  delete oligos; return 0; }
+            if (pDataArray->m->control_pressed) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }   return 0; }
+            
             
             if(pDataArray->allFiles){
                 // so we don't add the same groupfile multiple times
@@ -1604,7 +1610,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 
                 //remove names for outputFileNames, just cleans up the output
                 vector<string> outputNames2;
-                for(int i = 0; i < pDataArray->outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(pDataArray->outputNames[i]); } }
+                for(int i = 0; i < pDataArray->outputNames.size(); i++) { if (namesToRemove.count(pDataArray->outputNames[i]) == 0) { outputNames2.push_back(pDataArray->outputNames[i]); } }
                 pDataArray->outputNames = outputNames2;
                 
                 for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
@@ -1612,14 +1618,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     pDataArray->m->openInputFile(it->first, in);
                     
                     ofstream out;
-                    string thisroot = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
+                    string thisroot = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(it->first));
                     string thisGroupName = thisroot + ".group"; pDataArray->outputNames.push_back(thisGroupName);
                     pDataArray->m->openOutputFile(thisGroupName, out);
                     
                     while (!in.eof()){
                         if (pDataArray->m->control_pressed) { break; }
                         
-                        Sequence currSeq(in); m->gobble(in);
+                        Sequence currSeq(in); pDataArray->m->gobble(in);
                         out << currSeq.getName() << '\t' << it->second << endl;
                     }
                     out.close();
@@ -1630,7 +1636,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             //append to combo files
             if (pDataArray->createFileGroup || pDataArray->createOligosGroup) {
                 ofstream outCGroup;
-                if (l == 0) {   pDataArray->m->openOutputFile(pDataArray->compositeGroupFile, outCGroup);  pDataArray->outputNames.push_back(compositeGroupFile);          }
+                if (l == 0) {   pDataArray->m->openOutputFile(pDataArray->compositeGroupFile, outCGroup);  pDataArray->outputNames.push_back(pDataArray->compositeGroupFile);          }
                 else {          pDataArray->m->openOutputFileAppend(pDataArray->compositeGroupFile, outCGroup);     }
                 
                 if (!pDataArray->allFiles) {
@@ -1639,7 +1645,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     ofstream outGroup;
                     pDataArray->m->openOutputFile(outputGroupFileName, outGroup);
                     
-                    for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                    for (map<string, string>::iterator itGroup = pDataArray->groupMap.begin(); itGroup != pDataArray->groupMap.end(); itGroup++) {
                         outCGroup << itGroup->first << '\t' << itGroup->second << endl;
                         outGroup << itGroup->first << '\t' << itGroup->second << endl;
                     }
@@ -1647,30 +1653,30 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 }
                 outCGroup.close();
                 
-                for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
-                    map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
-                    if (itTemp == totalGroupCounts.end()) { totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
+                for (map<string, int>::iterator itGroups = pDataArray->groupCounts.begin(); itGroups != pDataArray->groupCounts.end(); itGroups++) {
+                    map<string, int>::iterator itTemp = pDataArray->totalGroupCounts.find(itGroups->first);
+                    if (itTemp == pDataArray->totalGroupCounts.end()) { pDataArray->totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
                     else { itTemp->second += itGroups->second; } //existing group, update total
                 }
             }
-            if (l == 0) {  pDataArray->m->appendFiles(pDataArray->outMisMatch, pDataArray->compositeMisMatchFile);  }
-            else {  m->appendFilesWithoutHeaders(pDataArray->outMisMatch, pDataArray->compositeMisMatchFile);  }
-            m->appendFiles(pDataArray->outFasta, pDataArray->compositeFastaFile);
-            m->appendFiles(pDataArray->outScrapFasta, pDataArray->compositeScrapFastaFile);
-            m->appendFiles(pDataArray->outQual, pDataArray->compositeQualFile);
-            m->appendFiles(pDataArray->outScrapQual, pDataArray->compositeScrapQualFile);
+            if (l == 0) {  pDataArray->m->appendFiles(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
+            else {  pDataArray->m->appendFilesWithoutHeaders(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
+            pDataArray->m->appendFiles(pDataArray->outputFasta, pDataArray->compositeFastaFile);
+            pDataArray->m->appendFiles(pDataArray->outputScrapFasta, pDataArray->compositeScrapFastaFile);
+            pDataArray->m->appendFiles(pDataArray->outputQual, pDataArray->compositeQualFile);
+            pDataArray->m->appendFiles(pDataArray->outputScrapQual, pDataArray->compositeScrapQualFile);
             if (!pDataArray->allFiles) {
-                pDataArray->m->mothurRemove(pDataArray->outMisMatch);
-                pDataArray->m->mothurRemove(pDataArray->outFasta);
-                pDataArray->m->mothurRemove(pDataArray->outScrapFasta);
-                pDataArray->m->mothurRemove(pDataArray->outQual);
-                pDataArray->m->mothurRemove(pDataArray->outScrapQual);
+                pDataArray->m->mothurRemove(pDataArray->outputMisMatches);
+                pDataArray->m->mothurRemove(pDataArray->outputFasta);
+                pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
+                pDataArray->m->mothurRemove(pDataArray->outputQual);
+                pDataArray->m->mothurRemove(pDataArray->outputScrapQual);
             }else {
-                pDataArray->outputNames.push_back(pDataArray->outFasta);
-                pDataArray->outputNames.push_back(pDataArray->outScrapFasta);
-                pDataArray->outputNames.push_back(pDataArray->outQual);
-                pDataArray->outputNames.push_back(pDataArray->outScrapQual);
-                pDataArray->outputNames.push_back(pDataArray->outMisMatch);
+                pDataArray->outputNames.push_back(pDataArray->outputFasta);
+                pDataArray->outputNames.push_back(pDataArray->outputScrapFasta);
+                pDataArray->outputNames.push_back(pDataArray->outputQual);
+                pDataArray->outputNames.push_back(pDataArray->outputScrapQual);
+                pDataArray->outputNames.push_back(pDataArray->outputMisMatches);
             }
             
             pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n");	pDataArray->m->mothurOutEndLine();
@@ -1682,7 +1688,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
         
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "driverGroups");
+        pDataArray->m->errorOut(e, "MakeContigsCommand", "driverGroups");
         exit(1);
     }
 }
@@ -1930,15 +1936,18 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         inFFasta.seekg(pDataArray->linesInput_start);
         inRFasta.seekg(pDataArray->linesInputReverse_start);
         
+        bool hasIndex = false;
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {
                 pDataArray->m->openInputFile(thisfqualindexfile, inFQualIndex);
                 inFQualIndex.seekg(pDataArray->qlinesInput_start);
+                hasIndex = true;
             }
             else {  thisfqualindexfile = ""; }
             if (thisrqualindexfile != "NONE") {
                 pDataArray->m->openInputFile(thisrqualindexfile, inRQualIndex);
                 inRQualIndex.seekg(pDataArray->qlinesInputReverse_start);
+                hasIndex = true;
             }
             else { thisrqualindexfile = ""; }
         }
@@ -1976,10 +1985,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         int numBarcodes = oligos.getPairedBarcodes().size();
         
         
-        TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes());
+        TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), hasIndex);
         TrimOligos* rtrimOligos = NULL;
         if (pDataArray->reorient) {
-            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
         }
         
         for(int i = 0; i < pDataArray->linesInput_end; i++){ //end is the number of sequences to process

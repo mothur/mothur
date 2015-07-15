@@ -378,7 +378,7 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
             string extension = "";
             if (i != 0) { extension = toString(i) + ".temp"; }
             
-            degapData* tempDegap = new degapData(fileName, (outputFileName + extension) m, lines[i]->start, lines[i]->end);
+            degapData* tempDegap = new degapData(filename, (outputFileName + extension), m, lines[i].start, lines[i].end);
             pDataArray.push_back(tempDegap);
             processIDS.push_back(i);
             
