@@ -787,6 +787,8 @@
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getcoremicrobiomecommand.cpp; sourceTree = "<absolute>"; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getcoremicrobiomecommand.h; sourceTree = "<absolute>"; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = "<group>"; };
+		481623E31B58267D004C60B7 /* INSTALL */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = INSTALL; path = source/INSTALL; sourceTree = "<group>"; };
+		481623E41B58267D004C60B7 /* LICENSE_BOOST_1_0.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE_BOOST_1_0.txt; path = source/LICENSE_BOOST_1_0.txt; sourceTree = "<group>"; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		481FB51B1AC0A63E0076CFF3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		481FB5201AC0A6B60076CFF3 /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
@@ -1571,6 +1573,8 @@
 			children = (
 				A7A61F1A130035C800E05B6B /* LICENSE */,
 				A70332B512D3A13400761E33 /* makefile */,
+				481623E31B58267D004C60B7 /* INSTALL */,
+				481623E41B58267D004C60B7 /* LICENSE_BOOST_1_0.txt */,
 				A7E9B65912D37EC300DA6239 /* averagelinkage.cpp */,
 				A77B718A173D40E4002163C2 /* calcsparcc.h */,
 				A77B7189173D40E4002163C2 /* calcsparcc.cpp */,
