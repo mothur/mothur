@@ -1656,6 +1656,7 @@ string ClusterSplitCommand::printFile(string singleton, vector< map<string, stri
 		string outputFileName = getOutputFileName("file", variables);
         m->openOutputFile(outputFileName, out);
         outputTypes["file"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        m->setFileFile(outputFileName);
         
         out << singleton << endl;
         if (namefile != "") { out << "name" << endl; }

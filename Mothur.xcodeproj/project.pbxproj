@@ -746,7 +746,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/source/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "";
 		};
 		A7D162CB149F96CA000523E8 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -756,7 +756,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/source/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "";
 		};
 /* End PBXBuildRule section */
 
@@ -3361,6 +3361,8 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DBIT_VERSION",
+					"-DUSE_BOOST",
+					"-DUNIT_TEST",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
 				);
@@ -3408,6 +3410,8 @@
 				MACH_O_TYPE = mh_execute;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DUSE_READLINE",
+					"-DUSE_BOOST",
+					"-DUNIT_TEST",
 					"-DBIT_VERSION",
 					"$(OTHER_CFLAGS)",
 				);

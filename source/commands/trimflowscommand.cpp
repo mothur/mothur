@@ -379,6 +379,7 @@ int TrimFlowsCommand::execute(){
 		}
 		outputTypes["file"].push_back(flowFilesFileName);
 		outputNames.push_back(flowFilesFileName);
+        m->setFileFile(flowFilesFileName);
 			
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

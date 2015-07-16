@@ -15,6 +15,7 @@ vector<string> SetCurrentCommand::setParameters(){
 		
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pflow);
+        CommandParameter pfile("file", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pfile);
         CommandParameter pbiom("biom", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pbiom);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pphylip);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcolumn);
@@ -56,7 +57,7 @@ string SetCurrentCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
-		helpString += "The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary and taxonomy.\n";
+		helpString += "The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file and taxonomy.\n";
 		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
 		helpString += "set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n";
@@ -300,6 +301,14 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["summary"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("file");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["file"] = inputDir + it->second;		}
+                }
 			}
 			
 			//check for parameters
@@ -417,6 +426,11 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 			if (summaryfile == "not open") { m->mothurOut("Ignoring: " + parameters["summary"]); m->mothurOutEndLine(); summaryfile = ""; }
 			else if (summaryfile == "not found") {  summaryfile = "";  }
 			if (summaryfile != "") { m->setSummaryFile(summaryfile); }
+            
+            filefile = validParameter.validFile(parameters, "file", true);
+            if (filefile == "not open") { m->mothurOut("Ignoring: " + parameters["file"]); m->mothurOutEndLine(); filefile = ""; }
+            else if (filefile == "not found") {  filefile = "";  }
+            if (filefile != "") { m->setFileFile(filefile); }
 
 			string temp = validParameter.validFile(parameters, "processors", false);
 			if (temp == "not found"){	temp = m->getProcessors();	}
@@ -493,6 +507,8 @@ int SetCurrentCommand::execute(){
 					m->setCountTableFile("");
                 }else if (types[i] == "summary") {
 					m->setSummaryFile("");
+                }else if (types[i] == "file") {
+                    m->setFileFile("");
 				}else if (types[i] == "processors") {
 					m->setProcessors("1");
 				}else if (types[i] == "all") {

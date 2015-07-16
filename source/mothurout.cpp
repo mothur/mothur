@@ -26,6 +26,7 @@ set<string> MothurOut::getCurrentTypes()  {
         set<string> types;
         types.insert("fasta");
         types.insert("summary");
+        types.insert("file");
         types.insert("accnos");
         types.insert("column");
         types.insert("design");
@@ -82,9 +83,10 @@ void MothurOut::printCurrentFiles()  {
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
-        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();	}
+        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();        }
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
-        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();		}
+        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();         }
+        if (filefile != "")         {  mothurOut("file=" + filefile); mothurOutEndLine();               }
 		
 	}
 	catch(exception& e) {
@@ -119,7 +121,8 @@ bool MothurOut::hasCurrentFiles()  {
 		if (flowfile != "")			{  return true;			}
         if (biomfile != "")			{  return true;			}
         if (counttablefile != "")	{  return true;			}
-        if (summaryfile != "")	{  return true;			}
+        if (summaryfile != "")      {  return true;			}
+        if (filefile != "")         {  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -135,6 +138,7 @@ bool MothurOut::hasCurrentFiles()  {
 void MothurOut::clearCurrentFiles()  {
 	try {
 		phylipfile = "";
+        filefile = "";
 		columnfile = "";
 		listfile = "";
 		rabundfile = "";
@@ -3248,7 +3252,7 @@ set<string> MothurOut::readAccnos(string accnosfile){
             vector<string> pieces = splitWhiteSpace(rest);
             for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  count++; }
         }
-        cout << count << endl;
+        
 		return names;
 	}
 	catch(exception& e) {
@@ -3288,6 +3292,39 @@ int MothurOut::readAccnos(string accnosfile, vector<string>& names){
 		errorOut(e, "MothurOut", "readAccnos");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int MothurOut::readAccnos(string accnosfile, vector<string>& names, string noerror){
+    try {
+        names.clear();
+        ifstream in;
+        openInputFile(accnosfile, in, noerror);
+        string name;
+        
+        string rest = "";
+        char buffer[4096];
+        
+        while (!in.eof()) {
+            if (control_pressed) { break; }
+            
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
+        }
+        in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "readAccnos");
+        exit(1);
+    }
 }
 /***********************************************************************/
 

@@ -29,7 +29,7 @@ vector<string> MakeFileCommand::setParameters(){
 string MakeFileCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The make.file command takes a input directory and creates a file file containing the fastq files in the directory.\n";
+        helpString += "The make.file command takes a input directory and creates a file file containing the fastq or gz files in the directory.\n";
         helpString += "The make.fastq command parameters are inputdir and type.  inputdir is required.\n";
         helpString += "May create more than one file. Mothur will attempt to match paired files. \n";
         helpString += "The type parameter allows you to set the type of files to look for. Options are fastq or gz.  Default=fastq. \n";
@@ -138,79 +138,85 @@ int MakeFileCommand::execute(){
         
         //read in list of files
         vector<string> fastqFiles;
-        m->readAccnos(tempFile, fastqFiles);
+        m->readAccnos(tempFile, fastqFiles, "no error");
         m->mothurRemove(tempFile);
         
-        //sort into alpha order to put pairs togther if they exist
-        sort(fastqFiles.begin(), fastqFiles.end());
-        
-        vector< vector<string> > paired;
-        vector<string> singles;
-        string lastFile = "";
-        for (int i = 0; i < fastqFiles.size()-1; i++) {
-            if (m->control_pressed) { break; }
+        if (fastqFiles.size() == 0) { m->mothurOut("[WARNING]: Unable to find any " + typeFile + " files in your directory.\n"); }
+        else {
             
-            string simpleName1 = m->getRootName(m->getSimpleName(fastqFiles[i]));
-            string simpleName2 = m->getRootName(m->getSimpleName(fastqFiles[i+1]));
+            //sort into alpha order to put pairs togther if they exist
+            sort(fastqFiles.begin(), fastqFiles.end());
             
-            //possible pair
-            if (simpleName1.length() == simpleName2.length()) {
-                int numDiffs = 0;
-                for (int j = 0; j < simpleName1.length(); j++) {
-                    if (numDiffs > 1) { break; }
-                    else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
-                }
-                if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
-                else { //only one diff = paired files
-                    int pos = simpleName1.find("R1");
-                    int pos2 = simpleName2.find("R2");
-                    if ((pos != string::npos) && (pos2 != string::npos)){
-                        vector<string> temp; temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
-                        paired.push_back(temp);
-                        i++;
-                    }else {
-                        singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+            vector< vector<string> > paired;
+            vector<string> singles;
+            string lastFile = "";
+            for (int i = 0; i < fastqFiles.size()-1; i++) {
+                if (m->control_pressed) { break; }
+                
+                string simpleName1 = m->getRootName(m->getSimpleName(fastqFiles[i]));
+                string simpleName2 = m->getRootName(m->getSimpleName(fastqFiles[i+1]));
+                
+                //possible pair
+                if (simpleName1.length() == simpleName2.length()) {
+                    int numDiffs = 0;
+                    for (int j = 0; j < simpleName1.length(); j++) {
+                        if (numDiffs > 1) { break; }
+                        else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
                     }
+                    if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
+                    else { //only one diff = paired files
+                        int pos = simpleName1.find("R1");
+                        int pos2 = simpleName2.find("R2");
+                        if ((pos != string::npos) && (pos2 != string::npos)){
+                            vector<string> temp; temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                            paired.push_back(temp);
+                            i++;
+                        }else {
+                            singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                        }
+                    }
+                }else{
+                    singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
                 }
-            }else{
-                singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
             }
-        }
-        if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(fastqFiles[fastqFiles.size()-1]); }
-        
-        if (paired.size() != 0) {
-            map<string, string> variables;
-            variables["[filename]"] = inputDir + "fileList.";
-            variables["[tag]"] = "paired";
-            string filename = getOutputFileName("file",variables);
-            ofstream out;
-            m->openOutputFile(filename, out);
-            outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(fastqFiles[fastqFiles.size()-1]); }
             
-            for (int i = 0; i < paired.size(); i++) {
-                for (int j = 0; j < paired[i].size(); j++) {
-                    out << paired[i][j] << '\t';
+            if (singles.size() != 0) {
+                map<string, string> variables;
+                variables["[filename]"] = inputDir + "fileList.";
+                variables["[tag]"] = "single";
+                string filename = getOutputFileName("file",variables);
+                ofstream out;
+                m->openOutputFile(filename, out);
+                outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+                m->setFileFile(filename);
+                
+                for (int i = 0; i < singles.size(); i++) {
+                    out << singles[i] << endl;
                 }
-                out << endl;
+                out.close();
             }
-            out.close();
-        }
-        
-        if (singles.size() != 0) {
-            map<string, string> variables;
-            variables["[filename]"] = inputDir + "fileList.";
-            variables["[tag]"] = "single";
-            string filename = getOutputFileName("file",variables);
-            ofstream out;
-            m->openOutputFile(filename, out);
-            outputNames.push_back(filename); outputTypes["file"].push_back(filename);
             
-            for (int i = 0; i < singles.size(); i++) {
-                out << singles[i] << endl;
+            if (paired.size() != 0) {
+                map<string, string> variables;
+                variables["[filename]"] = inputDir + "fileList.";
+                variables["[tag]"] = "paired";
+                string filename = getOutputFileName("file",variables);
+                ofstream out;
+                m->openOutputFile(filename, out);
+                outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+                m->setFileFile(filename);
+                
+                for (int i = 0; i < paired.size(); i++) {
+                    for (int j = 0; j < paired[i].size(); j++) {
+                        out << paired[i][j] << '\t';
+                    }
+                    out << endl;
+                }
+                out.close();
             }
-            out.close();
+            
         }
-        
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOutEndLine();

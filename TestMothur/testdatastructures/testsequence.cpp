@@ -9,8 +9,6 @@
 #include "catch.hpp"
 #include "sequence.hpp"
 
-#define private public
-
 TEST_CASE("Testing Sequence Class") {
     Sequence seq;
     

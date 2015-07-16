@@ -126,6 +126,7 @@ class MothurOut {
         vector<string> splitWhiteSpace(string);
         set<string> readAccnos(string);
         int readAccnos(string, vector<string>&);
+        int readAccnos(string, vector<string>&, string);
         map<string, int> readNames(string);
         map<string, int> readNames(string, unsigned long int&);
         int readTax(string, map<string, string>&, bool);
@@ -235,6 +236,7 @@ class MothurOut {
         string getBiomFile()		{ return biomfile;			}
         string getCountTableFile()	{ return counttablefile;	}
         string getSummaryFile()     { return summaryfile;       }
+        string getFileFile()        { return filefile;          }
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -259,6 +261,7 @@ class MothurOut {
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
         void setSummaryFile(string f)		{ summaryfile = getFullPathName(f);			}
+        void setFileFile(string f)          { filefile = getFullPathName(f);			}
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
@@ -272,7 +275,8 @@ class MothurOut {
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
 		MothurOut() { 
-			control_pressed = false; defaultPath=""; 
+			control_pressed = false; defaultPath="";
+            filefile = "";
 			phylipfile = "";
 			columnfile = "";
 			listfile = "";
@@ -315,7 +319,7 @@ class MothurOut {
 		string defaultPath, outputDir;
 		string releaseDate, version;
 	
-		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile;
+		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile;
 
 		vector<string> Groups;

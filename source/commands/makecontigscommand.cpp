@@ -1911,11 +1911,11 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             #endif
             
 			//report progress
-            if((num) % 1000 == 0){	m->mothurOutJustToScreen(toString(num)); m->mothurOutEndLine();	 }
+            if((num) % 1000 == 0){	m->mothurOutJustToScreen(toString(num)+"\n"); }
 		}
         
 		//report progress
-		if((num) % 1000 != 0){	m->mothurOut(toString(num)); m->mothurOutEndLine();		}
+		if((num) % 1000 != 0){	m->mothurOutJustToScreen(toString(num)+"\n"); }
         
         //close files
         inFFasta.close();
