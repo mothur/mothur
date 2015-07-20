@@ -31,7 +31,7 @@ public:
 	
 	string getHelpString();	
     string getOutputPattern(string);	
-	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code was donated to the public domain.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.uchime\n"; }
+	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/usearch/manual/uchime_algo.html\nThis code was donated to the public domain.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.uchime\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
 	
 	int execute(); 
