@@ -1729,7 +1729,6 @@
 				7B21820217AD77BD00286E6A /* svm.hpp */,
 			);
 			name = svm;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7386C191619C9FB00651424 /* randomforest */ = {
@@ -1752,7 +1751,6 @@
 				834D9D571656D7C400E7FAB9 /* regularizedrandomforest.h */,
 			);
 			name = randomforest;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7D395C1184FA34300A350D7 /* communitytype */ = {
@@ -1768,7 +1766,6 @@
 				A7548FAE171440EC00B1F05A /* qFinderDMM.cpp */,
 			);
 			name = communitytype;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA3812D3956100DA6239 /* commands */ = {
@@ -2071,7 +2068,6 @@
 				A7E9B87A12D37EC400DA6239 /* venncommand.cpp */,
 			);
 			name = commands;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA3F12D395F700DA6239 /* calculators */ = {
@@ -2238,7 +2234,6 @@
 				A7E9B88012D37EC400DA6239 /* whittaker.h */,
 			);
 			name = calculators;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA4212D3960D00DA6239 /* containers */ = {
@@ -2334,7 +2329,6 @@
 				A7E9B86712D37EC400DA6239 /* treenode.h */,
 			);
 			name = containers;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA4512D3965600DA6239 /* chimera */ = {
@@ -2364,7 +2358,6 @@
 				A7E9B82F12D37EC400DA6239 /* slayer.h */,
 			);
 			name = chimera;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA4B12D3966900DA6239 /* classifier */ = {
@@ -2394,7 +2387,6 @@
 				A721AB73161C573B009860A1 /* taxonomynode.cpp */,
 			);
 			name = classifier;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA4F12D398D700DA6239 /* clearcut */ = {
@@ -2415,7 +2407,6 @@
 				A7E9B6FC12D37EC400DA6239 /* getopt_long.cpp */,
 			);
 			name = clearcut;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA5312D39A5E00DA6239 /* read */ = {
@@ -2445,7 +2436,6 @@
 				A7D755D91535F679009BF21A /* treereader.cpp */,
 			);
 			name = read;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 		A7E9BA5612D39BD800DA6239 /* metastats */ = {
@@ -2457,7 +2447,6 @@
 				A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */,
 			);
 			name = metastats;
-			path = /Users/sarahwestcott/Desktop/mothur;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
