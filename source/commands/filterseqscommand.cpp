@@ -1043,7 +1043,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 
 		bool done = false;
 		int count = 0;
-	
+        bool error = false;
+        
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); return 1; }
@@ -1051,7 +1052,7 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 			Sequence seq(in); m->gobble(in);
 			if (seq.getName() != "") {
                     if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();}
-					if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
+                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); error = true; if (!m->debug) { m->control_pressed = true; } }
 					
 					if(trump != '*')			{	F.doTrump(seq);		}
 					if(m->isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}
@@ -1073,6 +1074,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}
 		in.close();
 		
+        if (error) { m->control_pressed = true; }
+        
 		return count;
 	}
 	catch(exception& e) {

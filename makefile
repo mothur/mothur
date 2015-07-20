@@ -112,7 +112,7 @@ endif
 mothur : $(OBJECTS) uchime
     $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
     strip mothur
-    mv mothur ..
+
 
 uchime:
     cd source/uchime_src && ./mk && mv uchime .. && cd ..
