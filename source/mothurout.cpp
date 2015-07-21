@@ -170,10 +170,24 @@ void MothurOut::clearCurrentFiles()  {
 }
 /***********************************************************************/
 string MothurOut::findProgramPath(string programName){
-	try { 
+	try {
+        string pPath = "";
+        
+        //look in ./
+        //is this the programs path?
+        ifstream in5;
+        string tempIn = ".";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        tempIn += "/" + programName;
+#else
+        tempIn += "\\" + programName;
+#endif
+        openInputFile(tempIn, in5, "");
+        
+        //if this file exists
+        if (in5) { in5.close(); pPath = getFullPathName(tempIn); if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
 		
 		string envPath = getenv("PATH");
-		string pPath = "";
 		
 		//delimiting path char
 		char delim;
@@ -3228,7 +3242,8 @@ set<string> MothurOut::readAccnos(string accnosfile){
 	try {
  		set<string> names;
 		ifstream in;
-		openInputFile(accnosfile, in);
+		int ableToOpen = openInputFile(accnosfile, in, "");
+        if (ableToOpen == 1) {  mothurOut("[ERROR]: Could not open " + accnosfile); mothurOutEndLine(); return names; }
 		string name;
 		
         string rest = "";

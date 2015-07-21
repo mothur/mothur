@@ -94,7 +94,7 @@ SharedCommand::SharedCommand(){
 //**********************************************************************************************************************
 SharedCommand::SharedCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
+        abort = false; calledHelp = false; pickedGroups=false;
 		allLines = 1;
 
 		//allow user to run help
@@ -227,6 +227,7 @@ SharedCommand::SharedCommand(string option)  {
 			 string groups = validParameter.validFile(parameters, "groups", false);
 			 if (groups == "not found") { groups = ""; }
 			 else {
+                 pickedGroups=true;
 				 m->splitAtDash(groups, Groups);
 				 m->setGroups(Groups);
 			 }
@@ -264,15 +265,6 @@ int SharedCommand::execute(){
 		}
 
 		string current = "";
-
-		//set rabund file as new current rabundfile
-		// itTypes = outputTypes.find("rabund");
-		// if (itTypes != outputTypes.end()) {
-		// 	if ((itTypes->second).size() != 0) {
-		// 		current = (itTypes->second)[0];
-		// 		m->setRabundFile(current);
-		// 	}
-		// }
 
 		itTypes = outputTypes.find("shared");
 		if (itTypes != outputTypes.end()) {
@@ -359,6 +351,7 @@ int SharedCommand::createSharedFromBiom() {
                 }
                 string tag = getTag(line);
                 fileLines[tag] = line;
+                
                 line = "";
                 atComma = false;
                 ignoreCommas = false;
@@ -370,9 +363,10 @@ int SharedCommand::createSharedFromBiom() {
             line = line.substr(0, line.length()-1);
             string tag = getTag(line);
             fileLines[tag] = line;
+            
         }
         in.close();
-
+        
         string biomType;
         map<string, string>::iterator it;
         it = fileLines.find("type");
@@ -446,7 +440,7 @@ int SharedCommand::createSharedFromBiom() {
 
             //read sample names
             groupNames = readRows(thisLine, numCols);
-
+            
             //if users selected groups, then remove the groups not wanted.
             SharedUtil util;
             vector<string> Groups = m->getGroups();
@@ -454,26 +448,11 @@ int SharedCommand::createSharedFromBiom() {
             util.setGroups(Groups, allGroups);
             m->setGroups(Groups);
 
-            //fill filehandles with neccessary ofstreams
-            int i;
-            ofstream* temp;
-            for (i=0; i<Groups.size(); i++) {
-                temp = new ofstream;
-                filehandles[Groups[i]] = temp;
-            }
-
             //set fileroot
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
-
-            //clears file before we start to write to it below
-            // for (int i=0; i<Groups.size(); i++) {
-            //     m->mothurRemove((fileroot + Groups[i] + ".rabund"));
-            //     outputNames.push_back((fileroot + Groups[i] + ".rabund"));
-            //     outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
-            // }
         }
 
-        if (m->control_pressed) { for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; } out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("shape");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a shape provided.\n"); }
@@ -487,7 +466,7 @@ int SharedCommand::createSharedFromBiom() {
             if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->control_pressed = true; }
         }
 
-        if (m->control_pressed) { for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; } out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
@@ -503,8 +482,8 @@ int SharedCommand::createSharedFromBiom() {
             printSharedData(lookup, out);
         }
 
-        for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; }
-        out.close();
+        //for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; }
+        //out.close();
 
         if (m->control_pressed) {  m->mothurRemove(filename); return 0; }
 
@@ -585,19 +564,21 @@ vector<SharedRAbundVector*> SharedCommand::readData(string matrixFormat, string 
             }
         }
 
+        
         SharedUtil util;
-
 		bool remove = false;
-		for (int i = 0; i < lookup.size(); i++) {
-			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util.isValidGroup(lookup[i]->getGroup(), m->getGroups()) == false) {
-				remove = true;
-				delete lookup[i]; lookup[i] = NULL;
-				lookup.erase(lookup.begin()+i);
-				i--;
-			}
-		}
-
+        if (pickedGroups) {
+            for (int i = 0; i < lookup.size(); i++) {
+                //if this sharedrabund is not from a group the user wants then delete it.
+                if (util.isValidGroup(lookup[i]->getGroup(), m->getGroups()) == false) {
+                    remove = true;
+                    delete lookup[i]; lookup[i] = NULL;
+                    lookup.erase(lookup.begin()+i);
+                    i--;
+                }
+            }
+        }
+        
 		if (remove) { eliminateZeroOTUS(lookup); }
 
 
@@ -752,12 +733,13 @@ vector<string> SharedCommand::readRows(string line, int& numRows) {
                     name = newName;
                 }
                 names.push_back(name);
+                
                 nextRow = "";
                 openParen = 0;
                 closeParen = 0;
             }
         }
-
+       
 
         return names;
     }
@@ -837,31 +819,11 @@ int SharedCommand::createSharedFromListGroup() {
             m->openOutputFile(filename, out);
         }
 
-        //fill filehandles with neccessary ofstreams
-        int i;
-        ofstream* temp;
-        for (i=0; i<Groups.size(); i++) {
-            temp = new ofstream;
-            filehandles[Groups[i]] = temp;
-        }
-
         //set fileroot
         fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
         map<string, string> variables;
 		variables["[filename]"] = fileroot;
-        //clears file before we start to write to it below
-        for (int i=0; i<Groups.size(); i++) {
-            variables["[group]"] = Groups[i];
-            // string rabundFIleName = getOutputFileName("rabund",variables);
-            // m->mothurRemove(rabundFIleName);
-            // outputNames.push_back(rabundFIleName);
-            // outputTypes["rabund"].push_back(rabundFIleName);
-        }
-
         string errorOff = "no error";
-
-        //if user provided an order file containing the order the shared file should be in read it
-        //if (ordergroupfile != "") { readOrderFile(); }
 
         InputData input(listfile, "shared");
         SharedListVector* SharedList = input.getSharedListVector();
@@ -870,12 +832,7 @@ int SharedCommand::createSharedFromListGroup() {
 
         if (m->control_pressed) {
             delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
-            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
             out.close(); if (!pickedGroups) { m->mothurRemove(filename); }
-            // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-            //     string rabundFIleName = getOutputFileName("rabund",variables);
-            //     m->mothurRemove(rabundFIleName);
-			// }
             return 0;
         }
 
@@ -892,7 +849,6 @@ int SharedCommand::createSharedFromListGroup() {
             out.close(); if (!pickedGroups) { m->mothurRemove(filename); } //remove blank shared file you made
 
             //delete memory
-            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; }
             delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
             return 0;
         }
@@ -931,16 +887,11 @@ int SharedCommand::createSharedFromListGroup() {
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
-
+    
         while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             if (m->control_pressed) {
                 delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
-                for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
                 if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
-                // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-                //     string rabundFIleName = getOutputFileName("rabund",variables);
-                //     m->mothurRemove(rabundFIleName);
-				// }
                 return 0;
             }
 
@@ -953,12 +904,7 @@ int SharedCommand::createSharedFromListGroup() {
                 if (m->control_pressed) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                     for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-                    for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
                     if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
-                    // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-                    //     string rabundFIleName = getOutputFileName("rabund",variables);
-                    //     m->mothurRemove(rabundFIleName);
-					// }
                     return 0;
                 }
 
@@ -1004,12 +950,7 @@ int SharedCommand::createSharedFromListGroup() {
                 if (m->control_pressed) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                     for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-                    for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
                     if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
-                    // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-                    //     string rabundFIleName = getOutputFileName("rabund",variables);
-                    //     m->mothurRemove(rabundFIleName);
-					// }
                     return 0;
                 }
 
@@ -1053,7 +994,7 @@ int SharedCommand::createSharedFromListGroup() {
             delete SharedList;
             SharedList = input.getSharedListVector(); //get new list vector to process
         }
-
+        
         //output error messages about any remaining user labels
         set<string>::iterator it;
         bool needToRun = false;
@@ -1062,7 +1003,7 @@ int SharedCommand::createSharedFromListGroup() {
                 needToRun = true;
             }
         }
-
+        
         //run last label if you need to
         if (needToRun == true)  {
             if (SharedList != NULL) {	delete SharedList;	}
@@ -1073,12 +1014,7 @@ int SharedCommand::createSharedFromListGroup() {
 
             if (m->control_pressed) {
                 if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
-                for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
                 if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
-                // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-                //     string rabundFIleName = getOutputFileName("rabund",variables);
-                //     m->mothurRemove(rabundFIleName);
-				// }
                 return 0;
             }
 
@@ -1109,24 +1045,16 @@ int SharedCommand::createSharedFromListGroup() {
             for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
             delete SharedList;
         }
-
+        
         if (!pickedGroups) { out.close(); }
-
-        for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-            delete it3->second;
-        }
 
         if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
 
         if (m->control_pressed) {
             if (!pickedGroups) { m->mothurRemove(filename); }
-            // for (int i=0; i<Groups.size(); i++) {  variables["[group]"] = Groups[i];
-            //     string rabundFIleName = getOutputFileName("rabund",variables);
-            //     m->mothurRemove(rabundFIleName);
-			// }
             return 0;
         }
-
+        
         return 0;
     }
 	catch(exception& e) {
@@ -1150,14 +1078,6 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup, ofst
 				thislookup[i]->print(out);
 
 				Groups.push_back(thislookup[i]->getGroup());
-
-				//RAbundVector rav = thislookup[i]->getRAbundVector();
-                // map<string, string> variables;
-                // variables["[filename]"] = fileroot;
-                // variables["[group]"] = thislookup[i]->getGroup();
-				// m->openOutputFileAppend(getOutputFileName("rabund",variables), *(filehandles[thislookup[i]->getGroup()]));
-				// rav.print(*(filehandles[thislookup[i]->getGroup()]));
-				// (*(filehandles[thislookup[i]->getGroup()])).close();
 			}
 			m->setGroups(Groups);
 		}else{
@@ -1181,14 +1101,6 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup, ofst
 					(myIt->second)->print(out);
 
 					Groups.push_back((myIt->second)->getGroup());
-
-					// RAbundVector rav = (myIt->second)->getRAbundVector();
-                    // map<string, string> variables;
-                    // variables["[filename]"] = fileroot;
-                    // variables["[group]"] = (myIt->second)->getGroup();
-					// m->openOutputFileAppend(getOutputFileName("rabund",variables), *(filehandles[(myIt->second)->getGroup()]));
-					// rav.print(*(filehandles[(myIt->second)->getGroup()]));
-					// (*(filehandles[(myIt->second)->getGroup()])).close();
 				}else{
 					m->mothurOut("Can't find shared info for " + order[i] + ", skipping."); m->mothurOutEndLine();
 				}

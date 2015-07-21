@@ -151,6 +151,9 @@ int MakeFileCommand::execute(){
             vector<string> singles;
             string lastFile = "";
             for (int i = 0; i < fastqFiles.size()-1; i++) {
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
+                
                 if (m->control_pressed) { break; }
                 
                 string simpleName1 = m->getRootName(m->getSimpleName(fastqFiles[i]));
@@ -183,7 +186,7 @@ int MakeFileCommand::execute(){
             
             if (singles.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = inputDir + "fileList.";
+                variables["[filename]"] = outputDir + "fileList.";
                 variables["[tag]"] = "single";
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
@@ -199,7 +202,7 @@ int MakeFileCommand::execute(){
             
             if (paired.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = inputDir + "fileList.";
+                variables["[filename]"] = outputDir + "fileList.";
                 variables["[tag]"] = "paired";
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
