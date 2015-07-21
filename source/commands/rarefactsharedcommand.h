@@ -14,6 +14,7 @@
 #include "rarefact.h"
 #include "display.h"
 #include "validcalculator.h"
+#include "designmap.h"
 
 class RareFactSharedCommand : public Command {
 	
@@ -48,7 +49,7 @@ private:
 	string label, calc, groups, outputDir, sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
     
-    int process(GroupMap&, string);
+    int process(DesignMap&, string);
     vector<string> createGroupFile(vector<string>&);
     int subsampleLookup(vector<SharedRAbundVector*>&, string);
 

@@ -19,7 +19,8 @@ vector<string> GetMIMarksPackageCommand::setParameters(){
         CommandParameter poligos("oligos", "InputTypes", "", "", "groupOligos", "none", "none","",false,false); parameters.push_back(poligos);
         CommandParameter ppackage("package", "Multiple", "air-host_associated-human_associated-human_gut-human_oral-human_skin-human_vaginal-microbial-miscellaneous-plant_associated-sediment-soil-wastewater-water", "miscellaneous", "", "", "","",false,false,true); parameters.push_back(ppackage);
         CommandParameter prequiredonly("requiredonly", "Boolean", "", "F", "", "", "","",false,false, true); parameters.push_back(prequiredonly);
-  		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+  		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -387,7 +388,7 @@ int GetMIMarksPackageCommand::execute(){
             }
         }
         
-        for (set<string>::iterator it = Groups.begin(); it != Groups.end(); it++) {  out << *it << '\t' << endl; }
+        for (set<string>::iterator it = Groups.begin(); it != Groups.end(); it++) {  out << *it << endl; }
         
         out.close();
         

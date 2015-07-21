@@ -16,6 +16,12 @@
 
 //#include <cstddef>
 
+//boost libraries
+#ifdef USE_BOOST
+    #include <boost/iostreams/filtering_stream.hpp>
+    #include <boost/iostreams/filter/gzip.hpp>
+#endif
+
 //io libraries
 #include <iostream>
 #include <iomanip>

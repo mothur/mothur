@@ -17,7 +17,8 @@ vector<string> SummaryQualCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -335,6 +336,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		int process = 1;
 		int numSeqs = 0;
 		processIDS.clear();
+        bool recalc = false;
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
@@ -369,12 +371,76 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            vector<unsigned long long> positions = m->divideFile(qualfile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+            
+            numSeqs = 0;
+            processIDS.resize(0);
+            process = 1;
+            position.clear();
+            averageQ.clear();
+            scores.clear();
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = qualfile + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    
+                    out << numSeqs << endl;
+                    out << position.size() << endl;
+                    for (int k = 0; k < position.size(); k++)			{		out << position[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < averageQ.size(); k++)			{		out << averageQ[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < scores.size(); k++)	{
+                        for (int j = 0; j < 41; j++) {
+                            out << scores[k][j] << '\t';
+                        }
+                        out << endl;
+                    }  
+                    out << endl;
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
 		//do your part
 		numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[0]);
 		
@@ -480,8 +546,8 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 		outputNames.push_back(sumFile); outputTypes["summary"].push_back(sumFile);
 		
 		//print headings
-		out << "Position\tnumSeqs\tAverageQ\t";
-		for (int i = 0; i < 41; i++) { out << "q" << i << '\t'; }
+		out << "Position\tnumSeqs\tAverageQ";
+		for (int i = 0; i < 41; i++) { out << '\t' << "q" << i; }
 		out << endl;
 		
 		for (int i = 0; i < position.size(); i++) {
@@ -489,10 +555,10 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 			if (m->control_pressed) { out.close(); return 0; }
 			
 			double average = averageQ[i] / (float) position[i];
-			out << i << '\t' << position[i] << '\t' << average << '\t';
+			out << i << '\t' << position[i] << '\t' << average;
 			
 			for (int j = 0; j < 41; j++) {
-				out << scores[i][j] << '\t';
+				out  << '\t' << scores[i][j];
 			}
 			out << endl;
 		}

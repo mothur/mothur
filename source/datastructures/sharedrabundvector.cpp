@@ -373,7 +373,7 @@ int SharedRAbundVector::size(){
 void SharedRAbundVector::printHeaders(ostream& output){
 	try {
 		string snumBins = toString(numBins);
-		output << "label\tGroup\tnumOtus\t";
+		output << "label\tGroup\tnumOtus";
 		if (m->sharedHeaderMode == "tax") {
 			for (int i = 0; i < numBins; i++) {  
 				
@@ -387,7 +387,7 @@ void SharedRAbundVector::printHeaders(ostream& output){
 				binLabel += sbinNumber;
 				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
-				output << binLabel << '\t'; 
+				output << '\t' << binLabel ;
 			}
 			output << endl;
 		}else {
@@ -402,7 +402,7 @@ void SharedRAbundVector::printHeaders(ostream& output){
 				binLabel += sbinNumber;
 				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
-				output << binLabel << '\t'; 
+				output  << '\t' << binLabel;
 			}
 			
 			output << endl;
@@ -417,9 +417,9 @@ void SharedRAbundVector::printHeaders(ostream& output){
 /***********************************************************************/
 void SharedRAbundVector::print(ostream& output) {
 	try {
-		output << numBins << '\t';
+		output << numBins;
 	
-		for(int i=0;i<data.size();i++){		output << data[i].abundance << '\t';		}
+		for(int i=0;i<data.size();i++){		output  << '\t' << data[i].abundance;		}
 		output << endl;
 	}
 	catch(exception& e) {

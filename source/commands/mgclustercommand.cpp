@@ -25,7 +25,8 @@ vector<string> MGClusterCommand::setParameters(){
 		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmerge);
         CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
 		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(phcluster);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

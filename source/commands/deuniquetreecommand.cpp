@@ -15,7 +15,8 @@ vector<string> DeuniqueTreeCommand::setParameters(){
 	try {
 		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","tree",false,true,true); parameters.push_back(ptree);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pname);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

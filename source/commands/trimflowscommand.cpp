@@ -31,7 +31,8 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(pallfiles);
         CommandParameter porder("order", "Multiple", "A-B-I", "A", "", "", "","",false,false, true); parameters.push_back(porder);
 		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfasta);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -378,6 +379,7 @@ int TrimFlowsCommand::execute(){
 		}
 		outputTypes["file"].push_back(flowFilesFileName);
 		outputNames.push_back(flowFilesFileName);
+        m->setFileFile(flowFilesFileName);
 			
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -437,12 +439,12 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		bool moreSeqs = 1;
 		
 		TrimOligos* trimOligos = NULL;
-        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); }
+        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), false); }
         else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  }
         
         TrimOligos* rtrimOligos = NULL;
         if (reorient) {
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), false); numBarcodes = oligos.getReorientedPairedBarcodes().size();
         }
 
 		
@@ -844,6 +846,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 	try {
 		processIDS.clear();
 		int exitCommand = 1;
+        bool recalc = false;
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -878,11 +881,85 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));
+                    if(allFiles){
+                        for(int i=0;i<barcodePrimerComboFileNames.size();i++){
+                            for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
+                                if (barcodePrimerComboFileNames[i][j] != "") {
+                                    string tempFile = barcodePrimerComboFileNames[i][j] +(toString(processIDS[i])) + ".temp";
+                                    m->mothurRemove(tempFile);
+                                }
+                            }
+                        }
+                    }
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+            vector<unsigned long long> flowFilePos = getFlowFileBreaks();
+            for (int i = 0; i < (flowFilePos.size()-1); i++) {
+                lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    
+                    vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
+                    if(allFiles){
+                        for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
+                            for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
+                                if (tempBarcodePrimerComboFileNames[i][j] != "") {
+                                    tempBarcodePrimerComboFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                    ofstream temp;
+                                    m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+                                    temp.close();
+                                }
+                            }
+                        }
+                    }
+                    driverCreateTrim(flowFileName,
+                                     (trimFlowFileName + m->mothurGetpid(process) + ".temp"),
+                                     (scrapFlowFileName + m->mothurGetpid(process) + ".temp"),
+                                     (fastaFileName + m->mothurGetpid(process) + ".temp"),
+                                     tempBarcodePrimerComboFileNames, lines[process]);
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+            
+        }
 		
 		//parent do my part
 		ofstream temp;

@@ -26,6 +26,7 @@ vector<string> PcrSeqsCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepprimer);
         CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pkeepdots);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -431,6 +432,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		int num = 0;
         int pstart = -1; int pend = -1;
         bool adjustNeeded = false;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
@@ -458,12 +460,68 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
+
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    string locationsFile = m->mothurGetpid(process) + ".temp";
+                    num = driverPcr(filename, goodFileName + m->mothurGetpid(process) + ".temp", badFileName + m->mothurGetpid(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << pstart << '\t' << adjustNeeded << endl;
+                    out << num << '\t' << badSeqNames.size() << endl;
+                    for (set<string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
+                        out << (*it) << endl;
+                    }
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+            
+        }
+
         string locationsFile = m->mothurGetpid(process) + ".temp";
         num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, adjustNeeded);
         
@@ -676,6 +734,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             int totalDiffs = 0;
             string commentString = "";
             
+            if (m->control_pressed) {  break; }
+            
 			if (currSeq.getName() != "") {
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
@@ -818,7 +878,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                 if (totalDiffs > pdiffs) { trashCode += "t"; goodSeq = false; }
                 
                 //trimming removed all bases
-                if (currSeq.getUnaligned() == "") { goodSeq = false; }
+               // if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
 				if(goodSeq == 1)    {
                     currSeq.printSequence(goodFile);

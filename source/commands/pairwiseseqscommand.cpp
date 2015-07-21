@@ -24,7 +24,8 @@ vector<string> PairwiseSeqsCommand::setParameters(){
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
 		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "","",false,false,true); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -516,6 +517,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
         int process = 1;
 		processIDS.clear();
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
@@ -532,12 +534,62 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+
 			}
 		}
 		
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            int numSeqs = alignDB.getNumSeqs();
+            lines.clear();
+            for (int i = 0; i < processors; i++) {
+                distlinePair tempLine;
+                lines.push_back(tempLine);
+                if (output != "square") {
+                    lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+                }else{
+                    lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+                    lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
+                }
+            }
+            
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);
+                    process++;
+                }else if (pid == 0){
+                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
+                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		//parent do my part
 		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
 		else { driver(lines[0].start, lines[0].end, filename, "square"); }
@@ -650,7 +702,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
 				}
-				outFile << name << '\t';	
+				outFile << name;
 			}
 			
 			for(int j=0;j<i;j++){
@@ -680,7 +732,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (output == "lt") {  outFile << dist << '\t'; }
+				if (output == "lt") {  outFile << '\t' << dist; }
 			}
 			
 			if (output == "lt") { outFile << endl; }
@@ -750,7 +802,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 			//pad with spaces to make compatible
 			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
 				
-			outFile << name << '\t';	
+			outFile << name;
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
@@ -774,7 +826,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
 								
-				outFile << dist << '\t';
+				outFile << '\t' << dist;
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 			}
@@ -946,7 +998,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
-			outputString += name + "\t";	
+			outputString += name;
 			
 			for(int j=0;j<i;j++){
 				
@@ -972,7 +1024,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
                 
                 if (m->debug) { cout << ("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 				
-				outputString += toString(dist) + "\t"; 
+				outputString +=  + "\t" + toString(dist);
 			}
 			
 			outputString += "\n"; 
@@ -1051,7 +1103,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
-			outputString += name + "\t";	
+			outputString += name;
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
@@ -1075,7 +1127,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
 				
-				outputString += toString(dist) + "\t";
+				outputString +=  + "\t" + toString(dist);
                 
                 if (m->debug) { cout << ("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 			}

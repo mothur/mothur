@@ -14,6 +14,7 @@
 #include "inputdata.h"
 #include "sharedrabundvector.h"
 #include "mothurmetastats.h"
+#include "designmap.h"
 
 class MetaStatsCommand : public Command {
 
@@ -37,7 +38,7 @@ public:
 private:
 	vector<linePair> lines;
 	
-	GroupMap* designMap;
+	DesignMap* designMap;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 		

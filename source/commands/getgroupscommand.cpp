@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "sharedutilities.h"
 #include "inputdata.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> GetGroupsCommand::setParameters(){	
@@ -26,7 +27,8 @@ vector<string> GetGroupsCommand::setParameters(){
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT","taxonomy",false,false, true); parameters.push_back(ptaxonomy);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -836,8 +838,8 @@ int GetGroupsCommand::readCount(){
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  GroupIndexes[groups[i]] = i; }
         sort(Groups.begin(), Groups.end());
-        out << "Representative_Sequence\ttotal\t";
-        for (int i = 0; i < Groups.size(); i++) { out << Groups[i] << '\t'; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
+        out << "Representative_Sequence\ttotal";
+        for (int i = 0; i < Groups.size(); i++) { out  << '\t' << Groups[i]; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
         out << endl;
         
         string name; int oldTotal;
@@ -859,8 +861,8 @@ int GetGroupsCommand::readCount(){
                     }
                 }
 
-                out << name << '\t' << thisTotal << '\t';
-                for (int i = 0; i < selectedCounts.size(); i++) {  out << selectedCounts[i] << '\t'; }
+                out << name << '\t' << thisTotal;
+                for (int i = 0; i < selectedCounts.size(); i++) {  out  << '\t' << selectedCounts[i]; }
                 out << endl;
                 
                 wroteSomething = true;
@@ -894,40 +896,24 @@ int GetGroupsCommand::readDesign(){
         variables["[extension]"] = m->getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		m->openInputFile(designfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
-		
-		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
-			
-			in >> name;				//read from first column
-			in >> group;			//read from second column
-			
-			//if this name is in the accnos file
-			if (m->inUsersGroups(name, Groups)) {
-				wroteSomething = true;
-				out << name << '\t' << group << endl;
-                selectedCount++;
-			}
-			
-			m->gobble(in);
-		}
-		in.close();
-		out.close();
+        DesignMap designMap(designfile);
+        
+        bool wroteSomething = false;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+
+        int numGroupsFound = designMap.printGroups(out, Groups);
+        
+        if (numGroupsFound > 0) { wroteSomething = true; }
+				
+        out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain groups from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " groups from your design file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(numGroupsFound) + " groups from your design file."); m->mothurOutEndLine();
         
-		
 		return 0;
 	}
 	catch(exception& e) {

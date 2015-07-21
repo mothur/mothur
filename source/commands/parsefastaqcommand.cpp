@@ -27,6 +27,7 @@ vector<string> ParseFastaQCommand::setParameters(){
 		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "","qfile",false,false); parameters.push_back(pqual);
         CommandParameter ppacbio("pacbio", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppacbio);
  		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -102,7 +103,7 @@ ParseFastaQCommand::ParseFastaQCommand(){
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(string option){
 	try {
-		abort = false; calledHelp = false; fileOption = 0; createFileGroup = false;
+        abort = false; calledHelp = false; fileOption = 0; createFileGroup = false; hasIndex = false;
         split = 1;
 		
 		if(option == "help") {	help(); abort = true; calledHelp = true; }
@@ -248,24 +249,29 @@ int ParseFastaQCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        vector< vector<string> > files;
+        if (file != "") {
+            //read file
+            files = readFile();
+        }
+        
+        if (m->control_pressed) { return 0; }
+        
         TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
         pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
         if (oligosfile != "")       {
             readOligos(oligosfile);
             //find group read belongs to
-            if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes()); numBarcodes = oligos.getPairedBarcodes().size(); numPrimers = oligos.getPairedPrimers().size(); }
+            if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), hasIndex); numBarcodes = oligos.getPairedBarcodes().size(); numPrimers = oligos.getPairedPrimers().size(); }
             else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  numPrimers = oligos.getPrimers().size(); numBarcodes = oligos.getBarcodes().size();  }
             
             if (reorient) {
-                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes()); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
             }
             
         }else if (groupfile != "")   { readGroup(groupfile);     }
         
         if (file != "") {
-            //read file
-            vector< vector<string> > files = readFile();
-            
             if (m->control_pressed) { return 0; }
             
             for (int i = 0; i < files.size(); i++) { //process each pair
@@ -1129,6 +1135,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 findex = pieces[2];
                 rindex = pieces[3];
                 fileOption = 4;
+                hasIndex = true;
                 if ((findex == "none") || (findex == "NONE")){ findex = ""; }
                 if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
             }else {

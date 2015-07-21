@@ -21,7 +21,8 @@ vector<string> CountSeqsCommand::setParameters(){
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -195,11 +196,16 @@ int CountSeqsCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        processors=1;
+#endif
 		
         map<string, string> variables;
 
         if (namefile != "") {
-            int total = 0;
+            unsigned long long total = 0;
             int start = time(NULL);
             if (outputDir == "") { outputDir = m->hasPath(namefile); }
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
@@ -319,7 +325,7 @@ int CountSeqsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
+unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
     try {
         variables["[distance]"] = lookup[0]->getLabel();
         string outputFileName = getOutputFileName("count", variables);
@@ -328,8 +334,8 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
         ofstream out;
         m->openOutputFile(outputFileName, out);
         
-        out << "OTU_Label\ttotal\t";
-        for (int i = 0; i < lookup.size(); i++) { out << lookup[i]->getGroup() << '\t'; } out << endl;
+        out << "OTU_Label\ttotal";
+        for (int i = 0; i < lookup.size(); i++) { out << '\t' << lookup[i]->getGroup(); } out << endl;
         
         for (int j = 0; j < lookup[0]->getNumBins(); j++) {
             if (m->control_pressed) { break; }
@@ -338,9 +344,9 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
             string output = "";
             for (int i = 0; i < lookup.size(); i++) {
                 total += lookup[i]->getAbundance(j);
-                output += toString(lookup[i]->getAbundance(j)) + '\t';
+                output += '\t' + toString(lookup[i]->getAbundance(j));
             }
-            out << m->currentSharedBinLabels[j] << '\t' << total << '\t' << output << endl;
+            out << m->currentSharedBinLabels[j] << '\t' << total << output << endl;
         }
         out.close();
         
@@ -353,12 +359,12 @@ int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<str
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processSmall(string outputFileName){
+unsigned long long CountSeqsCommand::processSmall(string outputFileName){
 	try {
         ofstream out;
         m->openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal\t";
+		out << "Representative_Sequence\ttotal";
         
         GroupMap* groupMap;
 		if (groupfile != "") { 
@@ -375,13 +381,13 @@ int CountSeqsCommand::processSmall(string outputFileName){
 			
 			//print groupNames
 			for (int i = 0; i < Groups.size(); i++) {
-				out << Groups[i] << '\t';
+				out << '\t' << Groups[i];
 			}
 		}
 		out << endl;
         out.close();
         
-        int total = createProcesses(groupMap, outputFileName);
+        unsigned long long total = createProcesses(groupMap, outputFileName);
         
         if (groupfile != "") { delete groupMap; }
         
@@ -393,14 +399,15 @@ int CountSeqsCommand::processSmall(string outputFileName){
 	}
 }
 /**************************************************************************************************/
-int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
+unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
 	try {
 		
 		vector<int> processIDS;
 		int process = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        int numSeqs = 0;
+        unsigned long long numSeqs = 0;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFilePerLine(namefile, processors);
@@ -408,7 +415,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 #else
 		if(processors == 1){ lines.push_back(linePair(0, 1000));  }
         else {
-            int numSeqs = 0;
+            unsigned long long numSeqs = 0;
             positions = m->setFilePosEachLine(namefile, numSeqs);
             if (positions.size() < processors) { processors = positions.size(); }
             
@@ -444,13 +451,65 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
                 outTemp.close();
                 
 				exit(0);
-			}else {
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                m->control_pressed = false;
+                recalc = true;
+                break;
+            }
 		}
 		
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            positions.clear();
+            lines.clear();
+            positions = m->divideFilePerLine(namefile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
+            
+            numSeqs = 0;
+            processIDS.resize(0);
+            process = 0;
+            
+            while (process != processors-1) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    string filename = m->mothurGetpid(process) + ".temp";
+                    numSeqs = driver(lines[process].start, lines[process].end, filename, groupMap);
+                    
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    ofstream outTemp;
+                    m->openOutputFile(tempFile, outTemp);
+                    
+                    outTemp << numSeqs << endl;
+                    outTemp.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
+        
 		string filename = m->mothurGetpid(process) + ".temp";
         numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
         
@@ -532,7 +591,7 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 	}
 }
 /**************************************************************************************************/
-int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
+unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
 	try {
         
         ofstream out;
@@ -547,7 +606,7 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 
         
 		bool done = false;
-        int total = 0;
+        unsigned long long total = 0;
 		while (!done) {
 			if (m->control_pressed) { break; }
 			
@@ -584,9 +643,9 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 				}
 				
 				if (total != 0) {
-					out << firstCol << '\t' << total << '\t';
+					out << firstCol << '\t' << total;
 					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << it->second << '\t';
+						out << '\t' << it->second;
 					}
 					out << endl;
 				}
@@ -617,7 +676,7 @@ int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, s
 }
 //**********************************************************************************************************************
 
-int CountSeqsCommand::processLarge(string outputFileName){
+unsigned long long CountSeqsCommand::processLarge(string outputFileName){
 	try {
         set<string> namesOfGroups;
         map<string, int> initial;
@@ -625,7 +684,7 @@ int CountSeqsCommand::processLarge(string outputFileName){
         ofstream out;
         m->openOutputFile(outputFileName, out); 
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal\t";
+		out << "Representative_Sequence\ttotal";
         if (groupfile == "") { out << endl; }
         
         map<string, unsigned long long> namesToIndex;
@@ -668,7 +727,7 @@ int CountSeqsCommand::processLarge(string outputFileName){
         //open input file
 		ifstream in2;
 		
-		int total = 0;
+		unsigned long long total = 0;
         vector< vector<int> > nameMapCount;
         if (groupfile != "") {
             m->openInputFile(outfile, in2);
@@ -716,9 +775,9 @@ int CountSeqsCommand::processLarge(string outputFileName){
                 int seqTotal = 0;
                 for (int j = 0; j < nameMapCount[i].size(); j++) {
                     seqTotal += nameMapCount[i][j];
-                    totalsLine += toString(nameMapCount[i][j]) + '\t';
+                    totalsLine += '\t' + toString(nameMapCount[i][j]);
                 }
-                out << indexToName[i] << '\t' << seqTotal << '\t' << totalsLine << endl;
+                out << indexToName[i] << '\t' << seqTotal << totalsLine << endl;
             }
         }
         

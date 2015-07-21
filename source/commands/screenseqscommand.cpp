@@ -32,6 +32,7 @@ vector<string> ScreenSeqsCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pcriteria);
 		CommandParameter poptimize("optimize", "Multiple", "none-start-end-maxambig-maxhomop-minlength-maxlength", "none", "", "", "","",true,false); parameters.push_back(poptimize);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -1428,6 +1429,8 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
         int process = 1;
 		int num = 0;
 		vector<int> processIDS;
+        bool recalc = false;
+        
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
@@ -1458,14 +1461,82 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            vector<unsigned long long> positions;
+            contigsLines.clear();
+            positions = m->divideFilePerLine(contigsreport, processors);
+            for (int i = 0; i < (positions.size()-1); i++) { contigsLines.push_back(linePair(positions[i], positions[(i+1)])); }
+            
+            //redo file divide
+            lines.clear(); positions.clear();
+            positions = m->divideFile(fastafile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            ostartPosition.clear();
+            oendPosition.clear();
+            oLength.clear();
+            omismatches.clear();
+            numNs.clear();
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = contigsreport + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    
+                    out << num << endl;
+                    out << ostartPosition.size() << endl;
+                    for (int k = 0; k < ostartPosition.size(); k++)		{		out << ostartPosition[k] << '\t';   }  out << endl;
+                    for (int k = 0; k < oendPosition.size(); k++)		{		out << oendPosition[k] << '\t';     }  out << endl;
+                    for (int k = 0; k < oLength.size(); k++)			{		out << oLength[k] << '\t';          }  out << endl;
+                    for (int k = 0; k < omismatches.size(); k++)        {		out << omismatches[k] << '\t';      }  out << endl;
+                    for (int k = 0; k < numNs.size(); k++)              {		out << numNs[k] << '\t';            }  out << endl;
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[0]);
-		
+        
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
@@ -1698,6 +1769,7 @@ int ScreenSeqsCommand::createProcessesAlignSummary(vector<float>& sims, vector<f
         int process = 1;
 		int num = 0;
 		vector<int> processIDS;
+        bool recalc = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
@@ -1726,11 +1798,75 @@ int ScreenSeqsCommand::createProcessesAlignSummary(vector<float>& sims, vector<f
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            vector<unsigned long long> positions;
+            alignLines.clear();
+            positions = m->divideFilePerLine(contigsreport, processors);
+            for (int i = 0; i < (positions.size()-1); i++) { alignLines.push_back(linePair(positions[i], positions[(i+1)])); }
+            
+            //redo file divide
+            lines.clear(); positions.clear();
+            positions = m->divideFile(fastafile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            sims.clear();
+            scores.clear();
+            inserts.clear();
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driverAlignSummary(sims, scores, inserts, alignLines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = alignreport + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    
+                    out << num << endl;
+                    out << sims.size() << endl;
+                    for (int k = 0; k < sims.size(); k++)		{		out << sims[k] << '\t';         }  out << endl;
+                    for (int k = 0; k < scores.size(); k++)		{		out << scores[k] << '\t';       }  out << endl;
+                    for (int k = 0; k < inserts.size(); k++)	{		out << inserts[k] << '\t';      }  out << endl;
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
 		num = driverAlignSummary(sims, scores, inserts, alignLines[0]);
 		
@@ -1986,6 +2122,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
         int process = 1;
 		int num = 0;
 		vector<int> processIDS;
+        bool recalc = false;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -2017,11 +2154,77 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            vector<unsigned long long> positions;
+            lines.clear();
+            positions = m->divideFile(fastafile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            startPosition.clear();
+            endPosition.clear();
+            seqLength.clear();
+            ambigBases.clear();
+            longHomoPolymer.clear();
+            numNs.clear();
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = fastafile + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    
+                    out << num << endl;
+                    out << startPosition.size() << endl;
+                    for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
+                    for (int k = 0; k < numNs.size(); k++)	{		out << numNs[k] << '\t'; }  out << endl;
+                    
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+
 		
 		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
 		
@@ -2527,6 +2730,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         vector<int> processIDS;   
         int process = 1;
 		int num = 0;
+        bool recalc = false;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -2549,11 +2753,60 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 				
 				exit(0);
 			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
 			}
 		}
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    num = driver(lines[process], goodFileName + m->mothurGetpid(process) + ".temp", badAccnos + m->mothurGetpid(process) + ".temp", filename, badSeqNames);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    out << num << endl;
+                    out.close();
+                    
+                    exit(0);
+                }else { 
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
 		
         num = driver(lines[0], goodFileName, badAccnos, filename, badSeqNames);
         

@@ -34,7 +34,9 @@ void ctrlc_handler ( int sig ) {
 /***********************************************************************/
 int main(int argc, char *argv[]){
 	MothurOut* m = MothurOut::getInstance();
-	try {	
+	try {
+        bool createLogFile = true;
+        
 		signal(SIGINT, ctrlc_handler );
 				
 		time_t ltime = time(NULL); /* calendar time */  
@@ -200,6 +202,7 @@ int main(int argc, char *argv[]){
 					mothur = new ScriptEngine(argv[0], argv[1]);
 					m->gui = true;
 			}else if ((input == "--version") || (input == "-v")) {
+                createLogFile = false;
                 string OS = "";
                 //version
                 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -223,9 +226,11 @@ int main(int argc, char *argv[]){
 				#ifdef USE_MPI
 					MPI_Finalize();
 				#endif
+                m->mothurRemove(logFileName);
 				return 0;
                 
             }else if ((input == "--help") || (input == "-h")) {
+                createLogFile = false;
                 m->mothurOutJustToLog("Script Mode");
                 m->mothurOutEndLine(); m->mothurOutEndLine();
 
@@ -283,7 +288,8 @@ int main(int argc, char *argv[]){
 			//need this because m->mothurOut makes the logfile, but doesn't know where to put it
 			rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp
 		}
-		
+        
+        if (!createLogFile) { m->mothurRemove(newlogFileName); }
 				
 		if (mothur != NULL) { delete mothur; }
 		

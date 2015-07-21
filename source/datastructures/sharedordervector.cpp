@@ -193,10 +193,10 @@ void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
 
 void SharedOrderVector::print(ostream& output){
 	try {
-		output << label << '\t' << numSeqs << '\t';
+		output << label << '\t' << numSeqs;
 	
 		for(int i=0;i<data.size();i++){
-			output << data[i].bin << '\t';
+			output << '\t' << data[i].bin;
 		}
 		output << endl;
 	}

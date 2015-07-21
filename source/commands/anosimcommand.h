@@ -13,7 +13,7 @@
 
 #include "command.hpp"
 
-class GroupMap;
+class DesignMap;
 
 class AnosimCommand : public Command {
 	
@@ -36,7 +36,7 @@ public:
 	
 private:
 	bool abort;
-	GroupMap* designMap;
+	DesignMap* designMap;
 	string outputDir, inputDir, designFileName, phylipFileName;
 	
 	vector<vector<double> > convertToRanks(vector<vector<double> >);

@@ -43,14 +43,14 @@ private:
     int processors;
     set<string> labels;
     
-    int processSmall(string);
-    int processLarge(string);
+    unsigned long long processSmall(string);
+    unsigned long long processLarge(string);
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     
-    int createProcesses(GroupMap*&, string);
-    int driver(unsigned long long, unsigned long long, string, GroupMap*&);
-    int processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
+    unsigned long long createProcesses(GroupMap*&, string);
+    unsigned long long driver(unsigned long long, unsigned long long, string, GroupMap*&);
+    unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
 
     
 };
@@ -138,9 +138,9 @@ static DWORD WINAPI MyCountThreadFunction(LPVOID lpParam){
 				}
 				
 				if (total != 0) {
-					out << firstCol << '\t' << total << '\t';
+					out << firstCol << '\t' << total;
 					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << it->second << '\t';
+						out << '\t' << it->second;
 					}
 					out << endl;
 				}

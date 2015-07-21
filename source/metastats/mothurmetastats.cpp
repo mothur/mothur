@@ -9,7 +9,6 @@
 
 #include "mothurmetastats.h"
 #include "mothurfisher.h"
-#include "spline.h"
 
 /***********************************************************/
 MothurMetastats::MothurMetastats(double t, int n) {
@@ -29,6 +28,7 @@ MothurMetastats::~MothurMetastats() {}
  //main metastats function
 int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secGroupingStart) {
     try {
+         
         row = data.size();		 //numBins
 		column = data[0].size(); //numGroups in subset
         secondGroupingStart = secGroupingStart; //g number of samples in group 1
@@ -41,7 +41,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
         for (int i = 0; i < row; i++) { C2[i].resize(3, 0.0);  } 
         vector<double> T_statistics; T_statistics.resize(row, 1); // a place to store the true t-statistics 
         vector<double> pvalues; pvalues.resize(row, 1); // place to store pvalues
-        vector<double> qvalues; qvalues.resize(row, 1); // stores qvalues
        
         //*************************************
         //      convert to proportions
@@ -99,11 +98,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 				pvalues[i] = pre;
 			}
             
-            //#*************************************
-            //#  calculate q values from p values
-            //#*************************************
-            qvalues = calc_qvalues(pvalues);
-            
         }else { //we have multiple subjects per population
             
             //#*************************************
@@ -138,24 +132,27 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                 T_statistics[i] = xbar_diff/denom;  // calculate two sample t-statistic
             }
             
-           /*for (int i = 0; i < row; i++) {
-                for (int j = 0; j < 3; j++) {
-                    cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
-                    cout << "C2[" << i+1 << "," << j+1 << "]=" << C2[i][j] << ";" << endl;
+            if (m->debug) {
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
+                        cout << "C2[" << i+1 << "," << j+1 << "]=" << C2[i][j] << ";" << endl;
+                    }
+                    cout << "T_statistics[" << i+1 << "]=" << T_statistics[i] << ";" << endl;
                 }
-                cout << "T_statistics[" << i+1 << "]=" << T_statistics[i] << ";" << endl;
+                
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < column; j++) {
+                        cout << "Fmatrix[" << i+1 << "," << j+1 << "]=" << data[i][j] << ";" << endl;
+                    }
+                }
             }
-            
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < column; j++) {
-                    cout << "Fmatrix[" << i+1 << "," << j+1 << "]=" << data[i][j] << ";" << endl;
-                }
-            }*/
-
             //#*************************************
             //# generate initial permuted p-values
             //#*************************************
             pvalues = permuted_pvalues(Pmatrix, T_statistics, data);
+            
+            if (m->debug) {  for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + m->currentSharedBinLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
             
             //#*************************************
             //#  generate p values for sparse data 
@@ -185,7 +182,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                     f22 = total2 - fish2[i];
 				
                     MothurFisher fisher;
+                    if (m->debug) {   m->mothurOut("[DEBUG]: about to run fisher for Otu " + m->currentSharedBinLabels[i] + " F11, F12, F21, F22 = " + toString(f11) + " " + toString(f12) + " " + toString(f21) + " " + toString(f22) + " " + "\n"); }
                     double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
+                    if (m->debug) {   m->mothurOut("[DEBUG]: about to completed fisher for Otu " + m->currentSharedBinLabels[i] + " pre = " + toString(pre) + "\n"); }
+                    
                     if (pre > 0.999999999)	{ pre = 1.0; }
                 
                     if (m->control_pressed) { return 1; }
@@ -193,11 +193,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                     pvalues[i] = pre;
                 }
 			}
-
-            //#*************************************
-            //#  calculate q values from p values
-            //#*************************************
-            qvalues = calc_qvalues(pvalues);
             
             //#*************************************
             //#  convert stderr^2 to std error
@@ -223,7 +218,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		
 		//output column headings - not really sure... documentation labels 9 columns, there are 10 in the output file
 		//storage 0 = meanGroup1 - line 529, 1 = varGroup1 - line 532, 2 = err rate1 - line 534, 3 = mean of counts group1?? - line 291, 4 = meanGroup2 - line 536, 5 = varGroup2 - line 539, 6 = err rate2 - line 541, 7 = mean of counts group2?? - line 292, 8 = pvalues - line 293
-		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tp-value\tq-value\n";
+		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tp-value\n";
 		
 		for(int i = 0; i < row; i++){
 			if (m->control_pressed) { out.close(); return 0; }
@@ -232,7 +227,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			if (i < m->currentSharedBinLabels.size()) { out << m->currentSharedBinLabels[i] << '\t'; }
             else { out << (i+1) << '\t'; }
             
-            out << C1[i][0] << '\t' << C1[i][1] << '\t' << C1[i][2] << '\t' << C2[i][0] << '\t' << C2[i][1] << '\t' << C2[i][2] << '\t' << pvalues[i] << '\t' << qvalues[i] << endl;
+            out << C1[i][0] << '\t' << C1[i][1] << '\t' << C1[i][2] << '\t' << C2[i][0] << '\t' << C2[i][1] << '\t' << C2[i][2] << '\t' << pvalues[i] <<  endl;
 		}  
 		
 		out << endl << endl;
@@ -367,57 +362,6 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
     }	
 }
 /***********************************************************/
-vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
-	try {
-        int numRows = pValues.size();
-		vector<double> qvalues(numRows, 0.0);
-
-		//fill lambdas with 0.00, 0.01, 0.02... 0.95
-		vector<double> lambdas(96, 0);
-		for (int i = 1; i < lambdas.size(); i++) { lambdas[i] = lambdas[i-1] + 0.01; }
-		
-		vector<double> pi0_hat(lambdas.size(), 0);
-		
-		//calculate pi0_hat
-		for (int l = 0; l < lambdas.size(); l++){ // for each lambda value
-			int count = 0;
-			for (int i = 0; i < numRows; i++){ // for each p-value in order
-				if (pValues[i] > lambdas[l]){ count++; }
-			}
-			pi0_hat[l] = count/(double)(numRows*(1.0-lambdas[l]));
-            //cout << lambdas[l] << '\t' << count << '\t' << numRows*(1.0-lambdas[l]) << '\t' << pi0_hat[l] << endl;
-		}
-		
-		double pi0 = smoothSpline(lambdas, pi0_hat, 3);
-		
-		//order p-values
-		vector<double> ordered_qs = qvalues;
-		vector<int> ordered_ps(pValues.size(), 0);
-		for (int i = 1; i < ordered_ps.size(); i++) {  ordered_ps[i] = ordered_ps[i-1] + 1; }
-		vector<double> tempPvalues = pValues;
-		OrderPValues(0, numRows-1, tempPvalues, ordered_ps);
-		
-		ordered_qs[numRows-1] = min((pValues[ordered_ps[numRows-1]]*pi0), 1.0);
-		for (int i = (numRows-2); i >= 0; i--){
-			double p = pValues[ordered_ps[i]];
-			double temp = p*numRows*pi0/(double)(i+1);
-
-			ordered_qs[i] = min(temp, ordered_qs[i+1]);
-		}
-		
-		//re-distribute calculated qvalues to appropriate rows
-		for (int i = 0; i < numRows; i++){
-			qvalues[ordered_ps[i]] = ordered_qs[i];
-		}
-		
-		return qvalues;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "calc_qvalues");
-		exit(1);
-	}
-}
-/***********************************************************/
 int MothurMetastats::OrderPValues(int low, int high, vector<double>& p, vector<int>& order) {
 	try {
 		
@@ -477,83 +421,7 @@ int MothurMetastats::swapElements(int i, int j, vector<double>& p, vector<int>& 
 		exit(1);
 	}
 }
-/***********************************************************/
-double MothurMetastats::smoothSpline(vector<double>& x, vector<double>& y, int df) {
-	try {
-				
-		double result = 0.0;
-		int n = x.size();
-		vector<double> w(n, 1);
-		double* xb = new double[n];
-		double* yb = new double[n];
-		double* wb = new double[n];
-		double yssw = 0.0;
-		for (int i = 0; i < n; i++) {
-			wb[i] = w[i];
-			yb[i] = w[i]*y[i];
-			yssw += (w[i] * y[i] * y[i]) - wb[i] * (yb[i] * yb[i]);
-			xb[i] = (x[i] - x[0]) / (x[n-1] - x[0]);
-		}
-		
-		vector<double> knot = sknot1(xb, n);
-		int nk = knot.size() - 4;
 
-		double low = -1.5; double high = 1.5; double tol = 1e-04; double eps = 2e-08; int maxit = 500;
-		int ispar = 0; int icrit = 3; double dofoff = 3.0;
-		double penalty = 1.0; 
-		int ld4 = 4; int isetup = 0; int ldnk = 1; int ier; double spar = 1.0; double crit;
-		
-		double* knotb = new double[knot.size()];
-		double* coef1 = new double[nk];
-		double* lev1 = new double[n];
-		double* sz1 = new double[n];
-		for (int i = 0; i < knot.size(); i++) {	knotb[i] = knot[i];	}
-		
-		Spline spline;
-		spline.sbart(&penalty, &dofoff, &xb[0], &yb[0], &wb[0], &yssw, &n, &knotb[0], &nk, &coef1[0], &sz1[0], &lev1[0], &crit,
-				&icrit, &spar, &ispar, &maxit, &low, &high, &tol, &eps, &isetup, &ld4, &ldnk, &ier);
-		
-		result = coef1[nk-1];
-		
-		//free memory
-		delete [] xb;
-		delete [] yb;
-		delete [] wb;
-		delete [] knotb;
-		delete [] coef1;
-		delete [] lev1;
-		delete [] sz1;
-							
-		return result;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "smoothSpline");
-		exit(1);
-	}
-}
-/***********************************************************/
-vector<double> MothurMetastats::sknot1(double* x, int n) {
-	try {
-		vector<double> knots;
-		int nk = nkn(n);
-		
-		//R equivalent - rep(x[1L], 3L)
-		knots.push_back(x[0]); knots.push_back(x[0]); knots.push_back(x[0]);
-		
-		//generate a sequence of nk equally spaced values from 1 to n. R equivalent = seq.int(1, n, length.out = nk)
-		vector<int> indexes = getSequence(0, n-1, nk);
-		for (int i = 0; i < indexes.size(); i++) { knots.push_back(x[indexes[i]]);  } 
-		
-		//R equivalent - rep(x[n], 3L)
-		knots.push_back(x[n-1]); knots.push_back(x[n-1]); knots.push_back(x[n-1]);
-				
-		return knots;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "sknot1");
-		exit(1);
-	}
-}
 /***********************************************************/
 vector<int> MothurMetastats::getSequence(int start, int end, int length) {
 	try {
@@ -573,36 +441,6 @@ vector<int> MothurMetastats::getSequence(int start, int end, int length) {
 		exit(1);
 	}
 }	
-/***********************************************************/
-//not right, havent fully figured out the variable types yet...
-int MothurMetastats::nkn(int n) {
-	try {
-		
-		if (n < 50) { return n; }
-		else {
-			double a1 = log2(50);
-			double a2 = log2(100);
-			double a3 = log2(140);
-			double a4 = log2(200);
-			
-			if (n < 200) {
-				return (int)pow(2.0, (a1 + (a2 - a1) * (n - 50)/(float)150));
-			}else if (n < 800) {
-				return (int)pow(2.0, (a2 + (a3 - a2) * (n - 200)/(float)600));
-			}else if (n < 3200) {
-				return (int)pow(2.0, (a3 + (a4 - a3) * (n - 800)/(float)2400));
-			}else {
-				return (int)pow((double)(200 + (n - 3200)), 0.2);
-			}
-		}
-	
-		return 0;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "nkn");
-		exit(1);
-	}
-}
 /***********************************************************/
 
 

@@ -26,7 +26,8 @@ vector<string> RemoveSeqsCommand::setParameters(){
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none","qfile",false,false); parameters.push_back(pqfile);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -856,7 +857,7 @@ int RemoveSeqsCommand::readGroup(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;				//read from first column
+			in >> name;			m->gobble(in);		//read from first column
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file

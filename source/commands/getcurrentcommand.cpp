@@ -13,7 +13,8 @@
 vector<string> GetCurrentCommand::setParameters(){	
 	try {
 		CommandParameter pclear("clear", "String", "", "", "", "", "","",false,false); parameters.push_back(pclear);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -146,6 +147,8 @@ int GetCurrentCommand::execute(){
 					m->setCountTableFile("");
                 }else if (types[i] == "summary") {
 					m->setSummaryFile("");
+                }else if (types[i] == "file") {
+                    m->setFileFile("");
 				}else if (types[i] == "processors") {
 					m->setProcessors("1");
 				}else if (types[i] == "all") {

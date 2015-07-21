@@ -48,10 +48,10 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
+	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
-	bool print_start, abort, hard, large, classic, runCluster, deleteFiles;
+	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	
@@ -66,6 +66,7 @@ private:
     int createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund);
     string readFile(vector< map<string, string> >&);
     string printFile(string, vector< map<string, string> >&);
+    int getLabels(string, set<string>& listLabels);
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////

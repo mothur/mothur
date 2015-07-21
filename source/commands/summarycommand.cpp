@@ -51,7 +51,8 @@ vector<string> SummaryCommand::setParameters(){
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
 		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -579,7 +580,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
         outputFileHandle << endl;
      
         if (subsample) {
-            outAve << sabund->getLabel() << '\t' << "ave\t"; 
+            outAve << sabund->getLabel() << '\t' << "ave";
             //find ave and std for this label and output
             //will need to modify the createGroupSummary to combine results and not mess with the .summary file.
             
@@ -598,7 +599,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
             for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     calcAverages[i][j] /= (float) iters;
-                    outAve << calcAverages[i][j] << '\t';
+                    outAve  << '\t' << calcAverages[i][j];
                 }
             }
             
@@ -614,12 +615,12 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
                 }
             }
             
-            outAve << endl << sabund->getLabel() << '\t' << "std\t"; 
+            outAve << endl << sabund->getLabel() << '\t' << "std";
             for (int i = 0; i < stdDev.size(); i++) {  //finds average.
                 for (int j = 0; j < stdDev[i].size(); j++) {
                     stdDev[i][j] /= (float) iters;
                     stdDev[i][j] = sqrt(stdDev[i][j]);
-                    outAve << stdDev[i][j] << '\t';
+                    outAve  << '\t' << stdDev[i][j];
                 }
             }
             outAve << endl;  
@@ -739,8 +740,9 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             
             string newLabel = "";
             for (int j = 0; j < theseLabels.size(); j++) { 
-                 if (j == 1) {  newLabel += "group\t" + theseLabels[j] + '\t';
-                }else{  newLabel += theseLabels[j] + '\t';	}
+                if (j == 1) {  newLabel += "group\t" + theseLabels[j];  }
+                else if (j == 0) {  newLabel += theseLabels[j] + "\t";  }
+                else{  newLabel += '\t' + theseLabels[j];	}
             }
 			
 			m->gobble(temp);
@@ -757,8 +759,9 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 					temp >> tempLabel; 
 						
 					//save for later
-					if (j == 1) { thisLine += groupIndex[outputNames[i]] + "\t" + tempLabel + "\t";	}
-					else{  thisLine += tempLabel + "\t";	}
+					if (j == 1) { thisLine += groupIndex[outputNames[i]] + "\t" + tempLabel;	}
+                    else if (j == 0) {  thisLine += tempLabel + "\t";  }
+					else{  thisLine += "\t" + tempLabel;	}
 				}
 					
 				thisLine += "\n";

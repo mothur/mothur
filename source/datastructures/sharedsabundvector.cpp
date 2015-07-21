@@ -99,10 +99,10 @@ int SharedSAbundVector::size(){
 /***********************************************************************/
 void SharedSAbundVector::print(ostream& output){
 	try {
-		output << label << '\t' << maxRank << '\t';
+		output << label << '\t' << maxRank;
 	
 		for(int i=1;i<=maxRank;i++){
-			output << data[i].abundance << '\t';
+			output << '\t' << data[i].abundance;
 		}
 		output << endl;
 	}

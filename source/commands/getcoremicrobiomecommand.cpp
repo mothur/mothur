@@ -19,7 +19,8 @@ vector<string> GetCoreMicroBiomeCommand::setParameters(){
 		CommandParameter poutput("output", "Multiple", "fraction-count", "fraction", "", "", "","",false,false); parameters.push_back(poutput);
         CommandParameter pabund("abundance", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pabund);
 		CommandParameter psamples("samples", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(psamples);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -398,8 +399,8 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { break; }
-            out << i+1 << '\t';
-            for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << table[j][i] << '\t'; }
+            out << i+1;
+            for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << '\t' << table[j][i]; }
             out << endl;
         }
 

@@ -230,7 +230,7 @@ Tree::Tree(CountTable* t, vector< vector<double> >& sims) : ct(t) {
 	}
 }
 /*****************************************************************/
-Tree::~Tree() {}
+Tree::~Tree() { }
 /*****************************************************************
 void Tree::addNamesToCounts(map<string, string> nameMap) {
 	try {

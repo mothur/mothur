@@ -20,7 +20,8 @@ vector<string> ClassifyTreeCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter pmethod("output", "Multiple", "node-taxon", "node", "", "", "","",false,false); parameters.push_back(pmethod);
         CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "","",false,true); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -248,7 +249,7 @@ int ClassifyTreeCommand::execute(){
                         
         if (m->control_pressed) { delete tmap;  delete outputTree;  return 0; }
 		
-        m->readTax(taxonomyfile, taxMap);
+        m->readTax(taxonomyfile, taxMap, true);
         
         /***************************************************/
         //		get concensus taxonomies                    //

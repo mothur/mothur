@@ -14,6 +14,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "svm.hpp"
+#include "designmap.h"
 
 class ClassifySvmSharedCommand : public Command {
 public:
@@ -34,7 +35,7 @@ public:
   void help() { m->mothurOut(getHelpString()); }
 
   void readSharedAndDesignFiles(const string&, const string&, LabeledObservationVector&, FeatureVector&);
-  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
+  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, DesignMap&, LabeledObservationVector&, FeatureVector&);
 
   //bool interruptTraining() { return m->control_pressed; }
 
@@ -59,7 +60,7 @@ private:
     int processors;
     bool useTiming;
 
-    GroupMap designMap;
+    DesignMap designMap;
     
     //void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
     //void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);

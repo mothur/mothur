@@ -29,7 +29,8 @@ vector<string> VennCommand::setParameters(){
 		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnseqs);
         CommandParameter psharedotus("sharedotus", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(psharedotus);
 		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
-        CommandParameter ppermute("permute", "Multiple", "1-2-3-4", "4", "", "", "","",false,false); parameters.push_back(ppermute);		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter ppermute("permute", "Multiple", "1-2-3-4", "4", "", "", "","",false,false); parameters.push_back(ppermute);		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

@@ -15,7 +15,8 @@ vector<string> SetLogFileCommand::setParameters(){
 	try {
 		CommandParameter pappend("append", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pappend);
 		CommandParameter pname("name", "String", "", "", "", "", "","",false,true,true); parameters.push_back(pname);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

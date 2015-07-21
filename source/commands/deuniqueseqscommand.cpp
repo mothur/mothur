@@ -17,7 +17,8 @@ vector<string> DeUniqueSeqsCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "namecount", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "namecount", "none","group",false,false,true); parameters.push_back(pcount);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;

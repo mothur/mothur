@@ -21,7 +21,8 @@ vector<string> IndicatorCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter ptree("tree", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none","tree-summary",false,false,true); parameters.push_back(ptree);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pprocessors);
 		
@@ -246,16 +247,14 @@ int IndicatorCommand::execute(){
 	
 		//read designfile if given and set up groups for read of sharedfiles
 		if (designfile != "") {
-			designMap = new GroupMap(designfile);
-			designMap->readDesignMap();
+			designMap = new DesignMap(designfile);
 			
 			//fill Groups - checks for "all" and for any typo groups
 			SharedUtil util;
-			vector<string> nameGroups = designMap->getNamesOfGroups();
+			vector<string> nameGroups = designMap->getCategory();
 			util.setGroups(Groups, nameGroups);
-			designMap->setNamesOfGroups(nameGroups);
 			
-			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
+			vector<string> namesSeqs = designMap->getNamesGroups(Groups);
 			m->setGroups(namesSeqs);
 		}
 	
@@ -300,7 +299,7 @@ int IndicatorCommand::execute(){
 					groupMap[m->Treenames[i]] = "Group1"; 
 				}else{
 					vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
-					vector<string> myNames = designMap->getNamesSeqs(myGroups);
+					vector<string> myNames = designMap->getNamesGroups(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
 						if (!(m->inUsersGroups(myNames[k], m->getAllGroups()))) {
@@ -436,11 +435,11 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
+			for (int i = 0; i < (designMap->getCategory()).size(); i++) {
 				
 				for (int k = 0; k < lookup.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookup[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
+					if (designMap->get(lookup[k]->getGroup()) == (designMap->getCategory())[i]) {
 						subset.push_back(lookup[k]);
 						groupsAlreadyAdded.insert(lookup[k]->getGroup());
 					}
@@ -460,10 +459,10 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundFloatVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
+			for (int i = 0; i < (designMap->getCategory()).size(); i++) {
 				for (int k = 0; k < lookupFloat.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookupFloat[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
+					if (designMap->get(lookupFloat[k]->getGroup()) == (designMap->getCategory())[i]) {
 						subset.push_back(lookupFloat[k]);
 						groupsAlreadyAdded.insert(lookupFloat[k]->getGroup());
 					}
@@ -685,22 +684,22 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			/******************************************************/
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
-			out << (i+1) << '\t';
+			out << (i+1);
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				if (pValues[j] < (1/(float)iters)) {
-					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters) << '\t';
+					out  << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters);
 				}else {
-					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << pValues[j] << '\t';
+					out  << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << pValues[j];
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
-					string pValueString = "<" + toString((1/(float)iters)); 
-					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
-					else { cout << "<" << (1/(float)iters); }
+					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j];
+					string pValueString = "\t<" + toString((1/(float)iters));
+					if (pValues[j] > (1/(float)iters)) { pValueString = toString('\t' + pValues[j]); cout << '\t' << pValues[j];}
+					else { cout << "\t<" << (1/(float)iters); }
 					m->mothurOutJustToLog(toString(i) + "\t" + m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 					m->mothurOutEndLine(); 
 				}
@@ -962,7 +961,7 @@ set<string> IndicatorCommand::getDescendantList(Tree*& T, int i, map<int, set<st
 				names.insert(T->tree[i].getName());
 			}else {
 				vector<string> myGroup; myGroup.push_back(T->tree[i].getName());
-				vector<string> myReps = designMap->getNamesSeqs(myGroup);
+				vector<string> myReps = designMap->getNamesGroups(myGroup);
 				for (int k = 0; k < myReps.size(); k++) {
 					names.insert(myReps[k]);
 				}
@@ -1169,6 +1168,7 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundFloatVector*> 
 vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVector*> >& groupings, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
+        bool recalc = false;
 
 		if(processors == 1){
 			pvalues = driver(groupings, num, indicatorValues, iters);
@@ -1204,22 +1204,74 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
 					m->openOutputFile(tempFile, out);
 					
-					//pass values
-					for (int i = 0; i < pvalues.size(); i++) {
-						out << pvalues[i] << '\t';
-					}
-					out << endl;
+                    //pass values
+                    for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
 					
 					out.close();
 					
 					exit(0);
 				}else { 
-					m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-					for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-					exit(0);
+                    m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    //wait to die
+                    for (int i=0;i<processIDS.size();i++) {
+                        int temp = processIDS[i];
+                        wait(&temp);
+                    }
+                    m->control_pressed = false;
+                    for (int i=0;i<processIDS.size();i++) {
+                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                    }
+                    recalc = true;
+                    break;
 				}
 			}
 			
+            if (recalc) {
+                //test line, also set recalc to true.
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                
+                //divide iters between processors
+                processIDS.resize(0);
+                process = 1;
+                procIters.clear();
+                int numItersPerProcessor = iters / processors;
+                
+                //divide iters between processes
+                for (int h = 0; h < processors; h++) {
+                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
+                    procIters.push_back(numItersPerProcessor);
+                }
+                
+                //loop through and create all the processes you want
+                while (process != processors) {
+                    pid_t pid = fork();
+                    
+                    if (pid > 0) {
+                        processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                        process++;
+                    }else if (pid == 0){
+                        pvalues = driver(groupings, num, indicatorValues, procIters[process]);
+                        
+                        //pass pvalues to parent
+                        ofstream out;
+                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
+                        m->openOutputFile(tempFile, out);
+                        
+                        //pass values
+                        for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
+                        
+                        out.close();
+                        
+                        exit(0);
+                    }else { 
+                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                        exit(0);
+                    }
+                }
+            }
+
 			//do my part
 			pvalues = driver(groupings, num, indicatorValues, procIters[0]);
 			
@@ -1347,6 +1399,7 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundVector*> >& gr
 vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >& groupings, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
+        bool recalc = false;
         
 		if(processors == 1){
 			pvalues = driver(groupings, num, indicatorValues, iters);
@@ -1392,12 +1445,67 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 					
 					exit(0);
 				}else {
-					m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-					for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-					exit(0);
+                    m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    //wait to die
+                    for (int i=0;i<processIDS.size();i++) {
+                        int temp = processIDS[i];
+                        wait(&temp);
+                    }
+                    m->control_pressed = false;
+                    for (int i=0;i<processIDS.size();i++) {
+                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                    }
+                    recalc = true;
+                    break;
 				}
 			}
 			
+            if (recalc) {
+                //test line, also set recalc to true.
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                
+                //divide iters between processors
+                processIDS.resize(0);
+                process = 1;
+                procIters.clear();
+                int numItersPerProcessor = iters / processors;
+                
+                //divide iters between processes
+                for (int h = 0; h < processors; h++) {
+                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
+                    procIters.push_back(numItersPerProcessor);
+                }
+                
+                //loop through and create all the processes you want
+                while (process != processors) {
+                    pid_t pid = fork();
+                    
+                    if (pid > 0) {
+                        processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                        process++;
+                    }else if (pid == 0){
+                        pvalues = driver(groupings, num, indicatorValues, procIters[process]);
+                        
+                        //pass pvalues to parent
+                        ofstream out;
+                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
+                        m->openOutputFile(tempFile, out);
+                        
+                        //pass values
+                        for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
+                        
+                        out.close();
+                        
+                        exit(0);
+                    }else {
+                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                        exit(0);
+                    }
+                }
+            }
+
 			//do my part
 			pvalues = driver(groupings, num, indicatorValues, procIters[0]);
 			

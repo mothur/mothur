@@ -17,7 +17,8 @@ vector<string> PCOACommand::setParameters(){
 	try {
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","pcoa-loadings",false,true,true); parameters.push_back(pphylip);
 		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmetric);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -275,9 +276,9 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 		pcaData << endl;
 		
 		for(int i=0;i<rank;i++){
-			pcaData << name_list[i] << '\t';
+			pcaData << name_list[i];
 			for(int j=0;j<rank;j++){
-				pcaData << G[i][j] << '\t';
+				pcaData  << '\t' << G[i][j];
 			}
 			pcaData << endl;
 		}

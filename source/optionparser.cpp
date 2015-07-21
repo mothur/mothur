@@ -130,6 +130,8 @@ map<string, string> OptionParser::getParameters() {
                             it->second = m->getCountTableFile();
                     }else if (it->first == "summary") {
                             it->second = m->getSummaryFile();
+                    }else if (it->first == "file") {
+                            it->second = m->getFileFile();
                     }else {
                         m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();
                     }

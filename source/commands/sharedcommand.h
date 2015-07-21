@@ -56,8 +56,6 @@ private:
 	set<string> labels;
 	string fileroot, outputDir, listfile, groupfile, biomfile, ordergroupfile, countfile;
 	bool firsttime, pickedGroups, abort, allLines;
-	map<string, ofstream*> filehandles;
-	map<string, ofstream*>::iterator it3;
 
 };
 
