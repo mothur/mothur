@@ -774,7 +774,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 
                                 /////////////////////////////////////////////////////////////
                                 if (!fixed) {
-                                    pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                                    pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                                 }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                             }
                         }
@@ -1520,11 +1520,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 thisNumReads++;
                 
                 //report progress
-                if((thisNumReads) % 1000 == 0){	pDataArray->m->mothurOut(toString(thisNumReads)); pDataArray->m->mothurOutEndLine();		}
+                if((thisNumReads) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(thisNumReads)+"\n"); 	}
             }
             
             //report progress
-            if((thisNumReads) % 1000 != 0){	pDataArray->m->mothurOut(toString(thisNumReads)); pDataArray->m->mothurOutEndLine();		}
+            if((thisNumReads) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(thisNumReads)+"\n"); 	}
             
             inFFasta.close();
             inRFasta.close();
@@ -1933,23 +1933,31 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         pDataArray->m->openInputFile(thisffastafile, inFFasta);
         pDataArray->m->openInputFile(thisrfastafile, inRFasta);
         
-        inFFasta.seekg(pDataArray->linesInput_start);
-        inRFasta.seekg(pDataArray->linesInputReverse_start);
+        bool begin = false;
+        //print header if you are process 0
+        if ((pDataArray->linesInput_start == 0) || (pDataArray->linesInput_start == 1)) {
+            begin = true;
+            inFFasta.seekg(0); inRFasta.seekg(0);
+            pDataArray->m->zapGremlins(inFFasta); pDataArray->m->zapGremlins(inRFasta);
+        }else { //this accounts for the difference in line endings.
+            inFFasta.seekg(pDataArray->linesInput_start-1); pDataArray->m->gobble(inFFasta);
+            inRFasta.seekg(pDataArray->linesInputReverse_start-1); pDataArray->m->gobble(inRFasta);
+        }
         
         bool hasIndex = false;
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {
                 pDataArray->m->openInputFile(thisfqualindexfile, inFQualIndex);
-                inFQualIndex.seekg(pDataArray->qlinesInput_start);
+                if (begin) { inFQualIndex.seekg(0);  pDataArray->m->zapGremlins(inFQualIndex); }
+                else { inFQualIndex.seekg(pDataArray->qlinesInput_start-1); pDataArray->m->gobble(inFQualIndex); }
                 hasIndex = true;
-            }
-            else {  thisfqualindexfile = ""; }
+            }else {  thisfqualindexfile = ""; }
             if (thisrqualindexfile != "NONE") {
                 pDataArray->m->openInputFile(thisrqualindexfile, inRQualIndex);
-                inRQualIndex.seekg(pDataArray->qlinesInputReverse_start);
+                if (begin) { inRQualIndex.seekg(0);  pDataArray->m->zapGremlins(inRQualIndex); }
+                else { inRQualIndex.seekg(pDataArray->qlinesInputReverse_start-1); pDataArray->m->gobble(inRQualIndex); }
                 hasIndex = true;
-            }
-            else { thisrqualindexfile = ""; }
+            }else { thisrqualindexfile = ""; }
         }
         
         pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
@@ -2110,6 +2118,9 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                        if (tignore) { ignore=true; }
+                        ///bool fixed = checkName(fread, f2iread);
+                        /////////////////////////////////////////////////////////////
                         fixed = false;
                         if (fread.getName() == f2iread.getName()) {
                             fixed = true;
@@ -2125,7 +2136,6 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 }
                             }
                         }
-                        
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
                             pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
@@ -2158,6 +2168,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                        ///bool fixed = checkName(fread, r2iread);
+                        /////////////////////////////////////////////////////////////
                         fixed = false;
                         if (fread.getName() == r2iread.getName()) {
                             fixed = true;
@@ -2176,7 +2188,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
-                            pDataArray->m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                            pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                         }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                     }
                     hasIndex = true;
@@ -2629,11 +2641,11 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             pDataArray->count++;
             
             //report progress
-            if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+            if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 	}
         }
         
         //report progress
-        if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+        if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
         
         inFFasta.close();
         inRFasta.close();

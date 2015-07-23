@@ -2157,7 +2157,7 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                     FastqRead r2iread(inRQ, tignore, format); m->gobble(inRQ);
                     if (tignore) { ignore=true; }
                     if (!checkName(fread, r2iread)) {
-                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                        m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                 }
             }
@@ -2244,7 +2244,7 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
                     FastqRead r2iread(inRQualIndex, tignore, format); m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     if (!checkName(fread, r2iread)) {
-                        m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
+                        m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                 }
             }
@@ -2581,6 +2581,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             if (qual.size() != 0) {
                 long long numFQualSeqs = 0;
                 long long numRQualSeqs = 0;
+                
                 fastaFilePos.clear();
                 qfileFilePos.clear();
                 
@@ -2590,7 +2591,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 if (qual[0] == "NONE") { fastaFilePos = qfileFilePos; numFQualSeqs = numRQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
                 if (qual[1] == "NONE") { qfileFilePos = fastaFilePos; numRQualSeqs = numFQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
 
-                
                 if ((numFQualSeqs != numRQualSeqs) || (numFQualSeqs != numFastaSeqs)){
                     if (delim == '>') {
                         m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
@@ -2616,7 +2616,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
   
             }else { qLines = lines;	} //files with duds
         }
-        if(qual.size() != 0)	{	qLines = lines;	} //files with duds
+        if(qual.size() == 0)	{	qLines = lines;	} //files with duds
         return 1;
         
 #endif

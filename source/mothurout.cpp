@@ -1939,7 +1939,7 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
                 if((input[0] == delim) && (((numLines-1)%nameLine) == 0)){ //this is a name line
                     //mothurOut(input + '\t' + toString(count+numLines-input.length()) + '\n');// << endl;
                     positions.push_back(count+numLines-input.length());
-                    if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
+                    if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + input + ".\n"); }
                 }else if (int(c) == -1) { break; }
                 else {
                     input = "";

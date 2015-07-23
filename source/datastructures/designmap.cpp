@@ -450,7 +450,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
             int count = 0;
             for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) { //loop through each
                 //check category to see if this group meets the requirements
-                if (m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAny = true; it = selected.end(); }
+                if (m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAny = true; break; }
                 count++;
             }
             if (hasAny) {
