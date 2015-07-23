@@ -115,12 +115,10 @@ mothur : $(OBJECTS) uchime
 
 
 uchime:
-	cd source/uchime_src && ./mk && mv uchime .. && cd ..
+	cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
 
 
-install : mothur uchime
-	mv mothur ..
-	mv uchime ..
+install : mothur
 
 
 %.o : %.c %.h
