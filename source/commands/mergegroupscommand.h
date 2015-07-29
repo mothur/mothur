@@ -41,12 +41,13 @@ private:
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile;
+	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile;
 	vector<string> Groups, outputNames;
 		
 	int process(vector<SharedRAbundVector*>&, ofstream&);
 	int processSharedFile(DesignMap*&);
 	int processGroupFile(DesignMap*&);
+    int processCountFile(DesignMap*&);
 };
 
 #endif

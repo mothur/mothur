@@ -9,12 +9,14 @@
 
 #include "mergegroupscommand.h"
 #include "sharedutilities.h"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> MergeGroupsCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none","shared",false,false,true); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -35,12 +37,9 @@ vector<string> MergeGroupsCommand::setParameters(){
 string MergeGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The merge.groups command reads a shared or group file and a design file and merges the groups that are in the same grouping in the design file.\n";
-		helpString += "The merge.groups command outputs a .shared file. \n";
-		helpString += "The merge.groups command parameters are shared, group, groups, label and design.  The design parameter is required.\n";
+		helpString += "The merge.groups command input files are shared, group, countfile and a design file.  It reads the design file and merges the groups in the other files accordingly.\n";
 		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
-		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n";
-		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes. By default all groups are selected.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
 		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
 		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
@@ -60,7 +59,8 @@ string MergeGroupsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "shared") {  pattern = "[filename],merge,[extension]"; } 
-        else if (type == "group") {  pattern = "[filename],merge,[extension]"; } 
+        else if (type == "group") {  pattern = "[filename],merge,[extension]"; }
+        else if (type == "count") {  pattern = "[filename],merge,[extension]"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -78,6 +78,7 @@ MergeGroupsCommand::MergeGroupsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MergeGroupsCommand", "MetaStatsCommand");
@@ -113,6 +114,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			vector<string> tempOutNames;
 			outputTypes["shared"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -145,6 +147,14 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
+                }
 				
 			}
 			
@@ -166,7 +176,12 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; groupfile = ""; }
 			else if (groupfile == "not found") {  groupfile = ""; }
-			else { m->setGroupFile(groupfile); }	
+			else { m->setGroupFile(groupfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { abort = true; countfile = ""; }
+            else if (countfile == "not found") {  countfile = ""; }
+            else { m->setCountTableFile(countfile); }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -181,8 +196,12 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
 			m->setGroups(Groups);
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
-			if ((sharedfile == "") && (groupfile == "")) { 
+			if ((sharedfile == "") && (groupfile == "") && (countfile == "")) {
 				//give priority to group, then shared
 				groupfile = m->getGroupFile(); 
 				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
@@ -190,7 +209,11 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 					sharedfile = m->getSharedFile(); 
 					if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                        countfile = m->getCountTableFile();
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                        }
 					}
 				}
 			}
@@ -213,6 +236,7 @@ int MergeGroupsCommand::execute(){
 		
 		if (groupfile != "") { processGroupFile(designMap); }
 		if (sharedfile != "") { processSharedFile(designMap); }
+        if (countfile != "") { processCountFile(designMap); }
 
 		//reset groups parameter
 		m->clearGroups();  
@@ -457,6 +481,99 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 		m->errorOut(e, "MergeGroupsCommand", "processGroupFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
+    try {
+        CountTable countTable;
+        if (!countTable.testGroups(countfile)) { m->mothurOut("[ERROR]: your countfile contains no group information, please correct.\n"); m->control_pressed = true; return 0; }
+        
+        //read countTable
+        countTable.readTable(countfile, true, false);
+        
+        //fill Groups - checks for "all" and for any typo groups
+        SharedUtil util;
+        vector<string> nameGroups = countTable.getNamesOfGroups();
+        util.setGroups(Groups, nameGroups);
+        
+        vector<string> dnamesGroups = designMap->getNamesGroups();
+        
+        //sanity check
+        bool error = false;
+        if (nameGroups.size() == dnamesGroups.size()) { //at least there are the same number
+            //is every group in counttable also in designmap
+            for (int i = 0; i < nameGroups.size(); i++) {
+                if (m->control_pressed) { break; }
+                if (!m->inUsersGroups(nameGroups[i], dnamesGroups)) { error = true; break; }
+            }
+            
+        }
+        if (error) { m->mothurOut("[ERROR]: Your countfile does not contain the same groups as your design file, please correct\n"); m->control_pressed = true; return 0; }
+        
+        //user selected groups - remove some groups from table
+        if (Groups.size() != nameGroups.size()) {
+            for (int i = 0; i < nameGroups.size(); i++) {
+                if (!m->inUsersGroups(nameGroups[i], Groups)) { countTable.removeGroup(nameGroups[i]); }
+            }
+        }
+        //ask again in case order changed
+        nameGroups = countTable.getNamesOfGroups();
+        int numGroups = nameGroups.size();
+        
+        //create new table
+        CountTable newTable;
+        vector<string> treatments = designMap->getCategory();
+        map<string, int> clearedMap;
+        for (int i = 0; i < treatments.size(); i++) {
+            newTable.addGroup(treatments[i]);
+            clearedMap[treatments[i]] = 0;
+        }
+        treatments = newTable.getNamesOfGroups();
+        
+        vector<string> namesOfSeqs = countTable.getNamesOfSeqs();
+        for (int i = 0; i < namesOfSeqs.size(); i++) {
+            
+            if (m->control_pressed) { break; }
+            
+            vector<int> thisSeqsCounts = countTable.getGroupCounts(namesOfSeqs[i]);
+            map<string, int> thisSeqsMap = clearedMap;
+            
+            for (int j = 0; j < numGroups; j++) {
+                if (thisSeqsCounts[j] != 0) { //abundance for this group, not sure if this would run faster without if.  Time to lookup treatment on counts we don't care about vs. asking if each time.
+                    thisSeqsMap[designMap->get(nameGroups[j])] += thisSeqsCounts[j];  //
+                }
+            }
+        
+            //create new counts for seq for new table
+            vector<int> newCounts;
+            for (int j = 0; j < treatments.size(); j++){
+                newCounts.push_back(thisSeqsMap[treatments[j]]); //order matters, add in count for each treatment in new table.
+            }
+            
+            //add seq to new table
+            newTable.push_back(namesOfSeqs[i], newCounts);
+        }
+        
+        if (error) { m->control_pressed = true; return 0; }
+        
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+        string outputFileName = getOutputFileName("count", variables);
+        outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        
+        newTable.printTable(outputFileName);
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "processCountFile");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
