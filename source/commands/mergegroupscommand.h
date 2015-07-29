@@ -16,6 +16,10 @@
 #include "designmap.h"
 
 class MergeGroupsCommand : public Command {
+    
+#ifdef UNIT_TEST
+    friend class TestMergeGroupsCommand;
+#endif
 	
 public:
 	MergeGroupsCommand(string);
