@@ -7,10 +7,11 @@
 //
 
 #include "catch.hpp"
-#include "sequence.hpp"
+#include "testsequence.h"
 
 TEST_CASE("Testing Sequence Class") {
     Sequence seq;
+    TestSequence seq2;
     
     SECTION("test constructor - string, string") {
         INFO("Using TestSeq, atgcatgc") // Only appears on a FAIL
@@ -46,7 +47,7 @@ TEST_CASE("Testing Sequence Class") {
     
     SECTION("test initialize") {
         INFO("No data") // Only appears on a FAIL
-        seq.initialize();
+        seq2.initialize();
         CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
         
         CHECK(seq.getUnaligned() == "");

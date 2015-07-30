@@ -311,7 +311,7 @@ int RemoveDistsCommand::readPhylip(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         outputTypes["phylip"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        out << names.size() << endl;
+        out << (nseqs-names.size()) << endl;
             
         unsigned int count = 0;
         unsigned int keptCount = 0;

@@ -25,6 +25,11 @@
 
 class Sequence {
 public:
+    
+    #ifdef UNIT_TEST
+        friend class TestSequence;
+    #endif
+    
 	Sequence();
 	Sequence(string, string);
 	Sequence(ifstream&);

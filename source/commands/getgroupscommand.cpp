@@ -25,6 +25,8 @@ vector<string> GetGroupsCommand::setParameters(){
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "sharedGroup", "FNGLT","design",false,false, true); parameters.push_back(pdesign);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "FNGLT","list",false,false, true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT","taxonomy",false,false, true); parameters.push_back(ptaxonomy);
+        CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "PhylipColumn", "none","phylip",false,false,true); parameters.push_back(pphylip);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "none", "PhylipColumn", "none","column",false,false,true); parameters.push_back(pcolumn);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -44,9 +46,9 @@ vector<string> GetGroupsCommand::setParameters(){
 string GetGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy, design or shared file.\n";
+		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, count, list, taxonomy, design, phylip, column or shared file.\n";
 		helpString += "It outputs a file containing the sequences in the those specified groups, or a sharedfile containing only those groups.\n";
-		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design and groups. The group or count parameter is required, unless you have a current group or count file, or are using a shared file.\n";
+		helpString += "The get.groups command parameters are accnos, fasta, name, group, count, list, taxonomy, shared, design, phylip, column and groups. The group or count parameter is required, unless you have a current group or count file, or are using a shared file.\n";
 		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
 		helpString += "The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
@@ -70,6 +72,8 @@ string GetGroupsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "phylip")       {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "column")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],pick,[extension]";    }
@@ -96,6 +100,8 @@ GetGroupsCommand::GetGroupsCommand(){
 		outputTypes["shared"] = tempOutNames;
         outputTypes["design"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "GetGroupsCommand");
@@ -135,6 +141,8 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			outputTypes["shared"] = tempOutNames;
             outputTypes["design"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["phylip"] = tempOutNames;
+            outputTypes["column"] = tempOutNames;
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -216,6 +224,23 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("phylip");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("column");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["column"] = inputDir + it->second;		}
+                }
+
 			}
 			
 			
@@ -230,6 +255,16 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			else if (fastafile == "not found") {  fastafile = "";  }
 			else { m->setFastaFile(fastafile); }
 			
+            phylipfile = validParameter.validFile(parameters, "phylip", true);
+            if (phylipfile == "not open") { phylipfile = ""; abort = true; }
+            else if (phylipfile == "not found") { phylipfile = ""; }
+            else { 	m->setPhylipFile(phylipfile); }
+            
+            columnfile = validParameter.validFile(parameters, "column", true);
+            if (columnfile == "not open") { columnfile = ""; abort = true; }
+            else if (columnfile == "not found") { columnfile = ""; }
+            else {  m->setColumnFile(columnfile);	}
+
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
@@ -323,7 +358,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count or list."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list."); m->mothurOutEndLine(); abort = true; }
 			if (((groupfile == "") && (countfile == "")) && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group or count file."); m->mothurOutEndLine(); abort = true; }
             
             if (countfile == "") {
@@ -396,6 +431,8 @@ int GetGroupsCommand::execute(){
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
         if (designfile != "")		{		readDesign();	}
+        if (phylipfile != "")		{		readPhylip();	}
+        if (columnfile != "")		{		readColumn();	}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
@@ -447,6 +484,16 @@ int GetGroupsCommand::execute(){
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 			}
+            
+            itTypes = outputTypes.find("phylip");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+            }
+            
+            itTypes = outputTypes.find("column");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+            }
 		}
 		
 		return 0;		
@@ -975,6 +1022,218 @@ int GetGroupsCommand::readTax(){
 		m->errorOut(e, "GetGroupsCommand", "readTax");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int GetGroupsCommand::readPhylip(){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(phylipfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(phylipfile));
+        variables["[extension]"] = m->getExtension(phylipfile);
+        string outputFileName = getOutputFileName("phylip", variables);
+        
+        ifstream in;
+        m->openInputFile(phylipfile, in);
+        
+        float distance;
+        int square, nseqs;
+        string name;
+        unsigned int row;
+        set<unsigned int> rows; //converts names in names to a index
+        row = 0;
+        
+        string numTest;
+        in >> numTest >> name;
+        
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        else { convert(numTest, nseqs); }
+        
+        if (names.count(name) != 0) { rows.insert(row); }
+        row++;
+        
+        //is the matrix square?
+        char d;
+        while((d=in.get()) != EOF){
+            
+            if(isalnum(d)){
+                square = 1;
+                in.putback(d);
+                for(int i=0;i<nseqs;i++){
+                    in >> distance;
+                }
+                break;
+            }
+            if(d == '\n'){
+                square = 0;
+                break;
+            }
+        }
+        
+        //map name to row/column
+        if(square == 0){
+            for(int i=1;i<nseqs;i++){
+                in >> name;
+                if (names.count(name) != 0) { rows.insert(row); }
+                row++;
+                
+                for(int j=0;j<i;j++){
+                    if (m->control_pressed) {  in.close(); return 0;  }
+                    in >> distance;
+                }
+            }
+        }
+        else{
+            for(int i=1;i<nseqs;i++){
+                in >> name;
+                if (names.count(name) != 0) { rows.insert(row); }
+                row++;
+                for(int j=0;j<nseqs;j++){
+                    if (m->control_pressed) {  in.close(); return 0;  }
+                    in >> distance;
+                }
+            }
+        }
+        in.close();
+        
+        if (m->control_pressed) {  return 0; }
+        
+        //read through file only printing rows and columns of seqs in names
+        ifstream inPhylip;
+        m->openInputFile(phylipfile, inPhylip);
+        
+        inPhylip >> numTest;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputTypes["phylip"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        out << names.size() << endl;
+        
+        unsigned int count = 0;
+        if(square == 0){
+            for(int i=0;i<nseqs;i++){
+                inPhylip >> name;
+                bool ignoreRow = false;
+                
+                if (names.count(name) == 0) { ignoreRow = true; }
+                else{ out << name << '\t'; count++; }
+                
+                for(int j=0;j<i;j++){
+                    if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
+                    inPhylip >> distance;
+                    if (!ignoreRow) {
+                        //is this a column we want
+                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                    }
+                }
+                if (!ignoreRow) { out << endl; }
+            }
+        }
+        else{
+            for(int i=0;i<nseqs;i++){
+                inPhylip >> name;
+                
+                bool ignoreRow = false;
+                
+                if (names.count(name) == 0) { ignoreRow = true; }
+                else{ out << name << '\t'; count++; }
+                
+                for(int j=0;j<nseqs;j++){
+                    if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
+                    inPhylip >> distance;
+                    if (!ignoreRow) {
+                        //is this a column we want
+                        if(rows.count(j) != 0) {  out << distance << '\t';  }
+                    }
+                }
+                if (!ignoreRow) { out << endl; }
+            }
+        }
+        inPhylip.close();
+        out.close();
+        
+        if (count == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        else if (count != names.size()) {
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
+            //rewrite with new number
+            m->renameFile(outputFileName, outputFileName+".temp");
+            ofstream out2;
+            m->openOutputFile(outputFileName, out2);
+            out2 << count << endl;
+            
+            ifstream in3;
+            m->openInputFile(outputFileName+".temp", in3);
+            in3 >> nseqs; m->gobble(in3);
+            char buffer[4096];
+            while (!in3.eof()) {
+                in3.read(buffer, 4096);
+                out2.write(buffer, in3.gcount());
+            }
+            in3.close();
+            out2.close();
+            m->mothurRemove(outputFileName+".temp");
+        }
+        
+        m->mothurOut("Selected " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetGroupsCommand", "readPhylip");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int GetGroupsCommand::readColumn(){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(columnfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(columnfile));
+        variables["[extension]"] = m->getExtension(columnfile);
+        string outputFileName = getOutputFileName("column", variables);
+        outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        ifstream in;
+        m->openInputFile(columnfile, in);
+        
+        set<string> foundNames;
+        string firstName, secondName;
+        float distance;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { out.close(); in.close(); return 0; }
+            
+            in >> firstName >> secondName >> distance; m->gobble(in);
+            
+            //are both names in the accnos file
+            if ((names.count(firstName) != 0) && (names.count(secondName) != 0)) {
+                out << firstName << '\t' << secondName << '\t' << distance << endl;
+                foundNames.insert(firstName);
+                foundNames.insert(secondName);
+            }
+        }
+        in.close();
+        out.close();
+        
+        if (foundNames.size() == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        else if (foundNames.size() != names.size()) {
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(foundNames.size()) + " of them in the column file."); m->mothurOutEndLine();
+        }
+        
+        m->mothurOut("Selected " + toString(foundNames.size()) + " groups or sequences from your column file."); m->mothurOutEndLine();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetGroupsCommand", "readColumn");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int GetGroupsCommand::fillNames(){
