@@ -69,11 +69,14 @@ ifeq  ($(strip $(USEBOOST)),yes)
 
     CXXFLAGS += -DUSE_BOOST
 
-    LIBS += \
-    ${BOOST_LIBRARY_DIR}/libboost_iostreams.a \
-    ${BOOST_LIBRARY_DIR}/zlib.a
+    LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
 
-    #if linux or windows then ${BOOST_LIBRARY_DIR}/libz.a
+    #if mac
+    LIBS += ${BOOST_LIBRARY_DIR}/zlib.a
+
+    #if linux or windows
+    #LIBS += ${BOOST_LIBRARY_DIR}/libz.a
+
 endif
 
 
