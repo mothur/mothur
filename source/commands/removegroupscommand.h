@@ -15,6 +15,10 @@
 #include "groupmap.h"
 
 class RemoveGroupsCommand : public Command {
+    
+#ifdef UNIT_TEST
+    friend class TestRemoveGroupsCommand;
+#endif
 	
 public:
 	

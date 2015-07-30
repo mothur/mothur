@@ -385,6 +385,8 @@
 		48C728651B66A77800D40830 /* testsequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728641B66A77800D40830 /* testsequence.cpp */; };
 		48C728671B66AB8800D40830 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		48C7286A1B69598400D40830 /* testmergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728681B69598400D40830 /* testmergegroupscommand.cpp */; };
+		48C728721B6AB3B900D40830 /* testremovegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */; };
+		48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */; };
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -814,9 +816,13 @@
 		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kmeralign.cpp; path = source/datastructures/kmeralign.cpp; sourceTree = "<group>"; };
 		48C51DF21A793EFE004ECDF1 /* kmeralign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kmeralign.h; path = source/datastructures/kmeralign.h; sourceTree = "<group>"; };
 		48C728641B66A77800D40830 /* testsequence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsequence.cpp; path = testcontainers/testsequence.cpp; sourceTree = "<group>"; };
-		48C728661B66A79400D40830 /* testsequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testsequence.h; sourceTree = "<group>"; };
 		48C728681B69598400D40830 /* testmergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testmergegroupscommand.cpp; path = testcommands/testmergegroupscommand.cpp; sourceTree = "<group>"; };
 		48C728691B69598400D40830 /* testmergegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testmergegroupscommand.h; path = testcommands/testmergegroupscommand.h; sourceTree = "<group>"; };
+		48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testremovegroupscommand.cpp; path = testcommands/testremovegroupscommand.cpp; sourceTree = "<group>"; };
+		48C728701B6AB3B900D40830 /* testremovegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testremovegroupscommand.h; path = testcommands/testremovegroupscommand.h; sourceTree = "<group>"; };
+		48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testgetgroupscommand.cpp; path = testcommands/testgetgroupscommand.cpp; sourceTree = "<group>"; };
+		48C728741B6AB4CD00D40830 /* testgetgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testgetgroupscommand.h; path = testcommands/testgetgroupscommand.h; sourceTree = "<group>"; };
+		48C728761B6AB4EE00D40830 /* testsequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testsequence.h; path = testcontainers/testsequence.h; sourceTree = "<group>"; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = "<group>"; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/completelinkage.cpp; sourceTree = "<absolute>"; };
@@ -1712,8 +1718,12 @@
 		481FB5211AC0A9B40076CFF3 /* testcommands */ = {
 			isa = PBXGroup;
 			children = (
+				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
+				48C728741B6AB4CD00D40830 /* testgetgroupscommand.h */,
 				48C728691B69598400D40830 /* testmergegroupscommand.h */,
 				48C728681B69598400D40830 /* testmergegroupscommand.cpp */,
+				48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */,
+				48C728701B6AB3B900D40830 /* testremovegroupscommand.h */,
 				481FB52D1AC1B0CB0076CFF3 /* testsetseedcommand.cpp */,
 			);
 			name = testcommands;
@@ -1723,7 +1733,7 @@
 			isa = PBXGroup;
 			children = (
 				48C728641B66A77800D40830 /* testsequence.cpp */,
-				48C728661B66A79400D40830 /* testsequence.h */,
+				48C728761B6AB4EE00D40830 /* testsequence.h */,
 			);
 			name = testcontainers;
 			sourceTree = "<group>";
@@ -2574,6 +2584,7 @@
 				481FB6661AC1B8450076CFF3 /* progress.cpp in Sources */,
 				481FB6511AC1B8100076CFF3 /* engine.cpp in Sources */,
 				481FB5381AC1B5E30076CFF3 /* clusterclassic.cpp in Sources */,
+				48C728721B6AB3B900D40830 /* testremovegroupscommand.cpp in Sources */,
 				481FB5EC1AC1B77E0076CFF3 /* parselistscommand.cpp in Sources */,
 				481FB5B61AC1B74F0076CFF3 /* filtersharedcommand.cpp in Sources */,
 				481FB5F81AC1B77E0076CFF3 /* rarefactsharedcommand.cpp in Sources */,
@@ -2650,6 +2661,7 @@
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
 				481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */,
+				48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */,
 				481FB6391AC1B7EA0076CFF3 /* ordervector.cpp in Sources */,
 				481FB59A1AC1B71B0076CFF3 /* chimeraslayercommand.cpp in Sources */,
 				481FB5901AC1B71B0076CFF3 /* aligncommand.cpp in Sources */,

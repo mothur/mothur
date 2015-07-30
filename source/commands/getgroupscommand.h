@@ -15,6 +15,10 @@
 #include "groupmap.h"
 
 class GetGroupsCommand : public Command {
+    
+#ifdef UNIT_TEST
+    friend class TestGetGroupsCommand;
+#endif
 	
 public:
 	
