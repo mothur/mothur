@@ -20,6 +20,8 @@ vector<string> RemoveGroupsCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "FNGLT","fasta",false,false,true); parameters.push_back(pfasta);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none","shared",false,false,true); parameters.push_back(pshared);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "PhylipColumn", "none","phylip",false,false,true); parameters.push_back(pphylip);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "none", "PhylipColumn", "none","column",false,false,true); parameters.push_back(pcolumn);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "FNGLT","group",false,false,true); parameters.push_back(pgroup);	        
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "sharedGroup", "FNGLT","design",false,false); parameters.push_back(pdesign);
@@ -44,9 +46,9 @@ vector<string> RemoveGroupsCommand::setParameters(){
 string RemoveGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.groups command removes sequences from a specfic group or set of groups from the following file types: fasta, name, group, count, list, taxonomy, design or sharedfile.\n";
+		helpString += "The remove.groups command removes sequences from a specfic group or set of groups from the following file types: fasta, name, group, count, list, taxonomy, design, phylip, column or sharedfile.\n";
 		helpString += "It outputs a file containing the sequences NOT in the those specified groups, or with a sharedfile eliminates the groups you selected.\n";
-		helpString += "The remove.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design and groups. The group or count parameter is required, unless you have a current group or count file or are using a sharedfile.\n";
+		helpString += "The remove.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design, phylip, column and groups. The group or count parameter is required, unless you have a current group or count file or are using a sharedfile.\n";
 		helpString += "You must also provide an accnos containing the list of groups to remove or set the groups parameter to the groups you wish to remove.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like removed.  You can separate group names with dashes.\n";
 		helpString += "The remove.groups command should be in the following format: remove.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
@@ -70,6 +72,8 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "phylip")      {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "column")      {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],[tag],pick,[extension]-[filename],pick,[extension]";    }
@@ -96,6 +100,8 @@ RemoveGroupsCommand::RemoveGroupsCommand(){
 		outputTypes["shared"] = tempOutNames;
         outputTypes["design"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveGroupsCommand", "RemoveGroupsCommand");
@@ -135,6 +141,8 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			outputTypes["shared"] = tempOutNames;
             outputTypes["design"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["phylip"] = tempOutNames;
+            outputTypes["column"] = tempOutNames;
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -216,6 +224,22 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("phylip");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("column");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["column"] = inputDir + it->second;		}
+                }
 			}
 			
 			
@@ -224,6 +248,16 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			if (accnosfile == "not open") { accnosfile = ""; abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = ""; }	
 			else { m->setAccnosFile(accnosfile); }
+            
+            phylipfile = validParameter.validFile(parameters, "phylip", true);
+            if (phylipfile == "not open") { phylipfile = ""; abort = true; }
+            else if (phylipfile == "not found") { phylipfile = ""; }
+            else { 	m->setPhylipFile(phylipfile); }
+            
+            columnfile = validParameter.validFile(parameters, "column", true);
+            if (columnfile == "not open") { columnfile = ""; abort = true; }
+            else if (columnfile == "not found") { columnfile = ""; }
+            else {  m->setColumnFile(columnfile);	}
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
@@ -324,7 +358,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file containing group names or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count or list."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list."); m->mothurOutEndLine(); abort = true; }
 			if (((groupfile == "") && (countfile == "")) && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group or count file."); m->mothurOutEndLine(); abort = true; }
             
             if (countfile == "") {
@@ -408,6 +442,8 @@ int RemoveGroupsCommand::execute(){
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
         if (designfile != "")		{		readDesign();	}
+        if (phylipfile != "")		{		readPhylip();		}
+        if (columnfile != "")		{		readColumn();       }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
@@ -458,6 +494,16 @@ int RemoveGroupsCommand::execute(){
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 			}
+            
+            itTypes = outputTypes.find("phylip");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+            }
+            
+            itTypes = outputTypes.find("column");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+            }
 		}
 		
 		return 0;		
@@ -1033,6 +1079,226 @@ int RemoveGroupsCommand::readTax(){
 		m->errorOut(e, "RemoveGroupsCommand", "readTax");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int RemoveGroupsCommand::readPhylip(){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(phylipfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(phylipfile));
+        variables["[extension]"] = m->getExtension(phylipfile);
+        string outputFileName = getOutputFileName("phylip", variables);
+        
+        ifstream in;
+        m->openInputFile(phylipfile, in);
+        
+        float distance;
+        int square, nseqs;
+        string name;
+        unsigned int row;
+        set<unsigned int> rows; //converts names in names to a index
+        row = 0;
+        
+        string numTest;
+        in >> numTest >> name;
+        
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        else { convert(numTest, nseqs); }
+        
+        //not one we want to remove
+        if (names.count(name) == 0) { rows.insert(row); }
+        row++;
+        
+        //is the matrix square?
+        char d;
+        while((d=in.get()) != EOF){
+            
+            if(isalnum(d)){
+                square = 1;
+                in.putback(d);
+                for(int i=0;i<nseqs;i++){
+                    in >> distance;
+                }
+                break;
+            }
+            if(d == '\n'){
+                square = 0;
+                break;
+            }
+        }
+        
+        //map name to row/column
+        if(square == 0){
+            for(int i=1;i<nseqs;i++){
+                in >> name;
+                if (names.count(name) == 0) { rows.insert(row); }
+                row++;
+                
+                for(int j=0;j<i;j++){
+                    if (m->control_pressed) {  in.close(); return 0;  }
+                    in >> distance;
+                }
+            }
+        }
+        else{
+            for(int i=1;i<nseqs;i++){
+                in >> name;
+                if (names.count(name) == 0) { rows.insert(row);  }
+                row++;
+                for(int j=0;j<nseqs;j++){
+                    if (m->control_pressed) {  in.close(); return 0;  }
+                    in >> distance;
+                }
+            }
+        }
+        in.close();
+        
+        if (m->control_pressed) {  return 0; }
+        
+        //read through file only printing rows and columns of seqs in names
+        ifstream inPhylip;
+        m->openInputFile(phylipfile, inPhylip);
+        
+        inPhylip >> numTest;
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputTypes["phylip"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        out << (nseqs-names.size()) << endl;
+        
+        unsigned int count = 0;
+        unsigned int keptCount = 0;
+        if(square == 0){
+            for(int i=0;i<nseqs;i++){
+                inPhylip >> name;
+                bool ignoreRow = false;
+                
+                if (names.count(name) != 0) { ignoreRow = true; count++; }
+                else{ out << name; keptCount++; }
+                
+                for(int j=0;j<i;j++){
+                    if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
+                    inPhylip >> distance;
+                    if (!ignoreRow) {
+                        //is this a column we want
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
+                    }
+                }
+                if (!ignoreRow) { out << endl; }
+            }
+        }
+        else{
+            for(int i=0;i<nseqs;i++){
+                inPhylip >> name;
+                
+                bool ignoreRow = false;
+                
+                if (names.count(name) != 0) { ignoreRow = true; count++; }
+                else{ out << name; keptCount++; }
+                
+                for(int j=0;j<nseqs;j++){
+                    if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
+                    inPhylip >> distance;
+                    if (!ignoreRow) {
+                        //is this a column we want
+                        if(rows.count(j) != 0) {  out << '\t' << distance;  }
+                    }
+                }
+                if (!ignoreRow) { out << endl; }
+            }
+        }
+        inPhylip.close();
+        out.close();
+        
+        if (keptCount == 0) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        else if (count != names.size()) {
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
+            //rewrite with new number
+            m->renameFile(outputFileName, outputFileName+".temp");
+            ofstream out2;
+            m->openOutputFile(outputFileName, out2);
+            out2 << keptCount << endl;
+            
+            ifstream in3;
+            m->openInputFile(outputFileName+".temp", in3);
+            in3 >> nseqs; m->gobble(in3);
+            char buffer[4096];
+            while (!in3.eof()) {
+                in3.read(buffer, 4096);
+                out2.write(buffer, in3.gcount());
+            }
+            in3.close();
+            out2.close();
+            m->mothurRemove(outputFileName+".temp");
+        }
+        
+        m->mothurOut("Removed " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveGroupsCommand", "readPhylip");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int RemoveGroupsCommand::readColumn(){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(columnfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(columnfile));
+        variables["[extension]"] = m->getExtension(columnfile);
+        string outputFileName = getOutputFileName("column", variables);
+        outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        ifstream in;
+        m->openInputFile(columnfile, in);
+        
+        set<string> removeNames;
+        string firstName, secondName;
+        float distance;
+        bool wrote = false;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { out.close(); in.close(); return 0; }
+            
+            in >> firstName >> secondName >> distance; m->gobble(in);
+            
+            //is either names in the accnos file
+            if (names.count(firstName) != 0)       {
+                removeNames.insert(firstName);
+                if (names.count(secondName) != 0)  { removeNames.insert(secondName);      }   }
+            else if (names.count(secondName) != 0) {
+                removeNames.insert(secondName);
+                if (names.count(firstName) != 0)   { removeNames.insert(firstName);     }   }
+            else {
+                wrote = true;
+                out << firstName << '\t' << secondName << '\t' << distance << endl;
+            }
+        }
+        in.close();
+        out.close();
+        
+        if (!wrote) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        else if (removeNames.size() != names.size()) {
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(removeNames.size()) + " of them in the column file."); m->mothurOutEndLine();
+        }
+        
+        m->mothurOut("Removed " + toString(removeNames.size()) + " groups or sequences from your column file."); m->mothurOutEndLine();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveGroupsCommand", "readColumn");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int RemoveGroupsCommand::fillNames(){
