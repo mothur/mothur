@@ -14,7 +14,7 @@
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* right){
-	return (left->getGroup() < right->getGroup());
+    return (left->getGroup() < right->getGroup());
 }
 //**********************************************************************************************************************
 vector<string> SharedCommand::setParameters(){
