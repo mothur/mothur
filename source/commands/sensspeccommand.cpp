@@ -248,30 +248,30 @@ int SensSpecCommand::execute(){
 int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 	try {
 		//for each otu
-		for(int i=0;i<list->getNumBins();i++){
+		cout << list->getNumBins() << endl;
 
+		for(int i=0;i<list->getNumBins();i++){
 			if (m->control_pressed) { return 0; }
 
 			string seqList = list->get(i);
 			int seqListLength = seqList.length();
-			string seqName = "";
 
-			vector<string> otuVector;
 
 			//parse bin by name...
+			int nSeqs = 1;
 			for(int j=0;j<seqListLength;j++){
-
-				if(seqList[j] == ','){
-					otuVector.push_back(seqName);
-					// seqMap[seqName] = i;
-					seqName = "";
-				}
-				else{
-					seqName += seqList[j];
-				}
-
+				if(seqList[j] == ','){	nSeqs++;	}
 			}
-			otuVector.push_back(seqName);
+			cout << i << '\t' << nSeqs << endl;
+
+			vector<string> otuVector(nSeqs);
+			int index = 0;
+			string seqName = "";
+
+			istringstream seqListStream(seqList);
+			while(getline(seqListStream, seqName, ',')) {
+				otuVector[index++] = seqName;
+			}
 
 			// indicate that a pair of sequences are in the same OTU; will
 			// assume that if they don't show up in the map that they're in
@@ -288,7 +288,7 @@ int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 				}
 			}
 		}
-
+		cout << list->getNumSeqs() << endl;
 		return list->getNumSeqs();
 	}
 	catch(exception& e) {
@@ -399,6 +399,9 @@ int SensSpecCommand::process(map<string, int>& seqMap, int nSeqs, string label, 
 			string seqNameA, seqNameB;
 			float distance;
 
+			cout << seqMap.size() << endl;
+			cout.flush();
+
 			while(columnFile){
 				columnFile >> seqNameA >> seqNameB >> distance;
 				m->gobble(columnFile);
@@ -418,7 +421,6 @@ int SensSpecCommand::process(map<string, int>& seqMap, int nSeqs, string label, 
 						truePositives++;
 						seqMap.erase(it);
 					} else {
-						cout << seqNamePair << endl;
 						falseNegatives++;
 					}
 				}
