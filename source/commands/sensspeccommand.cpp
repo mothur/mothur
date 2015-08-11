@@ -256,11 +256,14 @@ int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 			int seqListLength = seqList.length();
 			string seqName = "";
 
-			//parse bin by name, mapping each name to its otu number
+			vector<string> otuVector;
+
+			//parse bin by name...
 			for(int j=0;j<seqListLength;j++){
 
 				if(seqList[j] == ','){
-					seqMap[seqName] = i;
+					otuVector.push_back(seqName);
+					// seqMap[seqName] = i;
 					seqName = "";
 				}
 				else{
@@ -268,10 +271,25 @@ int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 				}
 
 			}
-			seqMap[seqName] = i;
+			otuVector.push_back(seqName);
+
+			// indicate that a pair of sequences are in the same OTU; will
+			// assume that if they don't show up in the map that they're in
+			// different OTUs
+			for(int i=0;i<otuVector.size();i++){
+				for(int j=0;j<i;j++){
+					if(otuVector[i] < otuVector[j]){
+						seqMap[otuVector[i] + '-' + otuVector[j]] = 1;
+					}
+					else{
+						seqMap[otuVector[j] + '-' + otuVector[i]] = 1;
+					}
+
+				}
+			}
 		}
 
-		return 0;
+		return list->getNumSeqs();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SensSpecCommand", "fillSeqMap");
@@ -281,7 +299,7 @@ int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 
 //***************************************************************************************************************
 
-int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCutoff, string& origCutoff){
+int SensSpecCommand::process(map<string, int>& seqMap, int nSeqs, string label, bool& getCutoff, string& origCutoff){
 
 	try {
 
@@ -297,10 +315,8 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 			}
 		}
 
-		int lNumSeqs = seqMap.size();
-
-			//could segfault out if there are sequences in phylip-formatted distance
-			//matrix that aren't in the list file
+		//could segfault out if there are sequences in phylip-formatted distance
+		//matrix that aren't in the list file
 		if(format == "phylip"){
 			truePositives = 0;
 			falsePositives = 0;
@@ -314,8 +330,8 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 
 			string seqName;
 			double distance;
-			vector<int> otuIndices(lNumSeqs, -1);
-
+			//vector<int> otuIndices(lNumSeqs, -1);
+			vector<string> seqNameVector;
 			m->mothurOut(label); m->mothurOutEndLine();
 
 			for(int i=0;i<pNumSeqs;i++){
@@ -323,19 +339,47 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 				if (m->control_pressed) { return 0; }
 
 				phylipFile >> seqName;
-				otuIndices[i] = seqMap[seqName];
+				seqNameVector.push_back(seqName);
+
+				//otuIndices[i] = seqMap[seqName];
 
 				for(int j=0;j<i;j++){
 					phylipFile >> distance;
 
+					string seqNamePair;
+					if(seqNameVector[i] < seqNameVector[j]){
+						seqNamePair = seqNameVector[i] + '-' + seqNameVector[j];
+					} else {
+						seqNamePair = seqNameVector[j] + '-' + seqNameVector[i];
+					}
+
 					if(distance <= cutoff){
-						if(otuIndices[i] == otuIndices[j])	{	truePositives++;	}
-						else								{	falseNegatives++;	}
+
+						map<string, int>::iterator it = seqMap.find(seqNamePair);
+
+						if(it != seqMap.end()){
+							truePositives++;
+							seqMap.erase(it);
+						} else {
+							falseNegatives++;
+						}
+
+					} else {
+
+						map<string, int>::iterator it = seqMap.find(seqNamePair);
+
+						if(it != seqMap.end()){
+							falsePositives++;
+							seqMap.erase(it);
+						} else {
+							trueNegatives++;
+						}
+
 					}
-					else{
-						if(otuIndices[i] == otuIndices[j])	{	falsePositives++;	}
-						else								{	trueNegatives++;	}
-					}
+
+
+
+
 				}
 
 	            m->getline(phylipFile); //get rest of line if square
@@ -354,56 +398,33 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 
 			string seqNameA, seqNameB;
 			float distance;
-			map<string, float> distanceMap;
 
 			while(columnFile){
 				columnFile >> seqNameA >> seqNameB >> distance;
-
-				string seqPairString;
-				if(seqNameA < seqNameB)	{	seqPairString = seqNameA + '\t' + seqNameB;	}
-				else					{	seqPairString = seqNameB + '\t' + seqNameA;	}
-
+				m->gobble(columnFile);
 
 				if(distance <= cutoff){
-					distanceMap[seqPairString] = distance;
-				}
+					string seqNamePair;
 
-				m->gobble(columnFile);
-			}
-
-			for(map<string,int>::iterator itA=seqMap.begin(); itA!=seqMap.end(); itA++){
-				for(map<string,int>::iterator itB=seqMap.begin(); itB!=itA; itB++){
-
-					string seqPairString;
-					if(itA->first < itB->first)	{	seqPairString = itA->first + '\t' + itB->first;	}
-					else						{	seqPairString = itB->first + '\t' + itA->first;	}
-
-					if(itA->second == itB->second){
-
-						map<string, float>::iterator itD = distanceMap.find(seqPairString);
-
-						if( itD != distanceMap.end() ){
-							truePositives++;
-							distanceMap.erase(itD);
-						}
-						else{
-							falsePositives++;
-						}
-					}
-					else {
-						map<string, float>::iterator itD = distanceMap.find(seqPairString);
-
-						if(itD != distanceMap.end()){
-							falseNegatives++;
-							distanceMap.erase(itD);
-						}
-						else{
-							trueNegatives++;
-						}
+					if(seqNameA < seqNameB){
+						seqNamePair = seqNameA + '-' + seqNameB;
+					} else {
+						seqNamePair = seqNameB + '-' + seqNameA;
 					}
 
+					map<string, int>::iterator it = seqMap.find(seqNamePair);
+
+					if(it != seqMap.end()) {
+						truePositives++;
+						seqMap.erase(it);
+					} else {
+						cout << seqNamePair << endl;
+						falseNegatives++;
+					}
 				}
 			}
+			falsePositives = seqMap.size();
+			trueNegatives = nSeqs * (nSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 		}
 
 
@@ -447,8 +468,8 @@ int SensSpecCommand::processListFile(){
 				userLabels.erase(list->getLabel());
 
 				//process
-				fillSeqMap(seqMap, list);
-				process(seqMap, list->getLabel(), getCutoff, origCutoff);
+				int numSeqs = fillSeqMap(seqMap, list);
+				process(seqMap, numSeqs, list->getLabel(), getCutoff, origCutoff);
 			}
 
 			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -462,8 +483,8 @@ int SensSpecCommand::processListFile(){
 				userLabels.erase(list->getLabel());
 
 				//process
-				fillSeqMap(seqMap, list);
-				process(seqMap, list->getLabel(), getCutoff, origCutoff);
+				int numSeqs = fillSeqMap(seqMap, list);
+				process(seqMap, numSeqs, list->getLabel(), getCutoff, origCutoff);
 
 				//restore real lastlabel to save below
 				list->setLabel(saveLabel);
@@ -493,8 +514,8 @@ int SensSpecCommand::processListFile(){
 			list = input.getListVector(lastLabel);
 
 			//process
-			fillSeqMap(seqMap, list);
-			process(seqMap, list->getLabel(), getCutoff, origCutoff);
+			int numSeqs = fillSeqMap(seqMap, list);
+			process(seqMap, numSeqs, list->getLabel(), getCutoff, origCutoff);
 
 			delete list;
 		}
