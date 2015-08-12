@@ -414,7 +414,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 random = time(NULL);
                 seed = true;
             }else {
-                if (m->isInteger(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
+                if (m->isNumeric1(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
                 else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
             }
 

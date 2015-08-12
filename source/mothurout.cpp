@@ -3537,7 +3537,7 @@ bool MothurOut::mothurConvert(string item, int& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-int");
 		exit(1);
 	}
 }
@@ -3558,7 +3558,7 @@ bool MothurOut::mothurConvert(string item, intDist& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-intDist");
 		exit(1);
 	}
 }
@@ -3568,7 +3568,8 @@ bool MothurOut::isNumeric1(string stringToCheck){
 	try {
 		bool numeric = false;
 		
-		if(stringToCheck.find_first_not_of("0123456789.-") == string::npos) { numeric = true; }
+        if (stringToCheck == "") { numeric = false;  }
+        else if(stringToCheck.find_first_not_of("0123456789.-") == string::npos) { numeric = true; }
 			
 		return numeric;
 	}
@@ -3625,7 +3626,7 @@ bool MothurOut::mothurConvert(string item, float& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-float");
 		exit(1);
 	}
 }
@@ -3646,7 +3647,7 @@ bool MothurOut::mothurConvert(string item, double& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-double");
 		exit(1);
 	}
 }

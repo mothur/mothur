@@ -42,7 +42,7 @@ private:
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);
-    vector<string> readRows(string, int&);
+    vector< vector<string> > readRows(string, int&, bool&);
     int getDims(string, int&, int&);
     vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);

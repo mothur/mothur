@@ -287,6 +287,7 @@ int BiomInfoCommand::createSharedFromBiom() {
         
         if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
         
+        vector<string> conTaxonomy;
         it = fileLines.find("rows");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a rows provided.\n"); }
         else {
@@ -297,7 +298,9 @@ int BiomInfoCommand::createSharedFromBiom() {
                 ofstream outMap;
                 m->openOutputFile(mapFilename, outMap);
                 
-                vector<string> taxonomies = readRows(thisLine, numRows);
+                bool hasTaxonomy = false;
+                vector< vector<string> > results = readRows(thisLine, numRows, hasTaxonomy);
+                vector<string> taxonomies = results[0];
                 
                 string snumBins = toString(numRows);
                 for (int i = 0; i < numRows; i++) {
@@ -315,7 +318,12 @@ int BiomInfoCommand::createSharedFromBiom() {
                     outMap << otuNames[i] << '\t' << taxonomies[i] << endl;
                 }
                 outMap.close();
-            }else{  otuNames = readRows(thisLine, numRows); }
+            }else{
+                bool hasTaxonomy = false;
+                vector< vector<string> > results = readRows(thisLine, numRows, hasTaxonomy);
+                otuNames = results[0];
+                if (hasTaxonomy) { conTaxonomy = results[1]; }
+            }
         }
         
         if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
@@ -326,7 +334,13 @@ int BiomInfoCommand::createSharedFromBiom() {
             string thisLine = it->second;
             
             //read sample names
-            groupNames = readRows(thisLine, numCols);
+            bool hasTaxonomy = false;
+            vector< vector<string> > results = readRows(thisLine, numCols, hasTaxonomy);
+            groupNames = results[0];
+            if (hasTaxonomy) {
+                /////////////////////write taxonomy file////////////////////////
+                //////////////write tax.summary //////////////////
+            }
             
             //if users selected groups, then remove the groups not wanted.
             SharedUtil util;
@@ -367,10 +381,14 @@ int BiomInfoCommand::createSharedFromBiom() {
             m->mothurOutEndLine(); m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
             lookup[0]->printHeaders(out);
             printSharedData(lookup, out);
+            
+            if (conTaxonomy.size() != 0) {
+                ////////////// write constaxonomy //////////////////
+                //////////////write tax.summary //////////////////
+            }
+            
+            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
         }
-        
-        //for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { delete it3->second; }
-        //out.close();
         
         if (m->control_pressed) {  m->mothurRemove(filename); return 0; }
         
@@ -566,7 +584,7 @@ int BiomInfoCommand::getDims(string line, int& shapeNumRows, int& shapeNumCols) 
     }
 }
 //**********************************************************************************************************************
-vector<string> BiomInfoCommand::readRows(string line, int& numRows) {
+vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bool& allBlank) {
     try {
         /*"rows":[
          {"id":"Otu01", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Porphyromonadaceae", "unclassified"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
@@ -582,17 +600,18 @@ vector<string> BiomInfoCommand::readRows(string line, int& numRows) {
          
          ],*/
         
-        vector<string> names;
+        vector< vector<string> > results; results.resize(2);
         int countOpenBrace = 0;
         int countClosedBrace = 0;
         int openParen = 0;
         int closeParen = 0;
         string nextRow = "";
         bool end = false;
+        allBlank = true;
         
         for (int i = 0; i < line.length(); i++) {
             
-            if (m->control_pressed) { return names; }
+            if (m->control_pressed) { return results; }
             
             if (line[i] == '[')         { countOpenBrace++;     }
             else if (line[i] == ']')    { countClosedBrace++;   }
@@ -605,10 +624,8 @@ vector<string> BiomInfoCommand::readRows(string line, int& numRows) {
             if ((openParen == closeParen) && (closeParen != 0)) { //process row
                 numRows++;
                 
-                cout << nextRow << endl;
-                vector<string> results = getNamesAndTaxonomies(nextRow);
-                names.push_back(results[0]);
-                cout << results[0] << '\t' << results[1] << endl;
+                vector<string> result = getNamesAndTaxonomies(nextRow);
+                if (result.size() != 0) { results[0].push_back(result[0]); results[1].push_back(result[1]); if (result[1] != "") { allBlank = false; } }
                 
                 nextRow = "";
                 openParen = 0;
@@ -617,7 +634,7 @@ vector<string> BiomInfoCommand::readRows(string line, int& numRows) {
         }
         
         
-        return names;
+        return results;
     }
     catch(exception& e) {
         m->errorOut(e, "BiomInfoCommand", "readRows");
@@ -647,7 +664,7 @@ vector<string> BiomInfoCommand::getNamesAndTaxonomies(string line) {
         
         int pos = line.find_first_of(',');
         if (pos == string::npos) { //some kind of error?? we expect at least metadata : null, just grab name
-            results.push_back(getName(line));
+            results.push_back(getName(line)); results.push_back("");
         }else {
             string value;
             m->splitAtComma(value, line);  //value hold name portion ("id":"Otu01") line holds rest
