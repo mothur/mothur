@@ -50,12 +50,10 @@ private:
 	long int truePositives, falsePositives, trueNegatives, falseNegatives;
 	bool abort, allLines, square;
 	bool hard;
-	//string lineLabel;
 	double cutoff;
 	int precision;
 
-	int fillSeqMap(map<string, int>&, ListVector*&);
-	int process(map<string, int>&, int, string, bool&, string&);
+	int process(map<string, int>&, ListVector*&, bool&, string&);
 };
 
 #endif
