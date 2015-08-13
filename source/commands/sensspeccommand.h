@@ -41,7 +41,7 @@ private:
 	void setUpOutput();
 	void outputStatistics(string, string);
 
-	string listFile, distFile, nameFile, sensSpecFileName, phylipfile, columnfile;
+	string listFile, distFile, sensSpecFileName, phylipfile, columnfile, namefile;
 	string outputDir;
 	string format;
 	vector<string> outputNames;

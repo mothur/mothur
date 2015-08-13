@@ -15,6 +15,7 @@ vector<string> SensSpecCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","sensspec",false,true,true); parameters.push_back(plist);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pphylip);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pcolumn);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
@@ -132,6 +133,15 @@ SensSpecCommand::SensSpecCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
+
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+
 			}
 			//check for required parameters
 			listFile = validParameter.validFile(parameters, "list", true);
@@ -153,6 +163,12 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			else if (columnfile == "not open") { abort = true; }
 			else { distFile = columnfile; format = "column";   m->setColumnFile(columnfile); }
 
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not found") { namefile =  "";  }
+			else if (namefile == "not open") { namefile = ""; abort = true; }
+			else {  m->setNameFile(namefile); }
+
+
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = m->getColumnFile();
@@ -167,6 +183,13 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				}
 			}else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a sens.spec command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 
+			if ((namefile == "") && (columnfile != "")) {
+                m->mothurOut("[ERROR]: you must provide a name file with a column file."); m->mothurOutEndLine(); abort = true;
+            }
+
+			if ((namefile == "") && (phylipfile != "")) {
+                m->mothurOut("[WARNING]: there is no reason to include a name file with a phylip file. Ignoring..."); m->mothurOutEndLine(); abort = false;
+            }
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
@@ -586,18 +609,17 @@ string SensSpecCommand::preProcessList(){
             }
             phylipFile.close();
         }else {
-            ifstream columnFile;
-            m->openInputFile(distFile, columnFile);
-            string seqNameA, seqNameB;
-            double distance;
+            ifstream nameFileHandle;
+            m->openInputFile(namefile, nameFileHandle);
+            string uniqueSeqName, redundantSeqNames;
 
-            while(columnFile){
+            while(nameFileHandle){
                 if (m->control_pressed) { return ""; }
-                columnFile >> seqNameA >> seqNameB >> distance;
-                uniqueNames.insert(seqNameA); uniqueNames.insert(seqNameB);
-                m->gobble(columnFile);
+                nameFileHandle >> uniqueSeqName >> redundantSeqNames;
+                uniqueNames.insert(uniqueSeqName);
+                m->gobble(nameFileHandle);
             }
-            columnFile.close();
+            nameFileHandle.close();
         }
 
         //read list file, if numSeqs > unique names then remove redundant names
