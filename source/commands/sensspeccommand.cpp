@@ -200,7 +200,10 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			sensSpecFileName = getOutputFileName("sensspec",variables);
 		}
 
-		m->mothurOut("NOTE: sens.spec assumes that you only unique sequences were used to generate the distance matrix."); m->mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("NOTE: sens.spec assumes that only unique sequences were used to generate the distance matrix.");
+		m->mothurOutEndLine();
+		m->mothurOutEndLine();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SensSpecCommand", "SensSpecCommand");
