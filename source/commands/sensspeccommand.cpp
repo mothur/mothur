@@ -199,6 +199,8 @@ SensSpecCommand::SensSpecCommand(string option)  {
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
 			sensSpecFileName = getOutputFileName("sensspec",variables);
 		}
+
+		m->mothurOut("NOTE: It only makes sense to run sens.spec with a set of unique sequences."); m->mothurOutEndLine();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SensSpecCommand", "SensSpecCommand");
