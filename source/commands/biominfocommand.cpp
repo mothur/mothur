@@ -15,7 +15,9 @@ vector<string> BiomInfoCommand::setParameters(){
     try {
         CommandParameter pbiom("biom", "InputTypes", "", "", "", "", "","",false,true, true); parameters.push_back(pbiom);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
+        CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -32,9 +34,13 @@ vector<string> BiomInfoCommand::setParameters(){
 string BiomInfoCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The biom.info command reads a biom file creates a shared file. If your biom file contains metadata mothur will also create taxonomy or constaxonomy files.\n";
-        helpString += "The biom.info command parameters are biom and label. The biom parameter is required.\n";
+        helpString += "The biom.info command reads a biom file creates a shared file. If your biom file contains metadata mothur will also create taxonomy or constaxonomy along with tax.summary files.\n";
+        helpString += "The biom.info command parameters are biom, label and relabund. The biom parameter is required.\n";
         helpString += "The label parameter allows you to enter a distance label to be used in the shared file created from your biom file.\n";
+        helpString += "The relabund parameter allows you to indicate you want the tax.summary file values to be relative abundances rather than raw abundances. Default=F. \n";
+        helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
+        helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
+        helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
         helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e. 0.03).\n";
         return helpString;
@@ -65,7 +71,7 @@ string BiomInfoCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 BiomInfoCommand::BiomInfoCommand(){
     try {
-        abort = true; calledHelp = true;
+        abort = true; calledHelp = true; maxLevel = 0;
         setParameters();
         vector<string> tempOutNames;
         outputTypes["taxonomy"] = tempOutNames;
@@ -81,7 +87,7 @@ BiomInfoCommand::BiomInfoCommand(){
 //**********************************************************************************************************************
 BiomInfoCommand::BiomInfoCommand(string option)  {
     try {
-        abort = false; calledHelp = false; pickedGroups=false;
+        abort = false; calledHelp = false; maxLevel = 0;
         
         //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -133,6 +139,14 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             
             label = validParameter.validFile(parameters, "label", false);
             if (label == "not found") { label = "userLabel"; }
+            
+            string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
+            relabund = m->isTrue(temp);
+            
+            basis = validParameter.validFile(parameters, "basis", false);
+            if (basis == "not found") { basis = "otu"; }
+            
+            if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
         }
         
     }
@@ -184,11 +198,11 @@ int BiomInfoCommand::createSharedFromBiom() {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
         variables["[tag]"] = label;
-        filename = getOutputFileName("shared",variables);
-        outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
+        string sharedFilename = getOutputFileName("shared",variables);
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
         
         ofstream out;
-        m->openOutputFile(filename, out);
+        m->openOutputFile(sharedFilename, out);
         
         /*{
          "id":"/Users/SarahsWork/Desktop/release/temp.job2.shared-unique",
@@ -264,7 +278,7 @@ int BiomInfoCommand::createSharedFromBiom() {
             //            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->control_pressed = true;  }
         }
         
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_type provided.\n"); }
@@ -274,7 +288,7 @@ int BiomInfoCommand::createSharedFromBiom() {
             if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->control_pressed = true; }
         }
         
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_element_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_element_type provided.\n"); }
@@ -285,12 +299,13 @@ int BiomInfoCommand::createSharedFromBiom() {
             if (matrixElementType == "float") { m->mothurOut("[WARNING]: the shared file only uses integers, any float values will be rounded down to the nearest integer.\n"); }
         }
         
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         vector<string> conTaxonomy;
         it = fileLines.find("rows");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a rows provided.\n"); }
         else {
+            maxLevel = 0;
             string thisLine = it->second;
             if ((biomType == "Taxon table") || (biomType == "Taxontable")) {
                 string mapFilename = getOutputFileName("map",variables);
@@ -326,7 +341,7 @@ int BiomInfoCommand::createSharedFromBiom() {
             }
         }
         
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("columns");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
@@ -334,26 +349,55 @@ int BiomInfoCommand::createSharedFromBiom() {
             string thisLine = it->second;
             
             //read sample names
+            maxLevel = 0;
             bool hasTaxonomy = false;
             vector< vector<string> > results = readRows(thisLine, numCols, hasTaxonomy);
             groupNames = results[0];
             if (hasTaxonomy) {
-                /////////////////////write taxonomy file////////////////////////
-                //////////////write tax.summary //////////////////
+                //write taxonomy file
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                variables["[tag]"] = label;
+                string taxFilename = getOutputFileName("taxonomy",variables);
+                outputNames.push_back(taxFilename); outputTypes["taxonomy"].push_back(taxFilename);
+                ofstream outTax;
+                m->openOutputFile(taxFilename, outTax);
+                
+                GroupMap* g = NULL;
+                PhyloSummary taxaSum(g, relabund);
+                
+                for (int i = 0; i < results[1].size(); i++) {
+                    if (m->control_pressed) { break; }
+                    
+                    string newTax = addUnclassifieds(results[1][i]);
+                    outTax << results[0][i] << '\t' << newTax << endl;
+                    
+                    taxaSum.addSeqToTree(results[0][i], newTax);
+                }
+                outTax.close();
+                
+                //write taxonomy file
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                variables["[tag]"] = label;
+                variables["[tag2]"] = "";
+                string taxSumFilename = getOutputFileName("taxsummary",variables);
+                outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
+                ofstream outTaxSum;
+                m->openOutputFile(taxSumFilename, outTaxSum);
+                
+                //write tax.summary
+                if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
+                else            {   taxaSum.print(outTaxSum);               }
+                
+                outTaxSum.close();
             }
-            
-            //if users selected groups, then remove the groups not wanted.
-            SharedUtil util;
-            vector<string> Groups = m->getGroups();
-            vector<string> allGroups = groupNames;
-            util.setGroups(Groups, allGroups);
-            m->setGroups(Groups);
+            m->setGroups(groupNames);
             
             //set fileroot
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
         }
         
-        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("shape");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a shape provided.\n"); }
@@ -367,7 +411,7 @@ int BiomInfoCommand::createSharedFromBiom() {
             if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->control_pressed = true; }
         }
         
-        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
@@ -383,14 +427,59 @@ int BiomInfoCommand::createSharedFromBiom() {
             printSharedData(lookup, out);
             
             if (conTaxonomy.size() != 0) {
-                ////////////// write constaxonomy //////////////////
-                //////////////write tax.summary //////////////////
+                //sanity check
+                if ((lookup[0]->getNumBins() == conTaxonomy.size()) && (lookup[0]->getNumBins() == otuNames.size())) {
+                    //write taxonomy file
+                    map<string, string> variables;
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                    variables["[tag]"] = label;
+                    string taxFilename = getOutputFileName("constaxonomy",variables);
+                    outputNames.push_back(taxFilename); outputTypes["constaxonomy"].push_back(taxFilename);
+                    ofstream outTax;
+                    m->openOutputFile(taxFilename, outTax);
+                    outTax << "OTU\tSize\tTaxonomy\n";
+                    
+                    GroupMap* g = NULL;
+                    PhyloSummary taxaSum(g, relabund);
+                    
+                    for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+                        if (m->control_pressed) { break; }
+                        
+                        int total = 0;
+                        for (int j = 0; j < lookup.size(); j++) {  total += lookup[j]->getAbundance(i);  }
+                        
+                        string newTax = addUnclassifieds(conTaxonomy[i]);
+                        outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
+                        
+                        if (basis == "sequence") {
+                            for (int k = 0; k < total; k++) { taxaSum.addSeqToTree(otuNames[i], newTax); } //one for each sequence in the otu
+                        }else {
+                            taxaSum.addSeqToTree(otuNames[i], newTax); //add otu
+                        }
+                    }
+                    outTax.close();
+                    
+                    //write taxonomy file
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                    variables["[tag]"] = label;
+                    variables["[tag2]"] = "cons";
+                    string taxSumFilename = getOutputFileName("taxsummary",variables);
+                    outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
+                    ofstream outTaxSum;
+                    m->openOutputFile(taxSumFilename, outTaxSum);
+                    
+                    //write tax.summary
+                    if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
+                    else            {   taxaSum.print(outTaxSum);               }
+                    
+                    outTaxSum.close();
+                }
             }
             
             for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
         }
         
-        if (m->control_pressed) {  m->mothurRemove(filename); return 0; }
+        if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         return 0;
     }
@@ -399,6 +488,37 @@ int BiomInfoCommand::createSharedFromBiom() {
         exit(1);
     }
 }
+/**************************************************************************************************/
+string BiomInfoCommand::addUnclassifieds(string tax) {
+    try{
+        string newTax, taxon;
+        int level = 0;
+        
+        newTax = "";
+        
+        //keep what you have counting the levels
+        while (tax.find_first_of(';') != -1) {
+            //get taxon
+            taxon = tax.substr(0,tax.find_first_of(';'))+';';
+            tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+            newTax += taxon;
+            level++;
+        }
+        
+        //add "unclassified" until you reach maxLevel
+        while (level < maxLevel) {
+            newTax += "unclassified;";
+            level++;
+        }
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomInfoCommand", "addUnclassifieds");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, string line, string matrixElementType, vector<string>& groupNames, int numOTUs) {
     try {
@@ -469,85 +589,10 @@ vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, strin
             }
         }
         
-        
-        SharedUtil util;
-        bool remove = false;
-        if (pickedGroups) {
-            for (int i = 0; i < lookup.size(); i++) {
-                //if this sharedrabund is not from a group the user wants then delete it.
-                if (util.isValidGroup(lookup[i]->getGroup(), m->getGroups()) == false) {
-                    remove = true;
-                    delete lookup[i]; lookup[i] = NULL;
-                    lookup.erase(lookup.begin()+i);
-                    i--;
-                }
-            }
-        }
-        
-        if (remove) { eliminateZeroOTUS(lookup); }
-        
-        
         return lookup;
     }
     catch(exception& e) {
         m->errorOut(e, "BiomInfoCommand", "readData");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int BiomInfoCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-    try {
-        
-        vector<SharedRAbundVector*> newLookup;
-        for (int i = 0; i < thislookup.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
-            temp->setLabel(thislookup[i]->getLabel());
-            temp->setGroup(thislookup[i]->getGroup());
-            newLookup.push_back(temp);
-        }
-        
-        //for each bin
-        vector<string> newBinLabels;
-        string snumBins = toString(thislookup[0]->getNumBins());
-        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-            
-            //look at each sharedRabund and make sure they are not all zero
-            bool allZero = true;
-            for (int j = 0; j < thislookup.size(); j++) {
-                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-            }
-            
-            //if they are not all zero add this bin
-            if (!allZero) {
-                for (int j = 0; j < thislookup.size(); j++) {
-                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-                }
-                
-                //if there is a bin label use it otherwise make one
-                string binLabel = "Otu";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-                
-                newBinLabels.push_back(binLabel);
-            }
-        }
-        
-        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-        
-        thislookup = newLookup;
-        m->currentSharedBinLabels = newBinLabels;
-        
-        return 0;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "eliminateZeroOTUS");
         exit(1);
     }
 }
@@ -584,7 +629,7 @@ int BiomInfoCommand::getDims(string line, int& shapeNumRows, int& shapeNumCols) 
     }
 }
 //**********************************************************************************************************************
-vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bool& allBlank) {
+vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bool& hasTaxonomy) {
     try {
         /*"rows":[
          {"id":"Otu01", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Porphyromonadaceae", "unclassified"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
@@ -607,7 +652,7 @@ vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bo
         int closeParen = 0;
         string nextRow = "";
         bool end = false;
-        allBlank = true;
+        bool allBlank = true;
         
         for (int i = 0; i < line.length(); i++) {
             
@@ -633,6 +678,8 @@ vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bo
             }
         }
         
+        if (allBlank) { hasTaxonomy = false; }
+        else { hasTaxonomy = true; }
         
         return results;
     }
@@ -759,6 +806,8 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
             result += results[i] + ";";
         }
         
+        if (results.size() > maxLevel) { maxLevel = results.size(); }
+        
         return result;
     }
     catch(exception& e) {
@@ -798,7 +847,9 @@ string BiomInfoCommand::getTag(string& line) {
 void BiomInfoCommand::printSharedData(vector<SharedRAbundVector*> thislookup, ofstream& out) {
     try {
         
+        //sorts alphabetically
         m->clearGroups();
+        vector<string> Groups;
         map<string, SharedRAbundVector*> Ovectors;
         for (int i = 0; i < thislookup.size(); i++) { Ovectors[thislookup[i]->getGroup()] = thislookup[i]; }
         

@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
+#include "phylosummary.h"
 
 class BiomInfoCommand : public Command {
     
@@ -36,20 +37,21 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
     void printSharedData(vector<SharedRAbundVector*>, ofstream&);
     int createSharedFromBiom();
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);
+    string addUnclassifieds(string tax);
     vector< vector<string> > readRows(string, int&, bool&);
     int getDims(string, int&, int&);
     vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);
     
-    vector<string> Groups, outputNames;
-    string fileroot, outputDir, biomfile, label;
-    bool firsttime, pickedGroups, abort;
+    vector<string> outputNames;
+    string fileroot, outputDir, biomfile, label, basis;
+    bool firsttime, abort, relabund;
+    int maxLevel;
     
 };
 
