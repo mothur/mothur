@@ -38,7 +38,7 @@ public:
     
 private:
     void printSharedData(vector<SharedRAbundVector*>, ofstream&);
-    int createSharedFromBiom();
+    int createFilesFromBiom();
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);

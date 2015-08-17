@@ -162,18 +162,24 @@ int BiomInfoCommand::execute(){
         
         if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        createSharedFromBiom();
+        int start = time(NULL);
         
-        if (m->control_pressed) {
-            for (int i = 0; i < outputNames.size(); i++) {
-                m->mothurRemove(outputNames[i]);
-            }
-        }
+        createFilesFromBiom();
+        
+        m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n");	m->mothurOutEndLine();
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } }
         
         string current = "";
         itTypes = outputTypes.find("shared");
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+        }
+        
+        //set taxonomy file as new current taxonomyfile
+        itTypes = outputTypes.find("taxonomy");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
         }
         
         m->mothurOutEndLine();
@@ -189,7 +195,7 @@ int BiomInfoCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-int BiomInfoCommand::createSharedFromBiom() {
+int BiomInfoCommand::createFilesFromBiom() {
     try {
         //getting output filename
         string filename = biomfile;
@@ -439,14 +445,33 @@ int BiomInfoCommand::createSharedFromBiom() {
                     m->openOutputFile(taxFilename, outTax);
                     outTax << "OTU\tSize\tTaxonomy\n";
                     
-                    GroupMap* g = NULL;
-                    PhyloSummary taxaSum(g, relabund);
+                    CountTable* ct = NULL;
+                    if (basis == "otu") {
+                        ct = new CountTable();
+                        for (int j = 0; j < lookup.size(); j++) {  ct->addGroup(lookup[j]->getGroup()); }
+                        
+                        int numBins = lookup[0]->getNumBins();
+                        for (int i = 0; i < numBins; i++) {
+                            vector<int> abunds;
+                            for (int j = 0; j < lookup.size(); j++) {
+                                if (m->control_pressed) { break; }
+                                abunds.push_back(lookup[j]->getAbundance(i));
+                            }
+                            ct->push_back(otuNames[i], abunds);
+                        }
+                    }
+                    
+                    PhyloSummary taxaSum(ct, relabund);
                     
                     for (int i = 0; i < lookup[0]->getNumBins(); i++) {
                         if (m->control_pressed) { break; }
                         
                         int total = 0;
-                        for (int j = 0; j < lookup.size(); j++) {  total += lookup[j]->getAbundance(i);  }
+                        map<string, bool> containsGroup;
+                        for (int j = 0; j < lookup.size(); j++) {
+                            total += lookup[j]->getAbundance(i);
+                            containsGroup[lookup[j]->getGroup()] = lookup[j]->getAbundance(i);
+                        }
                         
                         string newTax = addUnclassifieds(conTaxonomy[i]);
                         outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
@@ -454,7 +479,7 @@ int BiomInfoCommand::createSharedFromBiom() {
                         if (basis == "sequence") {
                             for (int k = 0; k < total; k++) { taxaSum.addSeqToTree(otuNames[i], newTax); } //one for each sequence in the otu
                         }else {
-                            taxaSum.addSeqToTree(otuNames[i], newTax); //add otu
+                            taxaSum.addSeqToTree(newTax, containsGroup); //add otu
                         }
                     }
                     outTax.close();
@@ -468,23 +493,24 @@ int BiomInfoCommand::createSharedFromBiom() {
                     ofstream outTaxSum;
                     m->openOutputFile(taxSumFilename, outTaxSum);
                     
+                    
                     //write tax.summary
                     if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
                     else            {   taxaSum.print(outTaxSum);               }
                     
                     outTaxSum.close();
+                    if (ct != NULL) { delete ct; }
+                   
                 }
             }
             
             for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
         }
         
-        if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
-        
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "createSharedFromBiom");
+        m->errorOut(e, "BiomInfoCommand", "createFilesFromBiom");
         exit(1);
     }
 }
@@ -528,7 +554,7 @@ vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, strin
         //creates new sharedRAbunds
         for (int i = 0; i < groupNames.size(); i++) {
             SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
-            temp->setLabel("userLabel");
+            temp->setLabel(label);
             temp->setGroup(groupNames[i]);
             lookup.push_back(temp);
         }
