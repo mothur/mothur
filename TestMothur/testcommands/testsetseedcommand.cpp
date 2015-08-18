@@ -21,7 +21,7 @@ TEST_CASE("Testing set.seed command") {
         
         int randValue = rand()%100 + 1;
         
-        CHECK(randValue == 25);
+        CHECK(randValue == 16);
     }
     
     delete setseed;

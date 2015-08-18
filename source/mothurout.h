@@ -118,6 +118,7 @@ class MothurOut {
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
 		string getline(istringstream&);
+        bool stringBlank (string);
 		void gobble(istream&);
 		void gobble(istringstream&);
         void zapGremlins(istream&);
