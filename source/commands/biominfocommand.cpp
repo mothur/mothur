@@ -749,6 +749,7 @@ vector<string> BiomInfoCommand::getNamesAndTaxonomies(string line) {
                 int pos2 = line.find("bootstrap");
                 if (pos2 != string::npos) { //no taxonomy info given
                     taxonomy = line.substr(pos, (pos2-pos));
+                    taxonomy = taxonomy.substr(0, taxonomy.find_last_of(','));
                     bootstrap = line.substr(pos2);
                 }else {
                     taxonomy = line.substr(pos);
@@ -807,7 +808,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
                 m->splitAtComma(taxon, taxons);
                 results.push_back(taxon);
             }
-            if (taxons != "") { results.push_back(taxons); }
+            if (!m->stringBlank(taxons)) { results.push_back(taxons); }
         }
         
         if (bootstrap != "") {
@@ -823,7 +824,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
                 results[i]+="("+bootValue+")";
                 i++;
             }
-            if (bootValues != "") { results[i]+="("+bootValues+")"; }
+            if (!m->stringBlank(bootValues)) { results[i]+="("+bootValues+")"; }
         }
         
         string result = "";
@@ -833,7 +834,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
         }
         
         if (results.size() > maxLevel) { maxLevel = results.size(); }
-        
+       
         return result;
     }
     catch(exception& e) {

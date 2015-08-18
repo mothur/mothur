@@ -371,6 +371,7 @@
 		481FB6911AC1BAA60076CFF3 /* phylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78F12D37EC400DA6239 /* phylotree.cpp */; };
 		481FB6921AC1BAA60076CFF3 /* taxonomyequalizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B85D12D37EC400DA6239 /* taxonomyequalizer.cpp */; };
 		481FB6931AC1BAA60076CFF3 /* taxonomynode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB73161C573B009860A1 /* taxonomynode.cpp */; };
+		4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */; };
 		483C952E188F0CAD0035E7B7 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48705AC419BE32C50075E977 /* getmimarkspackagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */; };
 		48705AC519BE32C50075E977 /* oligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABD19BE32C50075E977 /* oligos.cpp */; };
@@ -800,6 +801,8 @@
 		481FB5281AC19F8B0076CFF3 /* setseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = setseedcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/setseedcommand.cpp; sourceTree = "<absolute>"; };
 		481FB5291AC19F8B0076CFF3 /* setseedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = setseedcommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/setseedcommand.h; sourceTree = "<absolute>"; };
 		481FB52D1AC1B0CB0076CFF3 /* testsetseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsetseedcommand.cpp; path = testcommands/testsetseedcommand.cpp; sourceTree = "<group>"; };
+		4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testbiominfocommand.cpp; sourceTree = "<group>"; };
+		4829D9661B8387D0002EEED4 /* testbiominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testbiominfocommand.h; sourceTree = "<group>"; };
 		48705ABA19BE32C50075E977 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = abstractrandomforest.hpp; path = source/randomforest/abstractrandomforest.hpp; sourceTree = "<group>"; };
 		48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getmimarkspackagecommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getmimarkspackagecommand.cpp; sourceTree = "<absolute>"; };
 		48705ABC19BE32C50075E977 /* getmimarkspackagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getmimarkspackagecommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getmimarkspackagecommand.h; sourceTree = "<absolute>"; };
@@ -1723,6 +1726,8 @@
 			isa = PBXGroup;
 			children = (
 				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
+				4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */,
+				4829D9661B8387D0002EEED4 /* testbiominfocommand.h */,
 				48C728741B6AB4CD00D40830 /* testgetgroupscommand.h */,
 				48C728691B69598400D40830 /* testmergegroupscommand.h */,
 				48C728681B69598400D40830 /* testmergegroupscommand.cpp */,
@@ -2715,6 +2720,7 @@
 				481FB68C1AC1BA9E0076CFF3 /* bayesian.cpp in Sources */,
 				481FB5F41AC1B77E0076CFF3 /* preclustercommand.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
+				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				481FB63E1AC1B7EA0076CFF3 /* sabundvector.cpp in Sources */,
 				481FB57D1AC1B6EA0076CFF3 /* structpearson.cpp in Sources */,

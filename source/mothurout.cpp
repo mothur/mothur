@@ -1070,6 +1070,20 @@ bool MothurOut::isBlank(string fileName){
 	}	
 }
 /***********************************************************************/
+bool MothurOut::stringBlank(string input){
+    try {
+        for (int i = 0; i < input.length(); i++) {
+            if (!isspace(input[i])) { return false; }
+        }
+        
+        return true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isBlank");
+        exit(1);
+    }	
+}
+/***********************************************************************/
 
 string MothurOut::getFullPathName(string fileName){
 	try{
