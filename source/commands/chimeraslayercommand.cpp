@@ -70,9 +70,6 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
         helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n";
 		helpString += "The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n";
@@ -719,9 +716,6 @@ int ChimeraSlayerCommand::execute(){
 				itFile = fileToPriority.begin();
 				string thisFastaName = itFile->first;
 				map<string, int> thisPriority = itFile->second;
-#ifdef USE_MPI	
-				MPIExecute(thisFastaName, outputFileName, accnosFileName, trimFastaFileName, thisPriority);
-#else
 				//break up file
 				vector<unsigned long long> positions; 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -746,7 +740,7 @@ int ChimeraSlayerCommand::execute(){
 				else{ numSeqs = createProcesses(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority); }
 				
 				if (m->control_pressed) {  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
-#endif
+
 			}else { //you have provided a groupfile
                 string countFile = "";
                 if (hasCount) {
@@ -754,9 +748,7 @@ int ChimeraSlayerCommand::execute(){
                     variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFileNames[s]));
                     newCountFile = getOutputFileName("count", variables);
                 }
-#ifdef USE_MPI	
-				MPIExecuteGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile, countFile);
-#else
+
 				if (processors == 1) {
                     numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile);
                     if (hasCount && dups) {
@@ -778,14 +770,8 @@ int ChimeraSlayerCommand::execute(){
 
                 }
 				else {  numSeqs = createProcessesGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile, countFile); 		} //destroys fileToPriority
-#endif
 
-#ifdef USE_MPI	
-				int pid; 
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-				if (pid == 0) {
-#endif
+
                     if (!dups) {
                         totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
                         m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
@@ -811,11 +797,6 @@ int ChimeraSlayerCommand::execute(){
                             outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
                         }
                     }
-
-#ifdef USE_MPI	
-				}
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
-#endif
 			}
 			
             m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
@@ -850,277 +831,6 @@ int ChimeraSlayerCommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "execute");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosFileName, string trimFastaFileName, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup, string countlist, string countfile){
-	try {
-#ifdef USE_MPI	
-		int pid; 
-		int tag = 2001;
-		
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-	
-		//put filenames in a vector, then pass each process a starting and ending point in the vector
-		//all processes already have the fileToPriority and fileGroup, they just need to know which files to process
-		map<string, map<string, int> >::iterator itFile;
-		vector<string> filenames;
-		for(itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) { filenames.push_back(itFile->first); }
-        
-        int numGroupsPerProcessor = ceil(filenames.size() / (double) processors);
-		int startIndex =  pid * numGroupsPerProcessor;
-		int endIndex = (pid+1) * numGroupsPerProcessor;
-		if(pid == (processors - 1)){	endIndex = filenames.size(); 	}
-		
-		vector<unsigned long long> MPIPos;
-		
-		MPI_File outMPI;
-		MPI_File outMPIAccnos;
-		MPI_File outMPIFasta;
-        MPI_File outMPICount;
-		
-		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-		int inMode=MPI_MODE_RDONLY; 
-		
-		char outFilename[1024];
-		strcpy(outFilename, outputFileName.c_str());
-		
-		char outAccnosFilename[1024];
-		strcpy(outAccnosFilename, accnosFileName.c_str());
-		
-		char outFastaFilename[1024];
-		strcpy(outFastaFilename, trimFastaFileName.c_str());
-        
-        char outCountFilename[1024];
-		strcpy(outCountFilename, countlist.c_str());
-		
-		MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-		MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
-		if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
-        if (hasCount && dups) {  MPI_File_open(MPI_COMM_WORLD, outCountFilename, outMode, MPI_INFO_NULL, &outMPICount); }
-		
-		if (m->control_pressed) {   MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos); if (hasCount && dups) { MPI_File_close(&outMPICount); } return 0;  }
-		
-		//print headers
-		if (pid == 0) { //you are the root process 
-			m->mothurOutEndLine();
-			m->mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
-			m->mothurOutEndLine();
-			
-			string outTemp = "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
-			
-			//print header
-			int length = outTemp.length();
-			char* buf2 = new char[length];
-			memcpy(buf2, outTemp.c_str(), length);
-			
-			MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
-			delete buf2;
-		}
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
-		
-		for (int i = startIndex; i < endIndex; i++) {
-			
-			int start = time(NULL);
-			int num = 0;
-			string thisFastaName = filenames[i];
-			map<string, int> thisPriority = fileToPriority[thisFastaName];
-			
-			char inFileName[1024];
-			strcpy(inFileName, thisFastaName.c_str());
-			MPI_File inMPI;
-			MPI_File_open(MPI_COMM_SELF, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-            
-			MPIPos = m->setFilePosFasta(thisFastaName, num); //fills MPIPos, returns numSeqs
-			
-			cout << endl << "Checking sequences from group: " << fileGroup[thisFastaName] << "." << endl; 
-			
-            set<string> cnames;
-			driverMPI(0, num, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, thisFastaName, thisPriority, true);
-			numSeqs += num;
-			
-			MPI_File_close(&inMPI);
-			m->mothurRemove(thisFastaName);
-            
-            if (dups) {
-                if (cnames.size() != 0) {
-                    if (hasCount) {
-                        for (set<string>::iterator it = cnames.begin(); it != cnames.end(); it++) {
-                            string outputString = (*it) + "\t" + fileGroup[thisFastaName] + "\n";
-                            int length = outputString.length();
-                            char* buf2 = new char[length];
-                            memcpy(buf2, outputString.c_str(), length);
-                            MPI_File_write_shared(outMPICount, buf2, length, MPI_CHAR, &status);
-                            delete buf2;
-                        }
-                    }else {
-                        map<string, map<string, string> >::iterator itGroupNameMap = group2NameMap.find(fileGroup[thisFastaName]);
-                        if (itGroupNameMap != group2NameMap.end()) {
-                            map<string, string> thisnamemap = itGroupNameMap->second;
-                            map<string, string>::iterator itN;
-                            for (set<string>::iterator it = cnames.begin(); it != cnames.end(); it++) {
-                                itN = thisnamemap.find(*it);
-                                if (itN != thisnamemap.end()) {
-                                    vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
-                                    for (int j = 0; j < tempNames.size(); j++) { //write to accnos file
-                                        string outputString = tempNames[j] + "\n";
-                                        int length = outputString.length();
-                                        char* buf2 = new char[length];
-                                        memcpy(buf2, outputString.c_str(), length);
-                                        
-                                        MPI_File_write_shared(outMPIAccnos, buf2, length, MPI_CHAR, &status);
-                                        delete buf2;
-                                    }
-                                    
-                                }else { m->mothurOut("[ERROR]: parsing cannot find " + *it + ".\n"); m->control_pressed = true; }
-                            }
-                        }else { m->mothurOut("[ERROR]: parsing cannot find " + fileGroup[thisFastaName] + ".\n"); m->control_pressed = true; }
-                    }
-                    
-                }
-            }
-						
-			cout << endl << "It took " << toString(time(NULL) - start) << " secs to check " + toString(num) + " sequences from group " << fileGroup[thisFastaName] << "." << endl;
-		}
-		
-		if (pid == 0) {
-			for(int i = 1; i < processors; i++) { 
-				int temp = 0;
-				MPI_Recv(&temp, 1, MPI_INT, i, 2001, MPI_COMM_WORLD, &status);
-				numSeqs += temp;
-			}
-		}else{ MPI_Send(&numSeqs, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD); }
-		
-		MPI_File_close(&outMPI);
-		MPI_File_close(&outMPIAccnos); 
-		if (trim) { MPI_File_close(&outMPIFasta); }
-        if (hasCount && dups) { MPI_File_close(&outMPICount); }
-		
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
-#endif
-		return 0;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "MPIExecuteGroups");
-		exit(1);
-	}
-}		
-//**********************************************************************************************************************
-int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, string accnosFileName, string trimFastaFileName, map<string, int>& priority){
-	try {
-		
-#ifdef USE_MPI	
-		int pid, numSeqsPerProcessor; 
-		int tag = 2001;
-		vector<unsigned long long> MPIPos;
-		
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-		
-		MPI_File inMPI;
-		MPI_File outMPI;
-		MPI_File outMPIAccnos;
-		MPI_File outMPIFasta;
-		
-		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-		int inMode=MPI_MODE_RDONLY; 
-		
-		char outFilename[1024];
-		strcpy(outFilename, outputFileName.c_str());
-		
-		char outAccnosFilename[1024];
-		strcpy(outAccnosFilename, accnosFileName.c_str());
-		
-		char outFastaFilename[1024];
-		strcpy(outFastaFilename, trimFastaFileName.c_str());
-		
-		char inFileName[1024];
-		strcpy(inFileName, inputFile.c_str());
-		
-		MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-		MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-		MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
-		if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
-		
-		if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos);  return 0;  }
-		
-		if (pid == 0) { //you are the root process 
-			m->mothurOutEndLine();
-			m->mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
-			m->mothurOutEndLine();
-			
-			string outTemp = "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
-			
-			//print header
-			int length = outTemp.length();
-			char* buf2 = new char[length];
-			memcpy(buf2, outTemp.c_str(), length);
-			
-			MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
-			delete buf2;
-			
-			MPIPos = m->setFilePosFasta(inputFile, numSeqs); //fills MPIPos, returns numSeqs
-			
-			if (templatefile != "self") { //if template=self we can only use 1 processor
-				//send file positions to all processes
-				for(int i = 1; i < processors; i++) { 
-					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-				}
-			}
-			//figure out how many sequences you have to align
-			numSeqsPerProcessor = numSeqs / processors;
-			int startIndex =  pid * numSeqsPerProcessor;
-			if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-			
-			if (templatefile == "self") { //if template=self we can only use 1 processor
-				startIndex = 0;
-				numSeqsPerProcessor = numSeqs;
-			}
-			
-			//do your part
-            set<string> cnames;
-			driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, inputFile, priority, false);
-						
-			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);   return 0;  }
-			
-		}else{ //you are a child process
-			if (templatefile != "self") { //if template=self we can only use 1 processor
-				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				MPIPos.resize(numSeqs+1);
-				MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-				
-				//figure out how many sequences you have to align
-				numSeqsPerProcessor = numSeqs / processors;
-				int startIndex =  pid * numSeqsPerProcessor;
-				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-				
-				//do your part
-                set<string> cnames;
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, inputFile, priority, false);
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  return 0;  }
-				
-			}
-		}
-		
-		//close files 
-		MPI_File_close(&inMPI);
-		MPI_File_close(&outMPI);
-		MPI_File_close(&outMPIAccnos); 
-		if (trim) { MPI_File_close(&outMPIFasta); }
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-		
-		
-#endif		
-		return numSeqs;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "MPIExecute");
 		exit(1);
 	}
 }
@@ -1910,151 +1620,6 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-#ifdef USE_MPI
-int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, set<string>& cnames, vector<unsigned long long>& MPIPos, string filename, map<string, int>& priority, bool byGroup){
-	try {
-		MPI_Status status; 
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		Chimera* chimera;
-		if (templatefile != "self") { //you want to run slayer with a reference template
-			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
-		}else {
-			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand(), byGroup);	
-		}
-		
-		if (m->control_pressed) { delete chimera; return 0; }
-		
-		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
-		templateSeqsLength = chimera->getLength();
-		
-		for(int i=0;i<num;i++){
-			
-			if (m->control_pressed) {	delete chimera; return 1;	}
-			
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-	
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-
-			delete buf4;
-
-			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
-			string candidateAligned = candidateSeq->getAligned();
-		
-			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
-				
-				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
-					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
-				}else{
-		
-					//find chimeras
-					chimera->getChimeras(candidateSeq);
-			
-					if (m->control_pressed) {	delete chimera; delete candidateSeq; return 1;	}
-					
-					//if you are not chimeric, then check each half
-					data_results wholeResults = chimera->getResults();
-					
-					//determine if we need to split
-					bool isChimeric = false;
-					
-					if (wholeResults.flag == "yes") {
-						string chimeraFlag = "no";
-						if(  (wholeResults.results[0].bsa >= minBS && wholeResults.results[0].divr_qla_qrb >= divR)
-						   ||
-						   (wholeResults.results[0].bsb >= minBS && wholeResults.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
-						
-						
-						if (chimeraFlag == "yes") {	
-							if ((wholeResults.results[0].bsa >= minBS) || (wholeResults.results[0].bsb >= minBS)) { isChimeric = true; }
-						}
-					}
-					
-					if ((!isChimeric) && trimera) {							
-						//split sequence in half by bases
-						string leftQuery, rightQuery;
-						Sequence tempSeq(candidateSeq->getName(), candidateAligned);
-						divideInHalf(tempSeq, leftQuery, rightQuery);
-						
-						//run chimeraSlayer on each piece
-						Sequence* left = new Sequence(candidateSeq->getName(), leftQuery);
-						Sequence* right = new Sequence(candidateSeq->getName(), rightQuery);
-						
-						//find chimeras
-						chimera->getChimeras(left);
-						data_results leftResults = chimera->getResults();
-						
-						chimera->getChimeras(right);
-						data_results rightResults = chimera->getResults();
-						
-						//if either piece is chimeric then report
-                        bool flag = false;
-						Sequence trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults, flag);
-                        if (flag) { cnames.insert(candidateSeq->getName()); }
-                            
-						if (trim) {  
-							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";
-							
-							//write to accnos file
-							int length = outputString.length();
-							char* buf2 = new char[length];
-							memcpy(buf2, outputString.c_str(), length);
-							
-							MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
-							delete buf2;
-						}
-						
-						delete left; delete right;
-						
-					}else { 
-						//print results
-						Sequence trimmed = chimera->print(outMPI, outAccMPI);
-                        cnames.insert(candidateSeq->getName());
-						
-						if (trim) {  
-							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";
-							
-							//write to accnos file
-							int length = outputString.length();
-							char* buf2 = new char[length];
-							memcpy(buf2, outputString.c_str(), length);
-							
-							MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
-							delete buf2;
-						}
-					}
-					
-				}
-			}
-			delete candidateSeq;
-			
-			//report progress
-			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;		}
-		}
-		//report progress
-		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;		}
-		
-		int numNoParents = chimera->getNumNoParents();
-		if (numNoParents == num) { cout << "[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors." << endl; }
-		
-		delete chimera;		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "driverMPI");
-		exit(1);
-	}
-}
-#endif
-
 /**************************************************************************************************/
 
 int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename, string accnos, string fasta, map<string, int>& thisPriority) {

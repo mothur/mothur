@@ -44,10 +44,6 @@ private:
 	
 	int driver(linePair*, string, string, string);
 	int createProcesses(string, string, string);
-	
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	#endif
 
 	bool abort, filter, save;
 	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;

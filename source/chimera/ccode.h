@@ -29,10 +29,7 @@ class Ccode : public Chimera {
 		
 		int getChimeras(Sequence* query);
 		Sequence print(ostream&, ostream&);
-		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		#endif
+    
 	private:
 	
 		Dist* distCalc;
@@ -78,12 +75,6 @@ class Ccode : public Chimera {
 		int getDiff(string, string);  //return number of mismatched bases, a gap to base is not counted as a mismatch
 		float getT(int); 
 		float getF(int); 
-		
-		#ifdef USE_MPI
-		int printMapping(string&);
-		MPI_File outMap;
-		#endif
-
 };
 
 /***********************************************************/

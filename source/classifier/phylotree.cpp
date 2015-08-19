@@ -36,80 +36,32 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 		numNodes = 0;
 		numSeqs = 0;
 		
-		#ifdef USE_MPI
-			MPI_File inMPI;
-			MPI_Offset size;
-			MPI_Status status;
-
-			char inFileName[1024];
-			strcpy(inFileName, filename.c_str());
-
-			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
-			MPI_File_get_size(inMPI, &size);
-			
-			char* buffer = new char[size];
-			MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
-
-			string tempBuf = buffer;
-			if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buffer;
-			
-			//read version
-			m->getline(iss); m->gobble(iss);
-			
-			iss >> numNodes; m->gobble(iss);
-			
-			tree.resize(numNodes);
-			
-			for (int i = 0; i < tree.size(); i++) {
-				iss >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(iss);
-			}
-			
-			//read genus nodes
-			int numGenus = 0;
-			iss >> numGenus; m->gobble(iss);
-			
-			int gnode, gsize;
-			totals.clear();
-			for (int i = 0; i < numGenus; i++) {
-				iss >> gnode >> gsize; m->gobble(iss);
-				
-				uniqueTaxonomies.insert(gnode);
-				totals.push_back(gsize);
-			}
-			
-			MPI_File_close(&inMPI);
-			
-		#else
-			//read version
-			string line = m->getline(in); m->gobble(in);
-			
-			in >> numNodes; m->gobble(in);
-			
-			tree.resize(numNodes);
-			
-			for (int i = 0; i < tree.size(); i++) {
-				in >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(in);
-			}
-			
-			//read genus nodes
-			int numGenus = 0;
-			in >> numGenus; m->gobble(in);
-			
-			int gnode, gsize;
-			totals.clear();
-			for (int i = 0; i < numGenus; i++) {
-				in >> gnode >> gsize; m->gobble(in);
-				
-				uniqueTaxonomies.insert(gnode);
-				totals.push_back(gsize);
-			}
-			
-			in.close();
-			
-		#endif
-		
+        //read version
+        string line = m->getline(in); m->gobble(in);
+        
+        in >> numNodes; m->gobble(in);
+        
+        tree.resize(numNodes);
+        
+        for (int i = 0; i < tree.size(); i++) {
+            in >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(in);
+        }
+        
+        //read genus nodes
+        int numGenus = 0;
+        in >> numGenus; m->gobble(in);
+        
+        int gnode, gsize;
+        totals.clear();
+        for (int i = 0; i < numGenus; i++) {
+            in >> gnode >> gsize; m->gobble(in);
+            
+            uniqueTaxonomies.insert(gnode);
+            totals.push_back(gsize);
+        }
+        
+        in.close();
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "PhyloTree");
@@ -129,66 +81,15 @@ PhyloTree::PhyloTree(string tfile){
 		calcTotals = true;
 		string name, tax;
 		
-		#ifdef USE_MPI
-			int pid, num, processors;
-			vector<unsigned long long> positions;
-			
-			MPI_Status status; 
-			MPI_File inMPI;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-			MPI_Comm_size(MPI_COMM_WORLD, &processors);
-
-			char inFileName[1024];
-			strcpy(inFileName, tfile.c_str());
-
-			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-
-			if (pid == 0) {
-				positions = m->setFilePosEachLine(tfile, num);
-				
-				//send file positions to all processes
-				for(int i = 1; i < processors; i++) { 
-					MPI_Send(&num, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-					MPI_Send(&positions[0], (num+1), MPI_LONG, i, 2001, MPI_COMM_WORLD);
-				}
-			}else{
-				MPI_Recv(&num, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-				positions.resize(num+1);
-				MPI_Recv(&positions[0], (num+1), MPI_LONG, 0, 2001, MPI_COMM_WORLD, &status);
-			}
-		
-			//read file 
-			for(int i=0;i<num;i++){
-				//read next sequence
-				int length = positions[i+1] - positions[i];
-				char* buf4 = new char[length];
-
-				MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
-
-				string tempBuf = buf4;
-				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-				delete buf4;
-
-				istringstream iss (tempBuf,istringstream::in);
-				iss >> name >> tax;
-				addSeqToTree(name, tax);
-			}
-			
-			MPI_File_close(&inMPI);
-			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-		
-		#else
-            map<string, string> temp;
-            m->readTax(tfile, temp, true);
+        map<string, string> temp;
+        m->readTax(tfile, temp, true);
         
-            for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
-                addSeqToTree(itTemp->first, itTemp->second);
-                temp.erase(itTemp++);
-            }
-		#endif
-	
+        for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
+            addSeqToTree(itTemp->first, itTemp->second);
+            temp.erase(itTemp++);
+        }
+        
 		assignHeirarchyIDs(0);
-        
         
         string unknownTax = "unknown;";
         //added last taxon until you get desired level
@@ -407,16 +308,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
 void PhyloTree::setUp(string tfile){
 	try{
 		string taxFileNameTest = tfile.substr(0,tfile.find_last_of(".")+1) + "tree.sum";
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-			if (pid == 0) {  binUnclassified(taxFileNameTest);  }
-		
-		#else
-			binUnclassified(taxFileNameTest); 
-		#endif
+        binUnclassified(taxFileNameTest);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "setUp");
@@ -577,40 +469,26 @@ void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 /**************************************************************************************************/
 void PhyloTree::printTreeNodes(string treefilename) {
 	try {
-	
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-			if (pid == 0) {  
-		
-		#endif
-
-			ofstream outTree;
-			m->openOutputFile(treefilename, outTree);
-			
-			//output mothur version
-			outTree << "#" << m->getVersion() << endl;
-			
-			//print treenodes
-			outTree << tree.size() << endl;
-			for (int i = 0; i < tree.size(); i++) {
-				outTree << tree[i].name << '\t' << tree[i].level << '\t' << tree[i].parent << endl;
-			}
-			
-			//print genus nodes
-			outTree << endl << uniqueTaxonomies.size() << endl;
-			set<int>::iterator it2;
-			for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << *it2 << '\t' << tree[*it2].accessions.size() << endl;	}
-			outTree << endl;
-			
-			outTree.close();
-		
-		#ifdef USE_MPI
-			}
-		#endif
-
-		
+        ofstream outTree;
+        m->openOutputFile(treefilename, outTree);
+        
+        //output mothur version
+        outTree << "#" << m->getVersion() << endl;
+        
+        //print treenodes
+        outTree << tree.size() << endl;
+        for (int i = 0; i < tree.size(); i++) {
+            outTree << tree[i].name << '\t' << tree[i].level << '\t' << tree[i].parent << endl;
+        }
+        
+        //print genus nodes
+        outTree << endl << uniqueTaxonomies.size() << endl;
+        set<int>::iterator it2;
+        for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << *it2 << '\t' << tree[*it2].accessions.size() << endl;	}
+        outTree << endl;
+        
+        outTree.close();
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "printTreeNodes");

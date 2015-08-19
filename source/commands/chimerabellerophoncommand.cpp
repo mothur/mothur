@@ -42,9 +42,6 @@ string ChimeraBellerophonCommand::getHelpString(){
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter, default=false. \n";
 		helpString += "The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default is 1/4 sequence length. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 25.\n";
 		helpString += "chimera.bellerophon(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors) \n";
@@ -247,29 +244,7 @@ int ChimeraBellerophonCommand::execute(){
 			chimera->getChimeras();
 			
 			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
-			
-		#ifdef USE_MPI
-			MPI_File outMPI;
-			MPI_File outMPIAccnos;
-			
-			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-			
-			char outFilename[1024];
-			strcpy(outFilename, accnosFileName.c_str());
-
-			char FileName[1024];
-			strcpy(FileName, outputFileName.c_str());
-
-			MPI_File_open(MPI_COMM_WORLD, FileName, outMode, MPI_INFO_NULL, &outMPI);  //comm, filename, mode, info, filepointer
-			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
-	
-			numSeqs = chimera->print(outMPI, outMPIAccnos, "");
-			
-			MPI_File_close(&outMPI);
-			MPI_File_close(&outMPIAccnos);
-
-		#else
-		
+					
 			ofstream out;
 			m->openOutputFile(outputFileName, out);
 			
@@ -279,9 +254,7 @@ int ChimeraBellerophonCommand::execute(){
 			numSeqs = chimera->print(out, out2, "");
 			out.close();
 			out2.close(); 
-			
-		#endif
-			
+						
 			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
