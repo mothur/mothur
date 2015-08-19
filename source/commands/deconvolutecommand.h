@@ -39,7 +39,7 @@ public:
 	
 	
 private:
-	string inFastaName, oldNameMapFName, outputDir, countfile;
+	string fastafile, namefile, outputDir, countfile, format;
 	vector<string> outputNames;
 
 	bool abort;

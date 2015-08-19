@@ -16,6 +16,7 @@ vector<string> DeconvoluteCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pformat("format", "Multiple", "count-name", "name", "", "", "","",false,false, true); parameters.push_back(pformat);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -34,9 +35,10 @@ string DeconvoluteCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The unique.seqs command reads a fastafile and creates a name or count file.\n";
-		helpString += "It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n";
-		helpString += "If the sequence is unique the second column will just contain its name. \n";
-		helpString += "The unique.seqs command parameters are fasta and name.  fasta is required, unless there is a valid current fasta file.\n";
+		helpString += "The unique.seqs command parameters are fasta, name, count and format.  fasta is required, unless there is a valid current fasta file.\n";
+        helpString += "The name parameter is used to provide an existing name file associated with the fasta file. \n";
+        helpString += "The count parameter is used to provide an existing count file associated with the fasta file. \n";
+        helpString += "The format parameter is used to indicate what type of file you want outputted.  Choices are name and count, default=name.\n";
 		helpString += "The unique.seqs command should be in the following format: \n";
 		helpString += "unique.seqs(fasta=yourFastaFile) \n";	
 		return helpString;
@@ -140,36 +142,36 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 
 			
 			//check for required parameters
-			inFastaName = validParameter.validFile(parameters, "fasta", true);
-			if (inFastaName == "not open") { abort = true; }
-			else if (inFastaName == "not found") { 				
-				inFastaName = m->getFastaFile(); 
-				if (inFastaName != "") { m->mothurOut("Using " + inFastaName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+			fastafile = validParameter.validFile(parameters, "fasta", true);
+			if (fastafile == "not open") { abort = true; }
+			else if (fastafile == "not found") {
+				fastafile = m->getFastaFile();
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(inFastaName); }	
+			}else { m->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(inFastaName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it
 			}
 			
-			oldNameMapFName = validParameter.validFile(parameters, "name", true);
-			if (oldNameMapFName == "not open") { oldNameMapFName = ""; abort = true; }
-			else if (oldNameMapFName == "not found"){	oldNameMapFName = "";	}
-			else { m->setNameFile(oldNameMapFName); }
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { namefile = ""; abort = true; }
+			else if (namefile == "not found"){	namefile = "";	}
+			else { m->setNameFile(namefile); }
             
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
 			else { m->setCountTableFile(countfile); }
 			
-            if ((countfile != "") && (oldNameMapFName != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 
 			if (countfile == "") {
-                if (oldNameMapFName == "") {
-                    vector<string> files; files.push_back(inFastaName);
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
                     parser.getNameFile(files);
                 }
             }
@@ -190,20 +192,20 @@ int DeconvoluteCommand::execute() {
 
 		//prepare filenames and open files
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
         string outNameFile = getOutputFileName("name", variables);
         string outCountFile = getOutputFileName("count", variables);
-        variables["[extension]"] = m->getExtension(inFastaName);
+        variables["[extension]"] = m->getExtension(fastafile);
 		string outFastaFile = getOutputFileName("fasta", variables);
 		
 		map<string, string> nameMap;
 		map<string, string>::iterator itNames;
-		if (oldNameMapFName != "")  {  
-            m->readNames(oldNameMapFName, nameMap);
-            if (oldNameMapFName == outNameFile){
+		if (namefile != "")  {
+            m->readNames(namefile, nameMap);
+            if (namefile == outNameFile){
                 //prepare filenames and open files
                 map<string, string> mvariables;
-                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
                 mvariables["[tag]"] = "unique";
                 outNameFile = getOutputFileName("name", mvariables);
             }
@@ -214,7 +216,7 @@ int DeconvoluteCommand::execute() {
             if (countfile == outCountFile){
                 //prepare filenames and open files
                 map<string, string> mvariables;
-                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
                 mvariables["[tag]"] = "unique";
                 outCountFile = getOutputFileName("count", mvariables);   }
         }
@@ -222,7 +224,7 @@ int DeconvoluteCommand::execute() {
 		if (m->control_pressed) { return 0; }
 		
 		ifstream in; 
-		m->openInputFile(inFastaName, in);
+		m->openInputFile(fastafile, in);
 		
 		ofstream outFasta;
 		m->openOutputFile(outFastaFile, outFasta);
@@ -252,7 +254,7 @@ int DeconvoluteCommand::execute() {
 					//output to unique fasta file
 					seq.printSequence(outFasta);
 					
-					if (oldNameMapFName != "") {
+					if (namefile != "") {
 						itNames = nameMap.find(seq.getName());
 						
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
@@ -266,7 +268,7 @@ int DeconvoluteCommand::execute() {
                         sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned());
                     }else {	sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
 				}else { //this is a dup
-					if (oldNameMapFName != "") {
+					if (namefile != "") {
 						itNames = nameMap.find(seq.getName());
 						
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
