@@ -122,111 +122,7 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 			
 			m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
 			
-			#ifdef USE_MPI
-				int pid, processors;
-				vector<unsigned long long> positions;
-				int numSeqs;
-				int tag = 2001;
-				MPI_File inMPI;
-				MPI_Status status; 
 			
-				if (byGroup) {
-					char inFileName[1024];
-					strcpy(inFileName, file.c_str());
-					
-					MPI_File_open(MPI_COMM_SELF, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-					
-					positions = m->setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
-					
-					//read file 
-					for(int i=0;i<numSeqs;i++){
-						
-						if (m->control_pressed) { MPI_File_close(&inMPI); return container; }
-						
-						//read next sequence
-						int seqlength = positions[i+1] - positions[i];
-						char* buf4 = new char[seqlength];
-						
-						MPI_File_read_at(inMPI, positions[i], buf4, seqlength, MPI_CHAR, &status);
-						
-						string tempBuf = buf4;
-						if (tempBuf.length() > seqlength) { tempBuf = tempBuf.substr(0, seqlength); }
-						delete buf4;
-						
-						istringstream iss (tempBuf,istringstream::in);
-						
-						Sequence* current = new Sequence(iss);   
-						if (current->getName() != "") {
-							if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
-							else if (length != current->getAligned().length()) {	unaligned = true;	}
-							
-							container.push_back(current);  
-							if (rdb->save) { rdb->referenceSeqs.push_back(*current); }
-						}
-					}
-					
-					MPI_File_close(&inMPI);
-					
-				}else {					
-					
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-					MPI_Comm_size(MPI_COMM_WORLD, &processors);
-					
-					//char* inFileName = new char[file.length()];
-					//memcpy(inFileName, file.c_str(), file.length());
-					
-					char inFileName[1024];
-					strcpy(inFileName, file.c_str());
-					
-					MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-					//delete inFileName;
-					
-					if (pid == 0) {
-						positions = m->setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
-						
-						//send file positions to all processes
-						for(int i = 1; i < processors; i++) { 
-							MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-							MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-						}
-					}else{
-						MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-						positions.resize(numSeqs+1);
-						MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-					}
-					
-					//read file 
-					for(int i=0;i<numSeqs;i++){
-						
-						if (m->control_pressed) { MPI_File_close(&inMPI); return container; }
-						
-						//read next sequence
-						int seqlength = positions[i+1] - positions[i];
-						char* buf4 = new char[seqlength];
-						
-						MPI_File_read_at(inMPI, positions[i], buf4, seqlength, MPI_CHAR, &status);
-						
-						string tempBuf = buf4;
-						if (tempBuf.length() > seqlength) { tempBuf = tempBuf.substr(0, seqlength); }
-						delete buf4;
-						
-						istringstream iss (tempBuf,istringstream::in);
-						
-						Sequence* current = new Sequence(iss);   
-						if (current->getName() != "") {
-							if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
-							else if (length != current->getAligned().length()) {	unaligned = true;	}
-							
-							container.push_back(current);  
-							if (rdb->save) { rdb->referenceSeqs.push_back(*current); }
-						}
-					}
-					
-					MPI_File_close(&inMPI);
-					MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				}
-		#else
-
 			ifstream in;
 			m->openInputFile(file, in);
 			
@@ -246,7 +142,6 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 				}
 			}
 			in.close();
-		#endif
 		
 			m->mothurOut("Done."); m->mothurOutEndLine();
 			
@@ -271,54 +166,18 @@ void Chimera::setMask(string filename) {
 			seqMask = "";
 		}else{
 		
-	#ifdef USE_MPI	
-			MPI_File inMPI;
-			MPI_Offset size;
-			MPI_Status status;
-			
-			//char* inFileName = new char[filename.length()];
-			//memcpy(inFileName, filename.c_str(), filename.length());
-			
-			char inFileName[1024];
-			strcpy(inFileName, filename.c_str());
+            ifstream infile;
+            m->openInputFile(filename, infile);
+            
+            if (!infile.eof()) {
+                Sequence temp(infile);
+                seqMask = temp.getAligned();
+            }else {
+                m->mothurOut("Problem with mask."); m->mothurOutEndLine();
+                seqMask = "";
+            }
+            infile.close();
 	
-			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			MPI_File_get_size(inMPI, &size);
-
-			//delete inFileName;
-			
-			char* buffer = new char[size];
-			MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
-			
-			string tempBuf = buffer;
-			if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-			istringstream iss (tempBuf,istringstream::in);
-
-			delete buffer;
-			
-			if (!iss.eof()) {
-				Sequence temp(iss);
-				seqMask = temp.getAligned();
-			}else {
-				m->mothurOut("Problem with mask."); m->mothurOutEndLine(); 
-				seqMask = "";
-			}
-			
-			MPI_File_close(&inMPI);
-	#else
-	
-			ifstream infile;
-			m->openInputFile(filename, infile);
-			
-			if (!infile.eof()) {
-				Sequence temp(infile);
-				seqMask = temp.getAligned();
-			}else {
-				m->mothurOut("Problem with mask."); m->mothurOutEndLine(); 
-				seqMask = "";
-			}
-			infile.close();
-	#endif
 	
 		}
 	}

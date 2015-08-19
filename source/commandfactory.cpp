@@ -172,12 +172,6 @@ CommandFactory* CommandFactory::getInstance() {
 /***********************************************************/
 
 /***********************************************************/
-//note: This class is resposible for knowing which commands are mpiEnabled,
-//If a command is not enabled only process 0 will execute the command.
-//This avoids redundant outputs on pieces of code we have not paralellized.
-//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open.
-//example:  commands["dist.seqs"] = "MPIEnabled";
-
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
@@ -232,7 +226,7 @@ CommandFactory::CommandFactory(){
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
-	commands["set.dir"]				= "MPIEnabled";
+	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
 	commands["set.logfile"]			= "set.logfile";
@@ -272,30 +266,30 @@ CommandFactory::CommandFactory(){
 	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
-	commands["get.current"]			= "MPIEnabled";
-	commands["set.current"]			= "MPIEnabled";
+	commands["get.current"]			= "get.current";
+	commands["set.current"]			= "set.current";
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
 	commands["clear.memory"]		= "clear.memory";
-	commands["pairwise.seqs"]		= "MPIEnabled";
-	commands["pipeline.pds"]		= "MPIEnabled";
-	commands["classify.seqs"]		= "MPIEnabled";
-	commands["dist.seqs"]			= "MPIEnabled";
-	commands["filter.seqs"]			= "MPIEnabled";
-	commands["align.seqs"]			= "MPIEnabled";
-	commands["chimera.ccode"]		= "MPIEnabled";
-	commands["chimera.check"]		= "MPIEnabled";
-	commands["chimera.slayer"]		= "MPIEnabled";
+	commands["pairwise.seqs"]		= "pairwise.seqs";
+	commands["pipeline.pds"]		= "pipeline.pds";
+	commands["classify.seqs"]		= "classify.seqs";
+	commands["dist.seqs"]			= "dist.seqs";
+	commands["filter.seqs"]			= "filter.seqs";
+	commands["align.seqs"]			= "align.seqs";
+	commands["chimera.ccode"]		= "chimera.ccode";
+	commands["chimera.check"]		= "chimera.check";
+	commands["chimera.slayer"]		= "chimera.slayer";
 	commands["chimera.uchime"]		= "chimera.uchime";
 	commands["chimera.perseus"]		= "chimera.perseus";
-	commands["chimera.pintail"]		= "MPIEnabled";
-	commands["chimera.bellerophon"]	= "MPIEnabled";
-	commands["screen.seqs"]			= "MPIEnabled";
+	commands["chimera.pintail"]		= "chimera.pintail";
+	commands["chimera.bellerophon"]	= "chimera.bellerophon";
+	commands["screen.seqs"]			= "screen.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
-	commands["cluster.split"]		= "MPIEnabled";
-	commands["shhh.flows"]			= "MPIEnabled";
+	commands["cluster.split"]		= "cluster.split";
+	commands["shhh.flows"]			= "shhh.flows";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["summary.tax"]			= "summary.tax";
@@ -316,7 +310,7 @@ CommandFactory::CommandFactory(){
     commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
-	commands["quit"]				= "MPIEnabled";
+	commands["quit"]				= "quit";
     commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared";
@@ -341,18 +335,6 @@ CommandFactory::CommandFactory(){
 
 
 }
-/***********************************************************/
-
-/***********************************************************/
-bool CommandFactory::MPIEnabled(string commandName) {
-	bool mpi = false;
-	it = commands.find(commandName);
-	if (it != commands.end()) {
-		if (it->second == "MPIEnabled") { return true; }
-	}
-	return mpi;
-}
-/***********************************************************/
 
 /***********************************************************/
 CommandFactory::~CommandFactory(){

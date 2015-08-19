@@ -50,19 +50,12 @@ private:
     int sortFastaFile(vector<Sequence>&, map<string, int>&, string newFile);
 	string getNamesFile(string&);
 	//int setupChimera(string,);
-	int MPIExecute(string, string, string, string, map<string, int>&);
-	int deconvoluteResults(map<string, string>&, string, string, string);
+    int deconvoluteResults(map<string, string>&, string, string, string);
 	map<string, int> priority;
 	int setUpForSelfReference(SequenceParser*&, map<string, string>&, map<string, map<string, int> >&, int);
     int setUpForSelfReference(SequenceCountParser*&, map<string, string>&, map<string, map<string, int> >&, int);
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
 	int createProcessesGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
-	int MPIExecuteGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
-
-		
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, set<string>&, vector<unsigned long long>&, string, map<string, int>&, bool);
-	#endif
 
 	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
 	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;

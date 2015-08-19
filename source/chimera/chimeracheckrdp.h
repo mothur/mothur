@@ -31,10 +31,6 @@ class ChimeraCheckRDP : public Chimera {
 		int getChimeras(Sequence*);
 		Sequence print(ostream&, ostream&);
 		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		#endif
-		
 	private:
 		
 		Sequence* querySeq;

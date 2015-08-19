@@ -1725,10 +1725,10 @@
 		481FB5211AC0A9B40076CFF3 /* testcommands */ = {
 			isa = PBXGroup;
 			children = (
-				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
 				4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */,
 				4829D9661B8387D0002EEED4 /* testbiominfocommand.h */,
 				48C728741B6AB4CD00D40830 /* testgetgroupscommand.h */,
+				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
 				48C728691B69598400D40830 /* testmergegroupscommand.h */,
 				48C728681B69598400D40830 /* testmergegroupscommand.cpp */,
 				48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */,

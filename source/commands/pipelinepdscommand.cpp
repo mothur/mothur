@@ -239,13 +239,6 @@ int PipelineCommand::execute(){
 				CommandOptionParser parser(commands[i]);
 				string commandName = parser.getCommandString();
 				string options = parser.getOptionString();
-					
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-				#endif
 				
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options, "pipe");
@@ -258,10 +251,7 @@ int PipelineCommand::execute(){
 					vector<string> temp = itMade->second; 
 					for (int j = 0; j < temp.size(); j++) { outputNames.push_back(temp[j]); }
 				}
-									
-				#ifdef USE_MPI
-					}
-				#endif
+
 			}
 			
 		}else {  runUsersPipeline(); }
@@ -438,13 +428,6 @@ int PipelineCommand::runUsersPipeline(){
 								
 				if (m->control_pressed) { return 0; }
 					
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-				#endif
-				
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options, "pipe");
 				command->execute();
@@ -503,10 +486,6 @@ int PipelineCommand::runUsersPipeline(){
 						}
 					}
 				}
-									
-				#ifdef USE_MPI
-					}
-				#endif
 			}
 		}
 		

@@ -43,10 +43,6 @@ private:
 	
 	int driver(linePair*, string, string);
 	int createProcesses(string, string);
-		
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	#endif
 
 	bool abort, svg, save;
 	string fastafile, templatefile, namefile, outputDir;

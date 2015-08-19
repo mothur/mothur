@@ -26,11 +26,6 @@ public:
 	string getName(int i) { return data[i].getName(); } 
 	vector<int> findClosestSequences(Sequence*, int);  // returns indexes of n closest sequences to query
 	
-	#ifdef USE_MPI	
-	int MPISend(int) {return 0;}
-	int MPIRecv(int) {return 0;}
-	#endif
-	
 private:
 	vector<Sequence> data;
 	Dist* distCalculator;

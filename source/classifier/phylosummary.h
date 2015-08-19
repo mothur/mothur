@@ -29,7 +29,6 @@ struct rawTaxNode {
 };
 
 /**************************************************************************************************/
-//doesn't use MPI ifdefs since only pid 0 uses this class
 class PhyloSummary {
 
 public:

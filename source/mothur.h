@@ -55,9 +55,6 @@
 #include <ctime>
 #include <limits>
 
-#ifdef USE_MPI
-	#include "mpi.h"
-#endif
 /***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

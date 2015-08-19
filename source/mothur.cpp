@@ -42,10 +42,6 @@ int main(int argc, char *argv[]){
 		time_t ltime = time(NULL); /* calendar time */  
 		string logFileName = "mothur." + toString(ltime) + ".logfile";
 		
-		#ifdef USE_MPI
-			MPI_Init(&argc, &argv); 
-		#endif
-
 		m->setFileName(logFileName);
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -67,11 +63,6 @@ int main(int argc, char *argv[]){
 		
 			temp = m->getFullPathName(temp);
 			m->setDefaultPath(temp);
-		#endif
-		
-		#ifdef USE_MPI
-			int version, subversion;
-			MPI_Get_version(&version, &subversion);
 		#endif
 		
 		//get releaseDate from Make
@@ -174,12 +165,7 @@ int main(int argc, char *argv[]){
 			m->mothurOutEndLine();
 			m->mothurOutEndLine();			
 			m->mothurOut("Type 'quit()' to exit program");
-			m->mothurOutEndLine();	
-			
-			#ifdef USE_MPI
-				m->mothurOutJustToLog("Using MPI\tversion ");
-				m->mothurOutJustToLog(toString(version) + "." + toString(subversion) + "\n");
-			#endif
+			m->mothurOutEndLine();
 		}
 		
 		//srand(54321);
@@ -223,9 +209,6 @@ int main(int argc, char *argv[]){
                 #endif
                 
 				m->mothurOut(OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate); m->mothurOutEndLine(); m->mothurOutEndLine(); m->closeLog();
-				#ifdef USE_MPI
-					MPI_Finalize();
-				#endif
                 m->mothurRemove(logFileName);
 				return 0;
                 
@@ -292,11 +275,7 @@ int main(int argc, char *argv[]){
         if (!createLogFile) { m->mothurRemove(newlogFileName); }
 				
 		if (mothur != NULL) { delete mothur; }
-		
-		#ifdef USE_MPI
-			MPI_Finalize();
-		#endif
-		
+
 		return 0;
 	}
 	catch(exception& e) {

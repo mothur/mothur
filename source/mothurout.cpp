@@ -261,19 +261,7 @@ string MothurOut::findProgramPath(string programName){
 void MothurOut::setFileName(string filename)  {
 	try {
 		logFileName = filename;
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-		
 		openOutputFile(filename, out);
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -313,19 +301,7 @@ void MothurOut::setOutputDir(string pathname)  {
 /*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-		
 		out.close();
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "closeLog");
@@ -347,27 +323,18 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                if (!quietMode) {
-                    out << output;
-                    logger() << output;
-                }else {
-                    //check for this being an error
-                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                        out << output;
-                        logger() << output;
-                    }
-                }
-		
-		#ifdef USE_MPI
-			}
-		#endif
+
+        if (!quietMode) {
+            out << output;
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                out << output;
+                logger() << output;
+            }
+        }
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -378,25 +345,14 @@ void MothurOut::mothurOut(string output) {
 void MothurOut::mothurOutJustToScreen(string output) {
 	try {
 		
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-        
-        if (pid == 0) { //only one process should output to screen
-#endif
-            if (!quietMode) {
+        if (!quietMode) {
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
                 logger() << output;
-            }else {
-                //check for this being an error
-                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                    logger() << output;
-                }
             }
-
-            
-#ifdef USE_MPI
         }
-#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -406,21 +362,10 @@ void MothurOut::mothurOutJustToScreen(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                
 		if (!quietMode) {
             out << endl;
             logger() << endl;
         }
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -430,32 +375,19 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output, ofstream& outputFile) {
 	try {
-		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { //only one process should output to screen
-#endif
-            if (!quietMode) {
+        if (!quietMode) {
+            out << output;
+            outputFile << output;
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
                 out << output;
                 outputFile << output;
                 logger() << output;
-            }else {
-                //check for this being an error
-                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                    out << output;
-                    outputFile << output;
-                    logger() << output;
-                }
-                
             }
-
-			
-#ifdef USE_MPI
-		}
-#endif
-        
+            
+        }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -465,21 +397,11 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 	try {
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { //only one process should output to screen
-#endif
-			if (!quietMode) {
-                out << endl;
-                outputFile << endl;
-                logger() << endl;
-            }
-			
-#ifdef USE_MPI
-		}
-#endif
+        if (!quietMode) {
+            out << endl;
+            outputFile << endl;
+            logger() << endl;
+        }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -489,24 +411,16 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                if (!quietMode) {
-                    out << output;
-                }else {
-                    //check for this being an error
-                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                        out << output;
-                    }
-                }
-		
-		#ifdef USE_MPI
-			}
-		#endif
+
+        if (!quietMode) {
+            out << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                out << output;
+            }
+        }
+
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutJustToLog");
@@ -861,12 +775,6 @@ bool MothurOut::dirCheck(string& dirName){
         if (dirName == "") { return false; }
         
         string tag = "";
-        #ifdef USE_MPI
-            int pid; 
-            MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-            tag = toString(pid);
-        #endif
 
         //add / to name if needed
         string lastChar = dirName.substr(dirName.length()-1);
@@ -905,12 +813,6 @@ bool MothurOut::dirCheck(string& dirName, string noError){
         if (dirName == "") { return false; }
         
         string tag = "";
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        tag = toString(pid);
-#endif
         
         //add / to name if needed
         string lastChar = dirName.substr(dirName.length()-1);
@@ -951,12 +853,6 @@ bool MothurOut::mkDir(string& dirName){
         if (dirExist) { return true; }
         
         string tag = "";
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        tag = toString(pid);
-#endif
         
         string makeDirectoryCommand = "";
 

@@ -63,9 +63,6 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
@@ -669,96 +666,6 @@ int ClassifySeqsCommand::execute(){
 			int start = time(NULL);
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-			
-#ifdef USE_MPI	
-				int pid, numSeqsPerProcessor; 
-				int tag = 2001;
-				vector<unsigned long long> MPIPos;
-				
-				MPI_Status status; 
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-
-				MPI_File inMPI;
-				MPI_File outMPINewTax;
-				MPI_File outMPITempTax;
-				MPI_File outMPIAcc;
-							
-				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-				int inMode=MPI_MODE_RDONLY; 
-				
-				char outNewTax[1024];
-				strcpy(outNewTax, newTaxonomyFile.c_str());
-				
-				char outTempTax[1024];
-				strcpy(outTempTax, tempTaxonomyFile.c_str());
-			
-				char outAcc[1024];
-				strcpy(outAcc, newaccnosFile.c_str());
-				
-				char inFileName[1024];
-				strcpy(inFileName, fastaFileNames[s].c_str());
-
-				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				MPI_File_open(MPI_COMM_WORLD, outNewTax, outMode, MPI_INFO_NULL, &outMPINewTax);
-				MPI_File_open(MPI_COMM_WORLD, outTempTax, outMode, MPI_INFO_NULL, &outMPITempTax);
-				MPI_File_open(MPI_COMM_WORLD, outAcc, outMode, MPI_INFO_NULL, &outMPIAcc);
-				
-				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);  MPI_File_close(&outMPIAcc);   MPI_File_close(&outMPITempTax);  delete classify;  return 0;  }
-				
-				if (pid == 0) { //you are the root process 
-					
-					MPIPos = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
-					
-					//send file positions to all processes
-					for(int i = 1; i < processors; i++) { 
-						MPI_Send(&numFastaSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-						MPI_Send(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-					}
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numFastaSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-					
-				
-					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, outMPIAcc, MPIPos);
-					
-					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax); MPI_File_close(&outMPIAcc);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0;  }
-					
-					for (int i = 1; i < processors; i++) {
-						int done;
-						MPI_Recv(&done, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-					}
-				}else{ //you are a child process
-					MPI_Recv(&numFastaSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(numFastaSeqs+1);
-					MPI_Recv(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numFastaSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-					
-					
-					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, outMPIAcc, MPIPos);
-					
-					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);  MPI_File_close(&outMPIAcc);  MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
-
-					int done = 0;
-					MPI_Send(&done, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
-				}
-				
-				//close files 
-				MPI_File_close(&inMPI);
-				MPI_File_close(&outMPINewTax);
-				MPI_File_close(&outMPITempTax);
-				MPI_File_close(&outMPIAcc); 
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-#else
 		
 			vector<unsigned long long> positions; 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -785,78 +692,69 @@ int ClassifySeqsCommand::execute(){
 			}else{
 				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]); 
 			}
-#endif
 			
 			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
                 outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
             }else { m->mothurRemove(newaccnosFile); }
 
-		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
-		start = time(NULL);
-		
-		
-
-		#ifdef USE_MPI	
-			if (pid == 0) {  //this part does not need to be paralellized
-			
-				if(namefile != "") { m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();  MPIReadNamesFile(namefileNames[s]);  m->mothurOut("  Done."); m->mothurOutEndLine(); }
-		#else
-			//read namefile
-			if(namefile != "") {
-			
-			    m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
-				nameMap.clear(); //remove old names
-				m->readNames(namefileNames[s], nameMap);				
-				m->mothurOut("  Done."); m->mothurOutEndLine();
-			}
-		#endif
-
-                string group = "";
-                GroupMap* groupMap = NULL;
-                CountTable* ct = NULL;
-                PhyloSummary* taxaSum;
-                if (hasCount) { 
-                    ct = new CountTable();
-                    ct->readTable(countfileNames[s], true, false);
-                    taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund);
-                    taxaSum->summarize(tempTaxonomyFile);
-                }else {
-                    if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
+            m->mothurOutEndLine();
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+            start = time(NULL);
+            
+            //read namefile
+            if(namefile != "") {
+                
+                m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
+                nameMap.clear(); //remove old names
+                m->readNames(namefileNames[s], nameMap);
+                m->mothurOut("  Done."); m->mothurOutEndLine();
+            }
+            
+            string group = "";
+            GroupMap* groupMap = NULL;
+            CountTable* ct = NULL;
+            PhyloSummary* taxaSum;
+            if (hasCount) {
+                ct = new CountTable();
+                ct->readTable(countfileNames[s], true, false);
+                taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund);
+                taxaSum->summarize(tempTaxonomyFile);
+            }else {
+                if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
+                
+                taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund);
+                
+                if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+                
+                if (namefile == "") {  taxaSum->summarize(tempTaxonomyFile);  }
+                else {
+                    ifstream in;
+                    m->openInputFile(tempTaxonomyFile, in);
                     
-                    taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund);
+                    //read in users taxonomy file and add sequences to tree
+                    string name, taxon;
                     
-                    if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
-                    
-                    if (namefile == "") {  taxaSum->summarize(tempTaxonomyFile);  }
-                    else {
-                        ifstream in;
-                        m->openInputFile(tempTaxonomyFile, in);
+                    while(!in.eof()){
+                        if (m->control_pressed) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                         
-                        //read in users taxonomy file and add sequences to tree
-                        string name, taxon;
+                        in >> name >> taxon; m->gobble(in);
                         
-                        while(!in.eof()){
-                            if (m->control_pressed) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
-                            
-                            in >> name >> taxon; m->gobble(in);
-                            
-                            itNames = nameMap.find(name);
-                            
-                            if (itNames == nameMap.end()) { 
-                                m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
-                            }else{
-                                for (int i = 0; i < itNames->second.size(); i++) { 
-                                    taxaSum->addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
-                                }
-                                itNames->second.clear();
-                                nameMap.erase(itNames->first);
+                        itNames = nameMap.find(name);
+                        
+                        if (itNames == nameMap.end()) {
+                            m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                        }else{
+                            for (int i = 0; i < itNames->second.size(); i++) {
+                                taxaSum->addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
                             }
+                            itNames->second.clear();
+                            nameMap.erase(itNames->first);
                         }
-                        in.close();
                     }
+                    in.close();
                 }
-			m->mothurRemove(tempTaxonomyFile);
+            }
+            m->mothurRemove(tempTaxonomyFile);
 			
 			if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
 			
@@ -899,9 +797,6 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOutEndLine();
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			
-			#ifdef USE_MPI	
-				}
-			#endif
 		}
         delete classify;
         
@@ -1220,137 +1115,4 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-#ifdef USE_MPI
-int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& newFile, MPI_File& tempFile, MPI_File& accFile, vector<unsigned long long>& MPIPos){
-	try {
-		MPI_Status statusNew; 
-		MPI_Status statusTemp; 
-		MPI_Status statusAcc; 
-		MPI_Status status; 
-		
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-	
-		string taxonomy;
-		string outputString;
-
-		for(int i=0;i<num;i++){
-		
-			if (m->control_pressed) { return 0; }
-		
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buf4;
-
-			Sequence* candidateSeq = new Sequence(iss);
-			
-			if (candidateSeq->getName() != "") {
-				taxonomy = classify->getTaxonomy(candidateSeq);
-				
-				if (taxonomy == "unknown;") { m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); m->mothurOutEndLine(); }
-				
-				//output confidence scores or not
-				if (probs) {
-					outputString =  candidateSeq->getName() + "\t" + taxonomy + "\n";
-				}else{
-					outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
-				}
-				
-				int length = outputString.length();
-				char* buf2 = new char[length];
-				memcpy(buf2, outputString.c_str(), length);
-				
-				MPI_File_write_shared(newFile, buf2, length, MPI_CHAR, &statusNew);
-				delete buf2;
-				
-				outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
-				length = outputString.length();
-				char* buf = new char[length];
-				memcpy(buf, outputString.c_str(), length);
-				
-				MPI_File_write_shared(tempFile, buf, length, MPI_CHAR, &statusTemp);
-				delete buf;
-				
-				if (classify->getFlipped()) { 
-					outputString =  candidateSeq->getName() + "\n";
-					length = outputString.length();
-					char* buf3 = new char[length];
-					memcpy(buf3, outputString.c_str(), length);
-					
-					MPI_File_write_shared(accFile, buf3, length, MPI_CHAR, &statusAcc);
-					delete buf3;
-				}
-				
-			}				
-			delete candidateSeq;
-			
-			if((i+1) % 100 == 0){	cout << "Classifying sequence " << (i+1) << endl;	}
-		}
-		
-		if(num % 100 != 0){	cout << "Classifying sequence " << (num) << endl;	}
-		
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "driverMPI");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int ClassifySeqsCommand::MPIReadNamesFile(string nameFilename){
-	try {
-	
-		nameMap.clear(); //remove old names
-		
-		MPI_File inMPI;
-		MPI_Offset size;
-		MPI_Status status;
-
-		//char* inFileName = new char[nameFilename.length()];
-		//memcpy(inFileName, nameFilename.c_str(), nameFilename.length());
-		
-		char inFileName[1024];
-		strcpy(inFileName, nameFilename.c_str());
-
-		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
-		MPI_File_get_size(inMPI, &size);
-		//delete inFileName;
-
-		char* buffer = new char[size];
-		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
-
-		string tempBuf = buffer;
-		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-		istringstream iss (tempBuf,istringstream::in);
-		delete buffer;
-		
-		string firstCol, secondCol;
-		while(!iss.eof()) {
-			iss >> firstCol >> secondCol; m->gobble(iss);
-			
-			vector<string> temp;
-			m->splitAtComma(secondCol, temp);
-			
-			nameMap[firstCol] = temp;  
-		}
-	
-		MPI_File_close(&inMPI);
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "MPIReadNamesFile");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/

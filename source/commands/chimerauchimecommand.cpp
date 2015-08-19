@@ -90,9 +90,6 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The maxlen parameter is the maximum unaligned sequence length. Defaults 10000. Applies to both query and reference sequences.\n";
 		helpString += "The ucl parameter - use local-X alignments. Default is global-X or false. On tests so far, global-X is always better; this option is retained because it just might work well on some future type of data.\n";
 		helpString += "The queryfract parameter - minimum fraction of the query sequence that must be covered by a local-X alignment. Default 0.5. Applies only when ucl is true.\n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "The chimera.uchime command should be in the following format: \n";
 		helpString += "chimera.uchime(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.uchime(fasta=AD.align, reference=silva.gold.align) \n";

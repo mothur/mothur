@@ -153,14 +153,7 @@ class Chimera {
 		virtual int print(ostream&, ostream&, string){  return 0; }
 		virtual int getNumNoParents(){  return 0; }
 		virtual data_results getResults() { data_results results; return results; }
-		
-		#ifdef USE_MPI
-		virtual Sequence print(MPI_File&, MPI_File&){  Sequence temp; return temp; }
-		virtual Sequence print(MPI_File&, MPI_File&, data_results, data_results, bool&){  Sequence temp; return temp; }
-		virtual int print(MPI_File&, MPI_File&, string){  return 0; }
-		#endif
-		
-		
+				
 	protected:
 		
 		vector<Sequence*> templateSeqs;
