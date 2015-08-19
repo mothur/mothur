@@ -150,15 +150,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		ifstream in;
 		m->openInputFile(fastafile, in);
 
-		//open output files
-		map<int, ofstream*> outFiles;
-		for (int i = 0; i < numGroups; i++) {
-			ofstream* outFile = new ofstream();
-			//remove old temp files, just in case
-			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
-			m->openOutputFileAppend((fastafile + "." + toString(i) + ".temp"), *outFile);
-			outFiles[i] = outFile;
-		}
+		for (int i = 0; i < numGroups; i++) {  m->mothurRemove((fastafile + "." + toString(i) + ".temp")); }
 	
 		//parse fastafile
 		while (!in.eof()) {
@@ -170,28 +162,26 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 				//save names in case no namefile is given
 				if ((namefile == "") && (countfile == "")) {  names.insert(query.getName()); }
 			
-				if (it != seqGroup.end()) { //not singleton 
-					query.printSequence(*outFiles[it->second]);
+				if (it != seqGroup.end()) { //not singleton
+                    ofstream outFile;
+                    m->openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
+                    query.printSequence(outFile);
+                    outFile.close();
 					copyGroups.erase(query.getName());
 				}
 			}
 		}
 		in.close();
-
-		//Close output files
-		for (map<int, ofstream*>::iterator it = outFiles.begin(); it != outFiles.end(); it++) {
-			it->second->close();
-			delete it->second;
-			it->second = 0;
-		}
-
+        
+        bool error = false;
 		//warn about sequence in groups that are not in fasta file
 		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
 			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate and error."); m->mothurOutEndLine();
-			exit(1);
+            error = true;
 		}
-		
 		copyGroups.clear();
+        
+        if (error) { exit(1); }
         
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
@@ -452,42 +442,6 @@ int SplitMatrix::splitDistanceLarge(){
 							//if groupB is written to file it is above buffer size so read and write to new merged file
 							if (wroteOutPut[groupIDB]) {
 								string fileName2 = distFile + "." + toString(groupIDB) + ".temp";
-								/*ifstream fileB(fileName2.c_str(), ios::ate);
-								
-								outFile.open(fileName.c_str(), ios::app);
-								
-								long size;
-								char* memblock;
-
-								size = fileB.tellg();
-				
-								fileB.seekg (0, ios::beg);
-								
-								int numRead = size / 1024;
-								int lastRead = size % 1024;
-
-								for (int i = 0; i < numRead; i++) {
-				
-									memblock = new char [1024];
-								
-									fileB.read (memblock, 1024);
-									
-									string temp = memblock;
-									outFile << temp.substr(0, 1024);
-									
-									delete memblock;
-								}
-								
-								memblock = new char [lastRead];
-								
-								fileB.read (memblock, lastRead);
-								
-								//not sure why but it will read more than lastRead char...??
-								string temp = memblock;
-								outFile << temp.substr(0, lastRead);
-								delete memblock;
-								
-								fileB.close();*/
                                 m->appendFiles(fileName2, fileName);
 								m->mothurRemove(fileName2);
                         
@@ -517,42 +471,6 @@ int SplitMatrix::splitDistanceLarge(){
 							
 							if (wroteOutPut[groupIDA]) {
 								string fileName2 = distFile + "." + toString(groupIDA) + ".temp";
-								/*ifstream fileB(fileName2.c_str(), ios::ate);
-								
-								outFile.open(fileName.c_str(), ios::app);
-								
-								long size;
-								char* memblock;
-
-								size = fileB.tellg();
-															
-								fileB.seekg (0, ios::beg);
-								
-								int numRead = size / 1024;
-								int lastRead = size % 1024;
-
-								for (int i = 0; i < numRead; i++) {
-				
-									memblock = new char [1024];
-								
-									fileB.read (memblock, 1024);
-									string temp = memblock;
-									outFile << temp.substr(0, 1024);
-									
-									delete memblock;
-								}
-								
-								memblock = new char [lastRead];
-								
-								fileB.read (memblock, lastRead);
-								
-								//not sure why but it will read more than lastRead char...??
-								string temp = memblock;
-								outFile << temp.substr(0, lastRead);
-									
-								delete memblock;
-								
-								fileB.close();*/
                                 m->appendFiles(fileName2, fileName);
 								m->mothurRemove(fileName2);
 								
