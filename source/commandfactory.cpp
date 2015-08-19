@@ -381,8 +381,8 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
         }
 
-        pos = optionString.find("seed");
-        if (pos != string::npos) { //user has set inputdir in command option string
+        pos = optionString.find("seed=");
+        if (pos != string::npos) { //user has set seed in command option string
             string intputOption = "";
             bool foundEquals = false;
             for(int i=pos;i<optionString.length();i++){
@@ -404,7 +404,6 @@ int CommandFactory::checkForRedirects(string optionString) {
                 srand(random);
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
-
         }
 
 
