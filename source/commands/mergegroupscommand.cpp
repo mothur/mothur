@@ -18,6 +18,7 @@ vector<string> MergeGroupsCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
         CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+        CommandParameter pmethod("method", "Multiple", "sum-average-median", "sum", "", "", "","",false,false, true); parameters.push_back(pmethod);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -41,6 +42,8 @@ string MergeGroupsCommand::getHelpString(){
 		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes. By default all groups are selected.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+        helpString += "The groups parameter allows you to select groups you would like, and are also separated by dashes.\n";
+        helpString += "The method parameter allows you to select method you would like to use to merge the groups. Options are sum, average and median. Default=sum.\n";
 		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
 		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
 		helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
@@ -196,6 +199,10 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
 			m->setGroups(Groups);
+            
+            method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	output = "sum"; }
+            
+            if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum."); m->mothurOutEndLine(); method = "sum"; }
             
             if ((groupfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
