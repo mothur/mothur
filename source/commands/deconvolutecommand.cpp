@@ -38,7 +38,7 @@ string DeconvoluteCommand::getHelpString(){
 		helpString += "The unique.seqs command parameters are fasta, name, count and format.  fasta is required, unless there is a valid current fasta file.\n";
         helpString += "The name parameter is used to provide an existing name file associated with the fasta file. \n";
         helpString += "The count parameter is used to provide an existing count file associated with the fasta file. \n";
-        helpString += "The format parameter is used to indicate what type of file you want outputted.  Choices are name and count, default=name.\n";
+        helpString += "The format parameter is used to indicate what type of file you want outputted.  Choices are name and count, default=name unless count file used then default=count.\n";
 		helpString += "The unique.seqs command should be in the following format: \n";
 		helpString += "unique.seqs(fasta=yourFastaFile) \n";	
 		return helpString;
@@ -168,7 +168,18 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
-
+            format = validParameter.validFile(parameters, "format", false);
+            if(format == "not found"){
+                if (countfile != "") { format = "count";    }
+                else { format = "name";                     }
+            }
+            
+            if ((format != "name") && (format != "count")) {
+                m->mothurOut(format + " is not a valid format option. Options are count or name.");
+                if (countfile == "") { m->mothurOut("I will use name.\n"); format = "name"; }
+                else {  m->mothurOut("I will use count.\n"); format = "count"; }
+            }
+            
 			if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
@@ -189,7 +200,7 @@ int DeconvoluteCommand::execute() {
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-
+        
 		//prepare filenames and open files
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
@@ -234,6 +245,7 @@ int DeconvoluteCommand::execute() {
 		set<string> nameInFastaFile; //for sanity checking
 		set<string>::iterator itname;
 		vector<string> nameFileOrder;
+        CountTable newCt;
 		int count = 0;
 		while (!in.eof()) {
 			
@@ -260,13 +272,23 @@ int DeconvoluteCommand::execute() {
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
 							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
 						}else {
-							sequenceStrings[seq.getAligned()] = itNames->second;
-							nameFileOrder.push_back(seq.getAligned());
+                            if (format == "name") { sequenceStrings[seq.getAligned()] = itNames->second;  nameFileOrder.push_back(seq.getAligned());
+                            }else {  newCt.push_back(seq.getName(), m->getNumNames(itNames->second)); sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
 						}
-					}else if (countfile != "") { 
-                        ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
-                        sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned());
-                    }else {	sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
+					}else if (countfile != "") {
+                        if (format == "name") {
+                            int numSeqs = ct.getNumSeqs(seq.getName());
+                            string expandedName = seq.getName()+"_0";
+                            for (int i = 1; i < numSeqs; i++) {  expandedName += "," + seq.getName() + "_" + toString(i);  }
+                            sequenceStrings[seq.getAligned()] = expandedName;  nameFileOrder.push_back(seq.getAligned());
+                        }else {
+                            ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
+                            sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned());
+                        }
+                    }else {
+                        if (format == "name") { sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
+                        else {  newCt.push_back(seq.getName()); sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
+                    }
 				}else { //this is a dup
 					if (namefile != "") {
 						itNames = nameMap.find(seq.getName());
@@ -274,16 +296,26 @@ int DeconvoluteCommand::execute() {
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
 							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
 						}else {
-							sequenceStrings[seq.getAligned()] += "," + itNames->second;
+                            if (format == "name") { sequenceStrings[seq.getAligned()] += "," + itNames->second;  }
+                            else {  int currentReps = newCt.getNumSeqs(itStrings->second);  newCt.setNumSeqs(itStrings->second, currentReps+(m->getNumNames(itNames->second)));  }
 						}
-                    }else if (countfile != "") { 
-                        int num = ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
-                        if (num != 0) { //its in the table
-                            ct.mergeCounts(itStrings->second, seq.getName()); //merges counts and saves in uniques name
+                    }else if (countfile != "") {
+                        if (format == "name") {
+                            int numSeqs = ct.getNumSeqs(seq.getName());
+                            string expandedName = seq.getName()+"_0";
+                            for (int i = 1; i < numSeqs; i++) {  expandedName += "," + seq.getName() + "_" + toString(i);  }
+                            sequenceStrings[seq.getAligned()] += "," + expandedName;
+                        }else {
+                            int num = ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
+                            if (num != 0) { //its in the table
+                                ct.mergeCounts(itStrings->second, seq.getName()); //merges counts and saves in uniques name
+                            }
                         }
-                    }else {	sequenceStrings[seq.getAligned()] += "," + seq.getName();	}
+                    }else {
+                        if (format == "name") {  sequenceStrings[seq.getAligned()] += "," + seq.getName(); }
+                        else {  int currentReps = newCt.getNumSeqs(itStrings->second); newCt.setNumSeqs(itStrings->second, currentReps+1);  }
+                    }
 				}
-				
 				count++;
 			}
 			
@@ -298,11 +330,14 @@ int DeconvoluteCommand::execute() {
 		outFasta.close();
 		
 		if (m->control_pressed) { m->mothurRemove(outFastaFile); return 0; }
-		
+        
 		//print new names file
 		ofstream outNames;
-		if (countfile == "") { m->openOutputFile(outNameFile, outNames); outputNames.push_back(outNameFile); outputTypes["name"].push_back(outNameFile);  }
-        else { m->openOutputFile(outCountFile, outNames); ct.printHeaders(outNames); outputTypes["count"].push_back(outCountFile); outputNames.push_back(outCountFile); }
+		if (format == "name") { m->openOutputFile(outNameFile, outNames); outputNames.push_back(outNameFile); outputTypes["name"].push_back(outNameFile);   }
+        else { m->openOutputFile(outCountFile, outNames); outputTypes["count"].push_back(outCountFile); outputNames.push_back(outCountFile);                }
+        
+        if ((countfile != "") && (format == "count")) { ct.printHeaders(outNames); }
+        else if ((countfile == "") && (format == "count")) { newCt.printHeaders(outNames); }
 		
 		for (int i = 0; i < nameFileOrder.size(); i++) {
 			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); } return 0; }
@@ -310,7 +345,7 @@ int DeconvoluteCommand::execute() {
 			itStrings = sequenceStrings.find(nameFileOrder[i]);
 			
 			if (itStrings != sequenceStrings.end()) {
-                if (countfile == "") {
+                if (format == "name") {
                     //get rep name
                     int pos = (itStrings->second).find_first_of(',');
                     
@@ -319,7 +354,10 @@ int DeconvoluteCommand::execute() {
                     }else {
                         outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
                     }
-                }else {  ct.printSeq(outNames, itStrings->second);  }
+                }else {
+                    if (countfile != "") {  ct.printSeq(outNames, itStrings->second);  }
+                    else if (format == "count")  {  newCt.printSeq(outNames, itStrings->second);  }
+                }
 			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->control_pressed = true; }
 		}
 		outNames.close();
