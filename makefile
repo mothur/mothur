@@ -8,7 +8,6 @@
 # Macros
 #
 
-USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
 USECOMPRESSION ?= no
@@ -56,11 +55,6 @@ ifeq  ($(strip $(USEREADLINE)),yes)
         -lncurses
 endif
 
-
-ifeq  ($(strip $(USEMPI)),yes)
-    CXX = mpic++
-    CXXFLAGS += -DUSE_MPI
-endif
 
 #The boost libraries allow you to read gz files.
 ifeq  ($(strip $(USEBOOST)),yes)

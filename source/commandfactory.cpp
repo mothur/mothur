@@ -155,6 +155,7 @@
 #include "mimarksattributescommand.h"
 #include "setseedcommand.h"
 #include "makefilecommand.h"
+#include "biominfocommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -171,12 +172,6 @@ CommandFactory* CommandFactory::getInstance() {
 /***********************************************************/
 
 /***********************************************************/
-//note: This class is resposible for knowing which commands are mpiEnabled,
-//If a command is not enabled only process 0 will execute the command.
-//This avoids redundant outputs on pieces of code we have not paralellized.
-//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open.
-//example:  commands["dist.seqs"] = "MPIEnabled";
-
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
@@ -231,7 +226,7 @@ CommandFactory::CommandFactory(){
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
-	commands["set.dir"]				= "MPIEnabled";
+	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
 	commands["set.logfile"]			= "set.logfile";
@@ -271,30 +266,30 @@ CommandFactory::CommandFactory(){
 	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
-	commands["get.current"]			= "MPIEnabled";
-	commands["set.current"]			= "MPIEnabled";
+	commands["get.current"]			= "get.current";
+	commands["set.current"]			= "set.current";
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
 	commands["clear.memory"]		= "clear.memory";
-	commands["pairwise.seqs"]		= "MPIEnabled";
-	commands["pipeline.pds"]		= "MPIEnabled";
-	commands["classify.seqs"]		= "MPIEnabled";
-	commands["dist.seqs"]			= "MPIEnabled";
-	commands["filter.seqs"]			= "MPIEnabled";
-	commands["align.seqs"]			= "MPIEnabled";
-	commands["chimera.ccode"]		= "MPIEnabled";
-	commands["chimera.check"]		= "MPIEnabled";
-	commands["chimera.slayer"]		= "MPIEnabled";
+	commands["pairwise.seqs"]		= "pairwise.seqs";
+	commands["pipeline.pds"]		= "pipeline.pds";
+	commands["classify.seqs"]		= "classify.seqs";
+	commands["dist.seqs"]			= "dist.seqs";
+	commands["filter.seqs"]			= "filter.seqs";
+	commands["align.seqs"]			= "align.seqs";
+	commands["chimera.ccode"]		= "chimera.ccode";
+	commands["chimera.check"]		= "chimera.check";
+	commands["chimera.slayer"]		= "chimera.slayer";
 	commands["chimera.uchime"]		= "chimera.uchime";
 	commands["chimera.perseus"]		= "chimera.perseus";
-	commands["chimera.pintail"]		= "MPIEnabled";
-	commands["chimera.bellerophon"]	= "MPIEnabled";
-	commands["screen.seqs"]			= "MPIEnabled";
+	commands["chimera.pintail"]		= "chimera.pintail";
+	commands["chimera.bellerophon"]	= "chimera.bellerophon";
+	commands["screen.seqs"]			= "screen.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
-	commands["cluster.split"]		= "MPIEnabled";
-	commands["shhh.flows"]			= "MPIEnabled";
+	commands["cluster.split"]		= "cluster.split";
+	commands["shhh.flows"]			= "shhh.flows";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["summary.tax"]			= "summary.tax";
@@ -315,7 +310,7 @@ CommandFactory::CommandFactory(){
     commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
-	commands["quit"]				= "MPIEnabled";
+	commands["quit"]				= "quit";
     commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared";
@@ -335,22 +330,11 @@ CommandFactory::CommandFactory(){
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     commands["mimarks.attributes"]  = "mimarks.attributes";
     commands["make.file"]           = "make.file";
+    commands["biom.info"]           = "biom.info";
     commands["set.seed"]            = "set.seed";
 
 
 }
-/***********************************************************/
-
-/***********************************************************/
-bool CommandFactory::MPIEnabled(string commandName) {
-	bool mpi = false;
-	it = commands.find(commandName);
-	if (it != commands.end()) {
-		if (it->second == "MPIEnabled") { return true; }
-	}
-	return mpi;
-}
-/***********************************************************/
 
 /***********************************************************/
 CommandFactory::~CommandFactory(){
@@ -397,8 +381,8 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
         }
 
-        pos = optionString.find("seed");
-        if (pos != string::npos) { //user has set inputdir in command option string
+        pos = optionString.find("seed=");
+        if (pos != string::npos) { //user has set seed in command option string
             string intputOption = "";
             bool foundEquals = false;
             for(int i=pos;i<optionString.length();i++){
@@ -412,7 +396,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 random = time(NULL);
                 seed = true;
             }else {
-                if (m->isInteger(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
+                if (m->isNumeric1(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
                 else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
             }
 
@@ -420,7 +404,6 @@ int CommandFactory::checkForRedirects(string optionString) {
                 srand(random);
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
-
         }
 
 
@@ -599,6 +582,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
+        else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -774,6 +758,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
+        else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -935,6 +920,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
         else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
+        else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

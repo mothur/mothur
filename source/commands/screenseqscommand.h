@@ -60,12 +60,8 @@ private:
     int createProcessesContigsSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<linePair>);
     int driverAlignSummary(vector<float>&, vector<float>&, vector<int>&, linePair);
     int createProcessesAlignSummary(vector<float>&, vector<float>&, vector<int>&, vector<linePair>);
-    
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, map<string, string>&);
-	#endif
-
-	bool abort;
+ 
+    bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
     float minSim, minScore, criteria;

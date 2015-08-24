@@ -38,11 +38,6 @@ class ChimeraSlayer : public Chimera {
 		int getNumNoParents() { return numNoParents; }
 		data_results getResults() { return printResults; }
 		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		Sequence print(MPI_File&, MPI_File&, data_results, data_results, bool&);
-		#endif
-		
 	private:
 		Sequence querySeq;
 		Sequence trimQuery;

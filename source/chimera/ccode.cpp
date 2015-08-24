@@ -27,43 +27,13 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	decalc = new DeCalculator();
 	
 	mapInfo = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "mapinfo";
+    
+     ofstream out2;
+     m->openOutputFile(mapInfo, out2);
+     
+     out2 << "Place in masked, filtered and trimmed sequence\tPlace in original alignment" << endl;
+     out2.close();
 	
-	#ifdef USE_MPI
-		
-		//char* inFileName = new char[mapInfo.length()];
-		//memcpy(inFileName, mapInfo.c_str(), mapInfo.length());
-		
-		char inFileName[1024];
-		strcpy(inFileName, mapInfo.c_str());
-		
-		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
-
-		MPI_File_open(MPI_COMM_WORLD, inFileName, outMode, MPI_INFO_NULL, &outMap);  //comm, filename, mode, info, filepointer
-		
-		//delete inFileName;
-
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		if (pid == 0) {
-			string outString = "Place in masked, filtered and trimmed sequence\tPlace in original alignment\n";
-			
-			MPI_Status status;
-			int length = outString.length();
-			char* buf2 = new char[length];
-			memcpy(buf2, outString.c_str(), length);
-				
-			MPI_File_write_shared(outMap, buf2, length, MPI_CHAR, &status);
-			delete buf2;
-		}
-	#else
-
-		ofstream out2;
-		m->openOutputFile(mapInfo, out2);
-		
-		out2 << "Place in masked, filtered and trimmed sequence\tPlace in original alignment" << endl;
-		out2.close();
-	#endif
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Ccode", "Ccode");
@@ -74,11 +44,7 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 Ccode::~Ccode() {
 	delete distCalc;
 	delete decalc;
-	
-	#ifdef USE_MPI
-		MPI_File_close(&outMap);
-	#endif
-}	
+}
 //***************************************************************************************************************
 Sequence Ccode::print(ostream& out, ostream& outAcc) {
 	try {
@@ -168,134 +134,6 @@ Sequence Ccode::print(ostream& out, ostream& outAcc) {
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-//***************************************************************************************************************
-Sequence Ccode::print(MPI_File& out, MPI_File& outAcc) {
-	try {
-		
-		string outMapString = "";
-		
-		outMapString += querySeq->getName() + "\n";
-		for (it = spotMap.begin(); it!= spotMap.end(); it++) {
-			outMapString += toString(it->first)  + "\t" + toString(it->second)  + "\n";
-		}
-		printMapping(outMapString);
-		outMapString = "";
-		
-		string outString = "";
-		string outAccString = "";
-		
-		outString +=  querySeq->getName() + "\n\nReference sequences used and distance to query:\n";
-			
-		for (int j = 0; j < closest.size(); j++) {
-			outString += closest[j].seq->getName() + "\t" + toString(closest[j].dist) + "\n";
-		}
-		outString += "\n\nMapping information: ";
-		
-		//for each window
-		//window mapping info.
-		//you mask and did not filter
-		if ((seqMask != "") && (!filter)) { outString += "mask and trim."; }
-				
-		//you filtered and did not mask
-		if ((seqMask == "") && (filter)) { outString += "filter and trim."; }
-				
-		//you masked and filtered
-		if ((seqMask != "") && (filter)) { outString += "mask, filter and trim."; }
-			
-		outString += "\nWindow\tStartPos\tEndPos\n";
-		it = trim.begin();
-		for (int k = 0; k < windows.size()-1; k++) {
-			outString += toString(k+1) + "\t" + toString(spotMap[windows[k]-it->first]) + "\t" + toString(spotMap[windows[k]-it->first+windowSizes]) + "\n";
-		}
-			
-		outString += toString(windows.size()) + "\t" + toString(spotMap[windows[windows.size()-1]-it->first]) + "\t" + toString(spotMap[it->second-it->first-1]) + "\n\n";
-		
-		outString += "Window\tAvgQ\t(sdQ)\tAvgR\t(sdR)\tRatio\tAnova\n";
-		for (int k = 0; k < windows.size(); k++) {
-			float ds = averageQuery[k] / averageRef[k]; 
-			outString += toString(k+1) + "\t" + toString(averageQuery[k]) + "\t" + toString(sdQuery[k]) + "\t" + toString(averageRef[k]) + "\t" + toString(sdRef[k]) + "\t" + toString(ds) + "\t" + toString(anova[k]) + "\n";
-		}
-			
-		//varRef
-		//varQuery
-		/* F test for differences among variances.
-		* varQuery is expected to be higher or similar than varRef */
-		//float fs = varQuery[query] / varRef[query];	/* F-Snedecor, test for differences of variances */
-			
-		bool results = false;	
-					
-		//confidence limit, t - Student, anova
-		outString += "\nWindow\tConfidenceLimit\tt-Student\tAnova\n";
-			
-		for (int k = 0; k < windows.size(); k++) {
-			string temp = "";
-			if (isChimericConfidence[k]) {  temp += "*\t"; }
-			else { temp += "\t"; }
-				
-			if (isChimericTStudent[k]) {  temp += "*\t"; }
-			else { temp += "\t"; }
-				
-			if (isChimericANOVA[k]) {  temp += "*\t"; }
-			else { temp += "\t"; }
-			
-			outString += toString(k+1) + "\t" + temp + "\n";
-				
-			if (temp == "*\t*\t*\t") {  results = true;  }
-		}
-		outString += "\n";	
-		
-		MPI_Status status;
-		int length = outString.length();
-		char* buf2 = new char[length];
-		memcpy(buf2, outString.c_str(), length);
-				
-		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
-		delete buf2;
-
-		if (results) {
-			m->mothurOut(querySeq->getName() + " was found have at least one chimeric window."); m->mothurOutEndLine();
-			outAccString += querySeq->getName() + "\n";
-			
-			MPI_Status statusAcc;
-			length = outAccString.length();
-			char* buf = new char[length];
-			memcpy(buf, outAccString.c_str(), length);
-				
-			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
-			delete buf;
-		}
-
-		//free memory
-		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
-
-		return *querySeq;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Ccode", "print");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-int Ccode::printMapping(string& output) {
-	try {
-			MPI_Status status;
-			int length = output.length();
-			char* buf = new char[length];
-			memcpy(buf, output.c_str(), length);
-				
-			MPI_File_write_shared(outMap, buf, length, MPI_CHAR, &status);
-			delete buf;
-			
-			return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Ccode", "printMapping");
-		exit(1);
-	}
-}
-#endif
 //***************************************************************************************************************
 int Ccode::getChimeras(Sequence* query) {
 	try {

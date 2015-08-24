@@ -32,11 +32,7 @@ class Pintail : public Chimera {
 		
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
-		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		#endif
-		
+
 	private:
 	
 		Dist* distcalculator;

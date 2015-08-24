@@ -30,10 +30,6 @@ class Bellerophon : public Chimera {
 		int getChimeras();
 		int print(ostream&, ostream&, string);
 		
-		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&, string);
-		#endif
-		
 	private:
 		struct linePair {
 			unsigned long long start;

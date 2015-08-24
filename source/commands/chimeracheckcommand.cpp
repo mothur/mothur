@@ -45,9 +45,6 @@ string ChimeraCheckCommand::getHelpString(){
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 10.\n";
 		helpString += "The ksize parameter allows you to input kmersize, default is 7. \n";
 		helpString += "The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n";
@@ -363,86 +360,6 @@ int ChimeraCheckCommand::execute(){
 			string outputFileName = getOutputFileName("chimera", variables);
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			
-		#ifdef USE_MPI
-		
-				int pid, numSeqsPerProcessor; 
-				int tag = 2001;
-				vector<unsigned long long> MPIPos;
-				
-				MPI_Status status; 
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-
-				MPI_File inMPI;
-				MPI_File outMPI;
-							
-				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-				int inMode=MPI_MODE_RDONLY; 
-							
-				char outFilename[1024];
-				strcpy(outFilename, outputFileName.c_str());
-			
-				char inFileName[1024];
-				strcpy(inFileName, fastaFileNames[i].c_str());
-
-				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); delete chimera; return 0;  }
-				
-				if (pid == 0) { //you are the root process 
-					MPIPos = m->setFilePosFasta(fastaFileNames[i], numSeqs); //fills MPIPos, returns numSeqs
-					
-					//send file positions to all processes
-					for(int j = 1; j < processors; j++) { 
-						MPI_Send(&numSeqs, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
-						MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, j, tag, MPI_COMM_WORLD);
-					}	
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-					
-				
-					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}   outputTypes.clear(); delete chimera; return 0;  }
-					
-					//wait on chidren
-					for(int j = 1; j < processors; j++) { 
-						char buf[5];
-						MPI_Recv(buf, 5, MPI_CHAR, j, tag, MPI_COMM_WORLD, &status); 
-					}
-				}else{ //you are a child process
-					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(numSeqs+1);
-					MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-					
-					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  outputTypes.clear(); delete chimera; return 0;  }
-					
-					//tell parent you are done.
-					char buf[5];
-					strcpy(buf, "done"); 
-					MPI_Send(buf, 5, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
-				}
-				
-				//close files 
-				MPI_File_close(&inMPI);
-				MPI_File_close(&outMPI);
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-		#else
-			
-			
 			
 			//break up file
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -484,7 +401,7 @@ int ChimeraCheckCommand::execute(){
 				
 				if (m->control_pressed) { for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); delete chimera; return 0; }
 			#endif
-		#endif		
+	
 			delete chimera;
 			for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
 			
@@ -564,56 +481,6 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-#ifdef USE_MPI
-int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long long>& MPIPos){
-	try {
-		MPI_File outAccMPI;
-		MPI_Status status; 
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		for(int i=0;i<num;i++){
-			
-			if (m->control_pressed) { return 0; }
-			
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-	
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buf4;
-
-			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
-				
-			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
-				//find chimeras
-				chimera->getChimeras(candidateSeq);
-					
-				//print results
-				chimera->print(outMPI, outAccMPI);
-			}
-			delete candidateSeq;
-			
-			//report progress
-			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;		}
-		}
-		//report progress
-		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckCommand", "driverMPI");
-		exit(1);
-	}
-}
-#endif
-
 /**************************************************************************************************/
 
 int ChimeraCheckCommand::createProcesses(string outputFileName, string filename) {

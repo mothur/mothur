@@ -229,16 +229,6 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				if (pos != string::npos) { m->sharedHeaderMode = "tax"; }
 				else { m->sharedHeaderMode = "otu"; }
 			
-			#ifdef USE_MPI	
-				int pid, processors;
-				MPI_Status status;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				
-				if (commandName == "") { processors = 1; }
-				
-				if (pid == 0) {
-			#endif
 				ifstream in;
 				ableToOpen = m->openInputFile(it->second, in, "noerror");
 				in.close();
@@ -267,33 +257,6 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					}
 				}
 				
-				
-
-			#ifdef USE_MPI	
-					for(int i = 1; i < processors; i++) { 
-						MPI_Send(&ableToOpen, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-						
-						int length = container[parameter].length();
-						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-						MPI_Send(&(container[parameter][0]), length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-	
-					}
-				}else {
-					MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-					
-					int length;
-					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-					//recieve container
-					char* tempBuf = new char[length];
-					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-					
-					container[parameter] = tempBuf;
-					if (container[parameter].length() > length) { container[parameter] = container[parameter].substr(0, length);  }
-					delete tempBuf;	
-				}
-				
-			#endif
-			
 				if (ableToOpen == 1) { 
 					m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine();
 					return "not open"; 
@@ -383,4 +346,5 @@ vector<string> ValidParameters::addParameters(string parameters[], int size) {
 		exit(1);
 	}
 }
+/***********************************************************************/
 

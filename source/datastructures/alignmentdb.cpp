@@ -50,72 +50,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			//bool aligned = false;
             int tempLength = 0;
             
-			#ifdef USE_MPI	
-				int pid, processors;
-				vector<unsigned long long> positions;
-			
-				MPI_Status status; 
-				MPI_File inMPI;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				int tag = 2001;
-		
-				char inFileName[1024];
-				strcpy(inFileName, fastaFileName.c_str());
-		
-				MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				
-				if (pid == 0) {
-					positions = m->setFilePosFasta(fastaFileName, numSeqs); //fills MPIPos, returns numSeqs
-
-					//send file positions to all processes
-					for(int i = 1; i < processors; i++) { 
-						MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-						MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-					}
-				}else{
-					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					positions.resize(numSeqs+1);
-					MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-				}
-			
-				//read file 
-				for(int i=0;i<numSeqs;i++){
-					
-					if (m->control_pressed) {  templateSequences.clear(); break;  }
-					
-					//read next sequence
-					int length = positions[i+1] - positions[i];
-					char* buf4 = new char[length];
-				
-					MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
-			
-					string tempBuf = buf4;
-					if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-					delete buf4;
-
-					istringstream iss (tempBuf,istringstream::in);
-			
-					Sequence temp(iss);  
-					if (temp.getName() != "") {
-						templateSequences.push_back(temp);
-						
-						if (rdb->save) { rdb->referenceSeqs.push_back(temp); }
-						
-						//save longest base
-						if (temp.getUnaligned().length() >= longest)  { longest = temp.getUnaligned().length()+1; }
-                        if (tempLength != 0) {
-                            if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
-                        }else { tempLength = temp.getAligned().length(); }
-					}
-				}
-				
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-				MPI_File_close(&inMPI);
-			
-		#else
-			ifstream fastaFile;
+            ifstream fastaFile;
 			m->openInputFile(fastaFileName, fastaFile);
 
 			while (!fastaFile.eof()) {
@@ -137,7 +72,6 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				}
 			}
 			fastaFile.close();
-		#endif
 		
 			numSeqs = templateSequences.size();
 			//all of this is elsewhere already!
@@ -160,16 +94,15 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		if(method == "kmer")			{	
 			search = new KmerDB(fastaFileName, kmerSize);			
 			
-			#ifdef USE_MPI
-			#else
-				kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-				ifstream kmerFileTest(kmerDBName.c_str());
+			
+            kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+            ifstream kmerFileTest(kmerDBName.c_str());
 				
-				if(kmerFileTest){	
-					bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
-					if (GoodFile) {  needToGenerate = false;	}
-				}
-			#endif
+            if(kmerFileTest){
+                bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
+                if (GoodFile) {  needToGenerate = false;	}
+            }
+			
 		}
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
 		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}

@@ -191,14 +191,10 @@ private:
 	struct distlinePair {
 		int start;
 		int end;
-		
 	};
-	
-	//Dist* distCalculator;
+
 	SequenceDB alignDB;
-
 	string countends, output, fastafile, calc, outputDir, oldfastafile, column, compress;
-
 	int processors, numNewFasta;
 	float cutoff;
 	vector<int> processIDS;   //end line, processid
@@ -207,21 +203,10 @@ private:
 	bool abort;
 	vector<string>  Estimators, outputNames; //holds estimators to be used
 	
-	//void m->appendFiles(string, string);
 	void createProcesses(string, int);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
 	int driver(int, int, string, string);
-	
-	#ifdef USE_MPI 
-	int driverMPI(int, int, MPI_File&, float);
-	int driverMPI(int, int, string, unsigned long long&);
-	int driverMPI(int, int, string, unsigned long long&, string);
-	#endif
-	
-	//int convertMatrix(string);
 	bool sanityCheck();
-	//int convertToLowerTriangle(string);
-
 };
 
 #endif

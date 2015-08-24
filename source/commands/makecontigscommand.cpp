@@ -2293,6 +2293,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> fastaFilePos;
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> temp;
+        vector<unsigned long long> trimmedNamesFilePos;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         //set file positions for fasta file
@@ -2348,7 +2349,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                         firstSeqNames.erase(it);
                     }else if (itTrimmed != trimmedNames.end()) {
                         unsigned long long pos = in2.tellg();
-                        qfileFilePos.push_back(pos - input.length() - 1);
+                        trimmedNamesFilePos.push_back(pos - input.length() - 1);
                         trimmedNames.erase(itTrimmed);
                     }
                 }
@@ -2357,6 +2358,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
         }
         in2.close();
+        
+        if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { qfileFilePos = trimmedNamesFilePos; }
         
         //get last file position of reverse fasta[1]
         FILE * pFile;
@@ -2394,6 +2397,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         }
         
         qfileFilePos.clear();
+        trimmedNamesFilePos.clear();
         
         if (qual.size() != 0) {
             firstSeqNames = copy;
@@ -2424,7 +2428,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                                 firstSeqNames.erase(it);
                             }else if (itTrimmed != trimmedNames.end()) {
                                 unsigned long long pos = inQual.tellg();
-                                qfileFilePos.push_back(pos - input.length() - 1);
+                                trimmedNamesFilePos.push_back(pos - input.length() - 1);
                                 trimmedNames.erase(itTrimmed);
                             }
                         }
@@ -2433,6 +2437,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
                 }
                 inQual.close();
+                
+                if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { qfileFilePos = trimmedNamesFilePos; }
                 
                 //get last file position of reverse qual[0]
                 FILE * pFile;
@@ -2463,6 +2469,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             }
             firstSeqNames = copy;
             trimmedNames = tcopy;
+            trimmedNamesFilePos.clear();
             
             if (qual[1] != "NONE") {
                 ifstream inQual2;
@@ -2488,7 +2495,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                                 firstSeqNames.erase(it);
                             }else if (itTrimmed != trimmedNames.end()) {
                                 unsigned long long pos = inQual2.tellg();
-                                qfileFilePos.push_back(pos - input.length() - 1);
+                                trimmedNamesFilePos.push_back(pos - input.length() - 1);
                                 trimmedNames.erase(itTrimmed);
                             }
                         }
@@ -2497,6 +2504,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
                 }
                 inQual2.close();
+                
+                if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { temp = trimmedNamesFilePos; }
                 
                 //get last file position of reverse qual[1]
                 FILE * pFile2;

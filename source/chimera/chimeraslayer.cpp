@@ -46,7 +46,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
-//template=self, byGroup parameter used for mpienabled version to read the template as MPI_COMM_SELF instead of MPI_COMM_WORLD
+//template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid, bool bg) : Chimera()  {  	
 	try {
@@ -180,33 +180,7 @@ int ChimeraSlayer::doPrep() {
 				
 			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
-		#ifdef USE_MPI
-			for (int i = 0; i < templateSeqs.size(); i++) {
-					
-				if (m->control_pressed) { return 0; } 
-					
-				string leftFrag = templateSeqs[i]->getUnaligned();
-				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
-					
-				Sequence leftTemp(templateSeqs[i]->getName(), leftFrag);
-				databaseLeft->addSequence(leftTemp);	
-			}
-			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(templateSeqs.size());
-			
-			for (int i = 0; i < templateSeqs.size(); i++) {
-				if (m->control_pressed) { return 0; } 
-					
-				string rightFrag = templateSeqs[i]->getUnaligned();
-				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
-					
-				Sequence rightTemp(templateSeqs[i]->getName(), rightFrag);
-				databaseRight->addSequence(rightTemp);	
-			}
-			databaseRight->generateDB();
-			databaseRight->setNumSeqs(templateSeqs.size());
-
-		#else	
+		
 			//leftside
 			kmerDBNameLeft = leftTemplateFileName.substr(0,leftTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
@@ -267,7 +241,7 @@ int ChimeraSlayer::doPrep() {
 			kmerFileTestRight.close();
 			
 			databaseRight->setNumSeqs(templateSeqs.size());
-		#endif	
+    
 		}else if (searchMethod == "blast") {
 		
 			//generate blastdb
@@ -328,33 +302,6 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			
 			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
-#ifdef USE_MPI
-			for (int i = 0; i < userTemplate.size(); i++) {
-				
-				if (m->control_pressed) { return userTemplate; } 
-				
-				string leftFrag = userTemplate[i]->getUnaligned();
-				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
-				
-				Sequence leftTemp(userTemplate[i]->getName(), leftFrag);
-				databaseLeft->addSequence(leftTemp);	
-			}
-			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(userTemplate.size());
-			
-			for (int i = 0; i < userTemplate.size(); i++) {
-				if (m->control_pressed) { return userTemplate; } 
-				
-				string rightFrag = userTemplate[i]->getUnaligned();
-				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
-				
-				Sequence rightTemp(userTemplate[i]->getName(), rightFrag);
-				databaseRight->addSequence(rightTemp);	
-			}
-			databaseRight->generateDB();
-			databaseRight->setNumSeqs(userTemplate.size());
-			
-#else	
 			
 			
 			for (int i = 0; i < userTemplate.size(); i++) {
@@ -381,7 +328,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			}
 			databaseRight->generateDB();
 			databaseRight->setNumSeqs(userTemplate.size());
-#endif	
+	
 		}else if (searchMethod == "blast") {
 			
 			//generate blastdb
@@ -569,225 +516,6 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPi
 		exit(1);
 	}
 }
-
-#ifdef USE_MPI
-//***************************************************************************************************************
-Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece, bool& chimFlag) {
-	try {
-		MPI_Status status;
-		bool results = false;
-		string outAccString = "";
-		string outputString = "";
-        chimFlag = false;
-		
-		Sequence trim;
-		
-		if (trimChimera) { 
-			string aligned = leftPiece.trimQuery.getAligned() + rightPiece.trimQuery.getAligned();
-			trim.setName(leftPiece.trimQuery.getName());  trim.setAligned(aligned);
-		}
-		
-		
-		if ((leftPiece.flag == "yes") || (rightPiece.flag == "yes")) {
-			
-			string chimeraFlag = "no";
-			if (leftPiece.flag == "yes") {
-				
-				if(  (leftPiece.results[0].bsa >= minBS && leftPiece.results[0].divr_qla_qrb >= divR)
-				   ||
-				   (leftPiece.results[0].bsb >= minBS && leftPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
-			}
-			
-			if (rightPiece.flag == "yes") {
-				if ( (rightPiece.results[0].bsa >= minBS && rightPiece.results[0].divr_qla_qrb >= divR)
-					||
-					(rightPiece.results[0].bsb >= minBS && rightPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
-			}
-			
-			bool rightChimeric = false;
-			bool leftChimeric = false;
-
-			cout << endl;
-			
-			if (chimeraFlag == "yes") {	
-				//which peice is chimeric or are both
-				if (rightPiece.flag == "yes") { if ((rightPiece.results[0].bsa >= minBS) || (rightPiece.results[0].bsb >= minBS)) { rightChimeric = true; } }
-				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
-				
-				if (rightChimeric || leftChimeric) {
-					cout << querySeq.getName() <<  "\tyes" << endl;
-					outAccString += querySeq.getName() + "\n";
-					results = true;
-					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
-					
-					//write to accnos file
-					int length = outAccString.length();
-					char* buf2 = new char[length];
-					memcpy(buf2, outAccString.c_str(), length);
-				
-					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
-                    chimFlag = true;
-					delete buf2;
-					
-					if (trimChimera) {  
-						string newAligned = trim.getAligned();
-						
-						//right side is fine so keep that
-						if ((leftChimeric) && (!rightChimeric)) {
-							for (int i = 0; i < leftPiece.results[0].winREnd; i++) { newAligned[i] = '.'; } 
-						}else if ((!leftChimeric) && (rightChimeric)) { //leftside is fine so keep that
-							for (int i = (rightPiece.results[0].winLStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
-						}else { //both sides are chimeric, keep longest piece
-							
-							int lengthLeftLeft = leftPiece.results[0].winLEnd - leftPiece.results[0].winLStart;
-							int lengthLeftRight = leftPiece.results[0].winREnd - leftPiece.results[0].winRStart;
-							
-							int longest = 1; // leftleft = 1, leftright = 2, rightleft = 3 rightright = 4
-							int length = lengthLeftLeft;
-							if (lengthLeftLeft < lengthLeftRight) { longest = 2;  length = lengthLeftRight; }
-							
-							int lengthRightLeft = rightPiece.results[0].winLEnd - rightPiece.results[0].winLStart;
-							int lengthRightRight = rightPiece.results[0].winREnd - rightPiece.results[0].winRStart;
-							
-							if (lengthRightLeft > length) { longest = 3; length = lengthRightLeft;  }
-							if (lengthRightRight > length) { longest = 4; }
-							
-							if (longest == 1) { //leftleft
-								for (int i = (leftPiece.results[0].winRStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
-							}else if (longest == 2) { //leftright
-								//get rid of leftleft
-								for (int i = (leftPiece.results[0].winLStart-1); i < (leftPiece.results[0].winLEnd-1); i++) { newAligned[i] = '.'; }
-								//get rid of right
-								for (int i = (rightPiece.results[0].winLStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
-							}else if (longest == 3) { //rightleft
-								//get rid of left
-								for (int i = 0; i < leftPiece.results[0].winREnd; i++) { newAligned[i] = '.'; } 
-								//get rid of rightright
-								for (int i = (rightPiece.results[0].winRStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
-							}else { //rightright
-								//get rid of left
-								for (int i = 0; i < leftPiece.results[0].winREnd; i++) { newAligned[i] = '.'; } 
-								//get rid of rightleft
-								for (int i = (rightPiece.results[0].winLStart-1); i < (rightPiece.results[0].winLEnd-1); i++) { newAligned[i] = '.'; }
-							}
-						}
-						
-						trim.setAligned(newAligned);
-					}
-					
-				}
-			}
-			
-			outputString = getBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag);
-		
-			//write to output file
-			int length = outputString.length();
-			char* buf = new char[length];
-			memcpy(buf, outputString.c_str(), length);
-				
-			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-			delete buf;
-
-		}else {  
-			outputString += querySeq.getName() + "\tno\n";  
-	
-			//write to output file
-			int length = outputString.length();
-			char* buf = new char[length];
-			memcpy(buf, outputString.c_str(), length);
-				
-			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-			delete buf;
-		}
-		
-		
-		return trim;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayer", "print");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
-	try {
-		MPI_Status status;
-		bool results = false;
-		string outAccString = "";
-		string outputString = "";
-		
-		Sequence trim;
-		if (trimChimera) { trim.setName(trimQuery.getName()); trim.setAligned(trimQuery.getAligned()); }
-		
-		if (chimeraFlags == "yes") {
-			string chimeraFlag = "no";
-			if(  (chimeraResults[0].bsa >= minBS && chimeraResults[0].divr_qla_qrb >= divR)
-			   ||
-			   (chimeraResults[0].bsb >= minBS && chimeraResults[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
-			
-			
-			if (chimeraFlag == "yes") {	
-				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					cout << querySeq.getName() <<  "\tyes" << endl;
-					outAccString += querySeq.getName() + "\n";
-					results = true;
-					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
-					
-					//write to accnos file
-					int length = outAccString.length();
-					char* buf2 = new char[length];
-					memcpy(buf2, outAccString.c_str(), length);
-					
-					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
-					delete buf2;
-					
-					if (trimChimera) {  
-						int lengthLeft = chimeraResults[0].winLEnd - chimeraResults[0].winLStart;
-						int lengthRight = chimeraResults[0].winREnd - chimeraResults[0].winRStart;
-						
-						string newAligned = trim.getAligned();
-						if (lengthLeft > lengthRight) { //trim right
-							for (int i = (chimeraResults[0].winRStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
-						}else { //trim left
-							for (int i = 0; i < (chimeraResults[0].winLEnd-1); i++) { newAligned[i] = '.'; }
-						}
-						trim.setAligned(newAligned);	
-					}
-				}
-			}
-			
-			outputString = getBlock(chimeraResults[0], chimeraFlag);
-			
-			//write to output file
-			int length = outputString.length();
-			char* buf = new char[length];
-			memcpy(buf, outputString.c_str(), length);
-			
-			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-			delete buf;
-			
-		}else {  
-			outputString += querySeq.getName() + "\tno\n";  
-			
-			//write to output file
-			int length = outputString.length();
-			char* buf = new char[length];
-			memcpy(buf, outputString.c_str(), length);
-			
-			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-			delete buf;
-		}
-		
-		return trim;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayer", "print");
-		exit(1);
-	}
-}
-#endif
 
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {

@@ -46,18 +46,13 @@ public:
 private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
-	bool MPIWroteAccnos;
 	
 	AlignmentDB* templateDB;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string);
 	void appendReportFiles(string, string);
-	
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	#endif
-	
+		
 	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int processors, kmerSize;

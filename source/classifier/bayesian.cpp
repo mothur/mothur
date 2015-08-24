@@ -116,15 +116,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
                 ofstream out;
 				ofstream out2;
-				
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
-					if (pid == 0) {  
-				#endif
-
-				
                 if (shortcuts) { 
                     m->openOutputFile(probFileName, out); 
 				
@@ -139,27 +131,15 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
                     out2 << "#" << m->getVersion() << endl;
                 }
 				
-				#ifdef USE_MPI
-					}
-				#endif
+				
 
 				//for each word
 				for (int i = 0; i < numKmers; i++) {
                     //m->mothurOut("[DEBUG]: kmer = " + toString(i) + "\n");
                     
 					if (m->control_pressed) {  break; }
-					
-					#ifdef USE_MPI
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-						if (pid == 0) {  
-					#endif
 
                     if (shortcuts) {  out << i << '\t'; }
-					
-					#ifdef USE_MPI
-						}
-					#endif
 					
 					vector<int> seqsWithWordi = database->getSequencesWithKmer(i);
 					
@@ -182,53 +162,23 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 						
 						wordGenusProb[i][k] = log((count[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
 									
-						if (count[k] != 0) { 
-							#ifdef USE_MPI
-								int pid;
-								MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-						
-								if (pid == 0) {  
-							#endif
-
+						if (count[k] != 0) {
                             if (shortcuts) { out << k << '\t' << wordGenusProb[i][k] << '\t' ; }
-							
-							#ifdef USE_MPI
-								}
-							#endif
-
-							numNotZero++;  
+							numNotZero++;
 						}
 					}
 					
-					#ifdef USE_MPI
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-						if (pid == 0) {  
-					#endif
-					
-                            if (shortcuts) { 
-                                out << endl;
-                                out2 << probabilityInTemplate << '\t' << numNotZero << '\t' << log(probabilityInTemplate) << endl;
-                            }
-					
-					#ifdef USE_MPI
-						}
-					#endif
+                    
+                    if (shortcuts) {
+                        out << endl;
+                        out2 << probabilityInTemplate << '\t' << numNotZero << '\t' << log(probabilityInTemplate) << endl;
+                    }
+                    
 				}
-				
-				#ifdef USE_MPI
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-					if (pid == 0) {  
-				#endif
-				
-                        if (shortcuts) { 
-                            out.close();
-                            out2.close();
-                        }
-				#ifdef USE_MPI
-					}
-				#endif
+                if (shortcuts) {
+                    out.close();
+                    out2.close();
+                }
 				
 				//read in new phylotree with less info. - its faster
 				ifstream phyloTreeTest(phyloTreeName.c_str());
@@ -521,189 +471,53 @@ map<string, int> Bayesian::parseTaxMap(string newTax) {
 void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string inNumName) {
 	try{
 		
-		#ifdef USE_MPI
-			
-			int pid, num, num2, processors;
-			vector<unsigned long long> positions;
-			vector<unsigned long long> positions2;
-			
-			MPI_Status status; 
-			MPI_File inMPI;
-			MPI_File inMPI2;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-			MPI_Comm_size(MPI_COMM_WORLD, &processors);
-			int tag = 2001;
-
-			char inFileName[1024];
-			strcpy(inFileName, inNumName.c_str());
-			
-			char inFileName2[1024];
-			strcpy(inFileName2, inName.c_str());
-
-			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			MPI_File_open(MPI_COMM_WORLD, inFileName2, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI2);  //comm, filename, mode, info, filepointer
-
-			if (pid == 0) {
-				positions = m->setFilePosEachLine(inNumName, num);
-				positions2 = m->setFilePosEachLine(inName, num2);
-				
-				for(int i = 1; i < processors; i++) { 
-					MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(&positions[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-					
-					MPI_Send(&num2, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(&positions2[0], (num2+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-				}
-
-			}else{
-				MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				positions.resize(num+1);
-				MPI_Recv(&positions[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-				
-				MPI_Recv(&num2, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				positions2.resize(num2+1);
-				MPI_Recv(&positions2[0], (num2+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-			}
-			
-			//read version
-			int length = positions2[1] - positions2[0];
-			char* buf5 = new char[length];
-
-			MPI_File_read_at(inMPI2, positions2[0], buf5, length, MPI_CHAR, &status);
-			delete buf5;
-
-			//read numKmers
-			length = positions2[2] - positions2[1];
-			char* buf = new char[length];
-
-			MPI_File_read_at(inMPI2, positions2[1], buf, length, MPI_CHAR, &status);
-
-			string tempBuf = buf;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-			delete buf;
-
-			istringstream iss (tempBuf,istringstream::in);
-			iss >> numKmers;  
-			
-			//initialze probabilities
-			wordGenusProb.resize(numKmers);
-			
-			for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			
-			int kmer, name;  
-			vector<int> numbers; numbers.resize(numKmers);
-			float prob;
-			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);
-			WordPairDiffArr.resize(numKmers);
-			
-			//read version
-			length = positions[1] - positions[0];
-			char* buf6 = new char[length];
-
-			MPI_File_read_at(inMPI2, positions[0], buf6, length, MPI_CHAR, &status);
-			delete buf6;
-			
-			//read file 
-			for(int i=1;i<num;i++){
-				//read next sequence
-				length = positions[i+1] - positions[i];
-				char* buf4 = new char[length];
-
-				MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
-
-				tempBuf = buf4;
-				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-				delete buf4;
-
-				istringstream iss (tempBuf,istringstream::in);
-				float probTemp;
-				iss >> zeroCountProb[i] >> numbers[i] >> probTemp; 
-				WordPairDiffArr[i].prob = probTemp;
-
-			}
-			
-			MPI_File_close(&inMPI);
-			
-			for(int i=2;i<num2;i++){
-				//read next sequence
-				length = positions2[i+1] - positions2[i];
-				char* buf4 = new char[length];
-
-				MPI_File_read_at(inMPI2, positions2[i], buf4, length, MPI_CHAR, &status);
-
-				tempBuf = buf4;
-				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-				delete buf4;
-
-				istringstream iss (tempBuf,istringstream::in);
-				
-				iss >> kmer;
-				
-				//set them all to zero value
-				for (int i = 0; i < genusNodes.size(); i++) {
-					wordGenusProb[kmer][i] = log(zeroCountProb[kmer] / (float) (genusTotals[i]+1));
-				}
-				
-				//get probs for nonzero values
-				for (int i = 0; i < numbers[kmer]; i++) {
-					iss >> name >> prob;
-					wordGenusProb[kmer][name] = prob;
-				}
-				
-			}
-			MPI_File_close(&inMPI2);
-			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-		#else
-			//read version
-			string line = m->getline(in); m->gobble(in);
-			
-			in >> numKmers; m->gobble(in);
-			//cout << threadID << '\t' << line << '\t' << numKmers << &in << '\t' << &inNum << '\t' << genusNodes.size() << endl;
-			//initialze probabilities
-			wordGenusProb.resize(numKmers);
-			
-			for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			
-			int kmer, name, count;  count = 0;
-			vector<int> num; num.resize(numKmers);
-			float prob;
-			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);	
-			WordPairDiffArr.resize(numKmers);
-			
-			//read version
-			string line2 = m->getline(inNum); m->gobble(inNum);
-			float probTemp;
-		//cout << threadID << '\t' << line2 << '\t' << this << endl;	
-			while (inNum) {
-				inNum >> zeroCountProb[count] >> num[count] >> probTemp; 
-				WordPairDiffArr[count].prob = probTemp;
-				count++;
-				m->gobble(inNum);
-				//cout << threadID << '\t' << count << endl;
-			}
-			inNum.close();
-		//cout << threadID << '\t' << "here1 " << &wordGenusProb << '\t' << &num << endl; //
-		//cout << threadID << '\t' << &genusTotals << '\t' << endl; 
-		//cout << threadID << '\t' << genusNodes.size() << endl;
-			while(in) {
-				in >> kmer;
-			//cout << threadID << '\t' << kmer << endl;
-				//set them all to zero value
-				for (int i = 0; i < genusNodes.size(); i++) {
-					wordGenusProb[kmer][i] = log(zeroCountProb[kmer] / (float) (genusTotals[i]+1));
-				}
-			//cout << threadID << '\t' << num[kmer] << "here" << endl;	
-				//get probs for nonzero values
-				for (int i = 0; i < num[kmer]; i++) {
-					in >> name >> prob;
-					wordGenusProb[kmer][name] = prob;
-				}
-				
-				m->gobble(in);
-			}
-			in.close();
-		//cout << threadID << '\t' << "here" << endl;	
-		#endif
+        //read version
+        string line = m->getline(in); m->gobble(in);
+        
+        in >> numKmers; m->gobble(in);
+        //initialze probabilities
+        wordGenusProb.resize(numKmers);
+        
+        for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
+        
+        int kmer, name, count;  count = 0;
+        vector<int> num; num.resize(numKmers);
+        float prob;
+        vector<float> zeroCountProb; zeroCountProb.resize(numKmers);
+        WordPairDiffArr.resize(numKmers);
+        
+        //read version
+        string line2 = m->getline(inNum); m->gobble(inNum);
+        float probTemp;
+        
+        while (inNum) {
+            inNum >> zeroCountProb[count] >> num[count] >> probTemp;
+            WordPairDiffArr[count].prob = probTemp;
+            count++;
+            m->gobble(inNum);
+            
+        }
+        inNum.close();
+ 
+        while(in) {
+            in >> kmer;
+            
+            //set them all to zero value
+            for (int i = 0; i < genusNodes.size(); i++) {
+                wordGenusProb[kmer][i] = log(zeroCountProb[kmer] / (float) (genusTotals[i]+1));
+            }
+           
+            //get probs for nonzero values
+            for (int i = 0; i < num[kmer]; i++) {
+                in >> name >> prob;
+                wordGenusProb[kmer][name] = prob;
+            }
+            
+            m->gobble(in);
+        }
+        in.close();
+        
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "readProbFile");
