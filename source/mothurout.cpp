@@ -3729,6 +3729,66 @@ double  MothurOut::median(vector<double> x) {
 	}
 }
 /***********************************************************************/
+int  MothurOut::median(vector<int> x) {
+    try {
+        double value = 0;
+        
+        if (x.size() == 0) { } //error
+        else {
+            //For example, if a < b < c, then the median of the list {a, b, c} is b, and, if a < b < c < d, then the median of the list {a, b, c, d} is the mean of b and c; i.e., it is (b + c)/2.
+            sort(x.begin(), x.end());
+            //is x.size even?
+            if ((x.size()%2) == 0) { //size() is even. median = average of 2 midpoints
+                int midIndex1 = (x.size()/2)-1;
+                int midIndex2 = (x.size()/2);
+                value = (x[midIndex1]+ x[midIndex2]) / 2.0;
+            }else {
+                int midIndex = (x.size()/2);
+                value = x[midIndex];
+            }
+        }
+        return (int) value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "median - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int  MothurOut::average(vector<int> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return ((int) value / x.size());
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "average - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int  MothurOut::sum(vector<int> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "average - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
 int MothurOut::factorial(int num){
 	try {
 		int total = 1;

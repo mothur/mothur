@@ -200,7 +200,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			m->splitAtDash(groups, Groups);
 			m->setGroups(Groups);
             
-            method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	output = "sum"; }
+            method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
             
             if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum."); m->mothurOutEndLine(); method = "sum"; }
             
@@ -283,34 +283,49 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
 		
 		map<string, SharedRAbundVector> merged;
 		map<string, SharedRAbundVector>::iterator it;
+        map<string, vector<int> > clearGroupAbunds;
+        map<string, vector<int> >::iterator itAbunds;
+        
+        for (int i = 0; i < thisLookUp.size(); i++) {
+            if (m->control_pressed) { return 0; }
+            //what grouping does this group belong to
+            string grouping = designMap->get(thisLookUp[i]->getGroup());
+            if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+            else {
+                //do we already have a member of this grouping?
+                it = merged.find(grouping);
+                
+                if (it == merged.end()) { //nope, so create it
+                    merged[grouping] = *thisLookUp[i];
+                    merged[grouping].setGroup(grouping);
+                    vector<int> temp;
+                    clearGroupAbunds[grouping] = temp;
+                }
+            }
+        }
+        
+								
+        for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+            if (m->control_pressed) { return 0; }
+            
+            map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
+            for (int i = 0; i < thisLookUp.size(); i++) {
+                
+                string grouping = designMap->get(thisLookUp[i]->getGroup());
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                else {
+                    otusGroupAbunds[grouping].push_back(thisLookUp[i]->getAbundance(j));
+                }
+            }
+            
+            for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
+                int abund = mergeAbund(itAbunds->second);
+                merged[itAbunds->first].set(j, abund, itAbunds->first);
+            }
+        }
 		
-		for (int i = 0; i < thisLookUp.size(); i++) {
-			
-			if (m->control_pressed) { return 0; }
-			
-			//what grouping does this group belong to
-			string grouping = designMap->get(thisLookUp[i]->getGroup());
-			if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
-			
-			else {
-				//do we already have a member of this grouping?
-				it = merged.find(grouping);
-				
-				if (it == merged.end()) { //nope, so create it
-					merged[grouping] = *thisLookUp[i];
-					merged[grouping].setGroup(grouping);
-				}else { //yes, merge it
-					
-					for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-						int abund = (it->second).getAbundance(j);
-						abund += thisLookUp[i]->getAbundance(j);
-						
-						(it->second).set(j, abund, grouping);
-					}
-				}
-			}
-		}
-		
+        
+        
 		//print new file
 		for (it = merged.begin(); it != merged.end(); it++) {
 			out << (it->second).getLabel() << '\t' << it->first << '\t';
@@ -579,6 +594,29 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
     }
     catch(exception& e) {
         m->errorOut(e, "MergeGroupsCommand", "processCountFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+int MergeGroupsCommand::mergeAbund(vector<int>){
+    try {
+        int abund = 0;
+        
+        if (method == "sum") {
+            
+        }else if (method == "average") {
+            
+        }else if (method == "median") {
+            
+        }else {
+            m->mothurOut("[ERROR]: Invalid method. \n"); m->control_pressed = true; return 0;
+        }
+        
+        return abund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "mergeAbund");
         exit(1);
     }
 }

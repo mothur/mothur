@@ -52,6 +52,7 @@ private:
 	int processSharedFile(DesignMap*&);
 	int processGroupFile(DesignMap*&);
     int processCountFile(DesignMap*&);
+    int mergeAbund(vector<int>);
 };
 
 #endif
