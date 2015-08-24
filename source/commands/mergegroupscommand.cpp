@@ -546,10 +546,11 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         //create new table
         CountTable newTable;
         vector<string> treatments = designMap->getCategory();
-        map<string, int> clearedMap;
+        map<string, vector<int> > clearedMap;
         for (int i = 0; i < treatments.size(); i++) {
             newTable.addGroup(treatments[i]);
-            clearedMap[treatments[i]] = 0;
+            vector<int> temp;
+            clearedMap[treatments[i]] = temp;
         }
         treatments = newTable.getNamesOfGroups();
         
@@ -559,18 +560,17 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             if (m->control_pressed) { break; }
             
             vector<int> thisSeqsCounts = countTable.getGroupCounts(namesOfSeqs[i]);
-            map<string, int> thisSeqsMap = clearedMap;
+            map<string, vector<int> > thisSeqsMap = clearedMap;
             
             for (int j = 0; j < numGroups; j++) {
-                if (thisSeqsCounts[j] != 0) { //abundance for this group, not sure if this would run faster without if.  Time to lookup treatment on counts we don't care about vs. asking if each time.
-                    thisSeqsMap[designMap->get(nameGroups[j])] += thisSeqsCounts[j];  //
-                }
+                thisSeqsMap[designMap->get(nameGroups[j])].push_back(thisSeqsCounts[j]);
             }
         
             //create new counts for seq for new table
             vector<int> newCounts;
             for (int j = 0; j < treatments.size(); j++){
-                newCounts.push_back(thisSeqsMap[treatments[j]]); //order matters, add in count for each treatment in new table.
+                int abund = mergeAbund(thisSeqsMap[treatments[j]]);
+                newCounts.push_back(abund); //order matters, add in count for each treatment in new table.
             }
             
             //add seq to new table
@@ -599,16 +599,16 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::mergeAbund(vector<int>){
+int MergeGroupsCommand::mergeAbund(vector<int> values){
     try {
         int abund = 0;
         
         if (method == "sum") {
-            
+            abund = m->sum(values);
         }else if (method == "average") {
-            
+            abund = m->average(values);
         }else if (method == "median") {
-            
+            abund = m->median(values);
         }else {
             m->mothurOut("[ERROR]: Invalid method. \n"); m->control_pressed = true; return 0;
         }
