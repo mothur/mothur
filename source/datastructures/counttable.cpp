@@ -650,6 +650,28 @@ int CountTable::getNumSeqs(string seqName) {
 	}
 }
 /************************************************************/
+//set total number of seqs represented by seq
+int CountTable::setNumSeqs(string seqName, int abund) {
+    try {
+        
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true; return -1;
+        }else {
+            int diff = totals[it->second] - abund;
+            totals[it->second] = abund;
+            total-=diff;
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getNumSeqs");
+        exit(1);
+    }
+}
+
+/************************************************************/
 //returns unique index for sequence like get in NameAssignment
 int CountTable::get(string seqName) {
     try {
