@@ -270,7 +270,21 @@ int MergeGroupsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
 		designMap = new DesignMap(designfile);
-		
+        
+        if (method != "sum") {
+            string defaultClass = designMap->getDefaultClass();
+            vector<string> treatments = designMap->getCategory(defaultClass);
+            set<int> numGroupsPerTreatment;
+            for (int i = 0; i < treatments.size(); i++) {
+                if (m->control_pressed) { break; }
+                map<string, vector<string> > checkTreatments;
+                vector<string> temp; temp.push_back(treatments[i]);
+                checkTreatments[defaultClass] = temp;
+                numGroupsPerTreatment.insert(designMap->getNumUnique(checkTreatments));
+            }
+            if (numGroupsPerTreatment.size() > 1) { m->mothurOut("[ERROR]: The median and average methods require you to have the same number of sequences in each treatment, quitting.\n"); delete designMap; return 0; }
+        }
+
 		if (groupfile != "") { processGroupFile(designMap); }
 		if (sharedfile != "") { processSharedFile(designMap); }
         if (countfile != "") { processCountFile(designMap); }
