@@ -16,8 +16,9 @@ vector<string> MergeGroupsCommand::setParameters(){
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none","shared",false,false,true); parameters.push_back(pshared);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
-        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "countfasta","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+        CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "countfasta","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pmethod("method", "Multiple", "sum-average-median", "sum", "", "", "","",false,false, true); parameters.push_back(pmethod);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -38,8 +39,9 @@ vector<string> MergeGroupsCommand::setParameters(){
 string MergeGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The merge.groups command input files are shared, group, countfile and a design file.  It reads the design file and merges the groups in the other files accordingly.\n";
+		helpString += "The merge.groups command input files are shared, group, count, fasta and a design file.  It reads the design file and merges the groups in the other files accordingly.\n";
 		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
+        helpString += "The fasta parameter allows you to provide a fasta file associated with your count file.  This is used if you are using the median method, so that sequences that are entirely removed from the counttable will also be removed from the fasta file. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes. By default all groups are selected.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
         helpString += "The groups parameter allows you to select groups you would like, and are also separated by dashes.\n";
@@ -64,6 +66,7 @@ string MergeGroupsCommand::getOutputPattern(string type) {
         if (type == "shared") {  pattern = "[filename],merge,[extension]"; } 
         else if (type == "group") {  pattern = "[filename],merge,[extension]"; }
         else if (type == "count") {  pattern = "[filename],merge,[extension]"; }
+        else if (type == "fasta") {  pattern = "[filename],merge,[extension]"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -82,9 +85,10 @@ MergeGroupsCommand::MergeGroupsCommand(){
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "MetaStatsCommand");
+		m->errorOut(e, "MergeGroupsCommand", "MergeGroupsCommand");
 		exit(1);
 	}
 }
@@ -158,6 +162,14 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("fasta");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 				
 			}
 			
@@ -185,6 +197,12 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
             if (countfile == "not open") { abort = true; countfile = ""; }
             else if (countfile == "not found") {  countfile = ""; }
             else { m->setCountTableFile(countfile); }
+            
+            fastafile = validParameter.validFile(parameters, "fasta", true);
+            if (fastafile == "not open") { abort = true; countfile = ""; }
+            else if (fastafile == "not found") {  fastafile = ""; }
+            else { m->setFastaFile(fastafile); }
+            
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -203,6 +221,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
             method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
             
             if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum."); m->mothurOutEndLine(); method = "sum"; }
+            
             
             if ((groupfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
@@ -224,6 +243,17 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 					}
 				}
 			}
+            
+            if ((countfile == "") && (fastafile != "")) { m->mothurOut("[ERROR]: You may only use the fasta file with the count file, quitting."); m->mothurOutEndLine(); abort=true; }
+            else if ((countfile != "") && (method == "average")) { m->mothurOut("You may not use the average method with the count file. I will use the sum method."); m->mothurOutEndLine(); method = "sum"; }
+            else if ((countfile != "") && (method == "median") && (fastafile == "")) {
+                fastafile = m->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                else {
+                    m->mothurOut("[ERROR]: Fasta file is required with the median method and a count file so that sequences removed from your count table can also be removed from your fasta file to avoid downstream file mismatches, quitting.\n"); abort=true;
+                }
+            }
+        
 		}
 		
 	}

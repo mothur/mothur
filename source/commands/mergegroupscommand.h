@@ -45,7 +45,7 @@ private:
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile, method;
+	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile, method, fastafile;
 	vector<string> Groups, outputNames;
 		
 	int process(vector<SharedRAbundVector*>&, ofstream&);
