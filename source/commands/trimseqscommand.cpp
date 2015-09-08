@@ -70,7 +70,7 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "The oligos parameter allows you to provide an oligos file.\n";
 		helpString += "The name parameter allows you to provide a names file with your fasta file.\n";
         helpString += "The count parameter allows you to provide a count file with your fasta file.\n";
-		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
+		helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
 		helpString += "The maxlength parameter allows you to set and maximum sequence length. \n";

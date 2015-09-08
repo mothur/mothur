@@ -32,7 +32,7 @@ string GetCurrentCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The get.current command outputs the current files saved by mothur.\n";
 		helpString += "The get.current command has one parameter: clear.\n";
-		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The get.current command should be in the following format: \n";
 		helpString += "get.current() or get.current(clear=fasta-name-accnos)\n";
 		return helpString;
