@@ -58,7 +58,7 @@ string SetCurrentCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
 		helpString += "The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file and taxonomy.\n";
-		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
 		helpString += "set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n";
 		return helpString;

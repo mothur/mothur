@@ -70,7 +70,7 @@ string ScreenSeqsCommand::getHelpString(){
 		helpString += "The taxonomy parameter allows you to remove bad seqs from taxonomy files.\n";
 		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1.\n";
 		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
-		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
+		helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
 		helpString += "The maxn parameter allows you to set and maximum number of N's allowed in a sequence. \n";

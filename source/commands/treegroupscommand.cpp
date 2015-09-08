@@ -47,7 +47,7 @@ string TreeGroupCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n";
+		helpString += "The tree.shared command creates a .tre to represent the similarity between groups or sequences.\n";
 		helpString += "The tree.shared command parameters are shared, groups, calc, phylip, column, name, cutoff, precision, processors, subsample, iters and label.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n";

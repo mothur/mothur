@@ -36,7 +36,7 @@ string DegapSeqsCommand::getHelpString(){
 		helpString += "The degap.seqs command parameter are fasta and processors.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required unless you have a valid current fasta file. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
-        helpString += "The processors paramter allows you to enter the number of processors you would like to use. \n";
+        helpString += "The processors parameter allows you to enter the number of processors you would like to use. \n";
 		helpString += "The degap.seqs command should be in the following format: \n";
 		helpString += "degap.seqs(fasta=yourFastaFile) \n";	
 		helpString += "Example: degap.seqs(fasta=abrecovery.align) \n";

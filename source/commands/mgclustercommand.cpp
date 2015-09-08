@@ -43,7 +43,7 @@ string MGClusterCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision, hard,  method, merge, min, length, penalty, adjust and hcluster. The blast parameter is required.\n";
-		helpString += "The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n";
+		helpString += "The mgcluster command reads a blast and name file and clusters the sequences into OPF units similar to the OTUs.\n";
 		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
 		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
 		helpString += "The precision parameter's default value is 100. \n";
@@ -53,7 +53,7 @@ string MGClusterCommand::getHelpString(){
         helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
 		helpString += "The penalty parameter is used to adjust the error rate.  The default is 0.10.\n";
 		helpString += "The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n";
-		helpString += "The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n";
+		helpString += "The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be necessary if your file is too large to fit into RAM. The default is false.\n";
 		helpString += "The mgcluster command should be in the following format: \n";
 		helpString += "mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n";

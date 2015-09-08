@@ -840,7 +840,7 @@ int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int star
 			
 			for (int l = 0; l < k; l++) {
 				
-				if (k != l) { //we dont need to similiarity of a groups to itself
+				if (k != l) { //we dont need to similarity of a groups to itself
 					subset.clear(); //clear out old pair of sharedrabunds
 					//add new pair of sharedrabunds
 					subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
