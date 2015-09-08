@@ -43,7 +43,7 @@ public:
 	string getBinLabel();
 	void setBinLabel(string);
 	int getGroupIndex();
-	void setGroupIndex(int);								
+	void setGroupIndex(int);
 
 	void set(int, int, string);			//OTU, abundance, groupname
 	void setData(vector <individual>);
@@ -77,6 +77,7 @@ public:
 	vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors(vector<SharedRAbundVector*>);
 	
 private:
+    int eliminateZeroOTUS();
 	vector<individual>  data; 
 	vector<SharedRAbundVector*> lookup;
 	//GlobalData* globaldata;
@@ -86,8 +87,6 @@ private:
 	int numSeqs;
 	string group;
 	int index;	
-	
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 };
 
 

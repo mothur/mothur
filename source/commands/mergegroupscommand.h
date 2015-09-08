@@ -53,6 +53,8 @@ private:
 	int processGroupFile(DesignMap*&);
     int processCountFile(DesignMap*&);
     int mergeAbund(vector<int>);
+    int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+    int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 };
 
 #endif
