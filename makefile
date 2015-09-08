@@ -56,9 +56,9 @@ ifeq  ($(strip $(USEREADLINE)),yes)
         -lncurses
 endif
 
-
+MPICXX ?= mpic++
 ifeq  ($(strip $(USEMPI)),yes)
-    CXX = mpic++
+    CXX = $(MPICXX)
     CXXFLAGS += -DUSE_MPI
 endif
 
