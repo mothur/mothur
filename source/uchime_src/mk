@@ -6,7 +6,7 @@ rm -f *.o mk.stdout mk.stderr tmp.stderr
 
 for CPPName in $CPPNames
 do
-  echo $CPPName >> /dev/tty
+  echo $CPPName >&2
   g++ $ENV_GCC_OPTS -c -O3 -msse2 -mfpmath=sse -D_FILE_OFFSET_BITS=64 -DNDEBUG=1 -DUCHIMES=1 $CPPName.cpp -o $CPPName.o  >> mk.stdout 2>> tmp.stderr
 	cat tmp.stderr
 	cat tmp.stderr >> mk.stderr
