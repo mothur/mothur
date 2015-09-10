@@ -209,6 +209,7 @@ int CatchAllCommand::execute() {
 		savedOutputDir = outputDir;
 		string catchAllCommandExe = "";
         string catchAllTest = "";
+        string programName = "";
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if (outputDir == "") { outputDir = "./"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
             catchAllTest = path + "CatchAllcmdL.exe";
@@ -223,9 +224,8 @@ int CatchAllCommand::execute() {
 		int ableToOpen = m->openInputFile(catchAllTest, in, "no error"); in.close();
 		if(ableToOpen == 1) {	
             m->mothurOut(catchAllTest + " file does not exist. Checking path... \n");
-            //check to see if uchime is in the path??
             
-            string programName = "CatchAllcmdW.exe";
+            programName = "CatchAllcmdW.exe";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             programName = "CatchAllcmdL.exe";
 #endif
@@ -234,13 +234,23 @@ int CatchAllCommand::execute() {
             ifstream in2;
             ableToOpen = m->openInputFile(cLocation, in2, "no error"); in2.close();
 
-            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; } 
+            if(ableToOpen == 1) {
+                programName = "catchall";
+                
+                string cLocation = m->findProgramPath(programName);
+                
+                ifstream in3;
+                ableToOpen = m->openInputFile(cLocation, in3, "no error"); in3.close();
+                
+                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; }else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
+            }
             else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
         }
         catchAllTest = m->getFullPathName(catchAllTest);
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        catchAllCommandExe += "mono \"" + catchAllTest + "\" ";
+        if (programName == "catchall") { catchAllCommandExe += "catchall "; }
+        else {  catchAllCommandExe += "mono \"" + catchAllTest + "\" ";  }
 #else
         catchAllCommandExe += "\"" + catchAllTest + "\" ";
 #endif
