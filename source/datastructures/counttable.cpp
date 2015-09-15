@@ -709,7 +709,7 @@ int CountTable::push_back(string seqName) {
             m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
         }
         
-        return 0;
+        return 1;
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountTable", "push_back");
@@ -761,7 +761,7 @@ int CountTable::push_back(string seqName, int thisTotal) {
             m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
         }
         
-        return 0;
+        return thisTotal;
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountTable", "push_back");
@@ -772,10 +772,11 @@ int CountTable::push_back(string seqName, int thisTotal) {
 //add sequence with group info
 int CountTable::push_back(string seqName, vector<int> groupCounts) {
     try {
+        int thisTotal = 0;
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
             if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
-            int thisTotal = 0;
+            
             for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
             if (hasGroups) {  counts.push_back(groupCounts);  }
             indexNameMap[seqName] = uniques;
@@ -786,7 +787,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
             m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
         }
         
-        return 0;
+        return thisTotal;
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountTable", "push_back");

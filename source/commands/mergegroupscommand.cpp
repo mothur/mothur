@@ -10,6 +10,7 @@
 #include "mergegroupscommand.h"
 #include "sharedutilities.h"
 #include "counttable.h"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> MergeGroupsCommand::setParameters(){	
@@ -326,10 +327,63 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
 	try {
         if (method == "average") {
             //create sharedRabundFloatVectors
+            vector<SharedRAbundFloatVector*> temp = thisLookUp[0]->getSharedRAbundFloatVectors(thisLookUp);
             
             //follow code below
+            map<string, SharedRAbundFloatVector> merged;
+            map<string, SharedRAbundFloatVector>::iterator it;
+            map<string, vector<int> > clearGroupAbunds;
+            map<string, vector<int> >::iterator itAbunds;
             
+            for (int i = 0; i < temp.size(); i++) {
+                if (m->control_pressed) { return 0; }
+                //what grouping does this group belong to
+                string grouping = designMap->get(temp[i]->getGroup());
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                else {
+                    //do we already have a member of this grouping?
+                    it = merged.find(grouping);
+                    
+                    if (it == merged.end()) { //nope, so create it
+                        merged[grouping] = *temp[i];
+                        merged[grouping].setGroup(grouping);
+                        vector<int> temp;
+                        clearGroupAbunds[grouping] = temp;
+                    }
+                }
+            }
             
+            for (int j = 0; j < temp[0]->getNumBins(); j++) {
+                if (m->control_pressed) { return 0; }
+                
+                map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
+                for (int i = 0; i < temp.size(); i++) {
+                    
+                    string grouping = designMap->get(temp[i]->getGroup());
+                    if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                    else {
+                        otusGroupAbunds[grouping].push_back(temp[i]->getAbundance(j));
+                    }
+                }
+                
+                for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
+                    int abund = mergeAbund(itAbunds->second);
+                    merged[itAbunds->first].set(j, abund, itAbunds->first);
+                }
+            }
+            
+            if (method == "median") {
+                vector<SharedRAbundFloatVector*> temp2;
+                for (it = merged.begin(); it != merged.end(); it++) {  temp2.push_back(&(it->second)); }
+                eliminateZeroOTUS(temp2);
+            }
+            
+            //print new file
+            for (it = merged.begin(); it != merged.end(); it++) {
+                if (!m->printedSharedHeaders) { (it->second).printHeaders(out); }
+                out << (it->second).getLabel() << '\t' << it->first << '\t';
+                (it->second).print(out);
+            }
         }else {
             map<string, SharedRAbundVector> merged;
             map<string, SharedRAbundVector>::iterator it;
@@ -603,6 +657,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         }
         treatments = newTable.getNamesOfGroups();
         
+        set<string> namesToRemove;
         vector<string> namesOfSeqs = countTable.getNamesOfSeqs();
         for (int i = 0; i < namesOfSeqs.size(); i++) {
             
@@ -616,18 +671,54 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             }
         
             //create new counts for seq for new table
-            vector<int> newCounts;
+            vector<int> newCounts; int totalAbund = 0;
             for (int j = 0; j < treatments.size(); j++){
                 int abund = mergeAbund(thisSeqsMap[treatments[j]]);
-                newCounts.push_back(abund); //order matters, add in count for each treatment in new table.
+                newCounts.push_back(abund);  //order matters, add in count for each treatment in new table.
+                totalAbund += abund;
             }
             
             //add seq to new table
-            newTable.push_back(namesOfSeqs[i], newCounts);
+            if(totalAbund == 0) {
+                namesToRemove.insert(namesOfSeqs[i]);
+            }else { newTable.push_back(namesOfSeqs[i], newCounts); }
         }
         
         if (error) { m->control_pressed = true; return 0; }
         
+        //remove sequences zeroed out by median method
+        if (namesToRemove.size() != 0) {
+            //print names
+            ofstream out;
+            string accnosFile = "accnosFile.temp";
+            m->openOutputFile(accnosFile, out);
+            
+            //output to .accnos file
+            for (set<string>::iterator it = namesToRemove.begin(); it != namesToRemove.end(); it++) {
+                if (m->control_pressed) {  out.close(); m->mothurRemove(accnosFile); return 0; }
+                out << *it << endl;
+            }
+            out.close();
+
+            //run remove.seqs
+            string inputString = "accnos=" + accnosFile + ", fasta=" + fastafile;
+            
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* removeCommand = new RemoveSeqsCommand(inputString);
+            removeCommand->execute();
+            
+            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+            
+            delete removeCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            
+            m->mothurRemove(accnosFile);
+        }
+    
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
         map<string, string> variables;
