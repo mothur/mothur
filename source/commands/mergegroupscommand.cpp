@@ -10,14 +10,17 @@
 #include "mergegroupscommand.h"
 #include "sharedutilities.h"
 #include "counttable.h"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> MergeGroupsCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none","shared",false,false,true); parameters.push_back(pshared);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
-        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "sharedGroup", "countfasta","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+        CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "countfasta","fasta",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pmethod("method", "Multiple", "sum-average-median", "sum", "", "", "","",false,false, true); parameters.push_back(pmethod);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -37,10 +40,13 @@ vector<string> MergeGroupsCommand::setParameters(){
 string MergeGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The merge.groups command input files are shared, group, countfile and a design file.  It reads the design file and merges the groups in the other files accordingly.\n";
+		helpString += "The merge.groups command input files are shared, group, count, fasta and a design file.  It reads the design file and merges the groups in the other files accordingly.\n";
 		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
+        helpString += "The fasta parameter allows you to provide a fasta file associated with your count file.  This is used if you are using the median method, so that sequences that are entirely removed from the counttable will also be removed from the fasta file. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes. By default all groups are selected.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+        helpString += "The groups parameter allows you to select groups you would like, and are also separated by dashes.\n";
+        helpString += "The method parameter allows you to select method you would like to use to merge the groups. Options are sum, average and median. Default=sum.\n";
 		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
 		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
 		helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
@@ -61,6 +67,7 @@ string MergeGroupsCommand::getOutputPattern(string type) {
         if (type == "shared") {  pattern = "[filename],merge,[extension]"; } 
         else if (type == "group") {  pattern = "[filename],merge,[extension]"; }
         else if (type == "count") {  pattern = "[filename],merge,[extension]"; }
+        else if (type == "fasta") {  pattern = "[filename],merge,[extension]"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -79,9 +86,10 @@ MergeGroupsCommand::MergeGroupsCommand(){
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "MetaStatsCommand");
+		m->errorOut(e, "MergeGroupsCommand", "MergeGroupsCommand");
 		exit(1);
 	}
 }
@@ -155,6 +163,14 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("fasta");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 				
 			}
 			
@@ -182,6 +198,12 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
             if (countfile == "not open") { abort = true; countfile = ""; }
             else if (countfile == "not found") {  countfile = ""; }
             else { m->setCountTableFile(countfile); }
+            
+            fastafile = validParameter.validFile(parameters, "fasta", true);
+            if (fastafile == "not open") { abort = true; countfile = ""; }
+            else if (fastafile == "not found") {  fastafile = ""; }
+            else { m->setFastaFile(fastafile); }
+            
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -196,6 +218,11 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
 			m->setGroups(Groups);
+            
+            method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
+            
+            if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum."); m->mothurOutEndLine(); method = "sum"; }
+            
             
             if ((groupfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
@@ -217,6 +244,17 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 					}
 				}
 			}
+            
+            if ((countfile == "") && (fastafile != "")) { m->mothurOut("[ERROR]: You may only use the fasta file with the count file, quitting."); m->mothurOutEndLine(); abort=true; }
+            else if ((countfile != "") && (method == "average")) { m->mothurOut("You may not use the average method with the count file. I will use the sum method."); m->mothurOutEndLine(); method = "sum"; }
+            else if ((countfile != "") && (method == "median") && (fastafile == "")) {
+                fastafile = m->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                else {
+                    m->mothurOut("[ERROR]: Fasta file is required with the median method and a count file so that sequences removed from your count table can also be removed from your fasta file to avoid downstream file mismatches, quitting.\n"); abort=true;
+                }
+            }
+        
 		}
 		
 	}
@@ -233,7 +271,21 @@ int MergeGroupsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
 		designMap = new DesignMap(designfile);
-		
+        
+        if (method != "sum") {
+            string defaultClass = designMap->getDefaultClass();
+            vector<string> treatments = designMap->getCategory(defaultClass);
+            set<int> numGroupsPerTreatment;
+            for (int i = 0; i < treatments.size(); i++) {
+                if (m->control_pressed) { break; }
+                map<string, vector<string> > checkTreatments;
+                vector<string> temp; temp.push_back(treatments[i]);
+                checkTreatments[defaultClass] = temp;
+                numGroupsPerTreatment.insert(designMap->getNumUnique(checkTreatments));
+            }
+            if (numGroupsPerTreatment.size() > 1) { m->mothurOut("[ERROR]: The median and average methods require you to have the same number of sequences in each treatment, quitting.\n"); delete designMap; return 0; }
+        }
+
 		if (groupfile != "") { processGroupFile(designMap); }
 		if (sharedfile != "") { processSharedFile(designMap); }
         if (countfile != "") { processCountFile(designMap); }
@@ -273,43 +325,121 @@ int MergeGroupsCommand::execute(){
 
 int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
-		
-		map<string, SharedRAbundVector> merged;
-		map<string, SharedRAbundVector>::iterator it;
-		
-		for (int i = 0; i < thisLookUp.size(); i++) {
-			
-			if (m->control_pressed) { return 0; }
-			
-			//what grouping does this group belong to
-			string grouping = designMap->get(thisLookUp[i]->getGroup());
-			if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
-			
-			else {
-				//do we already have a member of this grouping?
-				it = merged.find(grouping);
-				
-				if (it == merged.end()) { //nope, so create it
-					merged[grouping] = *thisLookUp[i];
-					merged[grouping].setGroup(grouping);
-				}else { //yes, merge it
-					
-					for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-						int abund = (it->second).getAbundance(j);
-						abund += thisLookUp[i]->getAbundance(j);
-						
-						(it->second).set(j, abund, grouping);
-					}
-				}
-			}
-		}
-		
-		//print new file
-		for (it = merged.begin(); it != merged.end(); it++) {
-			out << (it->second).getLabel() << '\t' << it->first << '\t';
-			(it->second).print(out);
-		}
-		
+        if (method == "average") {
+            //create sharedRabundFloatVectors
+            vector<SharedRAbundFloatVector*> temp = thisLookUp[0]->getSharedRAbundFloatVectors(thisLookUp);
+            
+            //follow code below
+            map<string, SharedRAbundFloatVector> merged;
+            map<string, SharedRAbundFloatVector>::iterator it;
+            map<string, vector<int> > clearGroupAbunds;
+            map<string, vector<int> >::iterator itAbunds;
+            
+            for (int i = 0; i < temp.size(); i++) {
+                if (m->control_pressed) { return 0; }
+                //what grouping does this group belong to
+                string grouping = designMap->get(temp[i]->getGroup());
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                else {
+                    //do we already have a member of this grouping?
+                    it = merged.find(grouping);
+                    
+                    if (it == merged.end()) { //nope, so create it
+                        merged[grouping] = *temp[i];
+                        merged[grouping].setGroup(grouping);
+                        vector<int> temp;
+                        clearGroupAbunds[grouping] = temp;
+                    }
+                }
+            }
+            
+            for (int j = 0; j < temp[0]->getNumBins(); j++) {
+                if (m->control_pressed) { return 0; }
+                
+                map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
+                for (int i = 0; i < temp.size(); i++) {
+                    
+                    string grouping = designMap->get(temp[i]->getGroup());
+                    if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                    else {
+                        otusGroupAbunds[grouping].push_back(temp[i]->getAbundance(j));
+                    }
+                }
+                
+                for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
+                    int abund = mergeAbund(itAbunds->second);
+                    merged[itAbunds->first].set(j, abund, itAbunds->first);
+                }
+            }
+            
+            if (method == "median") {
+                vector<SharedRAbundFloatVector*> temp2;
+                for (it = merged.begin(); it != merged.end(); it++) {  temp2.push_back(&(it->second)); }
+                eliminateZeroOTUS(temp2);
+            }
+            
+            //print new file
+            for (it = merged.begin(); it != merged.end(); it++) {
+                if (!m->printedSharedHeaders) { (it->second).printHeaders(out); }
+                out << (it->second).getLabel() << '\t' << it->first << '\t';
+                (it->second).print(out);
+            }
+        }else {
+            map<string, SharedRAbundVector> merged;
+            map<string, SharedRAbundVector>::iterator it;
+            map<string, vector<int> > clearGroupAbunds;
+            map<string, vector<int> >::iterator itAbunds;
+            
+            for (int i = 0; i < thisLookUp.size(); i++) {
+                if (m->control_pressed) { return 0; }
+                //what grouping does this group belong to
+                string grouping = designMap->get(thisLookUp[i]->getGroup());
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                else {
+                    //do we already have a member of this grouping?
+                    it = merged.find(grouping);
+                    
+                    if (it == merged.end()) { //nope, so create it
+                        merged[grouping] = *thisLookUp[i];
+                        merged[grouping].setGroup(grouping);
+                        vector<int> temp;
+                        clearGroupAbunds[grouping] = temp;
+                    }
+                }
+            }
+            
+            for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+                if (m->control_pressed) { return 0; }
+                
+                map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
+                for (int i = 0; i < thisLookUp.size(); i++) {
+                    
+                    string grouping = designMap->get(thisLookUp[i]->getGroup());
+                    if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                    else {
+                        otusGroupAbunds[grouping].push_back(thisLookUp[i]->getAbundance(j));
+                    }
+                }
+                
+                for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
+                    int abund = mergeAbund(itAbunds->second);
+                    merged[itAbunds->first].set(j, abund, itAbunds->first);
+                }
+            }
+            
+            if (method == "median") {
+                vector<SharedRAbundVector*> temp;
+                for (it = merged.begin(); it != merged.end(); it++) {  temp.push_back(&(it->second)); }
+                eliminateZeroOTUS(temp);
+            }
+            
+            //print new file
+            for (it = merged.begin(); it != merged.end(); it++) {
+                if (!m->printedSharedHeaders) { (it->second).printHeaders(out); }
+                out << (it->second).getLabel() << '\t' << it->first << '\t';
+                (it->second).print(out);
+            }
+        }
 		return 0;
 		
 	}
@@ -350,8 +480,6 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				
-				if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
 				process(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -365,7 +493,6 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
-				if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
 				process(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -406,8 +533,6 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			
-			if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
 			process(lookup, out);
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -524,39 +649,76 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         //create new table
         CountTable newTable;
         vector<string> treatments = designMap->getCategory();
-        map<string, int> clearedMap;
+        map<string, vector<int> > clearedMap;
         for (int i = 0; i < treatments.size(); i++) {
             newTable.addGroup(treatments[i]);
-            clearedMap[treatments[i]] = 0;
+            vector<int> temp;
+            clearedMap[treatments[i]] = temp;
         }
         treatments = newTable.getNamesOfGroups();
         
+        set<string> namesToRemove;
         vector<string> namesOfSeqs = countTable.getNamesOfSeqs();
         for (int i = 0; i < namesOfSeqs.size(); i++) {
             
             if (m->control_pressed) { break; }
             
             vector<int> thisSeqsCounts = countTable.getGroupCounts(namesOfSeqs[i]);
-            map<string, int> thisSeqsMap = clearedMap;
+            map<string, vector<int> > thisSeqsMap = clearedMap;
             
             for (int j = 0; j < numGroups; j++) {
-                if (thisSeqsCounts[j] != 0) { //abundance for this group, not sure if this would run faster without if.  Time to lookup treatment on counts we don't care about vs. asking if each time.
-                    thisSeqsMap[designMap->get(nameGroups[j])] += thisSeqsCounts[j];  //
-                }
+                thisSeqsMap[designMap->get(nameGroups[j])].push_back(thisSeqsCounts[j]);
             }
         
             //create new counts for seq for new table
-            vector<int> newCounts;
+            vector<int> newCounts; int totalAbund = 0;
             for (int j = 0; j < treatments.size(); j++){
-                newCounts.push_back(thisSeqsMap[treatments[j]]); //order matters, add in count for each treatment in new table.
+                int abund = mergeAbund(thisSeqsMap[treatments[j]]);
+                newCounts.push_back(abund);  //order matters, add in count for each treatment in new table.
+                totalAbund += abund;
             }
             
             //add seq to new table
-            newTable.push_back(namesOfSeqs[i], newCounts);
+            if(totalAbund == 0) {
+                namesToRemove.insert(namesOfSeqs[i]);
+            }else { newTable.push_back(namesOfSeqs[i], newCounts); }
         }
         
         if (error) { m->control_pressed = true; return 0; }
         
+        //remove sequences zeroed out by median method
+        if (namesToRemove.size() != 0) {
+            //print names
+            ofstream out;
+            string accnosFile = "accnosFile.temp";
+            m->openOutputFile(accnosFile, out);
+            
+            //output to .accnos file
+            for (set<string>::iterator it = namesToRemove.begin(); it != namesToRemove.end(); it++) {
+                if (m->control_pressed) {  out.close(); m->mothurRemove(accnosFile); return 0; }
+                out << *it << endl;
+            }
+            out.close();
+
+            //run remove.seqs
+            string inputString = "accnos=" + accnosFile + ", fasta=" + fastafile;
+            
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* removeCommand = new RemoveSeqsCommand(inputString);
+            removeCommand->execute();
+            
+            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+            
+            delete removeCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            
+            m->mothurRemove(accnosFile);
+        }
+    
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
         map<string, string> variables;
@@ -572,6 +734,142 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
     }
     catch(exception& e) {
         m->errorOut(e, "MergeGroupsCommand", "processCountFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+int MergeGroupsCommand::mergeAbund(vector<int> values){
+    try {
+        int abund = 0;
+        
+        if (method == "sum") {
+            abund = m->sum(values);
+        }else if (method == "average") {
+            abund = m->average(values);
+        }else if (method == "median") {
+            abund = m->median(values);
+        }else {
+            m->mothurOut("[ERROR]: Invalid method. \n"); m->control_pressed = true; return 0;
+        }
+        
+        return abund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "mergeAbund");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int MergeGroupsCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+    try {
+        
+        vector<SharedRAbundVector*> newLookup;
+        for (int i = 0; i < thislookup.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+            temp->setLabel(thislookup[i]->getLabel());
+            temp->setGroup(thislookup[i]->getGroup());
+            newLookup.push_back(temp);
+        }
+        
+        //for each bin
+        vector<string> newBinLabels;
+        string snumBins = toString(thislookup[0]->getNumBins());
+        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+            
+            //look at each sharedRabund and make sure they are not all zero
+            bool allZero = true;
+            for (int j = 0; j < thislookup.size(); j++) {
+                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+            }
+            
+            //if they are not all zero add this bin
+            if (!allZero) {
+                for (int j = 0; j < thislookup.size(); j++) {
+                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+                }
+                //if there is a bin label use it otherwise make one
+                string binLabel = "Otu";
+                string sbinNumber = toString(i+1);
+                if (sbinNumber.length() < snumBins.length()) {
+                    int diff = snumBins.length() - sbinNumber.length();
+                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                }
+                binLabel += sbinNumber;
+                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
+                
+                newBinLabels.push_back(binLabel);
+            }
+        }
+        
+        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+        thislookup.clear();
+        
+        thislookup = newLookup;
+        m->currentSharedBinLabels = newBinLabels;
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "eliminateZeroOTUS");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int MergeGroupsCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
+    try {
+        
+        vector<SharedRAbundFloatVector*> newLookup;
+        for (int i = 0; i < thislookup.size(); i++) {
+            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
+            temp->setLabel(thislookup[i]->getLabel());
+            temp->setGroup(thislookup[i]->getGroup());
+            newLookup.push_back(temp);
+        }
+        
+        //for each bin
+        vector<string> newBinLabels;
+        string snumBins = toString(thislookup[0]->getNumBins());
+        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+            
+            //look at each sharedRabund and make sure they are not all zero
+            bool allZero = true;
+            for (int j = 0; j < thislookup.size(); j++) {
+                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+            }
+            
+            //if they are not all zero add this bin
+            if (!allZero) {
+                for (int j = 0; j < thislookup.size(); j++) {
+                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+                }
+                //if there is a bin label use it otherwise make one
+                string binLabel = "Otu";
+                string sbinNumber = toString(i+1);
+                if (sbinNumber.length() < snumBins.length()) {
+                    int diff = snumBins.length() - sbinNumber.length();
+                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                }
+                binLabel += sbinNumber;
+                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
+                
+                newBinLabels.push_back(binLabel);
+            }
+        }
+        
+        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+        
+        thislookup = newLookup;
+        m->currentSharedBinLabels = newBinLabels;
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "eliminateZeroOTUS");
         exit(1);
     }
 }

@@ -288,7 +288,7 @@ int DesignMap::setValues(string group, map<string, string> values) {
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DesignMap", "set");
+		m->errorOut(e, "DesignMap", "setValues");
 		exit(1);
 	}
 }
@@ -314,22 +314,21 @@ int DesignMap::getNumUnique(map<string, vector<string> > selected) {
     try {
         int num = 0;
         
-        //get indexes of categories
-        vector<int> indexes;
+        map<int, vector<string> > indexes;
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
                 m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0;
-            }else { indexes.push_back(it2->second); }
+            }else {
+                indexes[it2->second] = it->second;
+            }
         }
         
-        for (int i = 0; i < designMap.size(); i++) {
+        for (int j = 0; j < designMap.size(); j++) {
             bool hasAll = true; //innocent til proven guilty
-            int count = 0;
-            for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) { //loop through each
-                //check category to see if this group meets the requirements
-                if (!m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAll = false; it = selected.end(); }
-                count++;
+            for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
+               //column number is it->first
+                if (!m->inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
             }
             if (hasAll) { num++; }
         }
@@ -348,26 +347,24 @@ int DesignMap::getNumShared(map<string, vector<string> > selected) {
     try {
         int num = 0;
         
-        //get indexes of categories
-        vector<int> indexes;
+        map<int, vector<string> > indexes;
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
                 m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0;
-            }else { indexes.push_back(it2->second); }
+            }else {
+                indexes[it2->second] = it->second;
+            }
         }
         
-        for (int i = 0; i < designMap.size(); i++) {
-            bool hasAny = false; //guilty til proven innocent
-            int count = 0;
-            for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) { //loop through each
-                //check category to see if this group meets the requirements
-                if (m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAny = true; it = selected.end(); }
-                count++;
+        for (int j = 0; j < designMap.size(); j++) {
+            bool hasAny = false; //innocent til proven guilty
+            for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
+                //column number is it->first
+                if (m->inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
             }
             if (hasAny) { num++; }
         }
-
         
         return num;
     }
@@ -384,13 +381,14 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
     try {
         vector<string> names;
         
-        //get indexes of categories
-        vector<int> indexes;
+        map<int, vector<string> > indexes;
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
                 m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
-            }else { indexes.push_back(it2->second); }
+            }else {
+                indexes[it2->second] = it->second;
+            }
         }
         
         //map int to name
@@ -399,22 +397,19 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
             reverse[it->second] = it->first;
         }
         
-        for (int i = 0; i < designMap.size(); i++) {
+        for (int j = 0; j < designMap.size(); j++) {
             bool hasAll = true; //innocent til proven guilty
-            int count = 0;
-            for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) { //loop through each
-                //check category to see if this group meets the requirements
-                if (!m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAll = false; it = selected.end(); }
-                count++;
+            for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
+                //column number is it->first
+                if (!m->inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
             }
             if (hasAll) {
-                map<int, string>::iterator it = reverse.find(i);
+                map<int, string>::iterator it = reverse.find(j);
                 if (it == reverse.end()) {
                     m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
                 }else { names.push_back(it->second); }
             }
         }
-
         
         return names;
     }
@@ -430,13 +425,14 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
     try {
         vector<string> names;
         
-        //get indexes of categories
-        vector<int> indexes;
+        map<int, vector<string> > indexes;
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
                 m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
-            }else { indexes.push_back(it2->second); }
+            }else {
+                indexes[it2->second] = it->second;
+            }
         }
         
         //map int to name
@@ -445,22 +441,20 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
             reverse[it->second] = it->first;
         }
         
-        for (int i = 0; i < designMap.size(); i++) {
-            bool hasAny = false; 
-            int count = 0;
-            for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) { //loop through each
-                //check category to see if this group meets the requirements
-                if (m->inUsersGroups(designMap[i][indexes[count]], it->second)) { hasAny = true; break; }
-                count++;
+        for (int j = 0; j < designMap.size(); j++) {
+            bool hasAny = false; //innocent til proven guilty
+            for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
+                //column number is it->first
+                if (m->inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
             }
+
             if (hasAny) {
-                map<int, string>::iterator it = reverse.find(i);
+                map<int, string>::iterator it = reverse.find(j);
                 if (it == reverse.end()) {
                     m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
                 }else { names.push_back(it->second); }
             }
         }
-        
         
         return names;
     }

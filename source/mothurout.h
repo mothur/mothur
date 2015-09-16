@@ -199,6 +199,9 @@ class MothurOut {
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
         double median(vector<double>);
+        int median(vector<int>);
+        int average(vector<int>);
+        int sum(vector<int>);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);

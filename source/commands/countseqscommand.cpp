@@ -768,7 +768,7 @@ unsigned long long CountSeqsCommand::processLarge(string outputFileName){
             m->mothurRemove(outfile);
             m->mothurRemove(outName);
             in2.close();
-            for (map<int, string>::iterator it = indexToGroup.begin(); it != indexToGroup.end(); it++) { out << it->second << '\t';  }
+            for (map<int, string>::iterator it = indexToGroup.begin(); it != indexToGroup.end(); it++) { out << '\t' << it->second;  }
             out << endl;
             for (int i = 0; i < nameMapCount.size(); i++) {
                 string totalsLine = "";

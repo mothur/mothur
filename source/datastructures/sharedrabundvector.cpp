@@ -486,7 +486,7 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		
 		delete util;
 		
-		if (remove) { eliminateZeroOTUS(lookup); }
+		if (remove) { eliminateZeroOTUS(); }
 	
 		return lookup;
 	}
@@ -496,33 +496,33 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 	}
 }
 //**********************************************************************************************************************
-int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+int SharedRAbundVector::eliminateZeroOTUS() {
 		try {
 			
 			vector<SharedRAbundVector*> newLookup;
-			for (int i = 0; i < thislookup.size(); i++) {
+			for (int i = 0; i < lookup.size(); i++) {
 				SharedRAbundVector* temp = new SharedRAbundVector();
-				temp->setLabel(thislookup[i]->getLabel());
-				temp->setGroup(thislookup[i]->getGroup());
+				temp->setLabel(lookup[i]->getLabel());
+				temp->setGroup(lookup[i]->getGroup());
 				newLookup.push_back(temp);
 			}
 			
 			//for each bin
 			vector<string> newBinLabels;
-			string snumBins = toString(thislookup[0]->getNumBins());
-			for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+			string snumBins = toString(lookup[0]->getNumBins());
+			for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 				if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 				
 				//look at each sharedRabund and make sure they are not all zero
 				bool allZero = true;
-				for (int j = 0; j < thislookup.size(); j++) {
-					if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+				for (int j = 0; j < lookup.size(); j++) {
+					if (lookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
 				}
 				
 				//if they are not all zero add this bin
 				if (!allZero) {
-					for (int j = 0; j < thislookup.size(); j++) {
-						newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+					for (int j = 0; j < lookup.size(); j++) {
+						newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
 					}
 					
 					//if there is a bin label use it otherwise make one
@@ -539,9 +539,9 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 				}
 			}
 			
-			for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+			for (int j = 0; j < lookup.size(); j++) {  delete lookup[j];  }
 			
-			thislookup = newLookup;
+			lookup = newLookup;
 			m->currentSharedBinLabels = newBinLabels;
 			
 			return 0;
