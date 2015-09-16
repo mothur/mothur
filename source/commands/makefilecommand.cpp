@@ -12,6 +12,7 @@
 vector<string> MakeFileCommand::setParameters(){
     try {
         CommandParameter ptype("type", "Multiple", "fastq-gz", "fastq", "", "", "","",false,false); parameters.push_back(ptype);
+        CommandParameter pnumcols("numcols", "Multiple", "2-3", "3", "", "", "","",false,false, true); parameters.push_back(pnumcols);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -30,9 +31,10 @@ string MakeFileCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The make.file command takes a input directory and creates a file file containing the fastq or gz files in the directory.\n";
-        helpString += "The make.fastq command parameters are inputdir and type.  inputdir is required.\n";
+        helpString += "The make.fastq command parameters are inputdir, numcols and type.  inputdir is required.\n";
         helpString += "May create more than one file. Mothur will attempt to match paired files. \n";
         helpString += "The type parameter allows you to set the type of files to look for. Options are fastq or gz.  Default=fastq. \n";
+        helpString += "The numcols parameter allows you to set number of columns you mothur to make in the file.  Default=3, meaning groupName forwardFastq reverseFastq. The groupName is made from the beginning part of the forwardFastq file. Everything up to the first '_' or if no '_' is found then the root of the forwardFastq filename.\n";
         helpString += "The make.file command should be in the following format: \n";
         helpString += "make.file(inputdir=yourInputDirectory). \n";
         helpString += "Example make.group(inputdir=fastqFiles)\n";
@@ -102,9 +104,6 @@ MakeFileCommand::MakeFileCommand(string option)  {
             vector<string> tempOutNames;
             outputTypes["file"] = tempOutNames;
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
-            
             //if the user changes the input directory command factory will send this info to us in the output parameter
             inputDir = validParameter.validFile(parameters, "inputdir", false);
             if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting."); m->mothurOutEndLine(); abort = true;	}
@@ -113,11 +112,20 @@ MakeFileCommand::MakeFileCommand(string option)  {
                 else { abort = true; }
             }
             
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = inputDir;		}
+            
+            
             //if the user changes the input directory command factory will send this info to us in the output parameter
             typeFile = validParameter.validFile(parameters, "type", false);
             if (typeFile == "not found"){	typeFile = "fastq";		}
             
             if ((typeFile != "fastq") && (typeFile != "gz")) { m->mothurOut(typeFile + " is not a valid type. Options are fastq or gz. I will use fastq."); m->mothurOutEndLine(); typeFile = "fastq"; }
+            
+            string temp = validParameter.validFile(parameters, "numcols", false);		if(temp == "not found"){	temp = "3"; }
+            if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3."); m->mothurOutEndLine(); temp = "3";  }
+            m->mothurConvert(temp, numCols);
+            
         }
     }
     catch(exception& e) {
@@ -171,7 +179,15 @@ int MakeFileCommand::execute(){
                         int pos = simpleName1.find("R1");
                         int pos2 = simpleName2.find("R2");
                         if ((pos != string::npos) && (pos2 != string::npos)){
-                            vector<string> temp; temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                            vector<string> temp;
+                            if (numCols == 3) {
+                                string groupName = "noGroup"+toString(i);
+                                int posUnderscore = fastqFiles[i].find_first_of('_');
+                                if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
+                                else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
+                                temp.push_back(groupName);
+                            }
+                            temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
                             paired.push_back(temp);
                             i++;
                         }else {

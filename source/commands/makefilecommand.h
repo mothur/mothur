@@ -34,6 +34,7 @@ private:
     
     string inputDir, outputDir, typeFile;
     vector<string> outputNames;
+    int numCols;
     bool abort;
 };
 
