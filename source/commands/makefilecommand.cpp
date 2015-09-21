@@ -142,6 +142,7 @@ int MakeFileCommand::execute(){
         //find all .fastq files
         string tempFile = inputDir + "fileList.temp";
         string findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\"  > \"" + tempFile + "\"";
+        if (m->debug) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
         
         //read in list of files
