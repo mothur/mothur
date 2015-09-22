@@ -1093,9 +1093,10 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
             createOligosGroup = false;
             oligos = new Oligos();
             numBarcodes = 0; numFPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
+            string thisOutputGroupFileName = "";
             
             if(oligosfile != "")                        {       createOligosGroup = getOligos(fastaFileNames, qualFileNames, variables["[filename]"], uniqueFastaNames);    }
-            if (createOligosGroup || createFileGroup)   {       outputGroupFileName = getOutputFileName("group",variables);                                                 }
+            if (createOligosGroup || createFileGroup)   {       thisOutputGroupFileName = getOutputFileName("group",variables);                                                 }
             
             //give group in file file precedence
             if (createFileGroup) {  createOligosGroup = false; }
@@ -1168,19 +1169,17 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
                 if (l == 0) {   m->openOutputFile(compositeGroupFile, outCGroup);  outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);         }
                 else {          m->openOutputFileAppend(compositeGroupFile, outCGroup);     }
                 
-                if (!allFiles) {
-                    m->mothurRemove(outputGroupFileName);
-                }else {
-                    ofstream outGroup;
-                    m->openOutputFile(outputGroupFileName, outGroup);
-                    
-                    for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
-                        outCGroup << itGroup->first << '\t' << itGroup->second << endl;
-                        outGroup << itGroup->first << '\t' << itGroup->second << endl;
-                    }
-                    outGroup.close();
+                
+                ofstream outGroup;
+                m->openOutputFile(thisOutputGroupFileName, outGroup);
+                for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                    outCGroup << itGroup->first << '\t' << itGroup->second << endl;
+                    outGroup << itGroup->first << '\t' << itGroup->second << endl;
                 }
+                outGroup.close();
                 outCGroup.close();
+                
+                if (!allFiles) { m->mothurRemove(thisOutputGroupFileName); }
                 
                 for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
                     map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
