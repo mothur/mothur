@@ -231,8 +231,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 				abort=true;
 			}
 
-            if ((!fasta) && (!qual) && (file == "")) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
-            
+            if ((!fasta) && (!qual) && (file == "") && (fastaQFile == "") && (oligosfile == "")) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
             temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
 			reorient = m->isTrue(temp);
 
