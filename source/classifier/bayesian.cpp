@@ -111,7 +111,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			
 				//initialze probabilities
 				wordGenusProb.resize(numKmers);
-				WordPairDiffArr.resize(numKmers);
+                for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
 			
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
                 ofstream out;
@@ -484,7 +484,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
         vector<int> num; num.resize(numKmers);
         float prob;
         vector<float> zeroCountProb; zeroCountProb.resize(numKmers);
-        WordPairDiffArr.resize(numKmers);
+        for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
         
         //read version
         string line2 = m->getline(inNum); m->gobble(inNum);

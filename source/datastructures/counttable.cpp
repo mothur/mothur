@@ -28,6 +28,8 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
         
         uniques = 0;
         total = 0;
+        bool error = false;
+        //n contains treenames
         for (set<string>::iterator it = n.begin(); it != n.end(); it++) {
             
             if (m->control_pressed) { break; }
@@ -55,15 +57,20 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
                 totals.push_back(1);
                 total++;
                 uniques++;
+            }else {
+                error = true;
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();
             }
-        }
-        
-        if (hasGroups) {
-            for (int i = 0; i < totalGroups.size(); i++) {
-                if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
-            }
-        }
 
+        }
+        if (error) { m->control_pressed = true; }
+        else { //check for zero groups
+            if (hasGroups) {
+                for (int i = 0; i < totalGroups.size(); i++) {
+                    if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+                }
+            }
+        }
         return 0;
     }
 	catch(exception& e) {
