@@ -1126,7 +1126,7 @@ int GetSeqsCommand::readAlign(){
                     }
                     out << endl;
                 }else {
-                    m->mothurOut("[WARNING]: " + name + " is in your taxonomy file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
 				
 			}else {//still read just don't do anything with it
