@@ -60,7 +60,7 @@ public:
     
 private:
     char delim; 
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz, renameSeq;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
     string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName, group;
 	float match, misMatch, gapOpen, gapExtend;
@@ -77,8 +77,8 @@ private:
     bool checkName(Sequence& forward, Sequence& reverse);
     bool checkName(QualityScores& forward, QualityScores& reverse);
     bool checkName(Sequence& forward, QualityScores& reverse);
-    unsigned long long processMultipleFileOption(map<string, int>&);
-    unsigned long long processSingleFileOption(map<string, int>&);
+    unsigned long long processMultipleFileOption(map<string, int>&, vector<string>&);
+    unsigned long long processSingleFileOption(map<string, int>&, vector<string>&);
     int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);
     #ifdef USE_BOOST
     bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, string, string);

@@ -10,14 +10,19 @@
 #include "sequence.hpp"
 #include "groupmap.h"
 #include "counttable.h"
+#include "qualityscores.h"
 
 //**********************************************************************************************************************
 vector<string> RenameSeqsCommand::setParameters(){
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "GroupCount", "none","",false,false,true); parameters.push_back(pcount);
-        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "GroupCount", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pfile("file", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfile);
+        CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pmap);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pqfile("qfile", "InputTypes", "", "", "file", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "file", "none", "none","contigsreport",false,false,true); parameters.push_back(pcontigsreport);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount-file", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup-file", "none", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup-file", "none", "none","group",false,false,true); parameters.push_back(pgroup);
         CommandParameter pdelim("delim", "String", "", "_", "", "", "","",false,false); parameters.push_back(pdelim);
         CommandParameter pplacement("placement", "Multiple", "front-back", "back", "", "", "","",false,false); parameters.push_back(pplacement);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -37,10 +42,13 @@ vector<string> RenameSeqsCommand::setParameters(){
 string RenameSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The rename.seqs command reads a fastafile and groupfile or count file with an optional namefile. It creates files with the sequence names concatenated with the group.";
-		helpString += "The rename.seqs command parameters are fasta, name, group, count, placement, delim. Fasta and group or count are required, unless a current file is available for both.\n";
-        helpString += "The placement parameter allows you to indicate whether you would like the group name appended to the front or back of the sequence name.  Options are front or back. Default=back.\n";
-        helpString += "The delim parameter allow you to enter the character or characters you would like to separate the sequence name from the group name. Default='_'.\n";
+		helpString += "The rename.seqs command reads a fastafile or file file and renames the sequences using a count. Optionally you can add a groupfile or count file with an optional namefile. Then it will create files with the sequence names concatenated with the group.";
+		helpString += "The rename.seqs command parameters are fasta, name, group, count, qfile, placement, contigsreport and delim. Fasta is required, unless a current file is available for both.\n";
+        helpString += "The qfile allows you to provide an associated quality file.\n";
+        helpString += "The contigsreport allows you to provide an associated contigsreport file.\n";
+        helpString += "The file option allows you to provide a 1 or 2 column file. The first column contains a fasta file and the optional second column can be a group name. If there is a second column, all sequences in the fasta file will be assigned to that group.  This can be helpful when renaming data separated into samples. \n";
+        helpString += "The placement parameter allows you to indicate whether you would like the group name appended to the front or back of the sequence number.  Options are front or back. Default=back.\n";
+        helpString += "The delim parameter allow you to enter the character or characters you would like to separate the sequence number from the group name. Default='_'.\n";
         helpString += "The rename.seqs command should be in the following format: \n";
         helpString += "The rename.seqs command should be in the following format: \n";
 		helpString += "rename.seqs(fasta=yourFastaFile, group=yourGroupFile) \n";
@@ -58,10 +66,13 @@ string RenameSeqsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta")        {  pattern = "[filename],renamed,[extension]"; }
-        else if (type == "name")    {  pattern = "[filename],renamed,[extension]"; }
-        else if (type == "group")   {  pattern = "[filename],renamed,[extension]"; }
-        else if (type == "count")   {  pattern = "[filename],renamed,[extension]"; }
+        if (type == "fasta")                    {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "name")                {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "group")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "count")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "qfile")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "contigsreport")       {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "map")                 {  pattern = "[filename],renamed_map"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -77,10 +88,13 @@ RenameSeqsCommand::RenameSeqsCommand(){
 		abort = true; calledHelp = true;
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["map"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["contigsreport"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RenameSeqsCommand", "RenameSeqsCommand");
@@ -115,6 +129,9 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             outputTypes["name"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["map"] = tempOutNames;
+            outputTypes["qfile"] = tempOutNames;
+            outputTypes["contigsreport"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);
@@ -152,6 +169,38 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("qfile");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("contigsreport");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("map");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["map"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("file");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["file"] = inputDir + it->second;		}
+                }
 			}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -160,11 +209,23 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
 			if (fastaFile == "not open") { abort = true; }
-			else if (fastaFile == "not found") {
-				fastaFile = m->getFastaFile();
-				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastaFile); }
+			else if (fastaFile == "not found") { fastaFile = ""; }
+			else { m->setFastaFile(fastaFile); }
+            
+            fileFile = validParameter.validFile(parameters, "file", true);
+            if (fileFile == "not open") { abort = true; }
+            else if (fileFile == "not found") { fileFile = ""; }
+            else { m->setFileFile(fileFile); }
+            
+            if ((fastaFile == "") && (fileFile == "")) {
+                fastaFile = m->getFastaFile();
+                if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                else {
+                    fileFile = m->getFileFile();
+                    if (fileFile != "") { m->mothurOut("Using " + fileFile + " as input file for the file parameter."); m->mothurOutEndLine(); }
+                    else {  m->mothurOut("You have no current fastafile or file file and the fasta or file parameter is required."); m->mothurOutEndLine(); abort = true; }
+                }
+            }
 			
             groupfile = validParameter.validFile(parameters, "group", true);
             if (groupfile == "not open") { abort = true; }
@@ -174,35 +235,35 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             countfile = validParameter.validFile(parameters, "count", true);
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = ""; }
-            else {
-                m->setCountTableFile(countfile);
-                CountTable temp;
-                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting.\n"); abort=true; }
-            }
+            else {  m->setCountTableFile(countfile);  }
             
             nameFile = validParameter.validFile(parameters, "name", true);
             if (nameFile == "not open") { abort = true; }
             else if (nameFile == "not found"){ nameFile =""; }
             else { m->setNameFile(nameFile); }
             
-            //look for current files
-            if ((groupfile == "") && (countfile == "")) {
-                groupfile = m->getGroupFile();
-                if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
-                else {
-                    countfile = m->getCountTableFile();
-                    if (countfile != "") {
-                        m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
-                        CountTable temp;
-                        if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting.\n"); abort=true; }
-                    else {
-                        m->mothurOut("[ERROR]: You need to provide a groupfile or countfile."); m->mothurOutEndLine();
-                        abort = true;
-                    }
-                }
-            }
+            qualfile = validParameter.validFile(parameters, "qfile", true);
+            if (qualfile == "not open") { abort = true; }
+            else if (qualfile == "not found"){ qualfile =""; }
+            else { m->setQualFile(qualfile); }
+            
+            mapFile = validParameter.validFile(parameters, "map", true);
+            if (mapFile == "not open") { abort = true; }
+            else if (mapFile == "not found"){ mapFile = ""; }
+            
+            contigsfile = validParameter.validFile(parameters, "contigsreport", true);
+            if (contigsfile == "not open") { abort = true; }
+            else if (contigsfile == "not found"){ contigsfile = ""; }
             
             if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((fileFile != "") && (fastaFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: file or fasta."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((countfile != "") && (groupfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((fileFile != "") && ((nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (fileFile != "") || (fastaFile != "")) ) {
+                m->mothurOut("The file option cannot be used with any other files except the map file."); m->mothurOutEndLine(); abort = true;
+            }
 
             placement = validParameter.validFile(parameters, "placement", false);		if (placement == "not found") { placement = "back"; }
             if ((placement == "front") || (placement == "back")) { }
@@ -230,174 +291,159 @@ int RenameSeqsCommand::execute() {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-		//prepare filenames and open files
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastaFile);  }
-		string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
-        map<string, string> variables;
-        variables["[filename]"] = outFastaFile;
-        variables["[extension]"] = m->getExtension(fastaFile);
-        outFastaFile = getOutputFileName("fasta", variables);
-        outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
-        
-        ofstream outFasta;
-		m->openOutputFile(outFastaFile, outFasta);
-        
-        ifstream in;
-        m->openInputFile(fastaFile, in);
-        
-        GroupMap* groupMap = NULL;
-        CountTable* countTable = NULL;
-        if (groupfile != "") {
-            groupMap = new GroupMap(groupfile);
+        if (fileFile != "") {  processFile(); }
+        else {
             
-            int groupError = groupMap->readMap();
-            if (groupError == 1) { delete groupMap; return 0; }
-            vector<string> allGroups = groupMap->getNamesOfGroups();
-            m->setAllGroups(allGroups);
-        }else{
-            countTable = new CountTable();
-            countTable->readTable(countfile, true, false);
-        }
-        
-        while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            //prepare filenames and open files
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += m->hasPath(fastaFile);  }
+            string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
+            map<string, string> variables;
+            variables["[filename]"] = outFastaFile;
+            variables["[extension]"] = m->getExtension(fastaFile);
+            outFastaFile = getOutputFileName("fasta", variables);
+            outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
             
-            Sequence seq(in); m->gobble(in);
-            string group = "not found";
-            if (groupfile != "") { group = groupMap->getGroup(seq.getName()); }
-            else {
-                vector<string> groups = countTable->getGroups(seq.getName());
-                if (group.size() == 0) { group = "not found"; }
-                else {
-                    group = groups[0];
-                    for (int i = 1; i < groups.size(); i++) { group += "_" + groups[i]; }
-                }
-                
-            }
-            if (group == "not found") {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your file, please correct.\n"); m->control_pressed = true; }
-            else {
-                string newName = "";
-                if (placement == "back") { newName = seq.getName() + delim + group; }
-                else { newName = group + delim + seq.getName(); }
-                
-                //rename sequence in count table
-                if (countfile != "") { countTable->renameSeq(seq.getName(), newName); }
-                
-                seq.setName(newName);
-                seq.printSequence(outFasta);
-            }
-        }
-        in.close();
-        
-        if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
-        
-        bool notDone = true;
-        if (nameFile != "") {
-            thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(nameFile);  }
-            string outNameFile = thisOutputDir + m->getRootName(m->getSimpleName(nameFile));
-            variables["[filename]"] = outNameFile;
-            variables["[extension]"] = m->getExtension(nameFile);
-            outNameFile = getOutputFileName("group", variables);
-            outputNames.push_back(outNameFile); outputTypes["name"].push_back(outNameFile);
+            string outMapFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
+            variables["[filename]"] = outMapFile;
+            outMapFile = getOutputFileName("map", variables);
+            outputNames.push_back(outMapFile); outputTypes["map"].push_back(outMapFile);
+            ofstream outMap; m->openOutputFile(outMapFile, outMap);
             
             ofstream outName;
-            m->openOutputFile(outNameFile, outName);
-            
             map<string, vector<string> > nameMap;
-            m->readNames(nameFile, nameMap);
-            
-            //process name file changing names
-            for (map<string, vector<string> >::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
-                for (int i = 0; i < (it->second).size()-1; i++) {
-                    if (m->control_pressed) { break; }
-                    string group = groupMap->getGroup((it->second)[i]);
-                    if (group == "not found") {  m->mothurOut("[ERROR]: " + (it->second)[i] + " is not in your group file, please correct.\n"); m->control_pressed = true;  }
-                    else {
-                        string newName = "";
-                        if (placement == "back") { newName = (it->second)[i] + delim + group; }
-                        else { newName = group + delim + (it->second)[i]; }
-                        groupMap->renameSeq((it->second)[i], newName); //change in group file
-                        (it->second)[i] = newName; //change in namefile
-                    }
-                    if (i == 0) {  outName << (it->second)[i] << '\t' << (it->second)[i] << ','; }
-                    else { outName << (it->second)[i] << ','; }
-                }
+            if (nameFile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(nameFile);  }
+                string outNameFile = thisOutputDir + m->getRootName(m->getSimpleName(nameFile));
+                variables["[filename]"] = outNameFile;
+                variables["[extension]"] = m->getExtension(nameFile);
+                outNameFile = getOutputFileName("name", variables);
+                outputNames.push_back(outNameFile); outputTypes["name"].push_back(outNameFile);
                 
-                //print last one
-                if ((it->second).size() == 1) {
-                    string group = groupMap->getGroup((it->second)[0]);
-                    if (group == "not found") {  m->mothurOut("[ERROR]: " + (it->second)[0] + " is not in your group file, please correct.\n"); m->control_pressed = true;  }
-                    else {
-                        string newName = "";
-                        if (placement == "back") { newName = (it->second)[0] + delim + group; }
-                        else { newName = group + delim + (it->second)[0]; }
-                        groupMap->renameSeq((it->second)[0], newName); //change in group file
-                        (it->second)[0] = newName; //change in namefile
-
-                        outName << (it->second)[0] << '\t' << (it->second)[0] << endl;
-                    }
-                }
-                else {
-                    string group = groupMap->getGroup((it->second)[(it->second).size()-1]);
-                    if (group == "not found") {  m->mothurOut("[ERROR]: " + (it->second)[(it->second).size()-1] + " is not in your group file, please correct.\n"); m->control_pressed = true;  }
-                    else {
-                        string newName = "";
-                        if (placement == "back") { newName = (it->second)[(it->second).size()-1] + delim + group; }
-                        else { newName = group + delim + (it->second)[(it->second).size()-1]; }
-                        groupMap->renameSeq((it->second)[(it->second).size()-1], newName); //change in group file
-                        (it->second)[(it->second).size()-1] = newName; //change in namefile
-
-                        outName << (it->second)[(it->second).size()-1] << endl;
-                    }
-                }
+                m->openOutputFile(outNameFile, outName);
+                m->readNames(nameFile, nameMap);
             }
-            notDone = false;
-            outName.close();
-        }
-        
-        if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
-        
-        if (groupfile != "") {
-            if (notDone) {
-                vector<string> seqs = groupMap->getNamesSeqs();
-                for (int i = 0; i < seqs.size(); i++) {
-                    if (m->control_pressed) { break; }
-                    string group = groupMap->getGroup(seqs[i]);
-                    string newName = "";
-                    if (placement == "back") { newName = seqs[i] + delim + group; }
-                    else { newName = group + delim + seqs[i]; }
-                    groupMap->renameSeq(seqs[i], newName);
-                }
-            }
-            
-            thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-            string outGroupFile = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-            variables["[filename]"] = outGroupFile;
-            variables["[extension]"] = m->getExtension(groupfile);
-            outGroupFile = getOutputFileName("group", variables);
-            outputNames.push_back(outGroupFile); outputTypes["group"].push_back(outGroupFile);
             
             ofstream outGroup;
-            m->openOutputFile(outGroupFile, outGroup);
-            groupMap->print(outGroup);
-            outGroup.close();
-
-        }else {
-            thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-            string outCountFile = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-            variables["[filename]"] = outCountFile;
-            variables["[extension]"] = m->getExtension(countfile);
-            outCountFile = getOutputFileName("count", variables);
-            outputNames.push_back(outCountFile); outputTypes["count"].push_back(outCountFile);
-            countTable->printTable(outCountFile);
+            if (groupfile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+                string outGroupFile = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+                variables["[filename]"] = outGroupFile;
+                variables["[extension]"] = m->getExtension(groupfile);
+                outGroupFile = getOutputFileName("group", variables);
+                outputNames.push_back(outGroupFile); outputTypes["group"].push_back(outGroupFile);
+                
+                m->openOutputFile(outGroupFile, outGroup);
+            }
+            
+            ofstream outFasta;
+            m->openOutputFile(outFastaFile, outFasta);
+            
+            ifstream in;
+            m->openInputFile(fastaFile, in);
+            
+            GroupMap* groupMap = NULL;
+            CountTable* countTable = NULL;
+            bool hasGroups = false;
+            vector<string> allGroups; allGroups.push_back("");
+            m->setAllGroups(allGroups);
+            if (groupfile != "") {
+                groupMap = new GroupMap(groupfile);
+                
+                int groupError = groupMap->readMap();
+                if (groupError == 1) { delete groupMap; return 0; }
+                allGroups = groupMap->getNamesOfGroups();
+                m->setAllGroups(allGroups);
+                hasGroups = true;
+            }else if (countfile != "") {
+                countTable = new CountTable();
+                countTable->readTable(countfile, true, false);
+                hasGroups = countTable->hasGroupInfo();
+                if (hasGroups) {     allGroups = countTable->getNamesOfGroups(); allGroups.push_back("Multi"); m->setAllGroups(allGroups); }
+            }
+            
+            //set up for reads
+            map<string, int> counts; for (int i = 0; i < allGroups.size(); i++) {  counts[allGroups[i]] = 1; }
+            map<string, string> old2NewNameMap;
+            bool fillOld2NewNameMap = false;
+            if ((qualfile != "") || (contigsfile != "")) { fillOld2NewNameMap = true; }
+            
+            while (!in.eof()) {
+                if (m->control_pressed) { break; }
+                
+                Sequence seq(in); m->gobble(in);
+                
+                vector<string> dups;
+                if (nameFile != "") {
+                    map<string, vector<string> >::iterator it = nameMap.find(seq.getName());
+                    if (it == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name file, please correct.\n"); m->control_pressed = true;  }
+                    else { dups = it->second; }
+                }else { dups.push_back(seq.getName()); }
+                
+                for (int i = 0; i < dups.size(); i++) {
+                    string group = "";
+                    if (groupfile != "") {
+                        group = groupMap->getGroup(dups[i]);
+                    }else if (countfile != "") {
+                        if (hasGroups) {
+                            vector<string> groups = countTable->getGroups(seq.getName());
+                            if (group.size() == 0)      {   group = "not found";    }
+                            else if (group.size() == 1) {   group = groups[0];      }
+                            else                        {   group = "Multi";        }
+                        }
+                    }
+                    
+                    if (group == "not found") {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your file, please correct.\n"); m->control_pressed = true; }
+                    else {
+                        string newName = toString(counts[group]); counts[group]++;
+                        if ((placement == "back") && (group != "")) { newName += delim + group; }
+                        else if (group != "") { newName = group + delim + newName; }
+                        
+                        if (i == 0) {
+                            seq.setName(newName);
+                            seq.printSequence(outFasta);
+                        }
+                        
+                        if (countfile != "") { countTable->renameSeq(seq.getName(), newName); }
+                        if (groupfile != "") { outGroup << newName << '\t' << group << endl;  }
+                        
+                        if ((nameFile != "") && (i == 0))  { outName << newName << '\t' << newName;  }
+                        else { outName << "," << newName;  }
+                        
+                        outMap << newName << '\t' << dups[i] << endl;
+                        
+                        if (fillOld2NewNameMap) {  old2NewNameMap[dups[i]] = newName; }
+                    }
+                }
+                if (nameFile != "") { outName << endl;  }
+            }
+            in.close();
+            outMap.close();
+            if (nameFile != "") { outName.close(); }
+            
+            if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
+            
+            
+            if (groupfile != "") {   outGroup.close(); }
+            else if (countfile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+                string outCountFile = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+                variables["[filename]"] = outCountFile;
+                variables["[extension]"] = m->getExtension(countfile);
+                outCountFile = getOutputFileName("count", variables);
+                outputNames.push_back(outCountFile); outputTypes["count"].push_back(outCountFile);
+                countTable->printTable(outCountFile);
+            }
+            
+            if (groupMap != NULL) { delete groupMap; }
+            if (countTable != NULL) { delete countTable; }
+            
+            if (qualfile != "")         { readQual(old2NewNameMap);     }
+            if (contigsfile != "")      { readContigs(old2NewNameMap);  }
         }
-        
-        if (groupMap != NULL) { delete groupMap; }
-        if (countTable != NULL) { delete countTable; }
         
         if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
 
@@ -427,6 +473,11 @@ int RenameSeqsCommand::execute() {
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
         }
+        
+        itTypes = outputTypes.find("qfile");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+        }
 				
 		return 0;
 	}
@@ -434,6 +485,139 @@ int RenameSeqsCommand::execute() {
 		m->errorOut(e, "RenameSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int RenameSeqsCommand::readQual(map<string, string>& oldMap){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
+        variables["[extension]"] = m->getExtension(qualfile);
+        string outputFileName = getOutputFileName("qfile", variables);
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["qfile"].push_back(outputFileName);
+        cout << "qual = " << outputFileName << endl;
+        ifstream in;
+        m->openInputFile(qualfile, in);
+        
+        map<string, string>::iterator it;
+        
+        while(!in.eof()){
+            if (m->control_pressed) { break; }
+            
+            QualityScores qual(in); m->gobble(in);
+            
+            it = oldMap.find(qual.getName());
+            if (it == oldMap.end()) {
+                m->mothurOut("[ERROR]: " + qual.getName() + " is not in your quality file, please correct.\n"); m->control_pressed = true;
+            }else {
+                qual.setName(it->second);
+            }
+            
+            qual.printQScores(out);
+        }
+        in.close();
+        out.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readQual");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(contigsfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(contigsfile));
+        variables["[extension]"] = m->getExtension(contigsfile);
+        string outputFileName = getOutputFileName("contigsreport", variables);
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["contigsreport"].push_back(outputFileName);
+        cout << "contigsreport = " << outputFileName << endl;
+
+        ifstream in;
+        m->openInputFile(contigsfile, in);
+        out << (m->getline(in)) << endl;   //skip headers
+        
+        map<string, string>::iterator it;
+        int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
+        string name;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in);
+            
+            it = oldMap.find(name);
+            if (it == oldMap.end()) {
+                m->mothurOut("[ERROR]: " + name + " is not in your contigs report file, please correct.\n"); m->control_pressed = true;
+            }else {
+                name = it->second;
+            }
+
+            out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
+        }
+        in.close();
+        out.close();
+
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readContigs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int RenameSeqsCommand::readFasta(string thisFastaFile, map<string, string>& oldMap){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(thisFastaFile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(thisFastaFile));
+        variables["[extension]"] = m->getExtension(thisFastaFile);
+        string outputFileName = getOutputFileName("fasta", variables);
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
+        cout << "fasta = " << outputFileName << endl;
+        
+        ifstream in;
+        m->openInputFile(thisFastaFile, in);
+        
+        map<string, string>::iterator it;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            Sequence seq(in); m->gobble(in);
+            
+            it = oldMap.find(seq.getName());
+            if (it == oldMap.end()) {
+                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your fasta file, please correct.\n"); m->control_pressed = true;
+            }else {
+                seq.setName(it->second);
+            }
+            seq.printSequence(out);
+        }
+        in.close();
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readFasta");
+        exit(1);
+    }
 }
 /**************************************************************************************/
 
