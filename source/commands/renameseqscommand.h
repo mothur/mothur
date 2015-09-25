@@ -44,6 +44,7 @@ private:
     int readFasta(string, map<string, string>&);
     int processFile(map<string, string>&);
     int readMapFile(map<string, string>&);
+    vector< map<string, string> > readFiles();
     
 };
 

@@ -663,5 +663,115 @@ int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
         exit(1);
     }
 }
+//**********************************************************************************************************************
+int RenameSeqsCommand::processFile(map<string, string>& readMap){
+    try {
+        
+        vector<map<string, string> > files = readFiles();
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (m->control_pressed) { break; }
+            
+            string thisFastaFile = (files[i].begin())->first;
+            string group = (files[i].begin())->second;
+            
+            string thisOutputDir = outputDir;
+            string outMapFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFastaFile));
+            map<string, string> variables;
+            variables["[filename]"] = outMapFile;
+            outMapFile = getOutputFileName("map", variables);
+            outputNames.push_back(outMapFile); outputTypes["map"].push_back(outMapFile);
+            ofstream outMap; m->openOutputFile(outMapFile, outMap);
+            
+            //prepare filenames and open files
+            if (outputDir == "") {  thisOutputDir += m->hasPath(thisFastaFile);  }
+            string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFastaFile));
+            variables["[filename]"] = outFastaFile;
+            variables["[extension]"] = m->getExtension(thisFastaFile);
+            outFastaFile = getOutputFileName("fasta", variables);
+            outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
+            
+            ofstream outFasta;
+            m->openOutputFile(outFastaFile, outFasta);
+            
+            ifstream in;
+            m->openInputFile(thisFastaFile, in);
+            
+            int count = 1;
+            while (!in.eof()) {
+                if (m->control_pressed) { break; }
+                
+                Sequence seq(in); m->gobble(in);
+ 
+                //get new name
+                string newName = "";
+                if (mapFile != "") {
+                    map<string, string>::iterator itMap = readMap.find(seq.getName());
+                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your map file, please correct.\n"); m->control_pressed = true;}
+                    else { newName = itMap->second; }
+                }else {
+                    newName = toString(count); count++;
+                    if ((placement == "back") && (group != "")) { newName += delim + group; }
+                    else if (group != "") { newName = group + delim + newName; }
+                }
+                
+                if (i == 0) {
+                    seq.setName(newName);
+                    seq.printSequence(outFasta);
+                }
+                
+                outMap << newName << '\t' << seq.getName() << endl;
+            }
+            in.close();
+            outMap.close();
+            outFasta.close();
+        }
+        
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "processFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<map<string, string> > RenameSeqsCommand::readFiles(){
+    try {
+        
+        vector<map<string, string> > files;
+        
+        ifstream in;
+        m->openInputFile(fileFile, in);
+        
+        while (!in.eof()) {
+            if (m->control_pressed) { break; }
+            
+            string line = m->getline(in);  m->gobble(in);
+            vector<string> pieces = m->splitWhiteSpace(line);
+            
+            string group = "";
+            string thisFileName; thisFileName = "";
+            if (pieces.size() == 1) {
+                thisFileName = pieces[0];
+            }else if (pieces.size() == 2) {
+                thisFileName = pieces[0];
+                group = pieces[1];
+            }else {
+                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. The file option allows you to provide a 1 or 2 column file. The first column contains a fasta file and the optional second column can be a group name. If there is a second column, all sequences in the fasta file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->control_pressed = true;
+            }
+            
+            map<string, string> temp; temp[thisFileName] = group;
+            files.push_back(temp);
+        }
+        in.close();
+        
+        return files;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readFiles");
+        exit(1);
+    }
+}
 /**************************************************************************************/
 
