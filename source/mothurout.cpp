@@ -675,30 +675,11 @@ string MothurOut::getline(ifstream& fileHandle) {
 	}
 }
 /***********************************************************************/
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-inline bool endsWith(string s, const char * suffix){
-  size_t suffixLength = strlen(suffix);
-  return s.size() >= suffixLength && s.substr(s.size() - suffixLength, suffixLength).compare(suffix) == 0;
-}
-#endif
-#endif
-
 string MothurOut::getRootName(string longName){
 	try {
 	
 		string rootName = longName;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-    if (endsWith(rootName, ".gz") || endsWith(rootName, ".bz2")) {
-      int pos = rootName.find_last_of('.');
-      rootName = rootName.substr(0, pos);
-      cerr << "shortening " << longName << " to " << rootName << "\n";
-    }
-#endif
-#endif
 		if(rootName.find_last_of(".") != rootName.npos){
 			int pos = rootName.find_last_of('.')+1;
 			rootName = rootName.substr(0, pos);
@@ -1118,30 +1099,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-      // check for gzipped or bzipped file
-      if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-        string tempName = string(tmpnam(0));
-        mkfifo(tempName.c_str(), 0666);
-        int fork_result = fork();
-        if (fork_result < 0) {
-          cerr << "Error forking.\n";
-          exit(1);
-        } else if (fork_result == 0) {
-          string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-          cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-          system(command.c_str());
-          cerr << "Done decompressing " << completeFileName << "\n";
-          mothurRemove(tempName);
-          exit(EXIT_SUCCESS);
-        } else {
-          cerr << "waiting on child process " << fork_result << "\n";
-          completeFileName = tempName;
-        }
-      }
-#endif
-#endif
+        
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
 				//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1165,30 +1123,6 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-  // check for gzipped or bzipped file
-  if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-    string tempName = string(tmpnam(0));
-    mkfifo(tempName.c_str(), 0666);
-    int fork_result = fork();
-    if (fork_result < 0) {
-      cerr << "Error forking.\n";
-      exit(1);
-    } else if (fork_result == 0) {
-      string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-      cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-      system(command.c_str());
-      cerr << "Done decompressing " << completeFileName << "\n";
-      mothurRemove(tempName);
-      exit(EXIT_SUCCESS);
-    } else {
-      cerr << "waiting on child process " << fork_result << "\n";
-      completeFileName = tempName;
-    }
-  }
-#endif
-#endif
 
 		fileHandle.open(completeFileName.c_str());
 		if(!fileHandle) {
@@ -1215,30 +1149,6 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle){
         
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped or bzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-                system(command.c_str());
-                cerr << "Done decompressing " << completeFileName << "\n";
-                mothurRemove(tempName);
-                exit(EXIT_SUCCESS);
-            } else {
-                cerr << "waiting on child process " << fork_result << "\n";
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
         
 		fileHandle.open(completeFileName.c_str(), ios::binary);
 		if(!fileHandle) {
@@ -1265,31 +1175,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
         
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped or bzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-                system(command.c_str());
-                cerr << "Done decompressing " << completeFileName << "\n";
-                mothurRemove(tempName);
-                exit(EXIT_SUCCESS);
-            } else {
-                cerr << "waiting on child process " << fork_result << "\n";
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
-        
+
 		fileHandle.open(completeFileName.c_str(), ios::binary);
 		if(!fileHandle) {
 			//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1472,27 +1358,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	try { 
 	
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-    // check for gzipped file
-    if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-      string tempName = string(tmpnam(0));
-      mkfifo(tempName.c_str(), 0666);
-      cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-      int fork_result = fork();
-      if (fork_result < 0) {
-        cerr << "Error forking.\n";
-        exit(1);
-      } else if (fork_result == 0) {
-        string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
-        system(command.c_str());
-        exit(0);
-      } else {
-        completeFileName = tempName;
-      }
-    }
-#endif
-#endif
+
 		fileHandle.open(completeFileName.c_str(), ios::trunc);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1514,27 +1380,7 @@ int MothurOut::openOutputFileBinary(string fileName, ofstream& fileHandle){
 	try {
         
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
-                system(command.c_str());
-                exit(0);
-            } else {
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
+
 		fileHandle.open(completeFileName.c_str(), ios::trunc | ios::binary);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();

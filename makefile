@@ -10,7 +10,6 @@
 
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
-USECOMPRESSION ?= no
 USEBOOST ?= yes
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 RELEASE_DATE = "\"7/27/2015\""
@@ -43,15 +42,6 @@ endif
 #The boost libraries allow you to read gz files.
 ifeq  ($(strip $(USEBOOST)),yes)
     LIBS += -lboost_iostreams
-endif
-
-
-# if you want to enable reading and writing of compressed files, set to yes.
-# The default is no.  this may only work on unix-like systems, not for windows.
-
-
-ifeq  ($(strip $(USECOMPRESSION)),yes)
-    CXXFLAGS += -DUSE_COMPRESSION
 endif
 
 #
