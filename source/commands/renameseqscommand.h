@@ -42,7 +42,8 @@ private:
     int readQual(map<string, string>&);
     int readContigs(map<string, string>&);
     int readFasta(string, map<string, string>&);
-    int processFile();
+    int processFile(map<string, string>&);
+    int readMapFile(map<string, string>&);
     
 };
 

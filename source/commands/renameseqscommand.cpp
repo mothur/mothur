@@ -291,7 +291,10 @@ int RenameSeqsCommand::execute() {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        if (fileFile != "") {  processFile(); }
+        map<string, string> renameMap;
+        if (mapFile != "") { readMapFile(renameMap);  }
+        
+        if (fileFile != "") {  processFile(renameMap); }
         else {
             
             //prepare filenames and open files
@@ -346,6 +349,7 @@ int RenameSeqsCommand::execute() {
             
             GroupMap* groupMap = NULL;
             CountTable* countTable = NULL;
+            
             bool hasGroups = false;
             vector<string> allGroups; allGroups.push_back("");
             m->setAllGroups(allGroups);
@@ -384,6 +388,7 @@ int RenameSeqsCommand::execute() {
                 
                 for (int i = 0; i < dups.size(); i++) {
                     string group = "";
+                    
                     if (groupfile != "") {
                         group = groupMap->getGroup(dups[i]);
                     }else if (countfile != "") {
@@ -397,9 +402,17 @@ int RenameSeqsCommand::execute() {
                     
                     if (group == "not found") {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your file, please correct.\n"); m->control_pressed = true; }
                     else {
-                        string newName = toString(counts[group]); counts[group]++;
-                        if ((placement == "back") && (group != "")) { newName += delim + group; }
-                        else if (group != "") { newName = group + delim + newName; }
+                        //get new name
+                        string newName = "";
+                        if (mapFile != "") {
+                            map<string, string>::iterator itMap = renameMap.find(dups[i]);
+                            if (itMap == renameMap.end()) { m->mothurOut("[ERROR]: " + dups[i] + " is not in your map file, please correct.\n"); m->control_pressed = true;}
+                            else { newName = itMap->second; }
+                        }else {
+                            newName = toString(counts[group]); counts[group]++;
+                            if ((placement == "back") && (group != "")) { newName += delim + group; }
+                            else if (group != "") { newName = group + delim + newName; }
+                        }
                         
                         if (i == 0) {
                             seq.setName(newName);
@@ -422,6 +435,7 @@ int RenameSeqsCommand::execute() {
             in.close();
             outMap.close();
             if (nameFile != "") { outName.close(); }
+            renameMap.clear();
             
             if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
             
@@ -498,7 +512,7 @@ int RenameSeqsCommand::readQual(map<string, string>& oldMap){
         ofstream out;
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["qfile"].push_back(outputFileName);
-        cout << "qual = " << outputFileName << endl;
+
         ifstream in;
         m->openInputFile(qualfile, in);
         
@@ -541,7 +555,6 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
         ofstream out;
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["contigsreport"].push_back(outputFileName);
-        cout << "contigsreport = " << outputFileName << endl;
 
         ifstream in;
         m->openInputFile(contigsfile, in);
@@ -589,7 +602,6 @@ int RenameSeqsCommand::readFasta(string thisFastaFile, map<string, string>& oldM
         ofstream out;
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
-        cout << "fasta = " << outputFileName << endl;
         
         ifstream in;
         m->openInputFile(thisFastaFile, in);
@@ -616,6 +628,38 @@ int RenameSeqsCommand::readFasta(string thisFastaFile, map<string, string>& oldM
     }
     catch(exception& e) {
         m->errorOut(e, "RenameSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
+    try {
+        ifstream in;
+        m->openInputFile(mapFile, in);
+        
+        map<string, string>::iterator it;
+        string oldname, newname;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            in >> oldname; m->gobble(in);
+            in >> newname; m->gobble(in);
+            
+            it = readMap.find(oldname);
+            if (it != readMap.end()) {
+                m->mothurOut("[ERROR]: " + oldname + " is already in your map file. Sequence names must be unique, quitting.\n"); m->control_pressed = true;
+            }else {
+                readMap[oldname] = newname;
+            }
+            
+        }
+        in.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readMapFile");
         exit(1);
     }
 }
