@@ -46,7 +46,7 @@ string RenameSeqsCommand::getHelpString(){
 		helpString += "The rename.seqs command parameters are fasta, name, group, count, qfile, placement, contigsreport and delim. Fasta is required, unless a current file is available for both.\n";
         helpString += "The qfile allows you to provide an associated quality file.\n";
         helpString += "The contigsreport allows you to provide an associated contigsreport file.\n";
-        helpString += "The file option allows you to provide a 1 or 2 column file. The first column contains a fasta file and the optional second column can be a group name. If there is a second column, all sequences in the fasta file will be assigned to that group.  This can be helpful when renaming data separated into samples. \n";
+        helpString += "The file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples. \n";
         helpString += "The placement parameter allows you to indicate whether you would like the group name appended to the front or back of the sequence number.  Options are front or back. Default=back.\n";
         helpString += "The delim parameter allow you to enter the character or characters you would like to separate the sequence number from the group name. Default='_'.\n";
         helpString += "The rename.seqs command should be in the following format: \n";
@@ -261,7 +261,7 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             
             if ((countfile != "") && (groupfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
             
-            if ((fileFile != "") && ((nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (fileFile != "") || (fastaFile != "")) ) {
+            if ((fileFile != "") && ((nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (countfile != "") || (fastaFile != "")) ) {
                 m->mothurOut("The file option cannot be used with any other files except the map file."); m->mothurOutEndLine(); abort = true;
             }
 
@@ -672,11 +672,20 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
         for (int i = 0; i < files.size(); i++) {
             if (m->control_pressed) { break; }
             
-            string thisFastaFile = (files[i].begin())->first;
+            string thisFile = "";
+            string thisFileType = "";
             string group = (files[i].begin())->second;
+            string temp = (files[i].begin())->first;
             
+            int pos = temp.find_first_of('-');
+            if (pos == string::npos) {  m->mothurOut("[Opps]: I should never get here...\n");  }
+            else {
+                thisFileType = temp.substr(0, pos);
+                thisFile = temp.substr(pos);
+            }
+
             string thisOutputDir = outputDir;
-            string outMapFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFastaFile));
+            string outMapFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFile));
             map<string, string> variables;
             variables["[filename]"] = outMapFile;
             outMapFile = getOutputFileName("map", variables);
@@ -684,30 +693,34 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
             ofstream outMap; m->openOutputFile(outMapFile, outMap);
             
             //prepare filenames and open files
-            if (outputDir == "") {  thisOutputDir += m->hasPath(thisFastaFile);  }
-            string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFastaFile));
-            variables["[filename]"] = outFastaFile;
-            variables["[extension]"] = m->getExtension(thisFastaFile);
-            outFastaFile = getOutputFileName("fasta", variables);
-            outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
+            if (outputDir == "") {  thisOutputDir += m->hasPath(thisFile);  }
+            string outFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFile));
+            variables["[filename]"] = outFile;
+            variables["[extension]"] = m->getExtension(thisFile);
+            outFile = getOutputFileName(thisFileType, variables);
+            outputNames.push_back(outFile); outputTypes[thisFileType].push_back(outFile);
             
-            ofstream outFasta;
-            m->openOutputFile(outFastaFile, outFasta);
+            ofstream out;
+            m->openOutputFile(outFile, out);
             
             ifstream in;
-            m->openInputFile(thisFastaFile, in);
+            m->openInputFile(thisFile, in);
             
             int count = 1;
             while (!in.eof()) {
                 if (m->control_pressed) { break; }
                 
-                Sequence seq(in); m->gobble(in);
+                Sequence* seq;  QualityScores* qual;
+                string name = "";
+                if (thisFileType == "fasta")        {  seq = new Sequence(in);   name = seq->getName();        }
+                else if (thisFileType == "qfile")   {  qual = new QualityScores(in);  name = qual->getName();  }
+                m->gobble(in);
  
                 //get new name
                 string newName = "";
                 if (mapFile != "") {
-                    map<string, string>::iterator itMap = readMap.find(seq.getName());
-                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your map file, please correct.\n"); m->control_pressed = true;}
+                    map<string, string>::iterator itMap = readMap.find(name);
+                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your map file, please correct.\n"); m->control_pressed = true;}
                     else { newName = itMap->second; }
                 }else {
                     newName = toString(count); count++;
@@ -715,16 +728,15 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                     else if (group != "") { newName = group + delim + newName; }
                 }
                 
-                if (i == 0) {
-                    seq.setName(newName);
-                    seq.printSequence(outFasta);
-                }
                 
-                outMap << newName << '\t' << seq.getName() << endl;
+                if (thisFileType == "fasta")        {  seq->setName(newName);  seq->printSequence(out); delete seq; }
+                if (thisFileType == "qfile")        {  qual->setName(newName);  qual->printQScores(out); delete qual; }
+                
+                outMap << newName << '\t' << name << endl;
             }
             in.close();
             outMap.close();
-            outFasta.close();
+            out.close();
         }
         
         
@@ -752,13 +764,13 @@ vector<map<string, string> > RenameSeqsCommand::readFiles(){
             
             string group = "";
             string thisFileName; thisFileName = "";
-            if (pieces.size() == 1) {
-                thisFileName = pieces[0];
-            }else if (pieces.size() == 2) {
-                thisFileName = pieces[0];
-                group = pieces[1];
+            if (pieces.size() == 2) {
+                thisFileName = pieces[0]+"-"+pieces[1];
+            }else if (pieces.size() == 3) {
+                thisFileName = pieces[0]+"-"+pieces[1];
+                group = pieces[2];
             }else {
-                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. The file option allows you to provide a 1 or 2 column file. The first column contains a fasta file and the optional second column can be a group name. If there is a second column, all sequences in the fasta file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. TThe file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->control_pressed = true;
             }
             
             map<string, string> temp; temp[thisFileName] = group;

@@ -417,11 +417,12 @@ int MakeContigsCommand::execute(){
         int start = time(NULL);
         longestBase = 1000; group = "";
         vector<string> theseOutputFileNames;
+        map<string, string> theseAllFileNames;
    
         if (file != "") {
-            numReads = processMultipleFileOption(totalGroupCounts, theseOutputFileNames);
+            numReads = processMultipleFileOption(totalGroupCounts, theseOutputFileNames, theseAllFileNames);
         }else if ((ffastqfile != "") || (ffastafile != "")) {
-            numReads = processSingleFileOption(totalGroupCounts, theseOutputFileNames);
+            numReads = processSingleFileOption(totalGroupCounts, theseOutputFileNames, theseAllFileNames);
         }else {  return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
@@ -430,6 +431,12 @@ int MakeContigsCommand::execute(){
     
         
         if (renameSeq) {
+            //do we have qualfiles
+            bool hasQualFiles = false;
+            itTypes = outputTypes.find("qfile");
+            if (itTypes != outputTypes.end()) { hasQualFiles = true; }
+            
+            outputNames.clear(); outputTypes.clear();
             
             string inputString = "";
             if (theseOutputFileNames[0] != "")      { inputString += "fasta=" + theseOutputFileNames[0];            }
@@ -462,11 +469,59 @@ int MakeContigsCommand::execute(){
                 outMisMatchFile = filenames["contigsreport"][0]; m->renameFile(outMisMatchFile, theseOutputFileNames[2]);
                 outputNames.push_back(theseOutputFileNames[2]); outputTypes["contigsreport"].push_back(theseOutputFileNames[2]);
             }
-            cout << theseOutputFileNames[3] << '\t' << outputGroupFileName << endl;
+            
             if (theseOutputFileNames[3] != "")      {
                 outputGroupFileName = filenames["group"][0]; m->renameFile(outputGroupFileName, theseOutputFileNames[3]);
                 outputNames.push_back(theseOutputFileNames[3]); outputTypes["group"].push_back(theseOutputFileNames[3]);
             }
+            
+            //print out file for rename.seqs command
+            string tempFileFile = "makeContigsRenameFileForAllFIles.temp";
+            ofstream outTemp;
+            m->openOutputFile(tempFileFile, outTemp);
+////////////////////////check these scrap files to make sure they aren't blank /////////////////////
+            //add scrap qual and scrap fasta
+            if (theseOutputFileNames[4] != "")      {  outTemp << "fasta" << '\t' << theseOutputFileNames[4] << "scrap" << endl; }
+            if (theseOutputFileNames[5] != "")      {  outTemp << "qfile" << '\t' << theseOutputFileNames[5] << "scrap" << endl; }
+            
+            if (allFiles && (theseAllFileNames.size() != 0)) {
+                for (map<string, string>::iterator it = theseAllFileNames.begin(); it != theseAllFileNames.end(); it++) {
+                    outTemp << "fasta" << '\t' << it->first << '\t' << it->second << endl;
+                    if (hasQualFiles) {
+                        string qualFilename = m->getRootName(it->first);
+                        qualFilename += ".qual";
+                        outTemp << "qfile" << '\t' << qualFilename << '\t' << it->second << endl;
+                    }
+                }
+            }
+            outTemp.close();
+            
+            inputString = "file=" + tempFileFile;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* renameSeqsAllFilesCommand = new RenameSeqsCommand(inputString);
+            renameSeqsAllFilesCommand->execute();
+            
+            filenames = renameSeqsAllFilesCommand->getOutputFiles();
+            
+            delete renameSeqsAllFilesCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            
+            if (theseOutputFileNames[4] != "")      {
+                outScrapFastaFile = filenames["fasta"][0]; m->renameFile(outScrapFastaFile, theseOutputFileNames[4]);
+                outputNames.push_back(theseOutputFileNames[4]); outputTypes["fasta"].push_back(theseOutputFileNames[4]);
+            }
+            if (theseOutputFileNames[5] != "")      {
+                outScrapQualFile = filenames["qfile"][0]; m->renameFile(outScrapQualFile, theseOutputFileNames[5]);
+                outputNames.push_back(theseOutputFileNames[5]); outputTypes["qfile"].push_back(theseOutputFileNames[5]);
+            }
+            
+            /////////////////////// rename renamed allfiles to original filenames ////////////////////////////////
+            ///////////////// add to outputNames and outputTypes ////////////////////
+            
         }
         
         string currentFasta = "";
@@ -518,7 +573,7 @@ int MakeContigsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>& totalGroupCounts, vector<string>& theseOutputFileNames) {
+unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>& totalGroupCounts, vector<string>& theseOutputFileNames, map<string, string>& theseAllFileNames) {
     try {
         bool hasQual = false;
         unsigned long long numReads = 0;
@@ -668,6 +723,9 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
             outputNames = outputNames2;
             
             for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+                //save for rename
+                if (renameSeq) { theseAllFileNames[it->first] = it->second; }
+                
                 ifstream in;
                 m->openInputFile(it->first, in);
                 
@@ -698,13 +756,11 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         
         if (file == "") {
             totalGroupCounts = groupCounts;
-            if (!renameSeq) { outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile); }
+            if (!renameSeq) { outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile); outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile); }
             theseOutputFileNames.push_back(outFastaFile);
-            outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
             if (hasQual) {
-                if (!renameSeq) { outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile); }
+                if (!renameSeq) { outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile); outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile); }
                 theseOutputFileNames.push_back(outQualFile);
-                outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
             }else { theseOutputFileNames.push_back(""); }
             if (!renameSeq) { outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile); }
             theseOutputFileNames.push_back(outMisMatchFile);
@@ -712,6 +768,9 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 if (!renameSeq) { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
                 theseOutputFileNames.push_back(outputGroupFileName);
             }else { theseOutputFileNames.push_back(""); }
+            theseOutputFileNames.push_back(outScrapFastaFile);
+            if (hasQual) { theseOutputFileNames.push_back(outScrapQualFile); }
+            else { theseOutputFileNames.push_back(""); }
         }
         m->mothurOut("Done.\n");
         delete oligos;
@@ -724,7 +783,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
     }
 }
 //**********************************************************************************************************************
-unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int>& totalGroupCounts, vector<string>& theseOutputFileNames) {
+unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int>& totalGroupCounts, vector<string>& theseOutputFileNames, map<string, string>& theseAllFileNames) {
     try {
         unsigned long long numReads = 0;
         
@@ -755,9 +814,9 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
             outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
             outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
             outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
+            outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
+            outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
         }
-        outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
-        outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
         theseOutputFileNames.push_back(compositeFastaFile);
         theseOutputFileNames.push_back(compositeQualFile);
         theseOutputFileNames.push_back(compositeMisMatchFile);
@@ -767,7 +826,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
         vector< vector<string> > fileInputs = readFileNames(file);
         
         if (gz) {
-            numReads = createProcessesGroups(fileInputs, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts); theseOutputFileNames.push_back(compositeGroupFile);
+            numReads = createProcessesGroups(fileInputs, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts, theseAllFileNames); theseOutputFileNames.push_back(compositeGroupFile);
         }else {
             for (int l = 0; l < fileInputs.size(); l++) {
                 int startTime = time(NULL);
@@ -787,7 +846,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
                 vector<string> temp;
                 
                 //run file as if it was a single
-                int thisNumReads = processSingleFileOption(groupCounts, temp);
+                int thisNumReads = processSingleFileOption(groupCounts, temp, theseAllFileNames);
                 numReads += thisNumReads;
                 
                 //append to combo files
@@ -831,6 +890,10 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
                 m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n");	m->mothurOutEndLine();
             }
         }
+        
+        theseOutputFileNames.push_back(compositeScrapFastaFile);
+        theseOutputFileNames.push_back(compositeScrapQualFile);
+        
         return numReads;
     }
     catch(exception& e) {
@@ -840,7 +903,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
 }
 //**********************************************************************************************************************
 //only getting here is gz=true
-unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
+unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>& theseAllFileNames) {
     try {
         unsigned long long num = 0;
         vector<int> processIDS;
@@ -877,7 +940,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                                    compositeScrapFastaFile + m->mothurGetpid(process) + ".temp",
                                    compositeQualFile + m->mothurGetpid(process) + ".temp",
                                    compositeScrapQualFile + m->mothurGetpid(process) + ".temp",
-                                   compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts);
+                                   compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts, theseAllFileNames);
                 
                 //pass groupCounts to parent
                 ofstream out;
@@ -895,6 +958,13 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                     for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
                         out << it->first << '\t' << it->second << endl;
                     }
+                }
+                if (renameSeq) {
+                    out << theseAllFileNames.size() << endl;
+                    for (map<string, string>::iterator it = theseAllFileNames.begin(); it != theseAllFileNames.end(); it++) {
+                        out << it->first << '\t' << it->second << endl;
+                    }
+                    
                 }
                 out.close();
                 
@@ -952,7 +1022,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                                        compositeScrapFastaFile + m->mothurGetpid(process) + ".temp",
                                        compositeQualFile + m->mothurGetpid(process) + ".temp",
                                        compositeScrapQualFile + m->mothurGetpid(process) + ".temp",
-                                       compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts);
+                                       compositeMisMatchFile + m->mothurGetpid(process) + ".temp", totalGroupCounts, theseAllFileNames);
                     
                     //pass groupCounts to parent
                     ofstream out;
@@ -971,6 +1041,13 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                             out << it->first << '\t' << it->second << endl;
                         }
                     }
+                    if (renameSeq) {
+                        out << theseAllFileNames.size() << endl;
+                        for (map<string, string>::iterator it = theseAllFileNames.begin(); it != theseAllFileNames.end(); it++) {
+                            out << it->first << '\t' << it->second << endl;
+                        }
+                        
+                    }
                     out.close();
                     
                     exit(0);
@@ -982,7 +1059,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             }
         }
         
-        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
+        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts, theseAllFileNames);
         
         
         //force parent to wait until all the processes are done
@@ -1024,6 +1101,16 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                     }
                 }
             }
+            if (renameSeq) {
+                in >> tempNum; m->gobble(in);
+                if (tempNum != 0) {
+                    for (int j = 0; j < tempNum; j++) {
+                        string thisAllfilename, thisGroup;
+                        in >> thisAllfilename; m->gobble(in); in >> thisGroup; m->gobble(in);
+                        theseAllFileNames[thisAllfilename] = thisGroup;
+                    }
+                }
+            }
             in.close(); m->mothurRemove(tempFile);
             
         }
@@ -1043,14 +1130,14 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         for(int h=1; h<processors; h++ ){
             string extension = toString(h) + ".temp"; processIDS.push_back(h);
             
-            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz);
+            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz, renameSeqs);
             pDataArray.push_back(tempcontig);
             
             hThreadArray[h-1] = CreateThread(NULL, 0, MyGroupContigsThreadFunction, pDataArray[h-1], 0, &dwThreadIdArray[h-1]);
         }
         
        
-        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts);
+        num = driverGroups(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts, theseAllFileNames);
         
         //Wait until all threads have terminated.
         WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -1069,6 +1156,10 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                     if (it2 == groupMap.end()) {	groupMap[it->first] = it->second; }
                     else { m->mothurOut("[ERROR]: " + it->first + " is in your fasta file more than once. Sequence names must be unique. please correct.\n");  }
                 }
+            }
+            //add in threads allfiles, if they exist
+            for (map<string, string>::iterator it = pDataArray[i]->theseAllFileNames.begin(); it != pDataArray[i]->theseAllFileNames.end(); it++) {
+                theseAllFileNames[it->first] = it->second;
             }
             CloseHandle(hThreadArray[i]);
             delete pDataArray[i];
@@ -1106,7 +1197,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
     }
 }
 //**********************************************************************************************************************
-unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts) {
+unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>& theseAllFileNames) {
     try {
         unsigned long long numReads = 0;
         delim = '@';
@@ -1216,6 +1307,8 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
                 outputNames = outputNames2;
                 
                 for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+                    if (renameSeq) { theseAllFileNames[it->first] = it->second; }
+                    
                     ifstream in;
                     m->openInputFile(it->first, in);
                     

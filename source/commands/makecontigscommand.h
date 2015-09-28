@@ -77,8 +77,8 @@ private:
     bool checkName(Sequence& forward, Sequence& reverse);
     bool checkName(QualityScores& forward, QualityScores& reverse);
     bool checkName(Sequence& forward, QualityScores& reverse);
-    unsigned long long processMultipleFileOption(map<string, int>&, vector<string>&);
-    unsigned long long processSingleFileOption(map<string, int>&, vector<string>&);
+    unsigned long long processMultipleFileOption(map<string, int>&, vector<string>&, map<string, string>&);
+    unsigned long long processSingleFileOption(map<string, int>&, vector<string>&, map<string, string>&);
     int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);
     #ifdef USE_BOOST
     bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, boost::iostreams::filtering_istream&, string, string);
@@ -88,8 +88,8 @@ private:
     
     //main processing functions
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
-    unsigned long long createProcessesGroups(vector< vector<string> >, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts);
-    unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&);
+    unsigned long long createProcessesGroups(vector< vector<string> >, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>&);
+    unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&, map<string, string>&);
     unsigned long long driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
     int convertProb(double qProb);
     vector< vector<string> > readFileNames(string);
@@ -115,9 +115,10 @@ struct contigsData {
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq, kmerSize;
-    bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient, gz;
+    bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient, gz, renameSeqs;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
+    map<string, string> theseAllFileNames;
     vector< vector<string> > fileInputs;
     int start,end;
     string compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile;
@@ -164,8 +165,9 @@ struct contigsData {
         delim = d;
         format = form;
         done=false;
+        renameSeqs = false;
 	}
-    contigsData(string form, char d, string g, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb) {
+    contigsData(string form, char d, string g, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb, bool ren) {
         m = mout;
         match = ma;
         misMatch = misMa;
@@ -203,6 +205,7 @@ struct contigsData {
         totalGroupCounts = tGroupCounts;
         file2Group = fGroup;
         gz = gzb;
+        renameSeqs = ren;
     }
 };
 /**************************************************************************************************/
@@ -1614,6 +1617,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 pDataArray->outputNames = outputNames2;
                 
                 for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+                    
+                    if (pDataArray->renameSeq) { pDataArray->theseAllFileNames[it->first] = it->second; }
+                    
                     ifstream in;
                     pDataArray->m->openInputFile(it->first, in);
                     
