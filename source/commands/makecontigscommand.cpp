@@ -396,6 +396,8 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.validFile(parameters, "rename", false);		if (temp == "not found") { temp = "T"; }
             renameSeq = m->isTrue(temp);
             
+            if (allFiles && (oligosfile == "")) { m->mothurOut("You can only use the allfiles option with an oligos file.\n"); abort = true; }
+            
             qual_score.resize(47);
             qual_score[0] = -2; qual_score[1] = -1.58147; qual_score[2] = -0.996843; qual_score[3] = -0.695524; qual_score[4] = -0.507676; qual_score[5] = -0.38013; qual_score[6] = -0.289268; qual_score[7] = -0.222552; qual_score[8] = -0.172557; qual_score[9] = -0.134552; qual_score[10] = -0.105361; qual_score[11] = -0.0827653; qual_score[12] = -0.0651742; qual_score[13] = -0.0514183; qual_score[14] = -0.0406248; qual_score[15] = -0.0321336; qual_score[16] = -0.0254397; qual_score[17] = -0.0201544; qual_score[18] = -0.0159759; qual_score[19] = -0.0126692; qual_score[20] = -0.0100503; qual_score[21] = -0.007975; qual_score[22] = -0.00632956; qual_score[23] = -0.00502447; qual_score[24] = -0.00398902; qual_score[25] = -0.00316729; qual_score[26] = -0.00251505; qual_score[27] = -0.00199726; qual_score[28] = -0.00158615; qual_score[29] = -0.00125972; qual_score[30] = -0.0010005; qual_score[31] = -0.000794644; qual_score[32] = -0.000631156; qual_score[33] = -0.000501313; qual_score[34] = -0.000398186; qual_score[35] = -0.000316278; qual_score[36] = -0.00025122; qual_score[37] = -0.000199546; qual_score[38] = -0.000158502; qual_score[39] = -0.0001259; qual_score[40] = -0.000100005; qual_score[41] = -7.9436e-05; qual_score[42] = -6.30977e-05; qual_score[43] = -5.012e-05; qual_score[44] = -3.98115e-05; qual_score[45] = -3.16233e-05; qual_score[46] = -2.51192e-05;
             
@@ -457,6 +459,9 @@ int MakeContigsCommand::execute(){
             m->mothurCalling = false;
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
+            vector<string> mapFiles = filenames["map"];
+            for (int i = 0; i < mapFiles.size(); i++) { outputNames.push_back(mapFiles[i]);   }
+            
             if (theseOutputFileNames[0] != "")      {
                 outFastaFile = filenames["fasta"][0]; m->renameFile(outFastaFile, theseOutputFileNames[0]);
                 outputNames.push_back(theseOutputFileNames[0]); outputTypes["fasta"].push_back(theseOutputFileNames[0]);
@@ -479,49 +484,82 @@ int MakeContigsCommand::execute(){
             string tempFileFile = "makeContigsRenameFileForAllFIles.temp";
             ofstream outTemp;
             m->openOutputFile(tempFileFile, outTemp);
-////////////////////////check these scrap files to make sure they aren't blank /////////////////////
+
             //add scrap qual and scrap fasta
-            if (theseOutputFileNames[4] != "")      {  outTemp << "fasta" << '\t' << theseOutputFileNames[4] << "scrap" << endl; }
-            if (theseOutputFileNames[5] != "")      {  outTemp << "qfile" << '\t' << theseOutputFileNames[5] << "scrap" << endl; }
+            if (theseOutputFileNames[4] != "")      { if (!m->isBlank(theseOutputFileNames[4])) { outTemp << "fasta" << '\t' << theseOutputFileNames[4] << '\t' << "scrap" << endl; } }
+            if (theseOutputFileNames[5] != "")      {  if (!m->isBlank(theseOutputFileNames[5])) {outTemp << "qfile" << '\t' << theseOutputFileNames[5] << '\t' << "scrap" << endl; } }
             
             if (allFiles && (theseAllFileNames.size() != 0)) {
                 for (map<string, string>::iterator it = theseAllFileNames.begin(); it != theseAllFileNames.end(); it++) {
                     outTemp << "fasta" << '\t' << it->first << '\t' << it->second << endl;
+                    string groupFilename = m->getRootName(it->first);
+                    groupFilename += "contigs.groups";
+                    outTemp << "group" << '\t' << groupFilename << '\t' << it->second << endl;
                     if (hasQualFiles) {
                         string qualFilename = m->getRootName(it->first);
-                        qualFilename += ".qual";
+                        qualFilename += "qual";
                         outTemp << "qfile" << '\t' << qualFilename << '\t' << it->second << endl;
                     }
                 }
             }
             outTemp.close();
             
-            inputString = "file=" + tempFileFile;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
-            
-            Command* renameSeqsAllFilesCommand = new RenameSeqsCommand(inputString);
-            renameSeqsAllFilesCommand->execute();
-            
-            filenames = renameSeqsAllFilesCommand->getOutputFiles();
-            
-            delete renameSeqsAllFilesCommand;
-            m->mothurCalling = false;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            
-            if (theseOutputFileNames[4] != "")      {
-                outScrapFastaFile = filenames["fasta"][0]; m->renameFile(outScrapFastaFile, theseOutputFileNames[4]);
-                outputNames.push_back(theseOutputFileNames[4]); outputTypes["fasta"].push_back(theseOutputFileNames[4]);
+            if (!m->isBlank(tempFileFile)) {
+                inputString = "file=" + tempFileFile;
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurCalling = true;
+                
+                Command* renameSeqsAllFilesCommand = new RenameSeqsCommand(inputString);
+                renameSeqsAllFilesCommand->execute();
+                
+                filenames = renameSeqsAllFilesCommand->getOutputFiles();
+                
+                delete renameSeqsAllFilesCommand;
+                m->mothurCalling = false;
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                
+                int countFasta = 0;
+                int countQual = 0;
+                if (theseOutputFileNames[4] != "")      {
+                    if (!m->isBlank(theseOutputFileNames[4])) {
+                        outScrapFastaFile = filenames["fasta"][0]; m->renameFile(outScrapFastaFile, theseOutputFileNames[4]);
+                        outputNames.push_back(theseOutputFileNames[4]); outputTypes["fasta"].push_back(theseOutputFileNames[4]);
+                        countFasta++;
+                    }
+                }
+                if (theseOutputFileNames[5] != "")      {
+                    if (!m->isBlank(theseOutputFileNames[5])) {
+                        outScrapQualFile = filenames["qfile"][0]; m->renameFile(outScrapQualFile, theseOutputFileNames[5]);
+                        outputNames.push_back(theseOutputFileNames[5]); outputTypes["qfile"].push_back(theseOutputFileNames[5]);
+                        countQual++;
+                    }
+                }
+                
+                vector<string> mapFiles = filenames["map"]; cout << mapFiles.size() << endl;
+                for (int i = 0; i < mapFiles.size(); i++) { outputNames.push_back(mapFiles[i]);  cout << mapFiles[i] << endl; }
+                
+                //rename renamed allfiles to original filenames and add to outputNames and outputTypes
+                int countGroups = 0;
+                if (allFiles && (theseAllFileNames.size() != 0)) {
+                    for (map<string, string>::iterator it = theseAllFileNames.begin(); it != theseAllFileNames.end(); it++) {
+                        m->renameFile(filenames["fasta"][countFasta], it->first); countFasta++;
+                        outputNames.push_back(it->first); outputTypes["fasta"].push_back(it->first);
+                        
+                        string groupFilename = m->getRootName(it->first);
+                        groupFilename += "contigs.groups";
+                        m->renameFile(filenames["group"][countGroups], groupFilename); countGroups++;
+                        outputNames.push_back(groupFilename); outputTypes["group"].push_back(groupFilename);
+                        
+                        if (hasQualFiles) {
+                            string qualFilename = m->getRootName(it->first);
+                            qualFilename += "qual";
+                            m->renameFile(filenames["qfile"][countQual], qualFilename); countQual++;
+                            outputNames.push_back(qualFilename); outputTypes["qfile"].push_back(qualFilename);
+                        }
+                    }
+                }
             }
-            if (theseOutputFileNames[5] != "")      {
-                outScrapQualFile = filenames["qfile"][0]; m->renameFile(outScrapQualFile, theseOutputFileNames[5]);
-                outputNames.push_back(theseOutputFileNames[5]); outputTypes["qfile"].push_back(theseOutputFileNames[5]);
-            }
-            
-            /////////////////////// rename renamed allfiles to original filenames ////////////////////////////////
-            ///////////////// add to outputNames and outputTypes ////////////////////
-            
         }
         
         string currentFasta = "";
@@ -731,7 +769,9 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 
                 ofstream out;
                 variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
+                cout << variables["[filename]"] << endl;
                 string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+                
                 m->openOutputFile(thisGroupName, out);
                 
                 while (!in.eof()){

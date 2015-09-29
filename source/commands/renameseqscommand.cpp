@@ -681,19 +681,19 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
             if (pos == string::npos) {  m->mothurOut("[Opps]: I should never get here...\n");  }
             else {
                 thisFileType = temp.substr(0, pos);
-                thisFile = temp.substr(pos);
+                thisFile = temp.substr(pos+1);
             }
-
+            
             string thisOutputDir = outputDir;
-            string outMapFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFile));
+            if (outputDir == "") {  thisOutputDir += m->hasPath(thisFile);  }
+            string outMapFile = thisOutputDir + m->getSimpleName(thisFile);
             map<string, string> variables;
-            variables["[filename]"] = outMapFile;
+            variables["[filename]"] = outMapFile + ".";
             outMapFile = getOutputFileName("map", variables);
             outputNames.push_back(outMapFile); outputTypes["map"].push_back(outMapFile);
             ofstream outMap; m->openOutputFile(outMapFile, outMap);
             
             //prepare filenames and open files
-            if (outputDir == "") {  thisOutputDir += m->hasPath(thisFile);  }
             string outFile = thisOutputDir + m->getRootName(m->getSimpleName(thisFile));
             variables["[filename]"] = outFile;
             variables["[extension]"] = m->getExtension(thisFile);
@@ -714,6 +714,7 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                 string name = "";
                 if (thisFileType == "fasta")        {  seq = new Sequence(in);   name = seq->getName();        }
                 else if (thisFileType == "qfile")   {  qual = new QualityScores(in);  name = qual->getName();  }
+                else if (thisFileType == "group")   {  in >> name; m->gobble(in); in >> group;                 }
                 m->gobble(in);
  
                 //get new name
@@ -729,8 +730,9 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                 }
                 
                 
-                if (thisFileType == "fasta")        {  seq->setName(newName);  seq->printSequence(out); delete seq; }
-                if (thisFileType == "qfile")        {  qual->setName(newName);  qual->printQScores(out); delete qual; }
+                if (thisFileType == "fasta")        {  seq->setName(newName);  seq->printSequence(out); delete seq;     }
+                if (thisFileType == "qfile")        {  qual->setName(newName);  qual->printQScores(out); delete qual;   }
+                if (thisFileType == "group")        {  out << newName << '\t' << group << endl;                         }
                 
                 outMap << newName << '\t' << name << endl;
             }
