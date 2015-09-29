@@ -13,6 +13,10 @@
 
 class RenameSeqsCommand : public Command {
     
+#ifdef UNIT_TEST
+    friend class TestRenameSeqsCommand;
+#endif
+    
 public:
 	RenameSeqsCommand(string);
 	RenameSeqsCommand();

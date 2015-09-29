@@ -255,14 +255,14 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             if (contigsfile == "not open") { abort = true; }
             else if (contigsfile == "not found"){ contigsfile = ""; }
             
-            if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (nameFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
-            if ((fileFile != "") && (fastaFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: file or fasta."); m->mothurOutEndLine(); abort = true; }
+            if ((fileFile != "") && (fastaFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: file or fasta."); m->mothurOutEndLine(); abort = true; }
             
-            if ((countfile != "") && (groupfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (groupfile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
             
             if ((fileFile != "") && ((nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (countfile != "") || (fastaFile != "")) ) {
-                m->mothurOut("The file option cannot be used with any other files except the map file."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: The file option cannot be used with any other files except the map file."); m->mothurOutEndLine(); abort = true;
             }
 
             placement = validParameter.validFile(parameters, "placement", false);		if (placement == "not found") { placement = "back"; }
