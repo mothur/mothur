@@ -13,6 +13,10 @@
 
 class RenameSeqsCommand : public Command {
     
+#ifdef UNIT_TEST
+    friend class TestRenameSeqsCommand;
+#endif
+    
 public:
 	RenameSeqsCommand(string);
 	RenameSeqsCommand();
@@ -34,11 +38,18 @@ public:
 	
 private:
     
-	string fastaFile, nameFile, groupfile, outputDir, placement, delim, countfile;
+	string fastaFile, nameFile, groupfile, outputDir, placement, delim, countfile, qualfile, contigsfile, fileFile, mapFile;
 	vector<string> outputNames;
 	bool abort;
 	
 	map<string, string> nameMap;
+    int readQual(map<string, string>&);
+    int readContigs(map<string, string>&);
+    int readFasta(string, map<string, string>&);
+    int processFile(map<string, string>&);
+    int readMapFile(map<string, string>&);
+    vector< map<string, string> > readFiles();
+    
 };
 
 

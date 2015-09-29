@@ -301,6 +301,23 @@ void MothurOut::setOutputDir(string pathname)  {
 /*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
+        if (numErrors != 0) {
+            out << "\n\n************************************************************\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            out << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            
+            logger() << "\n\n************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+        }
 		out.close();
 	}
 	catch(exception& e) {
@@ -323,7 +340,8 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
+        
         if (!quietMode) {
             out << output;
             logger() << output;
@@ -344,7 +362,8 @@ void MothurOut::mothurOut(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToScreen(string output) {
 	try {
-		
+		if (output.find("[ERROR]") != string::npos) { numErrors++; }
+        
         if (!quietMode) {
             logger() << output;
         }else {
@@ -375,6 +394,8 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output, ofstream& outputFile) {
 	try {
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
+        
         if (!quietMode) {
             out << output;
             outputFile << output;
@@ -411,6 +432,7 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
 
         if (!quietMode) {
             out << output;
@@ -431,6 +453,8 @@ void MothurOut::mothurOutJustToLog(string output) {
 void MothurOut::errorOut(exception& e, string object, string function) {
 	//double vm, rss;
 	//mem_usage(vm, rss);
+    
+    numErrors++; 
 	
     string errorType = toString(e.what());
     

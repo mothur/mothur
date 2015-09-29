@@ -69,7 +69,7 @@ class MothurOut {
 		vector<string> sharedBinLabelsInFile;
 		vector<string> currentSharedBinLabels;
         vector<string> listBinLabelsInFile;
-		string saveNextLabel, argv, sharedHeaderMode, groupMode;
+		string saveNextLabel, argv, sharedHeaderMode, groupMode, testDirectory;
 		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
@@ -242,6 +242,7 @@ class MothurOut {
         string getSummaryFile()     { return summaryfile;       }
         string getFileFile()        { return filefile;          }
 		string getProcessors()		{ return processors;		}
+        int getNumErrors()          { return numErrors;         }
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
@@ -316,6 +317,7 @@ class MothurOut {
             groupMode = "group";
             changedSeqNames = false;
             modifyNames = true;
+            numErrors = 0;
 		}
 		~MothurOut();
 
@@ -329,6 +331,7 @@ class MothurOut {
 		vector<string> Groups;
 		vector<string> namesOfGroups;
 		ofstream out;
+        int numErrors;
 		
 		int mem_usage(double&, double&);
 
