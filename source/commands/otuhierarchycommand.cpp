@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> OtuHierarchyCommand::setParameters(){	
 	try {
-		CommandParameter poutput("output", "Multiple", "name-number", "name", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "name-otulabel", "name", "", "", "","",false,false); parameters.push_back(poutput);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","otuheirarchy",false,true,true); parameters.push_back(plist);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -35,7 +35,7 @@ string OtuHierarchyCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The otu.hierarchy command is used to see how otus relate at two distances. \n";
 		helpString += "The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n";
-		helpString += "The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n";
+		helpString += "The output parameter allows you to output the names of the sequence in the OTUs or the OTU labels. Options are name and otulabel, default is name. \n";
 		helpString += "The otu.hierarchy command should be in the following format: \n";
 		helpString += "otu.hierarchy(list=yourListFile, label=yourLabels).\n";
 		helpString += "Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n";
@@ -145,7 +145,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			
 			output = validParameter.validFile(parameters, "output", false);			if (output == "not found") { output = "name"; }
 			
-			if ((output != "name") && (output != "number")) { m->mothurOut("output options are name and number. I will use name."); m->mothurOutEndLine(); output = "name"; }
+			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name."); m->mothurOutEndLine(); output = "name"; }
 		}
 		
 	}
