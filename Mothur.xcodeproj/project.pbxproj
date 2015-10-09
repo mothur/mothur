@@ -968,7 +968,6 @@
 		48A52F991BC428DF00548F6C /* xstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xstring.h; path = source/vsearch_src/xstring.h; sourceTree = "<group>"; };
 		48A52FE31BC44D2900548F6C /* libcpu_sse2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcpu_sse2.a; path = ../vsearch/src/libcpu_sse2.a; sourceTree = "<group>"; };
 		48A52FE41BC44D2900548F6C /* libcpu_ssse3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcpu_ssse3.a; path = ../vsearch/src/libcpu_ssse3.a; sourceTree = "<group>"; };
-		48A52FE71BC5899A00548F6C /* libboost_iostreams.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_iostreams.a; path = "../boost_1_58_0/bin.v2/libs/iostreams/build/darwin-4.2.1/release/link-static/threading-multi/libboost_iostreams.a"; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = testcommands/testrenameseqscommand.cpp; sourceTree = "<group>"; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = testcommands/testrenameseqscommand.h; sourceTree = "<group>"; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = "<group>"; };
@@ -1735,7 +1734,6 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
-				48A52FE71BC5899A00548F6C /* libboost_iostreams.a */,
 				48A52FE31BC44D2900548F6C /* libcpu_sse2.a */,
 				48A52FE41BC44D2900548F6C /* libcpu_ssse3.a */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -3740,7 +3738,6 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-lncurses",
 					"-lboost_iostreams",
 					"-lz",
 				);
@@ -3790,7 +3787,6 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-lncurses",
 					"-lboost_iostreams",
 					"-lz",
 				);
