@@ -7,12 +7,12 @@
  *
  */
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "referencedb.h"
 
 //***************************************************************************************************************
 //this is a vertical soft filter
-string Chimera::createFilter(vector<Sequence*> seqs, float t) {
+string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 	try {
 		filterString = "";
 		int threshold = int (t * seqs.size());
@@ -62,12 +62,12 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 		return filterString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Chimera", "createFilter");
+		m->errorOut(e, "MothurChimera", "createFilter");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-map<int, int> Chimera::runFilter(Sequence* seq) {
+map<int, int> MothurChimera::runFilter(Sequence* seq) {
 	try {
 		map<int, int> maskMap;
 		string seqAligned = seq->getAligned();
@@ -88,12 +88,12 @@ map<int, int> Chimera::runFilter(Sequence* seq) {
 		return maskMap;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Chimera", "runFilter");
+		m->errorOut(e, "MothurChimera", "runFilter");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> Chimera::readSeqs(string file) {
+vector<Sequence*> MothurChimera::readSeqs(string file) {
 	try {
 		
 		vector<Sequence*> container;
@@ -151,12 +151,12 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		return container;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Chimera", "readSeqs");
+		m->errorOut(e, "MothurChimera", "readSeqs");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-void Chimera::setMask(string filename) {
+void MothurChimera::setMask(string filename) {
 	try {
 		
 		if (filename == "default") {
@@ -182,12 +182,12 @@ void Chimera::setMask(string filename) {
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Chimera", "setMask");
+		m->errorOut(e, "MothurChimera", "setMask");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-Sequence* Chimera::getSequence(string name) {
+Sequence* MothurChimera::getSequence(string name) {
 	try{
 		Sequence* temp;
 		
@@ -207,7 +207,7 @@ Sequence* Chimera::getSequence(string name) {
 		return temp;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Chimera", "getSequence");
+		m->errorOut(e, "MothurChimera", "getSequence");
 		exit(1);
 	}
 }

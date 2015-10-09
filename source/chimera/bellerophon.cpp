@@ -15,7 +15,7 @@
 
 /***************************************************************************************************************/
 
-Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, int p, string o) : Chimera() {
+Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, int p, string o) : MothurChimera() {
 	try {
 		fastafile = name;
 		correction = c;

@@ -12,7 +12,7 @@
 #include "eachgapdist.h"
 
 //***************************************************************************************************************
-Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int numW, string o) : Chimera() {  
+Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int numW, string o) : MothurChimera() {  
  try {	
 	
 	fastafile = filename;  

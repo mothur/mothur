@@ -8,7 +8,7 @@
  */
 
 #include "decalc.h"
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "dist.h"
 #include "eachgapdist.h"
 #include "ignoregaps.h"

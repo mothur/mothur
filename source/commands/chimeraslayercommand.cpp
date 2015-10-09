@@ -1488,7 +1488,7 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 		
         if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
         
-		Chimera* chimera;
+		MothurChimera* chimera;
 		if (templatefile != "self") { //you want to run slayer with a reference template
 			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
 		}else {

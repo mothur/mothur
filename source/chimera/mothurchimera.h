@@ -2,7 +2,7 @@
 #define CHIMERA_H
 
 /*
- *  chimera.h
+ *  mothurchimera.h
  *  Mothur
  *
  *  Created by Sarah Westcott on 7/9/09.
@@ -133,12 +133,12 @@ struct sim {
 };
 /***********************************************************************/
 
-class Chimera {
+class MothurChimera {
 
 	public:
 	
-		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  byGroup = false; }
-		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } for (int i = 0; i < filteredTemplateSeqs.size(); i++) { delete filteredTemplateSeqs[i];  } };
+		MothurChimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  byGroup = false; }
+		virtual ~MothurChimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } for (int i = 0; i < filteredTemplateSeqs.size(); i++) { delete filteredTemplateSeqs[i];  } };
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual int getLength()					{   return length;	}
 		virtual vector<Sequence*> readSeqs(string);

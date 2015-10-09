@@ -11,7 +11,7 @@
  */
 
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "maligner.h"
 #include "slayer.h"
 
@@ -21,7 +21,7 @@
 //This class was modeled after the chimeraSlayer written by the Broad Institute
 /***********************************************************************/
 
-class ChimeraSlayer : public Chimera {
+class ChimeraSlayer : public MothurChimera {
 	
 	public:
 		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
