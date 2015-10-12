@@ -17,13 +17,14 @@
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","list",false,false,true); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","rabund-sabund",false,false,true); parameters.push_back(pname);
-		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pcount);
-        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);		
+        CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","list",false,false,true); parameters.push_back(pphylip);
+        CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName","list",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName","rabund-sabund",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
@@ -46,8 +47,13 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Phylip or column and name are required, unless you have a valid current file.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
+        helpString += "The phylip and column parameter allow you to enter your distance file. \n";
+        helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
+        helpString += "The name parameter allows you to enter your name file. \n";
+        helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
+        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
         helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
@@ -94,7 +100,7 @@ ClusterCommand::ClusterCommand(){
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterCommand::ClusterCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
+        abort = false; calledHelp = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -160,6 +166,14 @@ ClusterCommand::ClusterCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fasta");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 			}
 			
 			//check for required parameters
@@ -173,6 +187,11 @@ ClusterCommand::ClusterCommand(string option)  {
 			else if (columnfile == "not found") { columnfile = ""; }
 			else {  distfile = columnfile; format = "column"; m->setColumnFile(columnfile);	}
 			
+            fastafile = validParameter.validFile(parameters, "fasta", true);
+            if (fastafile == "not open") { abort = true; }
+            else if (fastafile == "not found") { fastafile = ""; }
+            else { distfile = fastafile;  format = "fasta"; m->setFastaFile(fastafile); }
+            
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
@@ -183,7 +202,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { m->setCountTableFile(countfile); }
 			
-			if ((phylipfile == "") && (columnfile == "")) { 
+			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = m->getColumnFile(); 
@@ -191,13 +210,17 @@ ClusterCommand::ClusterCommand(string option)  {
 				else { 
 					phylipfile = m->getPhylipFile(); 
 					if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command."); m->mothurOutEndLine(); 
-						abort = true;
+					else {
+                        fastafile = m->getFastaFile();
+                        if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command."); m->mothurOutEndLine();
+                            abort = true;
+                        }
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			else if (((phylipfile != "") && (columnfile != "")) || ((phylipfile != "") && (fastafile != "")) || ((fastafile != "") && (columnfile != "")))  { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip, column or fasta."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
 				if ((namefile == "") && (countfile == "")){ 
@@ -248,8 +271,8 @@ ClusterCommand::ClusterCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "average"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
+			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
