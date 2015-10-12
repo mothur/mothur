@@ -11,7 +11,7 @@
 #include "database.hpp"
 #include "sequence.hpp"
 #include "distancedb.hpp"
-#include "onegapignore.h"
+#include "eachgapignore.h"
 
 
 /**************************************************************************************************/
@@ -19,7 +19,7 @@ DistanceDB::DistanceDB() : Database() {
 	try {
 		templateAligned = true;  
 		templateSeqsLength = 0; 
-		distCalculator = new oneGapIgnoreTermGapDist();
+		distCalculator = new eachGapIgnoreTermGapDist();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceDB", "DistanceDB");
