@@ -14,6 +14,7 @@
 #include "clusterdoturcommand.h"
 #include "deconvolutecommand.h"
 #include "sequence.hpp"
+#include "vsearch.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -383,13 +384,21 @@ int ClusterCommand::runVsearchCluster(){
         //Remove gap characters from each sequence if needed
         //Append the number of sequences that each unique sequence represents to the end of the fasta file name
         //Sorts by abundance
-        string vsearchFastafile = createVsearchFasta(fastafile, nameMap);
+        string vsearchFastafile = createVsearchFasta(fastafile, nameMap);  nameMap.clear();
         
         if (m->control_pressed) {  return 0; }
         
-        
+        if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.20.\n"); cutoff = 0.20; }
         
         //Run vsearch
+        string ucVsearchFile = m->getSimpleName(vsearchFastafile) + ".clustered.uc";
+        string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
+        vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
+        
+        if (m->control_pressed) {
+            ////////////////////////remove files/////////////////////
+            return 0;
+        }
         
         //Convert outputted *.uc file into a list file
         
@@ -403,9 +412,88 @@ int ClusterCommand::runVsearchCluster(){
 }
 //**********************************************************************************************************************
 
+int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, string logfile){
+    try {
+        
+        //vsearch --maxaccepts 16 --usersort --id 0.97 --minseqlength 30 --wordlength 8 --uc $ROOT.clustered.uc --cluster_smallmem $ROOT.sorted.fna --maxrejects 64 --strand both --log $ROOT.clustered.log --sizeorder
+
+        
+        int numArgs = 11;
+        char** vsearchParameters;
+        vsearchParameters = new char*[numArgs];
+        
+        vsearchParameters[0] = new char[8];
+        *vsearchParameters[0] = '\0'; strncat(vsearchParameters[0], "vsearch", 7);
+        
+        int parameterCount = 1;
+        //--maxaccepts 16
+        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxaccepts 16", 15);  	parameterCount++;
+        
+        //--usersort
+        vsearchParameters[parameterCount] = new char[11];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--usersort", 10);  	parameterCount++;
+        
+        
+        cutoff = abs(1.0 - cutoff); string cutoffString = toString(cutoff);
+        if (cutoffString.length() > 4) {  cutoffString = cutoffString.substr(0, 4);  }
+        else if (cutoffString.length() < 4)  {  for (int i = cutoffString.length(); i < 4; i++)  { cutoffString += "0";  } }
+        cutoffString = "--id " +  cutoffString;
+        
+        //--id 0.97
+        vsearchParameters[parameterCount] = new char[10];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], cutoffString.c_str(), 9);  	parameterCount++;
+        
+        //--minseqlength 30
+        vsearchParameters[parameterCount] = new char[18];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--minseqlength 30", 17);  	parameterCount++;
+        
+        //--wordlength 8
+        vsearchParameters[parameterCount] = new char[15];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--wordlength 8", 14);  	parameterCount++;
+        
+        //--uc $ROOT.clustered.uc
+        string tempIn = "--uc " + ucClusteredFile;
+        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
+        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
+        parameterCount++;
+        
+        //--cluster_smallmem $ROOT.sorted.fna
+        tempIn = "--cluster_smallmem " + inputFile;
+        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
+        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
+        parameterCount++;
+        
+        //--maxrejects 64
+        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxrejects 64", 15);  	parameterCount++;
+        
+        //--strand both
+        vsearchParameters[parameterCount] = new char[14];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--strand both", 13);  	parameterCount++;
+        
+        //--log $ROOT.clustered.log
+        tempIn = "--log " + logfile;
+        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
+        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
+        parameterCount++;
+        
+        //--sizeorder
+        vsearchParameters[parameterCount] = new char[12];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--sizeorder", 11);  	parameterCount++;
+        
+        errno = 0;
+        vsearch_main(numArgs, vsearchParameters);
+        
+        //free memory
+        for(int i = 0; i < numArgs; i++)  {  delete[] vsearchParameters[i];  }
+        delete[] vsearchParameters; 
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "vsearchDriver");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+
 string ClusterCommand::createVsearchFasta(string inputFile, map<string, int>& nameMap){
     try {
-        string vsearchFasta = m->getSimpleName(fastafile) + ".uc_sorted.temp";
+        string vsearchFasta = m->getSimpleName(fastafile) + method + ".sorted.fasta";
         
         vector<seqPriorityNode> seqs;
         map<string, int>::iterator it;
@@ -421,7 +509,7 @@ string ClusterCommand::createVsearchFasta(string inputFile, map<string, int>& na
             
             it = nameMap.find(seq.getName());
             if (it == nameMap.end()) {
-                
+                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name or countfile, quitting.\n"); m->control_pressed = true;
             }else {
                 seqPriorityNode temp(it->second, seq.getUnaligned(), it->first);
                 seqs.push_back(temp);

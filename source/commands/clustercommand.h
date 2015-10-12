@@ -71,6 +71,7 @@ private:
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
     string getNamesFile(string& inputFile);
     string createVsearchFasta(string, map<string, int>&);
+    int vsearchDriver(string, string, string);
     int runVsearchCluster();
     int runMothurCluster();
 };
