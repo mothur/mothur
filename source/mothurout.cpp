@@ -4739,7 +4739,29 @@ int MothurOut::min(int A, int B){
         exit(1);
     }
 }
-
+//**********************************************************************************************************************
+int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename){
+    try {
+        
+        sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
+        
+        ofstream out;
+        openOutputFile(filename, out);
+        
+        //print new file in order of
+        for (int i = 0; i < nameMapCount.size(); i++) {
+            if (control_pressed) {break;}
+            out << ">" << nameMapCount[i].name  << "/ab=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "printVsearchFile");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 
 

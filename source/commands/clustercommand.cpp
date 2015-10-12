@@ -12,7 +12,8 @@
 #include "readcolumn.h"
 #include "readmatrix.hpp"
 #include "clusterdoturcommand.h"
-
+#include "deconvolutecommand.h"
+#include "sequence.hpp"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -367,6 +368,82 @@ int ClusterCommand::execute(){
 }
 //**********************************************************************************************************************
 
+int ClusterCommand::runVsearchCluster(){
+    try {
+        
+        //Run unique.seqs on the data if a name or count file is not given
+        map<string, int> nameMap;
+        if ((namefile == "") && (countfile == ""))  {  countfile = getNamesFile(fastafile);     }
+        else if (namefile != "")                    {  nameMap = m->readNames(namefile);        }
+        
+        if (countfile != "") { CountTable countTable; countTable.readTable(countfile, false, false);  nameMap = countTable.getNameMap(); }
+        
+        if (m->control_pressed) {  return 0; }
+        
+        //Remove gap characters from each sequence if needed
+        //Append the number of sequences that each unique sequence represents to the end of the fasta file name
+        //Sorts by abundance
+        string vsearchFastafile = createVsearchFasta(fastafile, nameMap);
+        
+        if (m->control_pressed) {  return 0; }
+        
+        
+        
+        //Run vsearch
+        
+        //Convert outputted *.uc file into a list file
+        
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "runVsearchCluster");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+string ClusterCommand::createVsearchFasta(string inputFile, map<string, int>& nameMap){
+    try {
+        string vsearchFasta = m->getSimpleName(fastafile) + ".uc_sorted.temp";
+        
+        vector<seqPriorityNode> seqs;
+        map<string, int>::iterator it;
+        
+        ifstream in;
+        m->openInputFile(inputFile, in);
+        
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { in.close(); return vsearchFasta; }
+            
+            Sequence seq(in); m->gobble(in);
+            
+            it = nameMap.find(seq.getName());
+            if (it == nameMap.end()) {
+                
+            }else {
+                seqPriorityNode temp(it->second, seq.getUnaligned(), it->first);
+                seqs.push_back(temp);
+                nameMap.erase(it);
+            }
+            
+        }
+        in.close();
+        
+        m->printVsearchFile(seqs, vsearchFasta);
+
+        return vsearchFasta;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "createVsearchFasta");
+        exit(1);
+    }
+}
+
+
+//**********************************************************************************************************************
+
 int ClusterCommand::runMothurCluster(){
     try {
         
@@ -560,6 +637,41 @@ void ClusterCommand::printData(string label, map<string, int>& counts){
 
 
 }
+//**********************************************************************************************************************
+
+string ClusterCommand::getNamesFile(string& inputFile){
+    try {
+        string nameFile = "";
+        
+        m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        //use unique.seqs to create new name and fastafile
+        string inputString = "fasta=" + inputFile + ", format=count";
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
+        m->mothurCalling = true;
+        
+        Command* uniqueCommand = new DeconvoluteCommand(inputString);
+        uniqueCommand->execute();
+        
+        map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
+        
+        delete uniqueCommand;
+        m->mothurCalling = false;
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        
+        countfile = filenames["count"][0];
+        fastafile = filenames["fasta"][0];
+        distfile = fastafile;
+        
+        return nameFile;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "getNamesFile");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 
 int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){

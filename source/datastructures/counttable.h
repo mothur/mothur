@@ -87,7 +87,7 @@ class CountTable {
         vector<string> getNamesOfSeqs(string);
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         ListVector getListVector();
-        map<string, int> getNameMap();
+        map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
     
     private:
         string filename;

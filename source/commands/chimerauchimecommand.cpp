@@ -690,7 +690,7 @@ int ChimeraUchimeCommand::execute(){
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-				printFile(nameMapCount, newFasta);
+				m->printVsearchFile(nameMapCount, newFasta);
 				fastaFileNames[s] = newFasta;
 			}
 			
@@ -1099,29 +1099,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		m->errorOut(e, "ChimeraUchimeCommand", "deconvoluteResults");
 		exit(1);
 	}
-}	
-//**********************************************************************************************************************
-int ChimeraUchimeCommand::printFile(vector<seqPriorityNode>& nameMapCount, string filename){
-	try {
-		
-		sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
-		
-		ofstream out;
-		m->openOutputFile(filename, out);
-		
-		//print new file in order of
-		for (int i = 0; i < nameMapCount.size(); i++) {
-			out << ">" << nameMapCount[i].name  << "/ab=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
-		}
-		out.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "printFile");
-		exit(1);
-	}
-}	
+}		
 //**********************************************************************************************************************
 int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 	try {
