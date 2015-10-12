@@ -69,6 +69,8 @@ private:
 	vector<string> outputNames;
     
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
+    int runVsearchCluster();
+    int runMothurCluster();
 };
 
 #endif

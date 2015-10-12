@@ -325,153 +325,15 @@ int ClusterCommand::execute(){
 			return 0;
 		}
 		
-		ReadMatrix* read;
-		if (format == "column") { read = new ReadColumnMatrix(columnfile, sim); }	//sim indicates whether its a similarity matrix
-		else if (format == "phylip") { read = new ReadPhylipMatrix(phylipfile, sim); }
-		
-		read->setCutoff(cutoff);
-		
-		NameAssignment* nameMap = NULL;
-        CountTable* ct = NULL;
-        map<string, int> counts;
-		if(namefile != ""){	
-			nameMap = new NameAssignment(namefile);
-			nameMap->readMap();
-            read->read(nameMap);
-		}else if (countfile != "") {
-            ct = new CountTable();
-            ct->readTable(countfile, false, false);
-            read->read(ct);
-            counts = ct->getNameMap();
-        }else { read->read(nameMap); }
-		
-		list = read->getListVector();
-		matrix = read->getDMatrix();
+        time_t estart = time(NULL);
         
-		if(countfile != "") {
-            rabund = new RAbundVector();
-            createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
-            delete ct;
-        }else { rabund = new RAbundVector(list->getRAbundVector()); }
-		delete read;
-		
-		if (m->control_pressed) { //clean up
-			delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
-			listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
-		}
-		
-		//create cluster
-		if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
-		else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
-		else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
-		else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method, adjust);	}
-		tag = cluster->getTag();
-		
-		if (outputDir == "") { outputDir += m->hasPath(distfile); }
-		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
-		
-        map<string, string> variables; 
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = tag;
-        string sabundFileName = getOutputFileName("sabund", variables);
-        string rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
-        string listFileName = getOutputFileName("list", variables);
+        if (format == "fasta")  {   runVsearchCluster();    }
+        else                    {   runMothurCluster();     }
         
-        if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
-            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
-
-        }
-		m->openOutputFile(listFileName,	listFile);
-        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-        list->printHeaders(listFile);
-		
-		time_t estart = time(NULL);
-		float previousDist = 0.00000;
-		float rndPreviousDist = 0.00000;
-		oldRAbund = *rabund;
-		oldList = *list;
-
-		print_start = true;
-		start = time(NULL);
-		loops = 0;
-		double saveCutoff = cutoff;
-		
-		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){  
-		
-			if (m->control_pressed) { //clean up
-				delete list; delete matrix; delete rabund; delete cluster;
-				if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
-                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
-			}
-		
-			if (print_start && m->isTrue(timing)) {
-				m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
-					+ toString(m->roundDist(matrix->getSmallDist(), precision)) 
-					+ "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
-				cout.flush();
-				print_start = false;
-			}
-
-			loops++;
-
-			cluster->update(cutoff);
-            
-            float dist = matrix->getSmallDist();
-			float rndDist;
-			if (hard) {
-				rndDist = m->ceilDist(dist, precision); 
-			}else{
-				rndDist = m->roundDist(dist, precision); 
-			}
-
-			if(previousDist <= 0.0000 && dist != previousDist){
-				printData("unique", counts);
-			}
-			else if(rndDist != rndPreviousDist){
-				printData(toString(rndPreviousDist,  length-1), counts);
-			}
-		
-			previousDist = dist;
-			rndPreviousDist = rndDist;
-			oldRAbund = *rabund;
-			oldList = *list;
-		}
-
-		if (print_start && m->isTrue(timing)) {
-			m->mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
-					 + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
-			cout.flush();
-	 		print_start = false;
-		}
-		
-		if(previousDist <= 0.0000){
-			printData("unique", counts);
-		}
-		else if(rndPreviousDist<cutoff){
-			printData(toString(rndPreviousDist, length-1), counts);
-		}
-		
-		delete matrix;
-		delete list;
-		delete rabund;
-		delete cluster;
-        if (countfile == "") {
-            sabundFile.close();
-            rabundFile.close();
-        }
-		listFile.close();
-	
-		if (saveCutoff != cutoff) { 
-			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-
-			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
-		}
-		
+		if (m->control_pressed) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
+        
+        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+        
 		//set list file as new current listfile
 		string current = "";
 		itTypes = outputTypes.find("list");
@@ -496,12 +358,6 @@ int ClusterCommand::execute(){
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 
-		
-		//if (m->isTrue(timing)) {
-			m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
-		//}
-		
-		
 		return 0;
 	}
 	catch(exception& e) {
@@ -509,7 +365,165 @@ int ClusterCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
 
+int ClusterCommand::runMothurCluster(){
+    try {
+        
+        ReadMatrix* read;
+        if (format == "column") { read = new ReadColumnMatrix(columnfile, sim); }	//sim indicates whether its a similarity matrix
+        else if (format == "phylip") { read = new ReadPhylipMatrix(phylipfile, sim); }
+        
+        read->setCutoff(cutoff);
+        
+        NameAssignment* nameMap = NULL;
+        CountTable* ct = NULL;
+        map<string, int> counts;
+        if(namefile != ""){
+            nameMap = new NameAssignment(namefile);
+            nameMap->readMap();
+            read->read(nameMap);
+        }else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(countfile, false, false);
+            read->read(ct);
+            counts = ct->getNameMap();
+        }else { read->read(nameMap); }
+        
+        list = read->getListVector();
+        matrix = read->getDMatrix();
+        
+        if(countfile != "") {
+            rabund = new RAbundVector();
+            createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
+            delete ct;
+        }else { rabund = new RAbundVector(list->getRAbundVector()); }
+        delete read;
+        
+        if (m->control_pressed) { //clean up
+            delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+            listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
+        }
+        
+        //create cluster
+        if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
+        else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
+        else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
+        else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method, adjust);	}
+        tag = cluster->getTag();
+        
+        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        string listFileName = getOutputFileName("list", variables);
+        
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+        }
+        m->openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        list->printHeaders(listFile);
+        
+        
+        float previousDist = 0.00000;
+        float rndPreviousDist = 0.00000;
+        oldRAbund = *rabund;
+        oldList = *list;
+        
+        print_start = true;
+        start = time(NULL);
+        loops = 0;
+        double saveCutoff = cutoff;
+        
+        while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+            
+            if (m->control_pressed) { //clean up
+                delete list; delete matrix; delete rabund; delete cluster;
+                if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
+            }
+            
+            if (print_start && m->isTrue(timing)) {
+                m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/"
+                             + toString(m->roundDist(matrix->getSmallDist(), precision))
+                             + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
+                cout.flush();
+                print_start = false;
+            }
+            
+            loops++;
+            
+            cluster->update(cutoff);
+            
+            float dist = matrix->getSmallDist();
+            float rndDist;
+            if (hard) {
+                rndDist = m->ceilDist(dist, precision);
+            }else{
+                rndDist = m->roundDist(dist, precision);
+            }
+            
+            if(previousDist <= 0.0000 && dist != previousDist){
+                printData("unique", counts);
+            }
+            else if(rndDist != rndPreviousDist){
+                printData(toString(rndPreviousDist,  length-1), counts);
+            }
+            
+            previousDist = dist;
+            rndPreviousDist = rndDist;
+            oldRAbund = *rabund;
+            oldList = *list;
+        }
+        
+        if (print_start && m->isTrue(timing)) {
+            m->mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist)
+                         + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
+            cout.flush();
+            print_start = false;
+        }
+        
+        if(previousDist <= 0.0000){
+            printData("unique", counts);
+        }
+        else if(rndPreviousDist<cutoff){
+            printData(toString(rndPreviousDist, length-1), counts);
+        }
+        
+        delete matrix;
+        delete list;
+        delete rabund;
+        delete cluster;
+        if (countfile == "") {
+            sabundFile.close();
+            rabundFile.close();
+        }
+        listFile.close();
+        
+        if (saveCutoff != cutoff) { 
+            if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+            else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+            
+            m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
+        }
+
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "runMothurCluster");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 
 void ClusterCommand::printData(string label, map<string, int>& counts){
