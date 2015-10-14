@@ -78,7 +78,6 @@
 	#include <direct.h> //get cwd
 	#include <windows.h>
 	#include <psapi.h>
-	#include <direct.h>
 	#include <tchar.h>
 
 #endif

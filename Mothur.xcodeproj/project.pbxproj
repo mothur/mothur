@@ -380,6 +380,7 @@
 		48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
 		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
+		489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48A52F9A1BC428DF00548F6C /* abundance.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48A52F4D1BC428DF00548F6C /* abundance.cc */; };
 		48A52F9B1BC428DF00548F6C /* abundance.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48A52F4D1BC428DF00548F6C /* abundance.cc */; };
 		48A52F9C1BC428DF00548F6C /* align_simd.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48A52F4F1BC428DF00548F6C /* align_simd.cc */; };
@@ -892,6 +893,8 @@
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/mimarksattributescommand.cpp; sourceTree = "<absolute>"; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/mimarksattributescommand.h; sourceTree = "<absolute>"; };
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = "<group>"; };
+		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearch_src/vsearchfileparser.cpp; sourceTree = "<group>"; };
+		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearch_src/vsearchfileparser.h; sourceTree = "<group>"; };
 		48A52F4D1BC428DF00548F6C /* abundance.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abundance.cc; path = source/vsearch_src/abundance.cc; sourceTree = "<group>"; };
 		48A52F4E1BC428DF00548F6C /* abundance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = abundance.h; path = source/vsearch_src/abundance.h; sourceTree = "<group>"; };
 		48A52F4F1BC428DF00548F6C /* align_simd.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = align_simd.cc; path = source/vsearch_src/align_simd.cc; sourceTree = "<group>"; };
@@ -1983,6 +1986,8 @@
 				48A52F961BC428DF00548F6C /* util.h */,
 				48A52F971BC428DF00548F6C /* vsearch.cc */,
 				48A52F981BC428DF00548F6C /* vsearch.h */,
+				489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */,
+				489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */,
 				48A52F991BC428DF00548F6C /* xstring.h */,
 			);
 			name = vsearch;
@@ -3437,6 +3442,7 @@
 				48A52FC61BC428DF00548F6C /* msa.cc in Sources */,
 				A7E9B93C12D37EC400DA6239 /* seqerrorcommand.cpp in Sources */,
 				48A52FC21BC428DF00548F6C /* md5.c in Sources */,
+				489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */,
 				A7E9B93D12D37EC400DA6239 /* seqsummarycommand.cpp in Sources */,
 				A7E9B93E12D37EC400DA6239 /* sequence.cpp in Sources */,
 				A7E9B93F12D37EC400DA6239 /* sequencedb.cpp in Sources */,
