@@ -3672,7 +3672,7 @@
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -3700,7 +3700,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};
@@ -3747,7 +3747,7 @@
 					"-lboost_iostreams",
 					"-lz",
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
@@ -3796,7 +3796,7 @@
 					"-lboost_iostreams",
 					"-lz",
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};

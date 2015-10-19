@@ -57,12 +57,13 @@
   POSSIBILITY OF SUCH DAMAGE.
 
 */
-
+#ifndef VSEARCH_H
+#define VSEARCH_H
 
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include <getopt.h>
+//#include <getopt.h>
 #include <x86intrin.h>
 #include <stdlib.h>
 #include <time.h>
@@ -75,6 +76,7 @@
 #include <float.h>
 
 
+#include "getopt_long.h"
 #include "cityhash/city.h"
 #include "md5.h"
 #include "sha1.h"
@@ -323,4 +325,8 @@ extern FILE * fp_log;
 
 /* main function prototype */
 int vsearch_main(int, char**);
+
+#endif
+
+
 

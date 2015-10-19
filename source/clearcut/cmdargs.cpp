@@ -49,11 +49,11 @@
 #include <time.h>
 
 
-#ifdef USE_GNU
-#include <getopt.h>
-#else
+//#ifdef USE_GNU
+//#include <getopt.h>
+//#else
 #include "getopt_long.h"
-#endif /* USE_GNU*/
+//#endif /* USE_GNU*/
 
 
 #include "clearcut.h"

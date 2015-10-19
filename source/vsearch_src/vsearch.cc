@@ -62,7 +62,10 @@
     
 #include "vsearch.h"
 
+
 /* options */
+
+extern int opterr;
 
 bool opt_clusterout_id;
 bool opt_clusterout_sort;
@@ -457,6 +460,7 @@ void args_get_gap_penalty_string(char * arg, int is_open)
 
 long args_getlong(char * arg)
 {
+    fprintf(stdout, "arg=%s \n", arg);
   int len = 0;
   long temp = 0;
   int ret = sscanf(arg, "%ld%n", &temp, &len);
@@ -467,6 +471,7 @@ long args_getlong(char * arg)
 
 double args_getdouble(char * arg)
 {
+    fprintf(stdout, "arg=%s \n", arg);
   int len = 0;
   double temp = 0;
   int ret = sscanf(arg, "%lf%n", &temp, &len);
@@ -475,10 +480,10 @@ double args_getdouble(char * arg)
   return temp;
 }
 
-void args_init(int argc, char **argv)
+void args_init(int argc, char *argv[])
 {
   /* Set defaults */
-
+fprintf(stdout, "args_init begining\n");
   progname = argv[0];
 
   opt_abskew = 2.0;
@@ -629,152 +634,153 @@ void args_init(int argc, char **argv)
   opt_xsize = 0;
 
   opterr = 1;
-
-  static struct option long_options[] =
+fprintf(stdout, "args_init defaults done\n");
+    //changed to NULL to use getopt_long.h class - this avoids pulling mothur's
+  struct option long_options[] =
 
   {
-    {"help",                  no_argument,       0, 0 },
-    {"version",               no_argument,       0, 0 },
-    {"alnout",                required_argument, 0, 0 },
-    {"usearch_global",        required_argument, 0, 0 },
-    {"db",                    required_argument, 0, 0 },
-    {"id",                    required_argument, 0, 0 },
-    {"maxaccepts",            required_argument, 0, 0 },
-    {"maxrejects",            required_argument, 0, 0 },
-    {"wordlength",            required_argument, 0, 0 },
-    {"match",                 required_argument, 0, 0 },
-    {"mismatch",              required_argument, 0, 0 },
-    {"fulldp",                no_argument,       0, 0 },
-    {"strand",                required_argument, 0, 0 },
-    {"threads",               required_argument, 0, 0 },
-    {"gapopen",               required_argument, 0, 0 },
-    {"gapext",                required_argument, 0, 0 },
-    {"rowlen",                required_argument, 0, 0 },
-    {"userfields",            required_argument, 0, 0 },
-    {"userout",               required_argument, 0, 0 },
-    {"self",                  no_argument,       0, 0 },
-    {"blast6out",             required_argument, 0, 0 },
-    {"uc",                    required_argument, 0, 0 },
-    {"weak_id",               required_argument, 0, 0 },
-    {"uc_allhits",            no_argument,       0, 0 },
-    {"notrunclabels",         no_argument,       0, 0 },
-    {"sortbysize",            required_argument, 0, 0 },
-    {"output",                required_argument, 0, 0 },
-    {"minsize",               required_argument, 0, 0 },
-    {"maxsize",               required_argument, 0, 0 },
-    {"relabel",               required_argument, 0, 0 },
-    {"sizeout",               no_argument,       0, 0 },
-    {"derep_fulllength",      required_argument, 0, 0 },
-    {"minseqlength",          required_argument, 0, 0 },
-    {"minuniquesize",         required_argument, 0, 0 },
-    {"topn",                  required_argument, 0, 0 },
-    {"maxseqlength",          required_argument, 0, 0 },
-    {"sizein",                no_argument,       0, 0 },
-    {"sortbylength",          required_argument, 0, 0 },
-    {"matched",               required_argument, 0, 0 },
-    {"notmatched",            required_argument, 0, 0 },
-    {"dbmatched",             required_argument, 0, 0 },
-    {"dbnotmatched",          required_argument, 0, 0 },
-    {"fastapairs",            required_argument, 0, 0 },
-    {"output_no_hits",        no_argument,       0, 0 },
-    {"maxhits",               required_argument, 0, 0 },
-    {"top_hits_only",         no_argument,       0, 0 },
-    {"fasta_width",           required_argument, 0, 0 },
-    {"query_cov",             required_argument, 0, 0 },
-    {"target_cov",            required_argument, 0, 0 },
-    {"idprefix",              required_argument, 0, 0 },
-    {"idsuffix",              required_argument, 0, 0 },
-    {"minqt",                 required_argument, 0, 0 },
-    {"maxqt",                 required_argument, 0, 0 },
-    {"minsl",                 required_argument, 0, 0 },
-    {"maxsl",                 required_argument, 0, 0 },
-    {"leftjust",              no_argument,       0, 0 },
-    {"rightjust",             no_argument,       0, 0 },
-    {"selfid",                no_argument,       0, 0 },
-    {"maxid",                 required_argument, 0, 0 },
-    {"minsizeratio",          required_argument, 0, 0 },
-    {"maxsizeratio",          required_argument, 0, 0 },
-    {"maxdiffs",              required_argument, 0, 0 },
-    {"maxsubs",               required_argument, 0, 0 },
-    {"maxgaps",               required_argument, 0, 0 },
-    {"mincols",               required_argument, 0, 0 },
-    {"maxqsize",              required_argument, 0, 0 },
-    {"mintsize",              required_argument, 0, 0 },
-    {"mid",                   required_argument, 0, 0 },
-    {"shuffle",               required_argument, 0, 0 },
-    {"randseed",              required_argument, 0, 0 },
-    {"maskfasta",             required_argument, 0, 0 },
-    {"hardmask",              no_argument,       0, 0 },
-    {"qmask",                 required_argument, 0, 0 },
-    {"dbmask",                required_argument, 0, 0 },
-    {"cluster_smallmem",      required_argument, 0, 0 },
-    {"cluster_fast",          required_argument, 0, 0 },
-    {"centroids",             required_argument, 0, 0 },
-    {"clusters",              required_argument, 0, 0 },
-    {"consout",               required_argument, 0, 0 },
-    {"cons_truncate",         no_argument,       0, 0 },
-    {"msaout",                required_argument, 0, 0 },
-    {"usersort",              no_argument,       0, 0 },
-    {"xn",                    required_argument, 0, 0 },
-    {"iddef",                 required_argument, 0, 0 },
-    {"slots",                 required_argument, 0, 0 },
-    {"pattern",               required_argument, 0, 0 },
-    {"maxuniquesize",         required_argument, 0, 0 },
-    {"abskew",                required_argument, 0, 0 },
-    {"chimeras",              required_argument, 0, 0 },
-    {"dn",                    required_argument, 0, 0 },
-    {"mindiffs",              required_argument, 0, 0 },
-    {"mindiv",                required_argument, 0, 0 },
-    {"minh",                  required_argument, 0, 0 },
-    {"nonchimeras",           required_argument, 0, 0 },
-    {"uchime_denovo",         required_argument, 0, 0 },
-    {"uchime_ref",            required_argument, 0, 0 },
-    {"uchimealns",            required_argument, 0, 0 },
-    {"uchimeout",             required_argument, 0, 0 },
-    {"uchimeout5",            no_argument,       0, 0 },
-    {"alignwidth",            required_argument, 0, 0 },
-    {"allpairs_global",       required_argument, 0, 0 },
-    {"acceptall",             no_argument,       0, 0 },
-    {"cluster_size",          required_argument, 0, 0 },
-    {"samout",                required_argument, 0, 0 },
-    {"log",                   required_argument, 0, 0 },
-    {"quiet",                 no_argument,       0, 0 },
-    {"fastx_subsample",       required_argument, 0, 0 },
-    {"sample_pct",            required_argument, 0, 0 },
-    {"fastq_chars",           required_argument, 0, 0 },
-    {"profile",               required_argument, 0, 0 },
-    {"sample_size",           required_argument, 0, 0 },
-    {"fastaout",              required_argument, 0, 0 },
-    {"xsize",                 no_argument,       0, 0 },
-    {"clusterout_id",         no_argument,       0, 0 },
-    {"clusterout_sort",       no_argument,       0, 0 },
-    {"borderline",            required_argument, 0, 0 },
-    {"relabel_sha1",          no_argument,       0, 0 },
-    {"relabel_md5",           no_argument,       0, 0 },
-    {"derep_prefix",          required_argument, 0, 0 },
-    {"fastq_filter",          required_argument, 0, 0 },
-    {"fastqout",              required_argument, 0, 0 },
-    {"fastaout_discarded",    required_argument, 0, 0 },
-    {"fastqout_discarded",    required_argument, 0, 0 },
-    {"fastq_truncqual",       required_argument, 0, 0 },
-    {"fastq_maxee",           required_argument, 0, 0 },
-    {"fastq_trunclen",        required_argument, 0, 0 },
-    {"fastq_minlen",          required_argument, 0, 0 },
-    {"fastq_stripleft",       required_argument, 0, 0 },
-    {"fastq_maxee_rate",      required_argument, 0, 0 },
-    {"fastq_maxns",           required_argument, 0, 0 },
-    {"eeout",                 no_argument,       0, 0 },
-    {"fastq_ascii",           required_argument, 0, 0 },
-    {"fastq_qmin",            required_argument, 0, 0 },
-    {"fastq_qmax",            required_argument, 0, 0 },
-    {"fastq_qmaxout",         required_argument, 0, 0 },
-    {"fastq_stats",           required_argument, 0, 0 },
-    {"fastq_tail",            required_argument, 0, 0 },
-    {"fastx_revcomp",         required_argument, 0, 0 },
-    {"label_suffix",          required_argument, 0, 0 },
-    {"h",                     no_argument,       0, 0 },
-    {"samheader",             no_argument,       0, 0 },
-    {"sizeorder",             no_argument,       0, 0 },
+    {"help",                  no_argument,       NULL, 0 },
+    {"version",               no_argument,       NULL, 0 },
+    {"alnout",                required_argument, NULL, 0 },
+    {"usearch_global",        required_argument, NULL, 0 },
+    {"db",                    required_argument, NULL, 0 },
+    {"id",                    required_argument, NULL, 0 },
+    {"maxaccepts",            required_argument, NULL, 0 },
+    {"maxrejects",            required_argument, NULL, 0 },
+    {"wordlength",            required_argument, NULL, 0 },
+    {"match",                 required_argument, NULL, 0 },
+    {"mismatch",              required_argument, NULL, 0 },
+    {"fulldp",                no_argument,       NULL, 0 },
+    {"strand",                required_argument, NULL, 0 },
+    {"threads",               required_argument, NULL, 0 },
+    {"gapopen",               required_argument, NULL, 0 },
+    {"gapext",                required_argument, NULL, 0 },
+    {"rowlen",                required_argument, NULL, 0 },
+    {"userfields",            required_argument, NULL, 0 },
+    {"userout",               required_argument, NULL, 0 },
+    {"self",                  no_argument,       NULL, 0 },
+    {"blast6out",             required_argument, NULL, 0 },
+    {"uc",                    required_argument, NULL, 0 },
+    {"weak_id",               required_argument, NULL, 0 },
+    {"uc_allhits",            no_argument,       NULL, 0 },
+    {"notrunclabels",         no_argument,       NULL, 0 },
+    {"sortbysize",            required_argument, NULL, 0 },
+    {"output",                required_argument, NULL, 0 },
+    {"minsize",               required_argument, NULL, 0 },
+    {"maxsize",               required_argument, NULL, 0 },
+    {"relabel",               required_argument, NULL, 0 },
+    {"sizeout",               no_argument,       NULL, 0 },
+    {"derep_fulllength",      required_argument, NULL, 0 },
+    {"minseqlength",          required_argument, NULL, 0 },
+    {"minuniquesize",         required_argument, NULL, 0 },
+    {"topn",                  required_argument, NULL, 0 },
+    {"maxseqlength",          required_argument, NULL, 0 },
+    {"sizein",                no_argument,       NULL, 0 },
+    {"sortbylength",          required_argument, NULL, 0 },
+    {"matched",               required_argument, NULL, 0 },
+    {"notmatched",            required_argument, NULL, 0 },
+    {"dbmatched",             required_argument, NULL, 0 },
+    {"dbnotmatched",          required_argument, NULL, 0 },
+    {"fastapairs",            required_argument, NULL, 0 },
+    {"output_no_hits",        no_argument,       NULL, 0 },
+    {"maxhits",               required_argument, NULL, 0 },
+    {"top_hits_only",         no_argument,       NULL, 0 },
+    {"fasta_width",           required_argument, NULL, 0 },
+    {"query_cov",             required_argument, NULL, 0 },
+    {"target_cov",            required_argument, NULL, 0 },
+    {"idprefix",              required_argument, NULL, 0 },
+    {"idsuffix",              required_argument, NULL, 0 },
+    {"minqt",                 required_argument, NULL, 0 },
+    {"maxqt",                 required_argument, NULL, 0 },
+    {"minsl",                 required_argument, NULL, 0 },
+    {"maxsl",                 required_argument, NULL, 0 },
+    {"leftjust",              no_argument,       NULL, 0 },
+    {"rightjust",             no_argument,       NULL, 0 },
+    {"selfid",                no_argument,       NULL, 0 },
+    {"maxid",                 required_argument, NULL, 0 },
+    {"minsizeratio",          required_argument, NULL, 0 },
+    {"maxsizeratio",          required_argument, NULL, 0 },
+    {"maxdiffs",              required_argument, NULL, 0 },
+    {"maxsubs",               required_argument, NULL, 0 },
+    {"maxgaps",               required_argument, NULL, 0 },
+    {"mincols",               required_argument, NULL, 0 },
+    {"maxqsize",              required_argument, NULL, 0 },
+    {"mintsize",              required_argument, NULL, 0 },
+    {"mid",                   required_argument, NULL, 0 },
+    {"shuffle",               required_argument, NULL, 0 },
+    {"randseed",              required_argument, NULL, 0 },
+    {"maskfasta",             required_argument, NULL, 0 },
+    {"hardmask",              no_argument,       NULL, 0 },
+    {"qmask",                 required_argument, NULL, 0 },
+    {"dbmask",                required_argument, NULL, 0 },
+    {"cluster_smallmem",      required_argument, NULL, 0 },
+    {"cluster_fast",          required_argument, NULL, 0 },
+    {"centroids",             required_argument, NULL, 0 },
+    {"clusters",              required_argument, NULL, 0 },
+    {"consout",               required_argument, NULL, 0 },
+    {"cons_truncate",         no_argument,       NULL, 0 },
+    {"msaout",                required_argument, NULL, 0 },
+    {"usersort",              no_argument,       NULL, 0 },
+    {"xn",                    required_argument, NULL, 0 },
+    {"iddef",                 required_argument, NULL, 0 },
+    {"slots",                 required_argument, NULL, 0 },
+    {"pattern",               required_argument, NULL, 0 },
+    {"maxuniquesize",         required_argument, NULL, 0 },
+    {"abskew",                required_argument, NULL, 0 },
+    {"chimeras",              required_argument, NULL, 0 },
+    {"dn",                    required_argument, NULL, 0 },
+    {"mindiffs",              required_argument, NULL, 0 },
+    {"mindiv",                required_argument, NULL, 0 },
+    {"minh",                  required_argument, NULL, 0 },
+    {"nonchimeras",           required_argument, NULL, 0 },
+    {"uchime_denovo",         required_argument, NULL, 0 },
+    {"uchime_ref",            required_argument, NULL, 0 },
+    {"uchimealns",            required_argument, NULL, 0 },
+    {"uchimeout",             required_argument, NULL, 0 },
+    {"uchimeout5",            no_argument,       NULL, 0 },
+    {"alignwidth",            required_argument, NULL, 0 },
+    {"allpairs_global",       required_argument, NULL, 0 },
+    {"acceptall",             no_argument,       NULL, 0 },
+    {"cluster_size",          required_argument, NULL, 0 },
+    {"samout",                required_argument, NULL, 0 },
+    {"log",                   required_argument, NULL, 0 },
+    {"quiet",                 no_argument,       NULL, 0 },
+    {"fastx_subsample",       required_argument, NULL, 0 },
+    {"sample_pct",            required_argument, NULL, 0 },
+    {"fastq_chars",           required_argument, NULL, 0 },
+    {"profile",               required_argument, NULL, 0 },
+    {"sample_size",           required_argument, NULL, 0 },
+    {"fastaout",              required_argument, NULL, 0 },
+    {"xsize",                 no_argument,       NULL, 0 },
+    {"clusterout_id",         no_argument,       NULL, 0 },
+    {"clusterout_sort",       no_argument,       NULL, 0 },
+    {"borderline",            required_argument, NULL, 0 },
+    {"relabel_sha1",          no_argument,       NULL, 0 },
+    {"relabel_md5",           no_argument,       NULL, 0 },
+    {"derep_prefix",          required_argument, NULL, 0 },
+    {"fastq_filter",          required_argument, NULL, 0 },
+    {"fastqout",              required_argument, NULL, 0 },
+    {"fastaout_discarded",    required_argument, NULL, 0 },
+    {"fastqout_discarded",    required_argument, NULL, 0 },
+    {"fastq_truncqual",       required_argument, NULL, 0 },
+    {"fastq_maxee",           required_argument, NULL, 0 },
+    {"fastq_trunclen",        required_argument, NULL, 0 },
+    {"fastq_minlen",          required_argument, NULL, 0 },
+    {"fastq_stripleft",       required_argument, NULL, 0 },
+    {"fastq_maxee_rate",      required_argument, NULL, 0 },
+    {"fastq_maxns",           required_argument, NULL, 0 },
+    {"eeout",                 no_argument,       NULL, 0 },
+    {"fastq_ascii",           required_argument, NULL, 0 },
+    {"fastq_qmin",            required_argument, NULL, 0 },
+    {"fastq_qmax",            required_argument, NULL, 0 },
+    {"fastq_qmaxout",         required_argument, NULL, 0 },
+    {"fastq_stats",           required_argument, NULL, 0 },
+    {"fastq_tail",            required_argument, NULL, 0 },
+    {"fastx_revcomp",         required_argument, NULL, 0 },
+    {"label_suffix",          required_argument, NULL, 0 },
+    {"h",                     no_argument,       NULL, 0 },
+    {"samheader",             no_argument,       NULL, 0 },
+    {"sizeorder",             no_argument,       NULL, 0 },
     { 0, 0, 0, 0 }
   };
   
@@ -785,11 +791,12 @@ void args_init(int argc, char **argv)
 
   int option_index = 0;
   int c;
-  
-  while ((c = getopt_long_only(argc, argv, "", long_options, 
+ 
+  while ((c = getopt_long(argc, argv, "", long_options, 
                                &option_index)) == 0)
     {
-      if (option_index < option_count)
+      fprintf(stdout, "option=%d\n", option_index);  
+    if (option_index < option_count)
         options_selected[option_index] = 1;
 
       switch(option_index)
@@ -1971,7 +1978,7 @@ void fillheader()
            sysconf(_SC_NPROCESSORS_ONLN));
 }
 
-void getentirecommandline(int argc, char** argv)
+void getentirecommandline(int argc, char *argv[])
 {
   int len = 0;
   for (int i=0; i<argc; i++)
@@ -1997,15 +2004,18 @@ void show_header()
     }
 }
 
-int vsearch_main(int argc, char** argv)
+int vsearch_main(int argc, char *argv[])
 {
+    opterr = 0;
+    fprintf(stdout, "in vsearch_main\n");
   fillheader();
+    fprintf(stdout, "fillheader\n");
   getentirecommandline(argc, argv);
-
+fprintf(stdout, "getentirecommandline\n");
   cpu_features_detect();
-
+fprintf(stdout, "cpu_features_detect\n");
   args_init(argc, argv);
-
+fprintf(stdout, "args_init\n");
   if (opt_log)
     {
       fp_log = fopen(opt_log, "w");
@@ -2023,7 +2033,7 @@ int vsearch_main(int argc, char** argv)
     }
 
   show_header();
-
+fprintf(stdout, "show_header\n");
   if (!sse2_present)
     fatal("Sorry, this program requires a cpu with SSE2.");
 
