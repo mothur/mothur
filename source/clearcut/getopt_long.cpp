@@ -113,6 +113,8 @@ insert_argv(char **argv, int src, int dest)
     return 0;
 }
 
+
+
 static int
 search_longopt(char *arg, struct option *longopts)
 {
@@ -123,10 +125,9 @@ search_longopt(char *arg, struct option *longopts)
     
     for (i = 0; longopts[i].name; i++) {
         
-        if (strncmp(arg, longopts[i].name, len) == 0) {
-            if (found != -1)
-                return -1;      /* found some candidate */
+        if (strncmp(arg, longopts[i].name, len)==0) {
             found = i;
+            break;
         }
     }
     return found;
@@ -364,7 +365,7 @@ getopt_long(int argc, char **argv,
     }
     else if (opt[0] == '-' && opt[1] == '-') {
         /* long option */
-printf("in long option %s\n", opt);
+
         if (opt[2] == '\0') {
             /* end of command line switch */
             optind++;
@@ -374,7 +375,7 @@ printf("in long option %s\n", opt);
         opt += 2;
 
         i = search_longopt(opt, longopts);
-        printf("in long option %s, %d\n", opt, i);
+        
         if (i == -1) {
             optind++;
             optopt = 0;

@@ -380,22 +380,41 @@ int ClusterCommand::runVsearchCluster(){
     
         if (m->control_pressed) {  return 0; }
         
-        vsearchFastafile = vParse->getVsearchFile();  delete vParse;
+        vsearchFastafile = vParse->getVsearchFile();
         
-        if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.20.\n"); cutoff = 0.20; }
+        if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
         //Run vsearch
         string ucVsearchFile = m->getSimpleName(vsearchFastafile) + ".clustered.uc";
         string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
         vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
         
-        if (m->control_pressed) {
-            ////////////////////////remove files/////////////////////
-            return 0;
+        if (m->control_pressed) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
+        
+        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        tag = method;
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        string listFileName = getOutputFileName("list", variables);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        if (countfile == "") {
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
         }
         
         //Convert outputted *.uc file into a list file
+        vParse->createListFile(ucVsearchFile, listFileName, sabundFileName, rabundFileName, vParse->getNumBins(logfile), toString(1.0-cutoff));  delete vParse;
         
+        //remove temp files
+        m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile);
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         return 0;
     }
@@ -422,41 +441,9 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         int parameterCount = 1;
         //--maxaccepts=16
         vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxaccepts=16", 15);  	 parameterCount++;
-        cout << "here" << endl;
         
         //--usersort
         vsearchParameters[parameterCount] = new char[11];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--usersort", 10);  	parameterCount++;
-        
-        //--minseqlength=30
-        vsearchParameters[parameterCount] = new char[18];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--minseqlength=30", 17);  	parameterCount++;
-        
-        //--wordlength=8
-        vsearchParameters[parameterCount] = new char[15];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--wordlength=8", 14);  	parameterCount++;
-        
-        //--maxrejects=64
-        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxrejects=64", 15);  	parameterCount++;
-        
-        //--strand=both
-        vsearchParameters[parameterCount] = new char[14];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--strand=both", 13);  	parameterCount++;
-        
-        if (method == "agc") {
-            //--sizeorder
-            vsearchParameters[parameterCount] = new char[12];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--sizeorder", 11);  	parameterCount++;
-        }
-        
-        //--uc=$ROOT.clustered.uc
-        string tempIn = "--uc=" + ucClusteredFile;
-        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
-        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
-        parameterCount++;
-        
-        //--log=$ROOT.clustered.log
-        tempIn = "--log=" + logfile;
-        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
-        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
-        parameterCount++;
-        
-        cout << "here" << endl;
         
         //--id=0.97
         cutoff = abs(1.0 - cutoff); string cutoffString = toString(cutoff);
@@ -466,27 +453,47 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         cutoffString = "--id=" +  cutoffString;
         vsearchParameters[parameterCount] = new char[cutoffString.length()+1];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], cutoffString.c_str(), cutoffString.length());  	parameterCount++;
         
+        //--minseqlength=30
+        vsearchParameters[parameterCount] = new char[18];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--minseqlength=30", 17);  	parameterCount++;
         
+        //--wordlength=8
+        vsearchParameters[parameterCount] = new char[15];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--wordlength=8", 14);  	parameterCount++;
         
-        //--cluster_smallmem $ROOT.sorted.fna
-        tempIn = "--cluster_smallmem=" + inputFile;
+        //--uc=$ROOT.clustered.uc
+        string tempIn = "--uc=" + ucClusteredFile;
         vsearchParameters[parameterCount] = new char[tempIn.length()+1];
         *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
         parameterCount++;
+
+        //--cluster_smallmem $ROOT.sorted.fna
+        string tempSorted = "--cluster_smallmem=" + inputFile;
+        vsearchParameters[parameterCount] = new char[tempSorted.length()+1];
+        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempSorted.c_str(), tempSorted.length());
+        parameterCount++;
         
+        //--maxrejects=64
+        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxrejects=64", 15);  	parameterCount++;
         
+        //--strand=both
+        vsearchParameters[parameterCount] = new char[14];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--strand=both", 13);  	parameterCount++;
         
+        //--log=$ROOT.clustered.log
+        string tempLog = "--log=" + logfile;
+        vsearchParameters[parameterCount] = new char[tempLog.length()+1];
+        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempLog.c_str(), tempLog.length());
+        parameterCount++;
 
         
-        
-        
-        
+        if (method == "agc") {
+            //--sizeorder
+            vsearchParameters[parameterCount] = new char[12];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--sizeorder", 11);  	parameterCount++;
+        }
+
+        if (m->debug) {  for(int i = 0; i < numArgs; i++)  { cout << vsearchParameters[i]; } cout << endl;  }
         
         errno = 0;
-        for(int i = 0; i < numArgs; i++)  { cout << vsearchParameters[i]; } cout << endl;
-        
         vsearch_main(numArgs, vsearchParameters);
-        cout << "here" << endl;
+        
         //free memory
         for(int i = 0; i < numArgs; i++)  {  delete[] vsearchParameters[i];  }
         delete[] vsearchParameters; 

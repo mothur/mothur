@@ -460,7 +460,6 @@ void args_get_gap_penalty_string(char * arg, int is_open)
 
 long args_getlong(char * arg)
 {
-    fprintf(stdout, "arg=%s \n", arg);
   int len = 0;
   long temp = 0;
   int ret = sscanf(arg, "%ld%n", &temp, &len);
@@ -471,7 +470,6 @@ long args_getlong(char * arg)
 
 double args_getdouble(char * arg)
 {
-    fprintf(stdout, "arg=%s \n", arg);
   int len = 0;
   double temp = 0;
   int ret = sscanf(arg, "%lf%n", &temp, &len);
@@ -483,7 +481,6 @@ double args_getdouble(char * arg)
 void args_init(int argc, char *argv[])
 {
   /* Set defaults */
-fprintf(stdout, "args_init begining\n");
   progname = argv[0];
 
   opt_abskew = 2.0;
@@ -634,7 +631,7 @@ fprintf(stdout, "args_init begining\n");
   opt_xsize = 0;
 
   opterr = 1;
-fprintf(stdout, "args_init defaults done\n");
+
     //changed to NULL to use getopt_long.h class - this avoids pulling mothur's
   struct option long_options[] =
 
@@ -795,16 +792,16 @@ fprintf(stdout, "args_init defaults done\n");
   while ((c = getopt_long(argc, argv, "", long_options, 
                                &option_index)) == 0)
     {
-      fprintf(stdout, "option=%d\n", option_index);  
+        
     if (option_index < option_count)
         options_selected[option_index] = 1;
 
       switch(option_index)
         {
+                
         case 0:
           opt_help = 1;
           break;
-              
         case 1:
           opt_version = 1;
           break;
@@ -2007,15 +2004,10 @@ void show_header()
 int vsearch_main(int argc, char *argv[])
 {
     opterr = 0;
-    fprintf(stdout, "in vsearch_main\n");
   fillheader();
-    fprintf(stdout, "fillheader\n");
   getentirecommandline(argc, argv);
-fprintf(stdout, "getentirecommandline\n");
   cpu_features_detect();
-fprintf(stdout, "cpu_features_detect\n");
   args_init(argc, argv);
-fprintf(stdout, "args_init\n");
   if (opt_log)
     {
       fp_log = fopen(opt_log, "w");
