@@ -35,14 +35,14 @@ vector<string> RemoveOtuLabelsCommand::setParameters(){
 string RemoveOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.otulabels command can be used to remove specific otus with the output from classify.otu, otu.association, or corr.axes. It can also be used to select a set of otus from a shared or list file.\n";
-		helpString += "The remove.otulabels parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
+		helpString += "The remove.otus command can be used to remove specific otus with the output from classify.otu, otu.association, or corr.axes. It can also be used to select a set of otus from a shared or list file.\n";
+		helpString += "The remove.otus parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
 		helpString += "The constaxonomy parameter is input the results of the classify.otu command.\n";
         helpString += "The otucorr parameter is input the results of the otu.association command.\n";
         helpString += "The corraxes parameter is input the results of the corr.axes command.\n";
         helpString += "The label parameter is used to analyze specific labels in your input. \n";
-		helpString += "The remove.otulabels commmand should be in the following format: \n";
-		helpString += "remove.otulabels(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
+		helpString += "The remove.otus commmand should be in the following format: \n";
+		helpString += "remove.otus(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
 		return helpString;
 	}
 	catch(exception& e) {

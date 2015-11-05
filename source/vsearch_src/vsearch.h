@@ -154,6 +154,8 @@
     #endif
 #else
     #define PROG_ARCH "Windows_x86_64"
+    #include <windows.h>
+    #include <psapi.h>
 #endif
 
 

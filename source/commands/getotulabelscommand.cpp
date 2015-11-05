@@ -35,14 +35,14 @@ vector<string> GetOtuLabelsCommand::setParameters(){
 string GetOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.otulabels command can be used to select specific otus with the output from classify.otu, otu.association, or corr.axes commands.  It can also be used to select a set of otus from a shared or list file.\n";
-		helpString += "The get.otulabels parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
+		helpString += "The get.otus command can be used to select specific otus with the output from classify.otu, otu.association, or corr.axes commands.  It can also be used to select a set of otus from a shared or list file.\n";
+		helpString += "The get.otus parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
 		helpString += "The constaxonomy parameter is used to input the results of the classify.otu command.\n";
         helpString += "The otucorr parameter is used to input the results of the otu.association command.\n";
         helpString += "The corraxes parameter is used to input the results of the corr.axes command.\n";
         helpString += "The label parameter is used to analyze specific labels in your input. \n";
-		helpString += "The get.otulabels commmand should be in the following format: \n";
-		helpString += "get.otulabels(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
+		helpString += "The get.otus commmand should be in the following format: \n";
+		helpString += "get.otus(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
 		return helpString;
 	}
 	catch(exception& e) {

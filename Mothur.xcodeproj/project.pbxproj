@@ -165,7 +165,6 @@
 		481FB5C01AC1B74F0076CFF3 /* getlineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6F812D37EC400DA6239 /* getlineagecommand.cpp */; };
 		481FB5C11AC1B74F0076CFF3 /* getlistcountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6FA12D37EC400DA6239 /* getlistcountcommand.cpp */; };
 		481FB5C21AC1B74F0076CFF3 /* getoturepcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6FE12D37EC400DA6239 /* getoturepcommand.cpp */; };
-		481FB5C31AC1B74F0076CFF3 /* getotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70012D37EC400DA6239 /* getotuscommand.cpp */; };
 		481FB5C41AC1B74F0076CFF3 /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
 		481FB5C51AC1B74F0076CFF3 /* getrabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70212D37EC400DA6239 /* getrabundcommand.cpp */; };
 		481FB5C61AC1B74F0076CFF3 /* getrelabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70412D37EC400DA6239 /* getrelabundcommand.cpp */; };
@@ -221,7 +220,6 @@
 		481FB5F91AC1B77E0076CFF3 /* removedistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0231416B8244B006BA09E /* removedistscommand.cpp */; };
 		481FB5FA1AC1B77E0076CFF3 /* removegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */; };
 		481FB5FB1AC1B77E0076CFF3 /* removelineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */; };
-		481FB5FC1AC1B7970076CFF3 /* removeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */; };
 		481FB5FD1AC1B7970076CFF3 /* removeotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */; };
 		481FB5FE1AC1B7970076CFF3 /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		481FB5FF1AC1B7970076CFF3 /* removeseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */; };
@@ -627,7 +625,6 @@
 		A7E9B8D112D37EC400DA6239 /* getlistcountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6FA12D37EC400DA6239 /* getlistcountcommand.cpp */; };
 		A7E9B8D212D37EC400DA6239 /* getopt_long.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6FC12D37EC400DA6239 /* getopt_long.cpp */; };
 		A7E9B8D312D37EC400DA6239 /* getoturepcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6FE12D37EC400DA6239 /* getoturepcommand.cpp */; };
-		A7E9B8D412D37EC400DA6239 /* getotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70012D37EC400DA6239 /* getotuscommand.cpp */; };
 		A7E9B8D512D37EC400DA6239 /* getrabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70212D37EC400DA6239 /* getrabundcommand.cpp */; };
 		A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70412D37EC400DA6239 /* getrelabundcommand.cpp */; };
 		A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70612D37EC400DA6239 /* getsabundcommand.cpp */; };
@@ -716,7 +713,6 @@
 		A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BF12D37EC400DA6239 /* readtree.cpp */; };
 		A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */; };
 		A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */; };
-		A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */; };
 		A7E9B93512D37EC400DA6239 /* removeseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */; };
 		A7E9B93612D37EC400DA6239 /* reportfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */; };
 		A7E9B93712D37EC400DA6239 /* reversecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CD12D37EC400DA6239 /* reversecommand.cpp */; };
@@ -1322,8 +1318,6 @@
 		A7E9B6FD12D37EC400DA6239 /* getopt_long.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getopt_long.h; path = source/clearcut/getopt_long.h; sourceTree = "<group>"; };
 		A7E9B6FE12D37EC400DA6239 /* getoturepcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getoturepcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getoturepcommand.cpp; sourceTree = "<absolute>"; };
 		A7E9B6FF12D37EC400DA6239 /* getoturepcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getoturepcommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getoturepcommand.h; sourceTree = "<absolute>"; };
-		A7E9B70012D37EC400DA6239 /* getotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getotuscommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getotuscommand.cpp; sourceTree = "<absolute>"; };
-		A7E9B70112D37EC400DA6239 /* getotuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getotuscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getotuscommand.h; sourceTree = "<absolute>"; };
 		A7E9B70212D37EC400DA6239 /* getrabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = getrabundcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getrabundcommand.cpp; sourceTree = "<absolute>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B70312D37EC400DA6239 /* getrabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getrabundcommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getrabundcommand.h; sourceTree = "<absolute>"; };
 		A7E9B70412D37EC400DA6239 /* getrelabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getrelabundcommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/getrelabundcommand.cpp; sourceTree = "<absolute>"; };
@@ -1507,8 +1501,6 @@
 		A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removegroupscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removegroupscommand.h; sourceTree = "<absolute>"; };
 		A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = removelineagecommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removelineagecommand.cpp; sourceTree = "<absolute>"; };
 		A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removelineagecommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removelineagecommand.h; sourceTree = "<absolute>"; };
-		A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = removeotuscommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeotuscommand.cpp; sourceTree = "<absolute>"; };
-		A7E9B7C812D37EC400DA6239 /* removeotuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removeotuscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeotuscommand.h; sourceTree = "<absolute>"; };
 		A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = removeseqscommand.cpp; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeseqscommand.cpp; sourceTree = "<absolute>"; };
 		A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removeseqscommand.h; path = /Users/sarahwestcott/Desktop/mothur/source/commands/removeseqscommand.h; sourceTree = "<absolute>"; };
 		A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = reportfile.cpp; path = source/datastructures/reportfile.cpp; sourceTree = "<group>"; };
@@ -2163,8 +2155,6 @@
 				A7E9B6FA12D37EC400DA6239 /* getlistcountcommand.cpp */,
 				A7E9B6FF12D37EC400DA6239 /* getoturepcommand.h */,
 				A7E9B6FE12D37EC400DA6239 /* getoturepcommand.cpp */,
-				A7E9B70112D37EC400DA6239 /* getotuscommand.h */,
-				A7E9B70012D37EC400DA6239 /* getotuscommand.cpp */,
 				A70056E8156A93E300924A2D /* getotulabelscommand.h */,
 				A70056E5156A93D000924A2D /* getotulabelscommand.cpp */,
 				A7E9B70312D37EC400DA6239 /* getrabundcommand.h */,
@@ -2279,8 +2269,6 @@
 				A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */,
 				A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */,
 				A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */,
-				A7E9B7C812D37EC400DA6239 /* removeotuscommand.h */,
-				A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */,
 				A70056E9156AB6D400924A2D /* removeotulabelscommand.h */,
 				A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */,
 				A727864212E9E28C00F86ABA /* removerarecommand.h */,
@@ -2872,7 +2860,6 @@
 				481FB58C1AC1B6FF0076CFF3 /* slayer.cpp in Sources */,
 				481FB6531AC1B8100076CFF3 /* gotohoverlap.cpp in Sources */,
 				481FB66D1AC1B8520076CFF3 /* rftreenode.cpp in Sources */,
-				481FB5C31AC1B74F0076CFF3 /* getotuscommand.cpp in Sources */,
 				481FB65B1AC1B82C0076CFF3 /* mothurfisher.cpp in Sources */,
 				481FB6721AC1B8820076CFF3 /* refchimeratest.cpp in Sources */,
 				481FB6051AC1B7970076CFF3 /* seqerrorcommand.cpp in Sources */,
@@ -3178,7 +3165,6 @@
 				481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */,
 				481FB5851AC1B6FF0076CFF3 /* chimeracheckrdp.cpp in Sources */,
 				481FB55C1AC1B6660076CFF3 /* sharedbraycurtis.cpp in Sources */,
-				481FB5FC1AC1B7970076CFF3 /* removeotuscommand.cpp in Sources */,
 				481FB5BE1AC1B74F0076CFF3 /* getmetacommunitycommand.cpp in Sources */,
 				481FB6821AC1B8AF0076CFF3 /* svm.cpp in Sources */,
 				481FB6911AC1BAA60076CFF3 /* phylotree.cpp in Sources */,
@@ -3325,7 +3311,6 @@
 				A7E9B8D112D37EC400DA6239 /* getlistcountcommand.cpp in Sources */,
 				A7E9B8D212D37EC400DA6239 /* getopt_long.cpp in Sources */,
 				A7E9B8D312D37EC400DA6239 /* getoturepcommand.cpp in Sources */,
-				A7E9B8D412D37EC400DA6239 /* getotuscommand.cpp in Sources */,
 				A7E9B8D512D37EC400DA6239 /* getrabundcommand.cpp in Sources */,
 				A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */,
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
@@ -3429,7 +3414,6 @@
 				A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */,
 				A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */,
 				A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */,
-				A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */,
 				A7E9B93512D37EC400DA6239 /* removeseqscommand.cpp in Sources */,
 				48A52FDE1BC428DF00548F6C /* util.cc in Sources */,
 				A7E9B93612D37EC400DA6239 /* reportfile.cpp in Sources */,

@@ -12,7 +12,6 @@
 #include "readcolumn.h"
 #include "readmatrix.hpp"
 #include "clusterdoturcommand.h"
-#include "deconvolutecommand.h"
 #include "sequence.hpp"
 #include "vsearch.h"
 #include "vsearchfileparser.h"

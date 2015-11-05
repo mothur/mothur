@@ -185,13 +185,15 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
         }else {
             list.print(out);
             
-            //print sabund and rabund
-            ofstream sabund, rabund;
-            m->openOutputFile(sabundFile, sabund);
-            m->openOutputFile(rabundFile, rabund);
+            if ((sabundFile != "") && (rabundFile != "")){
+                //print sabund and rabund
+                ofstream sabund, rabund;
+                m->openOutputFile(sabundFile, sabund);
+                m->openOutputFile(rabundFile, rabund);
             
-            list.getRAbundVector().print(rabund);  rabund.close();
-            list.getSAbundVector().print(sabund);  sabund.close();
+                list.getRAbundVector().print(rabund);  rabund.close();
+                list.getSAbundVector().print(sabund);  sabund.close();
+            }
         }
         out.close();
         

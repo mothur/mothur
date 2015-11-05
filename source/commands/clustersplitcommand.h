@@ -67,6 +67,8 @@ private:
     string readFile(vector< map<string, string> >&);
     string printFile(string, vector< map<string, string> >&);
     int getLabels(string, set<string>& listLabels);
+    int vsearchDriver(string, string, string);
+    string runVsearchCluster(string, string, set<string>&, double&);
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////

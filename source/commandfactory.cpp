@@ -93,8 +93,6 @@
 #include "subsamplecommand.h"
 #include "removegroupscommand.h"
 #include "getgroupscommand.h"
-#include "getotuscommand.h"
-#include "removeotuscommand.h"
 #include "indicatorcommand.h"
 #include "consensusseqscommand.h"
 #include "trimflowscommand.h"
@@ -303,6 +301,7 @@ CommandFactory::CommandFactory(){
     commands["create.database"]     = "create.database";
     commands["make.biom"]           = "make.biom";
     commands["get.coremicrobiome"]  = "get.coremicrobiome";
+    commands["list.otus"]           = "list.otus";
     commands["list.otulabels"]      = "list.otulabels";
     commands["get.otulabels"]       = "get.otulabels";
     commands["remove.otulabels"]    = "remove.otulabels";
@@ -518,8 +517,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
-		else if(commandName == "get.otus")				{	command = new GetOtusCommand(optionString);					}
-		else if(commandName == "remove.otus")			{	command = new RemoveOtusCommand(optionString);				}
+        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtuLabelsCommand(optionString);			}
+        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
@@ -556,9 +556,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
-        else if(commandName == "list.otulabels")        {	command = new ListOtuLabelsCommand(optionString);           }
-        else if(commandName == "get.otulabels")         {	command = new GetOtuLabelsCommand(optionString);            }
-        else if(commandName == "remove.otulabels")      {	command = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
@@ -695,8 +692,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.groups")			{	pipecommand = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "remove.groups")			{	pipecommand = new RemoveGroupsCommand(optionString);			}
-		else if(commandName == "get.otus")				{	pipecommand = new GetOtusCommand(optionString);					}
-		else if(commandName == "remove.otus")			{	pipecommand = new RemoveOtusCommand(optionString);				}
+		else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	pipecommand = new GetOtuLabelsCommand(optionString);			}
+		else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	pipecommand = new RemoveOtuLabelsCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
@@ -732,9 +730,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
-        else if(commandName == "list.otulabels")        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
-        else if(commandName == "get.otulabels")         {	pipecommand = new GetOtuLabelsCommand(optionString);            }
-        else if(commandName == "remove.otulabels")      {	pipecommand = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
@@ -857,8 +852,9 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
 		else if(commandName == "get.groups")			{	shellcommand = new GetGroupsCommand();				}
 		else if(commandName == "remove.groups")			{	shellcommand = new RemoveGroupsCommand();			}
-		else if(commandName == "get.otus")				{	shellcommand = new GetOtusCommand();				}
-		else if(commandName == "remove.otus")			{	shellcommand = new RemoveOtusCommand();				}
+        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	shellcommand = new GetOtuLabelsCommand();			}
+        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	shellcommand = new RemoveOtuLabelsCommand();			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	shellcommand = new ListOtuLabelsCommand();           }
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
@@ -894,9 +890,6 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
         else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
         else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
-        else if(commandName == "list.otulabels")        {	shellcommand = new ListOtuLabelsCommand();          }
-        else if(commandName == "get.otulabels")         {	shellcommand = new GetOtuLabelsCommand();           }
-        else if(commandName == "remove.otulabels")      {	shellcommand = new RemoveOtuLabelsCommand();        }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
         else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }

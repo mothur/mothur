@@ -24,12 +24,12 @@ public:
     ~RemoveOtuLabelsCommand(){}
     
     vector<string> setParameters();
-    string getCommandName()			{ return "remove.otulabels";          }
+    string getCommandName()			{ return "remove.otus";          }
     string getCommandCategory()		{ return "OTU-Based Approaches";	} 
     
 	string getHelpString();	
     string getOutputPattern(string);	
-    string getCitation() { return "http://www.mothur.org/wiki/Get.otulabels"; }
+    string getCitation() { return "http://www.mothur.org/wiki/Get.otus"; }
     string getDescription()		{ return "Can be used with output from classify.otu, otu.association, or corr.axes to remove specific otus."; }
     
     int execute(); 

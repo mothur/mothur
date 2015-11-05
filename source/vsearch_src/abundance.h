@@ -61,6 +61,10 @@
 
 */
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#endif
 
 typedef struct abundance_s
 {

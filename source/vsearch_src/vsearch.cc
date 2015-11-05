@@ -2025,7 +2025,7 @@ int vsearch_main(int argc, char *argv[])
     }
 
   show_header();
-fprintf(stdout, "show_header\n");
+
   if (!sse2_present)
     fatal("Sorry, this program requires a cpu with SSE2.");
 
