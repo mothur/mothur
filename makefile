@@ -11,10 +11,10 @@
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
+OPTIMIZE ?= yes
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"7/27/2015\""
-VERSION = "\"1.36.1\""
-
+RELEASE_DATE = "\"1/04/2016\""
+VERSION = "\"1.37.0\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
@@ -42,6 +42,11 @@ endif
 #The boost libraries allow you to read gz files.
 ifeq  ($(strip $(USEBOOST)),yes)
     LIBS += -lboost_iostreams
+endif
+
+# Optimize to level 3:
+ifeq  ($(strip $(OPTIMIZE)),yes)
+    CXXFLAGS += -O3
 endif
 
 #
