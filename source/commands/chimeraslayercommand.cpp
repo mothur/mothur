@@ -86,7 +86,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n";
 		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
-		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast, and kmer, default blast. \n";
+		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast and kmer. Default=blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
 		helpString += "The blastlocation parameter allows you to specify the location of your blast executable. By default mothur will look in ./blast/bin relative to mothur's executable.  \n";
 		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
