@@ -2352,12 +2352,14 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
 
 int LinearAlgebra::svd(vector< vector<double> >& a, vector<double>& w, vector< vector<double> >& v) {
     try {
+        
         int flag, i, its, j, jj, k, l, nm;
         double c, f, h, s, x, y, z;
         double anorm = 0.0, g = 0.0, scale = 0.0;
 
         int numRows = a.size(); if (numRows == 0) { return 0; }
         int numCols = a[0].size();
+        if (numCols == 0) {  return 0; }
         w.resize(numCols, 0.0);
         v.resize(numCols); for (int i = 0; i < numCols; i++) { v[i].resize(numRows, 0.0); }
     
