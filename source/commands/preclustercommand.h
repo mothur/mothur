@@ -303,8 +303,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                 
                                 if (pDataArray->method == "unaligned") {
                                     //align to eachother
-                                    Sequence seqI("seq1", alignSeqs[i].seq.getAligned());
-                                    Sequence seqJ("seq2", alignSeqs[j].seq.getAligned());
+                                    Sequence seqI("seq1", alignSeqs[i].seq.getUnaligned());
+                                    Sequence seqJ("seq2", alignSeqs[j].seq.getUnaligned());
                                     
                                     //align seq2 to seq1 - less abundant to more abundant
                                     alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
@@ -443,13 +443,12 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			
 			pDataArray->m->openOutputFileAppend(pDataArray->newFName, outFasta);
 			pDataArray->m->openOutputFileAppend(pDataArray->newNName, outNames);
-						
+            
 			for (int i = 0; i < alignSeqs.size(); i++) {
 				if (alignSeqs[i].numIdentical != 0) {
 					alignSeqs[i].seq.printSequence(outFasta); 
 					if (pDataArray->countfile != "") {  outNames << pDataArray->groups[k] << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl; 
                     }else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;  }
-
 				}
 			}
 			
