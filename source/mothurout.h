@@ -167,7 +167,9 @@ class MothurOut {
         string getSimpleLabel(string);
         string findEdianness();
         string mothurGetpid(int);
-	
+        string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
 		
 		//string manipulation
 		void splitAtEquals(string&, string&);

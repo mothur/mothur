@@ -4762,6 +4762,71 @@ int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string fi
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<string>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            result += delim + list[i];
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<int>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            string temp = toString(list[i]);
+            result += delim + temp;
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<double>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            string temp = toString(list[i]);
+            result += delim + temp;
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 
 
