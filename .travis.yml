@@ -6,8 +6,9 @@ os:
 addons:
   apt:
     packages:
-      - readline
-      - boost
+      - libreadline6
+	  - libreadline6-dev
+      - libboost-all-dev
 
 before install:
   - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
