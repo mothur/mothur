@@ -1,2 +1,5 @@
 language: C++
 script: make install USEREADLINE='no' USEBOOST='no'
+os: 
+	mac
+	linux
