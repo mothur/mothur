@@ -7,7 +7,7 @@ addons:
   apt:
     packages:
       - libreadline6
-	  - libreadline6-dev
+      - libreadline6-dev
       - libboost-all-dev
 
 before install:
