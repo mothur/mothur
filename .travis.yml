@@ -1,5 +1,16 @@
 language: C++
-script: make install USEREADLINE='no' USEBOOST='no'
 os: 
-  mac
-  linux
+ - osx
+ - linux
+
+addons:
+  apt:
+    packages:
+      - readline
+      - boost
+
+before install:
+  - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew install readline boost; fi
+
+script: make install USEREADLINE='no' USEBOOST='no'
