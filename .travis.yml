@@ -1,5 +1,5 @@
 language: C++
-os: 
+os:
  - osx
  - linux
 
@@ -13,4 +13,4 @@ before install:
   - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew install readline boost; fi
 
-script: make install USEREADLINE='no' USEBOOST='no'
+script: make install
