@@ -239,7 +239,7 @@ int GetOtuLabelsCommand::execute(){
         set<string> newLabels;
         for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(m->getSimpleLabel(*it)); }
         labels = newLabels;
-		
+        
 		if (m->control_pressed) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
@@ -306,6 +306,8 @@ int GetOtuLabelsCommand::readClassifyOtu(){
             int size = 0;
             
             in >> otu >> size >> tax; m->gobble(in);
+            
+            if (m->debug) { m->mothurOut("Otu=" + otu + ", size=" + toString(size) + ", tax=" + tax + "\n"); }
             
             if (labels.count(m->getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
