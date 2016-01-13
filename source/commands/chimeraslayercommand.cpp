@@ -1833,13 +1833,14 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
 		
 		//read namefile or countfile
 		vector<seqPriorityNode> nameMapCount;
-        int error;
+        int error = 0;
         if (hasCount) { 
             CountTable ct;
             ct.readTable(nameFile, true, false);
             
             for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                 int num = ct.getNumSeqs(it->first);
+                
                 if (num == 0) { error = 1; }
                 else {
                     seqPriorityNode temp(num, it->second, it->first);
@@ -1867,7 +1868,7 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
 		out.close();
 		
 		rename(newFasta.c_str(), fastaFile.c_str());
-				
+        
 		return nameAbund;
 		
 	}
