@@ -223,7 +223,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
             tempDistFiles.push_back(tempDistFile);
         }
         
-        splitNames(seqGroup, numGroups, tempDistFiles);
+        splitNamesTax(seqGroup, numGroups, tempDistFiles);
         
 		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { m->mothurRemove((dists[i].begin()->first)); m->mothurRemove((dists[i].begin()->second)); } dists.clear(); }
 
@@ -309,7 +309,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			}
 		}
 		
-        splitNames(seqGroup, numGroups, tempDistFiles);
+        splitNamesDist(seqGroup, numGroups, tempDistFiles);
         
 		if (m->control_pressed)	 {  
 			for (int i = 0; i < dists.size(); i++) { 
@@ -519,7 +519,7 @@ int SplitMatrix::splitDistanceLarge(){
             }
         }
         
-		splitNames(seqGroup, numGroups, tempDistFiles);
+		splitNamesDist(seqGroup, numGroups, tempDistFiles);
 				
 		return 0;			
 	}
@@ -529,7 +529,7 @@ int SplitMatrix::splitDistanceLarge(){
 	}
 }
 //********************************************************************************************************************
-int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
+int SplitMatrix::splitNamesDist(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
 	try {
         ofstream outFile;
         map<string, int>::iterator it;
@@ -631,9 +631,116 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitNames");
+		m->errorOut(e, "SplitMatrix", "splitNamesDist");
 		exit(1);
 	}
+}
+//********************************************************************************************************************
+int SplitMatrix::splitNamesTax(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
+    try {
+        ofstream outFile;
+        map<string, int>::iterator it;
+        
+        string inputFile = namefile;
+        if (countfile != "") { inputFile = countfile; }
+        
+        for(int i=0;i<numGroups;i++){  m->mothurRemove((inputFile + "." + toString(i) + ".temp")); }
+        
+        singleton = inputFile + ".extra.temp";
+        ofstream remainingNames;
+        m->openOutputFile(singleton, remainingNames);
+        
+        bool wroteExtra = false;
+        string errorMessage = "name";
+        
+        ifstream bigNameFile;
+        m->openInputFile(inputFile, bigNameFile);
+        
+        //grab header line
+        string headers = "";
+        if (countfile != "") {  errorMessage = "count"; headers = m->getline(bigNameFile); m->gobble(bigNameFile); }
+        
+        string name, nameList;
+        while(!bigNameFile.eof()){
+            bigNameFile >> name >> nameList;
+            m->getline(bigNameFile); m->gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
+            
+            //did this sequence get assigned a group
+            it = seqGroup.find(name);
+            
+            if (it != seqGroup.end()) {
+                m->openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
+                outFile << name << '\t' << nameList << endl;
+                outFile.close();
+            }else{
+                m->mothurOut("[ERROR]: " + name + " is not assigned to a group.  This indicates a file mismatch likely caused by forgetting to include the " + errorMessage + " file on a remove.seqs or remove.lineage command. Please correct.\n"); m->control_pressed = true;
+            }
+        }
+        bigNameFile.close();
+        
+        for(int i=0;i<numGroups;i++){
+            string tempNameFile = inputFile + "." + toString(i) + ".temp";
+            string tempDistFile = tempDistFiles[i];
+            
+            //if there are valid distances
+            ifstream fileHandle;
+            fileHandle.open(tempDistFile.c_str());
+            if(fileHandle) 	{
+                m->gobble(fileHandle);
+                if (!fileHandle.eof()) {  //check
+                    map<string, string> temp;
+                    if (countfile != "") {
+                        //add header
+                        ofstream out;
+                        string newtempNameFile = tempNameFile + "2";
+                        m->openOutputFile(newtempNameFile, out);
+                        out << "Representative_Sequence\ttotal" << endl;
+                        out.close();
+                        m->appendFiles(tempNameFile, newtempNameFile);
+                        m->mothurRemove(tempNameFile);
+                        m->renameFile(newtempNameFile, tempNameFile);
+                    }
+                    temp[tempDistFile] = tempNameFile;
+                    dists.push_back(temp);
+                }else{
+                    ifstream in;
+                    m->openInputFile(tempNameFile, in);
+                    
+                    while(!in.eof()) {
+                        in >> name >> nameList;  m->gobble(in);
+                        wroteExtra = true;
+                        remainingNames << name << '\t' << nameList << endl;
+                    }
+                    in.close();
+                    m->mothurRemove(tempNameFile);
+                }
+            }
+            fileHandle.close();
+        }
+        
+        remainingNames.close();
+        
+        if (!wroteExtra) {
+            m->mothurRemove(singleton);
+            singleton = "none";
+        }else if (countfile != "") {
+            //add header
+            ofstream out;
+            string newtempNameFile = singleton + "2";
+            m->openOutputFile(newtempNameFile, out);
+            out << "Representative_Sequence\ttotal" << endl;
+            out.close();
+            m->appendFiles(singleton, newtempNameFile);
+            m->mothurRemove(singleton);
+            m->renameFile(newtempNameFile, singleton);
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitMatrix", "splitNamesTax");
+        exit(1);
+    }
 }
 //********************************************************************************************************************
 int SplitMatrix::splitDistanceRAM(){
@@ -751,7 +858,7 @@ int SplitMatrix::splitDistanceRAM(){
             }
         }
         
-		splitNames(seqGroup, numGroups, tempDistFiles);
+		splitNamesDist(seqGroup, numGroups, tempDistFiles);
 				
 		return 0;			
 	}
