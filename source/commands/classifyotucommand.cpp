@@ -444,7 +444,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 				it = taxMap.find(names[i]);
 		
 				if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-					m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+					m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
 				}else{
                     if (countfile != "") {
                         int numDups = ct->getNumSeqs(names[i]); 
@@ -565,26 +565,19 @@ int ClassifyOtuCommand::process(ListVector* processList) {
             else {  taxaSum = new PhyloSummary(groupMap,false); }
         }
         
-        vector<ofstream*> outSums;
-        vector<ofstream*> outs;
+        vector<string> outs;
         vector<PhyloSummary*> taxaSums;
         map<string, int> groupIndex;
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
                 groupIndex[groups[i]] = i;
-                ofstream* temp = new ofstream();
                 variables["[distance]"] = processList->getLabel() + "." + groups[i];
                 string outputFile = getOutputFileName("constaxonomy", variables);
-                m->openOutputFile(outputFile, *temp);
-                (*temp) << "OTU\tSize\tTaxonomy" << endl;
-                outs.push_back(temp);
+                ofstream temp;
+                m->openOutputFile(outputFile, temp);
+                outs.push_back(outputFile);
+                temp << "OTU\tSize\tTaxonomy" << endl;
                 outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
-                
-                ofstream* tempSum = new ofstream();
-                string outputSumFile = getOutputFileName("taxsummary", variables);
-                m->openOutputFile(outputSumFile, *tempSum);
-                outSums.push_back(tempSum);
-                outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
                 
                 PhyloSummary* taxaSumt;
                 if (countfile != "") {
@@ -689,8 +682,9 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                     
                     if (m->control_pressed) { break; }
                     
-                    
-                    (*outs[groupIndex[itParsed->first]]) << binLabels[i] << '\t' << size << '\t' << conTax << endl;
+                    ofstream out; m->openOutputFileAppend(outs[groupIndex[itParsed->first]], out);
+                    out << binLabels[i] << '\t' << size << '\t' << conTax << endl;
+                    out.close();
                     
                     string noConfidenceConTax = conTax;
                     m->removeConfidences(noConfidenceConTax);
@@ -719,11 +713,12 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
-                (*outs[i]).close();
-                taxaSums[i]->print(*outSums[i]);
-                (*outSums[i]).close();
-                delete outs[i];
-                delete outSums[i];
+                ofstream outSums;
+                string outputSumFile = getOutputFileName("taxsummary", variables);
+                m->openOutputFile(outputSumFile, outSums);
+                outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
+                taxaSums[i]->print(outSums);
+                outSums.close();
                 delete taxaSums[i];
             }
         }
