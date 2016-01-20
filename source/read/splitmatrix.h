@@ -40,7 +40,8 @@ class SplitMatrix  {
 		int splitClassify();
 		int splitDistanceLarge();
 		int splitDistanceRAM();
-		int splitNames(map<string, int>& groups, int, vector<string>&);
+		int splitNamesDist(map<string, int>& groups, int, vector<string>&);
+        int splitNamesTax(map<string, int>& groups, int, vector<string>&);
 		int splitDistanceFileByTax(map<string, int>&, int);
 		int createDistanceFilesFromTax(map<string, int>&, int);
 };
