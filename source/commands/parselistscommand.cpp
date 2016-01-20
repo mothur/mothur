@@ -324,8 +324,8 @@ int ParseListCommand::execute(){
 /**********************************************************************************************************************/
 int ParseListCommand::parse(ListVector* thisList) {
 	try {
-        map<string, ofstream*> filehandles;
-        map<string, ofstream*>::iterator it3;
+        map<string, string> files;
+        map<string, string>::iterator it3;
         
         //set fileroot
 		map<string, string> variables;
@@ -333,32 +333,25 @@ int ParseListCommand::parse(ListVector* thisList) {
         variables["[distance]"] = thisList->getLabel();
 		
 		//fill filehandles with neccessary ofstreams
-		ofstream* temp;
 		vector<string> gGroups;
         if (groupfile != "") { gGroups = groupMap->getNamesOfGroups(); }
         else { gGroups = ct.getNamesOfGroups(); }
         
+        map<string, string> groupVector;
+        map<string, string> groupLabels;
+        map<string, string>::iterator itGroup;
+        map<string, int> groupNumBins;
+        
 		for (int i=0; i<gGroups.size(); i++) {
-			temp = new ofstream;
-			filehandles[gGroups[i]] = temp;
-			
             variables["[group]"] = gGroups[i];
 			string filename = getOutputFileName("list",variables);
-			m->openOutputFile(filename, *temp);
+			ofstream temp;
+            m->openOutputFile(filename, temp);
+            files[gGroups[i]] = filename;
             outputNames.push_back(filename); outputTypes["list"].push_back(filename);
-		}
-
-	
-		map<string, string> groupVector;
-        map<string, string> groupLabels;
-		map<string, string>::iterator itGroup;
-		map<string, int> groupNumBins;
-		
-		//print label
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			groupNumBins[it3->first] = 0;
-			groupVector[it3->first] = "";
-            groupLabels[it3->first] = "label\tnumOtus";
+            groupNumBins[gGroups[i]] = 0;
+            groupVector[gGroups[i]] = "";
+            groupLabels[gGroups[i]] = "label\tnumOtus";
 		}
 
 		vector<string> binLabels = thisList->getLabels();
@@ -409,21 +402,14 @@ int ParseListCommand::parse(ListVector* thisList) {
 			}
 		
 		}
-		
-        if (m->control_pressed) {
-            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-                (*(filehandles[it3->first])).close();
-                delete it3->second;
-            }
-            return 0;
-        }
         
 		//end list vector
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-            (*(filehandles[it3->first])) << groupLabels[it3->first] << endl;
-			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
-            (*(filehandles[it3->first])).close();
-            delete it3->second;
+		for (it3 = files.begin(); it3 != files.end(); it3++) {
+            ofstream out;
+            m->openOutputFileAppend(files[it3->second], out);
+            out << groupLabels[it3->first] << endl;
+			out << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
+            out.close();
 		}
 		
 		return 0;

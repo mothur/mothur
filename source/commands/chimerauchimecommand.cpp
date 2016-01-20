@@ -1688,15 +1688,13 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		//divide file
 		int count = 0;
 		int spot = 0;
-		map<int, ofstream*> filehandles;
-		map<int, ofstream*>::iterator it3;
+		map<int, string> files;
+		map<int, string>::iterator it3;
 		
-		ofstream* temp;
 		for (int i = 0; i < processors; i++) {
-			temp = new ofstream;
-			filehandles[i] = temp;
-			m->openOutputFile(filename+toString(i)+".temp", *(temp));
-			files.push_back(filename+toString(i)+".temp");
+            ofstream temp;
+			files[i] = filename+toString(i)+".temp";
+			m->openOutputFile(filename+toString(i)+".temp", temp);
 		}
 		
 		ifstream in;
@@ -1709,18 +1707,14 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			Sequence tempSeq(in); m->gobble(in); 
 			
 			if (tempSeq.getName() != "") {
-				tempSeq.printSequence(*(filehandles[spot])); 
+                ofstream temp;
+                m->openOutputFileAppend(files[spot], temp);
+                tempSeq.printSequence(temp); temp.close();
 				spot++; count++;
 				if (spot == processors) { spot = 0; }
 			}
 		}
 		in.close();
-		
-		//delete memory
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			(*(it3->second)).close();
-			delete it3->second;
-		}
 		
 		//sanity check for number of processors
 		if (count < processors) { processors = count; }
