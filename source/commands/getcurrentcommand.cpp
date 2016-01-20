@@ -159,6 +159,10 @@ int GetCurrentCommand::execute(){
 			}
 		}
 		
+        unsigned long long ramUsed, total;
+        ramUsed = m->getRAMUsed(); total = m->getTotalRAM();
+        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
+        
 		if (m->hasCurrentFiles()) {
 			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
 			m->printCurrentFiles();
