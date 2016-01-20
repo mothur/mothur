@@ -63,6 +63,7 @@
 	#include <sys/resource.h>
 	#include <sys/types.h>
 	#include <sys/stat.h>
+    #include <sys/sysctl.h>
 	#include <unistd.h>
 	
 	#ifdef USE_READLINE
@@ -88,7 +89,7 @@ using namespace std;
 #define log2(x) (log10(x)/log10(2))
 #define isnan(x) ((x) != (x))
 #define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
-
+#define GIG 1073741824
 
 typedef unsigned long ull;
 typedef unsigned short intDist;
