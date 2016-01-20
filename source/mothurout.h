@@ -166,7 +166,9 @@ class MothurOut {
         string getSimpleLabel(string);
         string findEdianness();
         string mothurGetpid(int);
-	
+        unsigned long long getRAMUsed();
+        unsigned long long getTotalRAM();
+        unsigned long get_phys_pages();
 		
 		//string manipulation
 		void splitAtEquals(string&, string&);
@@ -318,6 +320,7 @@ class MothurOut {
             changedSeqNames = false;
             modifyNames = true;
             numErrors = 0;
+            numWarnings = 0;
 		}
 		~MothurOut();
 
@@ -331,7 +334,7 @@ class MothurOut {
 		vector<string> Groups;
 		vector<string> namesOfGroups;
 		ofstream out;
-        int numErrors;
+        int numErrors, numWarnings;
 		
 		int mem_usage(double&, double&);
 
