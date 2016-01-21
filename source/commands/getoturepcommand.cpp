@@ -942,7 +942,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				
 		ofstream newNamesOutput;
 		string outputNamesFile;
-		map<string, ofstream*> filehandles;
+		map<string, string> files; //group -> filenameAW
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
@@ -960,12 +960,9 @@ int GetOTURepCommand::process(ListVector* processList) {
             m->openOutputFile(outputNamesFile, newNamesOutput);
             newNamesOutput << "noGroup" << endl;
 		}else{ //you want to use groups
-			ofstream* temp;
 			for (int i=0; i<Groups.size(); i++) {
-				temp = new ofstream;
                 variables["[tag]"] = processList->getLabel();
                 variables["[group]"] = Groups[i];
-				filehandles[Groups[i]] = temp;
 				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
                 if (countfile == "") { 
                     outputNamesFile = getOutputFileName("name", variables);
@@ -974,9 +971,10 @@ int GetOTURepCommand::process(ListVector* processList) {
                     outputNamesFile = getOutputFileName("count", variables);
                     outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
                 }
-				
-				m->openOutputFile(outputNamesFile, *(temp));
-                *(temp) << Groups[i] << endl;
+				files[Groups[i]] = outputNamesFile;
+                ofstream temp;
+				m->openOutputFile(outputNamesFile, temp);
+                temp << Groups[i] << endl; temp.close();
 				outputNameFiles[outputNamesFile] = processList->getLabel() + "." + Groups[i];
 			}
 		}
@@ -984,18 +982,8 @@ int GetOTURepCommand::process(ListVector* processList) {
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
-			if (m->control_pressed) { 
-				out.close();  
-				if (Groups.size() == 0) { //you don't want to use groups
-					newNamesOutput.close();
-				}else{
-					for (int j=0; j<Groups.size(); j++) {
-						(*(filehandles[Groups[j]])).close();
-						delete filehandles[Groups[j]];
-					}
-				}
-				return 0; 
-			}
+        
+			if (m->control_pressed) { out.close(); if (Groups.size() == 0) { newNamesOutput.close(); } return 0; }
 			
 			string temp = processList->get(i);
 			vector<string> namesInBin;
@@ -1046,7 +1034,9 @@ int GetOTURepCommand::process(ListVector* processList) {
 						nameRep = findRep(NamesInGroup[Groups[j]], Groups[j]);
 						
 						//output group rep and other members of this group
-						(*(filehandles[Groups[j]])) << binLabels[i] << '\t' << nameRep << '\t';
+                        ofstream outGroup;
+                        m->openOutputFileAppend(files[Groups[j]], outGroup);
+						outGroup << binLabels[i] << '\t' << nameRep << '\t';
 						
                         //put rep at first position in names line
                         string outputString = nameRep + ",";
@@ -1060,20 +1050,14 @@ int GetOTURepCommand::process(ListVector* processList) {
                         if (outputString[outputString.length()-1] == ',') { //rip off comma
                             outputString = outputString.substr(0, outputString.length()-1);
                         }
-                        (*(filehandles[Groups[j]])) << outputString << endl;
+                        outGroup << outputString << endl; outGroup.close();
 					}
 				}
 			}
 		}
 		
-		if (Groups.size() == 0) { //you don't want to use groups
-			newNamesOutput.close();
-		}else{
-			for (int i=0; i<Groups.size(); i++) {
-				(*(filehandles[Groups[i]])).close();
-				delete filehandles[Groups[i]];
-			}
-		}
+        //you don't want to use groups
+		if (Groups.size() == 0) { newNamesOutput.close(); }
 		
 		return 0;
 

@@ -330,25 +330,24 @@ int SplitGroupCommand::runCount(){
         SharedUtil util;  util.setGroups(Groups, namesGroups); 
         
         //fill filehandles with neccessary ofstreams
-        map<string, ofstream*> ffiles;
-        map<string, ofstream*> cfiles;
-        ofstream* temp;
+        map<string, string> ffiles; //group -> filename
+        map<string, string> cfiles; //group -> filename
         for (int i=0; i<Groups.size(); i++) {
-            temp = new ofstream;
-            ffiles[Groups[i]] = temp;
+            ofstream ftemp, ctemp;
             map<string, string> variables; 
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
             variables["[group]"] = Groups[i];
             string newFasta = getOutputFileName("fasta",variables);
             outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
-            m->openOutputFile(newFasta, (*temp));
-            temp = new ofstream;
-            cfiles[Groups[i]] = temp;
+            ffiles[Groups[i]] = newFasta;
+            m->openOutputFile(newFasta, ftemp); ftemp.close();
+            
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
             string newCount = getOutputFileName("count",variables);
-            m->openOutputFile(newCount, (*temp));
             outputNames.push_back(newCount); outputTypes["count"].push_back(newCount);
-            (*temp) << "Representative_Sequence\ttotal\t" << Groups[i] << endl;
+            cfiles[Groups[i]] = newCount;
+            m->openOutputFile(newCount, ctemp);
+            ctemp << "Representative_Sequence\ttotal\t" << Groups[i] << endl; ctemp.close();
         }
         
         ifstream in; 
@@ -362,20 +361,17 @@ int SplitGroupCommand::runCount(){
                 vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
                 for (int i = 0; i < thisSeqsGroups.size(); i++) {
                     if (m->inUsersGroups(thisSeqsGroups[i], Groups)) { //if this sequence belongs to a group we want them print
-                        seq.printSequence(*(ffiles[thisSeqsGroups[i]]));
+                        ofstream outf, outc;
+                        m->openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
+                        seq.printSequence(outf); outf.close();
                         int numSeqs = ct.getGroupCount(seq.getName(), thisSeqsGroups[i]);
-                        (*(cfiles[thisSeqsGroups[i]])) << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl;
+                        m->openOutputFileAppend(cfiles[thisSeqsGroups[i]], outc);
+                        outc << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl; outc.close();
                     }
                 }
             }
         }
         in.close();
-        
-        //close and delete ofstreams
-        for (int i=0; i<Groups.size(); i++) {  
-            (*ffiles[Groups[i]]).close(); delete ffiles[Groups[i]];
-            (*cfiles[Groups[i]]).close(); delete cfiles[Groups[i]];
-        }
         
         return 0;
 
