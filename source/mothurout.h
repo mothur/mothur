@@ -336,8 +336,6 @@ class MothurOut {
 		ofstream out;
         int numErrors;
 		
-		int mem_usage(double&, double&);
-
 };
 /***********************************************/
 
