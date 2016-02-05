@@ -70,20 +70,22 @@
   http://dx.doi.org/10.1093/bioinformatics/btr381
 */
 
-/* global constants/data, no need for synchronization */
-const int parts = 4;
-const int few = 1;
-const int maxcandidates = few * parts;
-const int rejects = 64;
-const double chimera_id = 0.55;
-static int tophits;
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
 static pthread_attr_t attr;
 static pthread_t * pthread;
-static fasta_handle query_fasta_h;
 
 /* mutexes and global data protected by mutex */
 static pthread_mutex_t mutex_input;
 static pthread_mutex_t mutex_output;
+
+#else
+
+    todo
+
+#endif
+
 static unsigned int seqno = 0;
 static unsigned long progress = 0;
 static int chimera_count = 0;
@@ -93,6 +95,15 @@ static FILE * fp_nonchimeras = 0;
 static FILE * fp_uchimealns = 0;
 static FILE * fp_uchimeout = 0;
 static FILE * fp_borderline = 0;
+static fasta_handle query_fasta_h;
+
+/* global constants/data, no need for synchronization */
+const int parts = 4;
+const int few = 1;
+const int maxcandidates = few * parts;
+const int rejects = 64;
+const double chimera_id = 0.55;
+static int tophits;
 
 #define ALT
 //#define ALT2
@@ -790,7 +801,13 @@ int eval_parents(struct chimera_info_s * ci)
 
       /* print alignment */
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
       pthread_mutex_lock(&mutex_output);
+#else
+        
+        todo
+        
+#endif
 
       if (opt_uchimealns && (status == 4))
         {
@@ -925,7 +942,14 @@ int eval_parents(struct chimera_info_s * ci)
                       status == 4 ? 'Y' : (status == 2 ? 'N' : '?'));
             }
         }
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
       pthread_mutex_unlock(&mutex_output);
+#else
+        
+        todo
+        
+#endif
     }
 
   return status;
@@ -1107,8 +1131,12 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
   while(1)
     {
       /* get next sequence */
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
       
       pthread_mutex_lock(&mutex_input);
+#else
+        todo
+#endif
 
       if (opt_uchime_ref)
         {
@@ -1129,7 +1157,14 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
             }
           else
             {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
               pthread_mutex_unlock(&mutex_input);
+#else
+                todo
+#endif
+
+                
               break; /* end while loop */
             }
         }
@@ -1150,14 +1185,22 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
             }
           else
             {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
               pthread_mutex_unlock(&mutex_input);
+#else
+                todo
+#endif
               break; /* end while loop */
             }
         }
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
       pthread_mutex_unlock(&mutex_input);
 
-
+#else
+        todo
+#endif
       
       int status = 0;
 
@@ -1274,9 +1317,12 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
         status = 0;
 
       /* output results */
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
       pthread_mutex_lock(&mutex_output);
-
+#else
+        todo
+#endif
       if (status == 4)
         {
           chimera_count++;
@@ -1381,8 +1427,12 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
       progress_update(progress);
 
       seqno++;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
       pthread_mutex_unlock(&mutex_output);
+#else
+        todo
+#endif
     }
 
   if (allhits_list)
@@ -1402,9 +1452,11 @@ void * chimera_thread_worker(void * vp)
 
 void chimera_threads_run()
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  
+
   /* create worker threads */
   for(long t=0; t<opt_threads; t++)
     {
@@ -1423,6 +1475,9 @@ void chimera_threads_run()
     }
 
   pthread_attr_destroy(&attr);
+#else
+    todo
+#endif
 }
 
 void open_chimera_file(FILE * * f, char * name)
@@ -1472,16 +1527,22 @@ void chimera()
   nonchimera_count = 0;
   progress = 0;
   seqno = 0;
-  
+    
+    cia = (struct chimera_info_s *) xmalloc(opt_threads *
+                                            sizeof(struct chimera_info_s));
+ 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    
   /* prepare threads */
   pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
-  cia = (struct chimera_info_s *) xmalloc(opt_threads *
-                                          sizeof(struct chimera_info_s));
-
+    
   /* init mutexes for input and output */
   pthread_mutex_init(&mutex_input, NULL);
   pthread_mutex_init(&mutex_output, NULL);
-
+#else
+    todo
+#endif
+    
   /* prepare queries / database */
   if (opt_uchime_ref)
     {
@@ -1553,13 +1614,16 @@ void chimera()
   
   dbindex_free();
   db_free();
-
-  pthread_mutex_destroy(&mutex_output);
-  pthread_mutex_destroy(&mutex_input);
-  
-  free(cia);
-  free(pthread);
-  
+    free(cia);
+    
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    pthread_mutex_destroy(&mutex_output);
+    pthread_mutex_destroy(&mutex_input);
+    free(pthread);
+#else
+    todo
+#endif
+    
   close_chimera_file(fp_borderline);
   close_chimera_file(fp_uchimeout);
   close_chimera_file(fp_uchimealns);

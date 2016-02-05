@@ -62,7 +62,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    #include <pthread.h>
+#endif
 //#include <getopt.h>
 #include <x86intrin.h>
 #include <stdlib.h>
@@ -118,7 +120,7 @@
 //vsearch definitions
 
 #define PROG_NAME "vsearch" //PACKAGE
-#define PROG_VERSION "1.4.1" //PACKAGE_VERSION
+#define PROG_VERSION "1.9.7" //PACKAGE_VERSION
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "torognes@ifi.uio.no"
 

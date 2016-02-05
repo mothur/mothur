@@ -147,9 +147,15 @@ void dust(char * m, int len)
     }
 }
 
-static pthread_t * pthread;
-static pthread_attr_t attr;
-static pthread_mutex_t myMutex;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
+    static pthread_t * pthread;
+    static pthread_attr_t attr;
+    static pthread_mutex_t myMutex;
+#else
+    todo
+#endif
+
 static int nextseq = 0;
 static int seqcount = 0;
 
@@ -157,18 +163,33 @@ void * dust_all_worker(void * vp)
 {
   while(1)
     {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
       pthread_mutex_lock(&myMutex);
+#else
+        todo
+#endif
       int seqno = nextseq;
       if (seqno < seqcount)
         {
           nextseq++;
           progress_update(seqno);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
           pthread_mutex_unlock(&myMutex);
+#else
+            todo
+#endif
           dust(db_getsequence(seqno), db_getsequencelen(seqno));
         }
       else
         {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
           pthread_mutex_unlock(&myMutex);
+#else
+            todo
+#endif
           break;
         }
     }
@@ -178,6 +199,7 @@ void * dust_all_worker(void * vp)
 void dust_all()
 {
   progress_init("Masking", seqcount);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -195,6 +217,10 @@ void dust_all()
   free(pthread);
 
   pthread_attr_destroy(&attr);
+
+#else
+    todo
+#endif
 
   progress_done();
 }

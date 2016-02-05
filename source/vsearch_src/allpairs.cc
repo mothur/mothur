@@ -60,15 +60,23 @@
 
 #include "vsearch.h"
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
 static pthread_t * pthread;
 
 /* global constants/data, no need for synchronization */
-static int seqcount; /* number of database sequences */
 static pthread_attr_t attr;
 
 /* global data protected by mutex */
 static pthread_mutex_t mutex_input;
 static pthread_mutex_t mutex_output;
+
+#else
+
+create thread
+
+#endif
+
 static int qmatches;
 static int queries;
 static long progress = 0;
@@ -80,6 +88,7 @@ static FILE * fp_uc = 0;
 static FILE * fp_fastapairs = 0;
 static FILE * fp_matched = 0;
 static FILE * fp_notmatched = 0;
+static int seqcount; /* number of database sequences */
 
 inline int allpairs_hit_compare_typed(struct hit * x, struct hit * y)
 {
@@ -309,17 +318,24 @@ void allpairs_thread_run(long t)
 
   while (cont)
     {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
       pthread_mutex_lock(&mutex_input);
-      
+#else
+        todo
+#endif
       int query_no = queries;
 
       if (query_no < seqcount)
         {
           queries++;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
           /* let other threads read input */
           pthread_mutex_unlock(&mutex_input);
-
+#else
+            todo
+#endif
           /* init search info */
           si->query_no = query_no;
           si->qsize = db_getabundance(query_no);
@@ -438,10 +454,14 @@ void allpairs_thread_run(long t)
               qsort(finalhits, si->accepts,
                     sizeof(struct hit), allpairs_hit_compare);
             }
-          
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
           /* lock mutex for update of global data and output */
           pthread_mutex_lock(&mutex_output);
-          
+#else
+            todo
+#endif
           /* output results */
           allpairs_output_results(si->accepts,
                                   finalhits,
@@ -457,9 +477,14 @@ void allpairs_thread_run(long t)
           /* show progress */
           progress += seqcount - query_no - 1;
           progress_update(progress);
-          
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+         
           pthread_mutex_unlock(&mutex_output);
-          
+
+#else
+            todo
+#endif
+            
           /* free memory for alignment strings */
           for(int i=0; i < si->hit_count; i++)
             if (si->hits[i].aligned)
@@ -467,9 +492,13 @@ void allpairs_thread_run(long t)
         }
       else
         {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+           
           /* let other threads read input */
           pthread_mutex_unlock(&mutex_input);
-
+#else
+            todo
+#endif
           cont = 0;
         }
     }
@@ -504,9 +533,11 @@ void allpairs_thread_worker_run()
 {
   /* initialize threads, start them, join them and return */
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  
+
   /* init and create worker threads, put them into stand-by mode */
   for(int t=0; t<opt_threads; t++)
     {
@@ -523,6 +554,11 @@ void allpairs_thread_worker_run()
     }
 
   pthread_attr_destroy(&attr);
+    
+#else
+    todo
+#endif
+    
 }
 
 
@@ -609,12 +645,18 @@ void allpairs_global(char * cmdline, char * progheader)
   qmatches = 0;
   queries = 0;
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
 
   /* init mutexes for input and output */
   pthread_mutex_init(&mutex_input, NULL);
   pthread_mutex_init(&mutex_output, NULL);
-
+#else
+    
+    todo
+#endif
+    
   progress = 0;
   progress_init("Aligning", MAX(0,((long)seqcount)*((long)seqcount-1))/2);
   allpairs_thread_worker_run();
@@ -630,11 +672,17 @@ void allpairs_global(char * cmdline, char * progheader)
               qmatches, queries, 100.0 * qmatches / queries);
     }
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   pthread_mutex_destroy(&mutex_output);
   pthread_mutex_destroy(&mutex_input);
 
   free(pthread);
-
+#else
+    
+    todo
+#endif
+    
   /* clean up, global */
   db_free();
   if (opt_matched)

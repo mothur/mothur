@@ -62,17 +62,23 @@
 
 static struct searchinfo_s * si_plus;
 static struct searchinfo_s * si_minus;
-static pthread_t * pthread;
+
 
 /* global constants/data, no need for synchronization */
 static int tophits; /* the maximum number of hits to keep */
 static int seqcount; /* number of database sequences */
-static pthread_attr_t attr;
 static fasta_handle query_fasta_h;
 
 /* global data protected by mutex */
-static pthread_mutex_t mutex_input;
-static pthread_mutex_t mutex_output;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
+    static pthread_attr_t attr;
+    static pthread_t * pthread;
+    static pthread_mutex_t mutex_input;
+    static pthread_mutex_t mutex_output;
+#else
+    todo
+#endif
 static int qmatches;
 static int queries;
 static int * dbmatched;
@@ -94,8 +100,12 @@ void search_output_results(int hit_count,
                            char * qsequence,
                            char * qsequence_rc)
 {
-  pthread_mutex_lock(&mutex_output);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
+  pthread_mutex_lock(&mutex_output);
+#else
+    todo
+#endif
   /* show results */
   long toreport = MIN(opt_maxhits, hit_count);
 
@@ -220,8 +230,12 @@ void search_output_results(int hit_count,
   for (int i=0; i < hit_count; i++)
     if (hits[i].accepted)
       dbmatched[hits[i].target]++;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
   
   pthread_mutex_unlock(&mutex_output);
+#else
+    todo
+#endif
 }
 
 int search_query(long t)
@@ -273,8 +287,12 @@ void search_thread_run(long t)
 {
   while (1)
     {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
       pthread_mutex_lock(&mutex_input);
-      
+#else
+        todo
+#endif
       if (fasta_next(query_fasta_h,
                      ! opt_notrunclabels,
                      ((opt_qmask != MASK_SOFT) ?
@@ -320,9 +338,13 @@ void search_thread_run(long t)
           
           /* get progress as amount of input file read */
           unsigned long progress = fasta_get_position(query_fasta_h);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
           /* let other threads read input */
           pthread_mutex_unlock(&mutex_input);
+#else
+            todo
+#endif
           
           /* minus strand: copy header and reverse complementary sequence */
           if (opt_strand > 1)
@@ -334,9 +356,13 @@ void search_thread_run(long t)
             }
           
           int match = search_query(t);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
           
           /* lock mutex for update of global data and output */
           pthread_mutex_lock(&mutex_output);
+#else
+            todo
+#endif
 
           /* update stats */
           queries++;
@@ -346,12 +372,23 @@ void search_thread_run(long t)
 
           /* show progress */
           progress_update(progress);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
           pthread_mutex_unlock(&mutex_output);
+#else
+            todo
+#endif
+
         }
       else
         {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
           pthread_mutex_unlock(&mutex_input);
+#else
+            todo
+#endif
+
           break;
         }
     }
@@ -420,6 +457,7 @@ void * search_thread_worker(void * vp)
 void search_thread_worker_run()
 {
   /* initialize threads, start them, join them and return */
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -446,6 +484,9 @@ void search_thread_worker_run()
     }
 
   pthread_attr_destroy(&attr);
+#else
+    todo
+#endif
 }
 
 
@@ -601,21 +642,28 @@ void usearch_global(char * cmdline, char * progheader)
                                                sizeof(struct searchinfo_s));
   else
     si_minus = 0;
-  
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+ 
   pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
 
   /* init mutexes for input and output */
   pthread_mutex_init(&mutex_input, NULL);
   pthread_mutex_init(&mutex_output, NULL);
-
+#else
+    todo
+#endif
   progress_init("Searching", fasta_get_size(query_fasta_h));
   search_thread_worker_run();
   progress_done();
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
   
   pthread_mutex_destroy(&mutex_output);
   pthread_mutex_destroy(&mutex_input);
 
   free(pthread);
+#else
+    todo
+#endif
   free(si_plus);
   if (si_minus)
     free(si_minus);

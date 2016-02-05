@@ -85,17 +85,25 @@ static FILE * fp_blast6out = 0;
 static FILE * fp_fastapairs = 0;
 static FILE * fp_matched = 0;
 static FILE * fp_notmatched = 0;
-  
-static pthread_attr_t attr;
 
 static struct searchinfo_s * si_plus;
 static struct searchinfo_s * si_minus;
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    static pthread_attr_t attr;
+#else
+    todo
+#endif
+
 typedef struct thread_info_s
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
   pthread_t thread;
   pthread_mutex_t mutex;
   pthread_cond_t cond;
+#else
+    todo
+#endif
   int work;
   int query_first;
   int query_count;
@@ -172,6 +180,8 @@ inline void cluster_worker(long t)
 
 void * threads_worker(void * vp)
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   long t = (long) vp;
   thread_info_s * tip = ti + t;
   pthread_mutex_lock(&tip->mutex);
@@ -189,11 +199,17 @@ void * threads_worker(void * vp)
         }
     }
   pthread_mutex_unlock(&tip->mutex);
+#else
+    todo
+#endif
+    
   return 0;
 }
 
 void threads_wakeup(int queries)
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   int threads = queries > opt_threads ? opt_threads : queries;
   int queries_rest = queries;
   int threads_rest = threads;
@@ -225,10 +241,15 @@ void threads_wakeup(int queries)
         pthread_cond_wait(&tip->cond, &tip->mutex);
       pthread_mutex_unlock(&tip->mutex);
     }
+#else
+    todo
+#endif
 }
 
 void threads_init()
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   
@@ -245,10 +266,15 @@ void threads_init()
       if (pthread_create(&tip->thread, &attr, threads_worker, (void*)(long)t))
         fatal("Cannot create thread");
     }
+#else
+    todo
+#endif
 }
 
 void threads_exit()
 {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
   /* finish and clean up worker threads */
   for(int t=0; t<opt_threads; t++)
     {
@@ -269,6 +295,9 @@ void threads_exit()
     }
   free(ti);
   pthread_attr_destroy(&attr);
+#else
+    todo
+#endif
 }
 
 void cluster_query_init(struct searchinfo_s * si)
