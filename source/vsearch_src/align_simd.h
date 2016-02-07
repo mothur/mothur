@@ -1,6 +1,3 @@
-
-
-
 /*
 
   VSEARCH: a versatile open source tool for metagenomics
@@ -98,7 +95,3 @@ search16(s16info_s * s,
          unsigned short * pmismatches,
          unsigned short * pgaps,
          char * * pcigar);
-    
-
-
-

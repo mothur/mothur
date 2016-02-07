@@ -91,7 +91,81 @@ static FILE * fp_notmatched = 0;
 static FILE * fp_dbmatched = 0;
 static FILE * fp_dbnotmatched = 0;
 
-void search_output_results(int hit_count,
+void add_hit(struct searchinfo_s * si, unsigned long seqno)
+{
+  if (search_acceptable_unaligned(si, seqno))
+    {
+      struct hit * hp = si->hits + si->hit_count;
+      si->hit_count++;
+      
+      hp->target = seqno;
+      hp->strand = si->strand;
+      
+      hp->count = 0;
+      
+      hp->nwscore = si->qseqlen * opt_match;
+      hp->nwdiff = 0;
+      hp->nwgaps = 0;
+      hp->nwindels = 0;
+      hp->nwalignmentlength = si->qseqlen;
+      hp->nwid = 100.0;
+      hp->matches = si->qseqlen;
+      hp->mismatches = 0;
+      
+      int ret = sprintf(hp->nwalignment, "%dM", si->qseqlen);
+      if ((ret == -1) || (!hp->nwalignment))
+        fatal("Out of memory");
+      
+      hp->internal_alignmentlength = si->qseqlen;
+      hp->internal_gaps = 0;
+      hp->internal_indels = 0;
+      hp->trim_q_left = 0;
+      hp->trim_q_right = 0;
+      hp->trim_t_left = 0;
+      hp->trim_t_right = 0;
+      hp->trim_aln_left = 0;
+      hp->trim_aln_right = 0;
+      
+      hp->id = 100.0;
+      hp->id0 = 100.0;
+      hp->id1 = 100.0;
+      hp->id2 = 100.0;
+      hp->id3 = 100.0;
+      hp->id4 = 100.0;
+      
+      hp->shortest = si->qseqlen;
+      hp->longest = si->qseqlen;
+      
+      hp->aligned = 1;
+
+      hp->accepted = 0;
+      hp->rejected = 0;
+      hp->weak = 0;
+      (void) search_acceptable_aligned(si, hp);
+    }
+}
+
+void search_exact_onequery(struct searchinfo_s * si)
+{
+  dbhash_search_info_s info;
+
+  char * seq = si->qsequence;
+  unsigned long seqlen = si->qseqlen;
+  char * normalized = (char*) xmalloc(seqlen+1);
+  string_normalize(normalized, seq, seqlen);
+
+  si->hit_count = 0;
+
+  long ret = dbhash_search_first(normalized, seqlen, & info);
+  while (ret >= 0)
+    {
+      add_hit(si, ret);
+      ret = dbhash_search_next(&info);
+    }
+  free(normalized);
+}
+
+void search_exact_output_results(int hit_count,
                            struct hit * hits,
                            char * query_head,
                            int qseqlen,
@@ -99,7 +173,8 @@ void search_output_results(int hit_count,
                            char * qsequence_rc)
 {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    pthread_mutex_lock(&mutex_output);
+
+  pthread_mutex_lock(&mutex_output);
 #endif
   /* show results */
   long toreport = MIN(opt_maxhits, hit_count);
@@ -215,13 +290,13 @@ void search_output_results(int hit_count,
   for (int i=0; i < hit_count; i++)
     if (hits[i].accepted)
       dbmatched[hits[i].target]++;
-  
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    pthread_mutex_unlock(&mutex_output);
+
+  pthread_mutex_unlock(&mutex_output);
 #endif
 }
 
-int search_query(long t)
+int search_exact_query(long t)
 {
   for (int s = 0; s < opt_strand; s++)
     {
@@ -238,7 +313,7 @@ int search_query(long t)
         }
 
       /* perform search */
-      search_onequery(si, opt_qmask);
+      search_exact_onequery(si);
     }
 
   struct hit * hits;
@@ -249,12 +324,12 @@ int search_query(long t)
                   & hits,
                   & hit_count);
 
-  search_output_results(hit_count,
-                        hits,
-                        si_plus[t].query_head,
-                        si_plus[t].qseqlen,
-                        si_plus[t].qsequence,
-                        opt_strand > 1 ? si_minus[t].qsequence : 0);
+  search_exact_output_results(hit_count,
+                              hits,
+                              si_plus[t].query_head,
+                              si_plus[t].qseqlen,
+                              si_plus[t].qsequence,
+                              opt_strand > 1 ? si_minus[t].qsequence : 0);
 
   /* free memory for alignment strings */
   for(int i=0; i<hit_count; i++)
@@ -266,16 +341,15 @@ int search_query(long t)
   return hit_count;
 }
 
-void search_thread_run(long t)
+void search_exact_thread_run(long t)
 {
   while (1)
     {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        pthread_mutex_lock(&mutex_input);
+
+      pthread_mutex_lock(&mutex_input);
 #endif
-      if (fasta_next(query_fasta_h,
-                     ! opt_notrunclabels,
-                     chrmap_no_change))
+      if (fasta_next(query_fasta_h, ! opt_notrunclabels, chrmap_no_change))
         {
           char * qhead = fasta_get_header(query_fasta_h);
           int query_head_len = fasta_get_header_length(query_fasta_h);
@@ -317,10 +391,10 @@ void search_thread_run(long t)
           
           /* get progress as amount of input file read */
           unsigned long progress = fasta_get_position(query_fasta_h);
-
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            /* let other threads read input */
-            pthread_mutex_unlock(&mutex_input);
+
+          /* let other threads read input */
+          pthread_mutex_unlock(&mutex_input);
 #endif
           /* minus strand: copy header and reverse complementary sequence */
           if (opt_strand > 1)
@@ -331,11 +405,11 @@ void search_thread_run(long t)
                                  si_plus[t].qseqlen);
             }
           
-          int match = search_query(t);
-          
+          int match = search_exact_query(t);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            /* lock mutex for update of global data and output */
-            pthread_mutex_lock(&mutex_output);
+          
+          /* lock mutex for update of global data and output */
+          pthread_mutex_lock(&mutex_output);
 #endif
           /* update stats */
           queries++;
@@ -346,25 +420,27 @@ void search_thread_run(long t)
           /* show progress */
           progress_update(progress);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            pthread_mutex_unlock(&mutex_output);
+
+          pthread_mutex_unlock(&mutex_output);
 #endif
         }
       else
         {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            pthread_mutex_unlock(&mutex_input);
+
+          pthread_mutex_unlock(&mutex_input);
 #endif
-            break;
+          break;
         }
     }
 }
 
-void search_thread_init(struct searchinfo_s * si)
+void search_exact_thread_init(struct searchinfo_s * si)
 {
   /* thread specific initialiation */
-  si->uh = unique_init();
-  si->kmers = (count_t *) xmalloc(seqcount * sizeof(count_t) + 32);
-  si->m = minheap_init(tophits);
+  si->uh = 0;
+  si->kmers = 0;
+  si->m = 0;
   si->hits = (struct hit *) xmalloc
     (sizeof(struct hit) * (tophits) * opt_strand);
   si->qsize = 1;
@@ -372,54 +448,28 @@ void search_thread_init(struct searchinfo_s * si)
   si->query_head = 0;
   si->seq_alloc = 0;
   si->qsequence = 0;
-#ifdef COMPARENONVECTORIZED
-  si->nw = nw_init();
-#else
   si->nw = 0;
-#endif
-  si->s = search16_init(opt_match,
-                        opt_mismatch,
-                        opt_gap_open_query_left,
-                        opt_gap_open_target_left,
-                        opt_gap_open_query_interior,
-                        opt_gap_open_target_interior,
-                        opt_gap_open_query_right,
-                        opt_gap_open_target_right,
-                        opt_gap_extension_query_left,
-                        opt_gap_extension_target_left,
-                        opt_gap_extension_query_interior,
-                        opt_gap_extension_target_interior,
-                        opt_gap_extension_query_right,
-                        opt_gap_extension_target_right);
+  si->s = 0;
 }
 
-void search_thread_exit(struct searchinfo_s * si)
+void search_exact_thread_exit(struct searchinfo_s * si)
 {
   /* thread specific clean up */
-  search16_exit(si->s);
-#ifdef COMPARENONVECTORIZED
-  nw_exit(si->nw);
-#endif
-  unique_exit(si->uh);
   free(si->hits);
-  minheap_exit(si->m);
-  free(si->kmers);
   if (si->query_head)
     free(si->query_head);
   if (si->qsequence)
     free(si->qsequence);
 }
 
-
-
-void * search_thread_worker(void * vp)
+void * search_exact_thread_worker(void * vp)
 {
   long t = (intptr_t) vp;
-  search_thread_run(t);
+  search_exact_thread_run(t);
   return 0;
 }
 
-void search_thread_worker_run()
+void search_exact_thread_worker_run()
 {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
@@ -431,11 +481,11 @@ void search_thread_worker_run()
   /* init and create worker threads, put them into stand-by mode */
   for(int t=0; t<opt_threads; t++)
     {
-      search_thread_init(si_plus+t);
+      search_exact_thread_init(si_plus+t);
       if (si_minus)
-        search_thread_init(si_minus+t);
+        search_exact_thread_init(si_minus+t);
       if (pthread_create(pthread+t, &attr,
-                         search_thread_worker, (void*)(long)t))
+                         search_exact_thread_worker, (void*)(long)t))
         fatal("Cannot create thread");
     }
 
@@ -444,25 +494,21 @@ void search_thread_worker_run()
     {
       if (pthread_join(pthread[t], NULL))
         fatal("Cannot join thread");
-      search_thread_exit(si_plus+t);
+      search_exact_thread_exit(si_plus+t);
       if (si_minus)
-        search_thread_exit(si_minus+t);
+        search_exact_thread_exit(si_minus+t);
     }
 
   pthread_attr_destroy(&attr);
 #else
-    long t = 0;
-    search_thread_init(si_plus);
+    search_exact_thread_init(si_plus);
     if (si_minus)
-        search_thread_init(si_minus);
-    search_thread_run(t);
+        search_exact_thread_init(si_minus);
+    search_exact_thread_run(0);
 #endif
-    
 }
 
-
-
-void search_prep(char * cmdline, char * progheader)
+void search_exact_prep(char * cmdline, char * progheader)
 {
   /* open output files */
 
@@ -525,6 +571,20 @@ void search_prep(char * cmdline, char * progheader)
         fatal("Unable to open notmatched output file for writing");
     }
 
+  if (opt_dbmatched)
+    {
+      fp_dbmatched = fopen(opt_dbmatched, "w");
+      if (! fp_dbmatched)
+        fatal("Unable to open dbmatched output file for writing");
+    }
+
+  if (opt_dbnotmatched)
+    {
+      fp_dbnotmatched = fopen(opt_dbnotmatched, "w");
+      if (! fp_dbnotmatched)
+        fatal("Unable to open dbnotmatched output file for writing");
+    }
+
   db_read(opt_db, 0);
 
   results_show_samheader(fp_samout, cmdline, opt_db);
@@ -538,28 +598,28 @@ void search_prep(char * cmdline, char * progheader)
 
   seqcount = db_getsequencecount();
 
-  dbindex_prepare(1, opt_dbmask);
-  dbindex_addallsequences(opt_dbmask);
-
   /* tophits = the maximum number of hits we need to store */
+  tophits = seqcount;
 
-  if ((opt_maxrejects == 0) || (opt_maxrejects > seqcount))
-    opt_maxrejects = seqcount;
+  dbmatched = (int*) xmalloc(seqcount * sizeof(int*));
+  memset(dbmatched, 0, seqcount * sizeof(int*));
 
-  if ((opt_maxaccepts == 0) || (opt_maxaccepts > seqcount))
-    opt_maxaccepts = seqcount;
-
-  tophits = opt_maxrejects + opt_maxaccepts + MAXDELAYED;
-
-  if (tophits > seqcount)
-    tophits = seqcount;
+  dbhash_open(seqcount);
+  dbhash_add_all();
 }
 
-void search_done()
+void search_exact_done()
 {
   /* clean up, global */
-  dbindex_free();
+  dbhash_close();
+
   db_free();
+  free(dbmatched);
+
+  if (opt_dbmatched)
+    fclose(fp_dbmatched);
+  if (opt_dbnotmatched)
+    fclose(fp_dbnotmatched);
   if (opt_matched)
     fclose(fp_matched);
   if (opt_notmatched)
@@ -576,34 +636,20 @@ void search_done()
     fclose(fp_alnout);
   if (fp_samout)
     fclose(fp_samout);
+
   show_rusage();
 }
 
-void usearch_global(char * cmdline, char * progheader)
+void search_exact(char * cmdline, char * progheader)
 {
-  search_prep(cmdline, progheader);
+  opt_id = 1.0;
 
-  if (opt_dbmatched)
-    {
-      fp_dbmatched = fopen(opt_dbmatched, "w");
-      if (! fp_dbmatched)
-        fatal("Unable to open dbmatched output file for writing");
-    }
-
-  if (opt_dbnotmatched)
-    {
-      fp_dbnotmatched = fopen(opt_dbnotmatched, "w");
-      if (! fp_dbnotmatched)
-        fatal("Unable to open dbnotmatched output file for writing");
-    }
-
-  dbmatched = (int*) xmalloc(seqcount * sizeof(int*));
-  memset(dbmatched, 0, seqcount * sizeof(int*));
+  search_exact_prep(cmdline, progheader);
 
   /* prepare reading of queries */
   qmatches = 0;
   queries = 0;
-  query_fasta_h = fasta_open(opt_usearch_global);
+  query_fasta_h = fasta_open(opt_search_exact);
 
   /* allocate memory for thread info */
   si_plus = (struct searchinfo_s *) xmalloc(opt_threads * 
@@ -613,24 +659,23 @@ void usearch_global(char * cmdline, char * progheader)
                                                sizeof(struct searchinfo_s));
   else
     si_minus = 0;
-  
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    
-    pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
-    
-    /* init mutexes for input and output */
-    pthread_mutex_init(&mutex_input, NULL);
-    pthread_mutex_init(&mutex_output, NULL);
+
+  pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
+
+  /* init mutexes for input and output */
+  pthread_mutex_init(&mutex_input, NULL);
+  pthread_mutex_init(&mutex_output, NULL);
 #endif
-    
   progress_init("Searching", fasta_get_size(query_fasta_h));
-  search_thread_worker_run();
+  search_exact_thread_worker_run();
   progress_done();
-  
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    pthread_mutex_destroy(&mutex_output);
-    pthread_mutex_destroy(&mutex_input);
-    free(pthread);
+  
+  pthread_mutex_destroy(&mutex_output);
+  pthread_mutex_destroy(&mutex_input);
+
+  free(pthread);
 #endif
     
   free(si_plus);
@@ -667,12 +712,6 @@ void usearch_global(char * cmdline, char * progheader)
           }
     }
 
-  free(dbmatched);
 
-  if (opt_dbmatched)
-    fclose(fp_dbmatched);
-  if (opt_dbnotmatched)
-    fclose(fp_dbnotmatched);
-
-  search_done();
+  search_exact_done();
 }

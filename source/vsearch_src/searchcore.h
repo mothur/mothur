@@ -63,11 +63,9 @@
 /* the number of alignments that can be delayed */
 #define MAXDELAYED 8
 
-/* minimum number of kmer matches */
-#define MINMATCHSAMPLECOUNT 6
-
-/* minimum kmer match frequency */
-#define MINMATCHSAMPLEFREQ 16
+/* Default minimum number of word matches for word lengths 7-15 */
+const int minwordmatches_defaults[] =
+  { -1, -1, -1, -1, -1, -1, -1, 14, 12, 11, 10,  9,  8,  7,  5,  3 };
 
 struct hit
 {
@@ -144,7 +142,7 @@ struct searchinfo_s
   int finalized;
 };
 
-void search_onequery(struct searchinfo_s * si);
+void search_onequery(struct searchinfo_s * si, int seqmask);
 
 struct hit * search_findbest2_byid(struct searchinfo_s * si_p,
                                    struct searchinfo_s * si_m);
@@ -163,3 +161,6 @@ void search_joinhits(struct searchinfo_s * si_p,
                      struct searchinfo_s * si_m,
                      struct hit * * hits,
                      int * hit_count);
+
+bool search_enough_kmers(struct searchinfo_s * si,
+                         unsigned int count);

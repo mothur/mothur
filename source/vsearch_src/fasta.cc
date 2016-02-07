@@ -128,10 +128,11 @@ fasta_handle fasta_open(const char * filename)
 
   if (h->format == FORMAT_GZIP)
     {
-      /* GZIP: Close ordinary file and open again as gzipped file */
+      /* GZIP: Keep original file open, then open as gzipped file as well */
 #ifdef HAVE_ZLIB_H
-      fclose(h->fp);
-      if (! (h->fp_gz = gzopen(filename, "rb")))
+      if (!gz_lib)
+        fatal("Files compressed with gzip are not supported");
+      if (! (h->fp_gz = (*gzdopen_p)(fileno(h->fp), "rb")))
         fatal("Unable to open gzip compressed fasta file (%s)", filename);
 #else
       fatal("Files compressed with gzip are not supported");
@@ -142,22 +143,25 @@ fasta_handle fasta_open(const char * filename)
     {
       /* BZIP2: Keep original file open, then open as bzipped file as well */
 #ifdef HAVE_ZLIB_H
+      if (!bz2_lib)
+        fatal("Files compressed with bzip2 are not supported");
       int bzError;
-      if (! (h->fp_bz = BZ2_bzReadOpen(& bzError, h->fp,
-                                       BZ_VERBOSE_0, BZ_MORE_MEM, NULL, 0)))
+      if (! (h->fp_bz = (*BZ2_bzReadOpen_p)(& bzError, h->fp,
+                                            BZ_VERBOSE_0, BZ_MORE_MEM,
+                                            NULL, 0)))
         fatal("Unable to open bzip2 compressed fasta file (%s)", filename);
 #else
       fatal("Files compressed with bzip2 are not supported");
 #endif
     }
 
+
+
   h->stripped_all = 0;
 
   for(int i=0; i<256; i++)
     h->stripped[i] = 0;
 
-  h->abundance = abundance_init();
-  
   h->file_position = 0;
 
   buffer_init(& h->file_buffer);
@@ -165,6 +169,7 @@ fasta_handle fasta_open(const char * filename)
   buffer_init(& h->sequence_buffer);
 
   h->lineno = 1;
+  h->lineno_start = 1;
   h->seqno = -1;
 
   return h;
@@ -205,15 +210,17 @@ void fasta_close(fasta_handle h)
 
     case FORMAT_GZIP:
 #ifdef HAVE_ZLIB_H
-      gzclose(h->fp_gz);
+      (*gzclose_p)(h->fp_gz);
       h->fp_gz = 0;
+      h->fp = 0;
       break;
 #endif
       
     case FORMAT_BZIP:
 #ifdef HAVE_BZLIB_H
-      BZ2_bzReadClose(&bz_error, h->fp_bz);
+      (*BZ2_bzReadClose_p)(&bz_error, h->fp_bz);
       h->fp_bz = 0;
+      h->fp = 0;
       break;
 #endif
 
@@ -221,8 +228,6 @@ void fasta_close(fasta_handle h)
       fatal("Internal error");
     }
   
-  abundance_exit(h->abundance);
-
   buffer_free(& h->file_buffer);
   buffer_free(& h->header_buffer);
   buffer_free(& h->sequence_buffer);
@@ -274,9 +279,10 @@ unsigned long fasta_file_fill_buffer(fasta_handle h)
 
         case FORMAT_GZIP:
 #ifdef HAVE_ZLIB_H
-          bytes_read = gzread(h->fp_gz,
-                              h->file_buffer.data + h->file_buffer.position,
-                              space);
+          bytes_read = (*gzread_p)(h->fp_gz,
+                                   h->file_buffer.data
+                                   + h->file_buffer.position,
+                                   space);
           if (bytes_read < 0)
             fatal("Error reading gzip compressed fasta file");
           break;
@@ -284,11 +290,11 @@ unsigned long fasta_file_fill_buffer(fasta_handle h)
           
         case FORMAT_BZIP:
 #ifdef HAVE_BZLIB_H
-          bytes_read = BZ2_bzRead(& bzError,
-                                  h->fp_bz,
-                                  h->file_buffer.data 
-                                  + h->file_buffer.position,
-                                  space);
+          bytes_read = (*BZ2_bzRead_p)(& bzError,
+                                       h->fp_bz,
+                                       h->file_buffer.data
+                                       + h->file_buffer.position,
+                                       space);
           if ((bytes_read < 0) ||
               ! ((bzError == BZ_OK) ||
                  (bzError == BZ_STREAM_END) ||
@@ -313,8 +319,8 @@ void buffer_extend(struct fasta_buffer_s * buffer, char * buf, unsigned long len
       /* alloc space for len more characters + terminating zero,
          but round up to nearest block size */
       buffer->alloc = 
-        (FASTA_BUFFER_ALLOC * 
-         ((buffer->length + len) / FASTA_BUFFER_ALLOC) + 1);
+        FASTA_BUFFER_ALLOC * 
+        (((buffer->length + len) / FASTA_BUFFER_ALLOC) + 1);
       buffer->data = (char*) xrealloc(buffer->data, buffer->alloc);
     }
 
@@ -329,11 +335,11 @@ void buffer_extend(struct fasta_buffer_s * buffer, char * buf, unsigned long len
 void fasta_truncate_header(fasta_handle h, bool truncateatspace)
 {
   /* Truncate the zero-terminated header string by inserting a new
-     terminator (zero byte) at the first space (if truncateatspace)
-     or first linefeed. */
+     terminator (zero byte) at the first space/tab character
+     (if truncateatspace) or first linefeed. */
   
   if (truncateatspace)
-    h->header_buffer.length = strcspn(h->header_buffer.data, " \n");
+    h->header_buffer.length = strcspn(h->header_buffer.data, " \t\n");
   else
     h->header_buffer.length = strcspn(h->header_buffer.data, "\n");
   
@@ -406,6 +412,8 @@ bool fasta_next(fasta_handle h,
                 bool truncateatspace,
                 char * char_mapping)
 {
+  h->lineno_start = h->lineno;
+
   h->header_buffer.length = 0;
   h->sequence_buffer.length = 0;
 
@@ -490,7 +498,12 @@ bool fasta_next(fasta_handle h,
 
 #ifdef HAVE_ZLIB_H
   if (h->format == FORMAT_GZIP)
-    h->file_position = gzoffset(h->fp_gz);
+    {
+      /* Circumvent the missing gzoffset function in zlib 1.2.3 and earlier */
+      int fd = dup(fileno(h->fp));
+      h->file_position = lseek(fd, 0, SEEK_CUR);
+      close(fd);
+    }
   else
 #endif
     h->file_position = ftell(h->fp);
@@ -500,7 +513,7 @@ bool fasta_next(fasta_handle h,
 
 long fasta_get_abundance(fasta_handle h)
 {
-  return abundance_get(h->abundance, h->header_buffer.data);
+  return abundance_get(global_abundance, h->header_buffer.data);
 }
 
 unsigned long fasta_get_position(fasta_handle h)
@@ -515,7 +528,7 @@ unsigned long fasta_get_size(fasta_handle h)
 
 unsigned long fasta_get_lineno(fasta_handle h)
 {
-  return h->lineno;
+  return h->lineno_start;
 }
 
 unsigned long fasta_get_seqno(fasta_handle h)
@@ -541,5 +554,160 @@ char * fasta_get_header(fasta_handle h)
 char * fasta_get_sequence(fasta_handle h)
 {
   return h->sequence_buffer.data;
+}
+
+
+/* fasta output */
+
+void fasta_print_header(FILE * fp, const char * hdr)
+{
+  fprintf(fp, ">%s\n", hdr);
+}
+
+void fasta_print_sequence(FILE * fp, char * seq, unsigned long len, int width)
+{
+  /*
+     The actual length of the sequence may be longer than "len", but only
+     "len" characters are printed.
+
+     Specify width of lines - zero (or <1)  means linearize (all on one line).
+  */
+
+  if (width < 1)
+    fprintf(fp, "%.*s\n", (int)(len), seq);
+  else
+    {
+      long rest = len;
+      for(unsigned long i=0; i<len; i += width)
+        {
+          fprintf(fp, "%.*s\n", (int)(MIN(rest,width)), seq+i);
+          rest -= width;
+        }
+    }
+}
+
+void fasta_print(FILE * fp, const char * hdr,
+                 char * seq, unsigned long len)
+{
+  fasta_print_header(fp, hdr);
+  fasta_print_sequence(fp, seq, len, opt_fasta_width);
+}
+
+
+void fasta_print_relabel(FILE * fp,
+                         char * seq,
+                         int len,
+                         char * header,
+                         int header_len,
+                         int abundance,
+                         int ordinal)
+{
+  fprintf(fp, ">");
+  if (opt_relabel || opt_relabel_sha1 || opt_relabel_md5)
+    {
+      if (opt_relabel_sha1)
+        fprint_seq_digest_sha1(fp, seq, len);
+      else if (opt_relabel_md5)
+        fprint_seq_digest_md5(fp, seq, len);
+      else
+        fprintf(fp, "%s%d", opt_relabel, ordinal);
+
+      if (opt_sizeout)
+        fprintf(fp, ";size=%u;", abundance);
+
+      if (opt_relabel_keep)
+        fprintf(fp, " %s", header);
+    }
+  else if (opt_sizeout)
+    {
+      abundance_fprint_header_with_size(global_abundance,
+                                        fp,
+                                        header,
+                                        header_len,
+                                        abundance);
+    }
+  else if (opt_xsize)
+    {
+      abundance_fprint_header_strip_size(global_abundance,
+                                         fp,
+                                         header,
+                                         header_len);
+    }
+  else
+    {
+      fprintf(fp, "%s", header);
+    }
+  fprintf(fp, "\n");
+
+  fasta_print_sequence(fp, seq, len, opt_fasta_width);
+}
+
+void fasta_print_db_relabel(FILE * fp,
+                            unsigned long seqno,
+                            int ordinal)
+{
+  fasta_print_relabel(fp,
+                      db_getsequence(seqno),
+                      db_getsequencelen(seqno),
+                      db_getheader(seqno),
+                      db_getheaderlen(seqno),
+                      db_getabundance(seqno),
+                      ordinal);
+}
+
+void fasta_print_db_sequence(FILE * fp, unsigned long seqno)
+{
+  char * seq = db_getsequence(seqno);
+  long seqlen = db_getsequencelen(seqno);
+  fasta_print_sequence(fp, seq, seqlen, opt_fasta_width);
+}
+
+void fasta_print_db(FILE * fp, unsigned long seqno)
+{
+  char * hdr = db_getheader(seqno);
+  char * seq = db_getsequence(seqno);
+  long seqlen = db_getsequencelen(seqno);
+
+  fasta_print_header(fp, hdr);
+  fasta_print_sequence(fp, seq, seqlen, opt_fasta_width);
+}
+
+void fasta_print_db_size(FILE * fp, unsigned long seqno, unsigned long size)
+{
+  char * hdr = db_getheader(seqno);
+  int hdrlen = db_getheaderlen(seqno);
+  
+  fprintf(fp, ">");
+  abundance_fprint_header_with_size(global_abundance,
+                                    fp,
+                                    hdr,
+                                    hdrlen,
+                                    size);
+  fprintf(fp, "\n");
+
+  char * seq = db_getsequence(seqno);
+  long seqlen = db_getsequencelen(seqno);
+
+  fasta_print_sequence(fp, seq, seqlen, opt_fasta_width);
+}
+
+void fasta_print_db_strip_size(FILE * fp, unsigned long seqno)
+{
+  /* write FASTA but remove abundance information, as with --xsize option */
+
+  char * hdr = db_getheader(seqno);
+  int hdrlen = db_getheaderlen(seqno);
+
+  fprintf(fp, ">");
+  abundance_fprint_header_strip_size(global_abundance,
+                                     fp,
+                                     hdr,
+                                     hdrlen);
+  fprintf(fp, "\n");
+
+  char * seq = db_getsequence(seqno);
+  long seqlen = db_getsequencelen(seqno);
+
+  fasta_print_sequence(fp, seq, seqlen, opt_fasta_width);
 }
 

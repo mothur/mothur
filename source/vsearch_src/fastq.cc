@@ -84,7 +84,7 @@ static char map_identity[256];
 void fastq_fatal(unsigned long lineno, const char * msg)
 {
   char * string; 
-  if (asprintf(& string,
+  if (sprintf(string,
                "Invalid line %lu in FASTQ file: %s",
                lineno,
                msg) == -1)
@@ -136,11 +136,11 @@ void buffer_makespace(struct fastq_buffer_s * buffer, unsigned long x)
 void buffer_truncate(struct fastq_buffer_s * buffer, bool truncateatspace)
 {
   /* Truncate the zero-terminated header string by inserting a new
-     terminator (zero byte) at the first space (if truncateatspace)
-     or first linefeed. */
+     terminator (zero byte) at the first space/tab character
+     (if truncateatspace) or first linefeed. */
   
   if (truncateatspace)
-    buffer->length = strcspn(buffer->data, " \n");
+    buffer->length = strcspn(buffer->data, " \t\n");
   else
     buffer->length = strcspn(buffer->data, "\n");
   
@@ -178,10 +178,11 @@ fastq_handle fastq_open(const char * filename)
 
   if (h->format == FORMAT_GZIP)
     {
-      /* GZIP: Close ordinary file and open again as gzipped file */
+      /* GZIP: Keep original file open, then open as bzipped file as well */
 #ifdef HAVE_ZLIB_H
-      fclose(h->fp);
-      if (! (h->fp_gz = gzopen(filename, "rb")))
+      if (!gz_lib)
+        fatal("Files compressed with gzip are not supported");
+      if (! (h->fp_gz = (*gzdopen_p)(fileno(h->fp), "rb")))
         fatal("Unable to open gzip compressed fastq file (%s)", filename);
 #else
       fatal("Files compressed with gzip are not supported");
@@ -192,9 +193,12 @@ fastq_handle fastq_open(const char * filename)
     {
       /* BZIP2: Keep original file open, then open as bzipped file as well */
 #ifdef HAVE_ZLIB_H
+      if (!bz2_lib)
+        fatal("Files compressed with bzip2 are not supported");
       int bzError;
-      if (! (h->fp_bz = BZ2_bzReadOpen(& bzError, h->fp,
-                                       BZ_VERBOSE_0, BZ_MORE_MEM, NULL, 0)))
+      if (! (h->fp_bz = (*BZ2_bzReadOpen_p)(& bzError, h->fp,
+                                            BZ_VERBOSE_0, BZ_MORE_MEM,
+                                            NULL, 0)))
         fatal("Unable to open bzip2 compressed fastq file (%s)", filename);
 #else
       fatal("Files compressed with bzip2 are not supported");
@@ -214,6 +218,7 @@ fastq_handle fastq_open(const char * filename)
   buffer_init(& h->quality_buffer);
 
   h->lineno = 1;
+  h->lineno_start = 1;
   h->seqno = -1;
 
   for(int i=0; i<256; i++)
@@ -257,14 +262,14 @@ void fastq_close(fastq_handle h)
 
     case FORMAT_GZIP:
 #ifdef HAVE_ZLIB_H
-      gzclose(h->fp_gz);
+      (*gzclose_p)(h->fp_gz);
       h->fp_gz = 0;
       break;
 #endif
       
     case FORMAT_BZIP:
 #ifdef HAVE_BZLIB_H
-      BZ2_bzReadClose(&bz_error, h->fp_bz);
+      (*BZ2_bzReadClose_p)(&bz_error, h->fp_bz);
       h->fp_bz = 0;
       break;
 #endif
@@ -285,6 +290,7 @@ void fastq_close(fastq_handle h)
   h->seqno = -1;
 
   free(h);
+  h=0;
 }
 
 
@@ -325,9 +331,10 @@ unsigned long fastq_file_fill_buffer(fastq_handle h)
 
         case FORMAT_GZIP:
 #ifdef HAVE_ZLIB_H
-          bytes_read = gzread(h->fp_gz,
-                              h->file_buffer.data + h->file_buffer.position,
-                              space);
+          bytes_read = (*gzread_p)(h->fp_gz,
+                                   h->file_buffer.data
+                                   + h->file_buffer.position,
+                                   space);
           if (bytes_read < 0)
             fatal("Error reading gzip compressed fastq file");
           break;
@@ -335,11 +342,11 @@ unsigned long fastq_file_fill_buffer(fastq_handle h)
           
         case FORMAT_BZIP:
 #ifdef HAVE_BZLIB_H
-          bytes_read = BZ2_bzRead(& bzError,
-                                  h->fp_bz,
-                                  h->file_buffer.data 
-                                  + h->file_buffer.position,
-                                  space);
+          bytes_read = (*BZ2_bzRead_p)(& bzError,
+                                       h->fp_bz,
+                                       h->file_buffer.data
+                                       + h->file_buffer.position,
+                                       space);
           if ((bytes_read < 0) ||
               ! ((bzError == BZ_OK) ||
                  (bzError == BZ_STREAM_END) ||
@@ -448,6 +455,8 @@ bool fastq_next(fastq_handle h,
   h->sequence_buffer.data[0] = 0;
   h->quality_buffer.length = 0;
   h->quality_buffer.data[0] = 0;
+
+  h->lineno_start = h->lineno;
 
   unsigned long rest = fastq_file_fill_buffer(h);
 
@@ -648,7 +657,12 @@ bool fastq_next(fastq_handle h,
 
 #ifdef HAVE_ZLIB_H
   if (h->format == FORMAT_GZIP)
-    h->file_position = gzoffset(h->fp_gz);
+    {
+      /* Circumvent the missing gzoffset function in zlib 1.2.3 and earlier */
+      int fd = dup(fileno(h->fp));
+      h->file_position = lseek(fd, 0, SEEK_CUR);
+      close(fd);
+    }
   else
 #endif
     h->file_position = ftell(h->fp);
@@ -680,7 +694,7 @@ unsigned long fastq_get_size(fastq_handle h)
 
 unsigned long fastq_get_lineno(fastq_handle h)
 {
-  return h->lineno;
+  return h->lineno_start;
 }
 
 unsigned long fastq_get_seqno(fastq_handle h)
@@ -706,4 +720,99 @@ char * fastq_get_header(fastq_handle h)
 char * fastq_get_sequence(fastq_handle h)
 {
   return h->sequence_buffer.data;
+}
+
+void fastq_print_header(FILE * fp, char * header)
+{
+  fprintf(fp, "@%s\n", header);
+}
+
+void fastq_print_sequence(FILE * fp, char * sequence)
+{
+  fprintf(fp, "%s\n", sequence);
+}
+
+void fastq_print_quality(FILE * fp, char * quality)
+{
+  fprintf(fp, "+\n%s\n", quality);
+}
+
+void fastq_print(FILE * fp, char * header, char * sequence, char * quality)
+{
+  fastq_print_header(fp, header);
+  fastq_print_sequence(fp, sequence);
+  fastq_print_quality(fp, quality);
+}
+
+void fastq_print_with_ee(FILE * fp, char * header,
+                         char * sequence, char * quality, double ee)
+{
+  fprintf(fp, "@%s;ee=%6.4lf\n", header, ee);
+  fastq_print_sequence(fp, sequence);
+  fastq_print_quality(fp, quality);
+}
+
+void fastq_print_relabel(FILE * fp,
+                         char * seq,
+                         int len,
+                         char * header,
+                         int header_len,
+                         char * quality,
+                         int abundance,
+                         int ordinal)
+{
+  fprintf(fp, "@");
+  if (opt_relabel || opt_relabel_sha1 || opt_relabel_md5)
+    {
+      if (opt_relabel_sha1)
+        fprint_seq_digest_sha1(fp, seq, len);
+      else if (opt_relabel_md5)
+        fprint_seq_digest_md5(fp, seq, len);
+      else
+        fprintf(fp, "%s%d", opt_relabel, ordinal);
+
+      if (opt_sizeout)
+        fprintf(fp, ";size=%u;", abundance);
+
+      if (opt_relabel_keep)
+        fprintf(fp, " %s", header);
+    }
+  else if (opt_sizeout)
+    {
+      abundance_fprint_header_with_size(global_abundance,
+                                        fp,
+                                        header,
+                                        header_len,
+                                        abundance);
+    }
+  else if (opt_xsize)
+    {
+      abundance_fprint_header_strip_size(global_abundance,
+                                         fp,
+                                         header,
+                                         header_len);
+    }
+  else
+    {
+      fprintf(fp, "%s", header);
+    }
+  fprintf(fp, "\n");
+  fastq_print_sequence(fp, seq);
+  fastq_print_quality(fp, quality);
+}
+
+long fastq_get_abundance(fastq_handle h)
+{
+  return abundance_get(global_abundance, h->header_buffer.data);
+}
+
+void fastq_print_db(FILE * fp, unsigned long seqno)
+{
+  char * hdr = db_getheader(seqno);
+  char * seq = db_getsequence(seqno);
+  char * qual = db_getquality(seqno);
+
+  fastq_print_header(fp, hdr);
+  fastq_print_sequence(fp, seq);
+  fastq_print_quality(fp, qual);
 }

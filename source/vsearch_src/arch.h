@@ -1,4 +1,3 @@
-
 /*
 
   VSEARCH: a versatile open source tool for metagenomics
@@ -61,4 +60,3 @@
 
 unsigned long arch_get_memused();
 unsigned long arch_get_memtotal();
-

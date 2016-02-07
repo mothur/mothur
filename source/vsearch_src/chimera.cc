@@ -70,19 +70,22 @@
   http://dx.doi.org/10.1093/bioinformatics/btr381
 */
 
+/* global constants/data, no need for synchronization */
+const int parts = 4;
+const int few = 4;
+const int maxcandidates = few * parts;
+const int rejects = 16;
+const double chimera_id = 0.55;
+static int tophits;
+static fasta_handle query_fasta_h;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
+/* mutexes and global data protected by mutex */
 static pthread_attr_t attr;
 static pthread_t * pthread;
-
-/* mutexes and global data protected by mutex */
 static pthread_mutex_t mutex_input;
 static pthread_mutex_t mutex_output;
-
-#else
-
-    todo
 
 #endif
 
@@ -95,18 +98,6 @@ static FILE * fp_nonchimeras = 0;
 static FILE * fp_uchimealns = 0;
 static FILE * fp_uchimeout = 0;
 static FILE * fp_borderline = 0;
-static fasta_handle query_fasta_h;
-
-/* global constants/data, no need for synchronization */
-const int parts = 4;
-const int few = 1;
-const int maxcandidates = few * parts;
-const int rejects = 64;
-const double chimera_id = 0.55;
-static int tophits;
-
-#define ALT
-//#define ALT2
 
 /* information for each query sequence to be checked */
 struct chimera_info_s
@@ -443,7 +434,7 @@ int eval_parents(struct chimera_info_s * ci)
     {
       for (int j=0; j < ci->maxi[i]; j++)
         *q++ = '-';
-      *q++ = ci->query_seq[qpos++];
+      *q++ = chrmap_upcase[(int)(ci->query_seq[qpos++])];
     }
   for (int j=0; j < ci->maxi[ci->query_len]; j++)
     *q++ = '-';
@@ -478,7 +469,7 @@ int eval_parents(struct chimera_info_s * ci)
               for(int x=0; x < ci->maxi[qpos]; x++)
                 {
                   if (x < run)
-                    *t++ = target_seq[tpos++];
+                    *t++ = chrmap_upcase[(int)(target_seq[tpos++])];
                   else
                     *t++ = '-';
                 }
@@ -493,7 +484,7 @@ int eval_parents(struct chimera_info_s * ci)
                       *t++ = '-';
                       
                   if (op == 'M')
-                    *t++ = target_seq[tpos++];
+                    *t++ = chrmap_upcase[(int)(target_seq[tpos++])];
                   else
                     *t++ = '-';
                       
@@ -802,13 +793,8 @@ int eval_parents(struct chimera_info_s * ci)
       /* print alignment */
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-      pthread_mutex_lock(&mutex_output);
-#else
-        
-        todo
-        
+        pthread_mutex_lock(&mutex_output);
 #endif
-
       if (opt_uchimealns && (status == 4))
         {
           fprintf(fp_uchimealns, "\n");
@@ -943,12 +929,7 @@ int eval_parents(struct chimera_info_s * ci)
             }
         }
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-      pthread_mutex_unlock(&mutex_output);
-#else
-        
-        todo
-        
+        pthread_mutex_unlock(&mutex_output);
 #endif
     }
 
@@ -1131,17 +1112,15 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
   while(1)
     {
       /* get next sequence */
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
       
-      pthread_mutex_lock(&mutex_input);
-#else
-        todo
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        pthread_mutex_lock(&mutex_input);
 #endif
-
+        
       if (opt_uchime_ref)
         {
           if (fasta_next(query_fasta_h, ! opt_notrunclabels,
-                         chrmap_upcase))
+                         chrmap_no_change))
             {
               ci->query_head_len = fasta_get_header_length(query_fasta_h);
               ci->query_len = fasta_get_sequence_length(query_fasta_h);
@@ -1158,14 +1137,9 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
           else
             {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-              pthread_mutex_unlock(&mutex_input);
-#else
-                todo
-#endif
-
-                
-              break; /* end while loop */
+                pthread_mutex_unlock(&mutex_input);
+#endif                
+                break; /* end while loop */
             }
         }
       else
@@ -1186,21 +1160,17 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
           else
             {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-              pthread_mutex_unlock(&mutex_input);
-#else
-                todo
+                pthread_mutex_unlock(&mutex_input);
 #endif
-              break; /* end while loop */
+                break; /* end while loop */
             }
         }
+
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-      pthread_mutex_unlock(&mutex_input);
-
-#else
-        todo
+        pthread_mutex_unlock(&mutex_input);
 #endif
+
+
       
       int status = 0;
 
@@ -1211,17 +1181,18 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
       ci->cand_count = 0;
       int allhits_count = 0;
 
-      for (int i=0; i<parts; i++)
-        {
-          struct hit * hits;
-          int hit_count;
-          search_onequery(ci->si+i);
-          search_joinhits(ci->si+i, 0, & hits, & hit_count);
-          for(int j=0; j<hit_count; j++)
-            if (hits[j].accepted)
-              allhits_list[allhits_count++] = hits[j];
-          free(hits);
-        }
+      if (ci->query_len >= parts)
+        for (int i=0; i<parts; i++)
+          {
+            struct hit * hits;
+            int hit_count;
+            search_onequery(ci->si+i, opt_qmask);
+            search_joinhits(ci->si+i, 0, & hits, & hit_count);
+            for(int j=0; j<hit_count; j++)
+              if (hits[j].accepted)
+                allhits_list[allhits_count++] = hits[j];
+            free(hits);
+          }
 
       for(int i=0; i < allhits_count; i++)
         {
@@ -1317,11 +1288,9 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
         status = 0;
 
       /* output results */
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-      pthread_mutex_lock(&mutex_output);
-#else
-        todo
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        pthread_mutex_lock(&mutex_output);
 #endif
       if (status == 4)
         {
@@ -1329,25 +1298,21 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
 
           if (opt_chimeras)
             {
-              fprint_fasta_hdr_only(fp_chimeras, ci->query_head);
-              fprint_fasta_seq_only(fp_chimeras, ci->query_seq,
-                                    ci->query_len, opt_fasta_width);
+              fasta_print(fp_chimeras,
+                          ci->query_head,
+                          ci->query_seq,
+                          ci->query_len);
             }
-
-
-#ifdef ALT2
-          if (opt_uchime_denovo)
-            dbindex_addsequence(seqno);
-#endif
         }
-
+      
       if (status == 3)
         {
           if (opt_borderline)
             {
-              fprint_fasta_hdr_only(fp_borderline, ci->query_head);
-              fprint_fasta_seq_only(fp_borderline, ci->query_seq,
-                                    ci->query_len, opt_fasta_width);
+              fasta_print(fp_borderline,
+                          ci->query_head,
+                          ci->query_seq,
+                          ci->query_len);
             }
         }
 
@@ -1370,48 +1335,19 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
                         ci->query_head);
             }
           
-#ifndef ALT
           /* uchime_denovo: add non-chimeras to db */
           if (opt_uchime_denovo)
-            dbindex_addsequence(seqno);
-#endif
+            dbindex_addsequence(seqno, opt_qmask);
 
           if (opt_nonchimeras)
             {
-              int size = ci->query_size;
-
-              if (opt_relabel_sha1 || opt_relabel_md5)
-                {
-                  char * seq = ci->query_seq;
-                  int len = ci->query_len;
-
-                  fprintf(fp_nonchimeras, ">");
-
-                  if (opt_relabel_sha1)
-                    fprint_seq_digest_sha1(fp_nonchimeras, seq, len);
-                  else
-                    fprint_seq_digest_md5(fp_nonchimeras, seq, len);
-
-                  if (opt_sizeout)
-                    fprintf(fp_nonchimeras, ";size=%d;\n", size);
-                  else
-                    fprintf(fp_nonchimeras, "\n");
-
-                }
-              else if (opt_relabel)
-                {
-                  if (opt_sizeout)
-                    fprintf(fp_nonchimeras, ">%s%d;size=%d;\n", 
-                            opt_relabel, nonchimera_count, size);
-                  else
-                    fprintf(fp_nonchimeras, ">%s%d\n", 
-                            opt_relabel, nonchimera_count);
-                }
-              else
-                fprintf(fp_nonchimeras, ">%s\n", ci->query_head);
-
-              fprint_fasta_seq_only(fp_nonchimeras, ci->query_seq,
-                                    ci->query_len, opt_fasta_width);
+              fasta_print_relabel(fp_nonchimeras,
+                                  ci->query_seq,
+                                  ci->query_len,
+                                  ci->query_head,
+                                  ci->query_head_len,
+                                  ci->query_size,
+                                  nonchimera_count);
             }
         }
       
@@ -1427,11 +1363,9 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
       progress_update(progress);
 
       seqno++;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-      pthread_mutex_unlock(&mutex_output);
-#else
-        todo
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        pthread_mutex_unlock(&mutex_output);
 #endif
     }
 
@@ -1447,7 +1381,7 @@ unsigned long chimera_thread_core(struct chimera_info_s * ci)
 
 void * chimera_thread_worker(void * vp)
 {
-  return (void *) chimera_thread_core(cia + (long) vp);
+  return (void *) (chimera_thread_core(cia + (intptr_t) vp));
 }
 
 void chimera_threads_run()
@@ -1456,7 +1390,7 @@ void chimera_threads_run()
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
+  
   /* create worker threads */
   for(long t=0; t<opt_threads; t++)
     {
@@ -1476,7 +1410,8 @@ void chimera_threads_run()
 
   pthread_attr_destroy(&attr);
 #else
-    todo
+    //assumes 1 thread
+    chimera_thread_core(cia);
 #endif
 }
 
@@ -1527,41 +1462,43 @@ void chimera()
   nonchimera_count = 0;
   progress = 0;
   seqno = 0;
-    
-    cia = (struct chimera_info_s *) xmalloc(opt_threads *
+  cia = (struct chimera_info_s *) xmalloc(opt_threads *
                                             sizeof(struct chimera_info_s));
  
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    
   /* prepare threads */
-  pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
     
-  /* init mutexes for input and output */
-  pthread_mutex_init(&mutex_input, NULL);
-  pthread_mutex_init(&mutex_output, NULL);
-#else
-    todo
+    /* init mutexes for input and output */
+    pthread_mutex_init(&mutex_input, NULL);
+    pthread_mutex_init(&mutex_output, NULL);
 #endif
-    
   /* prepare queries / database */
   if (opt_uchime_ref)
     {
-      db_read(opt_db, 1);
-      dbindex_prepare(1);
-      dbindex_addallsequences();
+      db_read(opt_db, 0);
+
+      if (opt_dbmask == MASK_DUST)
+        dust_all();
+      else if ((opt_dbmask == MASK_SOFT) && (opt_hardmask))
+        hardmask_all();
+
+      dbindex_prepare(1, opt_dbmask);
+      dbindex_addallsequences(opt_dbmask);
       query_fasta_h = fasta_open(opt_uchime_ref);
       progress_total = fasta_get_size(query_fasta_h);
     }
   else
     {
-      db_read(opt_uchime_denovo, 1);
-#ifndef ALT
+      db_read(opt_uchime_denovo, 0);
+
+      if (opt_qmask == MASK_DUST)
+        dust_all();
+      else if ((opt_qmask == MASK_SOFT) && (opt_hardmask))
+        hardmask_all();
+
       db_sortbyabundance();
-#endif
-      dbindex_prepare(1);
-#ifdef ALT
-      dbindex_addallsequences();
-#endif
+      dbindex_prepare(1, opt_qmask);
       progress_total = db_getnucleotidecount();
     }
 
@@ -1614,14 +1551,13 @@ void chimera()
   
   dbindex_free();
   db_free();
-    free(cia);
+
+  free(cia);
     
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
     pthread_mutex_destroy(&mutex_output);
     pthread_mutex_destroy(&mutex_input);
     free(pthread);
-#else
-    todo
 #endif
     
   close_chimera_file(fp_borderline);

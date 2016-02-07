@@ -155,16 +155,19 @@ int hit_compare_bysize(const void * a, const void * b)
   return hit_compare_bysize_typed((struct hit *) a, (struct hit *) b);
 }
 
+bool search_enough_kmers(struct searchinfo_s * si,
+                         unsigned int count)
+{
+  return (count >= opt_minwordmatches) || (count >= si->kmersamplecount);
+}
+
 inline void topscore_insert(int i, struct searchinfo_s * si)
 {
   count_t count = si->kmers[i];
   
   /* ignore sequences with very few kmer matches */
 
-  if (count < MINMATCHSAMPLECOUNT)
-    return;
-
-  if (count < si->kmersamplecount / MINMATCHSAMPLEFREQ)
+  if (!search_enough_kmers(si, count))
     return;
   
   unsigned int seqno = dbindex_getmapping(i);
@@ -209,12 +212,16 @@ void search_topscores(struct searchinfo_s * si)
       
       if (bitmap)
         {
-          if (ssse3_present)
-            increment_counters_from_bitmap_ssse3(si->kmers, 
-                                                 bitmap, indexed_count);
-          else
-            increment_counters_from_bitmap_sse2(si->kmers,
-                                                bitmap, indexed_count);
+            if (ssse3_present) {
+              #ifdef __SSE2__
+#else
+            increment_counters_from_bitmap_ssse3(si->kmers, bitmap, indexed_count);
+#endif
+            }else{
+              #ifdef __SSE2__
+            increment_counters_from_bitmap_sse2(si->kmers, bitmap, indexed_count);
+                #endif
+            }
         }
       else
         {
@@ -592,7 +599,7 @@ void align_delayed(struct searchinfo_s * si)
   si->finalized = si->hit_count;
 }
 
-void search_onequery(struct searchinfo_s * si)
+void search_onequery(struct searchinfo_s * si, int seqmask)
 {
   si->hit_count = 0;
 
@@ -619,7 +626,7 @@ void search_onequery(struct searchinfo_s * si)
   /* extract unique kmer samples from query*/
   unique_count(si->uh, opt_wordlength, 
                si->qseqlen, si->qsequence,
-               & si->kmersamplecount, & si->kmersample);
+               & si->kmersamplecount, & si->kmersample, seqmask);
   
   /* find database sequences with the most kmer hits */
   search_topscores(si);

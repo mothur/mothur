@@ -1,6 +1,3 @@
-
-
-
 /*
 
   VSEARCH: a versatile open source tool for metagenomics
@@ -62,7 +59,3 @@
 */
 
 void allpairs_global(char * cmdline, char * progheader);
-    
-
-
-

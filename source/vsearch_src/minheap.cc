@@ -243,7 +243,13 @@ minheap_test()
   
   for(int i=samples; i>=0; i--)
     {
-      elem_t x = {(unsigned int)(random()),0,1};
+        elem_t x; x.seqno = 0; x.length = 1;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        x.count = (unsigned int) (random());
+#else
+        x.count = (unsigned int) (rand());
+#endif
+        //= {(unsigned int)(random()),0,1};
       minheap_add(m, & x);
     }
 

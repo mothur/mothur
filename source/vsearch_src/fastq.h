@@ -88,12 +88,14 @@ struct fastq_s
   unsigned long file_position;
 
   unsigned long lineno;
+  unsigned long lineno_start;
   long seqno;
 
   unsigned long stripped_all;
   unsigned long stripped[256];
 
   int format;
+
 };
 
 typedef struct fastq_s * fastq_handle;
@@ -110,6 +112,24 @@ unsigned long fastq_get_seqno(fastq_handle h);
 char * fastq_get_header(fastq_handle h);
 char * fastq_get_sequence(fastq_handle h);
 char * fastq_get_quality(fastq_handle h);
+long fastq_get_abundance(fastq_handle h);
 unsigned long fastq_get_header_length(fastq_handle h);
 unsigned long fastq_get_sequence_length(fastq_handle h);
 unsigned long fastq_get_quality_length(fastq_handle h);
+
+void fastq_print(FILE * fp, char * header, char * sequence, char * quality);
+
+void fastq_print_with_ee(FILE * fp, char * header, char * sequence,
+                         char * quality, double ee);
+
+void fastq_print_relabel(FILE * fp,
+                         char * seq,
+                         int len,
+                         char * header,
+                         int header_len,
+                         char * quality,
+                         int abundance,
+                         int ordinal);
+
+
+void fastq_print_db(FILE * fp, unsigned long seqno);
