@@ -48,7 +48,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir;
+	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
 	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList;
@@ -67,6 +67,7 @@ private:
     string readFile(vector< map<string, string> >&);
     string printFile(string, vector< map<string, string> >&);
     int getLabels(string, set<string>& listLabels);
+    bool findVsearch();
     int vsearchDriver(string, string, string);
     string runVsearchCluster(string, string, set<string>&, double&);
 };
