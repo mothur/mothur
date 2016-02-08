@@ -1405,6 +1405,8 @@ int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
                 
                 string line = m->getline(in); m->gobble(in);
                 vector<string> thisPieces = m->splitWhiteSpaceWithQuotes(line);
+                
+                if (m->debug) {  m->mothurOut("[DEBUG]: " + group + " " + m->getStringFromVector(thisPieces, ", ") + "\n"); }
         
                 if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
                 else {  if (m->inUsersGroups(group, groups)) { lines[group] = thisPieces; } }
