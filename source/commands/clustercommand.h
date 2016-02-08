@@ -54,7 +54,7 @@ private:
 
 	bool abort, hard, sim;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, vsearchLocation;
 	double cutoff;
     float adjust;
 	string showabund, timing;

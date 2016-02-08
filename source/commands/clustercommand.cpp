@@ -13,8 +13,8 @@
 #include "readmatrix.hpp"
 #include "clusterdoturcommand.h"
 #include "sequence.hpp"
-#include "vsearch.h"
 #include "vsearchfileparser.h"
+#include "systemcommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -275,13 +275,16 @@ ClusterCommand::ClusterCommand(string option)  {
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
-
+            
+            if ((method == "agc") || (method == "dgc")) {
+                if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
+            }
+            
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
-			
 		}
 	}
 	catch(exception& e) {
@@ -371,6 +374,53 @@ int ClusterCommand::execute(){
 
 int ClusterCommand::runVsearchCluster(){
     try {
+        //look for uchime exe
+        string path = m->argv;
+        string tempPath = path;
+        for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+        path = path.substr(0, (tempPath.find_last_of('m')));
+        
+        string vsearchCommand;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
+        if (m->debug) {
+            m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
+            Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
+            newCommand->execute();
+            delete newCommand;
+            m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
+            newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
+            newCommand->execute();
+            delete newCommand;
+        }
+#else
+        vsearchCommand = path + "vsearch.exe";
+#endif
+        
+        //test to make sure uchime exists
+        ifstream in;
+        vsearchCommand = m->getFullPathName(vsearchCommand);
+        int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+        if(ableToOpen == 1) {
+            m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
+            //check to see if uchime is in the path??
+            
+            string uLocation = m->findProgramPath("vsearch");
+            
+            
+            ifstream in2;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#else
+            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+#endif
+            
+            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+        }else {  vsearchLocation = vsearchCommand; }
+        
+        vsearchLocation = m->getFullPathName(vsearchLocation);
+        
         string vsearchFastafile = ""; VsearchFileParser* vParse;
         if ((namefile == "") && (countfile == ""))  { vParse = new VsearchFileParser(fastafile);                        }
         else if (namefile != "")                    { vParse = new VsearchFileParser(fastafile, namefile, "name");      }
@@ -430,19 +480,33 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         //vsearch --maxaccepts 16 --usersort --id 0.97 --minseqlength 30 --wordlength 8 --uc $ROOT.clustered.uc --cluster_smallmem $ROOT.sorted.fna --maxrejects 64 --strand both --log $ROOT.clustered.log --sizeorder
 
         
-        int numArgs = 11; if (method == "dgc") {  numArgs = 10;  } //no sizeorder for dgc
-        char** vsearchParameters;
-        vsearchParameters = new char*[numArgs];
+        //no sizeorder for dgc
         
-        vsearchParameters[0] = new char[8];
-        *vsearchParameters[0] = '\0'; strncat(vsearchParameters[0], "vsearch", 7);
+        ucClusteredFile = m->getFullPathName(ucClusteredFile);
+        inputFile = m->getFullPathName(inputFile);
+        logfile = m->getFullPathName(logfile);
         
-        int parameterCount = 1;
+        //to allow for spaces in the path
+        ucClusteredFile = "\"" + ucClusteredFile + "\"";
+        inputFile = "\"" + inputFile + "\"";
+        logfile = "\"" + logfile + "\"";
+        
+        vector<char*> cPara;
+        
+        string vsearchCommand = vsearchLocation;
+        vsearchCommand = "\"" + vsearchCommand + "\" ";
+        
+        vector<char*> vsearchParameters;
+        char* vsearchParameter = new char[vsearchCommand.length()+1];  vsearchParameter[0] = '\0'; strncat(vsearchParameter, vsearchCommand.c_str(), vsearchCommand.length());
+        vsearchParameters.push_back(vsearchParameter);
+        
         //--maxaccepts=16
-        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxaccepts=16", 15);  	 parameterCount++;
+        char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
+        vsearchParameters.push_back(maxaccepts);
         
         //--usersort
-        vsearchParameters[parameterCount] = new char[11];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--usersort", 10);  	parameterCount++;
+        char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
+        vsearchParameters.push_back(usersort);
         
         //--id=0.97
         cutoff = abs(1.0 - cutoff); string cutoffString = toString(cutoff);
@@ -450,53 +514,68 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         else if (cutoffString.length() < 4)  {  for (int i = cutoffString.length(); i < 4; i++)  { cutoffString += "0";  } }
         
         cutoffString = "--id=" +  cutoffString;
-        vsearchParameters[parameterCount] = new char[cutoffString.length()+1];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], cutoffString.c_str(), cutoffString.length());  	parameterCount++;
+        char* cutoffParameter = new char[cutoffString.length()+1];  cutoffParameter[0] = '\0'; strncat(cutoffParameter, cutoffString.c_str(), cutoffString.length());
+        vsearchParameters.push_back(cutoffParameter);
         
         //--minseqlength=30
-        vsearchParameters[parameterCount] = new char[18];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--minseqlength=30", 17);  	parameterCount++;
+        char* minseqlength = new char[18];  minseqlength[0] = '\0'; strncat(minseqlength, "--minseqlength=30", 17);
+        vsearchParameters.push_back(minseqlength);
         
         //--wordlength=8
-        vsearchParameters[parameterCount] = new char[15];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--wordlength=8", 14);  	parameterCount++;
-        
+        char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
+        vsearchParameters.push_back(wordlength);
+
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;
-        vsearchParameters[parameterCount] = new char[tempIn.length()+1];
-        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempIn.c_str(), tempIn.length());
-        parameterCount++;
+        char* uc = new char[tempIn.length()+1];  uc[0] = '\0'; strncat(uc, tempIn.c_str(), tempIn.length());
+        vsearchParameters.push_back(uc);
 
         //--cluster_smallmem $ROOT.sorted.fna
         string tempSorted = "--cluster_smallmem=" + inputFile;
-        vsearchParameters[parameterCount] = new char[tempSorted.length()+1];
-        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempSorted.c_str(), tempSorted.length());
-        parameterCount++;
+        char* cluster_smallmen = new char[tempSorted.length()+1];  cluster_smallmen[0] = '\0'; strncat(cluster_smallmen, tempSorted.c_str(), tempSorted.length());
+        vsearchParameters.push_back(cluster_smallmen);
         
         //--maxrejects=64
-        vsearchParameters[parameterCount] = new char[16];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--maxrejects=64", 15);  	parameterCount++;
+        char* maxrejects = new char[16];  maxrejects[0] = '\0'; strncat(maxrejects, "--maxrejects=64", 15);
+        vsearchParameters.push_back(maxrejects);
         
         //--strand=both
-        vsearchParameters[parameterCount] = new char[14];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--strand=both", 13);  	parameterCount++;
+        char* strand = new char[14];  strand[0] = '\0'; strncat(strand, "--strand=both", 13);
+        vsearchParameters.push_back(strand);
         
         //--log=$ROOT.clustered.log
         string tempLog = "--log=" + logfile;
-        vsearchParameters[parameterCount] = new char[tempLog.length()+1];
-        *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], tempLog.c_str(), tempLog.length());
-        parameterCount++;
+        char* log = new char[tempLog.length()+1];  log[0] = '\0'; strncat(log, tempLog.c_str(), tempLog.length());
+        vsearchParameters.push_back(log);
 
-        
         if (method == "agc") {
             //--sizeorder
-            vsearchParameters[parameterCount] = new char[12];  *vsearchParameters[parameterCount] = '\0'; strncat(vsearchParameters[parameterCount], "--sizeorder", 11);  	parameterCount++;
-        }
+            char* sizeorder = new char[12];  sizeorder[0] = '\0'; strncat(sizeorder, "--sizeorder", 11);
+            vsearchParameters.push_back(sizeorder);
+            delete sizeorder;
+         }
 
-        if (m->debug) {  for(int i = 0; i < numArgs; i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        if (m->debug) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
         
-        errno = 0;
-        vsearch_main(numArgs, vsearchParameters);
-        
+        string commandString = "";
+        for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
+ 
+        //cout << "commandString = " << commandString << endl;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
+        if (m->debug) { m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
+        system(commandString.c_str());
+ 
         //free memory
-        for(int i = 0; i < numArgs; i++)  {  delete[] vsearchParameters[i];  }
-        delete[] vsearchParameters; 
+   //     for(int i = 0; i < vsearchParameters.size(); i++)  {  delete vsearchParameters[i];  }
         
+        //remove "" from filenames
+        ucClusteredFile = ucClusteredFile.substr(1, ucClusteredFile.length()-2);
+        inputFile = inputFile.substr(1, inputFile.length()-2);
+        logfile = logfile.substr(1, logfile.length()-2);
+
         return 0;
     }
     catch(exception& e) {
