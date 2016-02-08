@@ -63,7 +63,7 @@
 abundance_t * abundance_init(void)
 {
  abundance_t * a = (abundance_t *) xmalloc(sizeof(abundance_t));
- if (regcomp(&a->regex, "(^|;)size=([0-9]+)(;|$)", REG_EXTENDED))
+ if (regcomp(&a->regex, "(^|;)size=([0-9]+)(;|$)",REG_EXTENDED))
    fatal("Compilation of regular expression for abundance annotation failed");
  return a;
 }
@@ -110,7 +110,7 @@ void abundance_fprint_header_with_size(abundance_t * a,
       int pat_end = pmatch[0].rm_eo;
 
       fprintf(fp,
-              ">%.*s%s%.*s%ssize=%lu;\n",
+              "%.*s%s%.*s%ssize=%lu;",
               pat_start, header,
               (pat_start > 0 ? ";" : ""),
               header_length - pat_end, header + pat_end,
@@ -121,7 +121,7 @@ void abundance_fprint_header_with_size(abundance_t * a,
   else
     {
       fprintf(fp,
-              ">%s%ssize=%lu;\n", 
+              "%s%ssize=%lu;",
               header,
               (((header_length == 0) || 
                 (header[header_length - 1] != ';')) ? ";" : ""),
@@ -142,13 +142,13 @@ void abundance_fprint_header_strip_size(abundance_t * a,
       int pat_end = pmatch[0].rm_eo;
 
       fprintf(fp,
-              ">%.*s%s%.*s\n",
+              "%.*s%s%.*s",
               pat_start, header,
               ((pat_start > 0) && (pat_end < header_length)) ? ";" : "",
               header_length - pat_end, header + pat_end);
     }
   else
-    fprintf(fp, ">%s\n", header);
+    fprintf(fp, "%s", header);
 }
 
 char * abundance_strip_size(abundance_t * a,
@@ -165,14 +165,14 @@ char * abundance_strip_size(abundance_t * a,
       int pat_start = pmatch[0].rm_so;
       int pat_end = pmatch[0].rm_eo;
 
-      ret = asprintf(&temp,
+      ret = sprintf(temp,
                      "%.*s%s%.*s",
                      pat_start, header,
                      ((pat_start > 0) && (pat_end < header_length)) ? ";" : "",
                      header_length - pat_end, header + pat_end);
     }
   else
-    ret = asprintf(&temp, "%s", header);
+    ret = sprintf(temp, "%s", header);
   
   if (ret == -1)
     fatal("Out of memory");

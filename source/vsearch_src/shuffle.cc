@@ -100,7 +100,7 @@ void shuffle()
   progress_init("Writing output", passed);
   for(int i=0; i<passed; i++)
     {
-      db_fprint_fasta(fp_output, deck[i]);
+      fasta_print_db_relabel(fp_output, deck[i], i+1);
       progress_update(i);
     }
   progress_done();

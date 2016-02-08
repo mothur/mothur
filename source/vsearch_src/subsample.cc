@@ -62,12 +62,28 @@
 
 void subsample()
 {
-  FILE * fp_output = fopen(opt_fastaout, "w");
-  if (!fp_output)
-    fatal("Unable to open subsampling output file for writing");
+  FILE * fp_fastaout = 0;
+  FILE * fp_fastqout = 0;
+
+  if (opt_fastaout)
+    {
+      fp_fastaout = fopen(opt_fastaout, "w");
+      if (!fp_fastaout)
+        fatal("Unable to open fasta output file for writing");
+    }
+
+  if (opt_fastqout)
+    {
+      fp_fastqout = fopen(opt_fastqout, "w");
+      if (!fp_fastqout)
+        fatal("Unable to open fastq output file for writing");
+    }
 
   db_read(opt_fastx_subsample, 0);
   show_rusage();
+
+  if (fp_fastqout && ! db_is_fastq())
+    fatal("Cannot write FASTQ output with a FASTA input file, lacking quality scores");
 
   int dbsequencecount = db_getsequencecount();
 
@@ -132,20 +148,32 @@ void subsample()
     }
   progress_done();
 
-  int sampled = 0;
+  int samples = 0;
   progress_init("Writing output", dbsequencecount);
   for(int i=0; i<dbsequencecount; i++)
     {
       if (abundance[i]>0)
         {
-          if (opt_sizeout)
-            db_fprint_fasta_with_size(fp_output, i, abundance[i]);
-          else if (opt_xsize)
-            db_fprint_fasta_strip_size(fp_output, i);
-          else
-            db_fprint_fasta(fp_output, i);
+          samples++;
 
-          sampled++;
+          if (opt_fastaout)
+            fasta_print_relabel(fp_fastaout,
+                                db_getsequence(i),
+                                db_getsequencelen(i),
+                                db_getheader(i),
+                                db_getheaderlen(i),
+                                abundance[i],
+                                samples);
+
+          if (opt_fastqout)
+            fastq_print_relabel(fp_fastqout,
+                                db_getsequence(i),
+                                db_getsequencelen(i),
+                                db_getheader(i),
+                                db_getheaderlen(i),
+                                db_getquality(i),
+                                abundance[i],
+                                samples);
         }
       progress_update(i);
     }
@@ -153,8 +181,13 @@ void subsample()
 
   free(abundance);
 
-  fprintf(stderr, "Subsampled %lu reads from %d amplicons\n", n, sampled);
+  fprintf(stderr, "Subsampled %lu reads from %d amplicons\n", n, samples);
 
   db_free();
-  fclose(fp_output);
+
+  if (opt_fastaout)
+    fclose(fp_fastaout);
+
+  if (opt_fastqout)
+    fclose(fp_fastqout);
 }

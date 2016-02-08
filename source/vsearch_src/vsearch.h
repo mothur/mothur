@@ -57,16 +57,16 @@
   POSSIBILITY OF SUCH DAMAGE.
 
 */
-#ifndef VSEARCH_H
-#define VSEARCH_H
+#include <sys/types.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <pthread.h>
+
 
 #include <stdio.h>
 #include <string.h>
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    #include <pthread.h>
-#endif
-//#include <getopt.h>
-#include <x86intrin.h>
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
@@ -78,8 +78,30 @@
 #include <float.h>
 
 
-#include "getopt_long.h"
-#include "cityhash/city.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
+#ifdef __SSSE3__
+#include <tmmintrin.h>
+#define SSSE3
+#endif
+
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif
+
+#ifdef HAVE_BZLIB_H
+#include <bzlib.h>
+#endif
+
+#include "dynlibs.h"
+#include "city.h"
+#include "citycrc.h"
 #include "md5.h"
 #include "sha1.h"
 #include "util.h"
@@ -113,26 +135,30 @@
 #include "subsample.h"
 #include "fasta.h"
 #include "fastq.h"
+#include "fastx.h"
 #include "fastqops.h"
-#include "fastxdetect.h"
-
+#include "dbhash.h"
+#include "searchexact.h"
+#include "mergepairs.h"
 
 //vsearch definitions
 
 #define PROG_NAME "vsearch" //PACKAGE
-#define PROG_VERSION "1.9.7" //PACKAGE_VERSION
+#define PROG_VERSION "1.9.10" //PACKAGE_VERSION
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "torognes@ifi.uio.no"
 
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    #include <sys/time.h>
-    #include <sys/resource.h>
-    #include <unistd.h>
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <getopt_long.h>
+#include <dlfcn.h>
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
@@ -147,18 +173,20 @@
 #define HAVE_UNISTD_H 1
 
 
-    #if defined (__APPLE__) || (__MACH__)
-        #define PROG_ARCH "osx_x86_64"
-        #include <sys/sysctl.h>
-    #else
-        #define PROG_ARCH "linux_x86_64"
-        #include <sys/sysinfo.h>
-    #endif
+#if defined (__APPLE__) || (__MACH__)
+#define PROG_ARCH "osx_x86_64"
+#include <sys/sysctl.h>
 #else
-    #define PROG_ARCH "Windows_x86_64"
-    #include <windows.h>
-    #include <psapi.h>
+#define PROG_ARCH "linux_x86_64"
+#include <sys/sysinfo.h>
 #endif
+#else
+#define PROG_ARCH "Windows_x86_64"
+#include <windows.h>
+#include <psapi.h>
+#include <getopt.h>
+#endif
+
 
 
 /* options */
@@ -166,7 +194,11 @@
 extern bool opt_clusterout_id;
 extern bool opt_clusterout_sort;
 extern bool opt_eeout;
+extern bool opt_fastq_allowmergestagger;
+extern bool opt_fastq_eeout;
+extern bool opt_fastq_nostagger;
 extern bool opt_quiet;
+extern bool opt_relabel_keep;
 extern bool opt_relabel_md5;
 extern bool opt_relabel_sha1;
 extern bool opt_samheader;
@@ -188,14 +220,22 @@ extern char * opt_dbmatched;
 extern char * opt_dbnotmatched;
 extern char * opt_derep_fulllength;
 extern char * opt_derep_prefix;
+extern char * opt_eetabbedout;
+extern char * opt_fastaout_notmerged_fwd;
+extern char * opt_fastaout_notmerged_rev;
 extern char * opt_fastaout;
 extern char * opt_fastaout_discarded;
 extern char * opt_fastapairs;
 extern char * opt_fastq_chars;
+extern char * opt_fastq_convert;
 extern char * opt_fastq_filter;
+extern char * opt_fastq_mergepairs;
+extern char * opt_fastqout_notmerged_fwd;
+extern char * opt_fastqout_notmerged_rev;
 extern char * opt_fastq_stats;
 extern char * opt_fastqout;
 extern char * opt_fastqout_discarded;
+extern char * opt_fastx_mask;
 extern char * opt_fastx_revcomp;
 extern char * opt_fastx_subsample;
 extern char * opt_label_suffix;
@@ -209,7 +249,9 @@ extern char * opt_output;
 extern char * opt_pattern;
 extern char * opt_profile;
 extern char * opt_relabel;
+extern char * opt_reverse;
 extern char * opt_samout;
+extern char * opt_search_exact;
 extern char * opt_shuffle;
 extern char * opt_sortbylength;
 extern char * opt_sortbysize;
@@ -225,11 +267,13 @@ extern double opt_dn;
 extern double opt_fastq_maxee;
 extern double opt_fastq_maxee_rate;
 extern double opt_id;
+extern double opt_max_unmasked_pct;
 extern double opt_maxid;
 extern double opt_maxqt;
 extern double opt_maxsizeratio;
 extern double opt_maxsl;
 extern double opt_mid;
+extern double opt_min_unmasked_pct;
 extern double opt_mindiv;
 extern double opt_minh;
 extern double opt_minqt;
@@ -264,11 +308,17 @@ extern int opt_version;
 extern long opt_dbmask;
 extern long opt_fasta_width;
 extern long opt_fastq_ascii;
+extern long opt_fastq_asciiout;
+extern long opt_fastq_maxdiffs;
+extern long opt_fastq_maxmergelen;
 extern long opt_fastq_maxns;
 extern long opt_fastq_minlen;
+extern long opt_fastq_minmergelen;
+extern long opt_fastq_minovlen;
 extern long opt_fastq_qmax;
 extern long opt_fastq_qmaxout;
 extern long opt_fastq_qmin;
+extern long opt_fastq_qminout;
 extern long opt_fastq_stripleft;
 extern long opt_fastq_tail;
 extern long opt_fastq_trunclen;
@@ -295,6 +345,7 @@ extern long opt_minseqlength;
 extern long opt_minsize;
 extern long opt_mintsize;
 extern long opt_minuniquesize;
+extern long opt_minwordmatches;
 extern long opt_mismatch;
 extern long opt_notrunclabels;
 extern long opt_output_no_hits;
@@ -327,10 +378,4 @@ extern long avx2_present;
 
 extern FILE * fp_log;
 
-/* main function prototype */
-int vsearch_main(int, char**);
-
-#endif
-
-
-
+extern abundance_t * global_abundance;

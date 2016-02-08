@@ -85,26 +85,22 @@ static FILE * fp_blast6out = 0;
 static FILE * fp_fastapairs = 0;
 static FILE * fp_matched = 0;
 static FILE * fp_notmatched = 0;
+  
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+static pthread_attr_t attr;
+#endif
 
 static struct searchinfo_s * si_plus;
 static struct searchinfo_s * si_minus;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    static pthread_attr_t attr;
-#else
-    todo
-#endif
-
 typedef struct thread_info_s
 {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-  pthread_t thread;
-  pthread_mutex_t mutex;
-  pthread_cond_t cond;
-#else
-    todo
+    pthread_t thread;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
 #endif
-  int work;
+    int work;
   int query_first;
   int query_count;
 } thread_info_t;
@@ -164,7 +160,7 @@ inline void cluster_query_core(struct searchinfo_s * si)
     strcpy(si->qsequence, db_getsequence(seqno));
   
   /* perform search */
-  search_onequery(si);
+  search_onequery(si, opt_qmask);
 }
 
 inline void cluster_worker(long t)
@@ -180,6 +176,7 @@ inline void cluster_worker(long t)
 
 void * threads_worker(void * vp)
 {
+    
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
   long t = (long) vp;
@@ -199,39 +196,42 @@ void * threads_worker(void * vp)
         }
     }
   pthread_mutex_unlock(&tip->mutex);
-#else
-    todo
-#endif
-    
+    #endif
   return 0;
 }
 
 void threads_wakeup(int queries)
 {
+    int threads = queries > opt_threads ? opt_threads : queries;
+    int queries_rest = queries;
+    int threads_rest = threads;
+    int query_next = 0;
+    
+    /* tell the threads that there is work to do */
+    for(int t=0; t < threads; t++)
+    {
+        thread_info_t * tip = ti + t;
+        
+        tip->query_first = query_next;
+        tip->query_count = (queries_rest + threads_rest - 1) / threads_rest;
+        queries_rest -= tip->query_count;
+        query_next += tip->query_count;
+        threads_rest--;
+        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-  int threads = queries > opt_threads ? opt_threads : queries;
-  int queries_rest = queries;
-  int threads_rest = threads;
-  int query_next = 0;
-
-  /* tell the threads that there is work to do */
-  for(int t=0; t < threads; t++)
-    {
-      thread_info_t * tip = ti + t;
-
-      tip->query_first = query_next;
-      tip->query_count = (queries_rest + threads_rest - 1) / threads_rest;
-      queries_rest -= tip->query_count;
-      query_next += tip->query_count;
-      threads_rest--;
-
-      pthread_mutex_lock(&tip->mutex);
-      tip->work = 1;
-      pthread_cond_signal(&tip->cond);
-      pthread_mutex_unlock(&tip->mutex);
+        pthread_mutex_lock(&tip->mutex);
+        tip->work = 1;
+        pthread_cond_signal(&tip->cond);
+        pthread_mutex_unlock(&tip->mutex);
+#else
+       ti->work = 1;
+#endif
     }
-  
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
+    
   /* wait for theads to finish their work */
   for(int t=0; t < threads; t++)
     {
@@ -241,20 +241,20 @@ void threads_wakeup(int queries)
         pthread_cond_wait(&tip->cond, &tip->mutex);
       pthread_mutex_unlock(&tip->mutex);
     }
-#else
-    todo
 #endif
 }
 
 void threads_init()
 {
+    /* allocate memory for thread info */
+    ti = (thread_info_t *) xmalloc(opt_threads * sizeof(thread_info_t));
+
+    
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   
-  /* allocate memory for thread info */
-  ti = (thread_info_t *) xmalloc(opt_threads * sizeof(thread_info_t));
   
   /* init and create worker threads */
   for(int t=0; t < opt_threads; t++)
@@ -267,8 +267,11 @@ void threads_init()
         fatal("Cannot create thread");
     }
 #else
-    todo
+    long t = 0; //one thread
+    ti->work = 0;
+    cluster_worker(t);
 #endif
+    
 }
 
 void threads_exit()
@@ -293,11 +296,10 @@ void threads_exit()
       pthread_cond_destroy(&tip->cond);
       pthread_mutex_destroy(&tip->mutex);
     }
-  free(ti);
-  pthread_attr_destroy(&attr);
-#else
-    todo
+    pthread_attr_destroy(&attr);
 #endif
+  free(ti);
+  
 }
 
 void cluster_query_init(struct searchinfo_s * si)
@@ -399,11 +401,7 @@ void cluster_core_results_hit(struct hit * best,
                                qsequence, qseqlen, qsequence_rc);
   
   if (opt_matched)
-    {
-      fprintf(fp_matched, ">%s\n", query_head);
-      fprint_fasta_seq_only(fp_matched, qsequence, qseqlen,
-                            opt_fasta_width);
-    }
+    fasta_print(fp_matched, query_head, qsequence, qseqlen);
 }
 
 void cluster_core_results_nohit(int clusterno,
@@ -430,11 +428,7 @@ void cluster_core_results_nohit(int clusterno,
     }
   
   if (opt_notmatched)
-    {
-      fprintf(fp_notmatched, ">%s\n", query_head);
-      fprint_fasta_seq_only(fp_notmatched, qsequence, qseqlen,
-                            opt_fasta_width);
-    }
+    fasta_print(fp_notmatched, query_head, qsequence, qseqlen);
 }
 
 int compare_kmersample(const void * a, const void * b)
@@ -572,8 +566,7 @@ void cluster_core_parallel()
                                               sic->kmersample);
 
                       /* check if min number of shared kmers is satisfied */
-                      if ((shared >= MINMATCHSAMPLECOUNT) &&
-                          (shared >= si->kmersamplecount / MINMATCHSAMPLEFREQ))
+                      if (search_enough_kmers(si, shared))
                         {
                           unsigned int length = sic->qseqlen;
                           
@@ -824,7 +817,7 @@ void cluster_core_parallel()
               clusterinfo[myseqno].strand = 0;
               
               /* add current sequence to database */
-              dbindex_addsequence(myseqno);
+              dbindex_addsequence(myseqno, opt_qmask);
               
               /* output intermediate results to uc etc */
               cluster_core_results_nohit(clusters,
@@ -938,7 +931,7 @@ void cluster_core_serial()
           clusterinfo[seqno].clusterno = clusters;
           clusterinfo[seqno].cigar = 0;
           clusterinfo[seqno].strand = 0;
-          dbindex_addsequence(seqno);
+          dbindex_addsequence(seqno, opt_qmask);
           cluster_core_results_nohit(clusters,
                                      si_p->query_head,
                                      si_p->qseqlen,
@@ -1037,7 +1030,7 @@ void cluster(char * dbname,
         fatal("Unable to open notmatched output file for writing");
     }
 
-  db_read(dbname, opt_qmask != MASK_SOFT);
+  db_read(dbname, 0);
 
   results_show_samheader(fp_samout, cmdline, dbname);
 
@@ -1055,7 +1048,7 @@ void cluster(char * dbname,
   else if (opt_cluster_size)
     db_sortbyabundance();
   
-  dbindex_prepare(1);
+  dbindex_prepare(1, opt_qmask);
   
   /* tophits = the maximum number of hits we need to store */
 
@@ -1163,43 +1156,13 @@ void cluster(char * dbname,
 
           if (opt_centroids)
             {
-              unsigned int size = cluster_abundance[clusterno];
-
-              if (opt_relabel_sha1 || opt_relabel_md5)
-                {
-                  char * seq = db_getsequence(seqno);
-                  unsigned int len = db_getsequencelen(seqno);
-
-                  fprintf(fp_centroids, ">");
-
-                  if (opt_relabel_sha1)
-                    fprint_seq_digest_sha1(fp_centroids, seq, len);
-                  else
-                    fprint_seq_digest_md5(fp_centroids, seq, len);
-
-                  if (opt_sizeout)
-                    fprintf(fp_centroids, ";size=%u;\n", size);
-                  else
-                    fprintf(fp_centroids, "\n");
-
-                  db_fprint_fasta_seq_only(fp_centroids, seqno);
-                }
-              else if (opt_relabel)
-                {
-                  if (opt_sizeout)
-                    fprintf(fp_centroids, ">%s%d;size=%u;\n", opt_relabel, i+1, size);
-                  else
-                    fprintf(fp_centroids, ">%s%d\n", opt_relabel, i+1);
-
-                  db_fprint_fasta_seq_only(fp_centroids, seqno);
-                }
-              else
-                {
-                  if (opt_sizeout)
-                    db_fprint_fasta_with_size(fp_centroids, seqno, size);
-                  else
-                    db_fprint_fasta(fp_centroids, seqno);
-                }
+              fasta_print_relabel(fp_centroids,
+                                  db_getsequence(seqno),
+                                  db_getsequencelen(seqno),
+                                  db_getheader(seqno),
+                                  db_getheaderlen(seqno),
+                                  cluster_abundance[clusterno],
+                                  clusterno+1);
             }
 
           if (opt_uc)
@@ -1228,14 +1191,8 @@ void cluster(char * dbname,
       /* performed for all sequences */
 
       if (opt_clusters)
-        {
-          fprintf(fp_clusters, ">%s\n", db_getheader(seqno));
-          fprint_fasta_seq_only(fp_clusters,
-                                db_getsequence(seqno),
-                                db_getsequencelen(seqno),
-                                opt_fasta_width);
-        }
-
+        fasta_print_db(fp_clusters, seqno);
+      
       progress_update(i);
     }
 
@@ -1317,8 +1274,6 @@ void cluster(char * dbname,
 
       lastcluster = -1;
 
-      abundance_t * abundance_handle = abundance_init();
-
       for(int i=0; i<seqcount; i++)
         {
           int clusterno = clusterinfo[i].clusterno;
@@ -1334,8 +1289,7 @@ void cluster(char * dbname,
                   msa(fp_msaout, fp_consout, fp_profile,
                       lastcluster,
                       msa_target_count, msa_target_list,
-                      cluster_abundance[lastcluster],
-                      abundance_handle);
+                      cluster_abundance[lastcluster]);
                 }
 
               /* start new cluster */
@@ -1358,13 +1312,10 @@ void cluster(char * dbname,
           msa(fp_msaout, fp_consout, fp_profile,
               lastcluster,
               msa_target_count, msa_target_list,
-              cluster_abundance[lastcluster],
-              abundance_handle);
+              cluster_abundance[lastcluster]);
         }
 
       progress_done();
-
-      abundance_exit(abundance_handle);
 
       if (fp_profile)
         fclose(fp_profile);

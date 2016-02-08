@@ -60,20 +60,16 @@
 
 #include "vsearch.h"
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-static pthread_t * pthread;
-
 /* global constants/data, no need for synchronization */
-static pthread_attr_t attr;
+static int seqcount; /* number of database sequences */
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
 /* global data protected by mutex */
 static pthread_mutex_t mutex_input;
 static pthread_mutex_t mutex_output;
-
-#else
-
-create thread
+static pthread_attr_t attr;
+static pthread_t * pthread;
 
 #endif
 
@@ -88,7 +84,6 @@ static FILE * fp_uc = 0;
 static FILE * fp_fastapairs = 0;
 static FILE * fp_matched = 0;
 static FILE * fp_notmatched = 0;
-static int seqcount; /* number of database sequences */
 
 inline int allpairs_hit_compare_typed(struct hit * x, struct hit * y)
 {
@@ -219,26 +214,20 @@ void allpairs_output_results(int hit_count,
     {
       if (opt_matched)
         {
-          fprintf(fp_matched,
-                  ">%s\n",
-                  query_head);
-          fprint_fasta_seq_only(fp_matched,
-                                qsequence,
-                                qseqlen,
-                                opt_fasta_width);
+          fasta_print(fp_matched,
+                      query_head,
+                      qsequence,
+                      qseqlen);
         }
     }
   else
     {
       if (opt_notmatched)
         {
-          fprintf(fp_notmatched,
-                  ">%s\n",
-                  query_head);
-          fprint_fasta_seq_only(fp_notmatched,
-                                qsequence,
-                                qseqlen,
-                                opt_fasta_width);
+          fasta_print(fp_notmatched,
+                      query_head,
+                      qsequence,
+                      qseqlen);
         }
     }
 }
@@ -319,22 +308,19 @@ void allpairs_thread_run(long t)
   while (cont)
     {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-      pthread_mutex_lock(&mutex_input);
-#else
-        todo
+        pthread_mutex_lock(&mutex_input);
+        //#else assume 1 thread
 #endif
       int query_no = queries;
 
       if (query_no < seqcount)
         {
           queries++;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-          /* let other threads read input */
-          pthread_mutex_unlock(&mutex_input);
-#else
-            todo
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            /* let other threads read input */
+            pthread_mutex_unlock(&mutex_input);
+            //#else assume 1 thread
 #endif
           /* init search info */
           si->query_no = query_no;
@@ -454,13 +440,12 @@ void allpairs_thread_run(long t)
               qsort(finalhits, si->accepts,
                     sizeof(struct hit), allpairs_hit_compare);
             }
-
+          
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-          /* lock mutex for update of global data and output */
-          pthread_mutex_lock(&mutex_output);
-#else
-            todo
+            
+            /* lock mutex for update of global data and output */
+            pthread_mutex_lock(&mutex_output);
+            //#else assume 1 thread
 #endif
           /* output results */
           allpairs_output_results(si->accepts,
@@ -477,14 +462,11 @@ void allpairs_thread_run(long t)
           /* show progress */
           progress += seqcount - query_no - 1;
           progress_update(progress);
+          
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-         
-          pthread_mutex_unlock(&mutex_output);
-
-#else
-            todo
-#endif
             
+            pthread_mutex_unlock(&mutex_output);
+#endif
           /* free memory for alignment strings */
           for(int i=0; i < si->hit_count; i++)
             if (si->hits[i].aligned)
@@ -493,11 +475,10 @@ void allpairs_thread_run(long t)
       else
         {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-           
-          /* let other threads read input */
-          pthread_mutex_unlock(&mutex_input);
-#else
-            todo
+            
+            /* let other threads read input */
+            pthread_mutex_unlock(&mutex_input);
+            //#else assume 1 thread
 #endif
           cont = 0;
         }
@@ -524,7 +505,7 @@ void allpairs_thread_run(long t)
 
 void * allpairs_thread_worker(void * vp)
 {
-  long t = (long) vp;
+  long t = (intptr_t) vp;
   allpairs_thread_run(t);
   return 0;
 }
@@ -532,12 +513,11 @@ void * allpairs_thread_worker(void * vp)
 void allpairs_thread_worker_run()
 {
   /* initialize threads, start them, join them and return */
-
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
+  
   /* init and create worker threads, put them into stand-by mode */
   for(int t=0; t<opt_threads; t++)
     {
@@ -554,9 +534,10 @@ void allpairs_thread_worker_run()
     }
 
   pthread_attr_destroy(&attr);
-    
 #else
-    todo
+    //assume 1 thread - future work expand
+    long t = 0;
+    allpairs_thread_run(t);
 #endif
     
 }
@@ -628,7 +609,7 @@ void allpairs_global(char * cmdline, char * progheader)
         fatal("Unable to open notmatched output file for writing");
     }
 
-  db_read(opt_allpairs_global, opt_qmask != MASK_SOFT);
+  db_read(opt_allpairs_global, 0);
 
   results_show_samheader(fp_samout, cmdline, opt_allpairs_global);
 
@@ -646,15 +627,12 @@ void allpairs_global(char * cmdline, char * progheader)
   queries = 0;
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-  pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
-
-  /* init mutexes for input and output */
-  pthread_mutex_init(&mutex_input, NULL);
-  pthread_mutex_init(&mutex_output, NULL);
-#else
     
-    todo
+    pthread = (pthread_t *) xmalloc(opt_threads * sizeof(pthread_t));
+    
+    /* init mutexes for input and output */
+    pthread_mutex_init(&mutex_input, NULL);
+    pthread_mutex_init(&mutex_output, NULL);
 #endif
     
   progress = 0;
@@ -673,16 +651,13 @@ void allpairs_global(char * cmdline, char * progheader)
     }
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-
-  pthread_mutex_destroy(&mutex_output);
-  pthread_mutex_destroy(&mutex_input);
-
-  free(pthread);
-#else
     
-    todo
+    pthread_mutex_destroy(&mutex_output);
+    pthread_mutex_destroy(&mutex_input);
+    
+    free(pthread);
 #endif
-    
+
   /* clean up, global */
   db_free();
   if (opt_matched)

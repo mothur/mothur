@@ -62,6 +62,7 @@ struct seqinfo_s
 {
   size_t header_p;
   size_t seq_p;
+  size_t qual_p;
   unsigned int headerlen;
   unsigned int seqlen;
   unsigned int size;
@@ -71,7 +72,6 @@ typedef struct seqinfo_s seqinfo_t;
 
 extern char * datap;
 extern seqinfo_t * seqindex;
-extern abundance_t * db_abundance;
 
 inline char * db_getheader(unsigned long seqno)
 {
@@ -107,15 +107,6 @@ unsigned long db_getlongestheader();
 unsigned long db_getlongestsequence();
 unsigned long db_getshortestsequence();
 
-void db_fprint_fasta(FILE * fp, unsigned long seqno);
-
-void db_fprint_fasta_seq_only(FILE * fp, unsigned long seqno);
-
-void db_fprint_fasta_with_size(FILE * fp, unsigned long seqno, unsigned long size);
-
-void db_fprint_fasta_strip_size(FILE * fp, unsigned long seqno);
-
-
 /* Note: the sorting functions below must be called after db_read,
    but before dbindex_prepare */
 
@@ -123,3 +114,6 @@ void db_sortbylength();
 void db_sortbylength_shortest_first();
 
 void db_sortbyabundance();
+
+bool db_is_fastq();
+char * db_getquality(unsigned long seqno);

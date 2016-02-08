@@ -1,6 +1,3 @@
-
-
-
 /*
 
   VSEARCH: a versatile open source tool for metagenomics
@@ -61,11 +58,6 @@
 
 */
 
-#if defined(_WIN32)
-#include <windows.h>
-#include <psapi.h>
-#endif
-
 typedef struct abundance_s
 {
   regex_t regex;
@@ -91,6 +83,3 @@ void abundance_fprint_header_strip_size(abundance_t * a,
 char * abundance_strip_size(abundance_t * a,
                             char * header,
                             int header_length);
-
-
-

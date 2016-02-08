@@ -84,8 +84,11 @@ void progress_update(unsigned long progress)
   if (! opt_quiet)
     if (progress >= progress_next)
       {
-        fprintf(stderr, "  \r%s %.0f%%", progress_prompt,
-                100.0 * progress / progress_size);
+        if (progress_size > 0)
+          fprintf(stderr, "  \r%s %.0f%%", progress_prompt,
+                  100.0 * progress / progress_size);
+        else
+          fprintf(stderr, "  \r%s ?%%", progress_prompt);
         progress_next = progress + progress_chunk;
       }
 }
@@ -111,18 +114,19 @@ long gcd(long a, long b)
 void  __attribute__((noreturn)) fatal(const char * msg)
 {
   fprintf(stderr, "\n\n");
-  fprintf(stderr, "fatal error: %s\n", msg);
+  fprintf(stderr, "Fatal error: %s\n", msg);
 
   if (opt_log)
     {
       fprintf(fp_log, "\n\n");
-      fprintf(fp_log, "fatal error: %s\n", msg);
+      fprintf(fp_log, "Fatal error: %s\n", msg);
     }
 
   exit(EXIT_FAILURE);
 }
 
-void  __attribute__((noreturn)) fatal(const char * format, const char * message)
+void  __attribute__((noreturn)) fatal(const char * format, 
+                                      const char * message)
 {
   fprintf(stderr, "\n\n");
   fprintf(stderr, format, message);
@@ -142,8 +146,14 @@ void * xmalloc(size_t size)
 {
   const size_t alignment = 16;
   void * t = 0;
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
   if (posix_memalign(& t, alignment, size))
     fatal("Unable to allocate enough memory.");
+#else
+	t = _aligned_malloc(size, alignment);
+#endif
+
   if (!t)
     fatal("Unable to allocate enough memory.");
   return t;
@@ -184,9 +194,29 @@ unsigned long hash_cityhash64(char * s, unsigned long n)
 
 long getusec(void)
 {
-  struct timeval tv;
-  if(gettimeofday(&tv,0) != 0) return 0;
-  return tv.tv_sec * 1000000 + tv.tv_usec;
+    struct timeval tv;
+    
+#if defined (_WIN32)
+    static const unsigned __int64 epoch = (uint64_t)(116444736000000000);
+    FILETIME file_time;
+    SYSTEMTIME system_time;
+    ULARGE_INTEGER ularge;
+    
+    GetSystemTime(&system_time);
+    if ((SystemTimeToFileTime(&system_time, &file_time)) == 0) { return 0; } //failed
+    ularge.LowPart = file_time.dwLowDateTime;
+    ularge.HighPart = file_time.dwHighDateTime;
+    
+    tv.tv_sec = (long) ((ularge.QuadPart - epoch) / 10000000L);
+    tv.tv_usec = (long) (system_time.wMilliseconds * 1000);
+    return tv.tv_sec;
+    
+    
+    
+#else
+    if(gettimeofday(&tv,0) != 0) return 0;
+    return tv.tv_sec * 1000000 + tv.tv_usec;
+#endif
 }
 
 void show_rusage()
@@ -208,45 +238,6 @@ void show_rusage()
       fprintf(fp_log, " Memory: %luMB\n",  arch_get_memused() / 1024 / 1024);
     }
 #endif
-}
-
-void fprint_fasta_hdr_only(FILE * fp, const char * hdr)
-{
-  fprintf(fp, ">%s\n", hdr);
-}
-
-void fprint_fasta_seq_only(FILE * fp, char * seq, unsigned long len, int width)
-{
-  /* 
-     The actual length of the sequence may be longer than "len", but only
-     "len" characters are printed.
-     
-     Specify width of lines - zero (or <1)  means linearize (all on one line).
-  */
-
-  if (width < 1)
-    fprintf(fp, "%.*s\n", (int)(len), seq);
-  else
-    {
-      long rest = len;
-      for(unsigned long i=0; i<len; i += width)
-        {
-          fprintf(fp, "%.*s\n", (int)(MIN(rest,width)), seq+i);
-          rest -= width;
-        }
-    }
-}
-
-void fprint_fastq(FILE * fp, char * header, char * sequence, char * quality,
-                  bool add_ee, double ee)
-{
-  if (add_ee)
-    fprintf(fp, "@%s;ee=%6.4lf\n", header, ee);
-  else
-    fprintf(fp, "@%s\n", header);
-  fprintf(fp, "%s\n", sequence);
-  fprintf(fp, "+\n");
-  fprintf(fp, "%s\n", quality);
 }
 
 void reverse_complement(char * rc, char * seq, long len)
@@ -273,7 +264,11 @@ void random_init()
         fatal("Unable to read from /dev/urandom");
       close(fd);
     }
-  srandom(seed);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    srandom(seed);
+#else
+    srand(seed);
+#endif
 }
 
 long random_int(long n)
@@ -289,9 +284,14 @@ long random_int(long n)
 
   long random_max = RAND_MAX;
   long limit = random_max - (random_max + 1) % n;
-  long r = random();
-  while (r > limit)
+  long r = 1;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
     r = random();
+    while (r > limit) {  r = random();  }
+#else
+  	r = rand();
+    while (r > limit) {  r = rand();  }
+#endif
   return r % n;
 }
 
@@ -301,15 +301,35 @@ unsigned long random_ulong(unsigned long n)
     Generate a random integer in the range 0 to n-1, inclusive,
     n must be > 0
   */
+    
+    
+    unsigned long random_max = ULONG_MAX;
+    unsigned long limit = random_max - (random_max - n + 1) % n;
+    unsigned long r_long = 1;
+    
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-  unsigned long random_max = ULONG_MAX;
-  unsigned long limit = random_max - (random_max - n + 1) % n;
   unsigned long r = ((random() << 48) ^ (random() << 32) ^
                      (random() << 16) ^ (random()));
   while (r > limit)
     r = ((random() << 48) ^ (random() << 32) ^
          (random() << 16) ^ (random()));
-  return r % n;
+    
+    r_long = r;
+#else
+    
+  long long r = ((rand() << 48) ^ (rand() << 32) ^
+                     (rand() << 16) ^ (rand()));
+  while (r > limit)
+    r = ((rand() << 48) ^ (rand() << 32) ^
+         (rand() << 16) ^ (rand()));
+    
+    
+    r_long = (unsigned long) r;
+    
+#endif
+    
+  return r_long % n;
 }
 
 void string_normalize(char * normalized, char * s, unsigned int len)
@@ -410,3 +430,5 @@ void fprint_seq_digest_md5(FILE * fp, char * seq, int seqlen)
   get_hex_seq_digest_md5(digest, seq, seqlen);
   fprintf(fp, "%s", digest);
 }
+
+

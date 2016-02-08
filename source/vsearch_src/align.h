@@ -1,5 +1,3 @@
-
-
 /*
 
   VSEARCH: a versatile open source tool for metagenomics
@@ -92,6 +90,3 @@ void nw_align(char * dseq,
               long queryno,
               long dbseqno,
               struct nwinfo_s * nw);
-
-
-
