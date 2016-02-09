@@ -552,7 +552,6 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
             //--sizeorder
             char* sizeorder = new char[12];  sizeorder[0] = '\0'; strncat(sizeorder, "--sizeorder", 11);
             vsearchParameters.push_back(sizeorder);
-            delete sizeorder;
          }
 
         if (m->debug) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
@@ -569,7 +568,7 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         system(commandString.c_str());
  
         //free memory
-   //     for(int i = 0; i < vsearchParameters.size(); i++)  {  delete vsearchParameters[i];  }
+        for(int i = 0; i < vsearchParameters.size(); i++)  {  delete vsearchParameters[i];  }
         
         //remove "" from filenames
         ucClusteredFile = ucClusteredFile.substr(1, ucClusteredFile.length()-2);

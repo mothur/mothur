@@ -346,8 +346,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             //not using file option and don't have fasta method with classic
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-
-			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
+            
+            cutoffNotSet = false;
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
@@ -528,7 +529,7 @@ int ClusterSplitCommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { m->mothurRemove(listFileNames[i]); } return 0; }
 		
-		if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
+		if (saveCutoff != cutoff) { m->mothurOut("\nCutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		
@@ -584,7 +585,6 @@ int ClusterSplitCommand::execute(){
 //**********************************************************************************************************************
 map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
 	try {
-				
 		map<float, int> labelBin;
 		vector<float> orderFloat;
 		int numSingleBins;
@@ -1076,9 +1076,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
         }
 		
 		cutoff = smallestCutoff;
-					
+        
 		return listFileNames;
-	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "cluster");
@@ -1201,7 +1200,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 	try {
         string listFileName = "";
         
-        if ((method == "agc") || (method == "dgc")) {  runVsearchCluster(thisDistFile, thisNamefile, labels, smallestCutoff);  }
+        if ((method == "agc") || (method == "dgc")) {  listFileName = runVsearchCluster(thisDistFile, thisNamefile, labels, smallestCutoff);  }
         else {
             
             Cluster* cluster = NULL;
@@ -1367,7 +1366,7 @@ string ClusterSplitCommand::runVsearchCluster(string thisDistFile, string thisNa
         //Run vsearch
         string ucVsearchFile = m->getSimpleName(vsearchFastafile) + ".clustered.uc";
         string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
-        vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
+        vsearchDriver(vsearchFastafile, ucVsearchFile, logfile, smallestCutoff);
         
         if (m->control_pressed) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
         
@@ -1376,14 +1375,19 @@ string ClusterSplitCommand::runVsearchCluster(string thisDistFile, string thisNa
         string listFileName = outputDir + m->getRootName(m->getSimpleName(thisDistFile)) + tag + ".list";
         
         //Convert outputted *.uc file into a list file
-        vParse->createListFile(ucVsearchFile, listFileName, "", "", vParse->getNumBins(logfile), toString(1.0-cutoff));  delete vParse;
+        vParse->createListFile(ucVsearchFile, listFileName, "", "", vParse->getNumBins(logfile), toString(cutoff));  delete vParse;
         
         //remove temp files
         m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile);
         
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
+        
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
-        labels.insert(toString(cutoff)); smallestCutoff = cutoff;
+        labels.insert(toString(cutoff));
         
         return listFileName;
     }
@@ -1394,7 +1398,7 @@ string ClusterSplitCommand::runVsearchCluster(string thisDistFile, string thisNa
 }
 //**********************************************************************************************************************
 
-int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile, string logfile){
+int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile, string logfile, double cutoff){
     try {
         
         //vsearch --maxaccepts 16 --usersort --id 0.97 --minseqlength 30 --wordlength 8 --uc $ROOT.clustered.uc --cluster_smallmem $ROOT.sorted.fna --maxrejects 64 --strand both --log $ROOT.clustered.log --sizeorder
@@ -1470,7 +1474,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
             //--sizeorder
             char* sizeorder = new char[12];  sizeorder[0] = '\0'; strncat(sizeorder, "--sizeorder", 11);
             vsearchParameters.push_back(sizeorder);
-            delete sizeorder;
         }
         
         if (m->debug) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
@@ -1483,7 +1486,8 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
 #else
         commandString = "\"" + commandString + "\"";
 #endif
-        if (m->debug) { m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
+        if (m->debug) {  m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
+        
         system(commandString.c_str());
         
         //free memory
@@ -1685,6 +1689,8 @@ bool ClusterSplitCommand::findVsearch(){
         
         abort = false;
         
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
+        
         //look for uchime exe
         string path = m->argv;
         string tempPath = path;
@@ -1731,6 +1737,10 @@ bool ClusterSplitCommand::findVsearch(){
         }else {  vsearchLocation = vsearchCommand; }
         
         vsearchLocation = m->getFullPathName(vsearchLocation);
+        
+        if (m->debug) {
+            m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n");
+        }
         
         if (!abort) { return true; }
         

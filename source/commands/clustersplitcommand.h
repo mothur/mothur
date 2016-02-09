@@ -51,7 +51,7 @@ private:
 	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
-	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList;
+	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	
@@ -68,7 +68,7 @@ private:
     string printFile(string, vector< map<string, string> >&);
     int getLabels(string, set<string>& listLabels);
     bool findVsearch();
-    int vsearchDriver(string, string, string);
+    int vsearchDriver(string, string, string, double);
     string runVsearchCluster(string, string, set<string>&, double&);
 };
 
