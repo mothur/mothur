@@ -170,6 +170,9 @@ class MothurOut {
         unsigned long long getRAMUsed();
         unsigned long long getTotalRAM();
         unsigned long get_phys_pages();
+        string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
 		
 		//string manipulation
 		void splitAtEquals(string&, string&);
