@@ -729,9 +729,10 @@ int GetSeqsCommand::readList(){
         
         if (m->debug) { set<string> temp; sanity["list"] = temp; }
 		
-        set<string> uniqueNames;
+        
 		while(!in.eof()){
 			
+            set<string> uniqueNames;
 			selectedCount = 0;
 
 			//read in list vector

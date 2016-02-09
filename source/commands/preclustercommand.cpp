@@ -690,6 +690,7 @@ int PreClusterCommand::process(string newMapFile){
                                 
                                 alignSeqs[j].active = 0;
                                 alignSeqs[j].numIdentical = 0;
+                                alignSeqs[j].diffs = mismatch;
                                 count++;
                             }
                         }//end if j active

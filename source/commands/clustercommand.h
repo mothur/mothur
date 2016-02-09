@@ -54,7 +54,7 @@ private:
 
 	bool abort, hard, sim;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, vsearchLocation;
 	double cutoff;
     float adjust;
 	string showabund, timing;
@@ -69,6 +69,9 @@ private:
 	vector<string> outputNames;
     
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
+    int vsearchDriver(string, string, string);
+    int runVsearchCluster();
+    int runMothurCluster();
 };
 
 #endif

@@ -10,7 +10,7 @@
  *
  */
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "dist.h"
 #include "decalc.h"
 
@@ -21,7 +21,7 @@
 
 /***********************************************************/
 
-class Ccode : public Chimera {
+class Ccode : public MothurChimera {
 	
 	public:
 		Ccode(string, string, bool, string, int, int, string);	//fasta, template, filter, mask, window, numWanted, outputDir

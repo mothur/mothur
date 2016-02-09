@@ -10,7 +10,7 @@
  */
  
 #include "decalc.h"
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "database.hpp"
 
 /***********************************************************************/

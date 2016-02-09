@@ -55,6 +55,8 @@
 #include <ctime>
 #include <limits>
 
+
+
 /***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -65,6 +67,7 @@
 	#include <sys/stat.h>
     #include <sys/sysctl.h>
 	#include <unistd.h>
+
 	
 	#ifdef USE_READLINE
 		#include <readline/readline.h>
@@ -76,7 +79,6 @@
 	#include <direct.h> //get cwd
 	#include <windows.h>
 	#include <psapi.h>
-	#include <direct.h>
 	#include <tchar.h>
 
 #endif

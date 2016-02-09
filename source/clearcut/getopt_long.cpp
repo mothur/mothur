@@ -101,18 +101,19 @@ insert_argv(char **argv, int src, int dest)
 
     if (src > dest) {
         for (i = src; i > dest; i--)
-            argv[i] = argv[i-1];  //printf("%s\n", argv[i]);
+            argv[i] = argv[i-1]; //printf("%s\n", argv[i]);
     }
     if (src < dest) {
         for (i = src; i < dest; i++)
             argv[i] = argv[i+1]; //printf("%s\n", argv[i]);
     }
 
-    argv[dest] = tmp;
-	//printf("%s\n", argv[dest]);
+    argv[dest] = tmp; //printf("%s\n", argv[dest]);
 
     return 0;
 }
+
+
 
 static int
 search_longopt(char *arg, struct option *longopts)
@@ -121,15 +122,12 @@ search_longopt(char *arg, struct option *longopts)
     int len;
     for (len = 0; arg[len] && arg[len] != '='; len++)
         ;
-
+    
     for (i = 0; longopts[i].name; i++) {
-	//printf("%d\t%s\t", i, longopts[i].name); 
-	//printf("%s\n", arg);
-        if (strncmp(arg, longopts[i].name, len) == 0) {
-            if (found != -1)
-                return -1;      /* found some candidate */
+        
+        if (strncmp(arg, longopts[i].name, len)==0) {
             found = i;
-	//printf("found = %d\n", found);
+            break;
         }
     }
     return found;
@@ -377,12 +375,14 @@ getopt_long(int argc, char **argv,
         opt += 2;
 
         i = search_longopt(opt, longopts);
+        
         if (i == -1) {
             optind++;
             optopt = 0;
             return '?';
         }
         else {
+            
             int len = strlen(opt);
             char *p = strchr(opt, '=');
             if (p) {

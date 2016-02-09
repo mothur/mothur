@@ -648,7 +648,7 @@ int SRACommand::readContactFile(){
                 else { m->mothurOut("[ERROR]: " + centerType + " is not a center type option.  Valid center type options are consortium, center, institute and lab. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->control_pressed = true; }
             }else if (key == "OWNERSHIP")         {
                     ownership = value;
-                    for (int i = 0; i < centerType.length(); i++) { centerType[i] = tolower(ownership[i]); }
+                    for (int i = 0; i < ownership.length(); i++) { ownership[i] = tolower(ownership[i]); }
                     if ((ownership == "owner") || (ownership == "participant")) {}
                     else { m->mothurOut("[ERROR]: " + ownership + " is not a ownership option.  Valid ownership options are owner or participant. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->control_pressed = true; }
             }else if (key == "DESCRIPTION")     {   description = value;    }

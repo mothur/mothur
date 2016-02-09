@@ -10,7 +10,7 @@
  *
  */
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "dist.h"
 #include "decalc.h"
 
@@ -21,7 +21,7 @@
 
 /***********************************************************/
 
-class Pintail : public Chimera {
+class Pintail : public MothurChimera {
 	
 	public:
 		Pintail(string, string, bool, int, string, string, string, int, int, string); //fastafile, templatefile, filter, processors, mask, conservation, quantile, window, increment, outputDir)	

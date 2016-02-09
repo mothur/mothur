@@ -10,7 +10,7 @@
 #include "chimeracheckrdp.h"
 		
 //***************************************************************************************************************
-ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string n, bool s, int inc, int k, string o) : Chimera() { 
+ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string n, bool s, int inc, int k, string o) : MothurChimera() { 
 	try {
 		fastafile = filename; 
 		templateFileName = temp;  

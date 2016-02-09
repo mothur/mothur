@@ -12,16 +12,14 @@
 USEREADLINE ?= yes
 USEBOOST ?= yes
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"7/27/2015\""
-VERSION = "\"1.36.1\""
-
+RELEASE_DATE = "\"1/04/2016\""
+VERSION = "\"1.37.0\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
 endif
 
-
-CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
+CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -O3
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else

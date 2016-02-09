@@ -23,10 +23,11 @@ SplitMatrix::SplitMatrix(string distfile, string name, string count, string tax,
 	taxFile = tax;
     countfile = count;
 	large = l;
+    outputType = "distance";
 }
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, string t, int p, bool cl, string output){
+SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, string t, int p, bool cl, string output, string ot){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
 	namefile = name;
@@ -38,6 +39,7 @@ SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, fl
 	processors = p;
     classic = cl;
 	outputDir = output;
+    outputType = ot;
 }
 
 /***********************************************************************/
@@ -176,50 +178,54 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
         bool error = false;
 		//warn about sequence in groups that are not in fasta file
 		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
-			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate and error."); m->mothurOutEndLine();
+			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate an error."); m->mothurOutEndLine();
             error = true;
 		}
 		copyGroups.clear();
         
         if (error) { exit(1); }
         
-		//process each distance file
-		for (int i = 0; i < numGroups; i++) { 
-			
-			string options = "";
-            if (classic) { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
-            else { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
-			if (outputDir != "") { options += ", outputdir=" + outputDir; }
-            
-            m->mothurCalling = true;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: dist.seqs(" + options + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
-
-			Command* command = new DistanceCommand(options);
-			
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-            
-			command->execute();
-			delete command;
-            m->mothurCalling = false;
-
-			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
-			
-			//remove old names files just in case
-			if (namefile != "") { m->mothurRemove((namefile + "." + toString(i) + ".temp")); }
-            else { m->mothurRemove((countfile + "." + toString(i) + ".temp")); }
-		}
         
+        if (outputType == "distance") { //create distance matrices for each fasta file
+            //process each distance file
+            for (int i = 0; i < numGroups; i++) {
+                
+                string options = "";
+                if (classic) { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
+                else { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
+                if (outputDir != "") { options += ", outputdir=" + outputDir; }
+                
+                m->mothurCalling = true;
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("Running command: dist.seqs(" + options + ")"); m->mothurOutEndLine();
+                m->mothurCalling = true;
+                
+                Command* command = new DistanceCommand(options);
+                
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                
+                command->execute();
+                delete command;
+                m->mothurCalling = false;
+                
+                m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
+                
+                //remove old names files just in case
+                if (namefile != "") { m->mothurRemove((namefile + "." + toString(i) + ".temp")); }
+                else { m->mothurRemove((countfile + "." + toString(i) + ".temp")); }
+            }
+        }
         //restore old fasta file name since dist.seqs overwrites it with the temp files
         m->setFastaFile(fastafile);
         
         vector<string> tempDistFiles;    
         for(int i=0;i<numGroups;i++){
             if (outputDir == "") { outputDir = m->hasPath(fastafile); }
-            string tempDistFile = "";
-            if (classic) { tempDistFile =  outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "phylip.dist";}
-            else { tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist"; }
+            string tempDistFile = (fastafile + "." + toString(i) + ".temp");
+            if (outputType == "distance") {
+                if (classic) { tempDistFile =  outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "phylip.dist";}
+                else { tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist"; }
+            }
             tempDistFiles.push_back(tempDistFile);
         }
         

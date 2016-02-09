@@ -46,6 +46,7 @@ public:
 	vector <individual> getData();
 	float getAbundance(int);
     vector<float> getAbundances();
+    vector<double> getAbundances(string);
 	void push_front(float, int, string); //abundance, otu, groupname
 	void insert(float, int, string); //abundance, otu, groupname
 	void push_back(float, string);  //abundance, groupname

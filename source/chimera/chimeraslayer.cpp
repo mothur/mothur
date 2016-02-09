@@ -14,7 +14,7 @@
 
 //***************************************************************************************************************
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string mode, int k, int ms, int mms, int win, float div, 
-int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : Chimera()  {  	
+int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : MothurChimera()  {  	
 	try {
 		fastafile = file;
 		templateFileName = temp; templateSeqs = readSeqs(temp);
@@ -48,7 +48,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 //***************************************************************************************************************
 //template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
-							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid, bool bg) : Chimera()  {  	
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid, bool bg) : MothurChimera()  {  	
 	try {
 		byGroup = bg;
 		fastafile = file; templateSeqs = readSeqs(fastafile);
@@ -98,7 +98,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 //***************************************************************************************************************
 //template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
-							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : Chimera()  {  	
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : MothurChimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
 		templateFileName = temp; 

@@ -10,7 +10,7 @@
  *
  */
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "alignment.hpp"
 
 /***********************************************************/

@@ -696,10 +696,11 @@ int RemoveSeqsCommand::readList(){
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
-        set<string> uniqueNames;
+        
 		while(!in.eof()){
 			
 			removedCount = 0;
+            set<string> uniqueNames;
 			
 			//read in list vector
 			ListVector list(in);
