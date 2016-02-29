@@ -220,7 +220,7 @@ int SeqSummaryCommand::execute(){
 				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 			#else
 				positions = m->setFilePosFasta(fastafile, numSeqs); 
-                if (positions.size() < processors) { processors = positions.size(); }
+                if (numSeqs < processors) { processors = numSeqs; }
 		
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numSeqs / processors;

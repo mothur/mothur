@@ -1676,7 +1676,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         }else{
             int numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
-            if (fastaFilePos.size() < processors) { processors = fastaFilePos.size(); }
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
             if (qfilename != "") { 
                 int numQualSeqs = 0;

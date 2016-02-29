@@ -568,7 +568,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
                 else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -903,7 +903,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
             else {
                 int numFastaSeqs = 0;
                 positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                if (positions.size() < processors) { processors = positions.size(); }
+                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 
                 //figure out how many sequences you have to process
                 int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -1741,7 +1741,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
         else {
             int numFastaSeqs = 0;
             positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-            if (positions.size() < processors) { processors = positions.size(); }
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             //figure out how many sequences you have to process
             int numSeqsPerProcessor = numFastaSeqs / processors;

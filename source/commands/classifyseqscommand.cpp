@@ -676,7 +676,7 @@ int ClassifySeqsCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 			}else {
 				positions = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); 
-                if (positions.size() < processors) { processors = positions.size(); }
+                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
 				
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numFastaSeqs / processors;

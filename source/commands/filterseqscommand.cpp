@@ -362,7 +362,7 @@ int FilterSeqsCommand::filterSequences() {
                 if(processors != 1){
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 }
 #endif
             }
@@ -687,7 +687,7 @@ string FilterSeqsCommand::createFilter() {
 				}else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                     
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;

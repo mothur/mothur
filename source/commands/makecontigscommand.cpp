@@ -2768,7 +2768,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         }else{
             long long numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
-            if (fastaFilePos.size() < processors) { processors = fastaFilePos.size(); }
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             long long numRFastaSeqs = 0;
             qfileFilePos = m->setFilePosFasta(fasta[1], numRFastaSeqs, delim); //reverse
