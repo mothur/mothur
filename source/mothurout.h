@@ -276,7 +276,7 @@ class MothurOut {
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
-		void printCurrentFiles();
+		void printCurrentFiles(string); //string="" for just to logfile.
 		bool hasCurrentFiles();
 		void clearCurrentFiles();
         set<string> getCurrentTypes(); 

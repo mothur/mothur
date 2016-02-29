@@ -182,7 +182,6 @@
 		481FB5D21AC1B75C0076CFF3 /* libshuffcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B73B12D37EC400DA6239 /* libshuffcommand.cpp */; };
 		481FB5D31AC1B75C0076CFF3 /* listotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */; };
 		481FB5D41AC1B75C0076CFF3 /* listseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */; };
-		481FB5D51AC1B75C0076CFF3 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		481FB5D61AC1B75C0076CFF3 /* mantelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FA10011302E096003860FE /* mantelcommand.cpp */; };
 		481FB5D71AC1B75C0076CFF3 /* makebiomcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A724D2B6153C8628000A826F /* makebiomcommand.cpp */; };
 		481FB5D81AC1B75C0076CFF3 /* makecontigscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */; };
@@ -420,7 +419,6 @@
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
 		A7386C29161A110800651424 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
-		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A741744C175CD9B1007DF49B /* makelefsecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741744A175CD9B1007DF49B /* makelefsecommand.cpp */; };
@@ -893,8 +891,6 @@
 		A7386C201619CACB00651424 /* rftreenode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rftreenode.hpp; path = source/randomforest/rftreenode.hpp; sourceTree = "<group>"; };
 		A7386C241619E52200651424 /* abstractdecisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abstractdecisiontree.cpp; path = source/randomforest/abstractdecisiontree.cpp; sourceTree = "<group>"; };
 		A7386C28161A110700651424 /* decisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = decisiontree.cpp; path = source/randomforest/decisiontree.cpp; sourceTree = "<group>"; };
-		A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = loadlogfilecommand.h; path = source/commands/loadlogfilecommand.h; sourceTree = "<group>"; };
-		A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = loadlogfilecommand.cpp; path = source/commands/loadlogfilecommand.cpp; sourceTree = "<group>"; };
 		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = clearmemorycommand.h; path = source/commands/clearmemorycommand.h; sourceTree = "<group>"; };
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clearmemorycommand.cpp; path = source/commands/clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mothurmetastats.h; path = source/metastats/mothurmetastats.h; sourceTree = "<group>"; };
@@ -1943,8 +1939,6 @@
 				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
-				A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */,
-				A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
@@ -2692,7 +2686,6 @@
 				481FB5C81AC1B74F0076CFF3 /* getseqscommand.cpp in Sources */,
 				481FB6011AC1B7970076CFF3 /* reversecommand.cpp in Sources */,
 				481FB55E1AC1B66D0076CFF3 /* sharedjackknife.cpp in Sources */,
-				481FB5D51AC1B75C0076CFF3 /* loadlogfilecommand.cpp in Sources */,
 				481FB64B1AC1B7F40076CFF3 /* suffixtree.cpp in Sources */,
 				481FB5F21AC1B77E0076CFF3 /* phylotypecommand.cpp in Sources */,
 				481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */,
@@ -3263,7 +3256,6 @@
 				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
 				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
-				A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */,
 				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,

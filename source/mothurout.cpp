@@ -58,35 +58,68 @@ set<string> MothurOut::getCurrentTypes()  {
 	}
 }
 /*********************************************************************************************/
-void MothurOut::printCurrentFiles()  {
+void MothurOut::printCurrentFiles(string filename)  {
 	try {
         
-        
-		if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
-		if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
-		if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
-		if (fastafile != "")		{  mothurOut("fasta=" + fastafile); mothurOutEndLine();				}
-		if (groupfile != "")		{  mothurOut("group=" + groupfile); mothurOutEndLine();				}
-		if (listfile != "")			{  mothurOut("list=" + listfile); mothurOutEndLine();				}
-		if (namefile != "")			{  mothurOut("name=" + namefile); mothurOutEndLine();				}
-		if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile); mothurOutEndLine();			}
-		if (orderfile != "")		{  mothurOut("order=" + orderfile); mothurOutEndLine();				}
-		if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile); mothurOutEndLine();	}
-		if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile); mothurOutEndLine();			}
-		if (qualfile != "")			{  mothurOut("qfile=" + qualfile); mothurOutEndLine();				}
-		if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile); mothurOutEndLine();			}
-		if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile); mothurOutEndLine();		}
-		if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile); mothurOutEndLine();			}
-		if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
-		if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
-		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
-		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
-		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
-        if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
-        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();        }
-		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
-        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();         }
-        if (filefile != "")         {  mothurOut("file=" + filefile); mothurOutEndLine();               }
+        if (filename != "") {
+            ofstream out;
+            openOutputFile(filename, out);
+            
+            if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile, out); mothurOutEndLine(out);           }
+            if (columnfile != "")		{  mothurOut("column=" + columnfile, out); mothurOutEndLine(out);			}
+            if (designfile != "")		{  mothurOut("design=" + designfile, out); mothurOutEndLine(out);			}
+            if (fastafile != "")		{  mothurOut("fasta=" + fastafile, out); mothurOutEndLine(out);				}
+            if (groupfile != "")		{  mothurOut("group=" + groupfile, out); mothurOutEndLine(out);				}
+            if (listfile != "")			{  mothurOut("list=" + listfile, out); mothurOutEndLine(out);				}
+            if (namefile != "")			{  mothurOut("name=" + namefile, out); mothurOutEndLine(out);				}
+            if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile, out); mothurOutEndLine(out);			}
+            if (orderfile != "")		{  mothurOut("order=" + orderfile, out); mothurOutEndLine(out);				}
+            if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile, out); mothurOutEndLine(out);	}
+            if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile, out); mothurOutEndLine(out);			}
+            if (qualfile != "")			{  mothurOut("qfile=" + qualfile, out); mothurOutEndLine(out);				}
+            if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile, out); mothurOutEndLine(out);			}
+            if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile, out); mothurOutEndLine(out);		}
+            if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile, out); mothurOutEndLine(out);			}
+            if (sfffile != "")			{  mothurOut("sff=" + sfffile, out); mothurOutEndLine(out);					}
+            if (sharedfile != "")		{  mothurOut("shared=" + sharedfile, out); mothurOutEndLine(out);			}
+            if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile, out); mothurOutEndLine(out);		}
+            if (treefile != "")			{  mothurOut("tree=" + treefile, out); mothurOutEndLine(out);				}
+            if (flowfile != "")			{  mothurOut("flow=" + flowfile, out); mothurOutEndLine(out);				}
+            if (biomfile != "")			{  mothurOut("biom=" + biomfile, out); mothurOutEndLine(out);				}
+            if (counttablefile != "")	{  mothurOut("count=" + counttablefile, out); mothurOutEndLine(out);        }
+            if (processors != "1")		{  mothurOut("processors=" + processors, out); mothurOutEndLine(out);		}
+            if (summaryfile != "")		{  mothurOut("summary=" + summaryfile, out); mothurOutEndLine(out);         }
+            if (filefile != "")         {  mothurOut("file=" + filefile, out); mothurOutEndLine(out);               }
+            
+            out.close();
+            
+        }else {
+            if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
+            if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
+            if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
+            if (fastafile != "")		{  mothurOut("fasta=" + fastafile); mothurOutEndLine();				}
+            if (groupfile != "")		{  mothurOut("group=" + groupfile); mothurOutEndLine();				}
+            if (listfile != "")			{  mothurOut("list=" + listfile); mothurOutEndLine();				}
+            if (namefile != "")			{  mothurOut("name=" + namefile); mothurOutEndLine();				}
+            if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile); mothurOutEndLine();			}
+            if (orderfile != "")		{  mothurOut("order=" + orderfile); mothurOutEndLine();				}
+            if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile); mothurOutEndLine();	}
+            if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile); mothurOutEndLine();			}
+            if (qualfile != "")			{  mothurOut("qfile=" + qualfile); mothurOutEndLine();				}
+            if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile); mothurOutEndLine();			}
+            if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile); mothurOutEndLine();		}
+            if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile); mothurOutEndLine();			}
+            if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
+            if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
+            if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
+            if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
+            if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
+            if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
+            if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();        }
+            if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
+            if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();         }
+            if (filefile != "")         {  mothurOut("file=" + filefile); mothurOutEndLine();               }
+        }
 		
 	}
 	catch(exception& e) {

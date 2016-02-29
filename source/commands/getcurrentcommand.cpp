@@ -47,11 +47,28 @@ GetCurrentCommand::GetCurrentCommand(){
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetCurrentCommand", "GetCurrentCommand");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string GetCurrentCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
+        
+        if (type == "summary") {  pattern = "[filename],current_files.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetCurrentCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetCurrentCommand::GetCurrentCommand(string option)  {
@@ -74,9 +91,15 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+            vector<string> tempOutNames;
+            outputTypes["summary"] = tempOutNames;
+            
 			clearTypes = validParameter.validFile(parameters, "clear", false);			
 			if (clearTypes == "not found") { clearTypes = ""; }
 			else { m->splitAtDash(clearTypes, types);	}
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){  outputDir = ""; }
 		}
 		
 	}
@@ -164,8 +187,13 @@ int GetCurrentCommand::execute(){
         m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
         
 		if (m->hasCurrentFiles()) {
+            map<string, string> variables;
+            variables["[filename]"] = m->getFullPathName(outputDir);
+            string filename = getOutputFileName("summary", variables);
+            
 			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
-			m->printCurrentFiles();
+			m->printCurrentFiles(filename);
+            outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
         
         string inputDir = cFactory->getInputDir();
@@ -190,8 +218,16 @@ int GetCurrentCommand::execute(){
 #endif
         temp = m->getFullPathName(temp);
         m->mothurOutEndLine(); m->mothurOut("Current working directory: " + temp); m->mothurOutEndLine();
-		
-		return 0;
+        
+        if (m->hasCurrentFiles()) {
+            m->mothurOutEndLine();
+            m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+            for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
+            m->mothurOutEndLine();
+        }
+        
+        return 0;
+        
 	}
 	
 	catch(exception& e) {

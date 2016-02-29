@@ -131,7 +131,6 @@
 #include "getotulabelscommand.h"
 #include "removeotulabelscommand.h"
 #include "makecontigscommand.h"
-#include "loadlogfilecommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysvmsharedcommand.h"
 #include "classifyrfsharedcommand.h"
@@ -306,7 +305,6 @@ CommandFactory::CommandFactory(){
     commands["get.otulabels"]       = "get.otulabels";
     commands["remove.otulabels"]    = "remove.otulabels";
     commands["make.contigs"]        = "make.contigs";
-    commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "quit";
@@ -557,7 +555,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
-        else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "classify.rf")           {	command = new ClassifyRFSharedCommand(optionString);          }
@@ -731,7 +728,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
-        else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.rf")           {	pipecommand = new ClassifyRFSharedCommand(optionString);        }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
@@ -891,7 +887,6 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
         else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
-        else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.rf")           {	shellcommand = new ClassifyRFSharedCommand();       }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
