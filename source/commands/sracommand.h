@@ -41,7 +41,7 @@ private:
         Grant(string i, string a, string t) : grantId(i), grantAgency(a), grantTitle(t) {}
         Grant() : grantId(""), grantAgency(""), grantTitle("") {}
     };
-    bool abort, isSFF, pairedOligos, setOligosParameter;
+    bool abort, isSFF, pairedOligos, setOligosParameter, includeScrap;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, fileOption;
     
     string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;

@@ -19,6 +19,7 @@ vector<string> SRACommand::setParameters(){
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","xml",false,false); parameters.push_back(pfastq);
         CommandParameter pcontact("project", "InputTypes", "", "", "none", "none", "none","xml",false,true,true); parameters.push_back(pcontact);
         CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
+        CommandParameter pincludescrap("includescrap", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pincludescrap);
         CommandParameter pmimark("mimark", "InputTypes", "", "", "none", "none", "none","xml",false,true,true); parameters.push_back(pmimark);
         //choose only one multiple options
         CommandParameter pplatform("platform", "Multiple", "_LS454-ILLUMINA-ION_TORRENT-PACBIO_SMRT", "_LS454", "", "", "","",false,false); parameters.push_back(pplatform);
@@ -53,7 +54,7 @@ string SRACommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The make.sra command creates the necessary files for a NCBI submission. The xml file and individual sff or fastq files parsed from the original sff or fastq file.\n";
-		helpString += "The make.sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, checkorient, platform, orientation, libstrategy, datatype, libsource, libselection and instrument.\n";
+		helpString += "The make.sra command parameters are: sff, fastq, file, oligos, project, mimarksfile, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, checkorient, platform, orientation, libstrategy, datatype, libsource, libselection, instrument and includescrap.\n";
         helpString += "The sff parameter is used to provide the original sff file.\n";
 		helpString += "The fastq parameter is used to provide the original fastq file.\n";
         helpString += "The project parameter is used to provide your project file.\n";
@@ -66,6 +67,7 @@ string SRACommand::getHelpString(){
         helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
 		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
         helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. The default is false.\n";
+        helpString += "The includescrap parameter is used to indicate whether or not to include the scrapped sequences in your submission. The default is true.\n";
         helpString += "The platform parameter is used to specify platform you are using choices are: _LS454,ILLUMINA,ION_TORRENT,PACBIO_SMRT. Default=_LS454. This is a controlled vocabulary section in the XML file that will be generated.\n";
         helpString += "The orientation parameter is used to specify sequence orientation. Choices are: forward and reverse. Default=forward. This is a controlled vocabulary section in the XML file that will be generated.\n";
         helpString += "The instrument parameter is used to specify instrument. Choices are 454_GS-454_GS_20-454_GS_FLX-454_GS_FLX_Titanium-454_GS_Junior-Illumina_Genome_Analyzer-Illumina_Genome_Analyzer_II-Illumina_Genome_Analyzer_IIx-Illumina_HiSeq_2000-Illumina_HiSeq_1000-Illumina_MiSeq-PacBio_RS-Ion_Torrent_PGM-unspecified. Default=454_GS. This is a controlled vocabulary section in the XML file that will be generated. \n";
@@ -286,6 +288,9 @@ SRACommand::SRACommand(string option)  {
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
             
             checkorient = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
+            
+            temp = validParameter.validFile(parameters, "includescrap", false);		if (temp == "not found") { temp = "T"; }
+            includeScrap = m->isTrue(temp);
             			
 		}
 		
@@ -410,45 +415,48 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
             
-            if (m->control_pressed) { break; }
-            out << "\t<Action>\n";
-            out << "\t\t<AddData target_db=\"BioSample\">\n";
-            out << "\t\t\t<Data content_type=\"XML\">\n";
-            out << "\t\t\t\t<XmlContent>\n";
-            out << "\t\t\t\t\t<BioSample schema_version=\"2.0\">\n";
-            out << "\t\t\t\t\t\t<SampleId>\n";
-            out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID> \n";
-            out << "\t\t\t\t\t\t</SampleId>\n";
-            out << "\t\t\t\t\t\t<Descriptor>\n";
-            out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
-            out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["description"] + "</p></Description> \n";
-            out << "\t\t\t\t\t\t</Descriptor>\n";
-            out << "\t\t\t\t\t\t<Organism>\n";
-            string organismName = "metagenome";
-            map<string, string>::iterator itOrganism = Group2Organism.find(Groups[i]);
-            if (itOrganism != Group2Organism.end()) { organismName = itOrganism->second; } //user supplied acceptable organism, so use it.
-            out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
-            out << "\t\t\t\t\t\t</Organism>\n";
-                        out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
-            out << "\t\t\t\t\t\t<Attributes>\n";
-            //add biosample required attributes
-            map<string, map<string, string> >:: iterator it = mimarks.find(Groups[i]);
-            if (it != mimarks.end()) {
-                map<string, string> categories = it->second;
-                for (map<string, string>:: iterator it2 = categories.begin(); it2 != categories.end(); it2++) {
-                    if (m->control_pressed) { break; }
-                    out << "\t\t\t\t\t\t\t<Attribute attribute_name=\"" + it2->first + "\">" + it2->second + "</Attribute>\n";
+            if ((!includeScrap) && (Groups[i] == "scrap")) {} //ignore scrap
+            else {
+                if (m->control_pressed) { break; }
+                out << "\t<Action>\n";
+                out << "\t\t<AddData target_db=\"BioSample\">\n";
+                out << "\t\t\t<Data content_type=\"XML\">\n";
+                out << "\t\t\t\t<XmlContent>\n";
+                out << "\t\t\t\t\t<BioSample schema_version=\"2.0\">\n";
+                out << "\t\t\t\t\t\t<SampleId>\n";
+                out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID> \n";
+                out << "\t\t\t\t\t\t</SampleId>\n";
+                out << "\t\t\t\t\t\t<Descriptor>\n";
+                out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
+                out << "\t\t\t\t\t\t\t<Description><p>" + mimarks[Groups[i]]["description"] + "</p></Description> \n";
+                out << "\t\t\t\t\t\t</Descriptor>\n";
+                out << "\t\t\t\t\t\t<Organism>\n";
+                string organismName = "metagenome";
+                map<string, string>::iterator itOrganism = Group2Organism.find(Groups[i]);
+                if (itOrganism != Group2Organism.end()) { organismName = itOrganism->second; } //user supplied acceptable organism, so use it.
+                out << "\t\t\t\t\t\t\t<OrganismName>" + organismName + "</OrganismName> \n";
+                out << "\t\t\t\t\t\t</Organism>\n";
+                out << "\t\t\t\t\t\t<Package>" + packageType + "</Package>\n";
+                out << "\t\t\t\t\t\t<Attributes>\n";
+                //add biosample required attributes
+                map<string, map<string, string> >:: iterator it = mimarks.find(Groups[i]);
+                if (it != mimarks.end()) {
+                    map<string, string> categories = it->second;
+                    for (map<string, string>:: iterator it2 = categories.begin(); it2 != categories.end(); it2++) {
+                        if (m->control_pressed) { break; }
+                        out << "\t\t\t\t\t\t\t<Attribute attribute_name=\"" + it2->first + "\">" + it2->second + "</Attribute>\n";
+                    }
                 }
+                out << "\t\t\t\t\t\t</Attributes>\n";
+                out << "\t\t\t\t\t</BioSample>\n";
+                out << "\t\t\t\t</XmlContent>\n";
+                out << "\t\t\t</Data>\n";
+                out << "\t\t\t<Identifier>\n";
+                out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
+                out << "\t\t\t</Identifier>\n";
+                out << "\t\t</AddData>\n";
+                out << "\t</Action>\n";
             }
-            out << "\t\t\t\t\t\t</Attributes>\n";
-            out << "\t\t\t\t\t</BioSample>\n";
-            out << "\t\t\t\t</XmlContent>\n";
-            out << "\t\t\t</Data>\n";
-            out << "\t\t\t<Identifier>\n";
-            out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
-            out << "\t\t\t</Identifier>\n";
-            out << "\t\t</AddData>\n";
-            out << "\t</Action>\n";
         }
         
         map<string, string>::iterator itGroup;
@@ -456,147 +464,151 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
             
-            vector<string> thisGroupsFiles = filesBySample[Groups[i]];
-            string thisGroupsBarcode, thisGroupsPrimer;
-            if (libLayout == "paired") {  thisGroupsBarcode = "."; thisGroupsPrimer = "."; }
-            else { thisGroupsBarcode = ""; thisGroupsPrimer = ""; }
-            
-            itGroup = Group2Barcode.find(Groups[i]);
-            if (itGroup != Group2Barcode.end()) {
-                if (fileOption != 5) { thisGroupsBarcode = itGroup->second;  } //don't include barcodes if using index files.
-            }
-            
-            itGroup = Group2Primer.find(Groups[i]);
-            if (itGroup != Group2Primer.end()) { thisGroupsPrimer = itGroup->second;  }
-            
-            //cout << Groups[i] << '\t' << thisGroupsFiles.size() << endl;
-            
-            for (int j = 0; j < thisGroupsFiles.size(); j++) {
-                string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + Groups[i];
+            if ((!includeScrap) && (Groups[i] == "scrap")) {} //ignore scrap
+            else {
                 
-                if (m->control_pressed) { break; }
-                out << "\t<Action>\n";
-                out << "\t\t<AddFiles target_db=\"SRA\">\n";
-                if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
-                    vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                    libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
-                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[0]) + "\">\n";
-                    out << "\t\t\t\t<DataType>generic-data</DataType> \n";
-                    out << "\t\t\t</File>\n";
-                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[1]) + "\">\n";
-                    out << "\t\t\t\t<DataType>generic-data</DataType> \n";
-                    out << "\t\t\t</File>\n";
+                vector<string> thisGroupsFiles = filesBySample[Groups[i]];
+                string thisGroupsBarcode, thisGroupsPrimer;
+                if (libLayout == "paired") {  thisGroupsBarcode = "."; thisGroupsPrimer = "."; }
+                else { thisGroupsBarcode = ""; thisGroupsPrimer = ""; }
+                
+                itGroup = Group2Barcode.find(Groups[i]);
+                if (itGroup != Group2Barcode.end()) {
+                    if (fileOption != 5) { thisGroupsBarcode = itGroup->second;  } //don't include barcodes if using index files.
+                }
+                
+                itGroup = Group2Primer.find(Groups[i]);
+                if (itGroup != Group2Primer.end()) { thisGroupsPrimer = itGroup->second;  }
+                
+                //cout << Groups[i] << '\t' << thisGroupsFiles.size() << endl;
+                
+                for (int j = 0; j < thisGroupsFiles.size(); j++) {
+                    string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + Groups[i];
                     
-                    //attributes
-                    if (linkers.size() != 0) {
-                        string linkerString = "";
-                        //linker size forced to 1
-                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
-                        out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
-                    }
-                    
-                    if (thisGroupsBarcode != ".") {
-                        string barcodeString = "";
-                        vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcode, thisBarcodes, '.');
-                        if (thisBarcodes[0] != "NONE") { barcodeString += thisBarcodes[0] + ";"; }
-                        if (thisBarcodes[1] != "NONE") { barcodeString += thisBarcodes[1] + ";"; }//forward barcode + reverse barcode
+                    if (m->control_pressed) { break; }
+                    out << "\t<Action>\n";
+                    out << "\t\t<AddFiles target_db=\"SRA\">\n";
+                    if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
+                        vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
+                        libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
+                        out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[0]) + "\">\n";
+                        out << "\t\t\t\t<DataType>generic-data</DataType> \n";
+                        out << "\t\t\t</File>\n";
+                        out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[1]) + "\">\n";
+                        out << "\t\t\t\t<DataType>generic-data</DataType> \n";
+                        out << "\t\t\t</File>\n";
                         
-                        barcodeString = barcodeString.substr(0, barcodeString.length()-1);
-                        out << "\t\t\t<Attribute name=\"BarCode\">" + barcodeString + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
-                    }
-                    if (spacers.size() != 0) {
-                        string spacerString = "";
-                        //spacer size forced to 1
-                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
-                        out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
-                    }
-                    
-                    if (thisGroupsPrimer != ".") {
-                        string primerString = "";
-                        
-                        vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimer, thisPrimers, '.');
-                        if (thisPrimers[0] != "") { primerString += thisPrimers[0] + ";"; }
-                        if (thisPrimers[1] != "") { primerString += thisPrimers[1] + ";"; }
-                        
-                        if (primerString != "") {
-                            primerString = primerString.substr(0, primerString.length()-1);
-                            out << "\t\t\t<Attribute name=\"Primer\">" + primerString + "</Attribute>\n";
-                            out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
+                        //attributes
+                        if (linkers.size() != 0) {
+                            string linkerString = "";
+                            //linker size forced to 1
+                            for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
                         }
-                    }
-                    out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
-
-                }else { //single
-                    out << "\t\t\t<File file_path=\"" + m->getSimpleName(thisGroupsFiles[j]) + "\">\n";
-                    out << "\t\t\t\t<DataType>generic-data</DataType> \n";
-                    out << "\t\t\t</File>\n";
-                    //attributes
-                    //linkers -> barcodes -> spacers -> primers
-                   
-                    if (linkers.size() != 0) {
-                        string linkerString = "";
-                        for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
-                        out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
-                    }
-                    
-                    if (thisGroupsBarcode != "") {
-                        out << "\t\t\t<Attribute name=\"BarCode\">" + thisGroupsBarcode + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
-                    }
-                    if (spacers.size() != 0) {
-                        string spacerString = "";
-                        for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
-                        out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
-                    }
-                    
-                    if (thisGroupsPrimer != "") {
-                        out << "\t\t\t<Attribute name=\"Primer\">" + thisGroupsPrimer + "</Attribute>\n";
-                        out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
+                        
+                        if (thisGroupsBarcode != ".") {
+                            string barcodeString = "";
+                            vector<string> thisBarcodes; m->splitAtChar(thisGroupsBarcode, thisBarcodes, '.');
+                            if (thisBarcodes[0] != "NONE") { barcodeString += thisBarcodes[0] + ";"; }
+                            if (thisBarcodes[1] != "NONE") { barcodeString += thisBarcodes[1] + ";"; }//forward barcode + reverse barcode
+                            
+                            barcodeString = barcodeString.substr(0, barcodeString.length()-1);
+                            out << "\t\t\t<Attribute name=\"BarCode\">" + barcodeString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
+                        }
+                        if (spacers.size() != 0) {
+                            string spacerString = "";
+                            //spacer size forced to 1
+                            for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
+                        }
+                        
+                        if (thisGroupsPrimer != ".") {
+                            string primerString = "";
+                            
+                            vector<string> thisPrimers; m->splitAtChar(thisGroupsPrimer, thisPrimers, '.');
+                            if (thisPrimers[0] != "") { primerString += thisPrimers[0] + ";"; }
+                            if (thisPrimers[1] != "") { primerString += thisPrimers[1] + ";"; }
+                            
+                            if (primerString != "") {
+                                primerString = primerString.substr(0, primerString.length()-1);
+                                out << "\t\t\t<Attribute name=\"Primer\">" + primerString + "</Attribute>\n";
+                                out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
+                            }
+                        }
+                        out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
+                        
+                    }else { //single
+                        out << "\t\t\t<File file_path=\"" + m->getSimpleName(thisGroupsFiles[j]) + "\">\n";
+                        out << "\t\t\t\t<DataType>generic-data</DataType> \n";
+                        out << "\t\t\t</File>\n";
+                        //attributes
+                        //linkers -> barcodes -> spacers -> primers
+                        
+                        if (linkers.size() != 0) {
+                            string linkerString = "";
+                            for (int k = 0; k < linkers.size(); k++) {  linkerString += linkers[k] + ";"; }  linkerString = linkerString.substr(0, linkerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Linker\">" + linkerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Linker_max_mismatch\">" + toString(ldiffs) + "</Attribute>\n";
+                        }
+                        
+                        if (thisGroupsBarcode != "") {
+                            out << "\t\t\t<Attribute name=\"BarCode\">" + thisGroupsBarcode + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"BarCode_max_mismatch\">" + toString(bdiffs) + "</Attribute>\n";
+                        }
+                        if (spacers.size() != 0) {
+                            string spacerString = "";
+                            for (int k = 0; k < spacers.size(); k++) {  spacerString += spacers[k] + ";"; }  spacerString = spacerString.substr(0, spacerString.length()-1);
+                            out << "\t\t\t<Attribute name=\"Adapter\">" + spacerString + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Adapter_max_mismatch\">" + toString(sdiffs) + "</Attribute>\n";
+                        }
+                        
+                        if (thisGroupsPrimer != "") {
+                            out << "\t\t\t<Attribute name=\"Primer\">" + thisGroupsPrimer + "</Attribute>\n";
+                            out << "\t\t\t<Attribute name=\"Primer_max_mismatch\">" + toString(pdiffs) + "</Attribute>\n";
+                            
+                        }
+                        //out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
+                        out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
                         
                     }
-                    //out << "\t\t\t<Attribute name=\"read_type\">" + orientation + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_name\">" + libId + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_strategy\">" + libStrategy + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_source\">" + libSource + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_selection\">" + libSelection + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_layout\">" + libLayout + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"instrument_model\">" + instrumentModel + "</Attribute>\n";
-                    out << "\t\t\t<Attribute name=\"library_construction_protocol\">" + mimarks[Groups[i]]["seq_methods"] + "</Attribute>\n";
-
+                    ///////////////////bioProject info
+                    out << "\t\t\t<AttributeRefId name=\"BioProject\">\n";
+                    out << "\t\t\t\t<RefId>\n";
+                    out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + "</SPUID> \n";
+                    out << "\t\t\t\t</RefId>\n";
+                    out << "\t\t\t</AttributeRefId>\n";
+                    //////////////////bioSample info
+                    out << "\t\t\t<AttributeRefId name=\"BioSample\">\n";
+                    out << "\t\t\t\t<RefId>\n";
+                    out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
+                    out << "\t\t\t\t</RefId>\n";
+                    out << "\t\t\t</AttributeRefId>\n";
+                    //libID
+                    out << "\t\t\t<Identifier>\n";
+                    if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
+                        vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
+                        libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
+                    }
+                    out << "\t\t\t\t<LocalId>" + libId + "</LocalId>\n";
+                    out << "\t\t\t</Identifier>\n";
+                    out << "\t\t</AddFiles>\n";
+                    out << "\t</Action>\n";
                 }
-                ///////////////////bioProject info
-                out << "\t\t\t<AttributeRefId name=\"BioProject\">\n";
-                out << "\t\t\t\t<RefId>\n";
-                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + projectName + "</SPUID> \n";
-                out << "\t\t\t\t</RefId>\n";
-                out << "\t\t\t</AttributeRefId>\n";
-                //////////////////bioSample info
-                out << "\t\t\t<AttributeRefId name=\"BioSample\">\n";
-                out << "\t\t\t\t<RefId>\n";
-                out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
-                out << "\t\t\t\t</RefId>\n";
-                out << "\t\t\t</AttributeRefId>\n";
-                //libID
-                out << "\t\t\t<Identifier>\n";
-                if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
-                    vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                    libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
-                }
-                out << "\t\t\t\t<LocalId>" + libId + "</LocalId>\n";
-                out << "\t\t\t</Identifier>\n";
-                out << "\t\t</AddFiles>\n";
-                out << "\t</Action>\n";
             }
         }
         out << "</Submission>\n";
@@ -858,6 +870,7 @@ int SRACommand::readMIMarksFile(){
         }
         in.close();
         
+        
         //add in values for "scrap" group
         map<string, string> categories;
         //start after *sample_name
@@ -869,6 +882,7 @@ int SRACommand::readMIMarksFile(){
         }
         mimarks["scrap"] = categories;
         Group2Organism["scrap"] = "metagenome";
+        
         
         if (organismError) {
             string organismTypes = "";
