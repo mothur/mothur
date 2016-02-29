@@ -520,9 +520,10 @@ unsigned long long MothurOut::getRAMUsed() {
     getrusage(RUSAGE_SELF, & r_usage);
     return r_usage.ru_maxrss * 1024;
 #else
-    PROCESS_MEMORY_COUNTERS info;
-    GetProcessMemoryInfo( GetCurrentProcess( ), &info, sizeof(info) );
-    return (size_t)info.PeakWorkingSetSize;
+        MEMORYSTATUSEX status;
+        status.dwLength = sizeof(status);
+        GlobalMemoryStatusEx(&status);
+        return (size_t)(status.ullTotalPhys - status.ullAvailPhys);
 #endif
     }
     catch(exception& e) {

@@ -1618,7 +1618,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 
                 for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
                     
-                    if (pDataArray->renameSeq) { pDataArray->theseAllFileNames[it->first] = it->second; }
+                    if (pDataArray->renameSeqs) { pDataArray->theseAllFileNames[it->first] = it->second; }
                     
                     ifstream in;
                     pDataArray->m->openInputFile(it->first, in);
