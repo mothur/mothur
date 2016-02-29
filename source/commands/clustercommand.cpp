@@ -133,7 +133,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
