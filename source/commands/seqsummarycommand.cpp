@@ -262,7 +262,8 @@ int SeqSummaryCommand::execute(){
         if ((startPosition.begin())->first == -1) { starts[0] = 0; }
         else {starts[0] = (startPosition.begin())->first; }
         long long totalSoFar = 0;
-        starts[0] = (startPosition.begin())->first;
+        //set all values to min
+        starts[1] = starts[0]; starts[2] = starts[0]; starts[3] = starts[0]; starts[4] = starts[0]; starts[5] = starts[0];
         int lastValue = 0;
         for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
@@ -281,7 +282,8 @@ int SeqSummaryCommand::execute(){
         if ((endPosition.begin())->first == -1) { ends[0] = 0; }
         else {ends[0] = (endPosition.begin())->first; }
         totalSoFar = 0;
-        ends[0] = (endPosition.begin())->first;
+        //set all values to min
+        ends[1] = ends[0]; ends[2] = ends[0]; ends[3] = ends[0]; ends[4] = ends[0]; ends[5] = ends[0];
         lastValue = 0;
         for (map<int, long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
@@ -298,7 +300,10 @@ int SeqSummaryCommand::execute(){
         }
         ends[6] = (endPosition.rbegin())->first;
         
-        lengths[0] = (seqLength.begin())->first;
+        if ((seqLength.begin())->first == -1) { lengths[0] = 0; }
+        else {lengths[0] = (seqLength.begin())->first; }
+        //set all values to min
+        lengths[1] = lengths[0]; lengths[2] = lengths[0]; lengths[3] = lengths[0]; lengths[4] = lengths[0]; lengths[5] = lengths[0];
         totalSoFar = 0;
         lastValue = 0;
         for (map<int, long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++) {
@@ -316,7 +321,10 @@ int SeqSummaryCommand::execute(){
         }
         lengths[6] = (seqLength.rbegin())->first;
                 
-        ambigs[0] = (ambigBases.begin())->first;
+        if ((ambigBases.begin())->first == -1) { ambigs[0] = 0; }
+        else {ambigs[0] = (ambigBases.begin())->first; }
+        //set all values to min
+        ambigs[1] = ambigs[0]; ambigs[2] = ambigs[0]; ambigs[3] = ambigs[0]; ambigs[4] = ambigs[0]; ambigs[5] = ambigs[0];
         totalSoFar = 0;
         lastValue = 0;
         for (map<int, long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++) {
@@ -334,7 +342,11 @@ int SeqSummaryCommand::execute(){
         }
         ambigs[6] = (ambigBases.rbegin())->first;
         
-        homops[0] = (longHomoPolymer.begin())->first;
+        
+        if ((longHomoPolymer.begin())->first == -1) { homops[0] = 0; }
+        else {homops[0] = (longHomoPolymer.begin())->first; }
+        //set all values to min
+        homops[1] = homops[0]; homops[2] = homops[0]; homops[3] = homops[0]; homops[4] = homops[0]; homops[5] = homops[0];
         totalSoFar = 0;
         lastValue = 0;
         for (map<int, long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++) {
@@ -355,10 +367,6 @@ int SeqSummaryCommand::execute(){
         double meanstartPosition, meanendPosition, meanseqLength, meanambigBases, meanlongHomoPolymer;
                 
 		meanstartPosition = meanStartPosition / (double) size; meanendPosition = meanEndPosition /(double) size; meanlongHomoPolymer = meanLongHomoPolymer / (double) size; meanseqLength = meanSeqLength / (double) size; meanambigBases = meanAmbigBases /(double) size;
-		
-		//to compensate for blank sequences that would result in startPosition and endPostion equalling -1
-		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
-		if (endPosition[0] == -1)	{  endPosition[0] = 0;		}
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
