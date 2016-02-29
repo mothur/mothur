@@ -27,7 +27,7 @@ vector<string> ScreenSeqsCommand::setParameters(){
 		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pend);
 		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pminlength("minlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pminlength("minlength", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminlength);
 		CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxlength);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pcriteria);
@@ -72,7 +72,7 @@ string ScreenSeqsCommand::getHelpString(){
 		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
 		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
-		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
+		helpString += "The minlength parameter allows you to set and minimum sequence length. Default=10.\n";
 		helpString += "The maxn parameter allows you to set and maximum number of N's allowed in a sequence. \n";
         helpString += "The minoverlap parameter allows you to set and minimum overlap. The default is -1. \n";
         helpString += "The ostart parameter is used to set an overlap position the \"good\" sequences must start by. The default is -1. \n";
@@ -335,7 +335,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "10"; }
 			m->mothurConvert(temp, minLength); 
 			
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
@@ -824,7 +824,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             if(endPos != -1 && endPos > end)				{	goodSeq = 0;	trashCode += "end|"; }
             if(maxAmbig != -1 && maxAmbig <	ambigs)         {	goodSeq = 0;	trashCode += "ambig|"; }
             if(maxHomoP != -1 && maxHomoP < polymer)        {	goodSeq = 0;	trashCode += "homop|"; }
-            if(minLength != -1 && minLength > length)		{	goodSeq = 0;	trashCode += "<length|"; }
+            if(minLength > length)                          {	goodSeq = 0;	trashCode += "<length|"; }
             if(maxLength != -1 && maxLength < length)		{	goodSeq = 0;	trashCode += ">length|"; }
             
             if(goodSeq == 1){
@@ -1088,7 +1088,7 @@ int ScreenSeqsCommand::getSummaryReport(){
 			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
 			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
 		}
         
@@ -1779,11 +1779,12 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
 			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
             else if (optimize[i] == "maxn") { maxN = numNs[criteriaPercentile]; m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
 		}
-
+        
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -2332,7 +2333,7 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
                     if(endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";}
                     if(maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";}
                     if(maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";}
-                    if(minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|";}
+                    if(minLength > currSeq.getNumBases())                           {	goodSeq = 0;	trashCode += "<length|";}
                     if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
                 }
                 
