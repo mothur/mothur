@@ -49,7 +49,7 @@ int SplitMatrix::split(){
         
 		if (method == "distance") {  
 			splitDistance();
-		}else if ((method == "classify") || (method == "fasta")) {
+		}else if ((method == "classify") || (method == "fasta") || (method == "vsearch")) {
 			splitClassify();
 		}else {
 			m->mothurOut("Unknown splitting method, aborting split."); m->mothurOutEndLine();
@@ -229,7 +229,8 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
             tempDistFiles.push_back(tempDistFile);
         }
         
-        splitNamesTax(seqGroup, numGroups, tempDistFiles);
+        if (method == "vsearch")    {   splitNamesVsearch(seqGroup, numGroups, tempDistFiles);  }
+        else                        {   splitNames(seqGroup, numGroups, tempDistFiles);     }
         
 		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { m->mothurRemove((dists[i].begin()->first)); m->mothurRemove((dists[i].begin()->second)); } dists.clear(); }
 
@@ -315,7 +316,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			}
 		}
 		
-        splitNamesDist(seqGroup, numGroups, tempDistFiles);
+        splitNames(seqGroup, numGroups, tempDistFiles);
         
 		if (m->control_pressed)	 {  
 			for (int i = 0; i < dists.size(); i++) { 
@@ -525,7 +526,7 @@ int SplitMatrix::splitDistanceLarge(){
             }
         }
         
-		splitNamesDist(seqGroup, numGroups, tempDistFiles);
+		splitNames(seqGroup, numGroups, tempDistFiles);
 				
 		return 0;			
 	}
@@ -535,7 +536,7 @@ int SplitMatrix::splitDistanceLarge(){
 	}
 }
 //********************************************************************************************************************
-int SplitMatrix::splitNamesDist(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
+int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
 	try {
         ofstream outFile;
         map<string, int>::iterator it;
@@ -637,12 +638,12 @@ int SplitMatrix::splitNamesDist(map<string, int>& seqGroup, int numGroups, vecto
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitNamesDist");
+		m->errorOut(e, "SplitMatrix", "splitNames");
 		exit(1);
 	}
 }
 //********************************************************************************************************************
-int SplitMatrix::splitNamesTax(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
+int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
     try {
         ofstream outFile;
         map<string, int>::iterator it;
@@ -864,7 +865,7 @@ int SplitMatrix::splitDistanceRAM(){
             }
         }
         
-		splitNamesDist(seqGroup, numGroups, tempDistFiles);
+		splitNames(seqGroup, numGroups, tempDistFiles);
 				
 		return 0;			
 	}

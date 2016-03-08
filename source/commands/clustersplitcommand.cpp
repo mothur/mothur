@@ -474,7 +474,7 @@ int ClusterSplitCommand::execute(){
                 else if (splitmethod == "fasta")		{
                     if ((method == "agc") || (method == "dgc")) {
                         if (!findVsearch()) { m->mothurOut("[ERROR] cannot find vsearch executable, aborting.\n"); return 0; }
-                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "fasta");
+                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputDir, "fasta");
                     }else{
                         split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "distance");
                     }
