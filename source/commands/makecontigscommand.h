@@ -59,12 +59,16 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    char delim; 
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz, renameSeq;
+    
+#define perfectMatch 2
+#define poundMatch  1
+
+    char delim;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz, renameSeq, nameType;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
     string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName, group;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers;
+	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers, poundMatchPos;
     vector<string> outputNames;
     Oligos* oligos;
     
@@ -73,6 +77,8 @@ private:
     map<int, string> file2Group;
     vector<double> qual_score;
     
+    bool setNameType(string, string);
+    bool setNameType(string, string, char);
     bool checkName(FastqRead& forward, FastqRead& reverse);
     bool checkName(Sequence& forward, Sequence& reverse);
     bool checkName(QualityScores& forward, QualityScores& reverse);
