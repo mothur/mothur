@@ -26,7 +26,7 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
         CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
-        CommandParameter prename("rename", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(prename);
+        CommandParameter prename("rename", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(prename);
         CommandParameter palign("align", "Multiple", "needleman-gotoh-kmer", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
         CommandParameter ptrimoverlap("trimoverlap", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptrimoverlap);
@@ -77,7 +77,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
         helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
-        helpString += "The rename parameter will rename the sequence to create smaller file sizes. Default=T.\n";
+        helpString += "The rename parameter will rename the sequence to create smaller file sizes. Default=F.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5) The default is 6.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
@@ -393,7 +393,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
 			reorient = m->isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "rename", false);		if (temp == "not found") { temp = "T"; }
+            temp = validParameter.validFile(parameters, "rename", false);		if (temp == "not found") { temp = "F"; }
             renameSeq = m->isTrue(temp);
             
             if (allFiles && (oligosfile == "")) { m->mothurOut("[ERROR]: You can only use the allfiles option with an oligos file.\n"); abort = true; }
@@ -1170,7 +1170,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         for(int h=1; h<processors; h++ ){
             string extension = toString(h) + ".temp"; processIDS.push_back(h);
             
-            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz, renameSeq);
+            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz, poundMatchPos, nameType, renameSeq);
             pDataArray.push_back(tempcontig);
             
             hThreadArray[h-1] = CreateThread(NULL, 0, MyGroupContigsThreadFunction, pDataArray[h-1], 0, &dwThreadIdArray[h-1]);
@@ -1237,6 +1237,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
     }
 }
 //**********************************************************************************************************************
+//process one file at a time
 unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fileInputs, int start, int end, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>& theseAllFileNames) {
     try {
         unsigned long long numReads = 0;
@@ -1254,6 +1255,9 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
             findexfile = fileInputs[l][2];
             rindexfile = fileInputs[l][3];
             group = file2Group[l];
+            
+            //find read name type to speed read matching later
+            nameType = setNameType(ffastqfile, rfastqfile, delim);
             
             groupCounts.clear();
             groupMap.clear();
@@ -1687,7 +1691,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             }
 			
             int spot = (h)*2;
-			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot].start, lines[spot].end, lines[spot+1].start, lines[spot+1].end, qLines[spot].start, qLines[spot].end, qLines[spot+1].start, qLines[spot+1].end, h);
+			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot].start, lines[spot].end, lines[spot+1].start, lines[spot+1].end, qLines[spot].start, qLines[spot].end, qLines[spot+1].start, qLines[spot+1].end, poundMatchPos, nameType, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -2490,6 +2494,89 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
 }
 /**************************************************************************************************/
 
+int MakeContigsCommand::setNameType(string forward, string reverse) {
+    try {
+        int type = 0;
+        
+        if (forward == reverse) {  type = perfectMatch;  }
+        else {
+            int pos = forward.find_last_of('#');
+            string tempForward = forward;
+            if (pos != string::npos) {  tempForward = forward.substr(0, pos);   }
+            
+            int pos2 = reverse.find_last_of('#');
+            string tempReverse = reverse;
+            if (pos2 != string::npos) {  tempReverse = reverse.substr(0, pos2);   }
+            
+            if (pos2 == pos) { poundMatchPos = pos; }
+            else {  poundMatchPos = 0;  }
+            
+            if (tempForward == tempReverse) { type = poundMatch;    }
+        }
+
+        return type;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "setNameType");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
+int MakeContigsCommand::setNameType(string forwardFile, string reverseFile, char delim) {
+    try {
+        int type = 0; bool error = false;
+        string forward = ""; string reverse = "";
+        
+        ifstream inForward, inReverse;
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inFF, inRF;
+#endif
+        if (!gz) { //plain text files
+            m->openInputFile(forwardFile, inForward);
+            m->openInputFile(reverseFile, inReverse);
+            
+            if (delim == '>') {
+                Sequence fread(inForward);
+                forward = fread.getName();
+                Sequence rread(inReverse);
+                reverse = rread.getName();
+            }else {
+                FastqRead fread(inForward, error, format);
+                forward = fread.getName();
+                FastqRead rread(inReverse, error, format);
+                reverse = rread.getName();
+            }
+        }else { //compressed files
+#ifdef USE_BOOST
+            m->openInputFileBinary(forwardFile, inForward, inFF);
+            m->openInputFileBinary(reverseFile, inForward, inRF);
+            
+            if (delim == '>') {
+                Sequence fread(inFF);
+                forward = fread.getName();
+                Sequence rread(inRF);
+                reverse = rread.getName();
+            }else {
+                FastqRead fread(inFF, error, format);
+                forward = fread.getName();
+                FastqRead rread(inRF, error, format);
+                reverse = rread.getName();
+            }
+#endif
+        }
+        
+        type = setNameType(forward, reverse);
+        
+        return type;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "setNameType");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
 int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vector<linePair>& lines, vector<linePair>& qLines, char delim) {
     try {
         lines.clear();
@@ -2498,7 +2585,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> temp;
         vector<unsigned long long> trimmedNamesFilePos;
-
+        
+        nameType = setNameType(fasta[0], fasta[1], delim);
+        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         //set file positions for fasta file
         fastaFilePos = m->divideFile(fasta[0], processors, delim);
@@ -3222,30 +3311,34 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
  */
 bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
     try {
-        if (forward.getName() == reverse.getName()) {
-            return true;
-        }else {
-            //if no match are the names only different by 1 and 2?
-            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
-            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-            if (tempFRead == tempRRead) {
-                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
-                    forward.setName(tempFRead);
-                    reverse.setName(tempRRead);
-                    return true;
-                }
-            }else {
-                //if no match are the names only different by 1 and 2?
-                string tempFRead = forward.getName();
-                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-                if (tempFRead == tempRRead) {
-                    reverse.setName(tempRRead);
-                    return true;
+        bool match = false;
+        
+        if (nameType == poundMatch) {
+            match = true;
+            //we know the location of the # matches in the forward and reverse
+            if (poundMatchPos) {
+                forward.setName(forward.getName().substr(0, poundMatchPos));
+                reverse.setName(reverse.getName().substr(0, poundMatchPos));
+            }else { //it does not match
+                string forwardName = forward.getName();
+                string reverseName = reverse.getName();
+                
+                int pos = forwardName.find_last_of('#');
+                if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
+                
+                int pos2 = reverseName.find_last_of('#');
+                if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
+                
+                if (forwardName == reverseName) {
+                    forward.setName(forwardName);
+                    reverse.setName(reverseName);
+                }else{
+                    match = false;
                 }
             }
-        }
+        }else if (nameType == perfectMatch) { match = true; }
         
-        return false;
+        return match;
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "ckeckName");
@@ -3258,30 +3351,34 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
  */
 bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
     try {
-        if (forward.getName() == reverse.getName()) {
-            return true;
-        }else {
-            //if no match are the names only different by 1 and 2?
-            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
-            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-            if (tempFRead == tempRRead) {
-                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
-                    forward.setName(tempFRead);
-                    reverse.setName(tempRRead);
-                    return true;
-                }
-            }else {
-                //if no match are the names only different by 1 and 2?
-                string tempFRead = forward.getName();
-                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-                if (tempFRead == tempRRead) {
-                    reverse.setName(tempRRead);
-                    return true;
+        bool match = false;
+        
+        if (nameType == poundMatch) {
+            match = true;
+            //we know the location of the # matches in the forward and reverse
+            if (poundMatchPos) {
+                forward.setName(forward.getName().substr(0, poundMatchPos));
+                reverse.setName(reverse.getName().substr(0, poundMatchPos));
+            }else { //it does not match
+                string forwardName = forward.getName();
+                string reverseName = reverse.getName();
+                
+                int pos = forwardName.find_last_of('#');
+                if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
+                
+                int pos2 = reverseName.find_last_of('#');
+                if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
+                
+                if (forwardName == reverseName) {
+                    forward.setName(forwardName);
+                    reverse.setName(reverseName);
+                }else{
+                    match = false;
                 }
             }
-        }
+        }else if (nameType == perfectMatch) { match = true; }
         
-        return false;
+        return match;
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "ckeckName");
@@ -3294,30 +3391,35 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
  */
 bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& reverse){
     try {
-        if (forward.getName() == reverse.getName()) {
-            return true;
-        }else {
-            //if no match are the names only different by 1 and 2?
-            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
-            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-            if (tempFRead == tempRRead) {
-                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
-                    forward.setName(tempFRead);
-                    reverse.setName(tempRRead);
-                    return true;
-                }
-            }else {
-                //if no match are the names only different by 1 and 2?
-                string tempFRead = forward.getName();
-                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-                if (tempFRead == tempRRead) {
-                    reverse.setName(tempRRead);
-                    return true;
+        bool match = false;
+        
+        if (nameType == poundMatch) {
+            match = true;
+            //we know the location of the # matches in the forward and reverse
+            if (poundMatchPos) {
+                forward.setName(forward.getName().substr(0, poundMatchPos));
+                reverse.setName(reverse.getName().substr(0, poundMatchPos));
+            }else { //it does not match
+                string forwardName = forward.getName();
+                string reverseName = reverse.getName();
+                
+                int pos = forwardName.find_last_of('#');
+                if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
+                
+                int pos2 = reverseName.find_last_of('#');
+                if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
+                
+                if (forwardName == reverseName) {
+                    forward.setName(forwardName);
+                    reverse.setName(reverseName);
+                }else{
+                    match = false;
                 }
             }
-        }
+        }else if (nameType == perfectMatch) { match = true; }
         
-        return false;
+        return match;
+
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "ckeckName");
@@ -3331,30 +3433,34 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
  */
 bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
     try {
-        if (forward.getName() == reverse.getName()) {
-            return true;
-        }else {
-            //if no match are the names only different by 1 and 2?
-            string tempFRead = forward.getName().substr(0, forward.getName().length()-1);
-            string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-            if (tempFRead == tempRRead) {
-                if ((forward.getName()[forward.getName().length()-1] == '1') && (reverse.getName()[reverse.getName().length()-1] == '2')) {
-                    forward.setName(tempFRead);
-                    reverse.setName(tempRRead);
-                    return true;
-                }
-            }else {
-                //if no match are the names only different by 1 and 2?
-                string tempFRead = forward.getName();
-                string tempRRead = reverse.getName().substr(0, reverse.getName().length()-1);
-                if (tempFRead == tempRRead) {
-                    reverse.setName(tempRRead);
-                    return true;
+        bool match = false;
+        
+        if (nameType == poundMatch) {
+            match = true;
+            //we know the location of the # matches in the forward and reverse
+            if (poundMatchPos) {
+                forward.setName(forward.getName().substr(0, poundMatchPos));
+                reverse.setName(reverse.getName().substr(0, poundMatchPos));
+            }else { //it does not match
+                string forwardName = forward.getName();
+                string reverseName = reverse.getName();
+                
+                int pos = forwardName.find_last_of('#');
+                if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
+                
+                int pos2 = reverseName.find_last_of('#');
+                if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
+                
+                if (forwardName == reverseName) {
+                    forward.setName(forwardName);
+                    reverse.setName(reverseName);
+                }else{
+                    match = false;
                 }
             }
-        }
+        }else if (nameType == perfectMatch) { match = true; }
         
-        return false;
+        return match;
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "ckeckName");
