@@ -1170,7 +1170,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         for(int h=1; h<processors; h++ ){
             string extension = toString(h) + ".temp"; processIDS.push_back(h);
             
-            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz, renameSeq);
+            contigsData* tempcontig = new contigsData(format, delim, group, align, outputDir, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, h, fileInputs, startEndIndexes[h].start, startEndIndexes[h].end, compositeGroupFile+extension, compositeFastaFile+extension, compositeScrapFastaFile+extension, compositeQualFile+extension, compositeScrapQualFile+extension, compositeMisMatchFile+extension, totalGroupCounts, file2Group, gz, poundMatchPos, nameType, renameSeq);
             pDataArray.push_back(tempcontig);
             
             hThreadArray[h-1] = CreateThread(NULL, 0, MyGroupContigsThreadFunction, pDataArray[h-1], 0, &dwThreadIdArray[h-1]);
@@ -1691,7 +1691,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             }
 			
             int spot = (h)*2;
-			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot].start, lines[spot].end, lines[spot+1].start, lines[spot+1].end, qLines[spot].start, qLines[spot].end, qLines[spot+1].start, qLines[spot+1].end, h);
+			contigsData* tempcontig = new contigsData(format, delim, group, fileInputs, qualOrIndexFiles, (outputFasta + extension), (outputScrapFasta + extension), (outputQual + extension), (outputScrapQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, tempFASTAFileNames, tempQUALFileNames, oligosfile, reorient, pdiffs, bdiffs, tdiffs, kmerSize, createOligosGroup, createFileGroup, allFiles, trimOverlap, lines[spot].start, lines[spot].end, lines[spot+1].start, lines[spot+1].end, qLines[spot].start, qLines[spot].end, qLines[spot+1].start, qLines[spot+1].end, poundMatchPos, nameType, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -2494,9 +2494,9 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
 }
 /**************************************************************************************************/
 
-bool MakeContigsCommand::setNameType(string forward, string reverse) {
+int MakeContigsCommand::setNameType(string forward, string reverse) {
     try {
-        bool type = false;
+        int type = 0;
         
         if (forward == reverse) {  type = perfectMatch;  }
         else {
@@ -2523,9 +2523,9 @@ bool MakeContigsCommand::setNameType(string forward, string reverse) {
 }
 /**************************************************************************************************/
 
-bool MakeContigsCommand::setNameType(string forwardFile, string reverseFile, char delim) {
+int MakeContigsCommand::setNameType(string forwardFile, string reverseFile, char delim) {
     try {
-        bool type = false; bool error = false;
+        int type = 0; bool error = false;
         string forward = ""; string reverse = "";
         
         ifstream inForward, inReverse;
@@ -2536,22 +2536,33 @@ bool MakeContigsCommand::setNameType(string forwardFile, string reverseFile, cha
             m->openInputFile(forwardFile, inForward);
             m->openInputFile(reverseFile, inReverse);
             
-            FastqRead fread(inForward, error, format);
-            forward = fread.getName();
-            
-            FastqRead rread(inReverse, error, format);
-            reverse = rread.getName();
-            
+            if (delim == '>') {
+                Sequence fread(inForward);
+                forward = fread.getName();
+                Sequence rread(inReverse);
+                reverse = rread.getName();
+            }else {
+                FastqRead fread(inForward, error, format);
+                forward = fread.getName();
+                FastqRead rread(inReverse, error, format);
+                reverse = rread.getName();
+            }
         }else { //compressed files
 #ifdef USE_BOOST
             m->openInputFileBinary(forwardFile, inForward, inFF);
             m->openInputFileBinary(reverseFile, inForward, inRF);
             
-            FastqRead fread(inFF, error, format);
-            forward = fread.getName();
-            
-            FastqRead rread(inRF, error, format);
-            reverse = rread.getName();
+            if (delim == '>') {
+                Sequence fread(inFF);
+                forward = fread.getName();
+                Sequence rread(inRF);
+                reverse = rread.getName();
+            }else {
+                FastqRead fread(inFF, error, format);
+                forward = fread.getName();
+                FastqRead rread(inRF, error, format);
+                reverse = rread.getName();
+            }
 #endif
         }
         
@@ -2574,8 +2585,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> temp;
         vector<unsigned long long> trimmedNamesFilePos;
-
-        string ForwardName = ""; string ReverseName = "";
+        
+        nameType = setNameType(fasta[0], fasta[1], delim);
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         //set file positions for fasta file
@@ -2599,7 +2610,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 name = name.substr(1);
                 m->checkName(name);
             }
-            ForwardName = name;
             firstSeqNames[name] = i;
             trimmedNames[name.substr(0, name.length()-1)];
             in.close();
@@ -2634,7 +2644,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                         unsigned long long pos = in2.tellg();
                         trimmedNamesFilePos.push_back(pos - input.length() - 1);
                         trimmedNames.erase(itTrimmed);
-                        ReverseName = name;
                     }
                 }
             }
@@ -2644,8 +2653,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         in2.close();
         
         if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { qfileFilePos = trimmedNamesFilePos; }
-        
-        nameType = setNameType(ForwardName, ReverseName);
         
         //get last file position of reverse fasta[1]
         FILE * pFile;
@@ -3306,8 +3313,8 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
     try {
         bool match = false;
         
-        if (poundMatch) {
-            match = poundMatch;
+        if (nameType == poundMatch) {
+            match = true;
             //we know the location of the # matches in the forward and reverse
             if (poundMatchPos) {
                 forward.setName(forward.getName().substr(0, poundMatchPos));
@@ -3329,7 +3336,7 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
                     match = false;
                 }
             }
-        }else if (perfectMatch) { match = perfectMatch; }
+        }else if (nameType == perfectMatch) { match = true; }
         
         return match;
     }
@@ -3346,8 +3353,8 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
     try {
         bool match = false;
         
-        if (poundMatch) {
-            match = poundMatch;
+        if (nameType == poundMatch) {
+            match = true;
             //we know the location of the # matches in the forward and reverse
             if (poundMatchPos) {
                 forward.setName(forward.getName().substr(0, poundMatchPos));
@@ -3369,10 +3376,9 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
                     match = false;
                 }
             }
-        }else if (perfectMatch) { match = perfectMatch; }
+        }else if (nameType == perfectMatch) { match = true; }
         
         return match;
-        return false;
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "ckeckName");
@@ -3387,8 +3393,8 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
     try {
         bool match = false;
         
-        if (poundMatch) {
-            match = poundMatch;
+        if (nameType == poundMatch) {
+            match = true;
             //we know the location of the # matches in the forward and reverse
             if (poundMatchPos) {
                 forward.setName(forward.getName().substr(0, poundMatchPos));
@@ -3410,7 +3416,7 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
                     match = false;
                 }
             }
-        }else if (perfectMatch) { match = perfectMatch; }
+        }else if (nameType == perfectMatch) { match = true; }
         
         return match;
 
@@ -3429,8 +3435,8 @@ bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
     try {
         bool match = false;
         
-        if (poundMatch) {
-            match = poundMatch;
+        if (nameType == poundMatch) {
+            match = true;
             //we know the location of the # matches in the forward and reverse
             if (poundMatchPos) {
                 forward.setName(forward.getName().substr(0, poundMatchPos));
@@ -3452,7 +3458,7 @@ bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
                     match = false;
                 }
             }
-        }else if (perfectMatch) { match = perfectMatch; }
+        }else if (nameType == perfectMatch) { match = true; }
         
         return match;
     }
