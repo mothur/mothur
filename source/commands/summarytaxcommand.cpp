@@ -19,7 +19,7 @@ vector<string> SummaryTaxCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
-
+        CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -43,6 +43,7 @@ string SummaryTaxCommand::getHelpString(){
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
+        helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
@@ -201,6 +202,9 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
             
             string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
 			relabund = m->isTrue(temp);
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
             if (countfile == "") {
                 if (namefile == "") {
@@ -289,7 +293,7 @@ int SummaryTaxCommand::execute(){
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxfile));
 		string summaryFile = getOutputFileName("summary",variables);
 		m->openOutputFile(summaryFile, outTaxTree);
-		taxaSum->print(outTaxTree);
+		taxaSum->print(outTaxTree, output);
 		outTaxTree.close();
 		
 		delete taxaSum;

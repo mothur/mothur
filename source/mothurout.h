@@ -141,11 +141,12 @@ class MothurOut {
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
         int printVsearchFile(vector<seqPriorityNode>&, string); //sorts and prints by abundance adding /ab=xxx/
+        bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
         bool mothurConvert(string, intDist&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
-	
+        bool mothurConvert(char, string&);
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);
@@ -162,6 +163,7 @@ class MothurOut {
 		bool isContainingOnlyDigits(string);
         bool containsAlphas(string);
 		bool isNumeric1(string);
+        bool isNumeric1(char);
         bool isInteger(string);
         bool isLabelEquivalent(string, string);
         string getSimpleLabel(string);

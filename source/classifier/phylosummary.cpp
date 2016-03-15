@@ -395,13 +395,58 @@ void PhyloSummary::assignRank(int index){
 }
 /**************************************************************************************************/
 
-void PhyloSummary::print(ofstream& out){
+string PhyloSummary::findTaxon(string rank){
+    try {
+        vector<string> pieces; vector<int> indexes;
+        m->splitAtChar(rank, pieces, '.');
+        for (int i = 0; i < pieces.size(); i++) {
+            int temp;
+            m->mothurConvert(pieces[i], temp);
+            indexes.push_back(temp);
+        }
+        string taxon = "";
+        getTaxons(indexes, 1, 0, taxon);
+        
+        return taxon;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloSummary", "findTaxon");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
+string PhyloSummary::getTaxons(vector<int> indexes, int index, int i, string& taxon){
+    try {
+        int counter = 1;
+        
+        for(map<string,int>::iterator it=tree[i].children.begin();it!=tree[i].children.end();it++){
+            if (counter == indexes[index]) {
+                taxon += tree[it->second].name + ";";
+                getTaxons(indexes, index+1, it->second, taxon);
+            }
+            counter++;
+        }
+        
+        return taxon;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloSummary", "getNextTaxon");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
+
+void PhyloSummary::print(ofstream& out, string output){
 	try {
 		
 		if (ignore)     {  assignRank(0); }
         vector<string> mGroups;
-		//print labels
-		out << "taxlevel\trankID\ttaxon\tdaughterlevels\ttotal";
+        
+        //print labels
+        if (output == "detail") {   out << "taxlevel\trankID\ttaxon\tdaughterlevels\ttotal";  }
+        else                    {   out << "taxon\ttotal";  }
 		if (groupmap != NULL) {
 			//so the labels match the counts below, since the map sorts them automatically...
 			//sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
@@ -435,39 +480,60 @@ void PhyloSummary::print(ofstream& out){
 			}
 		}
 		
-		//print root
-        if (relabund) {
-            out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-            out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << (tree[0].total/(double) tree[0].total);
-            
-            if (groupmap != NULL) {
-                for (int i = 0; i < mGroups.size(); i++) {
-                    double thisNum = tree[0].groupCount[mGroups[i]];
-                    thisNum /= (double) groupmap->getNumSeqs(mGroups[i]);
-                    out  << '\t' << thisNum;
+        
+        
+            //print root
+            if (relabund) {
+                out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+                
+                if (output == "detail") {
+                    out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << (tree[0].total/(double) tree[0].total);
+                }else{
+                    //if (totalChildrenInTree == 0) { //leaf node - we want to print it. Use rank to find full taxonomy
+                        //out << findTaxon(tree[0].rank) << '\t' << tree[0].total;
+                   // }
                 }
-            }else if ( ct != NULL) {
-                if (ct->hasGroupInfo()) {
-                    for (int i = 0; i < mGroups.size(); i++) {
-                        double thisNum = tree[0].groupCount[mGroups[i]];
-                        thisNum /= (double) ct->getGroupCount(mGroups[i]);
-                        out  << '\t' << thisNum;
+                
+                if ((output == "detail")) {
+                    if (groupmap != NULL) {
+                        for (int i = 0; i < mGroups.size(); i++) {
+                            double thisNum = tree[0].groupCount[mGroups[i]];
+                            thisNum /= (double) groupmap->getNumSeqs(mGroups[i]);
+                            out  << '\t' << thisNum;
+                        }
+                    }else if ( ct != NULL) {
+                        if (ct->hasGroupInfo()) {
+                            for (int i = 0; i < mGroups.size(); i++) {
+                                double thisNum = tree[0].groupCount[mGroups[i]];
+                                thisNum /= (double) ct->getGroupCount(mGroups[i]);
+                                out  << '\t' << thisNum;
+                            }
+                        }
+                    }
+                    out << endl;
+                }
+                
+            }else {
+                if (output == "detail") {
+                    out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total;
+                }else{
+                    if (totalChildrenInTree == 0) { //leaf node - we want to print it. Use rank to find full taxonomy
+                        out << findTaxon(tree[0].rank) << '\t' << tree[0].total;
                     }
                 }
+                if ((output == "detail")) {
+                    if (groupmap != NULL) {
+                        for (int i = 0; i < mGroups.size(); i++) {  out  << '\t'<< tree[0].groupCount[mGroups[i]]; }
+                    }else if ( ct != NULL) {
+                        if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << tree[0].groupCount[mGroups[i]]; } }
+                    }
+                    out << endl;
+                }
             }
-            out << endl;
-        }else {
-            out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total;
-            if (groupmap != NULL) {
-                for (int i = 0; i < mGroups.size(); i++) {  out  << '\t'<< tree[0].groupCount[mGroups[i]]; }
-            }else if ( ct != NULL) {
-                if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << tree[0].groupCount[mGroups[i]]; } }
-            }
-            out << endl;
-		}
-		
+        
+        
 		//print rest
-		print(0, out);
+		print(0, out, output);
 		
 	}
 	catch(exception& e) {
@@ -500,27 +566,22 @@ void PhyloSummary::print(ofstream& out, bool relabund){
                 }
 			}
 		}
-		
-		//print root
-		out << tree[0].name << "\t" << "1.0000"; //root relative abundance is 1, everyone classifies to root
-		
-		/*
-		if (groupmap != NULL) {
-			for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; }
-        }else if ( ct != NULL) {
-            if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; } }
-        }*/
+        
+        //print root
+        out << tree[0].name << "\t" << "1.0000"; //root relative abundance is 1, everyone classifies to root
         
         if (groupmap != NULL) {
             vector<string> mGroups = groupmap->getNamesOfGroups();
-			for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << "1.0000"; }
+            for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << "1.0000"; }
         }else if ( ct != NULL) {
             vector<string> mGroups = ct->getNamesOfGroups();
             if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << "1.0000"; } }
         }
         
-		out << endl;
-		
+        out << endl;
+        
+       
+        
 		//print rest
 		print(0, out, relabund);
 		
@@ -532,7 +593,7 @@ void PhyloSummary::print(ofstream& out, bool relabund){
 }
 /**************************************************************************************************/
 
-void PhyloSummary::print(int i, ofstream& out){
+void PhyloSummary::print(int i, ofstream& out, string output){
 	try {
 		map<string,int>::iterator it;
 		for(it=tree[i].children.begin();it!=tree[i].children.end();it++){
@@ -546,41 +607,65 @@ void PhyloSummary::print(int i, ofstream& out){
 					if (tree[it2->second].total != 0)  {   totalChildrenInTree++; }
 				}
                 
-                if (relabund) {
-                    out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << (tree[it->second].total/(double) tree[0].total);
+                if (output == "detail") {
+                    if (relabund) {
+                        out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << (tree[it->second].total/(double) tree[0].total);
+                    }else {
+                        out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total;
+                    }
                 }else {
-                    out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total;
-				}
+                    if (totalChildrenInTree == 0) { //leaf node - we want to print it. Use rank to find full taxonomy
+                        out << findTaxon(tree[it->second].rank) << '\t' << tree[it->second].total;
+                    }
+                }
+                
                 
                 if (relabund) {
                     map<string, int>::iterator itGroup;
                     if (groupmap != NULL) {
                         vector<string> mGroups = groupmap->getNamesOfGroups();
-                        for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)groupmap->getNumSeqs(mGroups[i])); }
+                        for (int i = 0; i < mGroups.size(); i++) {
+                            if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)groupmap->getNumSeqs(mGroups[i]));
+                            }
+                        }
                     }else if (ct != NULL) {
                         if (ct->hasGroupInfo()) {
                             vector<string> mGroups = ct->getNamesOfGroups();
-                            for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)ct->getGroupCount(mGroups[i])); }
+                            for (int i = 0; i < mGroups.size(); i++) {
+                                if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                    out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)ct->getGroupCount(mGroups[i]));
+                                }
+                            }
                         }
                     }
                 }else {
                     map<string, int>::iterator itGroup;
                     if (groupmap != NULL) {
                         vector<string> mGroups = groupmap->getNamesOfGroups();
-                        for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << tree[it->second].groupCount[mGroups[i]]; }
+                        for (int i = 0; i < mGroups.size(); i++) {
+                            if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                out  << '\t' << tree[it->second].groupCount[mGroups[i]];
+                            }
+                        }
                     }else if (ct != NULL) {
                         if (ct->hasGroupInfo()) {
                             vector<string> mGroups = ct->getNamesOfGroups();
-                            for (int i = 0; i < mGroups.size(); i++) {  out  << '\t' << tree[it->second].groupCount[mGroups[i]]; }
+                            for (int i = 0; i < mGroups.size(); i++) {
+                                if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                    out  << '\t' << tree[it->second].groupCount[mGroups[i]];
+                                }
+                            }
                         }
                     }
- 
+                    
                 }
-                out << endl;
+                if ((output == "detail") || (totalChildrenInTree == 0)) { out << endl; }
+                
 				
 			}
 			
-			print(it->second, out);
+			print(it->second, out, output);
 		}
 	}
 	catch(exception& e) {

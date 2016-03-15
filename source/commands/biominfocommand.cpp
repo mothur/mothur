@@ -18,6 +18,7 @@ vector<string> BiomInfoCommand::setParameters(){
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
         CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -39,6 +40,7 @@ string BiomInfoCommand::getHelpString(){
         helpString += "The label parameter allows you to enter a distance label to be used in the shared file created from your biom file.\n";
         helpString += "The relabund parameter allows you to indicate you want the tax.summary file values to be relative abundances rather than raw abundances. Default=F. \n";
         helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
+        helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
         helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
@@ -139,6 +141,9 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             
             label = validParameter.validFile(parameters, "label", false);
             if (label == "not found") { label = "userLabel"; }
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
             
             string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
             relabund = m->isTrue(temp);
@@ -393,7 +398,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 
                 //write tax.summary
                 if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
-                else            {   taxaSum.print(outTaxSum);               }
+                else            {   taxaSum.print(outTaxSum, output);       }
                 
                 outTaxSum.close();
             }
@@ -492,13 +497,9 @@ int BiomInfoCommand::createFilesFromBiom() {
                     outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
                     ofstream outTaxSum;
                     m->openOutputFile(taxSumFilename, outTaxSum);
-                    
-                    
-                    //write tax.summary
-                    if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
-                    else            {   taxaSum.print(outTaxSum);               }
-                    
+                    taxaSum.print(outTaxSum, output);
                     outTaxSum.close();
+                    
                     if (ct != NULL) { delete ct; }
                    
                 }

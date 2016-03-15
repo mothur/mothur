@@ -69,7 +69,7 @@ private:
 	Classify* classify;
 	ReferenceDB* rdb;
 	
-	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
+	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
