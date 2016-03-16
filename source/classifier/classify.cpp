@@ -17,7 +17,8 @@
 
 /**************************************************************************************************/
 void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch)  {		
-	try {	
+	try {
+        maxLevel = 0;
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		if (tfile == "saved") { tfile = rdb->getSavedTaxonomy(); }
@@ -168,7 +169,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 	}
 }
 /**************************************************************************************************/
-Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL; flipped=false; }
+Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL; flipped=false;  maxLevel = 0; }
 /**************************************************************************************************/
 
 int Classify::readTaxonomy(string file) {
@@ -199,9 +200,11 @@ int Classify::readTaxonomy(string file) {
         //taxonomy = tempTaxonomy;
 
 		phyloTree->assignHeirarchyIDs(0);
+        
+        maxLevel = phyloTree->getMaxLevel();
 		
 		phyloTree->setUp(file);
-	
+
 		m->mothurOut("DONE.");
 		m->mothurOutEndLine();	cout.flush();
 		

@@ -43,6 +43,8 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
         
         tree.resize(numNodes);
         
+        in >> maxLevel; m->gobble(in);
+        
         for (int i = 0; i < tree.size(); i++) {
             in >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(in);
         }
@@ -59,9 +61,7 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
             uniqueTaxonomies.insert(gnode);
             totals.push_back(gsize);
         }
-        
         in.close();
-        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "PhyloTree");
@@ -94,7 +94,7 @@ PhyloTree::PhyloTree(string tfile){
         string unknownTax = "unknown;";
         //added last taxon until you get desired level
 		for (int i = 1; i < maxLevel; i++) {
-			unknownTax += "unclassfied;";
+			unknownTax += "unknown_unclassfied;";
 		}
         
         addSeqToTree("unknown", unknownTax);
@@ -226,8 +226,12 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			}
 	
 			if (seqTaxonomy == "") {   uniqueTaxonomies.insert(currentNode);	}
+
 		}
-		
+        
+        //save maxLevel for binning the unclassified seqs
+        if (level > maxLevel) { maxLevel = level; }
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -284,7 +288,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
 	try {
 		map<string,int>::iterator it;
 		int counter = 1;
-		
+        
 		for(it=tree[index].children.begin();it!=tree[index].children.end();it++){
             
             if (m->debug) { m->mothurOut(toString(index) +'\t' + tree[it->second].name +'\n'); }
@@ -477,6 +481,9 @@ void PhyloTree::printTreeNodes(string treefilename) {
         
         //print treenodes
         outTree << tree.size() << endl;
+        
+        outTree << maxLevel << endl;
+        
         for (int i = 0; i < tree.size(); i++) {
             outTree << tree[i].name << '\t' << tree[i].level << '\t' << tree[i].parent << endl;
         }

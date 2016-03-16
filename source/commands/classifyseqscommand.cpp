@@ -717,92 +717,78 @@ int ClassifySeqsCommand::execute(){
                 m->mothurOut("  Done."); m->mothurOutEndLine();
             }
             
+            //output taxonomy with the unclassified bins added
+            ifstream inTax;
+            m->openInputFile(newTaxonomyFile, inTax);
+            
+            ofstream outTax;
+            string unclass = newTaxonomyFile + ".unclass.temp";
+            m->openOutputFile(unclass, outTax);
+            
+            //get maxLevel from phylotree so you know how many 'unclassified's to add
+            int maxLevel = classify->getMaxLevel();
+            
+            //read taxfile - this reading and rewriting is done to preserve the confidence scores.
+            string name, taxon;
             string group = "";
             GroupMap* groupMap = NULL;
             CountTable* ct = NULL;
             PhyloSummary* taxaSum;
+            
             if (hasCount) {
                 ct = new CountTable();
                 ct->readTable(countfileNames[s], true, false);
-                taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund, printlevel);
-                taxaSum->summarize(tempTaxonomyFile);
+                taxaSum = new PhyloSummary(ct, relabund, printlevel);
             }else {
                 if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
-                
-                taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund, printlevel);
-                
+                taxaSum = new PhyloSummary(groupMap, relabund, printlevel);
+            }
+            
+            while (!inTax.eof()) {
                 if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                 
-                if (namefile == "") {  taxaSum->summarize(tempTaxonomyFile);  }
-                else {
-                    ifstream in;
-                    m->openInputFile(tempTaxonomyFile, in);
+                inTax >> name >> taxon; m->gobble(inTax);
+                
+                string newTax = addUnclassifieds(taxon, maxLevel);
+                
+                outTax << name << '\t' << newTax << endl;
+                
+                if (namefile != "") {
+                    itNames = nameMap.find(name);
                     
-                    //read in users taxonomy file and add sequences to tree
-                    string name, taxon;
-                    
-                    while(!in.eof()){
-                        if (m->control_pressed) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
-                        
-                        in >> name >> taxon; m->gobble(in);
-                        
-                        itNames = nameMap.find(name);
-                        
-                        if (itNames == nameMap.end()) {
-                            m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
-                        }else{
-                            for (int i = 0; i < itNames->second.size(); i++) {
-                                taxaSum->addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
-                            }
-                            itNames->second.clear();
-                            nameMap.erase(itNames->first);
+                    if (itNames == nameMap.end()) {
+                        m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                    }else{
+                        for (int i = 0; i < itNames->second.size(); i++) {
+                            taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
                         }
+                        itNames->second.clear();
+                        nameMap.erase(itNames->first);
                     }
-                    in.close();
+                }else {
+                    taxaSum->addSeqToTree(name, newTax);
                 }
             }
-            m->mothurRemove(tempTaxonomyFile);
-			
-			if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
-			
-			//print summary file
-			ofstream outTaxTree;
-			m->openOutputFile(taxSummary, outTaxTree);
-			taxaSum->print(outTaxTree, output);
-			outTaxTree.close();
-			
-			//output taxonomy with the unclassified bins added
-			ifstream inTax;
-			m->openInputFile(newTaxonomyFile, inTax);
-			
-			ofstream outTax;
-			string unclass = newTaxonomyFile + ".unclass.temp";
-			m->openOutputFile(unclass, outTax);
-			
-			//get maxLevel from phylotree so you know how many 'unclassified's to add
-			int maxLevel = taxaSum->getMaxLevel();
-							
-			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
-			string name, taxon;
-			while (!inTax.eof()) {
-				if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} m->mothurRemove(unclass); delete classify; return 0; }
-
-				inTax >> name >> taxon; m->gobble(inTax);
-				
-				string newTax = addUnclassifieds(taxon, maxLevel);
-				
-				outTax << name << '\t' << newTax << endl;
-			}
-			inTax.close();	
-			outTax.close();
-			
+            inTax.close();
+            outTax.close();
+            
+            m->mothurRemove(newTaxonomyFile);
+            rename(unclass.c_str(), newTaxonomyFile.c_str());
+            
+            if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+            
+            //print summary file
+            ofstream outTaxTree;
+            m->openOutputFile(taxSummary, outTaxTree);
+            taxaSum->print(outTaxTree, output);
+            outTaxTree.close();
+            
             if (ct != NULL) { delete ct; }
             if (groupMap != NULL) { delete groupMap; } delete taxaSum;
-			m->mothurRemove(newTaxonomyFile);
-			rename(unclass.c_str(), newTaxonomyFile.c_str());
-			
-			m->mothurOutEndLine();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+            m->mothurRemove(tempTaxonomyFile);
+            
+            m->mothurOutEndLine();
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			
 		}
         delete classify;
@@ -850,9 +836,12 @@ string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
 			level++;
 		}
 		
+        m->removeConfidences(taxon);
+        string cTax = taxon.substr(0, taxon.length()-1) + "_unclassified;";
+        
 		//add "unclassified" until you reach maxLevel
 		while (level < maxlevel) {
-			newTax += "unclassified;";
+			newTax += cTax;
 			level++;
 		}
 		

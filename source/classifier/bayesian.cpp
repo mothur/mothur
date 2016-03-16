@@ -71,6 +71,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
 			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
+            maxLevel = phyloTree->getMaxLevel();
 			
 			m->mothurOut("DONE."); m->mothurOutEndLine();
 			
@@ -185,6 +186,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				delete phyloTree;
 				
 				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
+                maxLevel = phyloTree->getMaxLevel();
                 
 				//save probabilities
 				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
