@@ -615,10 +615,13 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                     }
                 }else {
                     if (totalChildrenInTree == 0) { //leaf node - we want to print it. Use rank to find full taxonomy
-                        out << findTaxon(tree[it->second].rank) << '\t' << tree[it->second].total;
+                        if (relabund) {
+                            out << findTaxon(tree[it->second].rank) << '\t' << tree[it->second].total/(double) tree[0].total;
+                        }else {
+                            out << findTaxon(tree[it->second].rank) << '\t' << tree[it->second].total;
+                        }
                     }
                 }
-                
                 
                 if (relabund) {
                     map<string, int>::iterator itGroup;

@@ -22,6 +22,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
         CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
         CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppersample);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
@@ -45,7 +46,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
 string ClassifyOtuCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
+		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
 		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
 		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
@@ -57,6 +58,7 @@ string ClassifyOtuCommand::getHelpString(){
 		helpString += "6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
         helpString += "The persample parameter allows you to find a consensus taxonomy for each group. Default=f\n";
+        helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
 		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your otu taxonomy output.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
@@ -264,6 +266,9 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
 			persample = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
+            relabund = m->isTrue(temp);
             
             output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
@@ -563,11 +568,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,false);  }
-            else {  taxaSum = new PhyloSummary(ct,false); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund);  }
+            else {  taxaSum = new PhyloSummary(ct,relabund); }
 		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap,false);  }
-            else {  taxaSum = new PhyloSummary(groupMap,false); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund);  }
+            else {  taxaSum = new PhyloSummary(groupMap,relabund); }
         }
         
         vector<string> outs;
