@@ -26,6 +26,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
@@ -74,6 +75,7 @@ string ClassifySeqsCommand::getHelpString(){
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
 		helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
 		helpString += "The classify.seqs command should be in the following format: \n";
 		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
 		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
@@ -538,7 +540,10 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			m->mothurConvert(temp, kmerSize); 
 			
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			m->mothurConvert(temp, match);  
+			m->mothurConvert(temp, match);
+            
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
 			
 			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
 			m->mothurConvert(temp, misMatch);  
@@ -719,12 +724,12 @@ int ClassifySeqsCommand::execute(){
             if (hasCount) {
                 ct = new CountTable();
                 ct->readTable(countfileNames[s], true, false);
-                taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund);
+                taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund, printlevel);
                 taxaSum->summarize(tempTaxonomyFile);
             }else {
                 if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
                 
-                taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund);
+                taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund, printlevel);
                 
                 if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                 

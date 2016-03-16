@@ -11,13 +11,14 @@
 #include "referencedb.h"
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r){
+PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r, int p){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = false;
         numSeqs = 0;
         relabund = r;
+        printlevel = p;
 		
 		ct = c;
         groupmap = NULL;
@@ -45,13 +46,14 @@ PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r){
 
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(CountTable* c, bool r){
+PhyloSummary::PhyloSummary(CountTable* c, bool r, int p){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = true;
         numSeqs = 0;
         relabund = r;
+        printlevel = p;
 		
 		ct = c;
         groupmap = NULL;
@@ -65,13 +67,14 @@ PhyloSummary::PhyloSummary(CountTable* c, bool r){
 	}
 }
 /**************************************************************************************************/
-PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r){
+PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r, int p){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = false;
         numSeqs = 0;
         relabund = r;
+        printlevel = p;
 		
 		groupmap = g;
         ct = NULL;
@@ -99,13 +102,14 @@ PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r){
 
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(GroupMap* g, bool r){
+PhyloSummary::PhyloSummary(GroupMap* g, bool r, int p){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = true;
         numSeqs = 0;
         relabund = r;
+        printlevel = p;
 		
 		groupmap = g;
         ct = NULL;
@@ -288,6 +292,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 			}
 			
 			level++;
+            
+            if (level > maxLevel) { maxLevel = level; }
 			
 			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
 				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
@@ -362,6 +368,8 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 			}
 			
 			level++;
+            
+            if (level > maxLevel) { maxLevel = level; }
 			
 			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
 				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
@@ -447,6 +455,10 @@ void PhyloSummary::print(ofstream& out, string output){
         //print labels
         if (output == "detail") {   out << "taxlevel\trankID\ttaxon\tdaughterlevels\ttotal";  }
         else                    {   out << "taxon\ttotal";  }
+        
+        if (printlevel == -1) { printlevel = maxLevel; }
+        else if (printlevel > maxLevel) { m->mothurOut("[WARNING]: Your printlevel is greater than your maxlevel, adjusting your printlevel to " + toString(maxLevel) + "\n"); printlevel = maxLevel; }
+        
 		if (groupmap != NULL) {
 			//so the labels match the counts below, since the map sorts them automatically...
 			//sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
@@ -607,14 +619,14 @@ void PhyloSummary::print(int i, ofstream& out, string output){
 					if (tree[it2->second].total != 0)  {   totalChildrenInTree++; }
 				}
                 
-                if (output == "detail") {
+                if ((output == "detail") && (printlevel >= tree[it->second].level)) {
                     if (relabund) {
                         out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << (tree[it->second].total/(double) tree[0].total);
                     }else {
                         out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total;
                     }
                 }else {
-                    if (totalChildrenInTree == 0) { //leaf node - we want to print it. Use rank to find full taxonomy
+                    if (printlevel == tree[it->second].level) { //leaf node - we want to print it. Use rank to find full taxonomy
                         if (relabund) {
                             out << findTaxon(tree[it->second].rank) << '\t' << tree[it->second].total/(double) tree[0].total;
                         }else {
@@ -628,7 +640,7 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                     if (groupmap != NULL) {
                         vector<string> mGroups = groupmap->getNamesOfGroups();
                         for (int i = 0; i < mGroups.size(); i++) {
-                            if ((output == "detail") || (totalChildrenInTree == 0)) {
+                            if (((output == "detail") && (printlevel >= tree[it->second].level)) || (printlevel == tree[it->second].level)) {
                                 out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)groupmap->getNumSeqs(mGroups[i]));
                             }
                         }
@@ -636,7 +648,7 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                         if (ct->hasGroupInfo()) {
                             vector<string> mGroups = ct->getNamesOfGroups();
                             for (int i = 0; i < mGroups.size(); i++) {
-                                if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                if (((output == "detail") && (printlevel >= tree[it->second].level)) || (printlevel == tree[it->second].level)) {
                                     out  << '\t' << (tree[it->second].groupCount[mGroups[i]]/(double)ct->getGroupCount(mGroups[i]));
                                 }
                             }
@@ -647,7 +659,7 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                     if (groupmap != NULL) {
                         vector<string> mGroups = groupmap->getNamesOfGroups();
                         for (int i = 0; i < mGroups.size(); i++) {
-                            if ((output == "detail") || (totalChildrenInTree == 0)) {
+                            if (((output == "detail") && (printlevel >= tree[it->second].level)) || (printlevel == tree[it->second].level)) {
                                 out  << '\t' << tree[it->second].groupCount[mGroups[i]];
                             }
                         }
@@ -655,7 +667,7 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                         if (ct->hasGroupInfo()) {
                             vector<string> mGroups = ct->getNamesOfGroups();
                             for (int i = 0; i < mGroups.size(); i++) {
-                                if ((output == "detail") || (totalChildrenInTree == 0)) {
+                                if (((output == "detail") && (printlevel >= tree[it->second].level)) || (printlevel == tree[it->second].level)) {
                                     out  << '\t' << tree[it->second].groupCount[mGroups[i]];
                                 }
                             }
@@ -663,9 +675,7 @@ void PhyloSummary::print(int i, ofstream& out, string output){
                     }
                     
                 }
-                if ((output == "detail") || (totalChildrenInTree == 0)) { out << endl; }
-                
-				
+                if (((output == "detail") && (printlevel >= tree[it->second].level)) || (printlevel == tree[it->second].level)) { out << endl; }
 			}
 			
 			print(it->second, out, output);

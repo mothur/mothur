@@ -42,7 +42,7 @@ private:
 	InputData* input;
 	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile, output;
 	bool abort, allLines, probs, persample, relabund;
-	int cutoff, threshold;
+	int cutoff, threshold, printlevel;
 	set<string> labels; //holds labels to be used
 	vector<string> outputNames, groups;
 	map<string, string> nameMap;

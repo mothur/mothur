@@ -23,6 +23,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
         CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
         CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppersample);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
@@ -61,6 +62,7 @@ string ClassifyOtuCommand::getHelpString(){
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
 		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your otu taxonomy output.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
 		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";
         helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
@@ -269,6 +271,9 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
             relabund = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
             
             output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
@@ -568,11 +573,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund);  }
-            else {  taxaSum = new PhyloSummary(ct,relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund, printlevel);  }
+            else {  taxaSum = new PhyloSummary(ct,relabund, printlevel); }
 		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund);  }
-            else {  taxaSum = new PhyloSummary(groupMap,relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel);  }
+            else {  taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
         }
         
         vector<string> outs;
@@ -591,11 +596,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 
                 PhyloSummary* taxaSumt;
                 if (countfile != "") {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, false);  }
-                    else {  taxaSumt = new PhyloSummary(ct, false); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, relabund, printlevel);  }
+                    else {  taxaSumt = new PhyloSummary(ct, relabund, printlevel); }
                 }else {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,false);  }
-                    else {  taxaSumt = new PhyloSummary(groupMap,false); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,relabund, printlevel);  }
+                    else {  taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
                 }
                 taxaSums.push_back(taxaSumt);
             }

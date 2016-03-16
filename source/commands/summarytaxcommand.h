@@ -36,6 +36,7 @@ class SummaryTaxCommand : public Command {
 	private:
 		bool abort, relabund;
 		string taxfile, outputDir, namefile, groupfile, refTaxonomy, countfile, output;
+        int printlevel;
 		vector<string> outputNames;
 		map<string, int> nameMap;
 };

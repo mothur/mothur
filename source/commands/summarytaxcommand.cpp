@@ -20,6 +20,7 @@ vector<string> SummaryTaxCommand::setParameters(){
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -44,6 +45,7 @@ string SummaryTaxCommand::getHelpString(){
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
@@ -203,6 +205,10 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
             string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
 			relabund = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
+
+            
             output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
@@ -239,11 +245,11 @@ int SummaryTaxCommand::execute(){
 		
         PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund); }
-            else { taxaSum = new PhyloSummary(ct, relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund, printlevel); }
+            else { taxaSum = new PhyloSummary(ct, relabund, printlevel); }
         }else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund); }
-            else { taxaSum = new PhyloSummary(groupMap, relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel); }
+            else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel); }
 		}
         
 		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }

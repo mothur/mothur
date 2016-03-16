@@ -51,7 +51,7 @@ private:
     vector<string> outputNames;
     string fileroot, outputDir, biomfile, label, basis, output;
     bool firsttime, abort, relabund;
-    int maxLevel;
+    int maxLevel, printlevel;
     
 };
 

@@ -70,7 +70,7 @@ private:
 	ReferenceDB* rdb;
 	
 	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
-	int processors, kmerSize, numWanted, cutoff, iters;
+	int processors, kmerSize, numWanted, cutoff, iters, printlevel;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
 	

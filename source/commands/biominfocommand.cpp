@@ -19,6 +19,7 @@ vector<string> BiomInfoCommand::setParameters(){
         CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -41,6 +42,7 @@ string BiomInfoCommand::getHelpString(){
         helpString += "The relabund parameter allows you to indicate you want the tax.summary file values to be relative abundances rather than raw abundances. Default=F. \n";
         helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
         helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
         helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
@@ -147,6 +149,9 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             
             string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
             relabund = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
             
             basis = validParameter.validFile(parameters, "basis", false);
             if (basis == "not found") { basis = "otu"; }
@@ -375,7 +380,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 m->openOutputFile(taxFilename, outTax);
                 
                 GroupMap* g = NULL;
-                PhyloSummary taxaSum(g, relabund);
+                PhyloSummary taxaSum(g, relabund, printlevel);
                 
                 for (int i = 0; i < results[1].size(); i++) {
                     if (m->control_pressed) { break; }
@@ -466,7 +471,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                         }
                     }
                     
-                    PhyloSummary taxaSum(ct, relabund);
+                    PhyloSummary taxaSum(ct, relabund, printlevel);
                     
                     for (int i = 0; i < lookup[0]->getNumBins(); i++) {
                         if (m->control_pressed) { break; }

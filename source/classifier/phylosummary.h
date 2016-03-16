@@ -32,10 +32,10 @@ struct rawTaxNode {
 class PhyloSummary {
 
 public:
-	PhyloSummary(GroupMap*, bool);
-	PhyloSummary(string, GroupMap*, bool);
-    PhyloSummary(CountTable*, bool);
-	PhyloSummary(string, CountTable*, bool);
+	PhyloSummary(GroupMap*, bool, int);
+	PhyloSummary(string, GroupMap*, bool, int);
+    PhyloSummary(CountTable*, bool, int);
+	PhyloSummary(string, CountTable*, bool, int);
 	~PhyloSummary() {}
 	
 	int summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
@@ -58,7 +58,7 @@ private:
     CountTable* ct;
 	bool ignore, relabund;
 	
-	int numNodes;
+	int numNodes, printlevel;
 	int numSeqs;
 	int maxLevel;
 	MothurOut* m;
