@@ -20,7 +20,8 @@ vector<string> ClassifyOtuCommand::setParameters(){
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppersample);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
@@ -57,6 +58,7 @@ string ClassifyOtuCommand::getHelpString(){
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
         helpString += "The persample parameter allows you to find a consensus taxonomy for each group. Default=f\n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
+        helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
 		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your otu taxonomy output.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
 		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";
         helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
@@ -262,6 +264,9 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
 			persample = m->isTrue(temp);
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
             if ((groupfile == "") && (countfile == "")) { if (persample) { m->mothurOut("persample is only valid with a group file, or count file with group information. Setting persample=f.\n"); persample = false; } 
             }
@@ -708,7 +713,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		out.close();
 		
 		//print summary file
-		taxaSum->print(outSum);
+		taxaSum->print(outSum, output);
 		outSum.close();
         
         if (persample) {
@@ -717,7 +722,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 string outputSumFile = getOutputFileName("taxsummary", variables);
                 m->openOutputFile(outputSumFile, outSums);
                 outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
-                taxaSums[i]->print(outSums);
+                taxaSums[i]->print(outSums, output);
                 outSums.close();
                 delete taxaSums[i];
             }

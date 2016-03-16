@@ -330,7 +330,6 @@ class BadConversion : public runtime_error {
 public:
 	BadConversion(const string& s) : runtime_error(s){ }
 };
-
 //**********************************************************************************************************************
 template<typename T>
 void convert(const string& s, T& x, bool failIfLeftoverChars = true){

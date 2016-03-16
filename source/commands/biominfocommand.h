@@ -49,7 +49,7 @@ private:
     vector<string> getNamesAndTaxonomies(string);
     
     vector<string> outputNames;
-    string fileroot, outputDir, biomfile, label, basis;
+    string fileroot, outputDir, biomfile, label, basis, output;
     bool firsttime, abort, relabund;
     int maxLevel;
     

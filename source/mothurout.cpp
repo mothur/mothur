@@ -3370,6 +3370,43 @@ bool MothurOut::mothurConvert(string item, int& num){
 	}
 }
 /***********************************************************************/
+bool MothurOut::mothurConvert(char item, int& num){
+    try {
+        bool error = false;
+        
+        if (isdigit(item)) {
+            string mystring; mothurConvert(item, mystring);
+            mothurConvert(mystring, num);
+        }else {
+            num = 0;
+            error = true;
+            mothurOut("[ERROR]: cannot convert " + toString(item) + " to an integer."); mothurOutEndLine();
+            commandInputsConvertError = true;
+        }
+        
+        return error;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurConvert-int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+bool MothurOut::mothurConvert(char item, string& output){
+    try {
+        
+        stringstream ss;
+        ss << item;
+        ss >> output;
+        return true;
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurConvert-char");
+        exit(1);
+    }
+}
+/***********************************************************************/
 bool MothurOut::mothurConvert(string item, intDist& num){
 	try {
 		bool error = false;

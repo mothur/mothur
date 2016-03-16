@@ -20,7 +20,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-
+        CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance-align", "kmer", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
 		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
@@ -73,7 +73,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The probs parameter shuts off the bootstrapping results for the wang and zap method. The default is true, meaning you want the bootstrapping to be shown.\n";
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
-		//helpString += "The flip parameter allows you shut off mothur's   The default is T.\n";
+		helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
 		helpString += "The classify.seqs command should be in the following format: \n";
 		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
 		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
@@ -570,8 +570,10 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "100";			}
 			m->mothurConvert(temp, iters); 
-
-			
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+			if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+            
 			if ((method == "wang") && (search != "kmer"))  { 
 				m->mothurOut("The wang method requires the kmer search. " + search + " will be disregarded, and kmer will be used." ); m->mothurOutEndLine();
 				search = "kmer";
@@ -761,7 +763,7 @@ int ClassifySeqsCommand::execute(){
 			//print summary file
 			ofstream outTaxTree;
 			m->openOutputFile(taxSummary, outTaxTree);
-			taxaSum->print(outTaxTree);
+			taxaSum->print(outTaxTree, output);
 			outTaxTree.close();
 			
 			//output taxonomy with the unclassified bins added
