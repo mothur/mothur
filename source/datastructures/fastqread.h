@@ -40,16 +40,19 @@ public:
     void setName(string n) { name = n; }
     string getSeq() { return sequence; }
     vector<int> getScores() { return scores; }
+    void printFastq(ostream&);
     
     Sequence getSequence();
     QualityScores getQuality();
     
     
+    
 private:
     MothurOut* m;
     vector<int> scores;
-    string name;
+    string name, comment;
     string sequence;
+    string scoreString;
     string format;
     vector<char> convertTable;
     

@@ -36,7 +36,7 @@ class GetSeqsCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames;
-		string accnosfile, accnosfile2, fastafile, fastqfile, namefile, countfile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir;
+		string accnosfile, accnosfile2, fastafile, fastqfile, namefile, countfile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir, format;
 		bool abort, dups;
         map<string, string> uniqueMap;
         //for debug

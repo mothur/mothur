@@ -11,6 +11,7 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -28,6 +29,7 @@ vector<string> GetSeqsCommand::setParameters(){
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter paccnos2("accnos2", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos2);
 
@@ -48,6 +50,7 @@ string GetSeqsCommand::getHelpString(){
 		helpString += "It outputs a file containing only the sequences in the .accnos file.\n";
 		helpString += "The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport, fastq and dups.  You must provide accnos unless you have a valid current accnos file, and at least one of the other parameters.\n";
 		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=true. \n";
+        helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -312,6 +315,13 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "true"; usedDups = ""; }
 			dups = m->isTrue(temp);
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+                abort=true;
+            }
 			
 			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, quality, fastq or listfile."); m->mothurOutEndLine(); abort = true; }
             
@@ -440,26 +450,17 @@ int GetSeqsCommand::readFastq(){
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			//read sequence name
-			string input = m->getline(in); m->gobble(in);
-			
-            string outputString = input + "\n";
+            bool ignore;
+            FastqRead fread(in, ignore, format); m->gobble(in);
             
-			if (input[0] == '@') {
-                //get rest of lines
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                
-                vector<string> splits = m->splitWhiteSpace(input);
-                string name = splits[0];
-                name = name.substr(1);
-                m->checkName(name);
+			if (!ignore) {
+                string name = fread.getName();
                 
                 if (names.count(name) != 0) {
                     if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
                         wroteSomething = true;
                         selectedCount++;
-                        out << outputString;
+                        fread.printFastq(out);
                         uniqueNames.insert(name);
                     }else {
                         m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");

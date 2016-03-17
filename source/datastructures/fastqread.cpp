@@ -79,6 +79,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
         else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
         else { name = name.substr(1); }
+        if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = m->getStringFromVector(pieces, " "); }
         
         //read sequence
         sequence = m->getline(in); m->gobble(in);
@@ -100,6 +101,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
         if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
         
+        scoreString = quality;
         scores = convertQual(quality);
         m->checkName(name);
         
@@ -132,6 +134,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
         if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
         else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
         else { name = name.substr(1); }
+        if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = m->getStringFromVector(pieces, " "); }
         
         //read sequence
         std::getline(in, sequence); m->gobble(in);
@@ -153,6 +156,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
         if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
         if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
         
+        scoreString = quality;
         scores = convertQual(quality);
         m->checkName(name);
         
@@ -207,6 +211,20 @@ Sequence FastqRead::getSequence() {
     }
     catch(exception& e) {
         m->errorOut(e, "FastqRead", "getSequence");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void FastqRead::printFastq(ostream& out) {
+    try {
+        out << "@" << name << " " << comment << endl;
+        out << sequence << endl;
+        out << "+" << endl;
+        out << scoreString << endl;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FastqRead", "printFastq");
         exit(1);
     }
 }
