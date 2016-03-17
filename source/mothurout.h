@@ -194,7 +194,8 @@ class MothurOut {
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
         map<string, vector<string> > parseClasses(string);
-        
+        string addUnclassifieds(string tax, int maxlevel, bool probs);
+    
 		
 		//math operation
         int max(int, int);

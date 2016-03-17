@@ -76,7 +76,6 @@ private:
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 
-	string addUnclassifieds(string, int);
 };
 
 /**************************************************************************************************/

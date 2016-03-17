@@ -385,7 +385,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 for (int i = 0; i < results[1].size(); i++) {
                     if (m->control_pressed) { break; }
                     
-                    string newTax = addUnclassifieds(results[1][i]);
+                    string newTax = m->addUnclassifieds(results[1][i], maxLevel, false);
                     outTax << results[0][i] << '\t' << newTax << endl;
                     
                     taxaSum.addSeqToTree(results[0][i], newTax);
@@ -483,7 +483,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                             containsGroup[lookup[j]->getGroup()] = lookup[j]->getAbundance(i);
                         }
                         
-                        string newTax = addUnclassifieds(conTaxonomy[i]);
+                        string newTax = m->addUnclassifieds(conTaxonomy[i], maxLevel, false);
                         outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
                         
                         if (basis == "sequence") {
@@ -520,37 +520,6 @@ int BiomInfoCommand::createFilesFromBiom() {
         exit(1);
     }
 }
-/**************************************************************************************************/
-string BiomInfoCommand::addUnclassifieds(string tax) {
-    try{
-        string newTax, taxon;
-        int level = 0;
-        
-        newTax = "";
-        
-        //keep what you have counting the levels
-        while (tax.find_first_of(';') != -1) {
-            //get taxon
-            taxon = tax.substr(0,tax.find_first_of(';'))+';';
-            tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-            newTax += taxon;
-            level++;
-        }
-        
-        //add "unclassified" until you reach maxLevel
-        while (level < maxLevel) {
-            newTax += "unclassified;";
-            level++;
-        }
-        
-        return newTax;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "addUnclassifieds");
-        exit(1);
-    }
-}
-
 //**********************************************************************************************************************
 vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, string line, string matrixElementType, vector<string>& groupNames, int numOTUs) {
     try {

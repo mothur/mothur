@@ -524,29 +524,19 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 			currentNode = bestChild;
 		}
 		
-		if (myLevel != phylo->getMaxLevel()) {
-			while (myLevel != phylo->getMaxLevel()) {
-                if (probs) {
-                    conTax += "unclassified(100);";
-                }else{
-                    conTax += "unclassified;";
-                }
-				myLevel++;
-			}
-		}		
+		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
+        
 		if (conTax == "") {  conTax = "no_consensus;";  }
 		
 		delete phylo;	
 		
 		return allNames;
-			
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "findConsensusTaxonomy");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 int ClassifyOtuCommand::process(ListVector* processList) {
 	try{
@@ -745,34 +735,6 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "process");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-string ClassifyOtuCommand::addUnclassifieds(string tax, int maxlevel) {
-	try{
-		string newTax, taxon;
-		int level = 0;
-		
-		//keep what you have counting the levels
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'))+';';
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-			level++;
-		}
-		
-		//add "unclassified" until you reach maxLevel
-		while (level < maxlevel) {
-			newTax += "unclassified;";
-			level++;
-		}
-		
-		return newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "addUnclassifieds");
 		exit(1);
 	}
 }

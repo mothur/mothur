@@ -749,7 +749,7 @@ int ClassifySeqsCommand::execute(){
                 
                 inTax >> name >> taxon; m->gobble(inTax);
                 
-                string newTax = addUnclassifieds(taxon, maxLevel);
+                string newTax = m->addUnclassifieds(taxon, maxLevel, probs);
                 
                 outTax << name << '\t' << newTax << endl;
                 
@@ -820,39 +820,6 @@ int ClassifySeqsCommand::execute(){
 		exit(1);
 	}
 }
-
-/**************************************************************************************************/
-string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
-	try{
-		string newTax, taxon;
-		int level = 0;
-		
-		//keep what you have counting the levels
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'))+';';
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-			level++;
-		}
-		
-        m->removeConfidences(taxon);
-        string cTax = taxon.substr(0, taxon.length()-1) + "_unclassified;";
-        
-		//add "unclassified" until you reach maxLevel
-		while (level < maxlevel) {
-			newTax += cTax;
-			level++;
-		}
-		
-		return newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "addUnclassifieds");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {

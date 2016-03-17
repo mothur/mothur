@@ -3427,6 +3427,50 @@ bool MothurOut::mothurConvert(string item, intDist& num){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
+    try{
+        string newTax, taxon;
+        int level = 0;
+        
+        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+        vector<int> confidences;
+        
+        int index = 0;
+        int confidence = 0;
+        for (int i = 0; i < taxons.size(); i++) {
+            index = i;
+            string thisTax = taxons[i]+";";
+            confidence = removeConfidences(thisTax);
+            confidences.push_back(confidence);
+    
+            if (thisTax == "unclassified;"){ index--; break; }
+            else{ newTax += taxons[i] + ";";  }
+        }
+        level = index+1;
+        
+        string thisTax = taxons[index]+";";
+        
+        removeConfidences(thisTax);
+        taxon = thisTax.substr(0, thisTax.length()-1);
+        
+        string cTax = "";
+        if (probs)  { cTax = taxon + "_unclassified(" + toString(confidences[index]) + ");";     }
+        else        { cTax = taxon + "_unclassified;";          }
+        
+        //add "unclassified" until you reach maxLevel
+        while (level < maxlevel) {
+            newTax += cTax;
+            level++;
+        }
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "addUnclassifieds");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 bool MothurOut::isNumeric1(string stringToCheck){
@@ -4675,6 +4719,7 @@ int MothurOut::removeConfidences(string& tax) {
 		
 		string taxon;
 		string newTax = "";
+        string confidenceScore = "0";
 		
 		while (tax.find_first_of(';') != -1) {
 			
@@ -4688,9 +4733,10 @@ int MothurOut::removeConfidences(string& tax) {
 				//is it a number?
 				int pos2 = taxon.find_last_of(')');
 				if (pos2 != -1) {
-					string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
-					if (isNumeric1(confidenceScore)) {
-						taxon = taxon.substr(0, pos); //rip off confidence 
+					string temp = taxon.substr(pos+1, (pos2-(pos+1)));
+					if (isNumeric1(temp)) {
+						taxon = taxon.substr(0, pos); //rip off confidence
+                        confidenceScore = temp;
 					}
 				}
 			}
@@ -4701,8 +4747,10 @@ int MothurOut::removeConfidences(string& tax) {
 		}
 		
 		tax = newTax;
+        
+        int confidence = 0; mothurConvert(confidenceScore, confidence);
 		
-		return 0;
+		return confidence;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "removeConfidences");
