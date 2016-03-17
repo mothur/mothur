@@ -61,6 +61,7 @@ class CountTable {
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
+        bool setNamesOfGroups(vector<string>);
         int addGroup(string);
         int removeGroup(string);
         

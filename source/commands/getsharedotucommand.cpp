@@ -14,7 +14,8 @@
 vector<string> GetSharedOTUCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "sharedFasta", "none", "none","fasta",false,false); parameters.push_back(pfasta);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "groupList","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "GroupCount", "groupList","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "none", "GroupCount", "none","",false,false); parameters.push_back(pcount);
 		CommandParameter plist("list", "InputTypes", "", "", "sharedList", "sharedList", "groupList","sharedseq",false,false,true); parameters.push_back(plist);
         CommandParameter pshared("shared", "InputTypes", "", "", "sharedList-sharedFasta", "sharedList", "none","sharedseq",false,false,true); parameters.push_back(pshared);
 		CommandParameter poutput("output", "Multiple", "accnos-default", "default", "", "", "","",false,false); parameters.push_back(poutput);
@@ -45,6 +46,7 @@ string GetSharedOTUCommand::getHelpString(){
 		helpString += "If you enter your groups under the sharedgroups parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n";
 		helpString += "If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group or shared file.\n";
 		helpString += "The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified. It can only be used with a list and group file not the shared file input.\n";
+        helpString += "The count parameter allows you to provide a count file containing the group info for the list file.\n";
 		helpString += "The output parameter allows you to output the list of names without the group and bin number added. \n";
 		helpString += "With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n";
 		helpString += "The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n";
@@ -163,6 +165,14 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
+                }
 			}
 
 			
@@ -187,6 +197,14 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else if (fastafile == "not found") {  fastafile = "";  }
 			else { m->setFastaFile(fastafile); }
 
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = ""; }
+            else {
+                m->setCountTableFile(countfile);
+                CountTable temp;
+                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
+            }
             
             if ((sharedfile == "") && (listfile == "")) { //look for currents
                 //is there are current file available for either of these?
@@ -206,12 +224,18 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
             }
 			
             if (listfile != "") {
-				if (groupfile == ""){
-					groupfile = m->getGroupFile();
-					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
-					else { m->mothurOut("You need to provide a group file if you are going to use the list format."); m->mothurOutEndLine(); abort = true;
-					}
-				}
+                if ((groupfile == "") && (countfile == "")) {
+                    groupfile = m->getGroupFile();
+                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                    else {
+                        countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
+                            abort = true;
+                        }
+                    }
+                }
 			}
 
 			if ((sharedfile != "") && (fastafile != "")) { m->mothurOut("You cannot use the fasta file with the shared file."); m->mothurOutEndLine(); abort = true; }
@@ -264,14 +288,23 @@ int GetSharedOTUCommand::execute(){
         if ( sharedfile != "") { runShared(); }
         else {
             m->setGroups(Groups);
-            groupMap = new GroupMap(groupfile);
-            int error = groupMap->readMap();
-            if (error == 1) { delete groupMap; return 0; }
+            if (groupfile != "") {
+                groupMap = new GroupMap(groupfile);
+                
+                int groupError = groupMap->readMap();
+                if (groupError == 1) { delete groupMap; return 0; }
+                vector<string> allGroups = groupMap->getNamesOfGroups();
+                m->setAllGroups(allGroups);
+            }else{
+                ct = new CountTable();
+                ct->readTable(countfile, true, false);
+            }
             
             if (m->control_pressed) { delete groupMap; return 0; }
             
             if (Groups.size() == 0) {
-                Groups = groupMap->getNamesOfGroups();
+                if (groupfile != "") { Groups = groupMap->getNamesOfGroups(); }
+                else {  Groups = ct->getNamesOfGroups();  }
                 
                 //make string for outputfile name
                 userGroups = "unique.";
@@ -281,9 +314,14 @@ int GetSharedOTUCommand::execute(){
             }else{
                 //sanity check for group names
                 SharedUtil util;
-                vector<string> namesOfGroups = groupMap->getNamesOfGroups(); 
+                vector<string> namesOfGroups;
+                if (groupfile != "") { namesOfGroups = groupMap->getNamesOfGroups(); }
+                else {  namesOfGroups = ct->getNamesOfGroups();  }
+                
                 util.setGroups(Groups, namesOfGroups);
-                groupMap->setNamesOfGroups(namesOfGroups);
+                
+                if (groupfile != "") { groupMap->setNamesOfGroups(namesOfGroups); }
+                else {  ct->setNamesOfGroups(namesOfGroups);  }
             }
         
             //put groups in map to find easier
@@ -320,7 +358,7 @@ int GetSharedOTUCommand::execute(){
                 if (m->control_pressed) { 
                     if (lastlist != NULL) {		delete lastlist;	}
                     for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear();
-                    delete groupMap; return 0;
+                    if (groupfile != "") { delete groupMap; }else { delete ct; } return 0;
                 }
                 
                 list = new ListVector(in);
@@ -382,7 +420,7 @@ int GetSharedOTUCommand::execute(){
             
             if (lastlist != NULL) {		delete lastlist;	}
             
-            if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete groupMap; return 0; } 
+            if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 
 		}
 		//set fasta file as new current fastafile
 		string current = "";
@@ -455,17 +493,32 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				string name = binNames[j];
 				
 				//find group
-				string seqGroup = groupMap->getGroup(name);
+                string seqGroup = "not found"; vector<string> seqsGroups;
+                if (groupfile != "") {  seqGroup = groupMap->getGroup(name); }
+                else {
+                    seqsGroups = ct->getGroups(name);
+                    seqGroup = m->getStringFromVector(seqsGroups, "-");
+                }
+                
 				if (output != "accnos") {
 					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + binLabels[i]));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
 				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
 				
-				//is this seq in one of hte groups we care about
-				it = groupFinder.find(seqGroup);
-				if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
-				else {  atLeastOne[seqGroup]++;  }
+                if (groupfile != "") {
+                    //is this seq in one of hte groups we care about
+                    it = groupFinder.find(seqGroup);
+                    if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
+                    else {  atLeastOne[seqGroup]++;  }
+                }else {
+                    for (int k = 0; k < seqsGroups.size(); k++) {
+                        //is this seq in one of hte groups we care about
+                        it = groupFinder.find(seqsGroups[k]);
+                        if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
+                        else {  atLeastOne[seqsGroups[k]]++;  }
+                    }
+                }
 			}
 			
 			//make sure you have at least one seq from each group you want

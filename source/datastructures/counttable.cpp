@@ -91,9 +91,32 @@ bool CountTable::testGroups(string file) {
         return hasGroups;
     }
 	catch(exception& e) {
-		m->errorOut(e, "CountTable", "readTable");
+		m->errorOut(e, "CountTable", "testGroups");
 		exit(1);
 	}
+}
+/************************************************************/
+bool CountTable::setNamesOfGroups(vector<string> mygroups) {
+    try {
+        //remove groups from table not in new groups we are setting
+        for (int i = 0; i < groups.size(); i++) {
+            if (m->inUsersGroups(groups[i], mygroups)) {}
+            else { removeGroup(groups[i]);  }
+        }
+        
+        //add any new groups in new groups list to table
+        for (int i = 0; i < mygroups.size(); i++) {
+            if (m->inUsersGroups(mygroups[i], groups)) {}
+            else { addGroup(mygroups[i]);  }
+        }
+        
+        //false if error
+        return (!m->control_pressed);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "setNamesOfGroups");
+        exit(1);
+    }
 }
 /************************************************************/
 int CountTable::createTable(string namefile, string groupfile, bool createGroup) {
