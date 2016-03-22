@@ -18,7 +18,64 @@ FastqRead::FastqRead() {
         for (int i = -64; i < 65; i++) {
             char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
             convertTable.push_back(temp);
+            convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FastqRead", "FastqRead");
+        exit(1);
+    }
+}
+/*******************************************************************************/
+FastqRead::FastqRead(Sequence s, QualityScores q) {
+    try {
+        m = MothurOut::getInstance(); format = "illumina1.8+";
+        
+        //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+        for (int i = -64; i < 65; i++) {
+            char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+            convertTable.push_back(temp);
+            convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
+        }
+        
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->control_pressed = true; }
+        else {
+            name = s.getName();
+            comment = s.getComment();
+            sequence = s.getUnaligned();
+            scores = q.getScores();
+            scoreString = convertQual(scores);
+        }
+        
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FastqRead", "FastqRead");
+        exit(1);
+    }
+}
+/*******************************************************************************/
+FastqRead::FastqRead(Sequence s, QualityScores q, string f) {
+    try {
+        m = MothurOut::getInstance(); format = f;
+        
+        //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+        for (int i = -64; i < 65; i++) {
+            char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+            convertTable.push_back(temp);
+            convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
+        }
+        
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->control_pressed = true; }
+        else {
+            name = s.getName();
+            comment = s.getComment();
+            sequence = s.getUnaligned();
+            scores = q.getScores();
+            scoreString = convertQual(scores);
+        }
+        
+        
     }
     catch(exception& e) {
         m->errorOut(e, "FastqRead", "FastqRead");
@@ -34,6 +91,7 @@ FastqRead::FastqRead(string f) {
         for (int i = -64; i < 65; i++) {
             char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
             convertTable.push_back(temp);
+            convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
     }
     catch(exception& e) {
@@ -51,6 +109,7 @@ FastqRead::FastqRead(string f, string n, string s, vector<int> sc) {
         for (int i = -64; i < 65; i++) {
             char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
             convertTable.push_back(temp);
+            convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
     }
     catch(exception& e) {
@@ -204,6 +263,31 @@ vector<int> FastqRead::convertQual(string qual) {
     }
 }
 //**********************************************************************************************************************
+string FastqRead::convertQual(vector<int> qual) {
+    try {
+        string scoreString = "";
+        
+        for (int i = 0; i < qual.size(); i++) {
+            int controlChar = int('!');
+            if (format == "illumina") {  controlChar = int('@');  }
+
+            int temp = qual[i] + controlChar;
+            
+            if (format == "solexa") { temp = convertBackTable[temp];  }
+            
+            char qualChar = (char) temp;
+            
+            scoreString += qualChar;
+        }
+        
+        return scoreString;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FastqRead", "convertQual");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 Sequence FastqRead::getSequence() {
     try {
         Sequence temp(name, sequence);
@@ -239,4 +323,5 @@ QualityScores FastqRead::getQuality() {
         exit(1);
     }
 }
+
 /*******************************************************************************/

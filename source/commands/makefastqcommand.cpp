@@ -10,13 +10,14 @@
 #include "makefastqcommand.h"
 #include "sequence.hpp"
 #include "qualityscores.h"
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> MakeFastQCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pqfile);
-		CommandParameter pformat("format", "Multiple", "sanger-illumina-illumina1.8+", "sanger", "", "", "","",false,false); parameters.push_back(pformat);
+		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -36,7 +37,7 @@ string MakeFastQCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.fastq command reads a fasta and quality file and creates a fastq file.\n";
 		helpString += "The make.fastq command parameters are fasta, qfile and format.  fasta and qfile are required.\n";
-		helpString += "The format parameter is used to indicate whether your sequences are sanger, illumina1.8+ or illumina, default=sanger.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n";
 		helpString += "Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -146,12 +147,12 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);		}
             
-            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
             
-            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+"))  { 
-				m->mothurOut(format + " is not a valid format. Your format choices are sanger, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
-				abort=true;
-			}
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+                abort=true;
+            }
 
 
 		}
@@ -189,18 +190,9 @@ int MakeFastQCommand::execute(){
 			
 			Sequence currSeq(fFile); m->gobble(fFile);
 			QualityScores currQual(qFile);  m->gobble(qFile);
-			
-			if (currSeq.getName() != currQual.getName()) { m->mothurOut("[ERROR]: mismatch between fasta and quality files. Found " + currSeq.getName() + " in fasta file and " + currQual.getName() + " in quality file."); m->mothurOutEndLine(); m->control_pressed = true; }
-			else {
-				//print sequence
-				out << '@' << currSeq.getName() << endl << currSeq.getAligned() << endl;
-				
-				string qualityString = convertQual(currQual.getQualityScores());
-				
-				//print quality info
-				out << '+' << currQual.getName() << endl << qualityString << endl;
-			}
-			
+            
+            FastqRead fread(currSeq, currQual, format);
+            fread.printFastq(out);
 		}
 		
 		fFile.close();
