@@ -11,6 +11,7 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
@@ -27,6 +28,7 @@ vector<string> RemoveSeqsCommand::setParameters(){
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -46,6 +48,7 @@ string RemoveSeqsCommand::getHelpString(){
 		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, count, list, taxonomy, quality, fastq or alignreport file.\n";
 		helpString += "It outputs a file containing the sequences NOT in the .accnos file.\n";
 		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, count, list, taxonomy, qfile, alignreport, fastq and dups.  You must provide accnos and at least one of the file parameters.\n";
+        helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n";
 		helpString += "The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
@@ -305,6 +308,13 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
                     parser.getNameFile(files);
                 }
             }
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+                abort=true;
+            }
 		}
 
 	}
@@ -484,26 +494,17 @@ int RemoveSeqsCommand::readFastq(){
 			
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
-			//read sequence name
-			string input = m->getline(in); m->gobble(in);
-			
-            string outputString = input + "\n";
+            //read sequence name
+            bool ignore;
+            FastqRead fread(in, ignore, format); m->gobble(in);
             
-			if (input[0] == '@') {
-                //get rest of lines
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                
-                vector<string> splits = m->splitWhiteSpace(input);
-                string name = splits[0];
-                name = name.substr(1);
-                m->checkName(name);
+            if (!ignore) {
+                string name = fread.getName();
                 
                 if (names.count(name) == 0) {
                     if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
                         wroteSomething = true;
-                        out << outputString;
+                        fread.printFastq(out);
                         uniqueNames.insert(name);
                     }else {
                         m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
