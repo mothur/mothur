@@ -445,57 +445,41 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         if (files[2] != "") { m->openInputFile(files[2], inFIndex);  }
         if (files[3] != "") { m->openInputFile(files[3], inRIndex);  }
         
-        
-        //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
-        for (int i = -64; i < 65; i++) {
-            char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
-            convertTable.push_back(temp);
-        }
-        
         int count = 0;
         while (!inf.eof() && !inr.eof()) {
             
             if (m->control_pressed) { break; }
             
             bool ignoref, ignorer;
-            fastqRead2 thisfRead = readFastq(inf, ignoref);
-            fastqRead2 thisrRead = readFastq(inr, ignorer);
+            FastqRead thisfRead(inf, ignoref, format);
+            FastqRead thisrRead(inr, ignorer, format);
             
             if (!ignoref && ! ignorer) {
-                vector<int> fqualScores;
-                vector<int> rqualScores;
                 if (qual) {
-                    fqualScores = convertQual(thisfRead.quality);
-                    outfQual << ">" << thisfRead.seq.getName() << endl;
-                    for (int i = 0; i < fqualScores.size(); i++) { outfQual << fqualScores[i] << " "; }
-                    outfQual << endl;
-                    
-                    rqualScores = convertQual(thisrRead.quality);
-                    outrQual << ">" << thisrRead.seq.getName() << endl;
-                    for (int i = 0; i < rqualScores.size(); i++) { outrQual << rqualScores[i] << " "; }
-                    outrQual << endl;
+                    thisfRead.getQuality().printQScores(outfQual);
+                    thisrRead.getQuality().printQScores(outrQual);
                 }
                 
-                if (m->control_pressed) { break; }
+                if (pacbio) { //change sequence bases with 0 quality scores to N
+                    vector<int> fqual = thisfRead.getScores();
+                    vector<int> rqual = thisrRead.getScores();
+                    string fseq = thisfRead.getSeq();
+                    string rseq = thisrRead.getSeq();
+                    
+                    for (int i = 0; i < fqual.size(); i++) { if (fqual[i] == 0){ fseq[i] = 'N'; } }
+                    thisfRead.setSeq(fseq);
                 
-                if (pacbio) {
-                    if (!qual) { rqualScores = convertQual(thisrRead.quality); fqualScores = convertQual(thisfRead.quality); } //convert if not done
-                    string sequence = thisfRead.seq.getAligned();
-                    for (int i = 0; i < fqualScores.size(); i++) {
-                        if (fqualScores[i] == 0){ sequence[i] = 'N'; }
-                    }
-                    thisfRead.seq.setAligned(sequence);
-                
-                    sequence = thisrRead.seq.getAligned();
-                    for (int i = 0; i < rqualScores.size(); i++) {
-                        if (rqualScores[i] == 0){ sequence[i] = 'N'; }
-                    }
-                    thisrRead.seq.setAligned(sequence);
+                    for (int i = 0; i < rqual.size(); i++) { if (rqual[i] == 0){ rseq[i] = 'N'; } }
+                    thisrRead.setSeq(rseq);
                 }
                 
                 //print sequence info to files
-                if (fasta) { thisfRead.seq.printSequence(outfFasta); thisrRead.seq.printSequence(outrFasta); }
+                if (fasta) {
+                    thisfRead.getSequence().printSequence(outfFasta);
+                    thisrRead.getSequence().printSequence(outrFasta);
+                }
                 
+                if (m->control_pressed) { break; }
                 if (split > 1) {
                     
                     Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
@@ -503,52 +487,55 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         bool ignorefi, ignoreri;
                     
                         if (files[2] != "") {
-                            fastqRead2 thisfiRead = readFastq(inFIndex, ignorefi);
-                            if (!ignorefi) {  findexBarcode.setAligned(thisfiRead.seq.getAligned());  }
+                            FastqRead thisfiRead(inFIndex, ignorefi, format);
+                            if (!ignorefi) {  findexBarcode.setAligned(thisfiRead.getSequence().getAligned());  }
                         }
                         
                         if (files[3] != "") {
-                            fastqRead2 thisriRead = readFastq(inRIndex, ignoreri);
-                            if (!ignoreri) {  rindexBarcode.setAligned(thisriRead.seq.getAligned());  }
+                            FastqRead thisriRead(inRIndex, ignoreri, format);
+                            if (!ignoreri) {  rindexBarcode.setAligned(thisriRead.getSequence().getAligned());  }
                         }
                     }
                     
                     int barcodeIndex, primerIndex, trashCodeLength;
-                    if (oligosfile != "")      {
+                    if (oligosfile != "") {
+                        QualityScores tempF = thisfRead.getQuality();
+                        QualityScores tempR = thisrRead.getQuality();
                         if ((files[2] != "") || (files[3] != "")) {
-                            Sequence tempF = thisfRead.seq;
-                            Sequence tempR = thisrRead.seq;
-                            thisfRead.seq = findexBarcode;
-                            thisrRead.seq = rindexBarcode;
-                            trashCodeLength = findGroup(thisfRead, thisrRead, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);
-                            thisfRead.seq = tempF;
-                            thisrRead.seq = tempR;
+                            //barcode already removed so no need to reset sequence to trimmed version
+                            trashCodeLength = findGroup(findexBarcode, tempF, rindexBarcode, tempR, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);
                         }else {
-                            trashCodeLength = findGroup(thisfRead, thisrRead, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);
+                            Sequence tempSeqF = thisfRead.getSequence();
+                            Sequence tempSeqR = thisrRead.getSequence();
+                            trashCodeLength = findGroup(tempSeqF, tempF, tempSeqR, tempR, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);
+                            thisfRead.setSeq(tempSeqF.getUnaligned());
+                            thisrRead.setSeq(tempSeqR.getUnaligned());
                         }
-                    }else if (groupfile != "")  {  trashCodeLength = findGroup(thisfRead, barcodeIndex, primerIndex, "groupMode");   }
+                        thisfRead.setScores(tempF.getScores()); //set to trimmed scores
+                        thisrRead.setScores(tempR.getScores());
+                    }else if (groupfile != "")  {  trashCodeLength = findGroup(thisfRead.getSequence(), barcodeIndex, primerIndex, "groupMode");   }
                     else {  m->mothurOut("[ERROR]: uh oh, we shouldn't be here...\n"); }
                     
                     if(trashCodeLength == 0){
                         ofstream out;
                         m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
-                        out << thisfRead.wholeRead;
+                        thisfRead.printFastq(out);
                         out.close();
                         
                         ofstream out2;
                         m->openOutputFileAppend(rfastqFileNames[barcodeIndex][primerIndex], out2);
-                        out2 << thisrRead.wholeRead;
+                        thisrRead.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf, outr;
                             m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
-                            thisfRead.seq.printSequence(outf);
+                            thisfRead.getSequence().printSequence(outf);
                             outf.close();
                             
                             m->openOutputFileAppend(rfastaFileNames[barcodeIndex][primerIndex], outr);
-                            thisrRead.seq.printSequence(outr);
+                            thisrRead.getSequence().printSequence(outr);
                             outr.close();
                         }
                         
@@ -556,15 +543,11 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         if (qual) {
                             ofstream outq, outq2;
                             m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
-                            outq << ">" << thisfRead.seq.getName() << endl;
-                            for (int i = 0; i < fqualScores.size(); i++) { outq << fqualScores[i] << " "; }
-                            outq << endl;
+                            thisfRead.getQuality().printQScores(outq);
                             outq.close();
                             
                             m->openOutputFileAppend(rqualFileNames[barcodeIndex][primerIndex], outq2);
-                            outq2 << ">" << thisrRead.seq.getName() << endl;
-                            for (int i = 0; i < rqualScores.size(); i++) { outq2 << rqualScores[i] << " "; }
-                            outq2 << endl;
+                            thisrRead.getQuality().printQScores(outq2);
                             outq2.close();
                         }
 
@@ -572,22 +555,22 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         //print no match fastq
                         ofstream out, out2;
                         m->openOutputFileAppend(ffqnoMatchFile, out);
-                        out << thisfRead.wholeRead;
+                        thisfRead.printFastq(out);
                         out.close();
                         
                         m->openOutputFileAppend(rfqnoMatchFile, out2);
-                        out2 << thisrRead.wholeRead;
+                        thisrRead.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf, outr;
                             m->openOutputFileAppend(ffnoMatchFile, outf);
-                            thisfRead.seq.printSequence(outf);
+                            thisfRead.getSequence().printSequence(outf);
                             outf.close();
                             
                             m->openOutputFileAppend(rfnoMatchFile, outr);
-                            thisrRead.seq.printSequence(outr);
+                            thisrRead.getSequence().printSequence(outr);
                             outr.close();
                         }
                         
@@ -595,15 +578,11 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         if (qual) {
                             ofstream outq, outq2;
                             m->openOutputFileAppend(fqnoMatchFile, outq);
-                            outq << ">" << thisfRead.seq.getName() << endl;
-                            for (int i = 0; i < fqualScores.size(); i++) { outq << fqualScores[i] << " "; }
-                            outq << endl;
+                            thisfRead.getQuality().printQScores(outq);
                             outq.close();
                             
                             m->openOutputFileAppend(rqnoMatchFile, outq2);
-                            outq2 << ">" << thisrRead.seq.getName() << endl;
-                            for (int i = 0; i < rqualScores.size(); i++) { outq2 << rqualScores[i] << " "; }
-                            outq2 << endl;
+                            thisrRead.getQuality().printQScores(outq2);
                             outq2.close();
                         }
                     }
@@ -663,49 +642,48 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
             if (m->control_pressed) { break; }
             
             bool ignore;
-            fastqRead2 thisRead = readFastq(in, ignore);
+            FastqRead thisRead(in, ignore, format);
             
             if (!ignore) {
-                vector<int> qualScores;
-                if (qual) {
-                    qualScores = convertQual(thisRead.quality);
-                    outQual << ">" << thisRead.seq.getName() << endl;
-                    for (int i = 0; i < qualScores.size(); i++) { outQual << qualScores[i] << " "; }
-                    outQual << endl;
-                }
-                
-                if (m->control_pressed) { break; }
+                if (qual) {  thisRead.getQuality().printQScores(outQual); }
                 
                 if (pacbio) {
-                    if (!qual) { qualScores = convertQual(thisRead.quality); } //convert if not done
-                    string sequence = thisRead.seq.getAligned();
-                    for (int i = 0; i < qualScores.size(); i++) {
-                        if (qualScores[i] == 0){ sequence[i] = 'N'; }
-                    }
-                    thisRead.seq.setAligned(sequence);
+                    vector<int> qual = thisRead.getScores();
+                    string seq = thisRead.getSeq();
+                    
+                    for (int i = 0; i < qual.size(); i++) { if (qual[i] == 0){ seq[i] = 'N'; } }
+                    thisRead.setSeq(seq);
                 }
                 
                 //print sequence info to files
-                if (fasta) { thisRead.seq.printSequence(outFasta); }
+                if (fasta) { thisRead.getSequence().printSequence(outFasta); }
+                
+                if (m->control_pressed) { break; }
                 
                 if (split > 1) {
                     int barcodeIndex, primerIndex, trashCodeLength;
-                    if (oligosfile != "")      {  trashCodeLength = findGroup(thisRead, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);    }
-                    else if (groupfile != "")  {  trashCodeLength = findGroup(thisRead, barcodeIndex, primerIndex, "groupMode");   }
+                    if (oligosfile != "")      {
+                        Sequence tempSeq = thisRead.getSequence();
+                        QualityScores tempQual = thisRead.getQuality();
+                        trashCodeLength = findGroup(tempSeq, tempQual, barcodeIndex, primerIndex, trimOligos, rtrimOligos, numBarcodes, numPrimers);
+                        thisRead.setSeq(tempSeq.getUnaligned());
+                        thisRead.setScores(tempQual.getScores());
+                    }
+                    else if (groupfile != "")  {  trashCodeLength = findGroup(thisRead.getSequence(), barcodeIndex, primerIndex, "groupMode");   }
                     else {  m->mothurOut("[ERROR]: uh oh, we shouldn't be here...\n"); }
                     
                     if(trashCodeLength == 0){ //files in here are per group
                         //print fastq to barcode and primer match
                         ofstream out;
                         m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
-                        out << thisRead.wholeRead;
+                        thisRead.printFastq(out);
                         out.close();
                         
                         //print fasta match if wanted
                         if (fasta) {
                             ofstream outf;
                             m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
-                            thisRead.seq.printSequence(outf);
+                            thisRead.getSequence().printSequence(outf);
                             outf.close();
                         }
                         
@@ -713,22 +691,21 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         if (qual) {
                             ofstream outq;
                             m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
-                            outq << ">" << thisRead.seq.getName() << endl;
-                            for (int i = 0; i < qualScores.size(); i++) { outq << qualScores[i] << " "; }
+                            thisRead.getQuality().printQScores(outq);
                             outq.close();
                         }
                     }else{
                         //print no match fastq
                         ofstream out;
                         m->openOutputFileAppend(ffqnoMatchFile, out);
-                        out << thisRead.wholeRead;
+                        thisRead.printFastq(out);
                         out.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf;
                             m->openOutputFileAppend(ffnoMatchFile, outf);
-                            thisRead.seq.printSequence(outf);
+                            thisRead.getSequence().printSequence(outf);
                             outf.close();
                         }
                         
@@ -736,8 +713,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         if (qual) {
                             ofstream outq;
                             m->openOutputFileAppend(fqnoMatchFile, outq);
-                            outq << ">" << thisRead.seq.getName() << endl;
-                            for (int i = 0; i < qualScores.size(); i++) { outq << qualScores[i] << " "; }
+                            thisRead.getQuality().printQScores(outq);
                             outq.close();
                         }
                     }
@@ -764,97 +740,14 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
 	}
 }
 //**********************************************************************************************************************
-fastqRead2 ParseFastaQCommand::readFastq(ifstream& in, bool& ignore){
-    try {
-        ignore = false;
-        string wholeRead = "";
-        
-        //read sequence name
-        string line = m->getline(in); m->gobble(in); if (split > 1) { wholeRead += line + "\n"; }
-        vector<string> pieces = m->splitWhiteSpace(line);
-        string name = "";  if (pieces.size() != 0) { name = pieces[0]; }
-        if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
-        else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
-        else { name = name.substr(1); }
-        
-        //read sequence
-        string sequence = m->getline(in); m->gobble(in); if (split > 1) { wholeRead += sequence + "\n"; }
-        if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
-        
-        //read sequence name
-        line = m->getline(in); m->gobble(in); if (split > 1) { wholeRead += line + "\n"; }
-        pieces = m->splitWhiteSpace(line);
-        string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
-        if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
-        else if (name2[0] != '+') { m->mothurOut("[WARNING]: reading " + name2 + " expected a name with + as a leading character, ignoring."); ignore=true; }
-        else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
-        
-        
-        //read quality scores
-        string quality = m->getline(in); m->gobble(in); if (split > 1) { wholeRead += quality + "\n"; }
-        if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
-        
-        //sanity check sequence length and number of quality scores match
-        if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
-        if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
-        
-        m->checkName(name);
-        Sequence seq(name, sequence);
-        fastqRead2 read(seq, quality, wholeRead);
-            
-        if (m->debug) { m->mothurOut("[DEBUG]: " + read.seq.getName() + " " + read.seq.getAligned() + " " + quality + "\n"); }
-        
-        return read;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ParseFastaQCommand", "readFastq");
-        exit(1);
-    }
-}
-
-//**********************************************************************************************************************
-vector<int> ParseFastaQCommand::convertQual(string qual) {
-	try {
-		vector<int> qualScores;
-		
-        bool negativeScores = false;
-        
-		for (int i = 0; i < qual.length(); i++) { 
-            
-            int temp = 0;
-            temp = int(qual[i]);
-            if (format == "illumina") {
-                temp -= 64; //char '@'
-            }else if (format == "illumina1.8+") {
-                temp -= int('!'); //char '!'
-            }else if (format == "solexa") {
-                temp = int(convertTable[temp]); //convert to sanger
-                temp -= int('!'); //char '!'
-            }else {
-                temp -= int('!'); //char '!'
-            }
-            if (temp < -5) { negativeScores = true; }
-			qualScores.push_back(temp);
-		}
-		
-        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
-        
-		return qualScores;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "convertQual");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
+int ParseFastaQCommand::findGroup(Sequence& currSeq, QualityScores& currQual, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
 	try {
         int success = 1;
         string trashCode = "";
         int currentSeqsDiffs = 0;
         
-        Sequence currSeq(thisRead.seq.getName(), thisRead.seq.getAligned());
-        QualityScores currQual; currQual.setScores(convertQual(thisRead.quality));
+        //Sequence currSeq(thisRead.seq.getName(), thisRead.seq.getAligned());
+        //QualityScores currQual; currQual.setScores(convertQual(thisRead.quality));
         
         //for reorient
         Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
@@ -954,12 +847,12 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
 	}
 }
 //**********************************************************************************************************************
-int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer, string groupMode) {
+int ParseFastaQCommand::findGroup(Sequence seq, int& barcode, int& primer, string groupMode) {
 	try {
         string trashCode = "";
         primer = 0;
         
-        string group = groupMap->getGroup(thisRead.seq.getName());
+        string group = groupMap->getGroup(seq.getName());
         if (group == "not found") {     trashCode += "g";   } //scrap for group
         else {  barcode = GroupToFile[group]; }
     
@@ -971,16 +864,16 @@ int ParseFastaQCommand::findGroup(fastqRead2 thisRead, int& barcode, int& primer
 	}
 }
 //**********************************************************************************************************************
-int ParseFastaQCommand::findGroup(fastqRead2 thisfRead, fastqRead2 thisrRead, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
+int ParseFastaQCommand::findGroup(Sequence& fcurrSeq, QualityScores& fcurrQual, Sequence& rcurrSeq, QualityScores& rcurrQual, int& barcode, int& primer, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos, int numBarcodes, int numPrimers) {
 	try {
         int success = 1;
         string trashCode = "";
         int currentSeqsDiffs = 0;
         
-        Sequence fcurrSeq(thisfRead.seq.getName(), thisfRead.seq.getAligned());
-        QualityScores fcurrQual; fcurrQual.setScores(convertQual(thisfRead.quality));
-        Sequence rcurrSeq(thisrRead.seq.getName(), thisrRead.seq.getAligned());
-        QualityScores rcurrQual; rcurrQual.setScores(convertQual(thisrRead.quality));
+        //Sequence fcurrSeq(thisfRead.seq.getName(), thisfRead.seq.getAligned());
+        //QualityScores fcurrQual; fcurrQual.setScores(convertQual(thisfRead.quality));
+        //Sequence rcurrSeq(thisrRead.seq.getName(), thisrRead.seq.getAligned());
+        //QualityScores rcurrQual; rcurrQual.setScores(convertQual(thisrRead.quality));
         
         //for reorient
         Sequence fsavedSeq(fcurrSeq.getName(), fcurrSeq.getAligned());

@@ -14,18 +14,9 @@
 #include "command.hpp"
 #include "trimoligos.h"
 #include "sequence.hpp"
+#include "fastqread.h"
 #include "groupmap.h"
 #include "oligos.h"
-
-struct fastqRead2 {
-    string quality;
-	Sequence seq;
-    string wholeRead;
-	
-	fastqRead2() {  };
-	fastqRead2(Sequence s, string q, string w) : seq(s), quality(q), wholeRead(w){};
-	~fastqRead2() {};
-};
 
 
 class ParseFastaQCommand : public Command {
@@ -75,10 +66,10 @@ private:
     vector<char> convertTable;
     bool readOligos(string oligosFile);
     bool readGroup(string oligosFile);
-    fastqRead2 readFastq(ifstream&, bool&);
-    int findGroup(fastqRead2, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
-    int findGroup(fastqRead2, int&, int&, string);
-    int findGroup(fastqRead2, fastqRead2, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
+    //fastqRead2 readFastq(ifstream&, bool&);
+    int findGroup(Sequence&, QualityScores&, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
+    int findGroup(Sequence, int&, int&, string);
+    int findGroup(Sequence&, QualityScores&, Sequence&, QualityScores&, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
     
     
 };
