@@ -389,6 +389,8 @@
 		48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */; };
 		48C728791B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
 		48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
+		48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */; };
+		48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9691CA4262A008DF76B /* dataset.cpp */; };
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -832,6 +834,10 @@
 		48C728761B6AB4EE00D40830 /* testsequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testsequence.h; path = testcontainers/testsequence.h; sourceTree = "<group>"; };
 		48C728771B728D6B00D40830 /* biominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = biominfocommand.cpp; path = source/commands/biominfocommand.cpp; sourceTree = "<group>"; };
 		48C728781B728D6B00D40830 /* biominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = biominfocommand.h; path = source/commands/biominfocommand.h; sourceTree = "<group>"; };
+		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testvsearchfileparser.cpp; sourceTree = "<group>"; };
+		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testvsearchfileparser.h; sourceTree = "<group>"; };
+		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dataset.cpp; sourceTree = "<group>"; };
+		48D6E96A1CA4262A008DF76B /* dataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = "<group>"; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = "<group>"; };
@@ -1713,6 +1719,10 @@
 			children = (
 				481FB5201AC0A6B60076CFF3 /* catch.hpp */,
 				481FB51B1AC0A63E0076CFF3 /* main.cpp */,
+				48D6E9691CA4262A008DF76B /* dataset.cpp */,
+				48D6E96A1CA4262A008DF76B /* dataset.h */,
+				48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */,
+				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
 				481FB5211AC0A9B40076CFF3 /* testcommands */,
 			);
@@ -2878,6 +2888,7 @@
 				481FB5B31AC1B7300076CFF3 /* deuniquetreecommand.cpp in Sources */,
 				481FB5D91AC1B75C0076CFF3 /* makefastqcommand.cpp in Sources */,
 				481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */,
+				48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */,
 				481FB5851AC1B6FF0076CFF3 /* chimeracheckrdp.cpp in Sources */,
 				481FB55C1AC1B6660076CFF3 /* sharedbraycurtis.cpp in Sources */,
 				481FB5BE1AC1B74F0076CFF3 /* getmetacommunitycommand.cpp in Sources */,
@@ -2913,6 +2924,7 @@
 				481FB6921AC1BAA60076CFF3 /* taxonomyequalizer.cpp in Sources */,
 				481FB68A1AC1BA9E0076CFF3 /* alignnode.cpp in Sources */,
 				481FB58B1AC1B6FF0076CFF3 /* pintail.cpp in Sources */,
+				48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */,
 				481FB6041AC1B7970076CFF3 /* sensspeccommand.cpp in Sources */,
 				481FB6491AC1B7F40076CFF3 /* suffixdb.cpp in Sources */,
 				481FB6111AC1B7AC0076CFF3 /* splitabundcommand.cpp in Sources */,

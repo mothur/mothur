@@ -16,6 +16,10 @@
 
 class VsearchFileParser {
     
+#ifdef UNIT_TEST
+    friend class TestVsearchFileParser;
+#endif
+    
     public:
         VsearchFileParser(string f); //fastafile
         VsearchFileParser(string f, string n, string format); //fastafile, name or count file, format("name" or "count")

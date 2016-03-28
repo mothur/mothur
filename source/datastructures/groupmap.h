@@ -43,7 +43,7 @@ public:
     int renameSeq(string, string);
     int print(ofstream&);
     int print(ofstream&, vector<string>); //print certain groups
-    
+    int addSeq(string name, string group);
     
     map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
     
