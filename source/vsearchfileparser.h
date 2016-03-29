@@ -21,6 +21,7 @@ class VsearchFileParser {
 #endif
     
     public:
+        VsearchFileParser();
         VsearchFileParser(string f); //fastafile
         VsearchFileParser(string f, string n, string format); //fastafile, name or count file, format("name" or "count")
         ~VsearchFileParser(){}
@@ -28,7 +29,8 @@ class VsearchFileParser {
         string getVsearchFile(); //creates vsearch formatted file. degapped, abundance appended, and sorted.
         string getCountFile(); //returns count filename. If no names or count file is given, then a count file is generated. 
         int createListFile(string uc, string listfile, string, string, int numbins, string label); //takes vsearch output and creates list file
-        int getNumBins(string logfile); 
+        int getNumBins(string logfile);
+        void setFastaFile(string f) { fastafile = f; }
     
     private:
         MothurOut* m;

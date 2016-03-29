@@ -9,16 +9,16 @@
 #ifndef __Mothur__testvsearchfileparser__
 #define __Mothur__testvsearchfileparser__
 
+
 #include "vsearchfileparser.h"
+#include "dataset.h"
 
 class TestVsearchFileParser : public VsearchFileParser {
     
+    
 public:
     
-    using VsearchFileParser::getNamesFile;
-    using VsearchFileParser::createVsearchFasta;
     using VsearchFileParser::removeAbundances;
-    
 };
 
 

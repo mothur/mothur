@@ -15,6 +15,8 @@ class TestRenameSeqsCommand : public RenameSeqsCommand {
     
 public:
     
+    MothurOut* m;
+    
     //private functions
     using RenameSeqsCommand::readQual;
     using RenameSeqsCommand::readContigs;

@@ -27,6 +27,11 @@
 
 class FastqRead {
 public:
+    
+#ifdef UNIT_TEST
+    friend class TestFastqRead;
+#endif
+    
     FastqRead();
     FastqRead(Sequence, QualityScores);
     FastqRead(Sequence, QualityScores, string);

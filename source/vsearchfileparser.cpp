@@ -13,6 +13,20 @@
 #include "sabundvector.hpp"
 
 /***********************************************************************/
+VsearchFileParser::VsearchFileParser(){
+    try {
+        m = MothurOut::getInstance();
+        fastafile = "";
+        namefile = "";
+        countfile = "";
+        format = "count";
+    }
+    catch(exception& e) {
+        m->errorOut(e, "VsearchFileParser", "VsearchFileParser");
+        exit(1);
+    }
+}
+/***********************************************************************/
 VsearchFileParser::VsearchFileParser(string f){
     try {
         m = MothurOut::getInstance();
@@ -48,6 +62,8 @@ VsearchFileParser::VsearchFileParser(string f, string nameOrCount, string forma)
 /***********************************************************************/
 string VsearchFileParser::getVsearchFile() {
     try {
+        if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->control_pressed = true;  }
+        
         //Run unique.seqs on the data if a name or count file is not given
         if ((namefile == "") && (countfile == ""))  {  countfile = getNamesFile(fastafile);     }
         else if (namefile != "")                    {  counts = m->readNames(namefile);        }

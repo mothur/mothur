@@ -14,7 +14,6 @@ class TestSequence : public Sequence {
     
     public:
     
-    //using Sequence::Sequence;
     using Sequence::initialize;
     
 };

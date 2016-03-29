@@ -13,6 +13,7 @@
 #include "sequence.hpp"
 #include "counttable.h"
 #include "groupmap.h"
+#include "sharedrabundvector.h"
 
 class TestDataSet  {
     
@@ -22,19 +23,23 @@ public:
     vector<Sequence> getSeqs() { fillSeqs(); return seqs; }
     map<string, string> getNameMap() { fillNames(); return nameMap; }
     GroupMap* getGroupMap() {  fillGroup(); return gMap; }
-    CountTable* getCountTable() { createCountable(); return ct; }
+    CountTable* getCountTable() { createCountTable(); return ct; }
+    vector<SharedRAbundVector*> getLookup() { fillLookup(); return lookup; }
+    
+    vector<string> getSubsetFNGFiles(int);  //number of uniques, Fasta, name, group returned
     
 private:
     MothurOut* m;
     vector<Sequence> seqs;
     map<string, string> nameMap;
-    CountTable ct;
+    CountTable* ct;
     GroupMap* gMap;
     vector<SharedRAbundVector*> lookup;
     void fillNames();
     void fillSeqs();
     void fillGroup();
     void createCountTable();
+    void fillLookup();
     
 };
 

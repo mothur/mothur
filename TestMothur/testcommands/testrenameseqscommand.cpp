@@ -6,10 +6,12 @@
 //  Copyright (c) 2015 Schloss Lab. All rights reserved.
 //
 
+#include "catch.hpp"
 #include "testrenameseqscommand.h"
 
 TEST_CASE("Testing Rename.seqs Command") {
     TestRenameSeqsCommand tRename;
+    MothurOut* m = MothurOut::getInstance();
     
     //setup environment
     tRename.fastaFile = m->testDirectory + "final.fasta";
@@ -29,7 +31,7 @@ TEST_CASE("Testing Rename.seqs Command") {
         tRename.groupfile = m->testDirectory + "final.groups";
         CAPTURE(tRename.execute()); // Displays this variable on a FAIL
         
-        CHECK(m->getNumErrors == 0);
+        CHECK(m->getNumErrors() == 0);
     }
     
     //add more tests...
