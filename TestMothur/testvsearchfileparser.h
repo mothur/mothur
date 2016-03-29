@@ -18,7 +18,18 @@ class TestVsearchFileParser : public VsearchFileParser {
     
 public:
     
+    TestVsearchFileParser();
+    ~TestVsearchFileParser();
+    
+    MothurOut* m;
+    TestDataSet data;
+    vector<string> filenames;
+    CountTable* ct;
+    
     using VsearchFileParser::removeAbundances;
+    
+
+   
 };
 
 

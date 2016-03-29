@@ -11,6 +11,8 @@
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
+		480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
+		480E8DB31CAB1F7900A0D137 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -2674,6 +2676,7 @@
 				481FB5461AC1B6190076CFF3 /* hamming.cpp in Sources */,
 				481FB6891AC1BA760076CFF3 /* phylosummary.cpp in Sources */,
 				481FB6881AC1B8B80076CFF3 /* weightedlinkage.cpp in Sources */,
+				480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */,
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
@@ -2856,6 +2859,7 @@
 				481FB6731AC1B8820076CFF3 /* seqnoise.cpp in Sources */,
 				481FB5DC1AC1B75C0076CFF3 /* makelookupcommand.cpp in Sources */,
 				481FB53D1AC1B5F80076CFF3 /* bstick.cpp in Sources */,
+				480E8DB31CAB1F7900A0D137 /* averagelinkage.cpp in Sources */,
 				481FB6681AC1B8450076CFF3 /* rarecalc.cpp in Sources */,
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB59F1AC1B71B0076CFF3 /* classifyrfsharedcommand.cpp in Sources */,

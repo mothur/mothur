@@ -10,15 +10,22 @@
 #include "testvsearchfileparser.h"
 
 /**************************************************************************************************/
+TestVsearchFileParser::TestVsearchFileParser() {  //setup
+    m = MothurOut::getInstance();
+    TestDataSet data;
+    filenames = data.getSubsetFNGFiles(10);
+    ct = data.getCountTable();
+}
+/**************************************************************************************************/
+TestVsearchFileParser::~TestVsearchFileParser() {
+    delete ct;
+    for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
+}
+/**************************************************************************************************/
 
 TEST_CASE("Testing VsearchParser Class") {
-    MothurOut* m = MothurOut::getInstance();
-    TestDataSet data;
-    vector<string> filenames = data.getSubsetFNGFiles(10);
-    CountTable* ct = data.getCountTable();
-    
-    VsearchFileParser vsearchParser(filenames[0], filenames[1], "name");
     TestVsearchFileParser testVParser;
+    VsearchFileParser vsearchParser(testVParser.filenames[0], testVParser.filenames[1], "name");
     
     SECTION("CreateVsearchFasta") {
         INFO("Using First 10 sequences of final.fasta and final.names") // Only appears on a FAIL
@@ -28,18 +35,18 @@ TEST_CASE("Testing VsearchParser Class") {
         CHECK(vsearchParser.getVsearchFile() == "tempSeqs.sorted.fasta.temp");
         
         ifstream in;
-        m->openInputFile(vsearchParser.getVsearchFile(), in);
+        testVParser.m->openInputFile(vsearchParser.getVsearchFile(), in);
         
         while (!in.eof()) {
-            Sequence seq(in); m->gobble(in);
+            Sequence seq(in); testVParser.m->gobble(in);
             
             vector<string> pieces;
             string name = seq.getName();
-            m->splitAtChar(name, pieces, '=');
+            testVParser.m->splitAtChar(name, pieces, '=');
             string abundString = pieces[1].substr(0, pieces[1].length()-1);
             int abund = 0;
-            m->mothurConvert(abundString, abund);
-            int totalSeqs = ct->getNumSeqs(seq.getName());
+            testVParser.m->mothurConvert(abundString, abund);
+            int totalSeqs = testVParser.ct->getNumSeqs(seq.getName());
             
             CHECK(abund == totalSeqs);
         }
