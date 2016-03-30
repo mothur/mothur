@@ -27,9 +27,8 @@ public:
     CountTable* ct;
     
     using VsearchFileParser::removeAbundances;
+    using VsearchFileParser::createListFile;
     
-
-   
 };
 
 

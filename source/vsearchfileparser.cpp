@@ -177,6 +177,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; m->gobble(in);
             
             seqName = removeAbundances(seqName);
+    
             
             if (format == "name") {
                 itName = nameMap.find(seqName);
