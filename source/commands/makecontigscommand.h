@@ -233,6 +233,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
     try {
         unsigned long long numReads = 0;
         pDataArray->delim = '@';
+        int poundMatchPos = pDataArray->poundMatchPosition;
+        string format = pDataArray->format;
         
         for (int l = pDataArray->start; l < pDataArray->end; l++) {
             int startTime = time(NULL);
@@ -254,31 +256,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             string forward = ""; string reverse = "";
             
             ifstream inForward, inReverse;
-#ifdef USE_BOOST
-            boost::iostreams::filtering_istream inFF, inRF;
-#endif
-            if (!gz) { //plain text files
-                m->openInputFile(forwardFile, inForward);
-                m->openInputFile(reverseFile, inReverse);
-                
-                FastqRead fread(inForward, error, format);
-                forward = fread.getName();
-                
-                FastqRead rread(inReverse, error, format);
-                reverse = rread.getName();
-                
-            }else { //compressed files
-#ifdef USE_BOOST
-                m->openInputFileBinary(forwardFile, inForward, inFF);
-                m->openInputFileBinary(reverseFile, inForward, inRF);
-                
-                FastqRead fread(inFF, error, format);
-                forward = fread.getName();
-                
-                FastqRead rread(inRF, error, format);
-                reverse = rread.getName();
-#endif
-            }
+
+            pDataArray->m->openInputFile(ffastqfile, inForward);
+            pDataArray->m->openInputFile(rfastqfile, inReverse);
+            
+            FastqRead fread(inForward, error, pDataArray->format);
+            forward = fread.getName();
+            
+            FastqRead rread(inReverse, error, pDataArray->format);
+            reverse = rread.getName();
+            
+            
             
             if (forward == reverse) {  type = perfectMatch;  }
             else {
@@ -296,7 +284,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 if (tempForward == tempReverse) { type = poundMatch;    }
             }
             
-            nameType = type;
+            pDataArray->nameType = type;
             ////////////////////////////////////////////////////////
             
             
@@ -556,7 +544,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             qual_score[0] = -2; qual_score[1] = -1.58147; qual_score[2] = -0.996843; qual_score[3] = -0.695524; qual_score[4] = -0.507676; qual_score[5] = -0.38013; qual_score[6] = -0.289268; qual_score[7] = -0.222552; qual_score[8] = -0.172557; qual_score[9] = -0.134552; qual_score[10] = -0.105361; qual_score[11] = -0.0827653; qual_score[12] = -0.0651742; qual_score[13] = -0.0514183; qual_score[14] = -0.0406248; qual_score[15] = -0.0321336; qual_score[16] = -0.0254397; qual_score[17] = -0.0201544; qual_score[18] = -0.0159759; qual_score[19] = -0.0126692; qual_score[20] = -0.0100503; qual_score[21] = -0.007975; qual_score[22] = -0.00632956; qual_score[23] = -0.00502447; qual_score[24] = -0.00398902; qual_score[25] = -0.00316729; qual_score[26] = -0.00251505; qual_score[27] = -0.00199726; qual_score[28] = -0.00158615; qual_score[29] = -0.00125972; qual_score[30] = -0.0010005; qual_score[31] = -0.000794644; qual_score[32] = -0.000631156; qual_score[33] = -0.000501313; qual_score[34] = -0.000398186; qual_score[35] = -0.000316278; qual_score[36] = -0.00025122; qual_score[37] = -0.000199546; qual_score[38] = -0.000158502; qual_score[39] = -0.0001259; qual_score[40] = -0.000100005; qual_score[41] = -7.9436e-05; qual_score[42] = -6.30977e-05; qual_score[43] = -5.012e-05; qual_score[44] = -3.98115e-05; qual_score[45] = -3.16233e-05; qual_score[46] = -2.51192e-05;
             
             int longestBase = 1000;
-            int poundMatchPos = p->poundMatchPosition;
+            int poundMatchPos = pDataArray->poundMatchPosition;
             
             Alignment* alignment;
             if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
@@ -913,8 +901,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         
                     }else { //reading fasta and maybe qual
-                        Sequence tfSeq(inFFasta); pDataArray->m->gobble(inFFasta);
-                        Sequence trSeq(inRFasta); pDataArray->m->gobble(inRFasta);
+                        Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
+                        Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
@@ -945,7 +933,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
-                            Sequence tf2Seq(inFFasta); pDataArray->m->gobble(inFFasta);
+                            Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
                             ///bool fixed = checkName(f2read, rread);
                             //////////////////////////////////////////////////////////////
                             fixed = false;
@@ -975,7 +963,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
                             
                             if (!fixed) {
-                                Sequence tr2Seq(inRFasta); pDataArray->m->gobble(inRFasta);
+                                Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 fixed = false;
@@ -1004,17 +992,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     }
                                 }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
                                 
-                                if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-                                else { trSeq = tr2Seq; }
+                                if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                                else { rread = r2read; }
                                 
-                            }else { tfSeq = tf2Seq; }
+                            }else { fread = f2read; }
                             /////////////////////////////////////////////////////////////
                             
                         }
                         
                         
-                        fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
-                        rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
+                        fSeq.setName(fread.getName()); fSeq.setAligned(fread.getAligned());
+                        rSeq.setName(rread.getName()); rSeq.setAligned(rread.getAligned());
                         if (thisfqualindexfile != "") {
                             fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                             rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
@@ -1054,10 +1042,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             
                             savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                             savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
-                            if (fQual->getName() != tfSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-                            if (rQual->getName() != trSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
+                            if (fQual->getName() != fread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                            if (rQual->getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + rread.getName() + ".\n"); ignore = true; }
                         }
-                        if (tfSeq.getName() != trSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                        if (fread.getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                     }
                 }else {
                     #ifdef USE_BOOST
@@ -2193,7 +2181,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
          */
         
         int longestBase = 1000;
-        int poundMatchPos = p->poundMatchPosition;
+        int poundMatchPos = pDataArray->poundMatchPosition;
         
         Alignment* alignment;
         if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
@@ -2304,6 +2292,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
                 
                 ///bool fixed = checkName(fread, rread);
+                bool fixed = false;
                 //////////////////////////////////////////////////////////////
                 if (pDataArray->nameType == poundMatch) {
                     fixed = poundMatch;
@@ -2543,11 +2532,11 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
                 
             }else { //reading fasta and maybe qual
-                Sequence tfSeq(inFFasta); pDataArray->m->gobble(inFFasta);
-                Sequence trSeq(inRFasta); pDataArray->m->gobble(inRFasta);
+                Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
+                Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
                 ///bool fixed = checkName(fread, rread);
                 //////////////////////////////////////////////////////////////
-                fixed = false;
+                bool fixed = false;
                 if (pDataArray->nameType == poundMatch) {
                     fixed = poundMatch;
                     //we know the location of the # matches in the forward and reverse
@@ -2574,7 +2563,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
-                    Sequence tf2Seq(inFFasta); pDataArray->m->gobble(inFFasta);
+                    Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
                     ///bool fixed = checkName(f2read, rread);
                     //////////////////////////////////////////////////////////////
                     fixed = false;
@@ -2604,7 +2593,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
                     
                     if (!fixed) {
-                        Sequence tr2Seq(inRFasta); pDataArray->m->gobble(inRFasta);
+                        Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
                         ///bool fixed = checkName(fread, r2read);
                         //////////////////////////////////////////////////////////////
                         fixed = false;
@@ -2633,17 +2622,17 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             }
                         }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
                         
-                        if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-                        else { trSeq = tr2Seq; }
+                        if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                        else { rread = r2read; }
                         
-                    }else { tfSeq = tf2Seq; }
+                    }else { fread = f2read; }
                     /////////////////////////////////////////////////////////////
                     
                 }
 
 
-                fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
-                rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
+                fSeq.setName(fread.getName()); fSeq.setAligned(fread.getAligned());
+                rSeq.setName(rread.getName()); rSeq.setAligned(rread.getAligned());
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
@@ -2682,10 +2671,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 
                     savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                     savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
-                    if (fQual->getName() != tfSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
-                    if (rQual->getName() != trSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
+                    if (fQual->getName() != fread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
+                    if (rQual->getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + rread.getName() + ".\n"); ignore = true; }
                 }
-                if (tfSeq.getName() != trSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+                if (fread.getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
             }
             
             int barcodeIndex = 0;
