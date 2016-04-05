@@ -597,8 +597,8 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 	try {
 		vector<string> filenames;
 		
-		map<string, ofstream*> filehandles;
-		map<string, ofstream*>::iterator it3;
+		map<string, string> files;
+		map<string, string>::iterator it3;
 					
 		input = new InputData(filename, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
@@ -607,33 +607,27 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
-			m->mothurRemove((sharedFileRoot + lookup[i]->getGroup() + ".rabund"));
-			filenames.push_back((sharedFileRoot + lookup[i]->getGroup() + ".rabund"));
+            ofstream temp;
+            string group = lookup[i]->getGroup();
+			m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
+			filenames.push_back((sharedFileRoot + group + ".rabund"));
+            files[group] = (sharedFileRoot + group + ".rabund");
+            groups.push_back(group);
 		}
 		
-		ofstream* temp;
-		for (int i=0; i<lookup.size(); i++) {
-			temp = new ofstream;
-			filehandles[lookup[i]->getGroup()] = temp;
-			groups.push_back(lookup[i]->getGroup());
-		}
-
 		while(lookup[0] != NULL) {
 		
 			for (int i = 0; i < lookup.size(); i++) {
 				RAbundVector rav = lookup[i]->getRAbundVector();
-				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
-				rav.print(*(filehandles[lookup[i]->getGroup()]));
-				(*(filehandles[lookup[i]->getGroup()])).close();
+                ofstream temp;
+                string group = lookup[i]->getGroup();
+				m->openOutputFileAppend(files[group], temp);
+				rav.print(temp);
+				temp.close();
 			}
 		
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors();
-		}
-		
-		//free memory
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			delete it3->second;
 		}
 		
 		delete input;

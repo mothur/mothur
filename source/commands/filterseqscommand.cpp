@@ -284,13 +284,6 @@ int FilterSeqsCommand::execute() {
 		
 		if (m->control_pressed) { outputTypes.clear(); return 0; }
 		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output the filter
-		#endif
-		
 		ofstream outFilter;
 		
 		//prevent giantic file name
@@ -303,11 +296,7 @@ int FilterSeqsCommand::execute() {
 		outFilter << filter << endl;
 		outFilter.close();
 		outputNames.push_back(filterFile); outputTypes["filter"].push_back(filterFile);
-		
-		#ifdef USE_MPI
-			}
-		#endif
-		
+				
 		////////////run filter/////////////////
 		
 		m->mothurOut("Running Filter... "); m->mothurOutEndLine();
@@ -363,88 +352,6 @@ int FilterSeqsCommand::filterSequences() {
                 map<string, string> variables; 
                 variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s]));
 				string filteredFasta = getOutputFileName("fasta", variables);
-#ifdef USE_MPI	
-				int pid, numSeqsPerProcessor, num; 
-				int tag = 2001;
-				vector<unsigned long long>MPIPos;
-						
-				MPI_Status status; 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-				MPI_File outMPI;
-				MPI_File inMPI;
-				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-				int inMode=MPI_MODE_RDONLY; 
-				
-				char outFilename[1024];
-				strcpy(outFilename, filteredFasta.c_str());
-			
-				char inFileName[1024];
-				strcpy(inFileName, fastafileNames[s].c_str());
-				
-				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
-
-				if (pid == 0) { //you are the root process 
-					
-					MPIPos = m->setFilePosFasta(fastafileNames[s], num); //fills MPIPos, returns numSeqs
-					numSeqs += num;
-					
-					//send file positions to all processes
-					for(int i = 1; i < processors; i++) { 
-						MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-						MPI_Send(&MPIPos[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-					}
-					
-					//figure out how many sequences you have to do
-					numSeqsPerProcessor = num / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
-					
-				
-					//do your part
-					driverMPIRun(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
-					
-					//wait on chidren
-					for(int i = 1; i < processors; i++) { 
-						char buf[5];
-						MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
-					}
-					
-				}else { //you are a child process
-					MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(num+1);
-					numSeqs += num;
-					MPI_Recv(&MPIPos[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = num / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
-					
-					
-					//align your part
-					driverMPIRun(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);		
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
-					
-					char buf[5];
-					strcpy(buf, "done"); 
-					
-					//tell parent you are done.
-					MPI_Send(buf, 5, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
-				}
-				
-				MPI_File_close(&outMPI);
-				MPI_File_close(&inMPI);
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-#else
             
             vector<unsigned long long> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
@@ -455,7 +362,7 @@ int FilterSeqsCommand::filterSequences() {
                 if(processors != 1){
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 }
 #endif
             }
@@ -498,7 +405,7 @@ int FilterSeqsCommand::filterSequences() {
 
 				if (m->control_pressed) {  return 1; }
 		#endif
-#endif
+
 			outputNames.push_back(filteredFasta); outputTypes["fasta"].push_back(filteredFasta);
 		}
 
@@ -509,80 +416,6 @@ int FilterSeqsCommand::filterSequences() {
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-/**************************************************************************************/
-int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long long>& MPIPos) {	
-	try {
-		string outputString = "";
-		int count = 0;
-		MPI_Status status; 
-		
-		for(int i=0;i<num;i++){
-		
-			if (m->control_pressed) { return 0; }
-		
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buf4;
-	
-			Sequence seq(iss);  m->gobble(iss);
-			
-			if (seq.getName() != "") {
-				string align = seq.getAligned();
-				string filterSeq = "";
-					
-				for(int j=0;j<alignmentLength;j++){
-					if(filter[j] == '1'){
-						filterSeq += align[j];
-					}
-				}
-				
-				count++;
-				outputString += ">" + seq.getName() + "\n" + filterSeq + "\n";
-				
-				if(count % 10 == 0){ //output to file 
-					//send results to parent
-					int length = outputString.length();
-					char* buf = new char[length];
-					memcpy(buf, outputString.c_str(), length);
-				
-					MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
-					outputString = "";
-					delete buf;
-				}
-
-			}
-			
-			if((i+1) % 100 == 0){	cout << (i+1) << endl;		}
-		}
-		
-		if(outputString != ""){ //output to file 
-			//send results to parent
-			int length = outputString.length();
-			char* buf = new char[length];
-			memcpy(buf, outputString.c_str(), length);
-			
-			MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
-			outputString = "";
-			delete buf;
-		}
-		
-		if((num) % 100 != 0){	cout << (num) << endl;	 	}
-			
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "driverRunFilter");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************/
 int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string inputFilename, linePair* filePos) {	
 	try {
@@ -831,69 +664,6 @@ string FilterSeqsCommand::createFilter() {
 			
 				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
-#ifdef USE_MPI	
-				int pid, numSeqsPerProcessor, num; 
-				int tag = 2001;
-				vector<unsigned long long> MPIPos;
-				
-				MPI_Status status; 
-				MPI_File inMPI; 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-							
-				//char* tempFileName = new char(fastafileNames[s].length());
-				//tempFileName = &(fastafileNames[s][0]);
-				
-				char tempFileName[1024];
-				strcpy(tempFileName, fastafileNames[s].c_str());
-		
-				MPI_File_open(MPI_COMM_WORLD, tempFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  return 0;  }
-				
-				if (pid == 0) { //you are the root process
-						MPIPos = m->setFilePosFasta(fastafileNames[s], num); //fills MPIPos, returns numSeqs
-						numSeqs += num;
-						
-						//send file positions to all processes
-						for(int i = 1; i < processors; i++) { 
-							MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-							MPI_Send(&MPIPos[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-						}
-								
-						//figure out how many sequences you have to do
-						numSeqsPerProcessor = num / processors;
-						int startIndex =  pid * numSeqsPerProcessor;
-						if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
-						
-				
-						//do your part
-						MPICreateFilter(startIndex, numSeqsPerProcessor, F, inMPI, MPIPos);
-						
-						if (m->control_pressed) {  MPI_File_close(&inMPI);  return 0;  }
-												
-				}else { //i am the child process
-					MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(num+1);
-					numSeqs += num;
-					MPI_Recv(&MPIPos[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = num / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
-					
-					
-					//do your part
-					MPICreateFilter(startIndex, numSeqsPerProcessor, F, inMPI,  MPIPos);
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  return 0;  }
-				}
-				
-				MPI_File_close(&inMPI);
-				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-#else
 				
                 vector<unsigned long long> positions;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -917,7 +687,7 @@ string FilterSeqsCommand::createFilter() {
 				}else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                     
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -935,93 +705,15 @@ string FilterSeqsCommand::createFilter() {
                 if (!recalced) {  savedPositions[s] = positions; }
                 
 				if (m->control_pressed) {  return filterString; }
-#endif
 			
 			}
 		}
-
-
-#ifdef USE_MPI	
-		int pid;
-		int Atag = 1; int Ttag = 2; int Ctag = 3; int Gtag = 4; int Gaptag = 5;
-		MPI_Status status;
-		
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){
-			
-			if (pid == 0) { //only one process should output the filter
-			
-				vector<int> temp; temp.resize(alignmentLength+1);
-								
-				//get the frequencies from the child processes
-				for(int i = 1; i < processors; i++) { 
-				
-					for (int j = 0; j < 5; j++) {
-					
-						MPI_Recv(&temp[0], (alignmentLength+1), MPI_INT, i, 2001, MPI_COMM_WORLD, &status); 
-						int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what letter count this is for
-						
-						if (receiveTag == Atag) { //you are recieveing the A frequencies
-							for (int k = 0; k < alignmentLength; k++) {		F.a[k] += temp[k];	}
-						}else if (receiveTag == Ttag) { //you are recieveing the T frequencies
-							for (int k = 0; k < alignmentLength; k++) {		F.t[k] += temp[k];	}
-						}else if (receiveTag == Ctag) { //you are recieveing the C frequencies
-							for (int k = 0; k < alignmentLength; k++) {		F.c[k] += temp[k];	}
-						}else if (receiveTag == Gtag) { //you are recieveing the G frequencies
-							for (int k = 0; k < alignmentLength; k++) {		F.g[k] += temp[k];	}
-						}else if (receiveTag == Gaptag) { //you are recieveing the gap frequencies
-							for (int k = 0; k < alignmentLength; k++) {		F.gap[k] += temp[k];	}
-						}
-					}
-				} 
-			}else{
-			
-				//send my fequency counts
-				F.a.push_back(Atag);
-				int ierr = MPI_Send(&(F.a[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				F.t.push_back(Ttag);
-				ierr = MPI_Send (&(F.t[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				F.c.push_back(Ctag);
-				ierr = MPI_Send(&(F.c[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				F.g.push_back(Gtag);
-				ierr = MPI_Send(&(F.g[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				F.gap.push_back(Gaptag);
-				ierr = MPI_Send(&(F.gap[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-			}
-			
-		}
-		
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-		
-		if (pid == 0) { //only one process should output the filter
-#endif
 
 		F.setNumSeqs(numSeqs);
 		if(m->isTrue(vertical) == 1)	{	F.doVertical();	}
 		if(soft != 0)				{	F.doSoft();		}
 		filterString = F.getFilter();
-		
-#ifdef USE_MPI
-		//send filter string to kids
-		//for(int i = 1; i < processors; i++) { 
-		//	MPI_Send(&filterString[0], alignmentLength, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-		//}
-		MPI_Bcast(&filterString[0], alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD);
-	}else{
-		//recieve filterString
-		char* tempBuf = new char[alignmentLength];
-		//MPI_Recv(&tempBuf[0], alignmentLength, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-		MPI_Bcast(tempBuf, alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD);
-		
-		filterString = tempBuf;
-		if (filterString.length() > alignmentLength) { filterString = filterString.substr(0, alignmentLength);  }
-		delete tempBuf;	
-	}
-	
-	MPI_Barrier(MPI_COMM_WORLD);
-#endif
-            
+        
 		return filterString;
 	}
 	catch(exception& e) {
@@ -1051,8 +743,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 					
 			Sequence seq(in); m->gobble(in);
 			if (seq.getName() != "") {
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();}
-                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); error = true; if (!m->debug) { m->control_pressed = true; } }
+                    if (m->debug) { m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();}
+                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); error = true; if (!m->debug) { m->control_pressed = true; }else{ m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();} }
 					
 					if(trump != '*')			{	F.doTrump(seq);		}
 					if(m->isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}
@@ -1083,53 +775,6 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-/**************************************************************************************/
-int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File& inMPI, vector<unsigned long long>& MPIPos) {	
-	try {
-		
-		MPI_Status status; 
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		for(int i=0;i<num;i++){
-			
-			if (m->control_pressed) { return 0; }
-			
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-	
-			char* buf4 = new char[length];
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			delete buf4;
-
-			Sequence seq(iss);  
-
-			if (seq.getAligned().length() != alignmentLength) {  cout << "Alignment length is " << alignmentLength << " and sequence " << seq.getName() << " has length " << seq.getAligned().length() << ", please correct." << endl; exit(1);  }
-			
-			if(trump != '*'){	F.doTrump(seq);	}
-			if(m->isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
-			cout.flush();
-						
-			//report progress
-			if((i+1) % 100 == 0){	cout << (i+1) << endl;		}
-		}
-		
-		//report progress
-		if((num) % 100 != 0){	cout << num << endl; 	}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "MPICreateFilter");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/
 
 int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {

@@ -357,7 +357,7 @@ int LefseCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
-        srand(time(NULL));
+        srand((unsigned)time(NULL));
         return 0;
 		
     }
@@ -767,8 +767,8 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
         int fractionNumGroups = numGroups * fBoots; //rfk
         minCl = (int)((float)(minCl*fBoots*fBoots*0.05));
         minCl = max(minCl, 1);
-        
-        if (m->debug) { m->mothurOut("[DEBUG]: about to start iters. \n."); }
+ 
+        if (m->debug) { m->mothurOut("[DEBUG]: about to start iters. FractionGroups = " + toString(fractionNumGroups) + "\n."); }
         
         vector< vector< vector<double> > > results;//[iters][numComparison][numOTUs]
         for (int j = 0; j < iters; j++) {
@@ -782,7 +782,9 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
                 save = h;
                 rand_s.clear();
-                for (int k = 0; k < fractionNumGroups; k++) {  rand_s.push_back(m->getRandomIndex(numGroups-1)); }
+                for (int k = 0; k < fractionNumGroups; k++) {  int index = m->getRandomIndex(numGroups-1); rand_s.push_back(index);
+                    //if (m->debug) { m->mothurOut("[DEBUG]: index = " + toString(index) + "\n."); }
+                }
                 if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
             if (m->control_pressed) { return sigOTUS; }
@@ -950,13 +952,15 @@ vector< vector<double> > LefseCommand::lda(vector< vector<double> >& adjustedLoo
 //modelled after lefse.py contast_within_classes_or_few_per_class function
 bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& lookup, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex, map<int, string> indexToClass) {
     try {
-        set<string> cls;
+        map<string, int> cls;
         int countFound = 0;
         
         for (int i = 0; i < rands.size(); i++) { //fill cls with the classes represented in the random selection
             for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {
                 if (m->inUsersGroups(rands[i], (it->second))) {
-                    cls.insert(it->first);
+                    map<string, int>::iterator itClass = cls.find(it->first);
+                    if (itClass != cls.end()) { itClass->second++; }
+                    else { cls[it->first] = 1;  }
                     countFound++;
                 }
             }
@@ -967,8 +971,8 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
         
         if (cls.size() < class2GroupIndex.size()) { return true; } //some classes are not present in sampling
         
-        for (set<string>::iterator it = cls.begin(); it != cls.end(); it++) {
-            if (cls.count(*it) < minCl) { return true; } //this sampling has class count below minimum
+        for (map<string, int>::iterator itClass = cls.begin(); itClass != cls.end(); itClass++) {
+            if (itClass->second < minCl) { return true; } //this sampling has class count below minimum
         }
         
         //for this otu

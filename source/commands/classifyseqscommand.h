@@ -69,19 +69,13 @@ private:
 	Classify* classify;
 	ReferenceDB* rdb;
 	
-	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
-	int processors, kmerSize, numWanted, cutoff, iters;
+	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
+	int processors, kmerSize, numWanted, cutoff, iters, printlevel;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 
-	string addUnclassifieds(string, int);
-	
-	int MPIReadNamesFile(string);
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	#endif
 };
 
 /**************************************************************************************************/

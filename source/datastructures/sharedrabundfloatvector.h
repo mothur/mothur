@@ -39,13 +39,14 @@ public:
 	string getGroup();
 	void setGroup(string);
 	int getGroupIndex();
-	void setGroupIndex(int);								
+	void setGroupIndex(int);
 
 	void set(int, float, string);			//OTU, abundance, groupname
 	individualFloat get(int);
 	vector <individual> getData();
 	float getAbundance(int);
     vector<float> getAbundances();
+    vector<double> getAbundances(string);
 	void push_front(float, int, string); //abundance, otu, groupname
 	void insert(float, int, string); //abundance, otu, groupname
 	void push_back(float, string);  //abundance, groupname
@@ -67,6 +68,7 @@ public:
 	vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
 	
 private:
+    int eliminateZeroOTUS();
 	vector<individualFloat>  data; 
 	vector<SharedRAbundFloatVector*> lookup;
 	//GlobalData* globaldata;
@@ -77,7 +79,7 @@ private:
 	string group;
 	int index;	
 	
-	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
+	
 };
 
 

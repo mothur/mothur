@@ -340,7 +340,7 @@ int PcrSeqsCommand::execute(){
             lines.push_back(linePair(0, 1000));
         }else {
             positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-            if (positions.size() < processors) { processors = positions.size(); }
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             //figure out how many sequences you have to process
             int numSeqsPerProcessor = numFastaSeqs / processors;

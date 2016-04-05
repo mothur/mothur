@@ -21,6 +21,31 @@
 /************************************************************/
  GroupMap::~GroupMap(){}
 /************************************************************/
+int GroupMap::addSeq(string name, string group) {
+    try {
+        int error = 0;
+        
+        setNamesOfGroups(group);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: name = '" + name + "', group = '" + group + "'\n"); }
+        m->checkName(name);
+        it = groupmap.find(name);
+        
+        if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+        else {
+            groupmap[name] = group;	//store data in map
+            seqsPerGroup[group]++;  //increment number of seqs in that group
+        }
+
+        
+        return error;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "addSeq");
+        exit(1);
+    }
+}
+/************************************************************/
 int GroupMap::readMap() {
     try {
         string seqName, seqGroup;

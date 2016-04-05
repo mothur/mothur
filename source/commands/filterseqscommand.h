@@ -56,10 +56,6 @@ private:
 	int createProcessesRunFilter(string, string, string);
 	int driverRunFilter(string, string, string, linePair*);
 	int driverCreateFilter(Filters& F, string filename, linePair* line);
-	#ifdef USE_MPI
-	int driverMPIRun(int, int, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	int MPICreateFilter(int, int, Filters&, MPI_File&, vector<unsigned long long>&);	
-	#endif
 	
 };
 
@@ -150,6 +146,7 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
 		}
 		
 		pDataArray->count = 0;
+        bool error = false;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
@@ -157,7 +154,8 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
 			Sequence current(in); pDataArray->m->gobble(in); 
 			
 			if (current.getName() != "") {
-				if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true;  }
+                if (pDataArray->m->debug) { pDataArray->m->mothurOutJustToScreen("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();}
+                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->debug) { pDataArray->m->control_pressed = true; }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
                 
                 if(pDataArray->trump != '*')			{	pDataArray->F.doTrump(current);		}
                 if(pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0)	{	pDataArray->F.getFreqs(current);	}
@@ -170,6 +168,8 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
         if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
         
 		in.close();
+        
+        if (error) { pDataArray->m->control_pressed = true; }
 		
 		return 0;
 		

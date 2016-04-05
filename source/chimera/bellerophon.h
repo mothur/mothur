@@ -11,7 +11,7 @@
  */
 
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "sparsematrix.hpp"
 #include "sequence.hpp"
 #include "dist.h"
@@ -21,7 +21,7 @@ typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeun
 
 /***********************************************************/
 
-class Bellerophon : public Chimera {
+class Bellerophon : public MothurChimera {
 	
 	public:
 		Bellerophon(string, bool, bool, int, int, int, string);	//fastafile, filter, correction, window, increment, processors, outputDir);	
@@ -29,10 +29,6 @@ class Bellerophon : public Chimera {
 		
 		int getChimeras();
 		int print(ostream&, ostream&, string);
-		
-		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&, string);
-		#endif
 		
 	private:
 		struct linePair {

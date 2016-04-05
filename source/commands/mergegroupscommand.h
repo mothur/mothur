@@ -16,6 +16,10 @@
 #include "designmap.h"
 
 class MergeGroupsCommand : public Command {
+    
+#ifdef UNIT_TEST
+    friend class TestMergeGroupsCommand;
+#endif
 	
 public:
 	MergeGroupsCommand(string);
@@ -41,12 +45,16 @@ private:
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile;
+	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile, method, fastafile;
 	vector<string> Groups, outputNames;
 		
 	int process(vector<SharedRAbundVector*>&, ofstream&);
 	int processSharedFile(DesignMap*&);
 	int processGroupFile(DesignMap*&);
+    int processCountFile(DesignMap*&);
+    int mergeAbund(vector<int>);
+    int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+    int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 };
 
 #endif

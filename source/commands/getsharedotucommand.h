@@ -14,6 +14,7 @@
 #include "listvector.hpp"
 #include "sequence.hpp"
 #include "groupmap.h"
+#include "counttable.h"
 #include "sharedrabundvector.h"
 #include "inputdata.h"
 
@@ -43,10 +44,11 @@ class GetSharedOTUCommand : public Command {
 		
 	private:
 		ListVector* list;
-		GroupMap* groupMap;
+        GroupMap* groupMap;
+        CountTable* ct;
 		
 		set<string> labels;
-		string fastafile, label, groups, listfile, groupfile, sharedfile, output, userGroups, outputDir, format;
+		string fastafile, label, groups, listfile, groupfile, sharedfile, output, userGroups, outputDir, format, countfile;
 		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;

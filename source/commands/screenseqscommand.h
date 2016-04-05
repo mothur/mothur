@@ -60,12 +60,8 @@ private:
     int createProcessesContigsSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<linePair>);
     int driverAlignSummary(vector<float>&, vector<float>&, vector<int>&, linePair);
     int createProcessesAlignSummary(vector<float>&, vector<float>&, vector<int>&, vector<linePair>);
-    
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, map<string, string>&);
-	#endif
-
-	bool abort;
+ 
+    bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
     float minSim, minScore, criteria;
@@ -426,7 +422,7 @@ static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){
                     if(pDataArray->endPos != -1 && pDataArray->endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|"; }
                     if(pDataArray->maxAmbig != -1 && pDataArray->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|"; }
                     if(pDataArray->maxHomoP != -1 && pDataArray->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|"; }
-                    if(pDataArray->minLength != -1 && pDataArray->minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|"; }
+                    if(pDataArray->minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|"; }
                     if(pDataArray->maxLength != -1 && pDataArray->maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|"; }
                 }
                 if (pDataArray->contigsreport == "") { //contigs report includes this so no need to check again

@@ -90,9 +90,6 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The maxlen parameter is the maximum unaligned sequence length. Defaults 10000. Applies to both query and reference sequences.\n";
 		helpString += "The ucl parameter - use local-X alignments. Default is global-X or false. On tests so far, global-X is always better; this option is retained because it just might work well on some future type of data.\n";
 		helpString += "The queryfract parameter - minimum fraction of the query sequence that must be covered by a local-X alignment. Default 0.5. Applies only when ucl is true.\n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "The chimera.uchime command should be in the following format: \n";
 		helpString += "chimera.uchime(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.uchime(fasta=AD.align, reference=silva.gold.align) \n";
@@ -693,7 +690,7 @@ int ChimeraUchimeCommand::execute(){
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-				printFile(nameMapCount, newFasta);
+				m->printVsearchFile(nameMapCount, newFasta);
 				fastaFileNames[s] = newFasta;
 			}
 			
@@ -1102,29 +1099,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		m->errorOut(e, "ChimeraUchimeCommand", "deconvoluteResults");
 		exit(1);
 	}
-}	
-//**********************************************************************************************************************
-int ChimeraUchimeCommand::printFile(vector<seqPriorityNode>& nameMapCount, string filename){
-	try {
-		
-		sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
-		
-		ofstream out;
-		m->openOutputFile(filename, out);
-		
-		//print new file in order of
-		for (int i = 0; i < nameMapCount.size(); i++) {
-			out << ">" << nameMapCount[i].name  << "/ab=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
-		}
-		out.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "printFile");
-		exit(1);
-	}
-}	
+}		
 //**********************************************************************************************************************
 int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 	try {
@@ -1691,39 +1666,28 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		//divide file
 		int count = 0;
 		int spot = 0;
-		map<int, ofstream*> filehandles;
-		map<int, ofstream*>::iterator it3;
 		
-		ofstream* temp;
 		for (int i = 0; i < processors; i++) {
-			temp = new ofstream;
-			filehandles[i] = temp;
-			m->openOutputFile(filename+toString(i)+".temp", *(temp));
-			files.push_back(filename+toString(i)+".temp");
+            ofstream temp;
+			files[i] = filename+toString(i)+".temp";
+			m->openOutputFile(filename+toString(i)+".temp", temp);
 		}
 		
 		ifstream in;
 		m->openInputFile(filename, in);
 		
 		while(!in.eof()) {
-			
-			if (m->control_pressed) { in.close(); for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { (*(it3->second)).close(); delete it3->second; } return 0; }
-			
 			Sequence tempSeq(in); m->gobble(in); 
 			
 			if (tempSeq.getName() != "") {
-				tempSeq.printSequence(*(filehandles[spot])); 
+                ofstream temp;
+                m->openOutputFileAppend(files[spot], temp);
+                tempSeq.printSequence(temp); temp.close();
 				spot++; count++;
 				if (spot == processors) { spot = 0; }
 			}
 		}
 		in.close();
-		
-		//delete memory
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			(*(it3->second)).close();
-			delete it3->second;
-		}
 		
 		//sanity check for number of processors
 		if (count < processors) { processors = count; }
@@ -1782,6 +1746,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		
 		//get rid of the file pieces.
 		for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }
+        
 		return num;	
 	}
 	catch(exception& e) {

@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "chimeraslayer.h"
 #include "sequenceparser.h"
 #include "sequencecountparser.h"
@@ -50,19 +50,12 @@ private:
     int sortFastaFile(vector<Sequence>&, map<string, int>&, string newFile);
 	string getNamesFile(string&);
 	//int setupChimera(string,);
-	int MPIExecute(string, string, string, string, map<string, int>&);
-	int deconvoluteResults(map<string, string>&, string, string, string);
+    int deconvoluteResults(map<string, string>&, string, string, string);
 	map<string, int> priority;
 	int setUpForSelfReference(SequenceParser*&, map<string, string>&, map<string, map<string, int> >&, int);
     int setUpForSelfReference(SequenceCountParser*&, map<string, string>&, map<string, map<string, int> >&, int);
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
 	int createProcessesGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
-	int MPIExecuteGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
-
-		
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, set<string>&, vector<unsigned long long>&, string, map<string, int>&, bool);
-	#endif
 
 	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
 	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;
@@ -198,7 +191,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 		
 		
 		
-		Chimera* chimera;
+		MothurChimera* chimera;
 		if (pDataArray->templatefile != "self") { //you want to run slayer with a reference template
 			chimera = new ChimeraSlayer(pDataArray->filename, pDataArray->templatefile, pDataArray->trim, pDataArray->search, pDataArray->ksize, pDataArray->match, pDataArray->mismatch, pDataArray->window, pDataArray->divR, pDataArray->minSimilarity, pDataArray->minCoverage, pDataArray->minBS, pDataArray->minSNP, pDataArray->parents, pDataArray->iters, pDataArray->increment, pDataArray->numwanted, pDataArray->realign, pDataArray->blastlocation, pDataArray->threadId);	
 		}else {
@@ -386,7 +379,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			ifstream inFASTA;
 			pDataArray->m->openInputFile(thisFastaName, inFASTA);
 			
-			Chimera* chimera;
+			MothurChimera* chimera;
 			chimera = new ChimeraSlayer(thisFastaName, pDataArray->templatefile, pDataArray->trim, thisPriority, pDataArray->search, pDataArray->ksize, pDataArray->match, pDataArray->mismatch, pDataArray->window, pDataArray->divR, pDataArray->minSimilarity, pDataArray->minCoverage, pDataArray->minBS, pDataArray->minSNP, pDataArray->parents, pDataArray->iters, pDataArray->increment, pDataArray->numwanted, pDataArray->realign, pDataArray->blastlocation, pDataArray->threadId);	
 			chimera->printHeader(out); 
 			

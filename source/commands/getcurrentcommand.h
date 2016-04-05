@@ -24,7 +24,7 @@ class GetCurrentCommand : public Command {
 		string getCommandName()			{ return "get.current";	}
 		string getCommandCategory()		{ return "General";		}
         string getHelpString();	
-        string getOutputPattern(string)	{ return ""; }
+        string getOutputPattern(string);
 		string getCitation() { return "http://www.mothur.org/wiki/Get.current"; }
 		string getDescription()		{ return "get current files saved by mothur"; }
 
@@ -39,7 +39,7 @@ class GetCurrentCommand : public Command {
 		vector<string> outputNames;
 		bool abort;
 	
-		string clearTypes;
+		string clearTypes, outputDir;
 		vector<string> types;
 		
 };

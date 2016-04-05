@@ -231,7 +231,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB) + "; " + toString(uniqSeqsToB) + " sequences are not shared";  }  
 				outsvg << "</text>\n";
 
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]);
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]);
 				if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal) + "; " + toString((sharedVal / (float)(numSeqsA + numSeqsB))*100) + "% of these sequences are shared";  }  
 				outsvg << "</text>\n";
 				

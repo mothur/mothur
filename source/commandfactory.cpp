@@ -93,8 +93,6 @@
 #include "subsamplecommand.h"
 #include "removegroupscommand.h"
 #include "getgroupscommand.h"
-#include "getotuscommand.h"
-#include "removeotuscommand.h"
 #include "indicatorcommand.h"
 #include "consensusseqscommand.h"
 #include "trimflowscommand.h"
@@ -133,7 +131,6 @@
 #include "getotulabelscommand.h"
 #include "removeotulabelscommand.h"
 #include "makecontigscommand.h"
-#include "loadlogfilecommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysvmsharedcommand.h"
 #include "classifyrfsharedcommand.h"
@@ -155,6 +152,7 @@
 #include "mimarksattributescommand.h"
 #include "setseedcommand.h"
 #include "makefilecommand.h"
+#include "biominfocommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -171,12 +169,6 @@ CommandFactory* CommandFactory::getInstance() {
 /***********************************************************/
 
 /***********************************************************/
-//note: This class is resposible for knowing which commands are mpiEnabled,
-//If a command is not enabled only process 0 will execute the command.
-//This avoids redundant outputs on pieces of code we have not paralellized.
-//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open.
-//example:  commands["dist.seqs"] = "MPIEnabled";
-
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
@@ -231,7 +223,7 @@ CommandFactory::CommandFactory(){
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
-	commands["set.dir"]				= "MPIEnabled";
+	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
 	commands["set.logfile"]			= "set.logfile";
@@ -271,30 +263,30 @@ CommandFactory::CommandFactory(){
 	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
-	commands["get.current"]			= "MPIEnabled";
-	commands["set.current"]			= "MPIEnabled";
+	commands["get.current"]			= "get.current";
+	commands["set.current"]			= "set.current";
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
 	commands["clear.memory"]		= "clear.memory";
-	commands["pairwise.seqs"]		= "MPIEnabled";
-	commands["pipeline.pds"]		= "MPIEnabled";
-	commands["classify.seqs"]		= "MPIEnabled";
-	commands["dist.seqs"]			= "MPIEnabled";
-	commands["filter.seqs"]			= "MPIEnabled";
-	commands["align.seqs"]			= "MPIEnabled";
-	commands["chimera.ccode"]		= "MPIEnabled";
-	commands["chimera.check"]		= "MPIEnabled";
-	commands["chimera.slayer"]		= "MPIEnabled";
+	commands["pairwise.seqs"]		= "pairwise.seqs";
+	commands["pipeline.pds"]		= "pipeline.pds";
+	commands["classify.seqs"]		= "classify.seqs";
+	commands["dist.seqs"]			= "dist.seqs";
+	commands["filter.seqs"]			= "filter.seqs";
+	commands["align.seqs"]			= "align.seqs";
+	commands["chimera.ccode"]		= "chimera.ccode";
+	commands["chimera.check"]		= "chimera.check";
+	commands["chimera.slayer"]		= "chimera.slayer";
 	commands["chimera.uchime"]		= "chimera.uchime";
 	commands["chimera.perseus"]		= "chimera.perseus";
-	commands["chimera.pintail"]		= "MPIEnabled";
-	commands["chimera.bellerophon"]	= "MPIEnabled";
-	commands["screen.seqs"]			= "MPIEnabled";
+	commands["chimera.pintail"]		= "chimera.pintail";
+	commands["chimera.bellerophon"]	= "chimera.bellerophon";
+	commands["screen.seqs"]			= "screen.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
-	commands["cluster.split"]		= "MPIEnabled";
-	commands["shhh.flows"]			= "MPIEnabled";
+	commands["cluster.split"]		= "cluster.split";
+	commands["shhh.flows"]			= "shhh.flows";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["summary.tax"]			= "summary.tax";
@@ -308,14 +300,14 @@ CommandFactory::CommandFactory(){
     commands["create.database"]     = "create.database";
     commands["make.biom"]           = "make.biom";
     commands["get.coremicrobiome"]  = "get.coremicrobiome";
+    commands["list.otus"]           = "list.otus";
     commands["list.otulabels"]      = "list.otulabels";
     commands["get.otulabels"]       = "get.otulabels";
     commands["remove.otulabels"]    = "remove.otulabels";
     commands["make.contigs"]        = "make.contigs";
-    commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
-	commands["quit"]				= "MPIEnabled";
+	commands["quit"]				= "quit";
     commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared";
@@ -335,22 +327,11 @@ CommandFactory::CommandFactory(){
     commands["get.mimarkspackage"]  = "get.mimarkspackage";
     commands["mimarks.attributes"]  = "mimarks.attributes";
     commands["make.file"]           = "make.file";
+    commands["biom.info"]           = "biom.info";
     commands["set.seed"]            = "set.seed";
 
 
 }
-/***********************************************************/
-
-/***********************************************************/
-bool CommandFactory::MPIEnabled(string commandName) {
-	bool mpi = false;
-	it = commands.find(commandName);
-	if (it != commands.end()) {
-		if (it->second == "MPIEnabled") { return true; }
-	}
-	return mpi;
-}
-/***********************************************************/
 
 /***********************************************************/
 CommandFactory::~CommandFactory(){
@@ -397,8 +378,8 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
         }
 
-        pos = optionString.find("seed");
-        if (pos != string::npos) { //user has set inputdir in command option string
+        pos = optionString.find("seed=");
+        if (pos != string::npos) { //user has set seed in command option string
             string intputOption = "";
             bool foundEquals = false;
             for(int i=pos;i<optionString.length();i++){
@@ -412,7 +393,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 random = time(NULL);
                 seed = true;
             }else {
-                if (m->isInteger(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
+                if (m->isNumeric1(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
                 else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
             }
 
@@ -420,7 +401,6 @@ int CommandFactory::checkForRedirects(string optionString) {
                 srand(random);
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
-
         }
 
 
@@ -535,8 +515,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
-		else if(commandName == "get.otus")				{	command = new GetOtusCommand(optionString);					}
-		else if(commandName == "remove.otus")			{	command = new RemoveOtusCommand(optionString);				}
+        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtuLabelsCommand(optionString);			}
+        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
@@ -573,11 +554,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
-        else if(commandName == "list.otulabels")        {	command = new ListOtuLabelsCommand(optionString);           }
-        else if(commandName == "get.otulabels")         {	command = new GetOtuLabelsCommand(optionString);            }
-        else if(commandName == "remove.otulabels")      {	command = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
-        else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "classify.rf")           {	command = new ClassifyRFSharedCommand(optionString);          }
@@ -599,6 +576,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "mimarks.attributes")    {	command = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
+        else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -711,8 +689,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.groups")			{	pipecommand = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "remove.groups")			{	pipecommand = new RemoveGroupsCommand(optionString);			}
-		else if(commandName == "get.otus")				{	pipecommand = new GetOtusCommand(optionString);					}
-		else if(commandName == "remove.otus")			{	pipecommand = new RemoveOtusCommand(optionString);				}
+		else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	pipecommand = new GetOtuLabelsCommand(optionString);			}
+		else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	pipecommand = new RemoveOtuLabelsCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
@@ -748,11 +727,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
-        else if(commandName == "list.otulabels")        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
-        else if(commandName == "get.otulabels")         {	pipecommand = new GetOtuLabelsCommand(optionString);            }
-        else if(commandName == "remove.otulabels")      {	pipecommand = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
-        else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.rf")           {	pipecommand = new ClassifyRFSharedCommand(optionString);        }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
@@ -774,6 +749,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "mimarks.attributes")    {	pipecommand = new MimarksAttributesCommand(optionString);       }
         else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
+        else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -872,8 +848,9 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
 		else if(commandName == "get.groups")			{	shellcommand = new GetGroupsCommand();				}
 		else if(commandName == "remove.groups")			{	shellcommand = new RemoveGroupsCommand();			}
-		else if(commandName == "get.otus")				{	shellcommand = new GetOtusCommand();				}
-		else if(commandName == "remove.otus")			{	shellcommand = new RemoveOtusCommand();				}
+        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	shellcommand = new GetOtuLabelsCommand();			}
+        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	shellcommand = new RemoveOtuLabelsCommand();			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	shellcommand = new ListOtuLabelsCommand();           }
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
@@ -909,11 +886,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
         else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
         else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
-        else if(commandName == "list.otulabels")        {	shellcommand = new ListOtuLabelsCommand();          }
-        else if(commandName == "get.otulabels")         {	shellcommand = new GetOtuLabelsCommand();           }
-        else if(commandName == "remove.otulabels")      {	shellcommand = new RemoveOtuLabelsCommand();        }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
-        else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.rf")           {	shellcommand = new ClassifyRFSharedCommand();       }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
@@ -935,6 +908,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
         else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
+        else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

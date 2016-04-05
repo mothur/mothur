@@ -40,9 +40,9 @@ private:
     CountTable* ct;
 	ListVector* list;
 	InputData* input;
-	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile;
-	bool abort, allLines, probs, persample;
-	int cutoff, threshold;
+	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile, output;
+	bool abort, allLines, probs, persample, relabund;
+	int cutoff, threshold, printlevel;
 	set<string> labels; //holds labels to be used
 	vector<string> outputNames, groups;
 	map<string, string> nameMap;
@@ -50,7 +50,6 @@ private:
 
 	int process(ListVector*);
     int processTaxMap();
-	string addUnclassifieds(string, int);
 	vector<string> findConsensusTaxonomy(vector<string>, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
 	
 												

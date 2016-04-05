@@ -69,7 +69,7 @@ class MothurOut {
 		vector<string> sharedBinLabelsInFile;
 		vector<string> currentSharedBinLabels;
         vector<string> listBinLabelsInFile;
-		string saveNextLabel, argv, sharedHeaderMode, groupMode;
+		string saveNextLabel, argv, sharedHeaderMode, groupMode, testDirectory;
 		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
@@ -118,6 +118,7 @@ class MothurOut {
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
 		string getline(istringstream&);
+        bool stringBlank (string);
 		void gobble(istream&);
 		void gobble(istringstream&);
         void zapGremlins(istream&);
@@ -139,11 +140,13 @@ class MothurOut {
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
+        int printVsearchFile(vector<seqPriorityNode>&, string); //sorts and prints by abundance adding /ab=xxx/
+        bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
         bool mothurConvert(string, intDist&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
-	
+        bool mothurConvert(char, string&);
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);
@@ -160,12 +163,18 @@ class MothurOut {
 		bool isContainingOnlyDigits(string);
         bool containsAlphas(string);
 		bool isNumeric1(string);
+        bool isNumeric1(char);
         bool isInteger(string);
         bool isLabelEquivalent(string, string);
         string getSimpleLabel(string);
         string findEdianness();
         string mothurGetpid(int);
-	
+        unsigned long long getRAMUsed();
+        unsigned long long getTotalRAM();
+        unsigned long get_phys_pages();
+        string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+        string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
 		
 		//string manipulation
 		void splitAtEquals(string&, string&);
@@ -185,7 +194,8 @@ class MothurOut {
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
         map<string, vector<string> > parseClasses(string);
-        
+        string addUnclassifieds(string tax, int maxlevel, bool probs);
+    
 		
 		//math operation
         int max(int, int);
@@ -198,6 +208,9 @@ class MothurOut {
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
         double median(vector<double>);
+        int median(vector<int>);
+        int average(vector<int>);
+        int sum(vector<int>);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);
@@ -238,6 +251,7 @@ class MothurOut {
         string getSummaryFile()     { return summaryfile;       }
         string getFileFile()        { return filefile;          }
 		string getProcessors()		{ return processors;		}
+        int getNumErrors()          { return numErrors;         }
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
@@ -265,7 +279,7 @@ class MothurOut {
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
-		void printCurrentFiles();
+		void printCurrentFiles(string); //string="" for just to logfile.
 		bool hasCurrentFiles();
 		void clearCurrentFiles();
         set<string> getCurrentTypes(); 
@@ -312,6 +326,8 @@ class MothurOut {
             groupMode = "group";
             changedSeqNames = false;
             modifyNames = true;
+            numErrors = 0;
+            numWarnings = 0;
 		}
 		~MothurOut();
 
@@ -325,9 +341,8 @@ class MothurOut {
 		vector<string> Groups;
 		vector<string> namesOfGroups;
 		ofstream out;
+        int numErrors, numWarnings;
 		
-		int mem_usage(double&, double&);
-
 };
 /***********************************************/
 

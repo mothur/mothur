@@ -8,7 +8,8 @@
  */
 
 #include "clustersplitcommand.h"
-
+#include "vsearchfileparser.h"
+#include "systemcommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
@@ -29,7 +30,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false); parameters.push_back(pmethod);
+        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
@@ -65,15 +66,12 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
-		helpString += "The method allows you to specify what clustering algorithm you want to use, default=average, option furthest, nearest, or average. \n";
+		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
         helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
-#ifdef USE_MPI
-		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
-#endif
 		helpString += "The cluster.split command should be in the following format: \n";
 		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
 		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
@@ -260,13 +258,13 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip, then fasta
 				columnfile = m->getColumnFile(); 
-				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {  format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 				else { 
 					phylipfile = m->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 					else { 
 						fastafile = m->getFastaFile(); 
-						if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+						if (fastafile != "") {   m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 						else { 
 							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a file, phylip or a column or fastafile."); m->mothurOutEndLine();
 							abort = true; 
@@ -347,9 +345,10 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			classic = m->isTrue(temp);
             
             //not using file option and don't have fasta method with classic
-            if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-
-			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
+            if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
+            
+            cutoffNotSet = false;
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
@@ -358,13 +357,18 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average")) { m->mothurOut("Using splitmethod " + splitmethod + ".\n"); }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
-			
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((method == "agc") || (method == "dgc")) {
+                if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
+                if (classic) { m->mothurOut("[ERROR]: You cannot use cluster.classic with the agc or dgc clustering methods, aborting\n."); abort = true; }
+            }
+            
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
-			else { m->mothurOut(splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("You need to provide a taxonomy file if you are going to use the classify splitmethod."); m->mothurOutEndLine(); abort = true;  }
+			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("[ERROR]: You need to provide a taxonomy file if you are going to use the classify splitmethod."); m->mothurOutEndLine(); abort = true;  }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -400,31 +404,11 @@ int ClusterSplitCommand::execute(){
         string singletonName = "";
         
         double saveCutoff = cutoff;
-        
-#ifdef USE_MPI
-        int pid;
-        int tag = 2001;
-        MPI_Status status;
-        MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-            
-#endif
 
         if (file != "") {
             deleteFiles = false; estart = time(NULL);
-            
-#ifdef USE_MPI
-            if (pid == 0) { //only process 0 converts and splits
-#endif
-
             singletonName = readFile(distName);
-                
-#ifdef USE_MPI
-            
-        } //only process 0 reads
-        //make everyone wait
-        MPI_Barrier(MPI_COMM_WORLD);
-#endif
+
             if (isList) {
                 
                 //set list file as new current listfile
@@ -445,11 +429,7 @@ int ClusterSplitCommand::execute(){
         }else {
 		          
             //****************** file prep work ******************************//
-#ifdef USE_MPI
-			if (pid == 0) { //only process 0 converts and splits
-
-#endif
-                
+            
                 //if user gave a phylip file convert to column file
                 if (format == "phylip") {
                     estart = time(NULL);
@@ -486,25 +466,22 @@ int ClusterSplitCommand::execute(){
                 
                 estart = time(NULL);
                 m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
-#ifdef USE_MPI
-            }
-            MPI_Barrier(MPI_COMM_WORLD);
-#endif
+
                 //split matrix into non-overlapping groups
                 SplitMatrix* split;
                 if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
                 else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
-                else if (splitmethod == "fasta")		{   split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);  }
+                else if (splitmethod == "fasta")		{
+                    if ((method == "agc") || (method == "dgc")) {
+                        if (!findVsearch()) { m->mothurOut("[ERROR] cannot find vsearch executable, aborting.\n"); return 0; }
+                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputDir, "fasta");
+                    }else{
+                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "distance");
+                    }
+                }
                 else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
-#ifdef USE_MPI
-            if ((pid == 0) || (splitmethod == "fasta")) { //only process 0 converts and splits
-                
-#endif
                 split->split();
-#ifdef USE_MPI
-            }
-            MPI_Barrier(MPI_COMM_WORLD);
-#endif
+
                 if (m->control_pressed) { delete split; return 0; }
                 
                 singletonName = split->getSingletonNames();
@@ -520,10 +497,7 @@ int ClusterSplitCommand::execute(){
                 
                 m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
                 estart = time(NULL);
-#ifdef USE_MPI
-            if (pid == 0) { //only process 0 converts and splits
-                
-#endif
+
                 if (!runCluster) {
                     string filename = printFile(singletonName, distName);
                     
@@ -532,177 +506,13 @@ int ClusterSplitCommand::execute(){
                     m->mothurOutEndLine(); m->mothurOut(filename); m->mothurOutEndLine();
                     for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
                     m->mothurOutEndLine();
-#ifdef USE_MPI
-#else
+
                     return 0;
-#endif
                 }
                 deleteFiles = true;
-#ifdef USE_MPI
-                
-            }
-            
-            MPI_Barrier(MPI_COMM_WORLD);
-            if (!runCluster) {  return 0;  }
-#endif
 
             }
 		//****************** break up files between processes and cluster each file set ******************************//
-	#ifdef USE_MPI
-			////you are process 0 from above////
-		if (pid == 0) {
-			vector < vector < map<string, string> > > dividedNames; //distNames[1] = vector of filenames for process 1...				
-			dividedNames.resize(processors);
-					
-			//for each file group figure out which process will complete it
-			//want to divide the load intelligently so the big files are spread between processes
-			for (int i = 0; i < distName.size(); i++) { 
-				int processToAssign = (i+1) % processors; 
-				if (processToAssign == 0) { processToAssign = processors; }
-						
-				dividedNames[(processToAssign-1)].push_back(distName[i]);
-			}
-					
-			//not lets reverse the order of ever other process, so we balance big files running with little ones
-			for (int i = 0; i < processors; i++) {
-				int remainder = ((i+1) % processors);
-				if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
-			}
-			
-			
-			//send each child the list of files it needs to process
-			for(int i = 1; i < processors; i++) { 
-				//send number of file pairs
-				int num = dividedNames[i].size();
-				MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-				
-				for (int j = 0; j < num; j++) { //send filenames to process i
-					char tempDistFileName[1024];
-					strcpy(tempDistFileName, (dividedNames[i][j].begin()->first).c_str());
-					int lengthDist = (dividedNames[i][j].begin()->first).length();
-					
-					MPI_Send(&lengthDist, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(tempDistFileName, 1024, MPI_CHAR, i, tag, MPI_COMM_WORLD);
-					
-					char tempNameFileName[1024];
-					strcpy(tempNameFileName, (dividedNames[i][j].begin()->second).c_str());
-					int lengthName = (dividedNames[i][j].begin()->second).length();
-
-					MPI_Send(&lengthName, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(tempNameFileName, 1024, MPI_CHAR, i, tag, MPI_COMM_WORLD);
-				}
-			}
-			
-			//process your share
-			listFileNames = cluster(dividedNames[0], labels);
-			
-			//receive the other processes info
-			for(int i = 1; i < processors; i++) { 
-				int num = dividedNames[i].size();
-				
-				double tempCutoff;
-				MPI_Recv(&tempCutoff, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, &status);
-				if (tempCutoff < cutoff) { cutoff = tempCutoff; }
-				
-				//send list filenames to root process
-				for (int j = 0; j < num; j++) {  
-					int lengthList = 0;
-					char tempListFileName[1024];
-				
-					MPI_Recv(&lengthList, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-					MPI_Recv(tempListFileName, 1024, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
-				
-					string myListFileName = tempListFileName;
-					myListFileName = myListFileName.substr(0, lengthList);
-					
-					listFileNames.push_back(myListFileName);
-				}
-				
-				//send Labels to root process
-				int numLabels = 0;
-				MPI_Recv(&numLabels, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-				
-				for (int j = 0; j < numLabels; j++) {  
-					int lengthLabel = 0;
-					char tempLabel[100];
-				
-					MPI_Recv(&lengthLabel, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-					MPI_Recv(tempLabel, 100, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
-				
-					string myLabel = tempLabel;
-					myLabel = myLabel.substr(0, lengthLabel);
-			
-					if (labels.count(myLabel) == 0) { labels.insert(myLabel); }
-				}
-			}
-			
-		}else { //you are a child process
-			vector < map<string, string> >  myNames;
-			
-			//recieve the files you need to process
-			//receive number of file pairs
-			int num = 0;
-			MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-			
-			myNames.resize(num);
-	
-			for (int j = 0; j < num; j++) { //receive filenames to process 
-				int lengthDist = 0;
-				char tempDistFileName[1024];
-				
-				MPI_Recv(&lengthDist, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				MPI_Recv(tempDistFileName, 1024, MPI_CHAR, 0, tag, MPI_COMM_WORLD, &status); 
-				
-				string myDistFileName = tempDistFileName;
-				myDistFileName = myDistFileName.substr(0, lengthDist);
-			
-				int lengthName = 0;
-				char tempNameFileName[1024];
-				
-				MPI_Recv(&lengthName, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				MPI_Recv(tempNameFileName, 1024, MPI_CHAR, 0, tag, MPI_COMM_WORLD, &status); 
-				
-				string myNameFileName = tempNameFileName;
-				myNameFileName = myNameFileName.substr(0, lengthName);
-				
-				//save file name
-				myNames[j][myDistFileName] = myNameFileName;
-			}
-	
-			//process them
-			listFileNames = cluster(myNames, labels);
-			
-			//send cutoff
-			MPI_Send(&cutoff, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
-			
-			//send list filenames to root process
-			for (int j = 0; j < num; j++) {  
-				char tempListFileName[1024];
-				strcpy(tempListFileName, listFileNames[j].c_str());
-				int lengthList = listFileNames[j].length();
-					
-				MPI_Send(&lengthList, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-				MPI_Send(tempListFileName, 1024, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
-			}
-			
-			//send Labels to root process
-			int numLabels = labels.size();
-			MPI_Send(&numLabels, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-			
-			for(set<string>::iterator it = labels.begin(); it != labels.end(); ++it) {
-				char tempLabel[100];
-				strcpy(tempLabel, (*it).c_str());
-				int lengthLabel = (*it).length();
-					
-				MPI_Send(&lengthLabel, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-				MPI_Send(tempLabel, 100, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
-			}
-		}
-		
-		//make everyone wait
-		MPI_Barrier(MPI_COMM_WORLD);
-		
-	#else
 		///////////////////// WINDOWS CAN ONLY USE 1 PROCESSORS ACCESS VIOLATION UNRESOLVED ///////////////////////
 		//sanity check
 		if (processors > distName.size()) { processors = distName.size(); }
@@ -716,20 +526,16 @@ int ClusterSplitCommand::execute(){
 		#else
 				listFileNames = cluster(distName, labels); //clusters individual files and returns names of list files
 		#endif
-	#endif	
+		
 		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { m->mothurRemove(listFileNames[i]); } return 0; }
 		
-		if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
+		if (saveCutoff != cutoff) { m->mothurOut("\nCutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		
 		//****************** merge list file and create rabund and sabund files ******************************//
 		estart = time(NULL);
 		m->mothurOut("Merging the clustered files..."); m->mothurOutEndLine();
-		
-		#ifdef USE_MPI
-			if (pid == 0) { //only process 0 merges
-		#endif
 
 		ListVector* listSingle;
 		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
@@ -768,13 +574,6 @@ int ClusterSplitCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
-		
-		#ifdef USE_MPI
-			} //only process 0 merges
-			
-			//make everyone wait
-			MPI_Barrier(MPI_COMM_WORLD);
-		#endif
 
 		return 0;
 	}
@@ -786,7 +585,6 @@ int ClusterSplitCommand::execute(){
 //**********************************************************************************************************************
 map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
 	try {
-				
 		map<float, int> labelBin;
 		vector<float> orderFloat;
 		int numSingleBins;
@@ -1256,7 +1054,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 
 vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNames, set<string>& labels){
 	try {
-		
 		vector<string> listFileNames;
 		double smallestCutoff = cutoff;
 		
@@ -1279,9 +1076,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
         }
 		
 		cutoff = smallestCutoff;
-					
+        
 		return listFileNames;
-	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "cluster");
@@ -1298,16 +1094,6 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
         ListVector* list = NULL;
         ListVector oldList;
         RAbundVector* rabund = NULL;
-        
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        //output your files too
-        if (pid != 0) {
-            cout << endl << "Reading " << thisDistFile << endl;
-        }
-#endif
 
         m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
         
@@ -1344,13 +1130,6 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldList = *list;
-		
-#ifdef USE_MPI
-        //output your files too
-        if (pid != 0) {
-            cout << endl << "Clustering " << thisDistFile << endl;
-        }
-#endif
 
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
         
@@ -1421,158 +1200,143 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 	try {
         string listFileName = "";
         
-        Cluster* cluster = NULL;
-        SparseDistanceMatrix* matrix = NULL;
-        ListVector* list = NULL;
-        ListVector oldList;
-        RAbundVector* rabund = NULL;
-        
-        if (m->control_pressed) { return listFileName; }
-        
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        //output your files too
-        if (pid != 0) {
-            cout << endl << "Reading " << thisDistFile << endl;
-        }
-#endif
-        
-        m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
-        
-        ReadMatrix* read = new ReadColumnMatrix(thisDistFile); 	
-        read->setCutoff(cutoff);
-        
-        NameAssignment* nameMap = NULL;
-        CountTable* ct = NULL;
-		if(namefile != ""){	
-			nameMap = new NameAssignment(thisNamefile);
-			nameMap->readMap();
-            read->read(nameMap);
-		}else if (countfile != "") {
-            ct = new CountTable();
-            ct->readTable(thisNamefile, false, false);
-            read->read(ct);
-        }else { read->read(nameMap); }
-		
-		list = read->getListVector();
-        oldList = *list;
-		matrix = read->getDMatrix();
-        
-		if(countfile != "") {
-            rabund = new RAbundVector();
-            createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
-            delete ct;
-        }else { rabund = new RAbundVector(list->getRAbundVector()); }
-
-        delete read;  read = NULL;
-        if (namefile != "") { delete nameMap; nameMap = NULL; }
-        
-        
-#ifdef USE_MPI
-        //output your files too
-        if (pid != 0) {
-            cout << endl << "Clustering " << thisDistFile << endl;
-        }
-#endif
-        
-        m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
-		
-        //create cluster
-        float adjust = -1.0;
-        if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
-        else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
-        else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
-        tag = cluster->getTag();
-		
-        if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
-        fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
-        
-        ofstream listFile;
-        m->openOutputFile(fileroot+ tag + ".list",	listFile);
-		
-        listFileName = fileroot+ tag + ".list";
-        
-        float previousDist = 0.00000;
-        float rndPreviousDist = 0.00000;
-        
-        oldList = *list;
-        
-        print_start = true;
-        start = time(NULL);
-        double saveCutoff = cutoff;
-		
-        while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+        if ((method == "agc") || (method == "dgc")) {  listFileName = runVsearchCluster(thisDistFile, thisNamefile, labels, smallestCutoff);  }
+        else {
             
-            if (m->control_pressed) { //clean up
-                delete matrix; delete list;	delete cluster; delete rabund;
-                listFile.close();
-                m->mothurRemove(listFileName); 	
-                return listFileName;
+            Cluster* cluster = NULL;
+            SparseDistanceMatrix* matrix = NULL;
+            ListVector* list = NULL;
+            ListVector oldList;
+            RAbundVector* rabund = NULL;
+            
+            if (m->control_pressed) { return listFileName; }
+            
+            m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
+            
+            ReadMatrix* read = new ReadColumnMatrix(thisDistFile);
+            read->setCutoff(cutoff);
+            
+            NameAssignment* nameMap = NULL;
+            CountTable* ct = NULL;
+            if(namefile != ""){
+                nameMap = new NameAssignment(thisNamefile);
+                nameMap->readMap();
+                read->read(nameMap);
+            }else if (countfile != "") {
+                ct = new CountTable();
+                ct->readTable(thisNamefile, false, false);
+                read->read(ct);
+            }else { read->read(nameMap); }
+            
+            list = read->getListVector();
+            oldList = *list;
+            matrix = read->getDMatrix();
+            
+            if(countfile != "") {
+                rabund = new RAbundVector();
+                createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
+                delete ct;
+            }else { rabund = new RAbundVector(list->getRAbundVector()); }
+            
+            delete read;  read = NULL;
+            if (namefile != "") { delete nameMap; nameMap = NULL; }
+            
+            m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
+            
+            //create cluster
+            float adjust = -1.0;
+            if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
+            else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
+            else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
+            tag = cluster->getTag();
+            
+            if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+            fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
+            
+            ofstream listFile;
+            m->openOutputFile(fileroot+ tag + ".list",	listFile);
+            
+            listFileName = fileroot+ tag + ".list";
+            
+            float previousDist = 0.00000;
+            float rndPreviousDist = 0.00000;
+            
+            oldList = *list;
+            
+            print_start = true;
+            start = time(NULL);
+            double saveCutoff = cutoff;
+            
+            while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+                
+                if (m->control_pressed) { //clean up
+                    delete matrix; delete list;	delete cluster; delete rabund;
+                    listFile.close();
+                    m->mothurRemove(listFileName);
+                    return listFileName;
+                }
+                
+                cluster->update(saveCutoff);
+                
+                float dist = matrix->getSmallDist();
+                float rndDist;
+                if (hard) {
+                    rndDist = m->ceilDist(dist, precision);
+                }else{
+                    rndDist = m->roundDist(dist, precision);
+                }
+                
+                if(previousDist <= 0.0000 && dist != previousDist){
+                    oldList.setLabel("unique");
+                    oldList.print(listFile);
+                    if (labels.count("unique") == 0) {  labels.insert("unique");  }
+                }
+                else if(rndDist != rndPreviousDist){
+                    oldList.setLabel(toString(rndPreviousDist,  length-1));
+                    oldList.print(listFile);
+                    if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
+                }
+                
+                previousDist = dist;
+                rndPreviousDist = rndDist;
+                oldList = *list;
             }
             
-            cluster->update(saveCutoff);
             
-            float dist = matrix->getSmallDist();
-            float rndDist;
-            if (hard) {
-                rndDist = m->ceilDist(dist, precision); 
-            }else{
-                rndDist = m->roundDist(dist, precision); 
-            }
-            
-            if(previousDist <= 0.0000 && dist != previousDist){
+            if(previousDist <= 0.0000){
                 oldList.setLabel("unique");
                 oldList.print(listFile);
-                if (labels.count("unique") == 0) {  labels.insert("unique");  }
+                if (labels.count("unique") == 0) { labels.insert("unique"); }
             }
-            else if(rndDist != rndPreviousDist){
+            else if(rndPreviousDist<cutoff){
                 oldList.setLabel(toString(rndPreviousDist,  length-1));
                 oldList.print(listFile);
                 if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
             }
             
-            previousDist = dist;
-            rndPreviousDist = rndDist;
-            oldList = *list;
+            delete matrix; delete list;	delete cluster; delete rabund;
+            matrix = NULL; list = NULL; cluster = NULL; rabund = NULL;
+            listFile.close();
+            
+            if (m->control_pressed) { //clean up
+                m->mothurRemove(listFileName);
+                return listFileName;
+            }
+            
+            if (deleteFiles) {
+                m->mothurRemove(thisDistFile);
+                m->mothurRemove(thisNamefile);
+            }
+            
+            if (saveCutoff != cutoff) { 
+                if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+                else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+                
+                m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
+            }
+            
+            if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
         }
-        
-		
-        if(previousDist <= 0.0000){
-            oldList.setLabel("unique");
-            oldList.print(listFile);
-            if (labels.count("unique") == 0) { labels.insert("unique"); }
-        }
-        else if(rndPreviousDist<cutoff){
-            oldList.setLabel(toString(rndPreviousDist,  length-1));
-            oldList.print(listFile);
-            if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
-        }
-        
-        delete matrix; delete list;	delete cluster; delete rabund; 
-        matrix = NULL; list = NULL; cluster = NULL; rabund = NULL;
-        listFile.close();
-        
-        if (m->control_pressed) { //clean up
-            m->mothurRemove(listFileName); 	
-            return listFileName;
-        }
-        
-        if (deleteFiles) {
-            m->mothurRemove(thisDistFile);
-            m->mothurRemove(thisNamefile);
-        }
-        
-        if (saveCutoff != cutoff) { 
-            if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-            else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-			
-            m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
-        }
-        
-        if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
-        
         return listFileName;
         
 	}
@@ -1583,15 +1347,169 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 }
 //**********************************************************************************************************************
 
+string ClusterSplitCommand::runVsearchCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
+    try {
+
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
+        
+        string vsearchFastafile = ""; VsearchFileParser* vParse;
+        if (namefile != "")                    { vParse = new VsearchFileParser(thisDistFile, thisNamefile, "name");      }
+        else if (countfile != "")              { vParse = new VsearchFileParser(thisDistFile, thisNamefile, "count");    }
+        else                                   { m->mothurOut("[ERROR]: Opps, should never get here. ClusterSplitCommand::runVsearchCluster() \n"); m->control_pressed = true; }
+        
+        if (m->control_pressed) {  return 0; }
+        
+        vsearchFastafile = vParse->getVsearchFile();
+        
+        if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
+        
+        //Run vsearch
+        string ucVsearchFile = m->getSimpleName(vsearchFastafile) + ".clustered.uc";
+        string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
+        vsearchDriver(vsearchFastafile, ucVsearchFile, logfile, smallestCutoff);
+        
+        if (m->control_pressed) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
+        
+        if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+        tag = method;
+        string listFileName = outputDir + m->getRootName(m->getSimpleName(thisDistFile)) + tag + ".list";
+        
+        //Convert outputted *.uc file into a list file
+        vParse->createListFile(ucVsearchFile, listFileName, "", "", vParse->getNumBins(logfile), toString(cutoff));  delete vParse;
+        
+        //remove temp files
+        m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile);
+        
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        
+        labels.insert(toString(cutoff));
+        
+        return listFileName;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "runVsearchCluster");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile, string logfile, double cutoff){
+    try {
+        
+        //vsearch --maxaccepts 16 --usersort --id 0.97 --minseqlength 30 --wordlength 8 --uc $ROOT.clustered.uc --cluster_smallmem $ROOT.sorted.fna --maxrejects 64 --strand both --log $ROOT.clustered.log --sizeorder
+        
+        
+        ucClusteredFile = m->getFullPathName(ucClusteredFile);
+        inputFile = m->getFullPathName(inputFile);
+        logfile = m->getFullPathName(logfile);
+        
+        //to allow for spaces in the path
+        ucClusteredFile = "\"" + ucClusteredFile + "\"";
+        inputFile = "\"" + inputFile + "\"";
+        logfile = "\"" + logfile + "\"";
+        
+        vector<char*> cPara;
+        
+        string vsearchCommand = vsearchLocation;
+        vsearchCommand = "\"" + vsearchCommand + "\" ";
+        
+        vector<char*> vsearchParameters;
+        char* vsearchParameter = new char[vsearchCommand.length()+1];  vsearchParameter[0] = '\0'; strncat(vsearchParameter, vsearchCommand.c_str(), vsearchCommand.length());
+        vsearchParameters.push_back(vsearchParameter);
+        
+        //--maxaccepts=16
+        char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
+        vsearchParameters.push_back(maxaccepts);
+        
+        //--usersort
+        char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
+        vsearchParameters.push_back(usersort);
+        
+        //--id=0.97
+        cutoff = abs(1.0 - cutoff); string cutoffString = toString(cutoff);
+        if (cutoffString.length() > 4) {  cutoffString = cutoffString.substr(0, 4);  }
+        else if (cutoffString.length() < 4)  {  for (int i = cutoffString.length(); i < 4; i++)  { cutoffString += "0";  } }
+        
+        cutoffString = "--id=" +  cutoffString;
+        char* cutoffParameter = new char[cutoffString.length()+1];  cutoffParameter[0] = '\0'; strncat(cutoffParameter, cutoffString.c_str(), cutoffString.length());
+        vsearchParameters.push_back(cutoffParameter);
+        
+        //--minseqlength=30
+        char* minseqlength = new char[18];  minseqlength[0] = '\0'; strncat(minseqlength, "--minseqlength=30", 17);
+        vsearchParameters.push_back(minseqlength);
+        
+        //--wordlength=8
+        char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
+        vsearchParameters.push_back(wordlength);
+        
+        //--uc=$ROOT.clustered.uc
+        string tempIn = "--uc=" + ucClusteredFile;
+        char* uc = new char[tempIn.length()+1];  uc[0] = '\0'; strncat(uc, tempIn.c_str(), tempIn.length());
+        vsearchParameters.push_back(uc);
+        
+        //--cluster_smallmem $ROOT.sorted.fna
+        string tempSorted = "--cluster_smallmem=" + inputFile;
+        char* cluster_smallmen = new char[tempSorted.length()+1];  cluster_smallmen[0] = '\0'; strncat(cluster_smallmen, tempSorted.c_str(), tempSorted.length());
+        vsearchParameters.push_back(cluster_smallmen);
+        
+        //--maxrejects=64
+        char* maxrejects = new char[16];  maxrejects[0] = '\0'; strncat(maxrejects, "--maxrejects=64", 15);
+        vsearchParameters.push_back(maxrejects);
+        
+        //--strand=both
+        char* strand = new char[14];  strand[0] = '\0'; strncat(strand, "--strand=both", 13);
+        vsearchParameters.push_back(strand);
+        
+        //--log=$ROOT.clustered.log
+        string tempLog = "--log=" + logfile;
+        char* log = new char[tempLog.length()+1];  log[0] = '\0'; strncat(log, tempLog.c_str(), tempLog.length());
+        vsearchParameters.push_back(log);
+        
+        if (method == "agc") {
+            //--sizeorder
+            char* sizeorder = new char[12];  sizeorder[0] = '\0'; strncat(sizeorder, "--sizeorder", 11);
+            vsearchParameters.push_back(sizeorder);
+        }
+        
+        if (m->debug) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        
+        string commandString = "";
+        for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
+        
+        //cout << "commandString = " << commandString << endl;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
+        if (m->debug) {  m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
+        
+        system(commandString.c_str());
+        
+        //free memory
+        for(int i = 0; i < vsearchParameters.size(); i++)  {  delete vsearchParameters[i];  }
+        
+        //remove "" from filenames
+        ucClusteredFile = ucClusteredFile.substr(1, ucClusteredFile.length()-2);
+        inputFile = inputFile.substr(1, inputFile.length()-2);
+        logfile = logfile.substr(1, logfile.length()-2);
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "vsearchDriver");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
 int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > distNames) {
 	try{
-		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		if (pid != 0) {
-#endif
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
@@ -1611,10 +1529,6 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 			
 		outputTypes["column"].push_back(outputFileName); outputNames.push_back(outputFileName);
 			
-#ifdef USE_MPI
-		}
-#endif
-				
 		return 0;	
 		
 		
@@ -1640,7 +1554,7 @@ int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbund
         return 0;
     }
     catch(exception& e) {
-		m->errorOut(e, "ClusterCommand", "createRabund");
+		m->errorOut(e, "ClusterSplitCommand", "createRabund");
 		exit(1);
 	}
     
@@ -1669,7 +1583,7 @@ string ClusterSplitCommand::printFile(string singleton, vector< map<string, stri
         return outputFileName;
     }
     catch(exception& e) {
-		m->errorOut(e, "ClusterCommand", "printFile");
+		m->errorOut(e, "ClusterSplitCommand", "printFile");
 		exit(1);
 	}
     
@@ -1736,7 +1650,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
         return singleton;
     }
     catch(exception& e) {
-		m->errorOut(e, "ClusterCommand", "readFile");
+		m->errorOut(e, "ClusterSplitCommand", "readFile");
 		exit(1);
 	}
     
@@ -1764,7 +1678,77 @@ int ClusterSplitCommand::getLabels(string file, set<string>& listLabels){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "ClusterCommand", "getLabels");
+        m->errorOut(e, "ClusterSplitCommand", "getLabels");
+        exit(1);
+    }
+    
+}
+//**********************************************************************************************************************
+bool ClusterSplitCommand::findVsearch(){
+    try {
+        
+        abort = false;
+        
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
+        
+        //look for uchime exe
+        string path = m->argv;
+        string tempPath = path;
+        for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+        path = path.substr(0, (tempPath.find_last_of('m')));
+        
+        string vsearchCommand;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
+        if (m->debug) {
+            m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
+            Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
+            newCommand->execute();
+            delete newCommand;
+            m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
+            newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
+            newCommand->execute();
+            delete newCommand;
+        }
+#else
+        vsearchCommand = path + "vsearch.exe";
+#endif
+        
+        //test to make sure uchime exists
+        ifstream in;
+        vsearchCommand = m->getFullPathName(vsearchCommand);
+        int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+        if(ableToOpen == 1) {
+            m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
+            //check to see if uchime is in the path??
+            
+            string uLocation = m->findProgramPath("vsearch");
+            
+            
+            ifstream in2;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#else
+            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+#endif
+            
+            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+        }else {  vsearchLocation = vsearchCommand; }
+        
+        vsearchLocation = m->getFullPathName(vsearchLocation);
+        
+        if (m->debug) {
+            m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n");
+        }
+        
+        if (!abort) { return true; }
+        
+        return false;
+
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "findVsearch");
         exit(1);
     }
     

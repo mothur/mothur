@@ -10,7 +10,7 @@
  *
  */
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "dist.h"
 #include "decalc.h"
 
@@ -21,7 +21,7 @@
 
 /***********************************************************/
 
-class Pintail : public Chimera {
+class Pintail : public MothurChimera {
 	
 	public:
 		Pintail(string, string, bool, int, string, string, string, int, int, string); //fastafile, templatefile, filter, processors, mask, conservation, quantile, window, increment, outputDir)	
@@ -32,11 +32,7 @@ class Pintail : public Chimera {
 		
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
-		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		#endif
-		
+
 	private:
 	
 		Dist* distcalculator;

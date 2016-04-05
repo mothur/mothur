@@ -306,6 +306,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				if (taxons[(taxons.length()-1)] == '\'') {  taxons = taxons.substr(0, (taxons.length()-1)); }
 			}
 			m->splitAtChar(taxons, listOfTaxons, '-');
+            if (m->debug) { string taxonString = m->getStringFromVector(listOfTaxons, ", "); m->mothurOut("[DEBUG]: " + taxonString + "\n."); }
 			
 			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile."); m->mothurOutEndLine(); abort = true; }
             

@@ -2055,7 +2055,6 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
 /********************************************************************/
 vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
     try {
-        
         string rawSequence = seq.getUnaligned();
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
@@ -2116,6 +2115,8 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
                 temp = temp.substr(0,alnLength);
                 
                 int numDiff = countDiffs(oligo, temp);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
                 
                 if(numDiff < minDiff){
                     minDiff = numDiff;
@@ -2225,6 +2226,8 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
                 temp = temp.substr(0,alnLength);
                 
                 int numDiff = countDiffs(oligo, temp);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
                 
                 if(numDiff < minDiff){
                     minDiff = numDiff;

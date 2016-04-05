@@ -19,7 +19,9 @@ vector<string> SummaryTaxCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
-
+        CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pthreshold("threshold", "Number", "", "0", "", "", "","",false,true); parameters.push_back(pthreshold);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -43,6 +45,9 @@ string SummaryTaxCommand::getHelpString(){
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
+        helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
+        helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
@@ -201,7 +206,17 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
             
             string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
 			relabund = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
+
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
+            temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0"; }
+            m->mothurConvert(temp, threshold);
+            
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(taxfile);
@@ -235,18 +250,36 @@ int SummaryTaxCommand::execute(){
 		
         PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund); }
-            else { taxaSum = new PhyloSummary(ct, relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund, printlevel); }
+            else { taxaSum = new PhyloSummary(ct, relabund, printlevel); }
         }else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund); }
-            else { taxaSum = new PhyloSummary(groupMap, relabund); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel); }
+            else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel); }
 		}
         
 		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		int numSeqs = 0;
-		if ((namefile == "") || (countfile != "")) { numSeqs = taxaSum->summarize(taxfile);  }
-		else if (namefile != "") {
+		if ((threshold == 0) && ((namefile == "") || (countfile != ""))) { numSeqs = taxaSum->summarize(taxfile);  }
+        else if (threshold != 0) {
+            ifstream in;
+            m->openInputFile(taxfile, in);
+            
+            string name, taxon;
+            while(!in.eof()){
+                
+                if (m->control_pressed) { break; }
+                
+                in >> name >> taxon; m->gobble(in);
+                
+                if (threshold != 0) {  taxon = processTaxMap(taxon);  }
+                
+                //add sequence to summary, countfile info included from Phylosummary constructor
+                taxaSum->addSeqToTree(name, taxon);
+            }
+            in.close();
+        }
+		else if ((threshold != 0) && (namefile != "")) {
 			map<string, vector<string> > nameMap;
 			map<string, vector<string> >::iterator itNames;
 			m->readNames(namefile, nameMap);
@@ -264,6 +297,8 @@ int SummaryTaxCommand::execute(){
                 if (m->control_pressed) { break; }
                 
 				in >> name >> taxon; m->gobble(in);
+                
+                if (threshold != 0) {  taxon = processTaxMap(taxon);  }
 				
 				itNames = nameMap.find(name);
 				
@@ -279,7 +314,7 @@ int SummaryTaxCommand::execute(){
 				}
 			}
 			in.close();
-		}else { numSeqs = taxaSum->summarize(taxfile);  }
+        }else if (threshold == 0) { numSeqs = taxaSum->summarize(taxfile);  }
 		
 		if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
@@ -289,7 +324,7 @@ int SummaryTaxCommand::execute(){
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxfile));
 		string summaryFile = getOutputFileName("summary",variables);
 		m->openOutputFile(summaryFile, outTaxTree);
-		taxaSum->print(outTaxTree);
+		taxaSum->print(outTaxTree, output);
 		outTaxTree.close();
 		
 		delete taxaSum;
@@ -310,6 +345,71 @@ int SummaryTaxCommand::execute(){
 		m->errorOut(e, "SummaryTaxCommand", "execute");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+string SummaryTaxCommand::processTaxMap(string tax) {
+    try{
+        
+        string newTax = tax;
+        
+        vector<string> taxons;
+        int taxLength = tax.length();
+        string taxon = "";
+        int spot = 0;
+        
+        for(int i=0;i<taxLength;i++){
+            
+            
+            if(tax[i] == ';'){
+                
+                int openParen = taxon.find_last_of('(');
+                int closeParen = taxon.find_last_of(')');
+                
+                string newtaxon, confidence;
+                if ((openParen != string::npos) && (closeParen != string::npos)) {
+                    string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
+                    if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                        newtaxon = taxon.substr(0, openParen); //rip off confidence
+                        confidence = taxon.substr((openParen+1), (closeParen-openParen-1));
+                    }else { //its part of the taxon
+                        newtaxon = taxon;
+                        confidence = "0";
+                    }
+                }else{
+                    newtaxon = taxon;
+                    confidence = "-1";
+                }
+                float con = 0;
+                convert(confidence, con);
+                
+                if (con == -1) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
+                else if ( con < threshold)  { spot = i; break; } //below threshold, set all to unclassified
+                else {} //acceptable, move on
+                taxons.push_back(taxon);
+                
+                taxon = "";
+            }
+            else{
+                taxon += tax[i];
+            }
+            
+        }
+        
+        if (spot != 0) {
+            newTax = "";
+            for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
+            for (int i = spot; i < taxLength; i++) {
+                if(tax[i] == ';'){   newTax += "unclassified;"; }
+                m->removeConfidences(newTax);
+            }
+        }else { m->removeConfidences(tax); newTax = tax; } //leave tax alone
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummaryTaxCommand", "processTaxMap");
+        exit(1);
+    }
 }
 /**************************************************************************************/
 

@@ -146,7 +146,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
 			}
 		}
         
-		//random_shuffle(mins.begin(), mins.end());  //randomize the order of the iterators in the mins vector
+		random_shuffle(mins.begin(), mins.end());  //randomize the order of the iterators in the mins vector
         
         row = mins[0].row;
         ull col = mins[0].col;

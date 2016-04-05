@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "chimera.h"
+#include "mothurchimera.h"
 
 
 /***********************************************************/
@@ -41,7 +41,7 @@ private:
 	bool abort, filter, correction;
 	string fastafile, outputDir;
 	int processors, window, increment, numSeqs;
-	Chimera* chimera;
+	MothurChimera* chimera;
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
 };

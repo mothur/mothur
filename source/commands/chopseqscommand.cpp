@@ -274,7 +274,7 @@ int ChopSeqsCommand::execute(){
 #else
         int numSeqs = 0;
         positions = m->setFilePosFasta(fastafile, numSeqs); 
-        if (positions.size() < processors) { processors = positions.size(); }
+        if (numSeqs < processors) { processors = numSeqs; }
 		
         //figure out how many sequences you have to process
         int numSeqsPerProcessor = numSeqs / processors;

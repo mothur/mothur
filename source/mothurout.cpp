@@ -58,35 +58,68 @@ set<string> MothurOut::getCurrentTypes()  {
 	}
 }
 /*********************************************************************************************/
-void MothurOut::printCurrentFiles()  {
+void MothurOut::printCurrentFiles(string filename)  {
 	try {
         
-        
-		if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
-		if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
-		if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
-		if (fastafile != "")		{  mothurOut("fasta=" + fastafile); mothurOutEndLine();				}
-		if (groupfile != "")		{  mothurOut("group=" + groupfile); mothurOutEndLine();				}
-		if (listfile != "")			{  mothurOut("list=" + listfile); mothurOutEndLine();				}
-		if (namefile != "")			{  mothurOut("name=" + namefile); mothurOutEndLine();				}
-		if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile); mothurOutEndLine();			}
-		if (orderfile != "")		{  mothurOut("order=" + orderfile); mothurOutEndLine();				}
-		if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile); mothurOutEndLine();	}
-		if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile); mothurOutEndLine();			}
-		if (qualfile != "")			{  mothurOut("qfile=" + qualfile); mothurOutEndLine();				}
-		if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile); mothurOutEndLine();			}
-		if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile); mothurOutEndLine();		}
-		if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile); mothurOutEndLine();			}
-		if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
-		if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
-		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
-		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
-		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
-        if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
-        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();        }
-		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
-        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();         }
-        if (filefile != "")         {  mothurOut("file=" + filefile); mothurOutEndLine();               }
+        if (filename != "") {
+            ofstream out;
+            openOutputFile(filename, out);
+            
+            if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile, out); mothurOutEndLine(out);           }
+            if (columnfile != "")		{  mothurOut("column=" + columnfile, out); mothurOutEndLine(out);			}
+            if (designfile != "")		{  mothurOut("design=" + designfile, out); mothurOutEndLine(out);			}
+            if (fastafile != "")		{  mothurOut("fasta=" + fastafile, out); mothurOutEndLine(out);				}
+            if (groupfile != "")		{  mothurOut("group=" + groupfile, out); mothurOutEndLine(out);				}
+            if (listfile != "")			{  mothurOut("list=" + listfile, out); mothurOutEndLine(out);				}
+            if (namefile != "")			{  mothurOut("name=" + namefile, out); mothurOutEndLine(out);				}
+            if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile, out); mothurOutEndLine(out);			}
+            if (orderfile != "")		{  mothurOut("order=" + orderfile, out); mothurOutEndLine(out);				}
+            if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile, out); mothurOutEndLine(out);	}
+            if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile, out); mothurOutEndLine(out);			}
+            if (qualfile != "")			{  mothurOut("qfile=" + qualfile, out); mothurOutEndLine(out);				}
+            if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile, out); mothurOutEndLine(out);			}
+            if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile, out); mothurOutEndLine(out);		}
+            if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile, out); mothurOutEndLine(out);			}
+            if (sfffile != "")			{  mothurOut("sff=" + sfffile, out); mothurOutEndLine(out);					}
+            if (sharedfile != "")		{  mothurOut("shared=" + sharedfile, out); mothurOutEndLine(out);			}
+            if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile, out); mothurOutEndLine(out);		}
+            if (treefile != "")			{  mothurOut("tree=" + treefile, out); mothurOutEndLine(out);				}
+            if (flowfile != "")			{  mothurOut("flow=" + flowfile, out); mothurOutEndLine(out);				}
+            if (biomfile != "")			{  mothurOut("biom=" + biomfile, out); mothurOutEndLine(out);				}
+            if (counttablefile != "")	{  mothurOut("count=" + counttablefile, out); mothurOutEndLine(out);        }
+            if (processors != "1")		{  mothurOut("processors=" + processors, out); mothurOutEndLine(out);		}
+            if (summaryfile != "")		{  mothurOut("summary=" + summaryfile, out); mothurOutEndLine(out);         }
+            if (filefile != "")         {  mothurOut("file=" + filefile, out); mothurOutEndLine(out);               }
+            
+            out.close();
+            
+        }else {
+            if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
+            if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
+            if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
+            if (fastafile != "")		{  mothurOut("fasta=" + fastafile); mothurOutEndLine();				}
+            if (groupfile != "")		{  mothurOut("group=" + groupfile); mothurOutEndLine();				}
+            if (listfile != "")			{  mothurOut("list=" + listfile); mothurOutEndLine();				}
+            if (namefile != "")			{  mothurOut("name=" + namefile); mothurOutEndLine();				}
+            if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile); mothurOutEndLine();			}
+            if (orderfile != "")		{  mothurOut("order=" + orderfile); mothurOutEndLine();				}
+            if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile); mothurOutEndLine();	}
+            if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile); mothurOutEndLine();			}
+            if (qualfile != "")			{  mothurOut("qfile=" + qualfile); mothurOutEndLine();				}
+            if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile); mothurOutEndLine();			}
+            if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile); mothurOutEndLine();		}
+            if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile); mothurOutEndLine();			}
+            if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
+            if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
+            if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
+            if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
+            if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
+            if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
+            if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();        }
+            if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
+            if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();         }
+            if (filefile != "")         {  mothurOut("file=" + filefile); mothurOutEndLine();               }
+        }
 		
 	}
 	catch(exception& e) {
@@ -261,19 +294,7 @@ string MothurOut::findProgramPath(string programName){
 void MothurOut::setFileName(string filename)  {
 	try {
 		logFileName = filename;
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-		
 		openOutputFile(filename, out);
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -313,19 +334,43 @@ void MothurOut::setOutputDir(string pathname)  {
 /*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-		
+        if (numErrors != 0) {
+            out << "\n\n************************************************************\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            out << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            out << "************************************************************\n";
+            
+            logger() << "\n\n************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+            logger() << "************************************************************\n";
+        }
+        
+        if (numWarnings != 0) {
+            out << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            out << "Detected " + toString(numWarnings) + " [WARNING] messages, please review.\n";
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            
+            logger() << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            logger() << "Detected " + toString(numWarnings) + " [WARNING] messages, please review.\n";
+            logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+            logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+        }
+        
 		out.close();
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "closeLog");
@@ -347,27 +392,22 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-		
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                if (!quietMode) {
-                    out << output;
-                    logger() << output;
-                }else {
-                    //check for this being an error
-                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                        out << output;
-                        logger() << output;
-                    }
-                }
-		
-		#ifdef USE_MPI
-			}
-		#endif
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
+        
+        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+
+        
+        if (!quietMode) {
+            out << output;
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                out << output;
+                logger() << output;
+            }
+        }
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -377,26 +417,18 @@ void MothurOut::mothurOut(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToScreen(string output) {
 	try {
-		
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+		if (output.find("[ERROR]") != string::npos) { numErrors++; }
         
-        if (pid == 0) { //only one process should output to screen
-#endif
-            if (!quietMode) {
+        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        
+        if (!quietMode) {
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
                 logger() << output;
-            }else {
-                //check for this being an error
-                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                    logger() << output;
-                }
             }
-
-            
-#ifdef USE_MPI
         }
-#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -406,21 +438,10 @@ void MothurOut::mothurOutJustToScreen(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                
 		if (!quietMode) {
             out << endl;
             logger() << endl;
         }
-		
-		#ifdef USE_MPI
-			}
-		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -430,32 +451,23 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output, ofstream& outputFile) {
 	try {
-		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { //only one process should output to screen
-#endif
-            if (!quietMode) {
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
+        
+        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        
+        if (!quietMode) {
+            out << output;
+            outputFile << output;
+            logger() << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
                 out << output;
                 outputFile << output;
                 logger() << output;
-            }else {
-                //check for this being an error
-                if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                    out << output;
-                    outputFile << output;
-                    logger() << output;
-                }
-                
             }
-
-			
-#ifdef USE_MPI
-		}
-#endif
-        
+            
+        }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -465,21 +477,11 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 	try {
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { //only one process should output to screen
-#endif
-			if (!quietMode) {
-                out << endl;
-                outputFile << endl;
-                logger() << endl;
-            }
-			
-#ifdef USE_MPI
-		}
-#endif
+        if (!quietMode) {
+            out << endl;
+            outputFile << endl;
+            logger() << endl;
+        }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -489,24 +491,19 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
-		#ifdef USE_MPI
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-			if (pid == 0) { //only one process should output to screen
-		#endif
-                if (!quietMode) {
-                    out << output;
-                }else {
-                    //check for this being an error
-                    if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                        out << output;
-                    }
-                }
-		
-		#ifdef USE_MPI
-			}
-		#endif
+        if (output.find("[ERROR]") != string::npos) { numErrors++; }
+
+        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        
+        if (!quietMode) {
+            out << output;
+        }else {
+            //check for this being an error
+            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
+                out << output;
+            }
+        }
+
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutJustToLog");
@@ -515,8 +512,7 @@ void MothurOut::mothurOutJustToLog(string output) {
 }
 /*********************************************************************************************/
 void MothurOut::errorOut(exception& e, string object, string function) {
-	//double vm, rss;
-	//mem_usage(vm, rss);
+    numErrors++; 
 	
     string errorType = toString(e.what());
     
@@ -524,104 +520,94 @@ void MothurOut::errorOut(exception& e, string object, string function) {
     mothurOut("[ERROR]: ");
     mothurOut(errorType);
     
+    unsigned long long ramUsed, total;
+    ramUsed = getRAMUsed(); total = getTotalRAM();
+    mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + "Gigabytes . Total Ram: " + toString(total/(double)GIG) + "Gigabytes.\n\n");
+    
     if (pos == string::npos) { //not bad_alloc
         mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
         mothurOutEndLine();
     }else { //bad alloc
         if (object == "cluster"){
-            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  There are two common causes for this, file size and format.\n\nFile Size:\nThe cluster command loads your distance matrix into RAM, and your distance file is most likely too large to fit in RAM. There are two options to help with this. The first is to use a cutoff. By using a cutoff mothur will only load distances that are below the cutoff. If that is still not enough, there is a command called cluster.split, http://www.mothur.org/wiki/cluster.split which divides the distance matrix, and clusters the smaller pieces separately. You may also be able to reduce the size of the original distance matrix by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. \n\nWrong Format:\nThis error can be caused by trying to read a column formatted distance matrix using the phylip parameter. By default, the dist.seqs command generates a column formatted distance matrix. To make a phylip formatted matrix set the dist.seqs command parameter output to lt.  \n\nIf you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
+            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  There are two common causes for this, file size and format.\n\nFile Size:\nThe cluster command loads your distance matrix into RAM, and your distance file is most likely too large to fit in RAM. There are two options to help with this. The first is to use a cutoff. By using a cutoff mothur will only load distances that are below the cutoff. If that is still not enough, there is a command called cluster.split, http://www.mothur.org/wiki/cluster.split which divides the distance matrix, and clusters the smaller pieces separately. You may also be able to reduce the size of the original distance matrix by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. \n\nWrong Format:\nThis error can be caused by trying to read a column formatted distance matrix using the phylip parameter. By default, the dist.seqs command generates a column formatted distance matrix. To make a phylip formatted matrix set the dist.seqs command parameter output to lt.  \n\nIf you are unable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
         }else if (object == "shhh.flows"){
-                mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory. The shhh.flows command is very memory intensive. This error is most commonly caused by trying to process a dataset too large, using multiple processors, or failing to run trim.flows before shhh.flows. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Running trim.flows with an oligos file, and then shhh.flows with the file option may also resolve the issue. If for some reason you are unable to run shhh.flows with your data, a good alternative is to use the trim.seqs command using a 50-bp sliding window and to trim the sequence when the average quality score over that window drops below 35. Our results suggest that the sequencing error rates by this method are very good, but not quite as good as by shhh.flows and that the resulting sequences tend to be a bit shorter. If you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry. ");
+                mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory. The shhh.flows command is very memory intensive. This error is most commonly caused by trying to process a dataset too large, using multiple processors, or failing to run trim.flows before shhh.flows. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Running trim.flows with an oligos file, and then shhh.flows with the file option may also resolve the issue. If for some reason you are unable to run shhh.flows with your data, a good alternative is to use the trim.seqs command using a 50-bp sliding window and to trim the sequence when the average quality score over that window drops below 35. Our results suggest that the sequencing error rates by this method are very good, but not quite as good as by shhh.flows and that the resulting sequences tend to be a bit shorter. If you are unable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry. ");
         }else {
-            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  This is most commonly caused by trying to process a dataset too large, using multiple processors, or a file format issue. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Also, you may be able to reduce the size of your dataset by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. If you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
+            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  This is most commonly caused by trying to process a dataset too large, using multiple processors, or a file format issue. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Also, you may be able to reduce the size of your dataset by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. If you are unable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
         }
     }
 }
 /*********************************************************************************************/
-//The following was originally from http://stackoverflow.com/questions/669438/how-to-get-memory-usage-at-run-time-in-c 
-// process_mem_usage(double &, double &) - takes two doubles by reference,
-// attempts to read the system-dependent data for a process' virtual memory
-// size and resident set size, and return the results in KB.
-//
-// On failure, returns 0.0, 0.0
-int MothurOut::mem_usage(double& vm_usage, double& resident_set) {
-  #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-  
-	   vm_usage     = 0.0;
-	   resident_set = 0.0;
-
-	   // 'file' stat seems to give the most reliable results
-	   //
-	   ifstream stat_stream("/proc/self/stat",ios_base::in);
-
-	   // dummy vars for leading entries in stat that we don't care about
-	   //
-	   string pid, comm, state, ppid, pgrp, session, tty_nr;
-	   string tpgid, flags, minflt, cminflt, majflt, cmajflt;
-	   string utime, stime, cutime, cstime, priority, nice;
-	   string O, itrealvalue, starttime;
-
-	   // the two fields we want
-	   //
-	   unsigned long vsize;
-	   long rss;
-
-	   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
-				   >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
-				   >> utime >> stime >> cutime >> cstime >> priority >> nice
-				   >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
-
-	   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
-	   vm_usage     = vsize / 1024.0;
-	   resident_set = rss * page_size_kb;
-	   
-	   mothurOut("Memory Usage: vm = " + toString(vm_usage) + " rss = " + toString(resident_set) + "\n");
-		return 0;
-
-	#else
-/*		//windows memory usage
-		// Get the list of process identifiers.
-		DWORD aProcesses[1024], cbNeeded, cProcesses;
-		
-		if ( !EnumProcesses( aProcesses, sizeof(aProcesses), &cbNeeded ) ){ return 1; }
-
-		// Calculate how many process identifiers were returned.
-		cProcesses = cbNeeded / sizeof(DWORD);
-
-		// Print the memory usage for each process
-		for (int i = 0; i < cProcesses; i++ ) {
-			DWORD processID = aProcesses[i];
-			
-			PROCESS_MEMORY_COUNTERS pmc;
-
-			HANDLE hProcess = OpenProcess((PROCESS_QUERY_INFORMATION | PROCESS_VM_READ), FALSE, processID);
-
-			// Print the process identifier.
-			printf( "\nProcess ID: %u\n", processID);
-			
-			if (NULL != hProcess) {
-
-				if ( GetProcessMemoryInfo( hProcess, &pmc, sizeof(pmc)) ) {
-					printf( "\tPageFaultCount: 0x%08X\n", pmc.PageFaultCount );
-					printf( "\tPeakWorkingSetSize: 0x%08X\n", pmc.PeakWorkingSetSize );
-					printf( "\tWorkingSetSize: 0x%08X\n", pmc.WorkingSetSize );
-					printf( "\tQuotaPeakPagedPoolUsage: 0x%08X\n", pmc.QuotaPeakPagedPoolUsage );
-					printf( "\tQuotaPagedPoolUsage: 0x%08X\n", pmc.QuotaPagedPoolUsage );
-					printf( "\tQuotaPeakNonPagedPoolUsage: 0x%08X\n", pmc.QuotaPeakNonPagedPoolUsage );
-					printf( "\tQuotaNonPagedPoolUsage: 0x%08X\n", pmc.QuotaNonPagedPoolUsage );
-					printf( "\tPagefileUsage: 0x%08X\n", pmc.PagefileUsage ); 
-					printf( "\tPeakPagefileUsage: 0x%08X\n", pmc.PeakPagefileUsage );
-				}
-				CloseHandle(hProcess);
-			}
-		}
-*/
-			return 0;
-
-	#endif
+unsigned long long MothurOut::getRAMUsed() {
+    try {
+       
+#if defined (__APPLE__) || (__MACH__)
+    /* Mac: ru_maxrss gives the size in bytes */
+    struct rusage r_usage;
+    getrusage(RUSAGE_SELF, & r_usage);
+    
+    return r_usage.ru_maxrss;
+#elif (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    /* Linux: ru_maxrss gives the size in kilobytes  */
+    struct rusage r_usage;
+    getrusage(RUSAGE_SELF, & r_usage);
+    return r_usage.ru_maxrss * 1024;
+#else
+        MEMORYSTATUSEX status;
+        status.dwLength = sizeof(status);
+        GlobalMemoryStatusEx(&status);
+        return (size_t)(status.ullTotalPhys - status.ullAvailPhys);
+#endif
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getMemoryUsed");
+        exit(1);
+    }
 }
+/*********************************************************************************************/
 
-
+unsigned long long MothurOut::getTotalRAM() {
+    try {
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+    long pages = get_phys_pages();
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    if ((page_size == -1) || (pages == -1))
+        mothurOut("[WARNING]: Cannot determine amount of RAM");
+    return pages * page_size;
+#elif defined (_WIN32)
+    MEMORYSTATUSEX status;
+    status.dwLength = sizeof(status);
+    GlobalMemoryStatusEx(&status);
+    return (size_t)status.ullTotalPhys;
+#else
+    struct sysinfo si;
+    if (sysinfo(&si))
+        mothurOut("[WARNING]: Cannot determine amount of RAM");
+    return si.totalram * si.mem_unit;
+    
+#endif
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getTotalRAM");
+        exit(1);
+    }
+}
+/***********************************************************************/
+unsigned long MothurOut::get_phys_pages () {
+    unsigned long phys_pages = 0;
+#if (_SC_PAGE_SIZE)
+    uint64_t mem;
+    size_t len = sizeof(mem);
+    sysctlbyname("hw.memsize", &mem, &len, NULL, 0);
+    phys_pages = mem/sysconf(_SC_PAGE_SIZE);
+#elif (_SC_PHYS_PAGES)
+    phys_pages = sysconf(_SC_PHYS_PAGES);
+#else
+     mothurOut("[WARNING]: Cannot determine number of physical pages\n");
+#endif
+    return phys_pages;
+}
 /***********************************************************************/
 int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
 	try {
@@ -761,30 +747,11 @@ string MothurOut::getline(ifstream& fileHandle) {
 	}
 }
 /***********************************************************************/
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-inline bool endsWith(string s, const char * suffix){
-  size_t suffixLength = strlen(suffix);
-  return s.size() >= suffixLength && s.substr(s.size() - suffixLength, suffixLength).compare(suffix) == 0;
-}
-#endif
-#endif
-
 string MothurOut::getRootName(string longName){
 	try {
 	
 		string rootName = longName;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-    if (endsWith(rootName, ".gz") || endsWith(rootName, ".bz2")) {
-      int pos = rootName.find_last_of('.');
-      rootName = rootName.substr(0, pos);
-      cerr << "shortening " << longName << " to " << rootName << "\n";
-    }
-#endif
-#endif
 		if(rootName.find_last_of(".") != rootName.npos){
 			int pos = rootName.find_last_of('.')+1;
 			rootName = rootName.substr(0, pos);
@@ -861,12 +828,6 @@ bool MothurOut::dirCheck(string& dirName){
         if (dirName == "") { return false; }
         
         string tag = "";
-        #ifdef USE_MPI
-            int pid; 
-            MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-            tag = toString(pid);
-        #endif
 
         //add / to name if needed
         string lastChar = dirName.substr(dirName.length()-1);
@@ -905,12 +866,6 @@ bool MothurOut::dirCheck(string& dirName, string noError){
         if (dirName == "") { return false; }
         
         string tag = "";
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        tag = toString(pid);
-#endif
         
         //add / to name if needed
         string lastChar = dirName.substr(dirName.length()-1);
@@ -951,12 +906,6 @@ bool MothurOut::mkDir(string& dirName){
         if (dirExist) { return true; }
         
         string tag = "";
-#ifdef USE_MPI
-        int pid;
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        
-        tag = toString(pid);
-#endif
         
         string makeDirectoryCommand = "";
 
@@ -1068,6 +1017,20 @@ bool MothurOut::isBlank(string fileName){
 		errorOut(e, "MothurOut", "isBlank");
 		exit(1);
 	}	
+}
+/***********************************************************************/
+bool MothurOut::stringBlank(string input){
+    try {
+        for (int i = 0; i < input.length(); i++) {
+            if (!isspace(input[i])) { return false; }
+        }
+        
+        return true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isBlank");
+        exit(1);
+    }	
 }
 /***********************************************************************/
 
@@ -1208,30 +1171,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-      // check for gzipped or bzipped file
-      if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-        string tempName = string(tmpnam(0));
-        mkfifo(tempName.c_str(), 0666);
-        int fork_result = fork();
-        if (fork_result < 0) {
-          cerr << "Error forking.\n";
-          exit(1);
-        } else if (fork_result == 0) {
-          string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-          cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-          system(command.c_str());
-          cerr << "Done decompressing " << completeFileName << "\n";
-          mothurRemove(tempName);
-          exit(EXIT_SUCCESS);
-        } else {
-          cerr << "waiting on child process " << fork_result << "\n";
-          completeFileName = tempName;
-        }
-      }
-#endif
-#endif
+        
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
 				//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1255,30 +1195,6 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-  // check for gzipped or bzipped file
-  if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-    string tempName = string(tmpnam(0));
-    mkfifo(tempName.c_str(), 0666);
-    int fork_result = fork();
-    if (fork_result < 0) {
-      cerr << "Error forking.\n";
-      exit(1);
-    } else if (fork_result == 0) {
-      string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-      cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-      system(command.c_str());
-      cerr << "Done decompressing " << completeFileName << "\n";
-      mothurRemove(tempName);
-      exit(EXIT_SUCCESS);
-    } else {
-      cerr << "waiting on child process " << fork_result << "\n";
-      completeFileName = tempName;
-    }
-  }
-#endif
-#endif
 
 		fileHandle.open(completeFileName.c_str());
 		if(!fileHandle) {
@@ -1305,30 +1221,6 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle){
         
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped or bzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-                system(command.c_str());
-                cerr << "Done decompressing " << completeFileName << "\n";
-                mothurRemove(tempName);
-                exit(EXIT_SUCCESS);
-            } else {
-                cerr << "waiting on child process " << fork_result << "\n";
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
         
 		fileHandle.open(completeFileName.c_str(), ios::binary);
 		if(!fileHandle) {
@@ -1355,31 +1247,7 @@ int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string
         
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped or bzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
-                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-                system(command.c_str());
-                cerr << "Done decompressing " << completeFileName << "\n";
-                mothurRemove(tempName);
-                exit(EXIT_SUCCESS);
-            } else {
-                cerr << "waiting on child process " << fork_result << "\n";
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
-        
+
 		fileHandle.open(completeFileName.c_str(), ios::binary);
 		if(!fileHandle) {
 			//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1562,27 +1430,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	try { 
 	
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-    // check for gzipped file
-    if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-      string tempName = string(tmpnam(0));
-      mkfifo(tempName.c_str(), 0666);
-      cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-      int fork_result = fork();
-      if (fork_result < 0) {
-        cerr << "Error forking.\n";
-        exit(1);
-      } else if (fork_result == 0) {
-        string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
-        system(command.c_str());
-        exit(0);
-      } else {
-        completeFileName = tempName;
-      }
-    }
-#endif
-#endif
+
 		fileHandle.open(completeFileName.c_str(), ios::trunc);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -1604,27 +1452,7 @@ int MothurOut::openOutputFileBinary(string fileName, ofstream& fileHandle){
 	try {
         
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#ifdef USE_COMPRESSION
-        // check for gzipped file
-        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
-            string tempName = string(tmpnam(0));
-            mkfifo(tempName.c_str(), 0666);
-            cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
-            int fork_result = fork();
-            if (fork_result < 0) {
-                cerr << "Error forking.\n";
-                exit(1);
-            } else if (fork_result == 0) {
-                string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
-                system(command.c_str());
-                exit(0);
-            } else {
-                completeFileName = tempName;
-            }
-        }
-#endif
-#endif
+
 		fileHandle.open(completeFileName.c_str(), ios::trunc | ios::binary);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -3537,9 +3365,46 @@ bool MothurOut::mothurConvert(string item, int& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-int");
 		exit(1);
 	}
+}
+/***********************************************************************/
+bool MothurOut::mothurConvert(char item, int& num){
+    try {
+        bool error = false;
+        
+        if (isdigit(item)) {
+            string mystring; mothurConvert(item, mystring);
+            mothurConvert(mystring, num);
+        }else {
+            num = 0;
+            error = true;
+            mothurOut("[ERROR]: cannot convert " + toString(item) + " to an integer."); mothurOutEndLine();
+            commandInputsConvertError = true;
+        }
+        
+        return error;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurConvert-int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+bool MothurOut::mothurConvert(char item, string& output){
+    try {
+        
+        stringstream ss;
+        ss << item;
+        ss >> output;
+        return true;
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurConvert-char");
+        exit(1);
+    }
 }
 /***********************************************************************/
 bool MothurOut::mothurConvert(string item, intDist& num){
@@ -3558,9 +3423,53 @@ bool MothurOut::mothurConvert(string item, intDist& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-intDist");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
+    try{
+        string newTax, taxon;
+        int level = 0;
+        
+        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+        vector<int> confidences;
+        
+        int index = 0;
+        int confidence = 0;
+        for (int i = 0; i < taxons.size(); i++) {
+            index = i;
+            string thisTax = taxons[i]+";";
+            confidence = removeConfidences(thisTax);
+            confidences.push_back(confidence);
+    
+            if (thisTax == "unclassified;"){ index--; break; }
+            else{ newTax += taxons[i] + ";";  }
+        }
+        level = index+1;
+        
+        string thisTax = taxons[index]+";";
+        
+        removeConfidences(thisTax);
+        taxon = thisTax.substr(0, thisTax.length()-1);
+        
+        string cTax = "";
+        if (probs)  { cTax = taxon + "_unclassified(" + toString(confidences[index]) + ");";     }
+        else        { cTax = taxon + "_unclassified;";          }
+        
+        //add "unclassified" until you reach maxLevel
+        while (level < maxlevel) {
+            newTax += cTax;
+            level++;
+        }
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "addUnclassifieds");
+        exit(1);
+    }
 }
 
 /***********************************************************************/
@@ -3568,7 +3477,8 @@ bool MothurOut::isNumeric1(string stringToCheck){
 	try {
 		bool numeric = false;
 		
-		if(stringToCheck.find_first_not_of("0123456789.-") == string::npos) { numeric = true; }
+        if (stringToCheck == "") { numeric = false;  }
+        else if(stringToCheck.find_first_not_of("0123456789.-") == string::npos) { numeric = true; }
 			
 		return numeric;
 	}
@@ -3625,7 +3535,7 @@ bool MothurOut::mothurConvert(string item, float& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-float");
 		exit(1);
 	}
 }
@@ -3646,7 +3556,7 @@ bool MothurOut::mothurConvert(string item, double& num){
 		return error;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "mothurConvert");
+		errorOut(e, "MothurOut", "mothurConvert-double");
 		exit(1);
 	}
 }
@@ -3816,6 +3726,66 @@ double  MothurOut::median(vector<double> x) {
 		errorOut(e, "MothurOut", "median");
 		exit(1);
 	}
+}
+/***********************************************************************/
+int  MothurOut::median(vector<int> x) {
+    try {
+        double value = 0;
+        
+        if (x.size() == 0) { } //error
+        else {
+            //For example, if a < b < c, then the median of the list {a, b, c} is b, and, if a < b < c < d, then the median of the list {a, b, c, d} is the mean of b and c; i.e., it is (b + c)/2.
+            sort(x.begin(), x.end());
+            //is x.size even?
+            if ((x.size()%2) == 0) { //size() is even. median = average of 2 midpoints
+                int midIndex1 = (x.size()/2)-1;
+                int midIndex2 = (x.size()/2);
+                value = (x[midIndex1]+ x[midIndex2]) / 2.0;
+            }else {
+                int midIndex = (x.size()/2);
+                value = x[midIndex];
+            }
+        }
+        return (int) value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "median - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int  MothurOut::average(vector<int> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return ((int) value / x.size());
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "average - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int  MothurOut::sum(vector<int> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "average - int");
+        exit(1);
+    }
 }
 /***********************************************************************/
 int MothurOut::factorial(int num){
@@ -4749,6 +4719,7 @@ int MothurOut::removeConfidences(string& tax) {
 		
 		string taxon;
 		string newTax = "";
+        string confidenceScore = "0";
 		
 		while (tax.find_first_of(';') != -1) {
 			
@@ -4762,9 +4733,10 @@ int MothurOut::removeConfidences(string& tax) {
 				//is it a number?
 				int pos2 = taxon.find_last_of(')');
 				if (pos2 != -1) {
-					string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
-					if (isNumeric1(confidenceScore)) {
-						taxon = taxon.substr(0, pos); //rip off confidence 
+					string temp = taxon.substr(pos+1, (pos2-(pos+1)));
+					if (isNumeric1(temp)) {
+						taxon = taxon.substr(0, pos); //rip off confidence
+                        confidenceScore = temp;
 					}
 				}
 			}
@@ -4775,8 +4747,10 @@ int MothurOut::removeConfidences(string& tax) {
 		}
 		
 		tax = newTax;
+        
+        int confidence = 0; mothurConvert(confidenceScore, confidence);
 		
-		return 0;
+		return confidence;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "removeConfidences");
@@ -4898,7 +4872,94 @@ int MothurOut::min(int A, int B){
         exit(1);
     }
 }
-
+//**********************************************************************************************************************
+int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename){
+    try {
+        
+        sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
+        
+        ofstream out;
+        openOutputFile(filename, out);
+        
+        //print new file in order of
+        for (int i = 0; i < nameMapCount.size(); i++) {
+            if (control_pressed) {break;}
+            out << ">" << nameMapCount[i].name  << "/size=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "printVsearchFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<string>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            result += delim + list[i];
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<int>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            string temp = toString(list[i]);
+            result += delim + temp;
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string MothurOut::getStringFromVector(vector<double>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        result = list[0];
+        
+        for (int i = 1; i < list.size(); i++) {
+            if (control_pressed) { break;  }
+            string temp = toString(list[i]);
+            result += delim + temp;
+        }
+        
+        return result;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getStringFromVector");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 
 

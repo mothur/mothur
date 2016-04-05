@@ -11,7 +11,7 @@
  */
 
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "kmer.hpp"
 #include "kmerdb.hpp"
 #include "alignmentdb.h"
@@ -22,7 +22,7 @@
 
 /***********************************************************/
 
-class ChimeraCheckRDP : public Chimera {
+class ChimeraCheckRDP : public MothurChimera {
 	
 	public:
 		ChimeraCheckRDP(string, string, string, bool, int, int, string); //fasta, template, name, svg, increment, ksize, outputDir	
@@ -30,10 +30,6 @@ class ChimeraCheckRDP : public Chimera {
 		
 		int getChimeras(Sequence*);
 		Sequence print(ostream&, ostream&);
-		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		#endif
 		
 	private:
 		

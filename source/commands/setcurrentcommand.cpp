@@ -35,6 +35,7 @@ vector<string> SetCurrentCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pshared);
 		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pordergroup);
         CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcount);
+        CommandParameter pcurrent("current", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcurrent);
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(prelabund);
 		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(psff);
 		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(poligos);
@@ -57,8 +58,9 @@ string SetCurrentCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
-		helpString += "The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file and taxonomy.\n";
-		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file and taxonomy.\n";
+        helpString += "The current parameter is used to input the output file from get.current.  This function is intended to allow you to input filenames from previous instances on mothur.  NOTE: If you have a current file set in the file *.current_files.summary file, and also set a value for that file type, the value set takes precedence.  For example, if you run set.current(current=current_files.summary, fasta=abrecovery.fasta) and your have fasta=final.fasta in the *.current_files.summary file the current fasta file will be set to abrecovery.fasta.\n";
+		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
 		helpString += "set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n";
 		return helpString;
@@ -75,11 +77,28 @@ SetCurrentCommand::SetCurrentCommand(){
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SetCurrentCommand", "SetCurrentCommand");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string SetCurrentCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
+        
+        if (type == "summary") {  pattern = "[filename],current_files.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SetCurrentCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SetCurrentCommand::SetCurrentCommand(string option)  {
@@ -104,6 +123,8 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+            vector<string> tempOutNames;
+            outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -309,7 +330,23 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("current");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["current"] = inputDir + it->second;		}
+                }
 			}
+            
+            currentFile = validParameter.validFile(parameters, "current", true);
+            if (currentFile == "not open") { m->mothurOut("Ignoring: " + parameters["current"]); m->mothurOutEndLine(); currentFile = ""; }
+            else if (currentFile == "not found") {  currentFile = "";  }
+            if (currentFile != "") { readCurrentFiles(); } //setting variables overwrites the settings in the file.
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){  outputDir = ""; }
 			
 			//check for parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
@@ -453,7 +490,7 @@ int SetCurrentCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
 		//user wants to clear a type
 		if (types.size() != 0) {
 			for (int i = 0; i < types.size(); i++) {
@@ -518,9 +555,22 @@ int SetCurrentCommand::execute(){
 				}
 			}
 		}
-		
+        
 		m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
-		m->printCurrentFiles();
+        
+        if (m->hasCurrentFiles()) {
+            map<string, string> variables;
+            variables["[filename]"] = m->getFullPathName(outputDir);
+            string filename = getOutputFileName("summary", variables);
+            
+            m->printCurrentFiles(filename);
+            outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
+            
+            m->mothurOutEndLine();
+            m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+            for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
+            m->mothurOutEndLine();
+        }
 		
 		return 0;	
 	}
@@ -530,7 +580,92 @@ int SetCurrentCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
 
+int SetCurrentCommand::readCurrentFiles(){
+    try{
+        
+        ifstream in;
+        m->openInputFile(currentFile, in);
+        
+        
+        while(!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            string line = m->getline(in); m->gobble(in);
+            
+            vector<string> pieces;
+            m->splitAtChar(line, pieces, '=');
+            
+            if (pieces.size() != 2) { m->mothurOut("[ERROR]: " + m->getStringFromVector(pieces, ",") + " line is not in the correct format.  Did you edit the file? Mothur expects tag=filename.  Example: fasta=final.fasta\n"); m->control_pressed = true;  }
+            else{
+                   //look for file types
+                if (pieces[0] == "fasta") {
+                    m->setFastaFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "qfile") {
+                    m->setQualFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "phylip") {
+                    m->setPhylipFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "column") {
+                    m->setColumnFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "list") {
+                    m->setListFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "rabund") {
+                    m->setRabundFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "sabund") {
+                    m->setSabundFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "name") {
+                    m->setNameFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "group") {
+                    m->setGroupFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "order") {
+                    m->setOrderFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "ordergroup") {
+                    m->setOrderGroupFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "tree") {
+                    m->setTreeFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "shared") {
+                    m->setSharedFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "relabund") {
+                    m->setRelAbundFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "design") {
+                    m->setDesignFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "sff") {
+                    m->setSFFFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "oligos") {
+                    m->setOligosFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "accnos") {
+                    m->setAccnosFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "taxonomy") {
+                    m->setTaxonomyFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "flow") {
+                    m->setFlowFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "biom") {
+                    m->setBiomFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "count") {
+                    m->setCountTableFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "summary") {
+                    m->setSummaryFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "file") {
+                    m->setFileFile(m->getFullPathName(pieces[1]));
+                }else if (pieces[0] == "processors") {
+                    m->setProcessors(pieces[1]);
+                }else {
+                    m->mothurOut("[ERROR]: mothur does not save a current file for " + m->getFullPathName(pieces[1])); m->mothurOutEndLine();
+                }
+            }
+        }
+        in.close();
+        
+        return 0;
+    }
+    
+    catch(exception& e) {
+        m->errorOut(e, "SetCurrentCommand", "readCurrentFiles");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 
 

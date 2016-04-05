@@ -55,9 +55,8 @@
 #include <ctime>
 #include <limits>
 
-#ifdef USE_MPI
-	#include "mpi.h"
-#endif
+
+
 /***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -66,7 +65,9 @@
 	#include <sys/resource.h>
 	#include <sys/types.h>
 	#include <sys/stat.h>
+    #include <sys/sysctl.h>
 	#include <unistd.h>
+
 	
 	#ifdef USE_READLINE
 		#include <readline/readline.h>
@@ -78,7 +79,6 @@
 	#include <direct.h> //get cwd
 	#include <windows.h>
 	#include <psapi.h>
-	#include <direct.h>
 	#include <tchar.h>
 
 #endif
@@ -91,7 +91,7 @@ using namespace std;
 #define log2(x) (log10(x)/log10(2))
 #define isnan(x) ((x) != (x))
 #define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
-
+#define GIG 1073741824
 
 typedef unsigned long ull;
 typedef unsigned short intDist;
@@ -330,7 +330,6 @@ class BadConversion : public runtime_error {
 public:
 	BadConversion(const string& s) : runtime_error(s){ }
 };
-
 //**********************************************************************************************************************
 template<typename T>
 void convert(const string& s, T& x, bool failIfLeftoverChars = true){

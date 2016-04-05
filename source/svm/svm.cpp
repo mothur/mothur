@@ -325,7 +325,6 @@ void SvmPerformanceSummary::init(const SVM& svm, const LabeledObservationVector&
     double fp = 0;
     double fn = 0;
     double tn = 0;
-    double unknown = 0;
     for (int i = 0; i < actualLabels.size(); i++) {
         Label predictedLabel = predictedLabels.at(i);
         Label actualLabel = actualLabels.at(i).getLabel();
@@ -1067,9 +1066,9 @@ RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOne
         m->mothurOut( "multiclass SVM accuracy: " + toString(s->getAccuracy()) ); m->mothurOutEndLine();
 
         m->mothurOut( "two-class SVM performance" ); m->mothurOutEndLine();
-        int labelFieldWidth = 2 + max_element(s->getLabels().begin(), s->getLabels().end())->size();
-        int performanceFieldWidth = 10;
-        int performancePrecision = 3;
+        //int labelFieldWidth = 2 + max_element(s->getLabels().begin(), s->getLabels().end())->size();
+        //int performanceFieldWidth = 10;
+        //int performancePrecision = 3;
         m->mothurOut("class 1\tclass 2\tprecision\trecall\f\accuracy"); m->mothurOutEndLine();
         for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
             SvmPerformanceSummary sps = s->getSvmPerformanceSummary(**svm);

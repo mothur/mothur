@@ -31,6 +31,7 @@ public:
 	virtual bool getFlipped()  { return flipped;	}
 	virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
 	virtual void setDistName(string s) {} //for knn, so if distance method is selected with knn you can create the smallest distance file in the right place.
+    int getMaxLevel() { return maxLevel; }
 	
 protected:
 
@@ -42,7 +43,7 @@ protected:
 	
 	string taxFile, templateFile, simpleTax;
 	vector<string> names;
-	int threadID, numLevels, numTaxa;
+	int threadID, numLevels, numTaxa, maxLevel;
 	bool flip, flipped, shortcuts;
 	
 	int readTaxonomy(string);

@@ -18,7 +18,7 @@ inline bool compareQuanMembers(quanMember left, quanMember right){
 } 
 //***************************************************************************************************************
 
-Pintail::Pintail(string filename, string temp, bool f, int p, string mask, string cons, string q, int win, int inc, string o) : Chimera() { 
+Pintail::Pintail(string filename, string temp, bool f, int p, string mask, string cons, string q, int win, int inc, string o) : MothurChimera() { 
 	try {
 	
 		fastafile = filename; 
@@ -70,10 +70,7 @@ int Pintail::doPrep() {
 		else						{	decalc->setAlignmentLength(seqMask.length());						}
 		
 		decalc->setMask(seqMask);
-		
-	#ifdef USE_MPI
-		//do nothing
-	#else
+
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			//find breakup of templatefile for quantiles
 			if (processors == 1) {   templateLines.push_back(new linePair(0, templateSeqs.size()));  }
@@ -87,7 +84,6 @@ int Pintail::doPrep() {
 		#else
 			templateLines.push_back(new linePair(0, templateSeqs.size()));
 		#endif
-	#endif
 		
 		m->mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
@@ -288,66 +284,6 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-//***************************************************************************************************************
-Sequence Pintail::print(MPI_File& out, MPI_File& outAcc) {
-	try {
-		
-		string outputString = "";
-		int index = ceil(deviation);
-		
-		//is your DE value higher than the 95%
-		string chimera;
-		if (index != 0) {  //if index is 0 then its an exact match to a template seq
-			if (quantiles[index][4] == 0.0) {
-				chimera = "Your template does not include sequences that provide quantile values at distance " + toString(index);
-			}else {
-				if (DE > quantiles[index][4])		{	chimera = "Yes";	}
-				else								{	chimera = "No";		}
-			}
-		}else{ chimera = "No";		}
-
-		outputString += querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera + "\n";
-		if (chimera == "Yes") {
-			cout << querySeq->getName() << "\tdiv: " << toString(deviation) << "\tstDev: " << toString(DE) << "\tchimera flag: " << chimera << endl;
-			string outAccString = querySeq->getName() + "\n";
-			
-			MPI_Status statusAcc;
-			int length = outAccString.length();
-			char* buf = new char[length];
-			memcpy(buf, outAccString.c_str(), length);
-				
-			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
-			delete buf;
-
-			return *querySeq;
-		}
-		outputString += "Observed";
-		
-		for (int j = 0; j < obsDistance.size(); j++) {  outputString +=  "\t" + toString(obsDistance[j]);  }
-		outputString += "\n";
-		
-		outputString += "Expected";
-		
-		for (int m = 0; m < expectedDistance.size(); m++) {  outputString += "\t" +  toString(expectedDistance[m]);  }
-		outputString += "\n";
-		
-		MPI_Status status;
-		int length = outputString.length();
-		char* buf2 = new char[length];
-		memcpy(buf2, outputString.c_str(), length);
-				
-		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
-		delete buf2;
-		
-		return *querySeq;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Pintail", "print");
-		exit(1);
-	}
-}
-#endif
 //***************************************************************************************************************
 int Pintail::getChimeras(Sequence* query) {
 	try {
@@ -425,55 +361,6 @@ vector<float> Pintail::readFreq() {
 		vector<float> prob;
 		set<int> h = decalc->getPos();  //positions of bases in masking sequence
 		
-	#ifdef USE_MPI
-		
-		MPI_File inMPI;
-		MPI_Offset size;
-		MPI_Status status;
-
-		//char* inFileName = new char[consfile.length()];
-		//memcpy(inFileName, consfile.c_str(), consfile.length());
-		
-		char inFileName[1024];
-		strcpy(inFileName, consfile.c_str());
-
-		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
-		MPI_File_get_size(inMPI, &size);
-		//delete inFileName;
-
-		char* buffer = new char[size];
-		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
-
-		string tempBuf = buffer;
-		delete buffer;
-
-		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-		istringstream iss (tempBuf,istringstream::in);
-		
-		//read version
-		string line = m->getline(iss); m->gobble(iss);
-		
-		while(!iss.eof()) {
-			iss >> pos >> num;
-	
-			if (h.count(pos) > 0) {
-				float Pi;
-				Pi =  (num - 0.25) / 0.75; 
-			
-				//cannot have probability less than 0.
-				if (Pi < 0) { Pi = 0.0; }
-
-				//do you want this spot
-				prob.push_back(Pi);  
-			}
-			
-			m->gobble(iss);
-		}
-	
-		MPI_File_close(&inMPI);
-		
-	#else	
-
 		ifstream in;
 		m->openInputFile(consfile, in);
 		
@@ -498,9 +385,6 @@ vector<float> Pintail::readFreq() {
 			m->gobble(in);
 		}
 		in.close();
-		
-	#endif
-	
 		return prob;
 		
 	}
@@ -699,55 +583,6 @@ vector< vector<float> > Pintail::readQuantiles() {
 		//to fill 0
 		quan.push_back(temp); 
 
-	#ifdef USE_MPI
-		
-		MPI_File inMPI;
-		MPI_Offset size;
-		MPI_Status status;
-		
-		//char* inFileName = new char[quanfile.length()];
-		//memcpy(inFileName, quanfile.c_str(), quanfile.length());
-		
-		char inFileName[1024];
-		strcpy(inFileName, quanfile.c_str());
-
-		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
-		MPI_File_get_size(inMPI, &size);
-		//delete inFileName;
-
-
-		char* buffer = new char[size];
-		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
-
-		string tempBuf = buffer;
-		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-		istringstream iss (tempBuf,istringstream::in);
-		delete buffer;
-		
-		//read version
-		string line = m->getline(iss); m->gobble(iss);
-		
-		while(!iss.eof()) {
-			iss >> num >> ten >> twentyfive >> fifty >> seventyfive >> ninetyfive >> ninetynine; 
-			
-			temp.clear();
-			
-			temp.push_back(ten); 
-			temp.push_back(twentyfive);
-			temp.push_back(fifty);
-			temp.push_back(seventyfive);
-			temp.push_back(ninetyfive);
-			temp.push_back(ninetynine);
-			
-			quan.push_back(temp);  
-			
-			m->gobble(iss);
-		}
-	
-		MPI_File_close(&inMPI);
-		
-	#else	
-
 		ifstream in;
 		m->openInputFile(quanfile, in);
 		
@@ -772,8 +607,7 @@ vector< vector<float> > Pintail::readQuantiles() {
 			m->gobble(in);
 		}
 		in.close();
-	#endif
-	
+
 		return quan;
 		
 	}
@@ -787,44 +621,12 @@ vector< vector<float> > Pintail::readQuantiles() {
 void Pintail::printQuanFile(string file, string outputString) {
 	try {
 	
-		#ifdef USE_MPI
-		
-			MPI_File outQuan;
-			MPI_Status status;
-			
-			int pid;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
-
-			//char* FileName = new char[file.length()];
-			//memcpy(FileName, file.c_str(), file.length());
-			
-			char FileName[1024];
-			strcpy(FileName, file.c_str());
-			
-			if (pid == 0) {
-				MPI_File_open(MPI_COMM_SELF, FileName, outMode, MPI_INFO_NULL, &outQuan);  //comm, filename, mode, info, filepointer
-				
-				int length = outputString.length();
-				char* buf = new char[length];
-				memcpy(buf, outputString.c_str(), length);
-					
-				MPI_File_write(outQuan, buf, length, MPI_CHAR, &status);
-				delete buf;
-
-				MPI_File_close(&outQuan);
-			}
-
-			//delete FileName;
-		#else
 			ofstream outQuan;
 			m->openOutputFile(file, outQuan);
 			
 			outQuan << outputString;
 			
 			outQuan.close();
-		#endif
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "printQuanFile");

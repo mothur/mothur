@@ -15,7 +15,7 @@
 
 /***************************************************************************************************************/
 
-Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, int p, string o) : Chimera() {
+Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, int p, string o) : MothurChimera() {
 	try {
 		fastafile = name;
 		correction = c;
@@ -128,102 +128,6 @@ int Bellerophon::print(ostream& out, ostream& outAcc, string s) {
 		exit(1);
 	}
 }
-#ifdef USE_MPI
-//***************************************************************************************************************
-int Bellerophon::print(MPI_File& out, MPI_File& outAcc, string s) {
-	try {
-	
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		if (pid == 0) {
-			string outString = "";
-						
-			//sorted "best" preference scores for all seqs
-			vector<Preference> best = getBestPref();
-			
-			int above1 = 0;
-			int ninetyfive = best.size() * 0.05;
-			float cutoffScore = best[ninetyfive].score;
-
-			if (m->control_pressed) { return numSeqs; }
-			
-			outString = "Name\tScore\tLeft\tRight\n";
-			MPI_Status status;
-			int olength = outString.length();
-			char* buf5 = new char[olength];
-			memcpy(buf5, outString.c_str(), olength);
-					
-			MPI_File_write_shared(out, buf5, olength, MPI_CHAR, &status);
-			
-			delete buf5;
-
-			//output prefenence structure to .chimeras file
-			for (int i = 0; i < best.size(); i++) {
-				
-				if (m->control_pressed) {  return numSeqs; }
-				
-				outString = best[i].name + "\t" +  toString(best[i].score) + "\t" + best[i].leftParent + "\t" + best[i].rightParent + "\n";
-			
-				MPI_Status status;
-				int length = outString.length();
-				char* buf2 = new char[length];
-				memcpy(buf2, outString.c_str(), length);
-					
-				MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
-				
-				delete buf2;
-				
-				//calc # of seqs with preference above 95%tile
-				if (best[i].score >= cutoffScore) { 
-					above1++; 
-					string outAccString = "";
-					 outAccString += best[i].name + "\n";
-					
-					MPI_Status statusAcc;
-					length = outAccString.length();
-					char* buf = new char[length];
-					memcpy(buf, outAccString.c_str(), length);
-					
-					MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
-					
-					delete buf;
-
-					cout << best[i].name << " is a suspected chimera at breakpoint " << toString(best[i].midpoint) << endl;
-					cout << "It's score is " << toString(best[i].score) << " with suspected left parent " << best[i].leftParent << " and right parent " << best[i].rightParent << endl;
-				}
-			}
-			
-			//output results to screen
-			m->mothurOutEndLine();
-			m->mothurOut("Sequence with preference score above " + toString(cutoffScore) +  ": " + toString(above1)); m->mothurOutEndLine();
-			int spot;
-			spot = best.size()-1;
-			m->mothurOut("Minimum:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = best.size() * 0.975;
-			m->mothurOut("2.5%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = best.size() * 0.75;
-			m->mothurOut("25%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = best.size() * 0.50;
-			m->mothurOut("Median: \t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = best.size() * 0.25;
-			m->mothurOut("75%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = best.size() * 0.025;
-			m->mothurOut("97.5%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			spot = 0;
-			m->mothurOut("Maximum:\t" + toString(best[spot].score)); m->mothurOutEndLine();
-			
-		}
-		
-		return numSeqs;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Bellerophon", "print");
-		exit(1);
-	}
-}
-#endif
 //********************************************************************************************************************
 //sorts highest score to lowest
 inline bool comparePref(Preference left, Preference right){
@@ -237,82 +141,7 @@ int Bellerophon::getChimeras() {
 		vector<int> midpoints;   midpoints.resize(iters, window);
 		for (int i = 1; i < iters; i++) {  midpoints[i] = midpoints[i-1] + increment;  }
 	
-	#ifdef USE_MPI
-		int pid, numSeqsPerProcessor; 
-	
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
 		
-		numSeqsPerProcessor = iters / processors;
-		
-		//each process hits this only once
-		unsigned long long startPos = pid * numSeqsPerProcessor;
-		if(pid == processors - 1){
-				numSeqsPerProcessor = iters - pid * numSeqsPerProcessor;
-		}
-		lines.push_back(linePair(startPos, numSeqsPerProcessor));
-		
-		//fill pref with scores
-		driverChimeras(midpoints, lines[0]);
-		
-		if (m->control_pressed) { return 0; }
-				
-		//each process must send its parts back to pid 0
-		if (pid == 0) {
-			
-			//receive results 
-			for (int j = 1; j < processors; j++) {
-				
-				vector<string>  MPIBestSend; 
-				for (int i = 0; i < numSeqs; i++) {
-				
-					if (m->control_pressed) { return 0; }
-
-					MPI_Status status;
-					//receive string
-					int length;
-					MPI_Recv(&length, 1, MPI_INT, j, 2001, MPI_COMM_WORLD, &status);
-					
-					char* buf = new char[length];
-					MPI_Recv(&buf[0], length, MPI_CHAR, j, 2001, MPI_COMM_WORLD, &status);
-					
-					string temp = buf;
-					if (temp.length() > length) { temp = temp.substr(0, length); }
-					delete buf;
-
-					MPIBestSend.push_back(temp);
-				}
-				
-				fillPref(j, MPIBestSend);
-				
-				if (m->control_pressed) { return 0; }
-			}
-
-		}else {
-			//takes best window for each sequence and turns Preference to string that can be parsed by pid 0.
-			//played with this a bit, but it may be better to try user-defined datatypes with set string lengths??
-			vector<string> MPIBestSend = getBestWindow(lines[0]);
-			pref.clear();
-				
-			//send your result to parent
-			for (int i = 0; i < numSeqs; i++) {
-				
-				if (m->control_pressed) { return 0; }
-				
-				int bestLength = MPIBestSend[i].length();
-				char* buf = new char[bestLength];
-				memcpy(buf, MPIBestSend[i].c_str(), bestLength);
-				
-				MPI_Send(&bestLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD);
-				MPI_Send(buf, bestLength, MPI_CHAR, 0, 2001, MPI_COMM_WORLD);
-				delete buf;
-			}
-			
-			MPIBestSend.clear();
-		}
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-	#else
-	
 		//divide breakpoints between processors
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){ 
@@ -342,8 +171,7 @@ int Bellerophon::getChimeras() {
 			driverChimeras(midpoints, lines[0]);
 		#endif
 	
-	#endif
-	
+		
 		return 0;
 		
 	}
@@ -597,8 +425,6 @@ int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, 
 				
 				itL = currentLeft.find(j);
 				itR = currentRight.find(j);
-//cout << " i = " << i << " j = " << j << " distLeft = " << itL->second << endl;
-//cout << " i = " << i << " j = " << j << " distright = " << itR->second << endl;
 				
 				//if you can find this entry update the preferences
 				if ((itL != currentLeft.end()) && (itR != currentRight.end())) {
@@ -606,31 +432,19 @@ int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, 
 					if (!correction) {
 						pref[count][i].score += abs((itL->second - itR->second));
 						pref[count][j].score += abs((itL->second - itR->second));
-//cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
-//cout << "abs = " << abs((itL->second - itR->second)) << endl;
-//cout << i << " score = " << pref[i].score[1] << endl;
-//cout << j << " score = " << pref[j].score[1] << endl;
 					}else {
 						pref[count][i].score += abs((sqrt(itL->second) - sqrt(itR->second)));
 						pref[count][j].score += abs((sqrt(itL->second) - sqrt(itR->second)));
-//cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
-//cout << "abs = " << abs((sqrt(itL->second) - sqrt(itR->second))) << endl;
-//cout << i << " score = " << pref[i].score[1] << endl;
-//cout << j << " score = " << pref[j].score[1] << endl;
-					}
-//cout << "pref[" << i << "].closestLeft[1] = "	<< 	pref[i].closestLeft[1] << " parent = " << pref[i].leftParent[1] << endl;			
+                    }
 					//are you the closest left sequence
 					if (itL->second < pref[count][i].closestLeft) {  
 
 						pref[count][i].closestLeft = itL->second;
 						pref[count][i].leftParent = seqs[j]->getName();
-//cout << "updating closest left to " << pref[i].leftParent[1] << endl;
 					}
-//cout << "pref[" << j << "].closestLeft[1] = "	<< 	pref[j].closestLeft[1] << " parent = " << pref[j].leftParent[1] << endl;	
-					if (itL->second < pref[count][j].closestLeft) { 
+					if (itL->second < pref[count][j].closestLeft) {
 						pref[count][j].closestLeft = itL->second;
 						pref[count][j].leftParent = seqs[i]->getName();
-//cout << "updating closest left to " << pref[j].leftParent[1] << endl;
 					}
 					
 					//are you the closest right sequence

@@ -55,7 +55,6 @@ private:
 	
 	string getNamesFile(string&);
 	int readFasta(string, map<string, string>&);
-	int printFile(vector<seqPriorityNode>&, string);
 	int deconvoluteResults(map<string, string>&, string, string, string);
 	int driverGroups(string, string, string, string, string, int, int, vector<string>);
 	int createProcessesGroups(string, string, string, string, string, vector<string>, string, string, string);

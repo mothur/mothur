@@ -64,15 +64,6 @@ bool InteractEngine::getInput(){
 		
 		while(quitCommandCalled != 1){
 
-			#ifdef USE_MPI
-				int pid, processors;
-				MPI_Status status;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				
-				if (pid == 0) {
-				
-			#endif
                     
 			if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
                     
@@ -83,30 +74,6 @@ bool InteractEngine::getInput(){
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
 
-			
-			#ifdef USE_MPI
-				//send commandName
-				for(int i = 1; i < processors; i++) { 
-						int length = input.length();
-						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-	
-					}
-				}else {
-					int length;
-					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-					//recieve container
-					char* tempBuf = new char[length];
-					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-					
-					input = tempBuf;
-					if (input.length() > length) { input = input.substr(0, length);  }
-					delete tempBuf;	
-				}
-
-			
-			#endif
-		
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
 	
@@ -114,13 +81,7 @@ bool InteractEngine::getInput(){
 			
 			if (commandName != "") {
 					mout->executing = true;
-					#ifdef USE_MPI
-						int pid;
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-						
-						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-					//cout << pid << " is in execute " << commandName << endl;
-					#endif
+
 					//executes valid command
                     mout->changedSeqNames = false;
 					mout->runParse = true;
@@ -145,10 +106,6 @@ bool InteractEngine::getInput(){
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
-					#ifdef USE_MPI
-						}
-                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-					#endif
 				}else {		
 					mout->mothurOut("Invalid.\n");
 				}
@@ -258,45 +215,10 @@ bool BatchEngine::getInput(){
 	    int count = 0;
 		while(quitCommandCalled != 1){
 			
-			#ifdef USE_MPI
-				int pid, processors;
-				MPI_Status status;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				
-				if (pid == 0) {
-				
-			#endif
-			
 			input = getNextCommand(inputBatchFile);
 			count++;
 			
-			#ifdef USE_MPI
-				//send commandName
-				for(int i = 1; i < processors; i++) { 
-						int length = input.length();
-						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-	
-					}
-				}else {
-					int length;
-					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-					//recieve container
-					char* tempBuf = new char[length];
-					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-					
-					input = tempBuf;
-					if (input.length() > length) { input = input.substr(0, length);  }
-					delete tempBuf;	
-				}
-
-			
-			#endif
-
-			
-			
-			if (input[0] != '#') {
+            if (input[0] != '#') {
 				if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 				
 				mout->mothurOut("\nmothur > " + input + "\n");
@@ -313,13 +235,7 @@ bool BatchEngine::getInput(){
 										
 				if (commandName != "") {
 					mout->executing = true;
-					#ifdef USE_MPI
-						int pid;
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-						
-//cout << pid << " is here " << commandName << '\t' << count << endl;
-						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-					#endif
+					
 					//executes valid command
                     mout->changedSeqNames = false;
 					mout->runParse = true;
@@ -345,10 +261,6 @@ bool BatchEngine::getInput(){
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
-					#ifdef USE_MPI
-						}
-                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-					#endif
 				}else {		
 					mout->mothurOut("Invalid.\n");
 				}
@@ -433,16 +345,6 @@ bool ScriptEngine::getInput(){
 	
 		while(quitCommandCalled != 1){
 			
-			#ifdef USE_MPI
-				int pid, processors;
-				MPI_Status status;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-				MPI_Comm_size(MPI_COMM_WORLD, &processors);
-				
-				if (pid == 0) {
-				//cout << pid << " is here " << processors << endl;
-			#endif
-			
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
@@ -457,34 +359,7 @@ bool ScriptEngine::getInput(){
 				mout->mothurOut("\nmothur > " + input + "\n");
 			}
 			
-			#ifdef USE_MPI
-				//send commandName
-				for(int i = 1; i < processors; i++) {
-                    //cout << pid << " is here " << input << endl;
-						int length = input.length();
-						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-                    //cout << pid << " is here " << length << '\t' << input << endl;
-						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
-	//cout << pid << " is here " << length << '\t' << input << endl;
-					}
-				}else {
-					int length;
-					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-                    //cout << pid << " is here " << length << endl;
-					//recieve container
-					char* tempBuf = new char[length];
-					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
-					//cout << pid << " is here " << length << '\t' << tempBuf << endl;
-					input = tempBuf;
-					if (input.length() > length) { input = input.substr(0, length);  }
-					delete tempBuf;	
-				}
-
-			
-			#endif
-			
-			
-			if (mout->control_pressed) { input = "quit()"; }
+            if (mout->control_pressed) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -495,16 +370,7 @@ bool ScriptEngine::getInput(){
 										
 			if (commandName != "") {
 					mout->executing = true;
-					#ifdef USE_MPI
-						int pid, numProcesses;
-						
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-						MPI_Comm_size(MPI_COMM_WORLD, &numProcesses); 
 					
-//cout << pid << " is here " << commandName  << endl;
-						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-							//cout << pid << " is in execute" << endl;
-					#endif
 					//executes valid command
                     mout->changedSeqNames = false;
 					mout->runParse = true;
@@ -529,11 +395,6 @@ bool ScriptEngine::getInput(){
 					mout->control_pressed = 0;
 					mout->executing = false;
 									
-					#ifdef USE_MPI
-					//cout << pid << " is done in execute" << endl;
-						}
-                        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-					#endif
 				}else {		
 					mout->mothurOut("Invalid.\n");
 				}

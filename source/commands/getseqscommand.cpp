@@ -11,6 +11,7 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -28,6 +29,7 @@ vector<string> GetSeqsCommand::setParameters(){
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter paccnos2("accnos2", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos2);
 
@@ -48,6 +50,7 @@ string GetSeqsCommand::getHelpString(){
 		helpString += "It outputs a file containing only the sequences in the .accnos file.\n";
 		helpString += "The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport, fastq and dups.  You must provide accnos unless you have a valid current accnos file, and at least one of the other parameters.\n";
 		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=true. \n";
+        helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -312,6 +315,13 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "true"; usedDups = ""; }
 			dups = m->isTrue(temp);
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+                abort=true;
+            }
 			
 			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, quality, fastq or listfile."); m->mothurOutEndLine(); abort = true; }
             
@@ -434,31 +444,27 @@ int GetSeqsCommand::readFastq(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 
-		
+        set<string> uniqueNames;
 		while(!in.eof()){
 			
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			//read sequence name
-			string input = m->getline(in); m->gobble(in);
-			
-            string outputString = input + "\n";
+            bool ignore;
+            FastqRead fread(in, ignore, format); m->gobble(in);
             
-			if (input[0] == '@') {
-                //get rest of lines
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                outputString += m->getline(in) + "\n"; m->gobble(in);
-                
-                vector<string> splits = m->splitWhiteSpace(input);
-                string name = splits[0];
-                name = name.substr(1);
-                m->checkName(name);
+			if (!ignore) {
+                string name = fread.getName();
                 
                 if (names.count(name) != 0) {
-					wroteSomething = true;
-                    selectedCount++;
-                    out << outputString;
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        selectedCount++;
+                        fread.printFastq(out);
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
                 }
             }
             
@@ -466,8 +472,7 @@ int GetSeqsCommand::readFastq(){
 		}
 		in.close();
 		out.close();
-		
-		
+        
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
 		
@@ -494,7 +499,6 @@ int GetSeqsCommand::readFasta(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
-		
 		ifstream in;
 		m->openInputFile(fastafile, in);
 		string name;
@@ -504,6 +508,7 @@ int GetSeqsCommand::readFasta(){
         
         if (m->debug) { set<string> temp; sanity["fasta"] = temp; }
 		
+        set<string> uniqueNames;
 		while(!in.eof()){
 		
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -521,13 +526,18 @@ int GetSeqsCommand::readFasta(){
 			if (name != "") {
 				//if this name is in the accnos file
 				if (names.count(name) != 0) {
-					wroteSomething = true;
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
 					
-					currSeq.printSequence(out);
-					selectedCount++;
+                        currSeq.printSequence(out);
+                        selectedCount++;
+                        uniqueNames.insert(name);
                     
-                    if (m->debug) { sanity["fasta"].insert(name); }
-				}
+                        if (m->debug) { sanity["fasta"].insert(name); }
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fasta file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
+                }
 			}
 			m->gobble(in);
 		}
@@ -570,6 +580,7 @@ int GetSeqsCommand::readQual(){
 		
         if (m->debug) { set<string> temp; sanity["qual"] = temp; }
 		
+        set<string> uniqueNames;
 		while(!in.eof()){	
 			string saveName = "";
 			string name = "";
@@ -600,13 +611,18 @@ int GetSeqsCommand::readQual(){
 			
 			m->gobble(in);
 			
-			if (names.count(saveName) != 0) {
-				wroteSomething = true;
-						
-				out << name << endl << scores;
-				selectedCount++;
-                if (m->debug) { sanity["qual"].insert(name); }
-			}
+            if (names.count(saveName) != 0) {
+                if (uniqueNames.count(saveName) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(saveName);
+                    wroteSomething = true;
+                    
+                    out << name << endl << scores;
+                    selectedCount++;
+                    if (m->debug) { sanity["qual"].insert(name); }
+                }else {
+                    m->mothurOut("[WARNING]: " + saveName + " is in your qfile more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                }
+            }
 			
 			m->gobble(in);
 		}
@@ -652,6 +668,7 @@ int GetSeqsCommand::readCount(){
         string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
         
         string name, rest; int thisTotal; rest = "";
+        set<string> uniqueNames;
         while (!in.eof()) {
             
             if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -662,9 +679,15 @@ int GetSeqsCommand::readCount(){
             if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) != 0) {
-                out << name << '\t' << thisTotal << '\t' << rest << endl;
-                wroteSomething = true;
-                selectedCount+= thisTotal;
+                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(name);
+
+                    out << name << '\t' << thisTotal << '\t' << rest << endl;
+                    wroteSomething = true;
+                    selectedCount+= thisTotal;
+                }else {
+                    m->mothurOut("[WARNING]: " + name + " is in your count file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                }
             }
         }
         in.close();
@@ -707,8 +730,10 @@ int GetSeqsCommand::readList(){
         
         if (m->debug) { set<string> temp; sanity["list"] = temp; }
 		
+        
 		while(!in.eof()){
 			
+            set<string> uniqueNames;
 			selectedCount = 0;
 
 			//read in list vector
@@ -740,10 +765,20 @@ int GetSeqsCommand::readList(){
 				
 				string newNames = "";
                 for (int j = 0; j < bnames.size(); j++) {
-					string name = bnames[j];
-					//if that name is in the .accnos file, add it
-					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; if (m->debug) { sanity["list"].insert(name); } }
-				}
+                    string name = bnames[j];
+                    
+                    //if that name is in the .accnos file, add it
+                    if (names.count(name) != 0) {
+                        if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                            uniqueNames.insert(name);
+                            newNames += name + ",";
+                            selectedCount++;
+                            if (m->debug) { sanity["list"].insert(name); }
+                        }else {
+                            m->mothurOut("[WARNING]: " + name + " is in your list file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                        }
+                    }
+                }
 			
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
@@ -802,6 +837,7 @@ int GetSeqsCommand::readName(){
         if (m->debug) { set<string> temp; sanity["name"] = temp; }
         if (m->debug) { set<string> temp; sanity["dupname"] = temp; }
 		
+        set<string> uniqueNames;
 		while(!in.eof()){
 		
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -815,13 +851,29 @@ int GetSeqsCommand::readName(){
 			vector<string> parsedNames;
 			m->splitAtComma(secondCol, parsedNames);
 			
-			vector<string> validSecond;
+			vector<string> validSecond; vector<string> parsedNames2;
+            bool parsedError = false;
 			for (int i = 0; i < parsedNames.size(); i++) {
-				if (names.count(parsedNames[i]) != 0) {
-					validSecond.push_back(parsedNames[i]);
-                    if (m->debug) { sanity["dupname"].insert(parsedNames[i]); }
+                if (names.count(parsedNames[i]) != 0) {
+                    if (uniqueNames.count(parsedNames[i]) == 0) { //this name hasn't been seen yet
+                        uniqueNames.insert(parsedNames[i]);
+                        validSecond.push_back(parsedNames[i]);
+                        parsedNames2.push_back(parsedNames[i]);
+                        if (m->debug) { sanity["dupname"].insert(parsedNames[i]); }
+                    }else {
+                        m->mothurOut("[WARNING]: " + parsedNames[i] + " is in your name file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                        parsedError = true;
+                    }
 				}
 			}
+            if (parsedError) {
+                parsedNames = parsedNames2;
+                hold = "";
+                if (parsedNames.size() != 0) {
+                    for (int i = 0; i < parsedNames.size()-1; i++) {  hold += parsedNames[i] + ',';  }
+                    hold += parsedNames[parsedNames.size()-1] + '\n';
+                }
+            }
 
 			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->debug) { sanity["dupname"].insert(parsedNames[i]); } }
@@ -831,41 +883,43 @@ int GetSeqsCommand::readName(){
                 if (m->debug) { sanity["name"].insert(firstCol); }
 			}else {
                 
-				selectedCount += validSecond.size();
-				
-				//if the name in the first column is in the set then print it and any other names in second column also in set
-				if (names.count(firstCol) != 0) {
-				
-					wroteSomething = true;
-					
-					out << firstCol << '\t';
-					
-					//you know you have at least one valid second since first column is valid
-					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-					out << validSecond[validSecond.size()-1] << endl;
+                if (validSecond.size() != 0) {
+                    selectedCount += validSecond.size();
                     
-                    if (m->debug) { sanity["name"].insert(firstCol); }
-					
-				
-				//make first name in set you come to first column and then add the remaining names to second column
-				}else {
-                    
-					//you want part of this row
-					if (validSecond.size() != 0) {
-					
-						wroteSomething = true;
-						
-						out << validSecond[0] << '\t';
-                        //we are changing the unique name in the fasta file
-                        uniqueMap[firstCol] = validSecond[0];
-					
-						//you know you have at least one valid second since first column is valid
-						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-						out << validSecond[validSecond.size()-1] << endl;
+                    //if the name in the first column is in the set then print it and any other names in second column also in set
+                    if (names.count(firstCol) != 0) {
                         
-                        if (m->debug) { sanity["name"].insert(validSecond[0]); }
-					}
-				}
+                        wroteSomething = true;
+                        
+                        out << firstCol << '\t';
+                        
+                        //you know you have at least one valid second since first column is valid
+                        for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
+                        out << validSecond[validSecond.size()-1] << endl;
+                        
+                        if (m->debug) { sanity["name"].insert(firstCol); }
+                        
+                        
+                        //make first name in set you come to first column and then add the remaining names to second column
+                    }else {
+                        
+                        //you want part of this row
+                        if (validSecond.size() != 0) {
+                            
+                            wroteSomething = true;
+                            
+                            out << validSecond[0] << '\t';
+                            //we are changing the unique name in the fasta file
+                            uniqueMap[firstCol] = validSecond[0];
+                            
+                            //you know you have at least one valid second since first column is valid
+                            for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
+                            out << validSecond[validSecond.size()-1] << endl;
+                            
+                            if (m->debug) { sanity["name"].insert(validSecond[0]); }
+                        }
+                    }
+                }
 			}
 			m->gobble(in);
 		}
@@ -908,6 +962,7 @@ int GetSeqsCommand::readGroup(){
         
         if (m->debug) { set<string> temp; sanity["group"] = temp; }
 		
+        set<string> uniqueNames;
 		while(!in.eof()){
 
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -917,15 +972,19 @@ int GetSeqsCommand::readGroup(){
 			in >> group;			//read from second column
             
 			
-			//if this name is in the accnos file
-			if (names.count(name) != 0) {
-				wroteSomething = true;
-				
-				out << name << '\t' << group << endl;
-				selectedCount++;
-                
-                if (m->debug) {  sanity["group"].insert(name); }
-			}
+            if (names.count(name) != 0) {
+                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(name);
+                    wroteSomething = true;
+                    
+                    out << name << '\t' << group << endl;
+                    selectedCount++;
+                    
+                    if (m->debug) {  sanity["group"].insert(name); }
+                }else {
+                    m->mothurOut("[WARNING]: " + name + " is in your group file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                }
+            }
 					
 			m->gobble(in);
 		}
@@ -967,6 +1026,7 @@ int GetSeqsCommand::readTax(){
         
         if (m->debug) { set<string> temp; sanity["tax"] = temp; }
 		
+        set<string> uniqueNames;
 		while(!in.eof()){
 
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -979,14 +1039,19 @@ int GetSeqsCommand::readTax(){
                 if (it != uniqueMap.end()) { name = it->second; }
             }
 			
-			//if this name is in the accnos file
-			if (names.count(name) != 0) {
-				wroteSomething = true;
+            if (names.count(name) != 0) {
+                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(name);
+
+                    wroteSomething = true;
 				
-				out << name << '\t' << tax << endl;
-				selectedCount++;
+                    out << name << '\t' << tax << endl;
+                    selectedCount++;
                 
-                if (m->debug) { sanity["tax"].insert(name); }
+                    if (m->debug) { sanity["tax"].insert(name); }
+                }else {
+                    m->mothurOut("[WARNING]: " + name + " is in your taxonomy file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                }
 			}
 					
 			m->gobble(in);
@@ -1034,6 +1099,7 @@ int GetSeqsCommand::readAlign(){
 		}
 		out << endl;
 		
+        set<string> uniqueNames;
 		while(!in.eof()){
 		
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -1047,18 +1113,23 @@ int GetSeqsCommand::readAlign(){
             }
 			
 			//if this name is in the accnos file
-			if (names.count(name) != 0) {
-				wroteSomething = true;
-				selectedCount++;
-				
-				out << name << '\t';
-				
-				//read rest
-				for (int i = 0; i < 15; i++) {  
-					if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-					else			{	break;			}
-				}
-				out << endl;
+            if (names.count(name) != 0) {
+                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(name);
+                    wroteSomething = true;
+                    selectedCount++;
+                    
+                    out << name << '\t';
+                    
+                    //read rest
+                    for (int i = 0; i < 15; i++) {
+                        if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
+                        else			{	break;			}
+                    }
+                    out << endl;
+                }else {
+                    m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                }
 				
 			}else {//still read just don't do anything with it
 				//read rest

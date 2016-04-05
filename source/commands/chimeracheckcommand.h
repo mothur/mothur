@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "chimeracheckrdp.h"
 
 
@@ -43,15 +43,11 @@ private:
 	
 	int driver(linePair*, string, string);
 	int createProcesses(string, string);
-		
-	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, vector<unsigned long long>&);
-	#endif
 
 	bool abort, svg, save;
 	string fastafile, templatefile, namefile, outputDir;
 	int processors, increment, ksize, numSeqs, templateSeqsLength;
-	Chimera* chimera;
+	MothurChimera* chimera;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
 	vector<string> outputNames;

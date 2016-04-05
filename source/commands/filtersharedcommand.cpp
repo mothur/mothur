@@ -336,6 +336,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
         
         if (m->control_pressed) {  return 0; }
         
+        map<string, int> labelsForRare;
         vector<string> filteredLabels;
         vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
         
@@ -447,6 +448,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
             //did this OTU pass the filter criteria
             if (okay) {
                 filteredLabels.push_back(saveBinLabels[i]);
+                labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
                 for (int j = 0; j < filteredLookup.size(); j++) { //add this OTU to the filtered lookup
                     filteredLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
                 }
@@ -467,7 +469,31 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                     filteredLookup[j]->push_back(rareCounts[j], thislookup[j]->getGroup());
                 }
                 //create label for rare OTUs
-                filteredLabels.push_back("rareOTUs");
+                map<string, int>::iterator it;
+                int otuNum = 0; bool notDone = true;
+                
+                //find label prefix
+                string prefix = "Otu";
+                if (filteredLabels[filteredLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+                
+                string tempLabel = filteredLabels[filteredLabels.size()-1];
+                string simpleLastLabel = m->getSimpleLabel(tempLabel);
+                m->mothurConvert(simpleLastLabel, otuNum); otuNum++;
+                while (notDone) {
+                    if (m->control_pressed) { notDone = false; break; }
+                    
+                    string potentialLabel = toString(otuNum);
+                    it = labelsForRare.find(potentialLabel);
+                    if (it == labelsForRare.end()) {
+                        potentialLabel = prefix + toString(otuNum);
+                        it = labelsForRare.find(potentialLabel);
+                        if (it == labelsForRare.end()) {
+                            notDone = false; break;
+                        }
+                    }
+                    otuNum++;
+                }
+                filteredLabels.push_back("rareOTUs" + toString(otuNum));
             }
         }
         

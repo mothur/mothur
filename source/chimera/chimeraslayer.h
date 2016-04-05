@@ -11,7 +11,7 @@
  */
 
 
-#include "chimera.h"
+#include "mothurchimera.h"
 #include "maligner.h"
 #include "slayer.h"
 
@@ -21,7 +21,7 @@
 //This class was modeled after the chimeraSlayer written by the Broad Institute
 /***********************************************************************/
 
-class ChimeraSlayer : public Chimera {
+class ChimeraSlayer : public MothurChimera {
 	
 	public:
 		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
@@ -37,11 +37,6 @@ class ChimeraSlayer : public Chimera {
 		int doPrep();
 		int getNumNoParents() { return numNoParents; }
 		data_results getResults() { return printResults; }
-		
-		#ifdef USE_MPI
-		Sequence print(MPI_File&, MPI_File&);
-		Sequence print(MPI_File&, MPI_File&, data_results, data_results, bool&);
-		#endif
 		
 	private:
 		Sequence querySeq;

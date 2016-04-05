@@ -15,6 +15,10 @@
 #include "groupmap.h"
 
 class RemoveGroupsCommand : public Command {
+    
+#ifdef UNIT_TEST
+    friend class TestRemoveGroupsCommand;
+#endif
 	
 public:
 	
@@ -37,7 +41,7 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile, outputDir, groups, sharedfile;
+	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile, outputDir, groups, sharedfile, phylipfile, columnfile;
 	bool abort;
 	vector<string> outputNames, Groups;
 	GroupMap* groupMap;
@@ -55,6 +59,8 @@ private:
 	int readTax();
 	int fillNames();
     int readDesign();
+    int readPhylip();
+    int readColumn();
 	
 };
 

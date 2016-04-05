@@ -27,7 +27,7 @@ vector<string> ScreenSeqsCommand::setParameters(){
 		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pend);
 		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pminlength("minlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pminlength("minlength", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminlength);
 		CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxlength);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pcriteria);
@@ -72,7 +72,7 @@ string ScreenSeqsCommand::getHelpString(){
 		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
 		helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
-		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
+		helpString += "The minlength parameter allows you to set and minimum sequence length. Default=10.\n";
 		helpString += "The maxn parameter allows you to set and maximum number of N's allowed in a sequence. \n";
         helpString += "The minoverlap parameter allows you to set and minimum overlap. The default is -1. \n";
         helpString += "The ostart parameter is used to set an overlap position the \"good\" sequences must start by. The default is -1. \n";
@@ -335,7 +335,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "10"; }
 			m->mothurConvert(temp, minLength); 
 			
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
@@ -449,13 +449,6 @@ int ScreenSeqsCommand::execute(){
         else {   numFastaSeqs = screenReports(badSeqNames);   }
 		
         if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
-        
-        #ifdef USE_MPI
-            int pid;
-            MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-        
-            if (pid == 0) { //only one process should fix files
-        #endif	
                 
 		if(namefile != "" && groupfile != "")	{	
 			screenNameGroupFile(badSeqNames);	
@@ -473,12 +466,8 @@ int ScreenSeqsCommand::execute(){
 		if(taxonomy != "")						{	screenTaxonomy(badSeqNames);		}
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
-		
-		#ifdef USE_MPI
-			}
-		#endif
 
-		m->mothurOutEndLine();
+        m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
 		m->mothurOutEndLine();
@@ -538,130 +527,11 @@ int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
 		outputNames.push_back(goodSeqFile); outputTypes["fasta"].push_back(goodSeqFile);
 		outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile);
         
-#ifdef USE_MPI	
-        int pid, numSeqsPerProcessor; 
-        int tag = 2001;
-        vector<unsigned long long> MPIPos;
-        
-        MPI_Status status; 
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-        MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-        
-        MPI_File inMPI;
-        MPI_File outMPIGood;
-        MPI_File outMPIBadAccnos;
-        
-        int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-        int inMode=MPI_MODE_RDONLY; 
-        
-        char outGoodFilename[1024];
-        strcpy(outGoodFilename, goodSeqFile.c_str());
-        
-        char outBadAccnosFilename[1024];
-        strcpy(outBadAccnosFilename, badAccnosFile.c_str());
-        
-        char inFileName[1024];
-        strcpy(inFileName, fastafile.c_str());
-        
-        MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-        MPI_File_open(MPI_COMM_WORLD, outGoodFilename, outMode, MPI_INFO_NULL, &outMPIGood);
-        MPI_File_open(MPI_COMM_WORLD, outBadAccnosFilename, outMode, MPI_INFO_NULL, &outMPIBadAccnos);
-        
-        if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood); MPI_File_close(&outMPIBadAccnos); return 0; }
-        
-        if (pid == 0) { //you are the root process 
-            
-            MPIPos = m->setFilePosFasta(fastafile, numFastaSeqs); //fills MPIPos, returns numSeqs
-            
-            //send file positions to all processes
-            for(int i = 1; i < processors; i++) { 
-                MPI_Send(&numFastaSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-                MPI_Send(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-            }
-            
-            //figure out how many sequences you have to align
-            numSeqsPerProcessor = numFastaSeqs / processors;
-            int startIndex =  pid * numSeqsPerProcessor;
-            if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-            
-            //align your part
-            driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
-            
-            if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos);  return 0; }
-            
-            for (int i = 1; i < processors; i++) {
-                //get bad lists
-                int badSize;
-                MPI_Recv(&badSize, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-            }
-        }else{ //you are a child process
-            MPI_Recv(&numFastaSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-            MPIPos.resize(numFastaSeqs+1);
-            MPI_Recv(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-            
-            //figure out how many sequences you have to align
-            numSeqsPerProcessor = numFastaSeqs / processors;
-            int startIndex =  pid * numSeqsPerProcessor;
-            if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-            
-            //align your part
-            driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
-            
-            if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos); return 0; }
-            
-            //send bad list	
-            int badSize = badSeqNames.size();
-            MPI_Send(&badSize, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-        }
-        
-        //close files 
-        MPI_File_close(&inMPI);
-        MPI_File_close(&outMPIGood);
-        MPI_File_close(&outMPIBadAccnos);
-        MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-        
-#else
-        if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}	
+        if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}
         else{ numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); }
         
         if (m->control_pressed) { m->mothurRemove(goodSeqFile); return numFastaSeqs; }
-#endif		
-        
-#ifdef USE_MPI
-        MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-        
-        if (pid == 0) { //only one process should fix files
-			
-            //read accnos file with all names in it, process 0 just has its names
-            MPI_File inMPIAccnos;
-            MPI_Offset size;
-			
-            char inFileName[1024];
-            strcpy(inFileName, badAccnosFile.c_str());
-			
-            MPI_File_open(MPI_COMM_SELF, inFileName, inMode, MPI_INFO_NULL, &inMPIAccnos);  //comm, filename, mode, info, filepointer
-            MPI_File_get_size(inMPIAccnos, &size);
-			
-            char* buffer = new char[size];
-            MPI_File_read(inMPIAccnos, buffer, size, MPI_CHAR, &status);
-			
-            string tempBuf = buffer;
-            if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
-            istringstream iss (tempBuf,istringstream::in);
-            
-            delete buffer;
-            MPI_File_close(&inMPIAccnos);
-            
-            badSeqNames.clear();
-            string tempName, trashCode;
-            while (!iss.eof()) {
-                iss >> tempName >> trashCode; m->gobble(iss);
-                badSeqNames[tempName] = trashCode;
-            }
-        }
-#endif
-        
-        
+		
 		return numFastaSeqs;
 
 	}
@@ -698,7 +568,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
                 else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                    if (positions.size() < processors) { processors = positions.size(); }
+                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -954,7 +824,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             if(endPos != -1 && endPos > end)				{	goodSeq = 0;	trashCode += "end|"; }
             if(maxAmbig != -1 && maxAmbig <	ambigs)         {	goodSeq = 0;	trashCode += "ambig|"; }
             if(maxHomoP != -1 && maxHomoP < polymer)        {	goodSeq = 0;	trashCode += "homop|"; }
-            if(minLength != -1 && minLength > length)		{	goodSeq = 0;	trashCode += "<length|"; }
+            if(minLength > length)                          {	goodSeq = 0;	trashCode += "<length|"; }
             if(maxLength != -1 && maxLength < length)		{	goodSeq = 0;	trashCode += ">length|"; }
             
             if(goodSeq == 1){
@@ -1033,7 +903,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
             else {
                 int numFastaSeqs = 0;
                 positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                if (positions.size() < processors) { processors = positions.size(); }
+                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
                 
                 //figure out how many sequences you have to process
                 int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -1168,49 +1038,41 @@ int ScreenSeqsCommand::getSummaryReport(){
 		vector<int> ambigBases;
 		vector<int> longHomoPolymer;
         
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { 
-#endif
+        //read summary file
+        ifstream in;
+        m->openInputFile(summaryfile, in);
+        m->getline(in);
+        
+        string name;
+        int start, end, length, ambigs, polymer, numReps;
+        
+        while (!in.eof()) {
             
+            if (m->control_pressed) { in.close(); return 0; }
             
-            //read summary file
-            ifstream in;
-            m->openInputFile(summaryfile, in);
-            m->getline(in);
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
             
-            string name;
-            int start, end, length, ambigs, polymer, numReps;
-            
-            while (!in.eof()) {
+            int num = 1;
+            if ((namefile != "") || (countfile !="")) {
+                //make sure this sequence is in the namefile, else error
+                map<string, int>::iterator it = nameMap.find(name);
                 
-                if (m->control_pressed) { in.close(); return 0; }
-                
-                //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
-                
-                int num = 1;
-				if ((namefile != "") || (countfile !="")) {
-					//make sure this sequence is in the namefile, else error 
-					map<string, int>::iterator it = nameMap.find(name);
-					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-					else { num = it->second; }
-				}
-				
-				//for each sequence this sequence represents
-				for (int i = 0; i < num; i++) {
-					startPosition.push_back(start);
-					endPosition.push_back(end);
-					seqLength.push_back(length);
-					ambigBases.push_back(ambigs);
-					longHomoPolymer.push_back(polymer);
-				}
-               
+                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                else { num = it->second; }
             }
-            in.close();
+            
+            //for each sequence this sequence represents
+            for (int i = 0; i < num; i++) {
+                startPosition.push_back(start);
+                endPosition.push_back(end);
+                seqLength.push_back(length);
+                ambigBases.push_back(ambigs);
+                longHomoPolymer.push_back(polymer);
+            }
+            
+        }
+        in.close();
 
         sort(startPosition.begin(), startPosition.end());
 		sort(endPosition.begin(), endPosition.end());
@@ -1226,37 +1088,10 @@ int ScreenSeqsCommand::getSummaryReport(){
 			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
 			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
 		}
         
-#ifdef USE_MPI
-    }
-    
-    MPI_Status status; 
-    MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-    MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-    
-    if (pid == 0) { 
-        //send file positions to all processes
-        for(int i = 1; i < processors; i++) { 
-            MPI_Send(&startPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-            MPI_Send(&endPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-            MPI_Send(&maxAmbig, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-            MPI_Send(&maxHomoP, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-            MPI_Send(&minLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-            MPI_Send(&maxLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-        }
-    }else {
-        MPI_Recv(&startPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-        MPI_Recv(&endPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-        MPI_Recv(&maxAmbig, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-        MPI_Recv(&maxHomoP, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-        MPI_Recv(&minLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-        MPI_Recv(&maxLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-    }
-    MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#endif
         return 0;
         
     }
@@ -1296,17 +1131,11 @@ int ScreenSeqsCommand::optimizeContigs(){
         }
 #endif
 		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { 
-			driverContigsSummary(olengths, oStarts, oEnds, numMismatches, numNs, contigsLines[0]);
-#else
+
             createProcessesContigsSummary(olengths, oStarts, oEnds, numMismatches, numNs, contigsLines); 
             
 			if (m->control_pressed) {  return 0; }
-#endif
+
             sort(olengths.begin(), olengths.end());
             sort(oStarts.begin(), oStarts.end());
             sort(oEnds.begin(), oEnds.end());
@@ -1325,31 +1154,6 @@ int ScreenSeqsCommand::optimizeContigs(){
 
             }
             
-#ifdef USE_MPI
-		}
-		
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-        
-		if (pid == 0) { 
-			//send file positions to all processes
-			for(int i = 1; i < processors; i++) { 
-                MPI_Send(&minOverlap, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&oStart, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&oEnd, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&mismatches, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-                MPI_Send(&maxN, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-			}
-		}else {
-            MPI_Recv(&minOverlap, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&oStart, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&oEnd, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&mismatches, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-            MPI_Recv(&maxN, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-		}
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#endif
 		return 0;
 	}
 	catch(exception& e) {
@@ -1646,51 +1450,24 @@ int ScreenSeqsCommand::optimizeAlign(){
         }
 #endif
 		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) { 
-			driverAlignSummary(sims, scores, inserts, alignLines[0]);
-#else
-            createProcessesAlignSummary(sims, scores, inserts, alignLines); 
-            
-			if (m->control_pressed) {  return 0; }
-#endif
-            sort(sims.begin(), sims.end());
-            sort(scores.begin(), scores.end());
-            sort(inserts.begin(), inserts.end());
-            
-            //numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-            int criteriaPercentile	= int(sims.size() * (criteria / (float) 100));
-            
-            for (int i = 0; i < optimize.size(); i++) {
-                if (optimize[i] == "minsim") { int mincriteriaPercentile = int(sims.size() * ((100 - criteria) / (float) 100)); minSim = sims[mincriteriaPercentile];  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
-                else if (optimize[i] == "minscore") { int mincriteriaPercentile = int(scores.size() * ((100 - criteria) / (float) 100)); minScore = scores[mincriteriaPercentile];  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
-                else if (optimize[i] == "maxinsert") { maxInsert = inserts[criteriaPercentile]; m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
-            }
-            
-#ifdef USE_MPI
-		}
-		
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
         
-		if (pid == 0) { 
-			//send file positions to all processes
-			for(int i = 1; i < processors; i++) { 
-                MPI_Send(&minSim, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&minScore, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&maxInsert, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-			}
-		}else {
-            MPI_Recv(&minSim, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&minScore, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&maxInsert, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-		}
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#endif
+        createProcessesAlignSummary(sims, scores, inserts, alignLines);
+        
+        if (m->control_pressed) {  return 0; }
+        
+        sort(sims.begin(), sims.end());
+        sort(scores.begin(), scores.end());
+        sort(inserts.begin(), inserts.end());
+        
+        //numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
+        int criteriaPercentile	= int(sims.size() * (criteria / (float) 100));
+        
+        for (int i = 0; i < optimize.size(); i++) {
+            if (optimize[i] == "minsim") { int mincriteriaPercentile = int(sims.size() * ((100 - criteria) / (float) 100)); minSim = sims[mincriteriaPercentile];  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
+            else if (optimize[i] == "minscore") { int mincriteriaPercentile = int(scores.size() * ((100 - criteria) / (float) 100)); minScore = scores[mincriteriaPercentile];  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxinsert") { maxInsert = inserts[criteriaPercentile]; m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
+        }
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -1964,7 +1741,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
         else {
             int numFastaSeqs = 0;
             positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-            if (positions.size() < processors) { processors = positions.size(); }
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             //figure out how many sequences you have to process
             int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -1976,24 +1753,17 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
         }
 #endif
 		
-#ifdef USE_MPI
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		
-		if (pid == 0) {
-            linePair tempLine(0, positions[positions.size()-1]);
-			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, tempLine);
-#else
+
 		int numSeqs = 0;
-		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			if(processors == 1){
-				numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
-			}else{
-				numSeqs = createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile); 
-			}
-				
-			if (m->control_pressed) {  return 0; }
-#endif
+		
+        if(processors == 1){
+            numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
+        }else{
+            numSeqs = createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile);
+        }
+        
+        if (m->control_pressed) {  return 0; }
+
 		sort(startPosition.begin(), startPosition.end());
 		sort(endPosition.begin(), endPosition.end());
 		sort(seqLength.begin(), seqLength.end());
@@ -2009,40 +1779,12 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
 			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
             else if (optimize[i] == "maxn") { maxN = numNs[criteriaPercentile]; m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
 		}
-
-#ifdef USE_MPI
-		}
-		
-		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-			
-		if (pid == 0) { 
-			//send file positions to all processes
-			for(int i = 1; i < processors; i++) { 
-				MPI_Send(&startPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&endPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&maxAmbig, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&maxHomoP, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&minLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-				MPI_Send(&maxLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-                MPI_Send(&maxN, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
-			}
-		}else {
-			MPI_Recv(&startPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&endPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&maxAmbig, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&maxHomoP, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&minLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-			MPI_Recv(&maxLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-            MPI_Recv(&maxN, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-		}
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#endif
+        
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -2385,7 +2127,7 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
 			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
             
 			in >> name; m->gobble(in); 
-            in >> thisTotal; 
+            in >> thisTotal; m->gobble(in); 
             if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
             
 			it = badSeqNames.find(name);
@@ -2591,7 +2333,7 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
                     if(endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";}
                     if(maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";}
                     if(maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";}
-                    if(minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|";}
+                    if(minLength > currSeq.getNumBases())                           {	goodSeq = 0;	trashCode += "<length|";}
                     if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
                 }
                 
@@ -2633,95 +2375,6 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-#ifdef USE_MPI
-int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badAccnosFile, vector<unsigned long long>& MPIPos, map<string, string>& badSeqNames){
-	try {
-		string outputString = "";
-		MPI_Status statusGood; 
-		MPI_Status statusBadAccnos; 
-		MPI_Status status; 
-		int pid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-		for(int i=0;i<num;i++){
-		
-			if (m->control_pressed) {  return 0; }
-			
-			//read next sequence
-			int length = MPIPos[start+i+1] - MPIPos[start+i];
-
-			char* buf4 = new char[length];
-
-			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
-			string tempBuf = buf4;	delete buf4;
-			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
-			
-			Sequence currSeq(iss);			
-			
-			//process seq
-			if (currSeq.getName() != "") {
-				bool goodSeq = 1;		//	innocent until proven guilty
-                string trashCode = "";
-                //have the report files found you bad
-                map<string, string>::iterator it = badSeqNames.find(currSeq.getName());
-                if (it != badSeqNames.end()) { goodSeq = 0;  trashCode = it->second; }  
-                
-                if (summaryfile == "") { //summaryfile includes these so no need to check again
-                    if(startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	trashCode += "start|"; }
-                    if(endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";}
-                    if(maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";}
-                    if(maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";}
-                    if(minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|";}
-                    if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
-                }
-                
-                if (contigsreport == "") { //contigs report includes this so no need to check again
-                    if(maxN != -1 && maxN < currSeq.getNumNs())                     {	goodSeq = 0;	trashCode += "n|"; }
-                }
-				
-                
-				if(goodSeq == 1){
-					outputString =  ">" + currSeq.getName() + "\n" + currSeq.getAligned() + "\n";
-				
-					//print good seq
-					length = outputString.length();
-					char* buf2 = new char[length];
-					memcpy(buf2, outputString.c_str(), length);
-					
-					MPI_File_write_shared(goodFile, buf2, length, MPI_CHAR, &statusGood);
-					delete buf2;
-				}
-				else{
-
-					badSeqNames[currSeq.getName()] = trashCode;
-					
-					//write to bad accnos file
-					outputString = currSeq.getName() + "\t" + trashCode.substr(0, trashCode.length()-1) + "\n";
-				
-					length = outputString.length();
-					char* buf3 = new char[length];
-					memcpy(buf3, outputString.c_str(), length);
-					
-					MPI_File_write_shared(badAccnosFile, buf3, length, MPI_CHAR, &statusBadAccnos);
-					delete buf3;
-				}
-			}
-			
-			//report progress
-			if((i) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(i)+"\n"); 		}
-		}
-				
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "driverMPI");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/
 
 int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, string filename, map<string, string>& badSeqNames) {

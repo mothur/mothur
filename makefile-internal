@@ -1,0 +1,98 @@
+64BIT_VERSION ?= yes
+USEREADLINE ?= yes
+USEBOOST ?= yes
+RELEASE_DATE = "\"4/05/2015\""
+VERSION = "\"1.37.0\""
+
+# Optimize to level 3:
+    CXXFLAGS += -O3
+
+
+ifeq  ($(strip $(64BIT_VERSION)),yes)
+    #if you are a mac user use the following line
+    #TARGET_ARCH += -arch x86_64
+
+    #if you using cygwin to build Windows the following line
+    #CXX = x86_64-w64-mingw32-g++
+    #CC = x86_64-w64-mingw32-g++
+    #TARGET_ARCH += -m64 -static
+
+    #if you are a linux user use the following line - specific processor builds in future??
+    #CXXFLAGS += -mtune=generic
+
+    CXXFLAGS += -DBIT_VERSION
+endif
+
+
+CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
+
+# if you do not want to use the readline library, set this to no.
+# make sure you have the library installed
+ifeq  ($(strip $(USEREADLINE)),yes)
+    CXXFLAGS += -DUSE_READLINE
+    LIBS += -lreadline
+endif
+
+
+#The boost libraries allow you to read gz files.
+ifeq  ($(strip $(USEBOOST)),yes)
+    #statically link so the boost install is not required on users machine
+    BOOST_INCLUDE_DIR="/usr/local/include"
+    BOOST_LIBRARY_DIR="/usr/local/lib"
+
+    CXXFLAGS += -DUSE_BOOST
+
+    LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
+
+    #if mac
+    LIBS += ${BOOST_LIBRARY_DIR}/zlib.a
+
+    #if linux or windows
+    #LIBS += ${BOOST_LIBRARY_DIR}/libz.a
+endif
+
+#
+# INCLUDE directories for mothur
+#
+#
+    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/metastats:source/randomforest:source/read:source/svm
+    skipUchime := source/uchime_src/
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
+    subDirIncludes = $(patsubst %, -I %, $(subdirs))
+    subDirLinking =  $(patsubst %, -L%, $(subdirs))
+    CXXFLAGS += -I. $(subDirIncludes)
+    LDFLAGS += $(subDirLinking)
+
+
+#
+# Get the list of all .cpp files, rename to .o files
+#
+    OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
+    OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
+    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+    OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
+
+mothur : $(OBJECTS) uchime
+    $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+    strip mothur
+
+
+uchime:
+    cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
+
+
+install : mothur
+
+
+%.o : %.c %.h
+    $(COMPILE.c) $(OUTPUT_OPTION) $<
+%.o : %.cpp %.h
+    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
+%.o : %.cpp %.hpp
+    $(COMPILE.cpp) $(OUTPUT_OPTION) $<
+
+
+
+clean :
+    @rm -f $(OBJECTS)
+    @rm -f uchime

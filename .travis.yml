@@ -1,0 +1,17 @@
+language: C++
+os:
+ - osx
+ - linux
+
+addons:
+  apt:
+    packages:
+      - libreadline6
+      - libreadline6-dev
+      - libboost-all-dev
+
+before install:
+  - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "TRAVIS_OS_NAME" == "osx" ]]; then brew install readline boost; fi
+
+script: make install

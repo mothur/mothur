@@ -27,7 +27,14 @@
 
 class FastqRead {
 public:
+    
+#ifdef UNIT_TEST
+    friend class TestFastqRead;
+#endif
+    
     FastqRead();
+    FastqRead(Sequence, QualityScores);
+    FastqRead(Sequence, QualityScores, string);
     FastqRead(string f); 
     FastqRead(string f, string n, string s, vector<int> sc); 
     FastqRead(ifstream&, bool&, string f);
@@ -36,24 +43,32 @@ public:
     #endif
     ~FastqRead() {}
     
+    void setFormat(string f) { format = f; }
+    string getFormat() { return format; }
     string getName() { return name; }
     void setName(string n) { name = n; }
     string getSeq() { return sequence; }
+    void setSeq(string s) { sequence = s; }
     vector<int> getScores() { return scores; }
+    void setScores(vector<int> s) { scores = s;  }
+    void printFastq(ostream&);
     
     Sequence getSequence();
     QualityScores getQuality();
     
-    
+
 private:
     MothurOut* m;
     vector<int> scores;
-    string name;
+    string name, comment;
     string sequence;
+    string scoreString;
     string format;
     vector<char> convertTable;
+    vector<int> convertBackTable;
     
     vector<int> convertQual(string qual);
+    string convertQual(vector<int>);
     
 };
 

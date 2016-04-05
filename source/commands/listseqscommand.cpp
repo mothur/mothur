@@ -11,7 +11,7 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
-
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> ListSeqsCommand::setParameters(){	
@@ -24,6 +24,7 @@ vector<string> ListSeqsCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(palignreport);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -43,6 +44,7 @@ string ListSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq or alignreport file and outputs a .accnos file containing sequence names.\n";
 		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq and alignreport.  You must provide one of these parameters.\n";
+         helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -221,10 +223,19 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
 			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
-			
-			int okay = 1;
-			if (outputDir != "") { okay++; }
-			if (inputDir != "") { okay++; }
+            
+            bool formatFound = true;
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	formatFound = false; format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+                abort=true;
+            }
+            
+            int okay = 1;
+            if (outputDir != "") { okay++; }
+            if (inputDir != "") { okay++; }
+            if (formatFound) { okay++; }
 			
 			if (parameters.size() > okay) { m->mothurOut("You may only enter one file."); m->mothurOutEndLine(); abort = true;  }
 		}
@@ -308,36 +319,19 @@ int ListSeqsCommand::readFastq(){
 		m->openInputFile(fastqfile, in);
 		string name;
 		
-		//ofstream out;
-		//string newFastaName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "numsAdded.fasta";
-		//m->openOutputFile(newFastaName, out);
 		int count = 1;
-		//string lastName = "";
-		
 		while(!in.eof()){
 			
 			if (m->control_pressed) { in.close(); return 0; }
 			
-			//read sequence name
-			string name = m->getline(in); m->gobble(in);
+            bool ignore;
+            FastqRead fread(in, ignore, format); m->gobble(in);
+            
+            if (!ignore) { names.push_back(fread.getName()); }
 			
-			if (name[0] == '@') {
-                vector<string> splits = m->splitWhiteSpace(name);
-                name = splits[0];
-                name = name.substr(1);
-                m->checkName(name);
-                names.push_back(name);
-                //get rest of lines
-                name = m->getline(in); m->gobble(in);
-                name = m->getline(in); m->gobble(in);
-                name = m->getline(in); m->gobble(in);
-            }
-			
-			m->gobble(in);
-			if (m->debug) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"; }
+			if (m->debug) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"); }
 		}
 		in.close();
-		//out.close();
 		
 		return 0;
         

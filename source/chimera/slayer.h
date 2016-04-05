@@ -11,7 +11,7 @@
 
  
 #include "sequence.hpp"
-#include "chimera.h"
+#include "mothurchimera.h"
 
 /***********************************************************************/
 //This class was modeled after the chimeraSlayer written by the Broad Institute

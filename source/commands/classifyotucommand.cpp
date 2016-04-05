@@ -20,7 +20,10 @@ vector<string> ClassifyOtuCommand::setParameters(){
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
+        CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
         CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppersample);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
@@ -44,7 +47,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
 string ClassifyOtuCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
+		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
 		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
 		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
@@ -56,7 +59,10 @@ string ClassifyOtuCommand::getHelpString(){
 		helpString += "6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
         helpString += "The persample parameter allows you to find a consensus taxonomy for each group. Default=f\n";
+        helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
+        helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
 		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your otu taxonomy output.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
 		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";
         helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
@@ -262,6 +268,15 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
 			persample = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
+            relabund = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
+            m->mothurConvert(temp, printlevel);
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
             if ((groupfile == "") && (countfile == "")) { if (persample) { m->mothurOut("persample is only valid with a group file, or count file with group information. Setting persample=f.\n"); persample = false; } 
             }
@@ -444,7 +459,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 				it = taxMap.find(names[i]);
 		
 				if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-					m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+					m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
 				}else{
                     if (countfile != "") {
                         int numDups = ct->getNumSeqs(names[i]); 
@@ -509,29 +524,19 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 			currentNode = bestChild;
 		}
 		
-		if (myLevel != phylo->getMaxLevel()) {
-			while (myLevel != phylo->getMaxLevel()) {
-                if (probs) {
-                    conTax += "unclassified(100);";
-                }else{
-                    conTax += "unclassified;";
-                }
-				myLevel++;
-			}
-		}		
+		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
+        
 		if (conTax == "") {  conTax = "no_consensus;";  }
 		
 		delete phylo;	
 		
 		return allNames;
-			
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "findConsensusTaxonomy");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 int ClassifyOtuCommand::process(ListVector* processList) {
 	try{
@@ -558,41 +563,34 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,false);  }
-            else {  taxaSum = new PhyloSummary(ct,false); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund, printlevel);  }
+            else {  taxaSum = new PhyloSummary(ct,relabund, printlevel); }
 		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap,false);  }
-            else {  taxaSum = new PhyloSummary(groupMap,false); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel);  }
+            else {  taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
         }
         
-        vector<ofstream*> outSums;
-        vector<ofstream*> outs;
+        vector<string> outs;
         vector<PhyloSummary*> taxaSums;
         map<string, int> groupIndex;
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
                 groupIndex[groups[i]] = i;
-                ofstream* temp = new ofstream();
                 variables["[distance]"] = processList->getLabel() + "." + groups[i];
                 string outputFile = getOutputFileName("constaxonomy", variables);
-                m->openOutputFile(outputFile, *temp);
-                (*temp) << "OTU\tSize\tTaxonomy" << endl;
-                outs.push_back(temp);
+                ofstream temp;
+                m->openOutputFile(outputFile, temp);
+                outs.push_back(outputFile);
+                temp << "OTU\tSize\tTaxonomy" << endl;
                 outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
-                
-                ofstream* tempSum = new ofstream();
-                string outputSumFile = getOutputFileName("taxsummary", variables);
-                m->openOutputFile(outputSumFile, *tempSum);
-                outSums.push_back(tempSum);
-                outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
                 
                 PhyloSummary* taxaSumt;
                 if (countfile != "") {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, false);  }
-                    else {  taxaSumt = new PhyloSummary(ct, false); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, relabund, printlevel);  }
+                    else {  taxaSumt = new PhyloSummary(ct, relabund, printlevel); }
                 }else {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,false);  }
-                    else {  taxaSumt = new PhyloSummary(groupMap,false); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,relabund, printlevel);  }
+                    else {  taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
                 }
                 taxaSums.push_back(taxaSumt);
             }
@@ -689,8 +687,9 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                     
                     if (m->control_pressed) { break; }
                     
-                    
-                    (*outs[groupIndex[itParsed->first]]) << binLabels[i] << '\t' << size << '\t' << conTax << endl;
+                    ofstream out; m->openOutputFileAppend(outs[groupIndex[itParsed->first]], out);
+                    out << binLabels[i] << '\t' << size << '\t' << conTax << endl;
+                    out.close();
                     
                     string noConfidenceConTax = conTax;
                     m->removeConfidences(noConfidenceConTax);
@@ -714,16 +713,17 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		out.close();
 		
 		//print summary file
-		taxaSum->print(outSum);
+		taxaSum->print(outSum, output);
 		outSum.close();
         
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
-                (*outs[i]).close();
-                taxaSums[i]->print(*outSums[i]);
-                (*outSums[i]).close();
-                delete outs[i];
-                delete outSums[i];
+                ofstream outSums;
+                string outputSumFile = getOutputFileName("taxsummary", variables);
+                m->openOutputFile(outputSumFile, outSums);
+                outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
+                taxaSums[i]->print(outSums, output);
+                outSums.close();
                 delete taxaSums[i];
             }
         }
@@ -735,34 +735,6 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "process");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-string ClassifyOtuCommand::addUnclassifieds(string tax, int maxlevel) {
-	try{
-		string newTax, taxon;
-		int level = 0;
-		
-		//keep what you have counting the levels
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'))+';';
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-			level++;
-		}
-		
-		//add "unclassified" until you reach maxLevel
-		while (level < maxlevel) {
-			newTax += "unclassified;";
-			level++;
-		}
-		
-		return newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "addUnclassifieds");
 		exit(1);
 	}
 }
