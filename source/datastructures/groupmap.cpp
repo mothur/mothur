@@ -36,6 +36,7 @@ int GroupMap::addSeq(string name, string group) {
             groupmap[name] = group;	//store data in map
             seqsPerGroup[group]++;  //increment number of seqs in that group
         }
+
         
         return error;
     }

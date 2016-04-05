@@ -2127,7 +2127,7 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
 			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
             
 			in >> name; m->gobble(in); 
-            in >> thisTotal; 
+            in >> thisTotal; m->gobble(in); 
             if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
             
 			it = badSeqNames.find(name);

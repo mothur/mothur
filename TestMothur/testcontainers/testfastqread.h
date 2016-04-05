@@ -14,8 +14,17 @@
 class TestFastqRead : public FastqRead {
     
 public:
+    TestFastqRead();
+    ~TestFastqRead();
     
     using FastqRead::convertQual;
+
+    MothurOut* m;
+    vector<FastqRead> reads;
+    vector<string> filenames;
+    
+    
+    
     
 };
 
