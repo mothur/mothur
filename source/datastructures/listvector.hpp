@@ -37,6 +37,7 @@ public:
 	void clear();
 	int size();
     void print(ostream&);
+    void print(ostream&, bool);
 	void print(ostream&, map<string, int>&);
     void printHeaders(ostream&);
 	

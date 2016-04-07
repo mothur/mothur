@@ -357,6 +357,31 @@ void ListVector::print(ostream& output){
         exit(1);
     }
 }
+/***********************************************************************/
+//no sort for subsampling and get.otus and remove.otus
+void ListVector::print(ostream& output, bool sortOtus){
+    try {
+        output << label << '\t' << numBins;
+        
+        vector<string> hold = data;
+        if (sortOtus) { sort(hold.begin(), hold.end(), abundNamesSort); }
+        
+        //find first non blank otu
+        int start = 0;
+        for(int i=0;i<hold.size();i++){  if(hold[i] != ""){  start = i; break; } }
+        
+        for(int i=start;i<hold.size();i++){
+            if(hold[i] != ""){
+                output << '\t' << hold[i];
+            }
+        }
+        output << endl;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListVector", "print");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 

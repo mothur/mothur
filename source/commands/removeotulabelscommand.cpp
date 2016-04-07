@@ -548,7 +548,7 @@ int RemoveOtuLabelsCommand::readList(){
             wroteSomething = true;
             newList.setLabels(newLabels);
             newList.printHeaders(out);
-            newList.print(out);
+            newList.print(out, false);
         }
 		out.close();
 		

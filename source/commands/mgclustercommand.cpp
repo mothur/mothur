@@ -617,7 +617,7 @@ void MGClusterCommand::printData(ListVector* mergedList, map<string, int>& count
 	try {
         if (countfile != "") {
             mergedList->print(listFile, counts);
-        }else { mergedList->print(listFile); }
+        }else { mergedList->print(listFile, true); }
         
         SAbundVector sabund = mergedList->getSAbundVector();
         

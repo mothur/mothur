@@ -677,7 +677,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 				
 				//print to new file
 				list->setLabel(thisLabel);
-				list->print(outFilled);
+				list->print(outFilled, true);
 		
 				//update labelBin
 				labelBin[orderFloat[l]] += list->getNumBins();
@@ -832,7 +832,7 @@ void ClusterSplitCommand::printData(ListVector* oldList){
 		oldRAbund.print(outRabund);
 		oldRAbund.getSAbundVector().print(outSabund);
 	
-		oldList->print(outList);
+		oldList->print(outList, true);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "printData");

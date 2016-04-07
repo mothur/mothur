@@ -1240,7 +1240,7 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
 		
 		ofstream listFile;
 		m->openOutputFile(filename, listFile);
-		list->print(listFile);
+		list->print(listFile, true);
 		listFile.close();
 		
 		delete matrix;	delete cluster;	delete rabund; delete list;

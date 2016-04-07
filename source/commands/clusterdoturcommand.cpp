@@ -366,7 +366,7 @@ void ClusterDoturCommand::printData(string label, map<string, int>& counts){
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
-            oldList.print(listFile);
+            oldList.print(listFile, true);
         }
 
 	}

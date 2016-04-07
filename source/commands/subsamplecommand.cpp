@@ -1372,7 +1372,7 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 		if (m->control_pressed) { out.close(); return 0; }
 		
         list->printHeaders(out);
-		list->print(out);
+		list->print(out, false);
         out.close();
 		
 		return 0;

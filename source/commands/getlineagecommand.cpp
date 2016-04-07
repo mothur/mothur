@@ -595,7 +595,7 @@ int GetLineageCommand::readList(){
 				wroteSomething = true;
 				newList.setLabels(newBinLabels);
                 newList.printHeaders(out);
-				newList.print(out);
+				newList.print(out, false);
 			}
 			
 			m->gobble(in);

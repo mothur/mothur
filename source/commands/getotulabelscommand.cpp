@@ -535,6 +535,7 @@ int GetOtuLabelsCommand::readList(){
 				selectedCount++;
                 newList.push_back(list->get(i));
                 newLabels.push_back(binLabels[i]);
+                cout << m->getNumNames(list->get(i)) << endl;
             }
         }
         
@@ -554,7 +555,7 @@ int GetOtuLabelsCommand::readList(){
             wroteSomething = true;
             newList.setLabels(newLabels);
             newList.printHeaders(out);
-            newList.print(out);
+            newList.print(out, false);
         }
 		out.close();
 		

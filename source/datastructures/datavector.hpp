@@ -37,6 +37,7 @@ public:
 	virtual int size()	= 0;
 	virtual void print(ostream&) = 0;
     virtual void print(ostream&, map<string, int>&) {}
+    virtual void print(ostream&, bool) { m->mothurOut("[ERROR]: no print function\n"); }
 	virtual void printHeaders(ostream&) {};
 	virtual void clear() = 0;
 	
