@@ -535,7 +535,6 @@ int GetOtuLabelsCommand::readList(){
 				selectedCount++;
                 newList.push_back(list->get(i));
                 newLabels.push_back(binLabels[i]);
-                cout << m->getNumNames(list->get(i)) << endl;
             }
         }
         
