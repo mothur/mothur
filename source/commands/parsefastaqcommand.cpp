@@ -472,6 +472,8 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     for (int i = 0; i < rqual.size(); i++) { if (rqual[i] == 0){ rseq[i] = 'N'; } }
                     thisrRead.setSeq(rseq);
                 }
+                FastqRead copyForward = thisfRead;
+                FastqRead copyReverse = thisrRead;
                 
                 //print sequence info to files
                 if (fasta) {
@@ -519,12 +521,12 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     if(trashCodeLength == 0){
                         ofstream out;
                         m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
-                        thisfRead.printFastq(out);
+                        copyForward.printFastq(out);
                         out.close();
                         
                         ofstream out2;
                         m->openOutputFileAppend(rfastqFileNames[barcodeIndex][primerIndex], out2);
-                        thisrRead.printFastq(out2);
+                        copyReverse.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
@@ -555,11 +557,11 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         //print no match fastq
                         ofstream out, out2;
                         m->openOutputFileAppend(ffqnoMatchFile, out);
-                        thisfRead.printFastq(out);
+                        copyForward.printFastq(out);
                         out.close();
                         
                         m->openOutputFileAppend(rfqnoMatchFile, out2);
-                        thisrRead.printFastq(out2);
+                        copyReverse.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
@@ -655,6 +657,8 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                     thisRead.setSeq(seq);
                 }
                 
+                FastqRead copy = thisRead;
+                
                 //print sequence info to files
                 if (fasta) { thisRead.getSequence().printSequence(outFasta); }
                 
@@ -676,7 +680,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         //print fastq to barcode and primer match
                         ofstream out;
                         m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
-                        thisRead.printFastq(out);
+                        copy.printFastq(out);
                         out.close();
                         
                         //print fasta match if wanted
@@ -698,7 +702,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         //print no match fastq
                         ofstream out;
                         m->openOutputFileAppend(ffqnoMatchFile, out);
-                        thisRead.printFastq(out);
+                        copy.printFastq(out);
                         out.close();
                         
                         //print no match fasta, if wanted
