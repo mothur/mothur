@@ -54,7 +54,7 @@ else
 endif
 
     LIBS += -lboost_iostreams -lz
-    CXXFLAGS += -DUSE_BOOST
+    CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 endif
 
 #

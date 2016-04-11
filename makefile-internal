@@ -1,7 +1,7 @@
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
-RELEASE_DATE = "\"4/05/2015\""
+RELEASE_DATE = "\"4/11/2015\""
 VERSION = "\"1.37.0\""
 
 # Optimize to level 3:
@@ -10,7 +10,7 @@ VERSION = "\"1.37.0\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     #if you are a mac user use the following line
-    #TARGET_ARCH += -arch x86_64
+    TARGET_ARCH += -arch x86_64
 
     #if you using cygwin to build Windows the following line
     #CXX = x86_64-w64-mingw32-g++
@@ -40,7 +40,7 @@ ifeq  ($(strip $(USEBOOST)),yes)
     BOOST_INCLUDE_DIR="/usr/local/include"
     BOOST_LIBRARY_DIR="/usr/local/lib"
 
-    CXXFLAGS += -DUSE_BOOST
+    CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
 
