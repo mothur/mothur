@@ -273,8 +273,11 @@ int main(int argc, char *argv[]){
         if (!createLogFile) { m->mothurRemove(newlogFileName); }
 				
 		if (mothur != NULL) { delete mothur; }
-
-		return 0;
+        
+        int returnCode = 0;
+        if (m->getNumErrors() != 0) { returnCode = 1; }
+        
+		return returnCode;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "mothur", "main");
