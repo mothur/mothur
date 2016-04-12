@@ -50,7 +50,6 @@
 #include "secondarystructurecommand.h"
 #include "getsharedotucommand.h"
 #include "getlistcountcommand.h"
-#include "hclustercommand.h"
 #include "classifyseqscommand.h"
 #include "phylotypecommand.h"
 #include "mgclustercommand.h"
@@ -217,7 +216,6 @@ CommandFactory::CommandFactory(){
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.otulist"]			= "get.otulist";
-	commands["hcluster"]			= "hcluster";
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
@@ -476,7 +474,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);				}
 		else if(commandName == "get.sharedseqs")		{	command = new GetSharedOTUCommand(optionString);			}
 		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);			}
-		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);				}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);			}
 		else if(commandName == "chimera.ccode")			{	command = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	command = new ChimeraCheckCommand(optionString);			}
@@ -650,7 +647,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "align.check")			{	pipecommand = new AlignCheckCommand(optionString);				}
 		else if(commandName == "get.sharedseqs")		{	pipecommand = new GetSharedOTUCommand(optionString);			}
 		else if(commandName == "get.otulist")			{	pipecommand = new GetListCountCommand(optionString);			}
-		else if(commandName == "hcluster")				{	pipecommand = new HClusterCommand(optionString);				}
 		else if(commandName == "classify.seqs")			{	pipecommand = new ClassifySeqsCommand(optionString);			}
 		else if(commandName == "chimera.ccode")			{	pipecommand = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	pipecommand = new ChimeraCheckCommand(optionString);			}
@@ -809,7 +805,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "align.check")			{	shellcommand = new AlignCheckCommand();				}
 		else if(commandName == "get.sharedseqs")		{	shellcommand = new GetSharedOTUCommand();			}
 		else if(commandName == "get.otulist")			{	shellcommand = new GetListCountCommand();			}
-		else if(commandName == "hcluster")				{	shellcommand = new HClusterCommand();				}
 		else if(commandName == "classify.seqs")			{	shellcommand = new ClassifySeqsCommand();			}
 		else if(commandName == "chimera.ccode")			{	shellcommand = new ChimeraCcodeCommand();			}
 		else if(commandName == "chimera.check")			{	shellcommand = new ChimeraCheckCommand();			}

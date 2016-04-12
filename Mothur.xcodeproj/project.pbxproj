@@ -174,7 +174,6 @@
 		481FB5C71AC1B74F0076CFF3 /* getsabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70612D37EC400DA6239 /* getsabundcommand.cpp */; };
 		481FB5C81AC1B74F0076CFF3 /* getseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70812D37EC400DA6239 /* getseqscommand.cpp */; };
 		481FB5C91AC1B74F0076CFF3 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70A12D37EC400DA6239 /* getsharedotucommand.cpp */; };
-		481FB5CA1AC1B74F0076CFF3 /* hclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71A12D37EC400DA6239 /* hclustercommand.cpp */; };
 		481FB5CB1AC1B74F0076CFF3 /* heatmapcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71E12D37EC400DA6239 /* heatmapcommand.cpp */; };
 		481FB5CC1AC1B74F0076CFF3 /* heatmapsimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B72212D37EC400DA6239 /* heatmapsimcommand.cpp */; };
 		481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B72812D37EC400DA6239 /* helpcommand.cpp */; };
@@ -309,7 +308,6 @@
 		481FB6511AC1B8100076CFF3 /* engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6DA12D37EC400DA6239 /* engine.cpp */; };
 		481FB6521AC1B8100076CFF3 /* fileoutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6E012D37EC400DA6239 /* fileoutput.cpp */; };
 		481FB6531AC1B8100076CFF3 /* gotohoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */; };
-		481FB6541AC1B8100076CFF3 /* hcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71812D37EC400DA6239 /* hcluster.cpp */; };
 		481FB6551AC1B8100076CFF3 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71C12D37EC400DA6239 /* heatmap.cpp */; };
 		481FB6561AC1B8100076CFF3 /* heatmapsim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B72012D37EC400DA6239 /* heatmapsim.cpp */; };
 		481FB6571AC1B8100076CFF3 /* inputdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B72D12D37EC400DA6239 /* inputdata.cpp */; };
@@ -566,8 +564,6 @@
 		A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71212D37EC400DA6239 /* gower.cpp */; };
 		A7E9B8DE12D37EC400DA6239 /* groupmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71412D37EC400DA6239 /* groupmap.cpp */; };
 		A7E9B8DF12D37EC400DA6239 /* hamming.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71612D37EC400DA6239 /* hamming.cpp */; };
-		A7E9B8E012D37EC400DA6239 /* hcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71812D37EC400DA6239 /* hcluster.cpp */; };
-		A7E9B8E112D37EC400DA6239 /* hclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71A12D37EC400DA6239 /* hclustercommand.cpp */; };
 		A7E9B8E212D37EC400DA6239 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71C12D37EC400DA6239 /* heatmap.cpp */; };
 		A7E9B8E312D37EC400DA6239 /* heatmapcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71E12D37EC400DA6239 /* heatmapcommand.cpp */; };
 		A7E9B8E412D37EC400DA6239 /* heatmapsim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B72012D37EC400DA6239 /* heatmapsim.cpp */; };
@@ -1199,10 +1195,6 @@
 		A7E9B71512D37EC400DA6239 /* groupmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = groupmap.h; path = source/datastructures/groupmap.h; sourceTree = SOURCE_ROOT; };
 		A7E9B71612D37EC400DA6239 /* hamming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hamming.cpp; path = source/calculators/hamming.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B71712D37EC400DA6239 /* hamming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hamming.h; path = source/calculators/hamming.h; sourceTree = SOURCE_ROOT; };
-		A7E9B71812D37EC400DA6239 /* hcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hcluster.cpp; path = source/hcluster.cpp; sourceTree = "<group>"; };
-		A7E9B71912D37EC400DA6239 /* hcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hcluster.h; path = source/hcluster.h; sourceTree = "<group>"; };
-		A7E9B71A12D37EC400DA6239 /* hclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hclustercommand.cpp; path = source/commands/hclustercommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B71B12D37EC400DA6239 /* hclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = hclustercommand.h; path = source/commands/hclustercommand.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B71C12D37EC400DA6239 /* heatmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = heatmap.cpp; path = source/heatmap.cpp; sourceTree = "<group>"; };
 		A7E9B71D12D37EC400DA6239 /* heatmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = heatmap.h; path = source/heatmap.h; sourceTree = "<group>"; };
 		A7E9B71E12D37EC400DA6239 /* heatmapcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = heatmapcommand.cpp; path = source/commands/heatmapcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1639,8 +1631,6 @@
 				A7E9B6E112D37EC400DA6239 /* fileoutput.h */,
 				A7E9B71112D37EC400DA6239 /* gotohoverlap.hpp */,
 				A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */,
-				A7E9B71812D37EC400DA6239 /* hcluster.cpp */,
-				A7E9B71912D37EC400DA6239 /* hcluster.h */,
 				A7E9B71C12D37EC400DA6239 /* heatmap.cpp */,
 				A7E9B71D12D37EC400DA6239 /* heatmap.h */,
 				A7E9B72012D37EC400DA6239 /* heatmapsim.cpp */,
@@ -1941,8 +1931,6 @@
 				A7E9B70812D37EC400DA6239 /* getseqscommand.cpp */,
 				A7E9B70B12D37EC400DA6239 /* getsharedotucommand.h */,
 				A7E9B70A12D37EC400DA6239 /* getsharedotucommand.cpp */,
-				A7E9B71B12D37EC400DA6239 /* hclustercommand.h */,
-				A7E9B71A12D37EC400DA6239 /* hclustercommand.cpp */,
 				A7E9B71F12D37EC400DA6239 /* heatmapcommand.h */,
 				A7E9B71E12D37EC400DA6239 /* heatmapcommand.cpp */,
 				A7E9B72312D37EC400DA6239 /* heatmapsimcommand.h */,
@@ -2718,7 +2706,6 @@
 				481FB61D1AC1B7AC0076CFF3 /* unifracunweightedcommand.cpp in Sources */,
 				481FB6141AC1B7AC0076CFF3 /* subsamplecommand.cpp in Sources */,
 				481FB5481AC1B61F0076CFF3 /* hellinger.cpp in Sources */,
-				481FB5CA1AC1B74F0076CFF3 /* hclustercommand.cpp in Sources */,
 				481FB5D41AC1B75C0076CFF3 /* listseqscommand.cpp in Sources */,
 				481FB6521AC1B8100076CFF3 /* fileoutput.cpp in Sources */,
 				481FB6851AC1B8B80076CFF3 /* validcalculator.cpp in Sources */,
@@ -2848,7 +2835,6 @@
 				481FB5651AC1B6A70076CFF3 /* sharedlennon.cpp in Sources */,
 				481FB53E1AC1B5FC0076CFF3 /* calculator.cpp in Sources */,
 				481FB6241AC1B7BA0076CFF3 /* qFinderDMM.cpp in Sources */,
-				481FB6541AC1B8100076CFF3 /* hcluster.cpp in Sources */,
 				481FB6311AC1B7EA0076CFF3 /* fullmatrix.cpp in Sources */,
 				481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */,
 				481FB58F1AC1B71B0076CFF3 /* newcommandtemplate.cpp in Sources */,
@@ -3054,8 +3040,6 @@
 				A7E9B8DE12D37EC400DA6239 /* groupmap.cpp in Sources */,
 				4893DE2918EEF28100C615DF /* (null) in Sources */,
 				A7E9B8DF12D37EC400DA6239 /* hamming.cpp in Sources */,
-				A7E9B8E012D37EC400DA6239 /* hcluster.cpp in Sources */,
-				A7E9B8E112D37EC400DA6239 /* hclustercommand.cpp in Sources */,
 				A7E9B8E212D37EC400DA6239 /* heatmap.cpp in Sources */,
 				A7E9B8E312D37EC400DA6239 /* heatmapcommand.cpp in Sources */,
 				A7E9B8E412D37EC400DA6239 /* heatmapsim.cpp in Sources */,

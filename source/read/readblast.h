@@ -22,7 +22,7 @@
 class ReadBlast {
 	
 public:
-	ReadBlast(string, float, float, int, bool, bool); //blastfile, cutoff, penalty, length of overlap, min or max bsr, hclusterWanted
+	ReadBlast(string, float, float, int, bool); //blastfile, cutoff, penalty, length of overlap, min or max bsr
 	~ReadBlast() {}
 	
 	int read(NameAssignment*);
@@ -36,7 +36,6 @@ private:
 	int length;	//number of amino acids overlapped
 	float penalty, cutoff;  //penalty is used to adjust error rate
 	bool minWanted;  //if true choose min bsr, if false choose max bsr
-	bool hclusterWanted;
 	
 	SparseDistanceMatrix* matrix;
 	vector<seqDist> overlap;

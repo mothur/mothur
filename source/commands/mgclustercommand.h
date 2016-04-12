@@ -14,7 +14,6 @@
 #include "readblast.h"
 #include "nameassignment.hpp"
 #include "cluster.hpp"
-#include "hcluster.h"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "counttable.h"
@@ -45,7 +44,6 @@ private:
 	ReadBlast* read;
 	NameAssignment* nameMap;
 	Cluster* cluster;
-	HCluster* hcluster;
 	ListVector* list;
     CountTable* ct;
 	ListVector oldList;
