@@ -1053,6 +1053,8 @@ int ScreenSeqsCommand::getSummaryReport(){
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
             
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
+            
             int num = 1;
             if ((namefile != "") || (countfile !="")) {
                 //make sure this sequence is in the namefile, else error
@@ -1824,6 +1826,8 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { num = it->second; }
 				}
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t" + toString(current.getNumBases()) + "\n"); }
 				
 				//for each sequence this sequence represents
                 int numns = current.getNumNs();
@@ -2335,6 +2339,8 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
                     if(maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";}
                     if(minLength > currSeq.getNumBases())                           {	goodSeq = 0;	trashCode += "<length|";}
                     if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
                 }
                 
                 if (contigsreport == "") { //contigs report includes this so no need to check again
