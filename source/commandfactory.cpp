@@ -85,7 +85,6 @@
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
 #include "parsefastaqcommand.h"
-#include "pipelinepdscommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
@@ -269,7 +268,6 @@ CommandFactory::CommandFactory(){
 	commands["count.groups"]		= "count.groups";
 	commands["clear.memory"]		= "clear.memory";
 	commands["pairwise.seqs"]		= "pairwise.seqs";
-	commands["pipeline.pds"]		= "pipeline.pds";
 	commands["classify.seqs"]		= "classify.seqs";
 	commands["dist.seqs"]			= "dist.seqs";
 	commands["filter.seqs"]			= "filter.seqs";
@@ -516,7 +514,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
         else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
-		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}

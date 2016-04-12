@@ -212,7 +212,6 @@
 		481FB5EF1AC1B77E0076CFF3 /* pcoacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78712D37EC400DA6239 /* pcoacommand.cpp */; };
 		481FB5F11AC1B77E0076CFF3 /* phylodiversitycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78B12D37EC400DA6239 /* phylodiversitycommand.cpp */; };
 		481FB5F21AC1B77E0076CFF3 /* phylotypecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79112D37EC400DA6239 /* phylotypecommand.cpp */; };
-		481FB5F31AC1B77E0076CFF3 /* pipelinepdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79512D37EC400DA6239 /* pipelinepdscommand.cpp */; };
 		481FB5F41AC1B77E0076CFF3 /* preclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79712D37EC400DA6239 /* preclustercommand.cpp */; };
 		481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74C06E816A9C0A8008390A3 /* primerdesigncommand.cpp */; };
 		481FB5F61AC1B77E0076CFF3 /* quitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A112D37EC400DA6239 /* quitcommand.cpp */; };
@@ -620,7 +619,6 @@
 		A7E9B91912D37EC400DA6239 /* phylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78F12D37EC400DA6239 /* phylotree.cpp */; };
 		A7E9B91A12D37EC400DA6239 /* phylotypecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79112D37EC400DA6239 /* phylotypecommand.cpp */; };
 		A7E9B91B12D37EC400DA6239 /* pintail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79312D37EC400DA6239 /* pintail.cpp */; };
-		A7E9B91C12D37EC400DA6239 /* pipelinepdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79512D37EC400DA6239 /* pipelinepdscommand.cpp */; };
 		A7E9B91D12D37EC400DA6239 /* preclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79712D37EC400DA6239 /* preclustercommand.cpp */; };
 		A7E9B91E12D37EC400DA6239 /* prng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79912D37EC400DA6239 /* prng.cpp */; };
 		A7E9B91F12D37EC400DA6239 /* progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79B12D37EC400DA6239 /* progress.cpp */; };
@@ -1312,8 +1310,6 @@
 		A7E9B79212D37EC400DA6239 /* phylotypecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = phylotypecommand.h; path = source/commands/phylotypecommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B79312D37EC400DA6239 /* pintail.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pintail.cpp; path = source/chimera/pintail.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B79412D37EC400DA6239 /* pintail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pintail.h; path = source/chimera/pintail.h; sourceTree = SOURCE_ROOT; };
-		A7E9B79512D37EC400DA6239 /* pipelinepdscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pipelinepdscommand.cpp; path = source/commands/pipelinepdscommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B79612D37EC400DA6239 /* pipelinepdscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pipelinepdscommand.h; path = source/commands/pipelinepdscommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B79712D37EC400DA6239 /* preclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = preclustercommand.cpp; path = source/commands/preclustercommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B79812D37EC400DA6239 /* preclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preclustercommand.h; path = source/commands/preclustercommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B79912D37EC400DA6239 /* prng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = prng.cpp; path = source/calculators/prng.cpp; sourceTree = SOURCE_ROOT; };
@@ -2011,8 +2007,6 @@
 				A7E9B78B12D37EC400DA6239 /* phylodiversitycommand.cpp */,
 				A7E9B79212D37EC400DA6239 /* phylotypecommand.h */,
 				A7E9B79112D37EC400DA6239 /* phylotypecommand.cpp */,
-				A7E9B79612D37EC400DA6239 /* pipelinepdscommand.h */,
-				A7E9B79512D37EC400DA6239 /* pipelinepdscommand.cpp */,
 				A7E9B79812D37EC400DA6239 /* preclustercommand.h */,
 				A7E9B79712D37EC400DA6239 /* preclustercommand.cpp */,
 				A74C06E616A9C097008390A3 /* primerdesigncommand.h */,
@@ -2751,7 +2745,6 @@
 				481FB6411AC1B7EA0076CFF3 /* sequenceparser.cpp in Sources */,
 				481FB6381AC1B7EA0076CFF3 /* oligos.cpp in Sources */,
 				481FB59E1AC1B71B0076CFF3 /* classifyseqscommand.cpp in Sources */,
-				481FB5F31AC1B77E0076CFF3 /* pipelinepdscommand.cpp in Sources */,
 				481FB5CF1AC1B75C0076CFF3 /* indicatorcommand.cpp in Sources */,
 				481FB64F1AC1B8100076CFF3 /* consensus.cpp in Sources */,
 				481FB5441AC1B6140076CFF3 /* goodscoverage.cpp in Sources */,
@@ -3100,7 +3093,6 @@
 				A7E9B91912D37EC400DA6239 /* phylotree.cpp in Sources */,
 				A7E9B91A12D37EC400DA6239 /* phylotypecommand.cpp in Sources */,
 				A7E9B91B12D37EC400DA6239 /* pintail.cpp in Sources */,
-				A7E9B91C12D37EC400DA6239 /* pipelinepdscommand.cpp in Sources */,
 				48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				A7E9B91D12D37EC400DA6239 /* preclustercommand.cpp in Sources */,
 				A7E9B91E12D37EC400DA6239 /* prng.cpp in Sources */,
