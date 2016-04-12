@@ -136,7 +136,6 @@
 		481FB5A01AC1B71B0076CFF3 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
 		481FB5A11AC1B71B0076CFF3 /* classifytreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */; };
 		481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B69612D37EC400DA6239 /* clearcutcommand.cpp */; };
-		481FB5A31AC1B7300076CFF3 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		481FB5A41AC1B7300076CFF3 /* clustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B69C12D37EC400DA6239 /* clustercommand.cpp */; };
 		481FB5A51AC1B7300076CFF3 /* clusterdoturcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B69E12D37EC400DA6239 /* clusterdoturcommand.cpp */; };
 		481FB5A61AC1B7300076CFF3 /* clusterfragmentscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6A012D37EC400DA6239 /* clusterfragmentscommand.cpp */; };
@@ -283,7 +282,6 @@
 		481FB6391AC1B7EA0076CFF3 /* ordervector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77712D37EC400DA6239 /* ordervector.cpp */; };
 		481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */; };
 		481FB63B1AC1B7EA0076CFF3 /* rabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */; };
-		481FB63C1AC1B7EA0076CFF3 /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		481FB63D1AC1B7EA0076CFF3 /* reportfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */; };
 		481FB63E1AC1B7EA0076CFF3 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */; };
 		481FB63F1AC1B7EA0076CFF3 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
@@ -413,7 +411,6 @@
 		A7190B221768E0DF00A9AFA6 /* lefsecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7190B201768E0DF00A9AFA6 /* lefsecommand.cpp */; };
 		A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
 		A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */; };
-		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB66161C570F009860A1 /* alignnode.cpp */; };
 		A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB68161C570F009860A1 /* aligntree.cpp */; };
 		A721AB71161C572A009860A1 /* kmernode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB6D161C572A009860A1 /* kmernode.cpp */; };
@@ -424,7 +421,6 @@
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
 		A7386C29161A110800651424 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
-		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A741744C175CD9B1007DF49B /* makelefsecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741744A175CD9B1007DF49B /* makelefsecommand.cpp */; };
 		A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
@@ -876,8 +872,6 @@
 		A71CB15F130B04A2001E7287 /* anosimcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = anosimcommand.h; path = source/commands/anosimcommand.h; sourceTree = SOURCE_ROOT; };
 		A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mergegroupscommand.h; path = source/commands/mergegroupscommand.h; sourceTree = SOURCE_ROOT; };
 		A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergegroupscommand.cpp; path = source/commands/mergegroupscommand.cpp; sourceTree = SOURCE_ROOT; };
-		A721765513BB9F7D0014DAAE /* referencedb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = referencedb.h; path = source/datastructures/referencedb.h; sourceTree = SOURCE_ROOT; };
-		A721765613BB9F7D0014DAAE /* referencedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = referencedb.cpp; path = source/datastructures/referencedb.cpp; sourceTree = SOURCE_ROOT; };
 		A721AB66161C570F009860A1 /* alignnode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = alignnode.cpp; path = source/classifier/alignnode.cpp; sourceTree = SOURCE_ROOT; };
 		A721AB67161C570F009860A1 /* alignnode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = alignnode.h; path = source/classifier/alignnode.h; sourceTree = SOURCE_ROOT; };
 		A721AB68161C570F009860A1 /* aligntree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = aligntree.cpp; path = source/classifier/aligntree.cpp; sourceTree = SOURCE_ROOT; };
@@ -901,8 +895,6 @@
 		A7386C201619CACB00651424 /* rftreenode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rftreenode.hpp; path = source/randomforest/rftreenode.hpp; sourceTree = SOURCE_ROOT; };
 		A7386C241619E52200651424 /* abstractdecisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abstractdecisiontree.cpp; path = source/randomforest/abstractdecisiontree.cpp; sourceTree = SOURCE_ROOT; };
 		A7386C28161A110700651424 /* decisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = decisiontree.cpp; path = source/randomforest/decisiontree.cpp; sourceTree = SOURCE_ROOT; };
-		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = clearmemorycommand.h; path = source/commands/clearmemorycommand.h; sourceTree = SOURCE_ROOT; };
-		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clearmemorycommand.cpp; path = source/commands/clearmemorycommand.cpp; sourceTree = SOURCE_ROOT; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mothurmetastats.h; path = source/metastats/mothurmetastats.h; sourceTree = SOURCE_ROOT; };
 		A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mothurmetastats.cpp; path = source/metastats/mothurmetastats.cpp; sourceTree = SOURCE_ROOT; };
 		A741744A175CD9B1007DF49B /* makelefsecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makelefsecommand.cpp; path = source/commands/makelefsecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1851,8 +1843,6 @@
 				A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */,
 				A7E9B69712D37EC400DA6239 /* clearcutcommand.h */,
 				A7E9B69612D37EC400DA6239 /* clearcutcommand.cpp */,
-				A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */,
-				A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */,
 				A7E9B69D12D37EC400DA6239 /* clustercommand.h */,
 				A7E9B69C12D37EC400DA6239 /* clustercommand.cpp */,
 				A7E9B69F12D37EC400DA6239 /* clusterdoturcommand.h */,
@@ -2318,8 +2308,6 @@
 				A7E9B7A012D37EC400DA6239 /* qualityscores.h */,
 				A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */,
 				A7E9B7A412D37EC400DA6239 /* rabundvector.hpp */,
-				A721765513BB9F7D0014DAAE /* referencedb.h */,
-				A721765613BB9F7D0014DAAE /* referencedb.cpp */,
 				A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */,
 				A7E9B7CC12D37EC400DA6239 /* reportfile.h */,
 				A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */,
@@ -2574,7 +2562,6 @@
 				481FB6271AC1B7EA0076CFF3 /* alignmentdb.cpp in Sources */,
 				481FB6351AC1B7EA0076CFF3 /* kmerdb.cpp in Sources */,
 				481FB5721AC1B6D40076CFF3 /* simpson.cpp in Sources */,
-				481FB5A31AC1B7300076CFF3 /* clearmemorycommand.cpp in Sources */,
 				481FB55D1AC1B6690076CFF3 /* sharedchao1.cpp in Sources */,
 				481FB5FE1AC1B7970076CFF3 /* removerarecommand.cpp in Sources */,
 				481FB53C1AC1B5F10076CFF3 /* bootstrap.cpp in Sources */,
@@ -2683,7 +2670,6 @@
 				481FB5D81AC1B75C0076CFF3 /* makecontigscommand.cpp in Sources */,
 				481FB6481AC1B7EA0076CFF3 /* sparsedistancematrix.cpp in Sources */,
 				481FB5531AC1B6490076CFF3 /* parsimony.cpp in Sources */,
-				481FB63C1AC1B7EA0076CFF3 /* referencedb.cpp in Sources */,
 				481FB6641AC1B8450076CFF3 /* optionparser.cpp in Sources */,
 				481FB68B1AC1BA9E0076CFF3 /* aligntree.cpp in Sources */,
 				481FB5FB1AC1B77E0076CFF3 /* removelineagecommand.cpp in Sources */,
@@ -3232,8 +3218,6 @@
 				A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */,
 				A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */,
 				A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */,
-				A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */,
-				A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */,
 				A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */,
 				A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */,
 				A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */,

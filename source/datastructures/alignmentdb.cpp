@@ -11,7 +11,6 @@
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
-#include "referencedb.h"
 
 /**************************************************************************************************/
 AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid){		//	This assumes that the template database is in fasta format, may 
@@ -20,68 +19,43 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		longest = 0;
 		method = s;
 		bool needToGenerate = true;
-		ReferenceDB* rdb = ReferenceDB::getInstance();
 		bool silent = false;
 		threadID = tid;
 		
-		if (fastaFileName == "saved-silent") {
-			fastaFileName = "saved"; silent = true;
-		}
-		
-		if (fastaFileName == "saved") {
-			int start = time(NULL);
-			
-			if (!silent) { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
-
-			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
-				templateSequences.push_back(rdb->referenceSeqs[i]);
-				//save longest base
-				if (rdb->referenceSeqs[i].getUnaligned().length() >= longest)  { longest = (rdb->referenceSeqs[i].getUnaligned().length()+1); }
-			}
-			fastaFileName = rdb->getSavedReference();
-			
-			numSeqs = templateSequences.size();
-			if (!silent) { m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  }
+        int start = time(NULL);
+        m->mothurOutEndLine();
+        m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
+        //bool aligned = false;
+        int tempLength = 0;
+        
+        ifstream fastaFile;
+        m->openInputFile(fastaFileName, fastaFile);
+        
+        while (!fastaFile.eof()) {
+            Sequence temp(fastaFile);  m->gobble(fastaFile);
             
-		}else {
-			int start = time(NULL);
-			m->mothurOutEndLine();
-			m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
-			//bool aligned = false;
-            int tempLength = 0;
+            if (m->control_pressed) {  templateSequences.clear(); break;  }
             
-            ifstream fastaFile;
-			m->openInputFile(fastaFileName, fastaFile);
+            if (temp.getName() != "") {
+                templateSequences.push_back(temp);
+                
+                //save longest base
+                if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
+                
+                if (tempLength != 0) {
+                    if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
+                }else { tempLength = temp.getAligned().length(); }
+            }
+        }
+        fastaFile.close();
+        
+        numSeqs = templateSequences.size();
+        //all of this is elsewhere already!
+        
+        m->mothurOut("DONE.");
+        m->mothurOutEndLine();	cout.flush();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences."); m->mothurOutEndLine();  
 
-			while (!fastaFile.eof()) {
-				Sequence temp(fastaFile);  m->gobble(fastaFile);
-				
-				if (m->control_pressed) {  templateSequences.clear(); break;  }
-				
-				if (temp.getName() != "") {
-					templateSequences.push_back(temp);
-					
-					if (rdb->save) { rdb->referenceSeqs.push_back(temp); }
-					
-					//save longest base
-					if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
-                    
-                    if (tempLength != 0) {
-                        if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
-                    }else { tempLength = temp.getAligned().length(); }
-				}
-			}
-			fastaFile.close();
-		
-			numSeqs = templateSequences.size();
-			//all of this is elsewhere already!
-			
-			m->mothurOut("DONE.");
-			m->mothurOutEndLine();	cout.flush();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences."); m->mothurOutEndLine();  
-
-		}
-		
 		
 		//in case you delete the seqs and then ask for them
 		emptySequence = Sequence();

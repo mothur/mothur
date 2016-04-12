@@ -8,7 +8,6 @@
  */
 
 #include "mothurchimera.h"
-#include "referencedb.h"
 
 //***************************************************************************************************************
 //this is a vertical soft filter
@@ -100,53 +99,32 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
 		int count = 0;
 		length = 0;
 		unaligned = false;
-		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
-		if (file == "saved") {
-			
-			
-			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
-			
-			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
-				Sequence* temp = new Sequence(rdb->referenceSeqs[i].getName(), rdb->referenceSeqs[i].getAligned());
-				
-				if (count == 0) {  length = temp->getAligned().length();  count++;  } //gets first seqs length
-				else if (length != temp->getAligned().length()) {	unaligned = true;	}
-				
-				if (temp->getName() != "") {  container.push_back(temp);  }
-			}
-			
-			templateFileName = rdb->getSavedReference();
-			
-		}else {
-			
-			m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
-			
-			
-			ifstream in;
-			m->openInputFile(file, in);
-			
-			//read in seqs and store in vector
-			while(!in.eof()){
-				
-				if (m->control_pressed) { return container; }
-				
-				Sequence* current = new Sequence(in);  m->gobble(in);
-				
-				if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
-				else if (length != current->getAligned().length()) {   unaligned = true;	}
-							
-				if (current->getName() != "") {  
-					container.push_back(current);  
-					if (rdb->save) { rdb->referenceSeqs.push_back(*current); }
-				}
-			}
-			in.close();
+        
+        m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
+        
+        
+        ifstream in;
+        m->openInputFile(file, in);
+        
+        //read in seqs and store in vector
+        while(!in.eof()){
+            
+            if (m->control_pressed) { return container; }
+            
+            Sequence* current = new Sequence(in);  m->gobble(in);
+            
+            if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
+            else if (length != current->getAligned().length()) {   unaligned = true;	}
+            
+            if (current->getName() != "") { container.push_back(current); }
+        }
+        in.close();
+        
+        m->mothurOut("Done."); m->mothurOutEndLine();
+        
+        filterString = (string(container[0]->getAligned().length(), '1'));
 		
-			m->mothurOut("Done."); m->mothurOutEndLine();
-			
-			filterString = (string(container[0]->getAligned().length(), '1'));
-		}
 		
 		return container;
 	}

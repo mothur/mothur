@@ -9,9 +9,7 @@
 
 #include "chimerauchimecommand.h"
 #include "deconvolutecommand.h"
-//#include "uc.h"
 #include "sequence.hpp"
-#include "referencedb.h"
 #include "systemcommand.h"
 
 //**********************************************************************************************************************
@@ -139,7 +137,6 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
 		abort = false; calledHelp = false; hasName=false; hasCount=false;
-		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -500,27 +497,15 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
 					else if (templatefile == "not found") { //check for saved reference sequences
-						if (rdb->getSavedReference() != "") {
-							templatefile = rdb->getSavedReference();
-							m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
-						}else {
-							m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-							m->mothurOutEndLine();
-							abort = true; 
-						}
+						m->mothurOut("[ERROR]: The reference parameter is a required.\n"); abort = true;
 					}
 				}
 			}else if (hasName) {  templatefile = "self"; }
             else if (hasCount) {  templatefile = "self"; }
-			else { 
-				if (rdb->getSavedReference() != "") {
-					templatefile = rdb->getSavedReference();
-					m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					templatefile = ""; abort = true; 
-				} 
+			else {
+                m->mothurOut("[ERROR]: The reference parameter is a required.");
+					
+                templatefile = ""; abort = true;
 			}
 				
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}

@@ -112,7 +112,6 @@
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
 #include "countgroupscommand.h"
-#include "clearmemorycommand.h"
 #include "summarytaxcommand.h"
 #include "chimeraperseuscommand.h"
 #include "shhhseqscommand.h"
@@ -266,7 +265,6 @@ CommandFactory::CommandFactory(){
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
-	commands["clear.memory"]		= "clear.memory";
 	commands["pairwise.seqs"]		= "pairwise.seqs";
 	commands["classify.seqs"]		= "classify.seqs";
 	commands["dist.seqs"]			= "dist.seqs";
@@ -535,7 +533,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	command = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
-		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "summary.qual")			{	command = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
@@ -707,7 +704,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	pipecommand = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
-		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "summary.qual")			{	pipecommand = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
@@ -865,7 +861,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	shellcommand = new CountSeqsCommand();				}
 		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
-		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
 		else if(commandName == "summary.qual")			{	shellcommand = new SummaryQualCommand();			}
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}

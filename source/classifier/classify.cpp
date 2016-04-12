@@ -13,148 +13,88 @@
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
 #include "distancedb.hpp"
-#include "referencedb.h"
 
 /**************************************************************************************************/
 void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch)  {		
 	try {
         maxLevel = 0;
-		ReferenceDB* rdb = ReferenceDB::getInstance();
-		
-		if (tfile == "saved") { tfile = rdb->getSavedTaxonomy(); }
-		
 		taxFile = tfile;
 		
 		int numSeqs = 0;
-		
-		if (tempFile == "saved") {
-			int start = time(NULL);
-			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
-			
-			numSeqs = rdb->referenceSeqs.size();
-			templateFile = rdb->getSavedReference();
-			tempFile = rdb->getSavedReference();
-			
-			bool needToGenerate = true;
-			string kmerDBName;
-			if(method == "kmer")			{	
-				database = new KmerDB(tempFile, kmerSize);			
-				
-				kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-				ifstream kmerFileTest(kmerDBName.c_str());
-				if(kmerFileTest){	
-					bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
-					if (GoodFile) {  needToGenerate = false;	}
-				}
-			}
-			else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
-			else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
-			else if(method == "distance")	{	database = new DistanceDB();	}
-			else {
-				m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-				m->mothurOutEndLine();
-				database = new KmerDB(tempFile, 8);
-			}
-			
-			if (needToGenerate) {
-				for (int k = 0; k < rdb->referenceSeqs.size(); k++) {
-					Sequence temp(rdb->referenceSeqs[k].getName(), rdb->referenceSeqs[k].getAligned());
-					names.push_back(temp.getName());
-					database->addSequence(temp);	
-				}
-				if ((method == "kmer") && (!shortcuts)) {;} //don't print
-                else {database->generateDB(); }
-			}else if ((method == "kmer") && (!needToGenerate)) {	
-				ifstream kmerFileTest(kmerDBName.c_str());
-				database->readKmerDB(kmerFileTest);	
-				
-				for (int k = 0; k < rdb->referenceSeqs.size(); k++) {
-					names.push_back(rdb->referenceSeqs[k].getName());
-				}			
-			}	
-			
-			database->setNumSeqs(numSeqs);
-			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences and generate the search databases.");m->mothurOutEndLine();  
-			
-		}else {
-			
-			templateFile = tempFile;	
-			
-			int start = time(NULL);
-			
-			m->mothurOut("Generating search database...    "); cout.flush();
-			
-			//need to know number of template seqs for suffixdb
-			if (method == "suffix") {
-				ifstream inFASTA;
-				m->openInputFile(tempFile, inFASTA);
-				m->getNumSeqs(inFASTA, numSeqs);
-				inFASTA.close();
-			}
 
-			bool needToGenerate = true;
-			string kmerDBName;
-			if(method == "kmer")			{	
-				database = new KmerDB(tempFile, kmerSize);			
-				
-				kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-				ifstream kmerFileTest(kmerDBName.c_str());
-				if(kmerFileTest){	
-					bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
-					if (GoodFile) {  needToGenerate = false;	}
-				}
-			}
-			else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
-			else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
-			else if(method == "distance")	{	database = new DistanceDB();	}
-			else {
-				m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-				m->mothurOutEndLine();
-				database = new KmerDB(tempFile, 8);
-			}
-			
-			if (needToGenerate) {
-				ifstream fastaFile;
-				m->openInputFile(tempFile, fastaFile);
-				
-				while (!fastaFile.eof()) {
-					Sequence temp(fastaFile);
-					m->gobble(fastaFile);
-					
-					if (rdb->save) { rdb->referenceSeqs.push_back(temp); }
-					
-					names.push_back(temp.getName());
-								
-					database->addSequence(temp);	
-				}
-				fastaFile.close();
-
-                if ((method == "kmer") && (!shortcuts)) {;} //don't print
-                else {database->generateDB(); } 
-				
-			}else if ((method == "kmer") && (!needToGenerate)) {	
-				ifstream kmerFileTest(kmerDBName.c_str());
-				database->readKmerDB(kmerFileTest);	
-			
-				ifstream fastaFile;
-				m->openInputFile(tempFile, fastaFile);
-				
-				while (!fastaFile.eof()) {
-					Sequence temp(fastaFile);
-					m->gobble(fastaFile);
-					
-					if (rdb->save) { rdb->referenceSeqs.push_back(temp); }
-					names.push_back(temp.getName());
-				}
-				fastaFile.close();
-			}
-            	
-			database->setNumSeqs(names.size());
-			
-			m->mothurOut("DONE."); m->mothurOutEndLine();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
-		}
+        templateFile = tempFile;
+        
+        int start = time(NULL);
+        
+        m->mothurOut("Generating search database...    "); cout.flush();
+        
+        //need to know number of template seqs for suffixdb
+        if (method == "suffix") {
+            ifstream inFASTA;
+            m->openInputFile(tempFile, inFASTA);
+            m->getNumSeqs(inFASTA, numSeqs);
+            inFASTA.close();
+        }
+        
+        bool needToGenerate = true;
+        string kmerDBName;
+        if(method == "kmer")			{
+            database = new KmerDB(tempFile, kmerSize);
+            
+            kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+            ifstream kmerFileTest(kmerDBName.c_str());
+            if(kmerFileTest){
+                bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
+                if (GoodFile) {  needToGenerate = false;	}
+            }
+        }
+        else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
+        else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
+        else if(method == "distance")	{	database = new DistanceDB();	}
+        else {
+            m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
+            m->mothurOutEndLine();
+            database = new KmerDB(tempFile, 8);
+        }
+        
+        if (needToGenerate) {
+            ifstream fastaFile;
+            m->openInputFile(tempFile, fastaFile);
+            
+            while (!fastaFile.eof()) {
+                Sequence temp(fastaFile);
+                m->gobble(fastaFile);
+                
+                names.push_back(temp.getName());
+                
+                database->addSequence(temp);
+            }
+            fastaFile.close();
+            
+            if ((method == "kmer") && (!shortcuts)) {;} //don't print
+            else {database->generateDB(); }
+            
+        }else if ((method == "kmer") && (!needToGenerate)) {
+            ifstream kmerFileTest(kmerDBName.c_str());
+            database->readKmerDB(kmerFileTest);
+            
+            ifstream fastaFile;
+            m->openInputFile(tempFile, fastaFile);
+            
+            while (!fastaFile.eof()) {
+                Sequence temp(fastaFile);
+                m->gobble(fastaFile);
+                
+                names.push_back(temp.getName());
+            }
+            fastaFile.close();
+        }
+        
+        database->setNumSeqs(names.size());
+        
+        m->mothurOut("DONE."); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
+        
         
         readTaxonomy(taxFile);
         
