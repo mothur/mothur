@@ -325,6 +325,8 @@ int MergeGroupsCommand::execute(){
 
 int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
+        vector<string> setNames = designMap->getCategory();
+        
         if (method == "average") {
             //create sharedRabundFloatVectors
             vector<SharedRAbundFloatVector*> temp = thisLookUp[0]->getSharedRAbundFloatVectors(thisLookUp);
@@ -332,6 +334,12 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
             //follow code below
             map<string, SharedRAbundFloatVector> merged;
             map<string, SharedRAbundFloatVector>::iterator it;
+            for (int i = 0; i < setNames.size(); i++) {
+                SharedRAbundFloatVector myLookup(thisLookUp[0]->getNumBins());
+                myLookup.setLabel(thisLookUp[0]->getLabel());
+                merged[setNames[i]] = myLookup;
+            }
+            
             map<string, vector<int> > clearGroupAbunds;
             map<string, vector<int> >::iterator itAbunds;
             
@@ -387,6 +395,12 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
         }else {
             map<string, SharedRAbundVector> merged;
             map<string, SharedRAbundVector>::iterator it;
+            for (int i = 0; i < setNames.size(); i++) {
+                SharedRAbundVector myLookup(thisLookUp[0]->getNumBins());
+                myLookup.setLabel(thisLookUp[0]->getLabel());
+                merged[setNames[i]] = myLookup;
+            }
+            
             map<string, vector<int> > clearGroupAbunds;
             map<string, vector<int> >::iterator itAbunds;
             
