@@ -3352,7 +3352,7 @@ int MothurOut::mothurRemove(string filename){
 bool MothurOut::mothurConvert(string item, int& num){
 	try {
 		bool error = false;
-        
+    
 		if (isNumeric1(item)) {
 			convert(item, num);
 		}else {
@@ -4714,7 +4714,7 @@ bool MothurOut::isContainingOnlyDigits(string input) {
 	}
 }
 /**************************************************************************************************/
-int MothurOut::removeConfidences(string& tax) {
+float MothurOut::removeConfidences(string& tax) {
 	try {
 		
 		string taxon;
@@ -4748,7 +4748,7 @@ int MothurOut::removeConfidences(string& tax) {
 		
 		tax = newTax;
         
-        int confidence = 0; mothurConvert(confidenceScore, confidence);
+        float confidence = 0; mothurConvert(confidenceScore, confidence);
 		
 		return confidence;
 	}

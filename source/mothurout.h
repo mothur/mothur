@@ -188,7 +188,7 @@ class MothurOut {
         int removeBlanks(vector<string>&);
         vector<string> splitWhiteSpaceWithQuotes(string);
         int splitWhiteSpaceWithQuotes(string, vector<string>&);
-		int removeConfidences(string&);
+		float removeConfidences(string&);
         string removeQuotes(string);
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset

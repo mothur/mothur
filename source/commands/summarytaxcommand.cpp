@@ -274,6 +274,8 @@ int SummaryTaxCommand::execute(){
                 
                 if (threshold != 0) {  taxon = processTaxMap(taxon);  }
                 
+                cout << taxon << endl;
+                
                 //add sequence to summary, countfile info included from Phylosummary constructor
                 taxaSum->addSeqToTree(name, taxon);
             }
@@ -380,7 +382,8 @@ string SummaryTaxCommand::processTaxMap(string tax) {
                     confidence = "-1";
                 }
                 float con = 0;
-                convert(confidence, con);
+                
+                m->mothurConvert(confidence, con);
                 
                 if (con == -1) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
                 else if ( con < threshold)  { spot = i; break; } //below threshold, set all to unclassified
