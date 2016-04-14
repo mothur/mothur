@@ -1,7 +1,7 @@
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
-RELEASE_DATE = "\"4/11/2015\""
+RELEASE_DATE = "\"4/11/2016\""
 VERSION = "\"1.37.0\""
 
 # Optimize to level 3:
