@@ -2550,7 +2550,7 @@ int MakeContigsCommand::setNameType(string forwardFile, string reverseFile, char
         }else { //compressed files
 #ifdef USE_BOOST
             m->openInputFileBinary(forwardFile, inForward, inFF);
-            m->openInputFileBinary(reverseFile, inForward, inRF);
+            m->openInputFileBinary(reverseFile, inReverse, inRF);
             
             if (delim == '>') {
                 Sequence fread(inFF);
