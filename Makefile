@@ -14,8 +14,8 @@ USEREADLINE ?= yes
 USEBOOST ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"4/05/2016\""
-VERSION = "\"1.37.0\""
+RELEASE_DATE = "\"4/18/2016\""
+VERSION = "\"1.37.1\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
