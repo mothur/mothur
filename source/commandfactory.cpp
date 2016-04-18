@@ -150,6 +150,7 @@
 #include "setseedcommand.h"
 #include "makefilecommand.h"
 #include "biominfocommand.h"
+#include "renamefilecommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -323,6 +324,7 @@ CommandFactory::CommandFactory(){
     commands["make.file"]           = "make.file";
     commands["biom.info"]           = "biom.info";
     commands["set.seed"]            = "set.seed";
+    commands["rename.file"]         = "rename.file";
 
 
 }
@@ -568,6 +570,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
+        else if(commandName == "rename.file")           {	command = new RenameFileCommand(optionString);              }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -739,6 +742,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
+        else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand(optionString);              }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -896,6 +900,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
         else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
         else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
+        else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand();              }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
