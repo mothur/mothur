@@ -3354,6 +3354,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.1\\\"\"",
 					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3388,6 +3389,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.1\\\"\"",
 					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3465,6 +3467,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.36.0\\\"\"",
 					"RELEASE_DATE=\"\\\"07/23/2015\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

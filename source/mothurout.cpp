@@ -3431,7 +3431,7 @@ bool MothurOut::mothurConvert(string item, intDist& num){
 string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
     try{
         string newTax, taxon;
-        int level = 0;
+        int level = 1;
         
         vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
         vector<int> confidences;
@@ -3447,7 +3447,7 @@ string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
             if (thisTax == "unclassified;"){ index--; break; }
             else{ newTax += taxons[i] + ";";  }
         }
-        level = index+1;
+        level = index+2;
         
         string thisTax = taxons[index]+";";
         
