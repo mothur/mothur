@@ -377,8 +377,10 @@
 		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
 		487D09EB1CB2CEF3007039BF /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
-		488841611CC515A000C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4888415F1CC515A000C5E972 /* renamefilecommand.cpp */; };
-		488841621CC515A000C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4888415F1CC515A000C5E972 /* renamefilecommand.cpp */; };
+		488841611CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		488841621CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
+		488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -818,6 +820,8 @@
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = SOURCE_ROOT; };
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
+		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
+		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = "<group>"; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = testcommands/testrenameseqscommand.cpp; sourceTree = "<group>"; };
@@ -2021,8 +2025,8 @@
 				A727864312E9E28C00F86ABA /* removerarecommand.cpp */,
 				A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */,
 				A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */,
-				4888415F1CC515A000C5E972 /* renamefilecommand.cpp */,
-				488841601CC515A000C5E972 /* renamefilecommand.h */,
+				488841631CC6C34900C5E972 /* renamefilecommand.cpp */,
+				488841641CC6C34900C5E972 /* renamefilecommand.h */,
 				A7CFA42F1755400500D9ED4D /* renameseqscommand.h */,
 				A7CFA4301755401800D9ED4D /* renameseqscommand.cpp */,
 				A7E9B7CE12D37EC400DA6239 /* reversecommand.h */,
@@ -2748,6 +2752,7 @@
 				481FB5581AC1B6590076CFF3 /* shannonrange.cpp in Sources */,
 				481FB5601AC1B6790076CFF3 /* sharedjest.cpp in Sources */,
 				481FB64A1AC1B7F40076CFF3 /* suffixnodes.cpp in Sources */,
+				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
 				481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
@@ -2847,7 +2852,7 @@
 				481FB5391AC1B5E90076CFF3 /* ace.cpp in Sources */,
 				481FB5751AC1B6EA0076CFF3 /* soergel.cpp in Sources */,
 				481FB5DA1AC1B75C0076CFF3 /* makegroupcommand.cpp in Sources */,
-				488841621CC515A000C5E972 /* renamefilecommand.cpp in Sources */,
+				488841621CC515A000C5E972 /* (null) in Sources */,
 				481FB5691AC1B6B50076CFF3 /* sharedrjsd.cpp in Sources */,
 				481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */,
 				481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */,
@@ -3022,6 +3027,7 @@
 				A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */,
 				A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */,
 				A7E9B8DE12D37EC400DA6239 /* groupmap.cpp in Sources */,
+				488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */,
 				4893DE2918EEF28100C615DF /* (null) in Sources */,
 				A7E9B8DF12D37EC400DA6239 /* hamming.cpp in Sources */,
 				A7E9B8E212D37EC400DA6239 /* heatmap.cpp in Sources */,
@@ -3080,7 +3086,7 @@
 				A7E9B91412D37EC400DA6239 /* parsimonycommand.cpp in Sources */,
 				A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */,
 				A7E9B91712D37EC400DA6239 /* phylodiversitycommand.cpp in Sources */,
-				488841611CC515A000C5E972 /* renamefilecommand.cpp in Sources */,
+				488841611CC515A000C5E972 /* (null) in Sources */,
 				A7E9B91812D37EC400DA6239 /* phylosummary.cpp in Sources */,
 				A7E9B91912D37EC400DA6239 /* phylotree.cpp in Sources */,
 				A7E9B91A12D37EC400DA6239 /* phylotypecommand.cpp in Sources */,
