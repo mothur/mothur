@@ -23,6 +23,8 @@ OptionParser::OptionParser(string option) {
 				m->splitAtEquals(key, value);
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
+				key = m->splitWhiteSpace(key).front();
+			    value = m->splitWhiteSpace(value).front();
 				parameters[key] = value;
 			}
 			
@@ -30,6 +32,8 @@ OptionParser::OptionParser(string option) {
 			m->splitAtEquals(key, option);
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
+            key = m->splitWhiteSpace(key).front();
+			option = m->splitWhiteSpace(option).front();
 			parameters[key] = option;
 		}
 	}
@@ -52,6 +56,8 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 				m->splitAtEquals(key, value);
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
+				key = m->splitWhiteSpace(key).front();
+			    value = m->splitWhiteSpace(value).front();
 				parameters[key] = value;
 			}
 			
@@ -59,6 +65,8 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 			m->splitAtEquals(key, option);
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
+			key = m->splitWhiteSpace(key).front();
+			option = m->splitWhiteSpace(option).front();
 			parameters[key] = option;
 		}
         
