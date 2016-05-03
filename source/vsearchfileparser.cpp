@@ -176,20 +176,22 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             
             in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; m->gobble(in);
             
-            seqName = removeAbundances(seqName);
-    
+            if (recordType != "S") {
             
-            if (format == "name") {
-                itName = nameMap.find(seqName);
-                if (itName == nameMap.end()) {  m->mothurOut("[ERROR]: " + seqName + " is not in your name file. Parsing error???\n"); m->control_pressed = true; }
-                else{  seqName = itName->second;  }
+                seqName = removeAbundances(seqName);
+                
+                if (format == "name") {
+                    itName = nameMap.find(seqName);
+                    if (itName == nameMap.end()) {  m->mothurOut("[ERROR]: " + seqName + " is not in your name file. Parsing error???\n"); m->control_pressed = true; }
+                    else{  seqName = itName->second;  }
+                }
+                
+                string bin = list.get(clusterNumber);
+                if (bin == "")  {   bin = seqName;          }
+                else            {   bin += ',' + seqName;   }
+                list.set(clusterNumber, bin);
+                
             }
-            
-            string bin = list.get(clusterNumber);
-            if (bin == "")  {   bin = seqName;          }
-            else            {   bin += ',' + seqName;   }
-            list.set(clusterNumber, bin);
-            
         }
         in.close();
         
@@ -213,7 +215,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             }
         }
         out.close();
-        
+
         return 0;
     }
     catch(exception& e) {

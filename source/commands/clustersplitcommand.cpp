@@ -592,7 +592,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		map<float, int> labelBin;
 		vector<float> orderFloat;
 		int numSingleBins;
-		
+        
 		//read in singletons
 		if (singleton != "none") {
             
@@ -612,17 +612,17 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
             
 			in.close();
 			m->mothurRemove(singleton);
-			
+            
 			numSingleBins = listSingle->getNumBins();
 		}else{  listSingle = NULL; numSingleBins = 0;  }
 		
 		//go through users set and make them floats so we can sort them 
 		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
-			float temp = -10.0;
+			double temp = -10.0;
 
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
-			
+            
 			if (temp <= cutoff) {
 				orderFloat.push_back(temp);
 				labelBin[temp] = numSingleBins; //initialize numbins 
@@ -649,14 +649,14 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			string filledInList = listNames[k] + "filledInTemp";
 			ofstream outFilled;
 			m->openOutputFile(filledInList, outFilled);
-	
+            
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
 			
 				string thisLabel;
 				if (orderFloat[l] == -1) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
-
+                
 				//this file has reached the end
 				if (list == NULL) { 
 					list = input->getListVector(lastLabel, true); 
@@ -665,7 +665,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 					float labelFloat;
 					if (list->getLabel() == "unique") {  labelFloat = -1.0;  }
 					else { convert(list->getLabel(), labelFloat); }
-
+                    
 					//check for missing labels
 					if (labelFloat > orderFloat[l]) { //you are missing the label, get the next smallest one
 						//if its bigger get last label, otherwise keep it
