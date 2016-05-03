@@ -618,7 +618,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		
 		//go through users set and make them floats so we can sort them 
 		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
-			float temp = -10.0;
+			double temp = -10.0;
 
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
