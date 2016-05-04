@@ -383,6 +383,7 @@
 		488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
+		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
@@ -824,6 +825,8 @@
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = "<group>"; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = "<group>"; };
+		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = testcommands/testrenamefilecommand.cpp; sourceTree = "<group>"; };
+		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = testcommands/testrenamefilecommand.h; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = testcommands/testrenameseqscommand.cpp; sourceTree = "<group>"; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = testcommands/testrenameseqscommand.h; sourceTree = "<group>"; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = SOURCE_ROOT; };
@@ -1734,6 +1737,8 @@
 				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
 				48C728691B69598400D40830 /* testmergegroupscommand.h */,
 				48C728681B69598400D40830 /* testmergegroupscommand.cpp */,
+				48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */,
+				48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */,
 				48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */,
 				48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */,
 				48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */,
@@ -2754,6 +2759,7 @@
 				481FB64A1AC1B7F40076CFF3 /* suffixnodes.cpp in Sources */,
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
+				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
 				481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
@@ -3499,7 +3505,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 			};
 			name = Debug;
 		};
@@ -3536,7 +3542,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 			};
 			name = Release;
 		};

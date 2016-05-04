@@ -7,6 +7,7 @@
 //
 
 #include "renamefilecommand.h"
+#include "systemcommand.h"
 
 //**********************************************************************************************************************
 vector<string> RenameFileCommand::setParameters(){
@@ -40,6 +41,7 @@ vector<string> RenameFileCommand::setParameters(){
         CommandParameter pmothurgenerated("shorten", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmothurgenerated);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
         vector<string> myArray;
@@ -56,9 +58,11 @@ string RenameFileCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The rename.file command allows you to rename files and updates the current files saved by mothur.\n";
-        helpString += "The rename.file command parameters are: phylip, column, list, rabund, sabund, name, group, design, tree, shared, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, taxonomy, constaxonomy, input, output and mothurgenerated.\n";
+        helpString += "The rename.file command parameters are: phylip, column, list, rabund, sabund, name, group, design, tree, shared, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, taxonomy, constaxonomy, input, output, prefix, deletedold and shorten.\n";
         helpString += "The output parameter allows you to provide an output file name for the input file you provide.\n";
         helpString += "The shorten parameter is used to inicate you want mothur to generate output file names for you. For example: stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.an.unique_list.shared would become stability.an.shared. Default=true.";
+        helpString += "The prefix parameter allows you to enter your own prefix for shortened names.";
+        helpString += "The deleteold parameter indicates whether you want to delete the old file.  Default=true.";
         helpString += "The rename.file command should be in the following format: \n";
         helpString += "rename.file(fasta=current, name=current, group=current, taxonomy=current, shorten=t)\n";
         return helpString;
@@ -455,6 +459,11 @@ RenameFileCommand::RenameFileCommand(string option)  {
             string temp = validParameter.validFile(parameters, "shorten", false);		if (temp == "not found") { temp = "T"; }
             mothurGenerated = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "deleteold", false);		if (temp == "not found") { temp = "T"; }
+            deleteOld = m->isTrue(temp);
+            
+            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { temp = ""; }
+            
             outputfile = validParameter.validFile(parameters, "new", false);
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
@@ -488,122 +497,122 @@ int RenameFileCommand::execute(){
         //look for file types
         if (fastafile != "") {
             newName = getNewName(fastafile, "fasta");
-            m->renameFile(fastafile, newName);
+            renameOrCopy(fastafile, newName);
             m->setFastaFile(newName);
         }
         if (qualfile != "") {
             newName = getNewName(qualfile, "qfile");
-            m->renameFile(qualfile, newName);
+            renameOrCopy(qualfile, newName);
             m->setQualFile(newName);
         }
         if (phylipfile != "") {
             newName = getNewName(phylipfile, "phylip");
-            m->renameFile(phylipfile, newName);
+            renameOrCopy(phylipfile, newName);
             m->setPhylipFile(newName);
         }
         if (columnfile != "") {
             newName = getNewName(columnfile, "column");
-            m->renameFile(columnfile, newName);
+            renameOrCopy(columnfile, newName);
             m->setColumnFile(newName);
         }
         if (listfile != "") {
             newName = getNewName(listfile, "list");
-            m->renameFile(listfile, newName);
+            renameOrCopy(listfile, newName);
             m->setListFile(newName);
         }
         if (rabundfile != "") {
             newName = getNewName(rabundfile, "rabund");
-            m->renameFile(rabundfile, newName);
+            renameOrCopy(rabundfile, newName);
             m->setRabundFile(newName);
         }
         if (sabundfile != "") {
             newName = getNewName(sabundfile, "sabund");
-            m->renameFile(sabundfile, newName);
+            renameOrCopy(sabundfile, newName);
             m->setSabundFile(newName);
         }
         if (namefile != "") {
             newName = getNewName(namefile, "name");
-            m->renameFile(namefile, newName);
+            renameOrCopy(namefile, newName);
             m->setNameFile(newName);
         }
         if (groupfile != "") {
             newName = getNewName(groupfile, "group");
-            m->renameFile(groupfile, newName);
+            renameOrCopy(groupfile, newName);
             m->setGroupFile(newName);
         }
         if (treefile != "") {
             newName = getNewName(treefile, "tree");
-            m->renameFile(treefile, newName);
+            renameOrCopy(treefile, newName);
             m->setTreeFile(newName);
         }
         if (sharedfile != "") {
             newName = getNewName(sharedfile, "shared");
-            m->renameFile(sharedfile, newName);
+            renameOrCopy(sharedfile, newName);
             m->setSharedFile(newName);
         }
         if (relabundfile != "") {
             newName = getNewName(relabundfile, "relabund");
-            m->renameFile(relabundfile, newName);
+            renameOrCopy(relabundfile, newName);
             m->setRelAbundFile(newName);
         }
         if (designfile != "") {
             newName = getNewName(designfile, "design");
-            m->renameFile(designfile, newName);
+            renameOrCopy(designfile, newName);
             m->setDesignFile(newName);
         }
         if (sfffile != "") {
             newName = getNewName(sfffile, "sff");
-            m->renameFile(sfffile, newName);
+            renameOrCopy(sfffile, newName);
             m->setSFFFile(newName);
         }
         if (oligosfile != "") {
             newName = getNewName(oligosfile, "oligos");
-            m->renameFile(oligosfile, newName);
+            renameOrCopy(oligosfile, newName);
             m->setOligosFile(newName);
         }
         if (accnosfile != "") {
             newName = getNewName(accnosfile, "accnos");
-            m->renameFile(accnosfile, newName);
+            renameOrCopy(accnosfile, newName);
             m->setAccnosFile(newName);
         }
         if (taxonomyfile != "") {
             newName = getNewName(taxonomyfile, "taxonomy");
-            m->renameFile(taxonomyfile, newName);
+            renameOrCopy(taxonomyfile, newName);
             m->setTaxonomyFile(newName);
         }
         if (constaxonomyfile != "") {
             newName = getNewName(constaxonomyfile, "constaxonomy");
-            m->renameFile(constaxonomyfile, newName);
+            renameOrCopy(constaxonomyfile, newName);
             m->setTaxonomyFile(newName);
         }
         if (flowfile != "") {
             newName = getNewName(flowfile, "flow");
-            m->renameFile(flowfile, newName);
+            renameOrCopy(flowfile, newName);
             m->setFlowFile(newName);
         }
         if (biomfile != "") {
             newName = getNewName(biomfile, "biom");
-            m->renameFile(biomfile, newName);
+            renameOrCopy(biomfile, newName);
             m->setBiomFile(newName);
         }
         if (countfile != "") {
             newName = getNewName(countfile, "count");
-            m->renameFile(countfile, newName);
+            renameOrCopy(countfile, newName);
             m->setCountTableFile(newName);
         }
         if (summaryfile != "") {
             newName = getNewName(summaryfile, "summary");
-            m->renameFile(summaryfile, newName);
+            renameOrCopy(summaryfile, newName);
             m->setSummaryFile(newName);
         }
         if (filefile != "") {
             newName = getNewName(filefile, "file");
-            m->renameFile(filefile, newName);
+            renameOrCopy(filefile, newName);
             m->setFileFile(newName);
         }
         if (inputfile != "") {
             newName = getNewName(inputfile, "input");
-            m->renameFile(inputfile, newName);
+            renameOrCopy(inputfile, newName);
         }
         
         m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
@@ -628,9 +637,11 @@ string RenameFileCommand::getNewName(string name, string type){
             string basicName = "final";
             string tag = "";
             
-            int pos = name.find_first_of(".");
-            if (pos != string::npos) { basicName = name.substr(0, pos); }
-           
+            if (prefix == "") {
+                int pos = name.find_first_of(".");
+                if (pos != string::npos) { basicName = name.substr(0, pos); }
+            }else { basicName = prefix; }
+            
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {
                 vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn.");
                 vector<string> newTags; newTags.push_back("an"); newTags.push_back("tx");  newTags.push_back("agc"); newTags.push_back("dgc"); newTags.push_back("nn"); newTags.push_back("fn"); newTags.push_back("wn");
@@ -653,6 +664,38 @@ string RenameFileCommand::getNewName(string name, string type){
     
     catch(exception& e) {
         m->errorOut(e, "RenameFileCommand", "getNewFileName");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+string RenameFileCommand::renameOrCopy(string oldName, string newName){
+    try {
+        if (deleteOld) {  m->renameFile(oldName, newName); }
+        else {
+            string command = "copy ";
+            
+            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                command = "cp ";
+            #endif
+            
+            string inputString = command + oldName + " " + newName;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: system(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* systemCommand = new SystemCommand(inputString);
+            systemCommand->execute();
+            delete systemCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        }
+        
+        return newName;
+    }
+    
+    catch(exception& e) {
+        m->errorOut(e, "RenameFileCommand", "renameOrCopy");
         exit(1);
     }
 }
