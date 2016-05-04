@@ -57,7 +57,7 @@ void Cluster::clusterNames(){
 	}
 }
 /***********************************************************************/
-void Cluster::update(double& cutOFF){
+bool Cluster::update(double& cutOFF){
 	try {
         smallCol = dMatrix->getSmallestCell(smallRow);
         nColCells = dMatrix->seqVec[smallCol].size();

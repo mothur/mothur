@@ -10,16 +10,26 @@
 #define __Mothur__opticluster__
 
 #include "cluster.hpp"
+#include "optimatrix.h"
 
 /***********************************************************************/
 
 class OptiCluster : public Cluster {
+    
 public:
-    OptiCluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
-    bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; }
+    OptiCluster(OptiMatrix*);
+    bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { return("opti"); }
     
+    int initialize();  //randomize and place in "best" OTUs
+    bool update(double&); //returns whether list changed and MCC
+    
 private:
+    ListVector* list;
+    
+    bool updateSplit(double oldMCC, double& newMCC); //return changed
+    bool updateMerge(double oldMCC, double& newMCC); //returns changed
+    double calcMCC(double, double, double, double);
     
 };
 
