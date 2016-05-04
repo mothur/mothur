@@ -10,7 +10,10 @@
 #define __Mothur__vsearchfileparser__
 
 #include "mothurout.h"
-
+#include "deconvolutecommand.h"
+#include "sequence.hpp"
+#include "rabundvector.hpp"
+#include "sabundvector.hpp"
 
 /**************************************************************************************************/
 

@@ -7,10 +7,7 @@
 //
 
 #include "vsearchfileparser.h"
-#include "deconvolutecommand.h"
-#include "sequence.hpp"
-#include "rabundvector.hpp"
-#include "sabundvector.hpp"
+
 
 /***********************************************************************/
 VsearchFileParser::VsearchFileParser(){
