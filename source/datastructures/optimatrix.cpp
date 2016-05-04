@@ -32,6 +32,44 @@ OptiMatrix::OptiMatrix(string d, string nc, string f, double c, bool s) : distFi
     else { readColumn();  }
 }
 /***********************************************************************/
+//assumes sorted optimatrix
+bool OptiMatrix::isClose(int i, int j){
+    try {
+        int low = 0;
+        int high = closeness[i].size() - 1;
+        int mid = 0;
+        
+        int l = closeness[i][low];
+        int h = closeness[i][high];
+        
+        while (l <= j && h >= j) {
+            mid = low + ((int)(int)(high - low)*(int)(j - l))/((int)(h-l));
+            
+            int m = closeness[i][mid];
+            
+            if (m < j) {
+                l = closeness[i][low = mid + 1];
+            } else if (m > j) {
+                h = closeness[i][high = mid - 1];
+            } else {
+                return mid;
+            }
+        }
+        
+        if (closeness[i][low] == j) {
+            return true;
+        }else{
+            return false; // Not found
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "isClose");
+        exit(1);
+    }
+}
+/***********************************************************************/
 
 string OptiMatrix::findDistFormat(string distFile){
     try {
@@ -122,8 +160,8 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff){
-                        closeness[i].insert(j);
-                        closeness[j].insert(i);
+                        closeness[i].push_back(j);
+                        closeness[j].push_back(i);
                     }
                     index++;
                     reading->update(index);
@@ -152,14 +190,16 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff && j < i){
-                        closeness[i].insert(j);
-                        closeness[j].insert(i);
+                        closeness[i].push_back(j);
+                        closeness[j].push_back(i);
                     }
                     index++;
                     reading->update(index);
                 }
             }
         }
+        
+        for (int i = 0; i < closeness.size(); i++) {  sort(closeness[i].begin(), closeness[i].end());  }
         
         if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
         
@@ -174,6 +214,73 @@ int OptiMatrix::readPhylip(){
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "readPhylip");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+int OptiMatrix::readColumn(){
+    try {
+        
+        string firstName, secondName;
+        float distance;
+        map<string, int> indexMap;
+        list = new ListVector();
+        
+        ifstream fileHandle;
+        m->openInputFile(distFile, fileHandle);
+        
+        while(fileHandle){  //let's assume it's a triangular matrix...
+            
+            fileHandle >> firstName; m->gobble(fileHandle);
+            fileHandle >> secondName; m->gobble(fileHandle);
+            fileHandle >> distance;	// get the row and column names and distance
+            
+            if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
+            
+            if (m->control_pressed) {  fileHandle.close();   return 0; }
+            
+            map<string,int>::iterator itA = indexMap.find(firstName);
+            map<string,int>::iterator itB = indexMap.find(secondName);
+            
+            int indexI, indexJ;
+            if(itA == indexMap.end()){
+                indexMap[firstName] = indexMap.size();
+                indexI = indexMap.size();
+                nameMap[indexI] = firstName;
+                list->push_back(toString(indexI));
+            }else { indexI = itA->second; }
+            
+            if(itB == indexMap.end()){
+                indexMap[secondName] = indexMap.size();
+                indexJ = indexMap.size();
+                nameMap[indexJ] = secondName;
+                list->push_back(toString(indexJ));
+            }else { indexJ = itB->second; }
+            
+            if (distance == -1) { distance = 1000000; }
+            else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+            
+            if(distance < cutoff){
+                closeness[indexI].push_back(indexJ);
+                closeness[indexJ].push_back(indexI);
+            }
+            m->gobble(fileHandle);
+        }
+        
+        for (int i = 0; i < closeness.size(); i++) {  sort(closeness[i].begin(), closeness[i].end());  }
+        
+        if (m->control_pressed) {  fileHandle.close();   return 0; }
+        
+        fileHandle.close();
+        
+        list->setLabel("0");
+        
+        return 1;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "readColumn");
         exit(1);
     }
 }

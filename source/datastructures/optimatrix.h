@@ -25,7 +25,7 @@ public:
     
 private:
     
-    vector< set<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
+    vector< vector<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     map<int, string> nameMap;
     
     string distFile, namefile, countfile, format, distFormat;
