@@ -54,9 +54,9 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 			}
 			
 			sims.clear();
-//			double biggest = -1;
-			double biggest = 1;
-			float scaler;
+			double biggest = 0;
+			double smallest = 10000000;
+			//float scaler;
 
 			//get sim for each comparison and save them so you can find the relative similairity
 			for(int i = 0; i < (lookup.size()-1); i++){
@@ -70,22 +70,26 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 						//get similairity between groups
 						data = calcs[k]->getValues(subset);
 						sims.push_back(1.0 - data[0]);
-					
+                
 						//save biggest similairity to set relative sim
-//						if (data[0] > biggest) { biggest = data[0]; }
+						if ((1.0 - data[0]) > biggest) { biggest = (1.0 - data[0]); }
+                    
+                        //save smalllest similairity to set relative sim
+                        if ((1.0 - data[0]) < smallest) { smallest = (1.0 - data[0]); }
+
 				}
 			}
-			
+            
 			//map biggest similairity found to red
-			scaler = 255.0 / biggest;
-			
+			float scalerBig = 255.0 / biggest;
+    
 			int count = 0;
 			//output similairites to file
 			for(int i = 0; i < (lookup.size()-1); i++){
 				for(int j = (i+1); j < lookup.size(); j++){
 				
 						//find relative color
-						int color = scaler * sims[count];					
+						int color = scalerBig * sims[count];
 						//draw box
 						outsvg << "<rect fill=\"rgb(" + toString(color) + ",0,0)\" stroke=\"rgb(" + toString(color) + ",0,0)\" x=\"" + toString((i*150)+80) + "\" y=\"" + toString((j*150)+75) + "\" width=\"150\" height=\"150\"/>\n";
 						count++;
@@ -93,7 +97,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 			}
 			
 			int y = ((lookup.size() * 150) + 120);
-			printLegend(y, biggest);
+			printLegend(y, biggest, smallest);
 		
 			outsvg << "</g>\n</svg>\n";
 			outsvg.close();
@@ -131,6 +135,7 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		}
 			
 		double biggest = -1;
+        double smallest = 10000000;
 		float scaler;
 
 		//get sim for each comparison and save them so you can find the relative similairity
@@ -144,6 +149,9 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 					
 				//save biggest similairity to set relative sim
 				if (sim > biggest) { biggest = sim; }
+                
+                //save smalllest similairity to set relative sim
+                if (sim < smallest) { smallest = sim; }
 			}
 		}
 			
@@ -164,7 +172,7 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		}
 			
 		int y = ((dists.size() * 150) + 120);
-		printLegend(y, biggest);
+		printLegend(y, biggest, smallest);
 		
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
@@ -180,10 +188,8 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 
 //**********************************************************************************************************************
 
-void HeatMapSim::printLegend(int y, float maxSim) {
+void HeatMapSim::printLegend(int y, float maxSim, float minSim) {
 	try {
-		maxSim = 1;
-		
 		//output legend and color labels
 		//go through map and give each score a color value
 		string color;
@@ -196,7 +202,7 @@ void HeatMapSim::printLegend(int y, float maxSim) {
 			x += 3;
 		}
 		
-		float scaler = maxSim / 5.0;
+        float scaler = (maxSim-minSim) / 5.0; 
 		
 		//prints legend labels
 		x = 0;
@@ -204,7 +210,7 @@ void HeatMapSim::printLegend(int y, float maxSim) {
 			float label = scaler*i;
 			label = int(label * 1000 + 0.5);
 			label /= 1000.0;
-			string text = toString(label, 1);
+			string text = toString(label, 3);
 			
 			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + text + "</text>\n";
 			x += 153;
