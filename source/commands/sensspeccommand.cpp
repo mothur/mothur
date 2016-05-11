@@ -37,7 +37,7 @@ vector<string> SensSpecCommand::setParameters(){
 string SensSpecCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The sens.spec command....\n";
+		helpString += "The sens.spec command determines the quality of the clusters.\n";
 		return helpString;
 	}
 	catch(exception& e) {

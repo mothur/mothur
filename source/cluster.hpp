@@ -5,6 +5,7 @@
 
 #include "mothur.h"
 #include "sparsedistancematrix.h"
+#include "optimatrix.h"
 #include "mothurout.h"
 
 class RAbundVector;
@@ -14,6 +15,7 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
+    Cluster(){}
     virtual ~Cluster() {}
     virtual bool update(double&);
 	virtual string getTag() = 0;

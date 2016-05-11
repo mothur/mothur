@@ -134,7 +134,9 @@ int OptiMatrix::readPhylip(){
         }
         
         Progress* reading;
-        closeness.resize(nseqs);
+        
+        vector< map<int, string> > temp;
+        map<int, string> tempNameMap;
 
         if(square == 0){
             
@@ -146,7 +148,7 @@ int OptiMatrix::readPhylip(){
                 if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
                 
                 fileHandle >> name;
-                nameMap[i] = name;
+                tempNameMap[i] = name;
                 
                 list->push_back(toString(i));
                 
@@ -160,8 +162,9 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff){
-                        closeness[i].push_back(j);
-                        closeness[j].push_back(i);
+                        map<int, string> tempA; tempA[j] = name;
+                        temp[i] = tempA;
+                        temp[j][i] = tempNameMap[j];
                     }
                     index++;
                     reading->update(index);
@@ -177,7 +180,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 fileHandle >> name;
                 
-                nameMap[i] = name;
+                tempNameMap[i] = name;
                 
                 list->push_back(toString(i));
                 
@@ -190,14 +193,48 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff && j < i){
-                        closeness[i].push_back(j);
-                        closeness[j].push_back(i);
+                        map<int, string> tempA; tempA[j] = name;
+                        temp[i] = tempA;
+                        temp[j][i] = tempNameMap[j];
                     }
                     index++;
                     reading->update(index);
                 }
             }
         }
+        
+        count = 0;
+        for (int i = 0; i < temp.size(); i++) {
+            //add to singletons +1 singletons count
+            if (temp[i].size() == 0) {
+                int newIndex = temp.size()+count;
+                singletons.push_back(newIndex);
+                count++;
+                
+                //add new Index singleton to nameMap
+                map<int, string>::iterator it = tempNameMap.find(i);
+                nameMap[newIndex] = it->second;
+                
+                tempNameMap.erase(it);
+            }else {
+                int newIndex = closeness.size();
+                
+                vector<int> thisClose;
+                for(map<int, string>:: iterator it = temp[i].begin(); it != temp[i].end(); it++) {
+                    thisClose.push_back(it->first);
+                }
+                closeness.push_back(thisClose);
+                
+                //add new Index singleton to nameMap
+                map<int, string>::iterator it = tempNameMap.find(i);
+                nameMap[newIndex] = it->second;
+                
+                tempNameMap.erase(it);
+                
+                temp[i].clear();
+            }
+        }
+
         
         for (int i = 0; i < closeness.size(); i++) {  sort(closeness[i].begin(), closeness[i].end());  }
         
@@ -230,6 +267,9 @@ int OptiMatrix::readColumn(){
         ifstream fileHandle;
         m->openInputFile(distFile, fileHandle);
         
+        vector< map<int, string> > temp;
+        map<int, string> tempNameMap;
+        
         while(fileHandle){  //let's assume it's a triangular matrix...
             
             fileHandle >> firstName; m->gobble(fileHandle);
@@ -243,18 +283,20 @@ int OptiMatrix::readColumn(){
             map<string,int>::iterator itA = indexMap.find(firstName);
             map<string,int>::iterator itB = indexMap.find(secondName);
             
-            int indexI, indexJ;
+            int indexI, indexJ; bool newA = false;  bool newB = false;
             if(itA == indexMap.end()){
+                newA = true;
                 indexMap[firstName] = indexMap.size();
                 indexI = indexMap.size();
-                nameMap[indexI] = firstName;
+                tempNameMap[indexI] = firstName;
                 list->push_back(toString(indexI));
             }else { indexI = itA->second; }
             
             if(itB == indexMap.end()){
+                newB = true;
                 indexMap[secondName] = indexMap.size();
                 indexJ = indexMap.size();
-                nameMap[indexJ] = secondName;
+                tempNameMap[indexJ] = secondName;
                 list->push_back(toString(indexJ));
             }else { indexJ = itB->second; }
             
@@ -262,10 +304,48 @@ int OptiMatrix::readColumn(){
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
             if(distance < cutoff){
-                closeness[indexI].push_back(indexJ);
-                closeness[indexJ].push_back(indexI);
+                if (newA) {
+                    map<int, string> tempA; tempA[indexJ] = firstName;
+                    temp[indexI] = tempA;
+                }else {  temp[indexI][indexJ] = firstName; }
+                if (newB) {
+                    map<int, string> tempB; tempB[indexI] = secondName;
+                    temp[indexJ] = tempB;
+                }else {  temp[indexJ][indexI] = secondName; }
             }
             m->gobble(fileHandle);
+        }
+        
+        int count = 0;
+        for (int i = 0; i < temp.size(); i++) {
+            //add to singletons +1 singletons count
+            if (temp[i].size() == 0) {
+                int newIndex = temp.size()+count;
+                singletons.push_back(newIndex);
+                count++;
+                
+                //add new Index singleton to nameMap
+                map<int, string>::iterator it = tempNameMap.find(i);
+                nameMap[newIndex] = it->second;
+                
+                tempNameMap.erase(it);
+            }else {
+                int newIndex = closeness.size();
+                
+                vector<int> thisClose;
+                for(map<int, string>:: iterator it = temp[i].begin(); it != temp[i].end(); it++) {
+                    thisClose.push_back(it->first);
+                }
+                closeness.push_back(thisClose);
+                
+                //add new Index singleton to nameMap
+                map<int, string>::iterator it = tempNameMap.find(i);
+                nameMap[newIndex] = it->second;
+                
+                tempNameMap.erase(it);
+                
+                temp[i].clear();
+            }
         }
         
         for (int i = 0; i < closeness.size(); i++) {  sort(closeness[i].begin(), closeness[i].end());  }
