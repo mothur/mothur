@@ -70,6 +70,7 @@ private:
     bool findVsearch();
     int vsearchDriver(string, string, string, double);
     string runVsearchCluster(string, string, set<string>&, double&);
+    string runOptiCluster(string, string, set<string>&, double&);
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////

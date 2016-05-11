@@ -51,28 +51,26 @@ int OptiCluster::initialize() {
  * keep or move the sequence to the OTU where the `metric` is the largest - flip a coin on ties */
 bool OptiCluster::update(double& bestBinMetric) {
     try {
-        //int iters = 0;
-        //while ((listVectorMetric < stableMetric) && (iters < maxIters)) {
         
-            //for each sequence (singletons removed on read)
-            for (int i = 0; i < bins.size(); i++) {
+        //for each sequence (singletons removed on read)
+        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
                 if ( m->control_pressed) { break; }
-                
+            
+                int seqNumber = it->first;
+                int binNumber = it->second;
+            
                 map<double, int> otuMetric; //maps otu to metric to find "best" otu
-                
-                //remove from old otu and create singleton
-                map<int, int>::iterator it = seqBin.find(i);
-                
-                if ((bins[it->second].size()) == 1) {} //already singleton
+            
+                if ((bins[binNumber].size()) == 1) {} //already singleton
                 else {
-                    double singleMetric = moveAdjustTFValues(it->second, i, -1);
+                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1);
                     otuMetric[singleMetric] = -1;
                 }
                 
                 //merge into each "close" otu
-                for (int j = 0; j < (matrix->getCloseSeqs(i)).size(); j++) {
-                    double newMetric = moveAdjustTFValues(it->second, i, j);
-                    otuMetric[newMetric] = it->second;
+                for (int j = 0; j < (matrix->getCloseSeqs(seqNumber)).size(); j++) {
+                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, j);
+                    otuMetric[newMetric] = binNumber;
                 }
                 
                 //choose "best" otu - which is highest value or last item in map.
@@ -82,17 +80,16 @@ bool OptiCluster::update(double& bestBinMetric) {
                 if (bestBin == -1) {  bestBin = insertLocation;  }
                 
                 //move seq from i to j
-                bins[bestBin].push_back(i); //add seq to bestbin
-                bins[i].erase(remove(bins[i].begin(), bins[i].end(), bestBin), bins[i].end()); //remove from old bin i
-                
-                it = seqBin.find(i); //find Otu to be plucked from
-                
-                if (bins[it->second].size() == 0) { seqBin[it->second] = -1; insertLocation = it->second; } //set flag if old bin is empty.
+                bins[bestBin].push_back(seqNumber); //add seq to bestbin
+                bins[binNumber].erase(remove(bins[binNumber].begin(), bins[binNumber].end(), seqNumber), bins[binNumber].end()); //remove from old bin i
+            
+                if (bins[binNumber].size() == 0) { seqBin[binNumber] = -1; insertLocation = binNumber; } //set flag if old bin is empty.
 
                 //update seqBins
-                seqBin[i] = bestBin; //set new OTU location
-            }
-       // }
+                seqBin[seqNumber] = bestBin; //set new OTU location
+        }
+      
+        return 0;
         
     }
     catch(exception& e) {
@@ -163,8 +160,17 @@ ListVector* OptiCluster::getList() {
     try {
         ListVector* list = new ListVector();
         
-        
-        
+        for (int i = 0; i < bins.size(); i++) {
+            if (bins[i].size() != 0) {
+                
+                string otu = matrix->getName(bins[i][0]);
+                
+                for (int j = 1; j < bins[i].size(); j++) {
+                    otu += "," + matrix->getName(bins[i][j]);
+                }
+                list->push_back(otu);
+            }
+        }
         
         return list;
     }

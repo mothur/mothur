@@ -30,7 +30,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
@@ -66,7 +66,7 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
-		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
+		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
@@ -357,8 +357,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			
-            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
-            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -1205,6 +1205,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         string listFileName = "";
         
         if ((method == "agc") || (method == "dgc")) {  listFileName = runVsearchCluster(thisDistFile, thisNamefile, labels, smallestCutoff);  }
+        else if (method == "opti")                  {  listFileName = runOptiCluster(thisDistFile, thisNamefile, labels, smallestCutoff);     }
         else {
             
             Cluster* cluster = NULL;
@@ -1348,6 +1349,32 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 		m->errorOut(e, "ClusterSplitCommand", "clusterFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
+    try {
+        string listFileName = "";
+        
+        string nameOrCount = "count";
+        if (namefile != "") { nameOrCount = "name"; }
+        
+        OptiMatrix optiMatrix(thisDistFile, thisNamefile, nameOrCount, cutoff, -1);
+        
+        
+        int iters = 0;
+        double listVectorMetric = -1; //worst state
+        while ((listVectorMetric < stableMetric) && (iters < maxIters)) {
+            
+            if (m->control_pressed) { break; }
+        }
+    
+        return listFileName;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "runOptiCluster");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

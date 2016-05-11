@@ -25,7 +25,8 @@ public:
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
     map<int, string> getNameMap() { return nameMap; }
-    ListVector* getList();
+    string getName(int); //name from nameMap index
+    ListVector* getListSingle();
     
 private:
     
@@ -38,7 +39,6 @@ private:
     bool sim;
     
     MothurOut* m;
-    ListVector* list;
     ListVector* singlelist;
     
     string findDistFormat(string distFile);
