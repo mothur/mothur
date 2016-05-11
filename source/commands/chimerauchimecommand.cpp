@@ -690,7 +690,7 @@ int ChimeraUchimeCommand::execute(){
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-				m->printVsearchFile(nameMapCount, newFasta);
+                m->printVsearchFile(nameMapCount, newFasta, "ab");
 				fastaFileNames[s] = newFasta;
 			}
 			

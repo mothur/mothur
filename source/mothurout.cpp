@@ -4873,7 +4873,7 @@ int MothurOut::min(int A, int B){
     }
 }
 //**********************************************************************************************************************
-int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename){
+int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename, string tag){
     try {
         
         sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
@@ -4884,7 +4884,7 @@ int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string fi
         //print new file in order of
         for (int i = 0; i < nameMapCount.size(); i++) {
             if (control_pressed) {break;}
-            out << ">" << nameMapCount[i].name  << "/size=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
+            out << ">" << nameMapCount[i].name  << "/" + tag + "=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
         }
         out.close();
         
