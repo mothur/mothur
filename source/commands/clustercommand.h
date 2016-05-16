@@ -54,11 +54,11 @@ private:
 
 	bool abort, hard, sim;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation;
-	double cutoff;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation, metric;
+	double cutoff, stableMetric;
     float adjust;
 	string showabund, timing;
-	int precision, length;
+	int precision, length, maxIters;
 	ofstream sabundFile, rabundFile, listFile;
 
 	bool print_start;
@@ -71,6 +71,7 @@ private:
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
     int vsearchDriver(string, string, string);
     int runVsearchCluster();
+    int runOptiCluster();
     int runMothurCluster();
 };
 

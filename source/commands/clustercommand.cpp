@@ -15,6 +15,8 @@
 #include "sequence.hpp"
 #include "vsearchfileparser.h"
 #include "systemcommand.h"
+#include "opticluster.h"
+#include "optimatrix.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -26,7 +28,10 @@ vector<string> ClusterCommand::setParameters(){
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pmetric("metric", "Multiple", "mcc", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+        CommandParameter pmetriccutoff("metriccutoff", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+        CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
@@ -49,14 +54,17 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund, metric, mtriccutoff, iters and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
         helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
-        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
-        helpString += "The cluster command should be in the following format: \n";
+        helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
+        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc). Default=mcc.\n";
+        helpString += "The metriccutoff parameter allows to set the stable value for the metric in the opticluster method. \n";
+        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
+       helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
 		return helpString;
@@ -257,6 +265,17 @@ ClusterCommand::ClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
 			
+            temp = validParameter.validFile(parameters, "metriccutoff", false);		if (temp == "not found")  { temp = "0.25"; }
+            m->mothurConvert(temp, stableMetric);
+            
+            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            
+            if (metric == "mcc") { }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc."); m->mothurOutEndLine(); abort = true; }
+
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "10000"; }
+            m->mothurConvert(temp, maxIters);
+            
             //bool cutoffSet = false;
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
@@ -273,8 +292,9 @@ ClusterCommand::ClusterCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "average"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
+        
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -335,8 +355,9 @@ int ClusterCommand::execute(){
 		
         time_t estart = time(NULL);
         
-        if (format == "fasta")  {   runVsearchCluster();    }
-        else                    {   runMothurCluster();     }
+        if (format == "fasta")      {   runVsearchCluster();    }
+        else if (method == "opti")  {   runOptiCluster();       }
+        else                        {   runMothurCluster();     }
         
 		if (m->control_pressed) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
         
@@ -800,6 +821,61 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
 		m->errorOut(e, "ClusterCommand", "createRabund");
 		exit(1);
 	}
+    
+}
+//**********************************************************************************************************************
+
+int ClusterCommand::runOptiCluster(){
+    try {
+        string nameOrCount = "count";
+        string thisNamefile = countfile;
+        if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        string distfile = columnfile;
+        if (format == "phylip") { distfile = phylipfile; }
+        
+        OptiMatrix matrix(distfile, thisNamefile, nameOrCount, cutoff, false);
+        
+        matrix.print(cout);
+        
+        OptiCluster cluster(&matrix, metric, stableMetric);
+        tag = cluster.getTag();
+        
+        cluster.initialize();
+        
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
+        
+        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        
+        string listFileName = fileroot+ tag + ".list";
+        
+        ofstream listFile;
+        m->openOutputFile(listFileName,	listFile);
+        
+        int iters = 0;
+        double listVectorMetric = -1; //worst state
+        while ((listVectorMetric < stableMetric) && (iters < maxIters)) {
+            
+            if (m->control_pressed) { break; }
+            
+            cluster.update(listVectorMetric);
+            
+            cout << iters << '\t' << listVectorMetric << endl;
+            iters++;
+        }
+        
+        ListVector* list = cluster.getList();
+        list->setLabel(toString(cutoff));
+        list->print(listFile);
+        listFile.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "runOptiCluster");
+        exit(1);
+    }
     
 }
 //**********************************************************************************************************************
