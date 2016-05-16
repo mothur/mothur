@@ -48,9 +48,9 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation;
-	double cutoff, splitcutoff;
-	int precision, length, processors, taxLevelCutoff;
+	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric;
+	double cutoff, splitcutoff, stableMetric;
+	int precision, length, processors, taxLevelCutoff, maxIters;
 	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
