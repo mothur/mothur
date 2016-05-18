@@ -27,6 +27,8 @@ public:
     map<int, string> getNameMap() { return nameMap; }
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
+    string getListSingleFile();
+    long int print(ostream&);
     
 private:
     
@@ -39,11 +41,11 @@ private:
     bool sim;
     
     MothurOut* m;
-    ListVector* singlelist;
     
     string findDistFormat(string distFile);
     int readPhylip();
     int readColumn();
+    
 };
 
 
