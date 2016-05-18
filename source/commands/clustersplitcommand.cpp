@@ -30,7 +30,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
-        CommandParameter pmetriccutoff("metriccutoff", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+        CommandParameter pmetriccutoff("delta", "Number", "", "0.001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
@@ -55,7 +55,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, iters, metriccutoff, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, iters, delta, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -72,7 +72,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc). Default=mcc.\n";
-        helpString += "The metriccutoff parameter allows to set the stable value for the metric in the opticluster method. \n";
+        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. Default=0.001\n";
 		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
@@ -365,7 +365,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "10000"; }
             m->mothurConvert(temp, maxIters);
             
-            temp = validParameter.validFile(parameters, "metriccutoff", false);		if (temp == "not found")  { temp = "0.25"; }
+            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.001"; }
             m->mothurConvert(temp, stableMetric);
 			
             metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
@@ -1380,8 +1380,6 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         OptiCluster cluster(&matrix, metric, stableMetric);
         tag = cluster.getTag();
         
-        cluster.initialize();
-        
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
         
         if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
@@ -1393,14 +1391,20 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         m->openOutputFile(listFileName,	listFile);
         
         int iters = 0;
-        double listVectorMetric = -1; //worst state
-        while ((listVectorMetric < stableMetric) && (iters < maxIters)) {
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        cluster.initialize(listVectorMetric);
+        
+        while ((delta > stableMetric) && (iters < maxIters)) {
             
             if (m->control_pressed) { break; }
-            
+            double oldMetric = listVectorMetric;
+            cout << "iters = " << iters << '\t' << listVectorMetric << endl;
             cluster.update(listVectorMetric);
             
-            cout << iters << '\t' << listVectorMetric << endl;
+            delta = abs(oldMetric - listVectorMetric);
+            cout << "iters = " << iters << '\t' << oldMetric - listVectorMetric << '\t' << stableMetric << '\t' << maxIters << endl;
             iters++;
         }
         

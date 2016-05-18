@@ -30,7 +30,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
-        CommandParameter pmetriccutoff("metriccutoff", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+        CommandParameter pmetriccutoff("delta", "Number", "", "0.001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
@@ -54,7 +54,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund, metric, mtriccutoff, iters and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund, metric, delta, iters and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
@@ -62,7 +62,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc). Default=mcc.\n";
-        helpString += "The metriccutoff parameter allows to set the stable value for the metric in the opticluster method. \n";
+        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
        helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
@@ -265,7 +265,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
 			
-            temp = validParameter.validFile(parameters, "metriccutoff", false);		if (temp == "not found")  { temp = "0.25"; }
+            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.001"; }
             m->mothurConvert(temp, stableMetric);
             
             metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
@@ -840,8 +840,6 @@ int ClusterCommand::runOptiCluster(){
         OptiCluster cluster(&matrix, metric, stableMetric);
         tag = cluster.getTag();
         
-        cluster.initialize();
-        
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
         
         if (outputDir == "") { outputDir += m->hasPath(distfile); }
@@ -853,14 +851,20 @@ int ClusterCommand::runOptiCluster(){
         m->openOutputFile(listFileName,	listFile);
         
         int iters = 0;
-        double listVectorMetric = -1; //worst state
-        while ((listVectorMetric < stableMetric) && (iters < maxIters)) {
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        cluster.initialize(listVectorMetric);
+    
+        while ((delta > stableMetric) && (iters < maxIters)) {
             
             if (m->control_pressed) { break; }
-            
+            double oldMetric = listVectorMetric;
+            cout << "iters = " << iters << '\t' << listVectorMetric << endl;
             cluster.update(listVectorMetric);
             
-            cout << iters << '\t' << listVectorMetric << endl;
+            delta = abs(oldMetric - listVectorMetric);
+            cout << "iters = " << iters << '\t' << oldMetric - listVectorMetric << '\t' << stableMetric << '\t' << maxIters << endl;
             iters++;
         }
         
