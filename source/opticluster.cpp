@@ -71,10 +71,10 @@ bool OptiCluster::update(double& listMetric) {
             
             int seqNumber = it->first;
             int binNumber = it->second;
-            cout << "seqBin "<< seqNumber << '\t' << binNumber << endl;
+            
             if (binNumber == -1) { }
             else {
-                //cout << seqNumber << '\t' << binNumber << endl;
+                
                 map<double, vector< vector<int> > > otuMetric; //maps otu to metric to find "best" otu and tp, tn, fp ,tn with ties
                 map<double, vector< vector<int> > >::iterator itMet;
                 double tn, tp, fp, fn;
@@ -138,7 +138,6 @@ bool OptiCluster::update(double& listMetric) {
                     }else{
                         otuMetric[newMetric].push_back(temp);
                     }
-                    //cout << binNumber << '\t' << newMetric << endl;
                 }
                 
                 //choose "best" otu - which is highest value or last item in map. - shuffle for ties
@@ -158,7 +157,7 @@ bool OptiCluster::update(double& listMetric) {
                     bins[binNumber].erase(remove(bins[binNumber].begin(), bins[binNumber].end(), seqNumber), bins[binNumber].end()); //remove from old bin i
                 }
                 if (bins[binNumber].size() == 0) { insertLocation = binNumber;  } //set flag if old bin is empty.
-                cout << "best bin = " << bestBin << endl;
+                
                 //update seqBins
                 seqBin[seqNumber] = bestBin; //set new OTU location
                 

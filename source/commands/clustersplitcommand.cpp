@@ -36,6 +36,7 @@ vector<string> ClusterSplitCommand::setParameters(){
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+        CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -55,7 +56,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, iters, delta, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, iters, delta, dist, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -68,6 +69,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
         helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
+        helpString += "The dist parameter allows you to indicate whether you want a column formatted distance matrix outputted along with the list file. Default=F.";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
@@ -118,6 +120,7 @@ ClusterSplitCommand::ClusterSplitCommand(){
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -400,6 +403,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "islist", false);  if (temp == "not found") { temp = "F"; }
             isList = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "dist", false);  if (temp == "not found") { temp = "F"; }
+            makeDist = m->isTrue(temp);
+            
+            if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
+            if (classic && makeDist) { m->mothurOut("[ERROR]: You cannot use the dist parameter with the classic parameter. Mothur will ignore the dist parameter.\n"); makeDist = false; }
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
@@ -513,7 +522,7 @@ int ClusterSplitCommand::execute(){
                 if (m->debug) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
                 
                 //output a merged distance file
-                //if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
+                if (makeDist)		{ createMergedDistanceFile(distName); }
 				
                 if (m->control_pressed) { return 0; }
                 
@@ -560,7 +569,7 @@ int ClusterSplitCommand::execute(){
 		m->mothurOut("Merging the clustered files..."); m->mothurOutEndLine();
 
 		ListVector* listSingle;
-		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
+		map<double, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
 		
 		if (m->control_pressed) { if (listSingle != NULL) { delete listSingle; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 		
@@ -572,7 +581,7 @@ int ClusterSplitCommand::execute(){
         if (!deleteFiles) { for (int i = 0; i < distName.size(); i++) {	m->mothurRemove(distName[i].begin()->first); m->mothurRemove(distName[i].begin()->second); 	} }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
-		
+        
 		//set list file as new current listfile
 		string current = "";
 		itTypes = outputTypes.find("list");
@@ -605,10 +614,10 @@ int ClusterSplitCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
+map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
 	try {
-		map<float, int> labelBin;
-		vector<float> orderFloat;
+		map<double, int> labelBin;
+		vector<double> orderFloat;
 		int numSingleBins;
 		
 		//read in singletons
@@ -633,14 +642,14 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			
 			numSingleBins = listSingle->getNumBins();
 		}else{  listSingle = NULL; numSingleBins = 0;  }
-		
+        
 		//go through users set and make them floats so we can sort them 
 		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
-			float temp = -10.0;
+			double temp = -10.0;
 
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
-			
+            
 			if (temp <= cutoff) {
 				orderFloat.push_back(temp);
 				labelBin[temp] = numSingleBins; //initialize numbins 
@@ -670,7 +679,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 	
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
-			
+                
 				string thisLabel;
 				if (orderFloat[l] == -1) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
@@ -721,7 +730,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 	}
 }
 //**********************************************************************************************************************
-int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> userLabels, ListVector* listSingle){
+int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> userLabels, ListVector* listSingle){
 	try {
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
@@ -752,7 +761,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		m->openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
-		map<float, int>::iterator itLabel;
+		map<double, int>::iterator itLabel;
         
         //clears out junk for autocompleting of list files above.  Perhaps there is a beter way to handle this from within the data structure?
         m->printedListHeaders = false;
@@ -1053,14 +1062,15 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         deleteFiles = true;
         
-        //delete the temp files now that we are done
-        for (int i = 0; i < distName.size(); i++) {
-            string thisNamefile = distName[i].begin()->second;
-            string thisDistFile = distName[i].begin()->first;
-            m->mothurRemove(thisNamefile);
-            m->mothurRemove(thisDistFile);
+        if (deleteFiles) {
+            //delete the temp files now that we are done
+            for (int i = 0; i < distName.size(); i++) {
+                string thisNamefile = distName[i].begin()->second;
+                string thisDistFile = distName[i].begin()->first;
+                m->mothurRemove(thisNamefile);
+                m->mothurRemove(thisDistFile);
+            }
         }
-
     #else
     #endif
         
@@ -1393,24 +1403,28 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
-            if (m->control_pressed) { return listFileName; }
+            if (m->control_pressed) { if (deleteFiles) { m->mothurRemove(thisDistFile);  m->mothurRemove(thisNamefile); } return listFileName; }
             double oldMetric = listVectorMetric;
-            cout << "iters = " << iters << '\t' << listVectorMetric << endl;
             cluster.update(listVectorMetric);
             
             delta = abs(oldMetric - listVectorMetric);
-            cout << "iters = " << iters << '\t' << oldMetric - listVectorMetric << '\t' << stableMetric << '\t' << maxIters << endl;
             iters++;
         }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
+        labels.insert(toString(smallestCutoff));
         
         ofstream listFile;
         m->openOutputFile(listFileName,	listFile);
         list->print(listFile);
         list->print(cout);
         listFile.close();
+        
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
     
         return listFileName;
         
@@ -1702,7 +1716,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
             }
             
             ListVector* listSingle;
-            map<float, int> labelBins = completeListFile(listFileNames, singleton, listLabels, listSingle);
+            map<double, int> labelBins = completeListFile(listFileNames, singleton, listLabels, listSingle);
             
             mergeLists(listFileNames, labelBins, listSingle);
         

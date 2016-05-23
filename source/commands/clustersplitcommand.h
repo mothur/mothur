@@ -51,7 +51,7 @@ private:
 	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric;
 	double cutoff, splitcutoff, stableMetric;
 	int precision, length, processors, taxLevelCutoff, maxIters;
-	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
+	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	
@@ -60,8 +60,8 @@ private:
 	vector<string> cluster(vector< map<string, string> >, set<string>&);
     string clusterFile(string, string, set<string>&, double&);
     string clusterClassicFile(string, string, set<string>&, double&);
-	int mergeLists(vector<string>, map<float, int>, ListVector*);
-	map<float, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
+	int mergeLists(vector<string>, map<double, int>, ListVector*);
+	map<double, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
 	int createMergedDistanceFile(vector< map<string, string> >);
     int createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund);
     string readFile(vector< map<string, string> >&);
