@@ -1093,10 +1093,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
 				listFileNames.clear(); return listFileNames;
 			}
-            
             listFileNames.push_back(listFileName);
         }
-		
 		cutoff = smallestCutoff;
         
 		return listFileNames;
@@ -1387,9 +1385,6 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         string listFileName = fileroot+ tag + ".list";
         
-        ofstream listFile;
-        m->openOutputFile(listFileName,	listFile);
-        
         int iters = 0;
         double listVectorMetric = 0; //worst state
         double delta = 1;
@@ -1398,7 +1393,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
-            if (m->control_pressed) { break; }
+            if (m->control_pressed) { return listFileName; }
             double oldMetric = listVectorMetric;
             cout << "iters = " << iters << '\t' << listVectorMetric << endl;
             cluster.update(listVectorMetric);
@@ -1410,7 +1405,11 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
+        
+        ofstream listFile;
+        m->openOutputFile(listFileName,	listFile);
         list->print(listFile);
+        list->print(cout);
         listFile.close();
     
         return listFileName;
