@@ -27,13 +27,12 @@ public:
     map<int, string> getNameMap() { return nameMap; }
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
-    string getListSingleFile();
     long int print(ostream&);
     
 private:
     
     vector< vector<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
-    vector<int> singletons;
+    vector<string> singletons;
     map<int, string> nameMap;
     
     string distFile, namefile, countfile, format, distFormat;

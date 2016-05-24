@@ -600,6 +600,12 @@ int ClusterSplitCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
 		}
+        
+        //set sabund file as new current sabundfile
+        itTypes = outputTypes.find("column");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+        }
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -643,14 +649,17 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			numSingleBins = listSingle->getNumBins();
 		}else{  listSingle = NULL; numSingleBins = 0;  }
         
-		//go through users set and make them floats so we can sort them 
+		//go through users set and make them floats so we can sort them
+        double tcutoff = cutoff * 1000; tcutoff = ceil(tcutoff);
 		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
 			double temp = -10.0;
 
-			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
+			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	m->mothurConvert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
             
-			if (temp <= cutoff) {
+            double ttemp = temp * 1000; ttemp = ceil(temp);
+            
+			if (ttemp <= tcutoff) {
 				orderFloat.push_back(temp);
 				labelBin[temp] = numSingleBins; //initialize numbins 
 			}
@@ -659,7 +668,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 		//sort order
 		sort(orderFloat.begin(), orderFloat.end());
 		userLabels.clear();
-			
+        
 		//get the list info from each file
 		for (int k = 0; k < listNames.size(); k++) {
             
@@ -676,7 +685,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			string filledInList = listNames[k] + "filledInTemp";
 			ofstream outFilled;
 			m->openOutputFile(filledInList, outFilled);
-	
+            
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
                 
@@ -877,8 +886,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //for each file group figure out which process will complete it
         //want to divide the load intelligently so the big files are spread between processes
-        for (int i = 0; i < distName.size(); i++) { 
-            //cout << i << endl;
+        for (int i = 0; i < distName.size(); i++) {
             int processToAssign = (i+1) % processors; 
             if (processToAssign == 0) { processToAssign = processors; }
             
@@ -888,7 +896,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //now lets reverse the order of ever other process, so we balance big files running with little ones
         for (int i = 0; i < processors; i++) {
-            //cout << i << endl;
             int remainder = ((i+1) % processors);
             if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
         }
@@ -960,7 +967,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             //for each file group figure out which process will complete it
             //want to divide the load intelligently so the big files are spread between processes
             for (int i = 0; i < distName.size(); i++) {
-                //cout << i << endl;
                 int processToAssign = (i+1) % processors;
                 if (processToAssign == 0) { processToAssign = processors; }
                 
@@ -970,7 +976,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             
             //now lets reverse the order of ever other process, so we balance big files running with little ones
             for (int i = 0; i < processors; i++) {
-                //cout << i << endl;
                 int remainder = ((i+1) % processors);
                 if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
             }
@@ -1379,12 +1384,13 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 //**********************************************************************************************************************
 string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
     try {
-       
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.035; }
+        
         string nameOrCount = "count";
         if (namefile != "") { nameOrCount = "name"; }
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, cutoff, false);
-    
+        
         OptiCluster cluster(&matrix, metric, stableMetric);
         tag = cluster.getTag();
         
@@ -1413,12 +1419,11 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
-        labels.insert(toString(smallestCutoff));
+        labels.insert(toString(cutoff));
         
         ofstream listFile;
         m->openOutputFile(listFileName,	listFile);
         list->print(listFile);
-        list->print(cout);
         listFile.close();
         
         if (deleteFiles) {

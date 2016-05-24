@@ -48,8 +48,8 @@ int OptiCluster::initialize(double& value) {
         }
         value = 0;
         if (metric == "mcc") { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);  }
-        cout << numSeqs * (numSeqs-1)/2 << " TP values = " << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << endl;
-        cout << calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives) << endl;
+        //cout << numSeqs * (numSeqs-1)/2 << " TP values = " << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << endl;
+        //cout << calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives) << endl;
         return value;
     }
     catch(exception& e) {
@@ -149,7 +149,7 @@ bool OptiCluster::update(double& listMetric) {
                 falsePositives = binsValues[0][3];
                 falseNegatives = binsValues[0][4];
                 
-                if (bestBin == -1) {  bestBin = insertLocation; cout << "insert location = " << insertLocation << endl; }
+                if (bestBin == -1) {  bestBin = insertLocation;  }
                 
                 if (bestBin != binNumber) {
                     //move seq from i to j
@@ -271,7 +271,6 @@ ListVector* OptiCluster::getList() {
                 list->push_back(otu);
             }
         }
-        
         return list;
     }
     catch(exception& e) {

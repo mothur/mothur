@@ -669,7 +669,7 @@ string SensSpecCommand::preProcessList(){
 
 			//read in list vector
 			ListVector list(in);
-            cout << list.getNumSeqs() << '\t' << uniqueNames.size() << endl;
+            
             //listfile is already unique
             if (list.getNumSeqs() == uniqueNames.size()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
 

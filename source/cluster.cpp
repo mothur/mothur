@@ -136,7 +136,7 @@ bool Cluster::update(double& cutOFF){
                 dMatrix->rmCell(smallCol, i);
 			}
 		}
-        
+        return changed;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Cluster", "update");
