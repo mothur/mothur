@@ -278,7 +278,7 @@ ClusterCommand::ClusterCommand(string option)  {
             
             //bool cutoffSet = false;
 			temp = validParameter.validFile(parameters, "cutoff", false);
-			if (temp == "not found") { temp = "10"; }
+			if (temp == "not found") { temp = "1.0"; }
             //else { cutoffSet = true; }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
@@ -827,15 +827,14 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
 
 int ClusterCommand::runOptiCluster(){
     try {
-        string nameOrCount = "count";
-        string thisNamefile = countfile;
-        if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        string nameOrCount = "name";
+        string thisNamefile = namefile;
+        map<string, int> counts;
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, cutoff, false);
-        
-        matrix.print(cout);
         
         OptiCluster cluster(&matrix, metric, stableMetric);
         tag = cluster.getTag();
@@ -849,6 +848,7 @@ int ClusterCommand::runOptiCluster(){
         
         ofstream listFile;
         m->openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         
         int iters = 0;
         double listVectorMetric = 0; //worst state
@@ -860,19 +860,41 @@ int ClusterCommand::runOptiCluster(){
             
             if (m->control_pressed) { break; }
             double oldMetric = listVectorMetric;
-            cout << "iters = " << iters << '\t' << listVectorMetric << endl;
+            
             cluster.update(listVectorMetric);
             
             delta = abs(oldMetric - listVectorMetric);
-            cout << "iters = " << iters << '\t' << oldMetric - listVectorMetric << '\t' << stableMetric << '\t' << maxIters << endl;
             iters++;
         }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
-        list->print(listFile);
+        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list->printHeaders(listFile); }
+        if(countfile != "") { list->print(listFile, counts); }
+        else { list->print(listFile); }
         listFile.close();
         
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+            SAbundVector sabund = list->getSAbundVector();
+            sabund.print(sabundFile);
+            sabundFile.close();
+            
+            RAbundVector rabund = list->getRAbundVector();
+            rabund.print(rabundFile);
+            rabundFile.close();
+        }
+        delete list;
         return 0;
         
     }
