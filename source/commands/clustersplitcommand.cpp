@@ -8,9 +8,8 @@
  */
 
 #include "clustersplitcommand.h"
-#include "vsearchfileparser.h"
 #include "systemcommand.h"
-#include "opticluster.h"
+
 
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
@@ -365,7 +364,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff);
             
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "10000"; }
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
             m->mothurConvert(temp, maxIters);
             
             temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.001"; }
@@ -1384,7 +1383,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 //**********************************************************************************************************************
 string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
     try {
-        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.035; }
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; cutoff += (5 / (precision * 10.0)); }
         
         string nameOrCount = "count";
         if (namefile != "") { nameOrCount = "name"; }
@@ -1427,8 +1426,8 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         listFile.close();
         
         if (deleteFiles) {
-            m->mothurRemove(thisDistFile);
-            m->mothurRemove(thisNamefile);
+            //m->mothurRemove(thisDistFile);
+           // m->mothurRemove(thisNamefile);
         }
     
         return listFileName;

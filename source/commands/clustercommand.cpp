@@ -11,12 +11,9 @@
 #include "readphylip.h"
 #include "readcolumn.h"
 #include "readmatrix.hpp"
-#include "clusterdoturcommand.h"
+
 #include "sequence.hpp"
-#include "vsearchfileparser.h"
 #include "systemcommand.h"
-#include "opticluster.h"
-#include "optimatrix.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -273,7 +270,7 @@ ClusterCommand::ClusterCommand(string option)  {
             if (metric == "mcc") { }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc."); m->mothurOutEndLine(); abort = true; }
 
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "10000"; }
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
             m->mothurConvert(temp, maxIters);
             
             //bool cutoffSet = false;

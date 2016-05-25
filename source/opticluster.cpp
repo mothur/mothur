@@ -75,46 +75,30 @@ bool OptiCluster::update(double& listMetric) {
             if (binNumber == -1) { }
             else {
                 
-                map<double, vector< vector<int> > > otuMetric; //maps otu to metric to find "best" otu and tp, tn, fp ,tn with ties
-                map<double, vector< vector<int> > >::iterator itMet;
+                //map<double, vector< vector<int> > > otuMetric; //maps otu to metric to find "best" otu and tp, tn, fp ,tn with ties
+                //map<double, vector< vector<int> > >::iterator itMet;
                 double tn, tp, fp, fn;
-                
+                double bestMetric = -1;
+                vector< vector<int> > bestMetricsTPValues;
                 //already singleton
                 if ((bins[binNumber].size()) == 1) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     vector<int> temp;
-                    temp.push_back(binNumber);
-                    temp.push_back(tp);
-                    temp.push_back(tn);
-                    temp.push_back(fp);
-                    temp.push_back(fn);
                     double singleMetric;
-                    if (metric == "mcc") { singleMetric = calcMCC(tp, tn, fp, fn);  }
-                    itMet = otuMetric.find(singleMetric);
-                    if (itMet == otuMetric.end()) {
-                        vector< vector <int> > temp2; temp2.push_back(temp);
-                        otuMetric[singleMetric] = temp2;
-                    }else{
-                        otuMetric[singleMetric].push_back(temp);
+                    if (metric == "mcc") {
+                        singleMetric = calcMCC(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     }
-
+                    bestMetric = singleMetric;
+                    bestMetricsTPValues.push_back(temp);
                 }else {
                     //make a singleton
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, tp, tn, fp, fn);
                     vector<int> temp;
-                    temp.push_back(-1);
-                    temp.push_back(tp);
-                    temp.push_back(tn);
-                    temp.push_back(fp);
-                    temp.push_back(fn);
-                    itMet = otuMetric.find(singleMetric);
-                    if (itMet == otuMetric.end()) {
-                        vector< vector <int> > temp2; temp2.push_back(temp);
-                        otuMetric[singleMetric] = temp2;
-                    }else{
-                        otuMetric[singleMetric].push_back(temp);
-                    }
+                    temp.push_back(-1); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    bestMetric = singleMetric;
+                    bestMetricsTPValues.push_back(temp);
                 }
                 
                 
@@ -126,28 +110,23 @@ bool OptiCluster::update(double& listMetric) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, tp, tn, fp, fn);
                     vector<int> temp;
-                    temp.push_back(*it);
-                    temp.push_back(tp);
-                    temp.push_back(tn);
-                    temp.push_back(fp);
-                    temp.push_back(fn);
-                    itMet = otuMetric.find(newMetric);
-                    if (itMet == otuMetric.end()) {
-                        vector< vector <int> > temp2; temp2.push_back(temp);
-                        otuMetric[newMetric] = temp2;
-                    }else{
-                        otuMetric[newMetric].push_back(temp);
+                    temp.push_back(*it); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    if (newMetric > bestMetric) { //new best
+                        bestMetric = newMetric;
+                        bestMetricsTPValues.clear();
+                        bestMetricsTPValues.push_back(temp);
+                    }else if (newMetric == bestMetric) { //tie
+                        bestMetricsTPValues.push_back(temp);
                     }
                 }
                 
                 //choose "best" otu - which is highest value or last item in map. - shuffle for ties
-                vector< vector<int> > binsValues = otuMetric.rbegin()->second;
-                random_shuffle(binsValues.begin(), binsValues.end());
-                int bestBin = binsValues[0][0];
-                truePositives = binsValues[0][1];
-                trueNegatives = binsValues[0][2];
-                falsePositives = binsValues[0][3];
-                falseNegatives = binsValues[0][4];
+                random_shuffle(bestMetricsTPValues.begin(), bestMetricsTPValues.end());
+                int bestBin = bestMetricsTPValues[0][0];
+                truePositives = bestMetricsTPValues[0][1];
+                trueNegatives = bestMetricsTPValues[0][2];
+                falsePositives = bestMetricsTPValues[0][3];
+                falseNegatives = bestMetricsTPValues[0][4];
                 
                 if (bestBin == -1) {  bestBin = insertLocation;  }
                 
@@ -160,17 +139,6 @@ bool OptiCluster::update(double& listMetric) {
                 
                 //update seqBins
                 seqBin[seqNumber] = bestBin; //set new OTU location
-                
-                /*for (int i = 0; i < bins.size(); i++) {
-                    if (bins[i].size() !=0) {
-                    for (int j = 0; j < bins[i].size(); j++) {
-                        cout << bins[i][j] << '\t';
-                    }
-                    cout << endl;
-                    }
-                }
-                
-                cout << "TP values = " << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t' << calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives)<< endl;*/
             }
         }
         
@@ -189,31 +157,28 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
     try {
         if (bin == newBin) { if (metric == "mcc") { return calcMCC(tp, tn, fp, fn); } }
  
-        set<int> closeCount; set<int> farApart;
+        int cCount = 0; int fCount = 0;
         for (int i = 0; i < bins[bin].size(); i++) { //how many close sequences are in the old bin?
             if (seq == bins[bin][i]) {}
-            else if (matrix->isClose(seq, bins[bin][i])) {  closeCount.insert(bins[bin][i]);   }
-            else { farApart.insert(bins[bin][i]);  }
+            else if (matrix->isClose(seq, bins[bin][i])) {  cCount++;   }
+            else { fCount++;  }
         }
-        int cCount = closeCount.size(); int fCount = farApart.size();
-        
+
         //move out of old bin
         fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
         
         //making a singleton bin. Close but we are forcing apart.
         if (newBin == -1) {
         }else { //merging a bin
-            set<int> newCloseCount; set<int> newFarApart;
+            int ncCount = 0; int nfCount = 0;
             for (int i = 0; i < bins[newBin].size(); i++) { //how many close sequences are in the old bin?
                 if (seq == bins[newBin][i]) {}
-                else if (matrix->isClose(seq, bins[newBin][i])) { newCloseCount.insert(bins[newBin][i]); }
-                else { newFarApart.insert(bins[newBin][i]);  }
+                else if (matrix->isClose(seq, bins[newBin][i])) { ncCount++; }
+                else { nfCount++;  }
             }
-            int ncCount = newCloseCount.size(); int nfCount = newFarApart.size();
-            
+   
             //move into new bin
             fn-=ncCount; tn-=nfCount;  tp+=ncCount; fp+=nfCount;
-            //cout <<"close = "<< cCount << '\t' << fCount << '\t' << ncCount << '\t' << nfCount << endl;
         }
 
         double result = 0.0;

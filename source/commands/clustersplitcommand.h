@@ -24,6 +24,8 @@
 #include "inputdata.h"
 #include "clustercommand.h"
 #include "clusterclassic.h"
+#include "vsearchfileparser.h"
+#include "opticluster.h"
 
 class ClusterSplitCommand : public Command {
 	

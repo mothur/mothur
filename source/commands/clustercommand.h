@@ -14,8 +14,12 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsedistancematrix.h"
 #include "counttable.h"
+#include "vsearchfileparser.h"
+#include "clusterdoturcommand.h"
+#include "opticluster.h"
+#include "optimatrix.h"
+
 
 /* The cluster() command:
 	The cluster command outputs a .list , .rabund and .sabund files.  
