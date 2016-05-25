@@ -585,6 +585,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             //if there are valid distances
             ifstream fileHandle;
             fileHandle.open(tempDistFile.c_str());
+            bool removeDist = false;
             if(fileHandle) 	{
                 m->gobble(fileHandle);
                 if (!fileHandle.eof()) {  //check
@@ -613,9 +614,11 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                     }
                     in.close();
                     m->mothurRemove(tempNameFile);
+                    removeDist = true;
                 }
             }
             fileHandle.close();
+            if (removeDist) { m->mothurRemove(tempDistFile); }
 		}
 		
 		remainingNames.close();

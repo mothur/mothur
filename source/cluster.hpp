@@ -1,14 +1,11 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-//test change
-
-#include "mothur.h"
 #include "sparsedistancematrix.h"
 #include "optimatrix.h"
 #include "mothurout.h"
+#include "rabundvector.hpp"
 
-class RAbundVector;
 class ListVector;
 
 class Cluster {
