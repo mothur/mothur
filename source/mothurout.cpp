@@ -10,7 +10,7 @@
 #include "mothurout.h"
 
 //needed for testing project
-//MothurOut* MothurOut::_uniqueInstance;
+MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
@@ -3783,7 +3783,24 @@ int  MothurOut::sum(vector<int> x) {
         return value;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "average - int");
+        errorOut(e, "MothurOut", "sum - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double  MothurOut::sum(vector<double> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "sum - double");
         exit(1);
     }
 }

@@ -356,11 +356,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             //not using file option and don't have fasta method with classic
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
             
-            cutoffNotSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
-			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));  
-			
+            
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff);
             
@@ -388,6 +384,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             #else
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
             #endif
+            
+            cutoffNotSet = false;
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
+            m->mothurConvert(temp, cutoff);
+            if (method != "opti") { cutoff += (5 / (precision * 10.0)); }
+
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
 			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
@@ -1383,14 +1385,14 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 //**********************************************************************************************************************
 string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
     try {
-        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; cutoff += (5 / (precision * 10.0)); }
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
         
         string nameOrCount = "count";
         if (namefile != "") { nameOrCount = "name"; }
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric, stableMetric);
+        OptiCluster cluster(&matrix, metric, stableMetric, "tptn");
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
@@ -1418,6 +1420,11 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
+        if (hard) {
+            cutoff = m->ceilDist(cutoff, precision);
+        }else{
+            cutoff = m->roundDist(cutoff, precision);
+        }
         labels.insert(toString(cutoff));
         
         ofstream listFile;
@@ -1426,9 +1433,14 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         listFile.close();
         
         if (deleteFiles) {
-            //m->mothurRemove(thisDistFile);
-           // m->mothurRemove(thisNamefile);
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
         }
+        
+        m->mothurOut("\ntp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        vector<double> results = cluster.getStats();
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
+        m->mothurOut("\n\n");
     
         return listFileName;
         

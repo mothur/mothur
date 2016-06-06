@@ -156,6 +156,9 @@ int OptiMatrix::readPhylip(){
         int square, nseqs;
         string name;
         int count = 0;
+        vector< map<int, string> > temp; temp.resize(nseqs);
+        map<int, string> tempNameMap;
+
         
         ifstream fileHandle;
         string numTest;
@@ -167,9 +170,7 @@ int OptiMatrix::readPhylip(){
         else { convert(numTest, nseqs); }
         
         //map shorten name to real name - space saver
-        nameMap[count] = name;
-        //list = new ListVector();
-        //list->push_back(toString(count)); //list without singletons above cutoff
+        tempNameMap[count] = name;
         
         //square test
         char d;
@@ -190,10 +191,7 @@ int OptiMatrix::readPhylip(){
         }
         
         Progress* reading;
-        
-        vector< map<int, string> > temp; temp.resize(nseqs);
-        map<int, string> tempNameMap;
-
+       
         if(square == 0){
             
             reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
@@ -205,8 +203,6 @@ int OptiMatrix::readPhylip(){
                 
                 fileHandle >> name;
                 tempNameMap[i] = name;
-                
-                //list->push_back(toString(i));
                 
                 for(int j=0;j<i;j++){
                     
@@ -280,10 +276,7 @@ int OptiMatrix::readPhylip(){
                     }else{
                         singletons.push_back(it->second);
                     }
-                }else {
-                    
                 }
-                
             }else {
                 int newIndex = closeness.size();
                 
@@ -352,7 +345,7 @@ int OptiMatrix::readColumn(){
         m->openInputFile(distFile, fileHandle);
         
         vector< map<int, string> > temp; temp.resize(nameAssignment.size());
-        map<int, string> tempNameMap;
+        vector<string> tempNameMap; tempNameMap.resize(nameAssignment.size(), "");
         
         while(fileHandle){  //let's assume it's a triangular matrix...
             
@@ -392,6 +385,7 @@ int OptiMatrix::readColumn(){
         for (int i = 0; i < temp.size(); i++) {
             if (temp[i].size() == 0) {
             }else {
+                string newName = tempNameMap[i];
                 int newIndex = closeness.size();
                 
                 vector<int> thisClose;
@@ -402,18 +396,13 @@ int OptiMatrix::readColumn(){
                 closenessIndexMap[i] = closeness.size()-1;
                 
                 //add new Index singleton to nameMap
-                map<int, string>::iterator it = tempNameMap.find(i);
-                if (it != tempNameMap.end()) {
-                    if (namefile != "") {
-                        map<string, string>::iterator it2 = names.find(it->second);
-                        if (it2 != names.end()) { //set name = names in namefile
-                            nameMap[newIndex] = it2->second;
-                        }else{  m->mothurOut("[ERROR]: cannot find " + it2->second + " int your name file, please correct.\n"); m->control_pressed = true; }
-                    }else{
-                        nameMap[newIndex] = it->second;
-                    }
-                }else {
-                    m->mothurOut("[ERROR]: cannot find " + toString(i) + " in your name file, please correct.\n"); m->control_pressed = true;
+                if (namefile != "") {
+                    map<string, string>::iterator it2 = names.find(newName);
+                    if (it2 != names.end()) { //set name = names in namefile
+                        nameMap[newIndex] = it2->second;
+                    }else{  m->mothurOut("[ERROR]: cannot find " + it2->second + " int your name file, please correct.\n"); m->control_pressed = true; }
+                }else{
+                    nameMap[newIndex] = newName;
                 }
                 temp[i].clear();
             }
@@ -433,6 +422,7 @@ int OptiMatrix::readColumn(){
                 }
             }
         }
+
         
         for (int i = 0; i < closeness.size(); i++) {
             for (int j = 0; j < closeness[i].size(); j++) {

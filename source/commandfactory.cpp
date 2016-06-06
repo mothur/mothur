@@ -153,7 +153,7 @@
 #include "renamefilecommand.h"
 
 //needed for testing project
-//CommandFactory* CommandFactory::_uniqueInstance;
+CommandFactory* CommandFactory::_uniqueInstance;
 
 /*******************************************************/
 

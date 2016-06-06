@@ -18,12 +18,13 @@ int OptiCluster::initialize(double& value) {
         
         for (int i = 0; i < numSeqs; i++) { bins[i].push_back(i); }
         
-        //random_shuffle(bins.begin(), bins.end());
-        
         //maps randomized sequences to bins
         for (int i = 0; i < numSeqs; i++) {
             seqBin[i] = bins[i][0];
+            randomizeSeqs.push_back(i);
         }
+        
+        random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end());
         
         vector<int> temp;
         bins.push_back(temp);
@@ -45,11 +46,11 @@ int OptiCluster::initialize(double& value) {
             }
             falseNegatives /= 2; //square matrix
             trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
+            totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         }
         value = 0;
         if (metric == "mcc") { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);  }
-        //cout << numSeqs * (numSeqs-1)/2 << " TP values = " << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << endl;
-        //cout << calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives) << endl;
+        
         return value;
     }
     catch(exception& e) {
@@ -65,9 +66,11 @@ bool OptiCluster::update(double& listMetric) {
     try {
 
         //for each sequence (singletons removed on read)
-        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+        for (int i = 0; i < randomizeSeqs.size(); i++) {
             
             if (m->control_pressed) { break; }
+            
+            map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
             
             int seqNumber = it->first;
             int binNumber = it->second;
@@ -75,8 +78,6 @@ bool OptiCluster::update(double& listMetric) {
             if (binNumber == -1) { }
             else {
                 
-                //map<double, vector< vector<int> > > otuMetric; //maps otu to metric to find "best" otu and tp, tn, fp ,tn with ties
-                //map<double, vector< vector<int> > >::iterator itMet;
                 double tn, tp, fp, fn;
                 double bestMetric = -1;
                 vector< vector<int> > bestMetricsTPValues;
@@ -116,7 +117,20 @@ bool OptiCluster::update(double& listMetric) {
                         bestMetricsTPValues.clear();
                         bestMetricsTPValues.push_back(temp);
                     }else if (newMetric == bestMetric) { //tie
-                        bestMetricsTPValues.push_back(temp);
+                        //cout << (tp+tn)/(double)totalPairs << '\t' << ((bestMetricsTPValues[0][1]+bestMetricsTPValues[0][2])/(double)totalPairs) << '\t' << optimizeTPTN << '\t' << optimizeFPFN << endl;
+                        if (optimizeTPTN && (((tp+fn)/(double)totalPairs) > ((bestMetricsTPValues[0][1]+bestMetricsTPValues[0][4])/(double)totalPairs))) { //optimize true positive, true negative
+                            bestMetric = newMetric;
+                            bestMetricsTPValues.clear();
+                            bestMetricsTPValues.push_back(temp);
+                            cout << "tp" << endl;
+                        }else if (optimizeFPFN && (((fp+fn)/(double)totalPairs) < ((bestMetricsTPValues[0][3]+bestMetricsTPValues[0][4])/(double)totalPairs))) {
+                            bestMetric = newMetric;
+                            bestMetricsTPValues.clear();
+                            bestMetricsTPValues.push_back(temp);
+                            cout << "FPFN" << endl;
+                        }else { //randomly pick one
+                            bestMetricsTPValues.push_back(temp);
+                        }
                     }
                 }
                 
@@ -207,6 +221,51 @@ double OptiCluster::calcMCC(double tp, double tn, double fp, double fn) {
     }
     catch(exception& e) {
         m->errorOut(e, "OptiCluster", "calcMCC");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<double> OptiCluster::getStats() {
+    try {
+        
+        double tp = (double) truePositives;
+        double fp = (double) falsePositives;
+        double tn = (double) trueNegatives;
+        double fn = (double) falseNegatives;
+        
+        double p = tp + fn;
+        double n = fp + tn;
+        double pPrime = tp + fp;
+        double nPrime = tn + fn;
+        
+        double sensitivity = tp / p;
+        double specificity = tn / n;
+        double positivePredictiveValue = tp / pPrime;
+        double negativePredictiveValue = tn / nPrime;
+        double falseDiscoveryRate = fp / pPrime;
+        
+        double accuracy = (tp + tn) / (p + n);
+        double matthewsCorrCoef = (tp * tn - fp * fn) / sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
+        double f1Score = 2.0 * tp / (p + pPrime);
+        
+        
+        if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}
+        if(n == 0)			{	specificity = 0;	matthewsCorrCoef = 0;	}
+        if(p + n == 0)		{	accuracy = 0;								}
+        if(p + pPrime == 0)	{	f1Score = 0;								}
+        if(pPrime == 0)		{	positivePredictiveValue = 0;	falseDiscoveryRate = 0;	matthewsCorrCoef = 0;	}
+        if(nPrime == 0)		{	negativePredictiveValue = 0;	matthewsCorrCoef = 0;							}
+        
+        vector<double> results;
+        
+        results.push_back(truePositives); results.push_back(trueNegatives); results.push_back(falsePositives); results.push_back(falseNegatives);
+        results.push_back(sensitivity); results.push_back(specificity); results.push_back(positivePredictiveValue); results.push_back(negativePredictiveValue);
+        results.push_back(falseDiscoveryRate); results.push_back(accuracy); results.push_back(matthewsCorrCoef); results.push_back(f1Score);
+        
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "getStats");
         exit(1);
     }
 }

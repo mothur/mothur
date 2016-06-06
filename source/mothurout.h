@@ -211,6 +211,7 @@ class MothurOut {
         int median(vector<int>);
         int average(vector<int>);
         int sum(vector<int>);
+        double sum(vector<double>);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);

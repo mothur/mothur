@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2114A7681C654D7400D3D8D9 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
 		480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
-		480E8DB31CAB1F7900A0D137 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -369,13 +367,14 @@
 		4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4827A4DA1CB3ED2100345170 /* fastqdataset.cpp */; };
 		4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */; };
 		483C952E188F0CAD0035E7B7 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
+		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48705AC419BE32C50075E977 /* getmimarkspackagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */; };
 		48705AC519BE32C50075E977 /* oligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABD19BE32C50075E977 /* oligos.cpp */; };
 		48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */; };
 		48705AC719BE32C50075E977 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC119BE32C50075E977 /* sharedrjsd.cpp */; };
 		48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
 		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
-		487D09EB1CB2CEF3007039BF /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		488841611CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		488841621CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -386,7 +385,6 @@
 		4888416D1CC7F1B900C5E972 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4888416B1CC7F1B900C5E972 /* optimatrix.cpp */; };
 		4888416E1CC7F1B900C5E972 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4888416B1CC7F1B900C5E972 /* optimatrix.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
-		489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
@@ -2856,11 +2854,9 @@
 				481FB6731AC1B8820076CFF3 /* seqnoise.cpp in Sources */,
 				481FB5DC1AC1B75C0076CFF3 /* makelookupcommand.cpp in Sources */,
 				481FB53D1AC1B5F80076CFF3 /* bstick.cpp in Sources */,
-				480E8DB31CAB1F7900A0D137 /* averagelinkage.cpp in Sources */,
 				481FB6681AC1B8450076CFF3 /* rarecalc.cpp in Sources */,
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB59F1AC1B71B0076CFF3 /* classifyrfsharedcommand.cpp in Sources */,
-				487D09EB1CB2CEF3007039BF /* vsearchfileparser.cpp in Sources */,
 				481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */,
 				481FB5B41AC1B7300076CFF3 /* distancecommand.cpp in Sources */,
 				481FB5391AC1B5E90076CFF3 /* ace.cpp in Sources */,
@@ -2983,6 +2979,7 @@
 				A7E9B89F12D37EC400DA6239 /* chimeraslayercommand.cpp in Sources */,
 				A7E9B8A012D37EC400DA6239 /* chopseqscommand.cpp in Sources */,
 				A7E9B8A112D37EC400DA6239 /* classify.cpp in Sources */,
+				48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */,
 				A7E9B8A212D37EC400DA6239 /* classifyotucommand.cpp in Sources */,
 				488841691CC7EE9800C5E972 /* opticluster.cpp in Sources */,
 				A7E9B8A312D37EC400DA6239 /* classifyseqscommand.cpp in Sources */,
@@ -3018,7 +3015,6 @@
 				A7E9B8C212D37EC400DA6239 /* engine.cpp in Sources */,
 				A7E9B8C312D37EC400DA6239 /* fasta.cpp in Sources */,
 				A7E9B8C412D37EC400DA6239 /* fastamap.cpp in Sources */,
-				2114A7681C654D7400D3D8D9 /* averagelinkage.cpp in Sources */,
 				A7E9B8C512D37EC400DA6239 /* fileoutput.cpp in Sources */,
 				A7E9B8C612D37EC400DA6239 /* filterseqscommand.cpp in Sources */,
 				A7E9B8C812D37EC400DA6239 /* flowdata.cpp in Sources */,
@@ -3134,7 +3130,6 @@
 				A7E9B93A12D37EC400DA6239 /* secondarystructurecommand.cpp in Sources */,
 				A7E9B93B12D37EC400DA6239 /* sensspeccommand.cpp in Sources */,
 				A7E9B93C12D37EC400DA6239 /* seqerrorcommand.cpp in Sources */,
-				489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */,
 				A7E9B93D12D37EC400DA6239 /* seqsummarycommand.cpp in Sources */,
 				A7E9B93E12D37EC400DA6239 /* sequence.cpp in Sources */,
 				A7E9B93F12D37EC400DA6239 /* sequencedb.cpp in Sources */,
@@ -3295,6 +3290,7 @@
 				A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */,
 				A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */,
 				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
+				48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */,
 				A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */,
 				A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */,
 				A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */,

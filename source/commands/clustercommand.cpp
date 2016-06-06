@@ -275,7 +275,7 @@ ClusterCommand::ClusterCommand(string option)  {
             
             //bool cutoffSet = false;
 			temp = validParameter.validFile(parameters, "cutoff", false);
-			if (temp == "not found") { temp = "1.0"; }
+            if (temp == "not found") { temp = "1.0"; cutoffNotSet = true; }
             //else { cutoffSet = true; }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
@@ -824,6 +824,9 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
 
 int ClusterCommand::runOptiCluster(){
     try {
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; cutoff += (5 / (precision * 10.0)); }
+        cutoff -= (5 / (precision * 10.0));
+        
         string nameOrCount = "name";
         string thisNamefile = namefile;
         map<string, int> counts;
@@ -833,7 +836,7 @@ int ClusterCommand::runOptiCluster(){
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric, stableMetric);
+        OptiCluster cluster(&matrix, metric, stableMetric, "tptn");
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
@@ -859,7 +862,7 @@ int ClusterCommand::runOptiCluster(){
             double oldMetric = listVectorMetric;
             
             cluster.update(listVectorMetric);
-            
+
             delta = abs(oldMetric - listVectorMetric);
             iters++;
         }
@@ -892,6 +895,14 @@ int ClusterCommand::runOptiCluster(){
             rabundFile.close();
         }
         delete list;
+        
+        
+        m->mothurOut("\ncutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        vector<double> results = cluster.getStats();
+        m->mothurOut(toString(cutoff) + "\t");
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
+        m->mothurOut("\n\n");
+        
         return 0;
         
     }
