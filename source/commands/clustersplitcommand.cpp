@@ -1433,8 +1433,8 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         listFile.close();
         
         if (deleteFiles) {
-            //m->mothurRemove(thisDistFile);
-            //m->mothurRemove(thisNamefile);
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
         }
         
         m->mothurOut("\ntp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
