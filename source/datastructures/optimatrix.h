@@ -14,6 +14,11 @@
 
 class OptiMatrix {
     
+#ifdef UNIT_TEST
+    friend class TestOptiMatrix;
+#endif
+
+    
 public:
     OptiMatrix(string, double, bool); //distfile, cutoff, sim
     OptiMatrix(string, string, string, double, bool); //distfile, name or count, format, cutoff, sim
