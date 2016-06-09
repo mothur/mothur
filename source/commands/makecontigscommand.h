@@ -83,6 +83,7 @@ private:
     bool checkName(Sequence& forward, Sequence& reverse);
     bool checkName(QualityScores& forward, QualityScores& reverse);
     bool checkName(Sequence& forward, QualityScores& reverse);
+    bool fixName(string& forward);
     unsigned long long processMultipleFileOption(map<string, int>&, vector<string>&, map<string, string>&);
     unsigned long long processSingleFileOption(map<string, int>&, vector<string>&, map<string, string>&);
     int loadQmatchValues(vector< vector<double> >&, vector< vector<double> >&);

@@ -2550,7 +2550,7 @@ int MakeContigsCommand::setNameType(string forwardFile, string reverseFile, char
         }else { //compressed files
 #ifdef USE_BOOST
             m->openInputFileBinary(forwardFile, inForward, inFF);
-            m->openInputFileBinary(reverseFile, inReverse, inRF);
+            m->openInputFileBinary(reverseFile, inForward, inRF);
             
             if (delim == '>') {
                 Sequence fread(inFF);
@@ -2584,7 +2584,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> fastaFilePos;
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> temp;
-        vector<unsigned long long> trimmedNamesFilePos;
         
         nameType = setNameType(fasta[0], fasta[1], delim);
         
@@ -2610,13 +2609,13 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 name = name.substr(1);
                 m->checkName(name);
             }
+            fixName(name);
             firstSeqNames[name] = i;
-            trimmedNames[name.substr(0, name.length()-1)];
             in.close();
         }
         
-        map<string, int> copy;  map<string, int> tcopy;
-        if (qual.size() != 0) { copy = firstSeqNames; tcopy = trimmedNames; }
+        map<string, int> copy;
+        if (qual.size() != 0) { copy = firstSeqNames; }
         
         //look for match in reverse file
         ifstream in2;
@@ -2632,27 +2631,21 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     string name = pieces[0];
                     name = name.substr(1);
                     m->checkName(name);
+                    fixName(name);
                     
                     map<string, int>::iterator it = firstSeqNames.find(name);
-                    map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                     
                     if (it != firstSeqNames.end())  { //this is the start of a new chunk
                         unsigned long long pos = in2.tellg();
                         qfileFilePos.push_back(pos - input.length() - 1);
                         firstSeqNames.erase(it);
-                    }else if (itTrimmed != trimmedNames.end()) {
-                        unsigned long long pos = in2.tellg();
-                        trimmedNamesFilePos.push_back(pos - input.length() - 1);
-                        trimmedNames.erase(itTrimmed);
                     }
                 }
             }
             
-            if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
+            if ((firstSeqNames.size() == 0)) { break; }
         }
         in2.close();
-        
-        if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { qfileFilePos = trimmedNamesFilePos; }
         
         //get last file position of reverse fasta[1]
         FILE * pFile;
@@ -2669,7 +2662,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         qfileFilePos.push_back(size);
 
         
-        if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
+        if ((firstSeqNames.size() != 0)){
             for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                 if (delim == '>') {
                     m->mothurOut(it->first + " is in your forward fasta file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -2690,11 +2683,10 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         }
         
         qfileFilePos.clear();
-        trimmedNamesFilePos.clear();
+        
         
         if (qual.size() != 0) {
             firstSeqNames = copy;
-            trimmedNames = tcopy;
             
             if (qual[0] != "NONE") {
                 //seach for filePos of each first name in the qfile and save in qfileFilePos
@@ -2711,27 +2703,20 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             string name = pieces[0];
                             name = name.substr(1);
                             m->checkName(name);
+                            fixName(name);
                             
                             map<string, int>::iterator it = firstSeqNames.find(name);
-                            map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                             
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
                                 unsigned long long pos = inQual.tellg();
                                 qfileFilePos.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
-                            }else if (itTrimmed != trimmedNames.end()) {
-                                unsigned long long pos = inQual.tellg();
-                                trimmedNamesFilePos.push_back(pos - input.length() - 1);
-                                trimmedNames.erase(itTrimmed);
-                            }
-                        }
+                            }                        }
                     }
                     
-                    if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
+                    if ((firstSeqNames.size() == 0)) { break; }
                 }
                 inQual.close();
-                
-                if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { qfileFilePos = trimmedNamesFilePos; }
                 
                 //get last file position of reverse qual[0]
                 FILE * pFile;
@@ -2748,7 +2733,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 qfileFilePos.push_back(size);
                 
                 
-                if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
+                if ((firstSeqNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
                             m->mothurOut(it->first + " is in your forward fasta file and reverse fasta file, but not your forward qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -2761,8 +2746,6 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 }
             }
             firstSeqNames = copy;
-            trimmedNames = tcopy;
-            trimmedNamesFilePos.clear();
             
             if (qual[1] != "NONE") {
                 ifstream inQual2;
@@ -2778,27 +2761,21 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             name = name.substr(1);
                             
                             m->checkName(name);
+                            fixName(name);
                             
                             map<string, int>::iterator it = firstSeqNames.find(name);
-                            map<string, int>::iterator itTrimmed = trimmedNames.find(name.substr(0, name.length()-1));
                             
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
                                 unsigned long long pos = inQual2.tellg();
                                 temp.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
-                            }else if (itTrimmed != trimmedNames.end()) {
-                                unsigned long long pos = inQual2.tellg();
-                                trimmedNamesFilePos.push_back(pos - input.length() - 1);
-                                trimmedNames.erase(itTrimmed);
                             }
                         }
                     }
                     
-                    if ((firstSeqNames.size() == 0) || (trimmedNames.size() == 0)) { break; }
+                    if ((firstSeqNames.size() == 0)) { break; }
                 }
                 inQual2.close();
-                
-                if ((firstSeqNames.size() != 0) && (trimmedNames.size() == 0)) { temp = trimmedNamesFilePos; }
                 
                 //get last file position of reverse qual[1]
                 FILE * pFile2;
@@ -2814,7 +2791,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 temp.push_back(size);
                 
                 
-                if ((firstSeqNames.size() != 0) && (trimmedNames.size() != 0)){
+                if ((firstSeqNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
                             m->mothurOut(it->first + " is in your forward fasta file, reverse fasta file, and forward qfile but not your reverse qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
@@ -3305,6 +3282,33 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+/**
+ * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
+ */
+bool MakeContigsCommand::fixName(string& forward){
+    try {
+        bool match = false;
+        
+        if (nameType == poundMatch) {
+            match = true;
+            //we know the location of the # matches in the forward and reverse
+            if (poundMatchPos) {
+                forward = (forward.substr(0, poundMatchPos));
+            }else { //it does not match
+                int pos = forward.find_last_of('#');
+                if (pos != string::npos) {  forward = forward.substr(0, pos);   }
+            }
+        }else if (nameType == perfectMatch) { match = true; }
+        
+        return match;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "fixName");
+        exit(1);
+    }
+}
+
 //***************************************************************************************************************
 /**
  * checks for minor diffs @MS7_15058:1:1101:11899:1633#8/1 @MS7_15058:1:1101:11899:1633#8/2 should match
