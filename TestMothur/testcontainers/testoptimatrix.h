@@ -23,6 +23,9 @@ public:
     using OptiMatrix::readPhylip;
     using OptiMatrix::readColumn;
     
+    string columnFile;
+    vector<string> filenames;
+    
 };
 
 #endif /* defined(__Mothur__testoptimatrix__) */

@@ -18,6 +18,7 @@ public:
     DistCDataSet();
     ~DistCDataSet() {}
     string getColumnFile() { return writeColumnFile(); }
+    vector<string> getFiles(int);
     string getCountFile()  { return writeCountFile();  }
     
 private:
