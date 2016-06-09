@@ -17,8 +17,8 @@
 class OptiCluster : public Cluster {
     
 public:
-    OptiCluster(OptiMatrix* mt, string met, double mc, string opt) : Cluster() {
-        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; metricCutoff = mc; optimizeFPFN = false; optimizeTPTN = false; if (opt == "tptn") { optimizeTPTN = true; }; if (opt == "fpfn") { optimizeFPFN = true; };
+    OptiCluster(OptiMatrix* mt, string met, double mc) : Cluster() {
+        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; metricCutoff = mc;
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
@@ -39,9 +39,13 @@ private:
     string metric;
     int truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs;
     double metricCutoff;
-        bool optimizeFPFN, optimizeTPTN;
     
     double calcMCC(double, double, double, double);
+    double calcSens(double, double, double, double);
+    double calcSpec(double, double, double, double);
+    double calcTPTN(double, double, double, double);
+    double calcTP2TN(double, double, double, double);
+    double calcFPFN(double tp, double tn, double fp, double fn);
     int removeDups(set<int>& left, set<int>& right);
     double moveAdjustTFValues(int bin, int seq, int newBin, double&, double&, double&, double&);
     int eraseIndex(vector<int>& otus, int value);

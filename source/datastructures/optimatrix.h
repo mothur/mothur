@@ -20,6 +20,7 @@ class OptiMatrix {
 
     
 public:
+    OptiMatrix() { m = MothurOut::getInstance(); }
     OptiMatrix(string, double, bool); //distfile, cutoff, sim
     OptiMatrix(string, string, string, double, bool); //distfile, name or count, format, cutoff, sim
     ~OptiMatrix(){ }
@@ -33,6 +34,7 @@ public:
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
     long int print(ostream&);
+    int readFile(string, string, string, double, bool); //distfile, name or count, format, cutoff, sim
     
 private:
     

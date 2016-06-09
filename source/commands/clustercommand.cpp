@@ -26,7 +26,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
-        CommandParameter pmetric("metric", "Multiple", "mcc", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp2tn", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
@@ -58,7 +58,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
-        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc). Default=mcc.\n";
+        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives + 2* true negatives (tp2tn). Default=mcc.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
        helpString += "The cluster command should be in the following format: \n";
@@ -267,7 +267,7 @@ ClusterCommand::ClusterCommand(string option)  {
             
             metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
             
-            if (metric == "mcc") { }
+            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp2tn") || (metric == "fpfn")){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc."); m->mothurOutEndLine(); abort = true; }
 
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
@@ -836,7 +836,7 @@ int ClusterCommand::runOptiCluster(){
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric, stableMetric, "tptn");
+        OptiCluster cluster(&matrix, metric, stableMetric);
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();

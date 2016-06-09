@@ -33,6 +33,20 @@ OptiMatrix::OptiMatrix(string d, string nc, string f, double c, bool s) : distFi
     else { readColumn();  }
 }
 /***********************************************************************/
+int OptiMatrix::readFile(string d, string nc, string f, double c, bool s)  {
+    distFile = d; format = f; cutoff = c; sim = s;
+    
+    if (format == "name") { namefile = nc; countfile = ""; }
+    else { countfile = nc; namefile = ""; }
+    
+    distFormat = findDistFormat(distFile);
+    
+    if (distFormat == "phylip") { readPhylip(); }
+    else { readColumn();  }
+    
+    return 0;
+}
+/***********************************************************************/
 ListVector* OptiMatrix::getListSingle() {
     try {
         ListVector* singlelist = NULL;

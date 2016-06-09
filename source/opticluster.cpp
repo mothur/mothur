@@ -31,26 +31,30 @@ int OptiCluster::initialize(double& value) {
         seqBin[numSeqs] = -1;
         insertLocation = numSeqs;
     
-        if (metric == "mcc") {
-            truePositives = 0;
-            falsePositives = 0;
-            falseNegatives = 0;
-            trueNegatives = 0;
-            //for each sequence (singletons removed on read)
-            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
-                if (it->second == -1) { }
-                else {
-                    int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
-                    falseNegatives += numCloseSeqs;
-                }
+        truePositives = 0;
+        falsePositives = 0;
+        falseNegatives = 0;
+        trueNegatives = 0;
+        //for each sequence (singletons removed on read)
+        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+            if (it->second == -1) { }
+            else {
+                int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                falseNegatives += numCloseSeqs;
             }
-            falseNegatives /= 2; //square matrix
-            trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
-            totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         }
-        value = 0;
-        if (metric == "mcc") { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);  }
+        falseNegatives /= 2; //square matrix
+        trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
+        totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
+        value = 0;
+        if (metric == "mcc")        { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);    }
+        else if (metric == "sens")  { value = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "spec")  { value = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "tptn")  { value = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "tp2tn") { value = calcTP2TN(truePositives, trueNegatives, falsePositives, falseNegatives);  }
+        else if (metric == "fpfn")  { value = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+       
         return value;
     }
     catch(exception& e) {
@@ -89,6 +93,21 @@ bool OptiCluster::update(double& listMetric) {
                     if (metric == "mcc") {
                         singleMetric = calcMCC(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "sens") {
+                        singleMetric = calcSens(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "spec") {
+                        singleMetric = calcSpec(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "tptn") {
+                        singleMetric = calcTPTN(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "tp2tn") {
+                        singleMetric = calcTP2TN(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "fpfn") {
+                        singleMetric = calcFPFN(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     }
                     bestMetric = singleMetric;
                     bestMetricsTPValues.push_back(temp);
@@ -117,20 +136,7 @@ bool OptiCluster::update(double& listMetric) {
                         bestMetricsTPValues.clear();
                         bestMetricsTPValues.push_back(temp);
                     }else if (newMetric == bestMetric) { //tie
-                        //cout << (tp+tn)/(double)totalPairs << '\t' << ((bestMetricsTPValues[0][1]+bestMetricsTPValues[0][2])/(double)totalPairs) << '\t' << optimizeTPTN << '\t' << optimizeFPFN << endl;
-                        if (optimizeTPTN && (((tp+fn)/(double)totalPairs) > ((bestMetricsTPValues[0][1]+bestMetricsTPValues[0][4])/(double)totalPairs))) { //optimize true positive, true negative
-                            bestMetric = newMetric;
-                            bestMetricsTPValues.clear();
-                            bestMetricsTPValues.push_back(temp);
-                            cout << "tp" << endl;
-                        }else if (optimizeFPFN && (((fp+fn)/(double)totalPairs) < ((bestMetricsTPValues[0][3]+bestMetricsTPValues[0][4])/(double)totalPairs))) {
-                            bestMetric = newMetric;
-                            bestMetricsTPValues.clear();
-                            bestMetricsTPValues.push_back(temp);
-                            cout << "FPFN" << endl;
-                        }else { //randomly pick one
-                            bestMetricsTPValues.push_back(temp);
-                        }
+                        bestMetricsTPValues.push_back(temp);
                     }
                 }
                 
@@ -156,7 +162,12 @@ bool OptiCluster::update(double& listMetric) {
             }
         }
         
-        if (metric == "mcc") {  listMetric = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        if (metric == "mcc")        { listMetric = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);    }
+        else if (metric == "sens")  { listMetric = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "spec")  { listMetric = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "tptn")  { listMetric = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "tp2tn") { listMetric = calcTP2TN(truePositives, trueNegatives, falsePositives, falseNegatives);  }
+        else if (metric == "fpfn")  { listMetric = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
         
         return 0;
         
@@ -169,7 +180,21 @@ bool OptiCluster::update(double& listMetric) {
 /***********************************************************************/
 double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp, double& tn, double& fp, double& fn) {
     try {
-        if (bin == newBin) { if (metric == "mcc") { return calcMCC(tp, tn, fp, fn); } }
+        if (bin == newBin) {
+            if (metric == "mcc") {
+                return calcMCC(tp, tn, fp, fn);
+            }else if (metric == "sens") {
+                return calcSens(tp, tn, fp, fn);
+            }else if (metric == "spec") {
+                return calcSpec(tp, tn, fp, fn);
+            }else if (metric == "tptn") {
+                return calcTPTN(tp, tn, fp, fn);
+            }else if (metric == "tp2tn") {
+                return calcTP2TN(tp, tn, fp, fn);
+            }else if (metric == "fpfn") {
+                return calcFPFN(tp, tn, fp, fn);
+            }
+        }
  
         int cCount = 0; int fCount = 0;
         for (int i = 0; i < bins[bin].size(); i++) { //how many close sequences are in the old bin?
@@ -196,8 +221,20 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
         }
 
         double result = 0.0;
-        if (metric == "mcc") { result = calcMCC(tp, tn, fp, fn);  }
-        
+        if (metric == "mcc") {
+            result =  calcMCC(tp, tn, fp, fn);
+        }else if (metric == "sens") {
+            result =  calcSens(tp, tn, fp, fn);
+        }else if (metric == "spec") {
+            result =  calcSpec(tp, tn, fp, fn);
+        }else if (metric == "tptn") {
+            result =  calcTPTN(tp, tn, fp, fn);
+        }else if (metric == "tp2tn") {
+            result =  calcTP2TN(tp, tn, fp, fn);
+        }else if (metric == "fpfn") {
+            result =  calcFPFN(tp, tn, fp, fn);
+        }
+
         return result;
     }
     catch(exception& e) {
@@ -221,6 +258,83 @@ double OptiCluster::calcMCC(double tp, double tn, double fp, double fn) {
     }
     catch(exception& e) {
         m->errorOut(e, "OptiCluster", "calcMCC");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcSens(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = tp + fn;
+        double sensitivity = tp / p;
+        
+        if(p == 0)	{	sensitivity = 0;	}
+        
+        return sensitivity;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcSens");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcSpec(double tp, double tn, double fp, double fn) {
+    try {
+        double n = fp + tn;
+        double specificity = tn / n;
+        
+        if(n == 0)			{	specificity = 0;	}
+        
+        return specificity;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcSpec");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcTPTN(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = tp + tn;
+        
+        double tptn = p / (double)(tp + tn + fp + fn);
+        
+        return tptn;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcTPTN");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcTP2TN(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = tp + (2*tn);
+        
+        double tptn = p / (double)(tp + tn + fp + fn);
+        
+        return tptn;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcTP2TN");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+double OptiCluster::calcFPFN(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = fp + fn;
+        
+        double tptn = 1.0 - (p / (double)(tp + tn + fp + fn)); //minimize
+        
+        return tptn;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcFPFN");
         exit(1);
     }
 }
