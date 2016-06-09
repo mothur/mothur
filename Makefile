@@ -13,6 +13,7 @@ OPTIMIZE ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
+BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 RELEASE_DATE = "\"4/18/2016\""
 VERSION = "\"1.37.1\""
@@ -44,14 +45,10 @@ ifeq  ($(strip $(USEREADLINE)),yes)
 endif
 
 
-#The boost libraries allow you to read gz files.
+#User specified boost library
 ifeq  ($(strip $(USEBOOST)),yes)
 
-#User specified boost library path
-ifeq  ($(strip $(BOOST_LIBRARY_DIR)),"\"Enter_your_boost_library_path_here\"")
-else
     LDFLAGS += ${BOOST_LIBRARY_DIR}
-endif
 
     LIBS += -lboost_iostreams -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
