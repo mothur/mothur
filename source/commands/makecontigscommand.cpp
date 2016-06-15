@@ -953,6 +953,9 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         
         //divide files between processors
         int remainingPairs = fileInputs.size();
+        
+        if (remainingPairs < processors) { processors = remainingPairs; }
+        
         int startIndex = 0;
         for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
             int numPairs = remainingPairs; //case for last processor
