@@ -827,10 +827,12 @@ int ClusterCommand::runOptiCluster(){
         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; cutoff += (5 / (precision * 10.0)); }
         cutoff -= (5 / (precision * 10.0));
         
-        string nameOrCount = "name";
-        string thisNamefile = namefile;
+        string nameOrCount = "";
+        string thisNamefile = "";
         map<string, int> counts;
         if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         

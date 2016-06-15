@@ -32,23 +32,49 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     
     columnFile = outputFilenames["column"][0];
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+    
+    inputString = "fasta=" + filenames[0] + ", output=lt";
+    m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+    m->mothurOut("Running command: dist.seqs(" + inputString + ")"); m->mothurOutEndLine();
+    m->mothurCalling = true;
+    
+    Command* dist2Command = new DistanceCommand(inputString);
+    dist2Command->execute();
+    
+    outputFilenames = dist2Command->getOutputFiles();
+    
+    delete dist2Command;
+    m->mothurCalling = false;
+    
+    phylipFile = outputFilenames["phylip"][0];
+    m->mothurOut("/******************************************/"); m->mothurOutEndLine();
 }
 /**************************************************************************************************/
 TestOptiMatrix::~TestOptiMatrix() {
     for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
     m->mothurRemove(columnFile);
+    m->mothurRemove(phylipFile);
 }
 /**************************************************************************************************/
 TEST_CASE("Testing OptiMatrix Class") {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", 0.03, false);
+    OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", 0.03, false);
     
-    SECTION("Testing Read") {
+    SECTION("Testing Column Read") {
         INFO("Using First 100 sequences of final.fasta and final.names") // Only appears on a FAIL
         
         CAPTURE(matrix.print(cout)); // Displays this variable on a FAIL
         
         CHECK(matrix.print(cout) == 112); //numdists in matrix
+    }
+    
+    SECTION("Testing Phylip Read") {
+        INFO("Using First 100 sequences of final.fasta and final.names") // Only appears on a FAIL
+        
+        CAPTURE(pmatrix.print(cout)); // Displays this variable on a FAIL
+        
+        CHECK(pmatrix.print(cout) == 112); //numdists in matrix
     }
     
     /* First few rows of matrix

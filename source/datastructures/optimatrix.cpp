@@ -25,7 +25,8 @@ OptiMatrix::OptiMatrix(string d, string nc, string f, double c, bool s) : distFi
     m = MothurOut::getInstance();
     
     if (format == "name") { namefile = nc; countfile = ""; }
-    else { countfile = nc; namefile = ""; }
+    else if (format == "count") { countfile = nc; namefile = ""; }
+    else { countfile = ""; namefile = ""; }
     
     distFormat = findDistFormat(distFile);
     
@@ -37,7 +38,8 @@ int OptiMatrix::readFile(string d, string nc, string f, double c, bool s)  {
     distFile = d; format = f; cutoff = c; sim = s;
     
     if (format == "name") { namefile = nc; countfile = ""; }
-    else { countfile = nc; namefile = ""; }
+    else if (format == "count") { countfile = nc; namefile = ""; }
+    else { countfile = ""; namefile = ""; }
     
     distFormat = findDistFormat(distFile);
     
@@ -170,10 +172,8 @@ int OptiMatrix::readPhylip(){
         int square, nseqs;
         string name;
         int count = 0;
-        vector< map<int, string> > temp; temp.resize(nseqs);
         map<int, string> tempNameMap;
 
-        
         ifstream fileHandle;
         string numTest;
         
@@ -183,8 +183,10 @@ int OptiMatrix::readPhylip(){
         if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
+        vector< map<int, string> > temp; temp.resize(nseqs);
+        
         //map shorten name to real name - space saver
-        tempNameMap[count] = name;
+        tempNameMap[0] = name;
         
         //square test
         char d;
@@ -228,10 +230,8 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff){
-                        map<int, string> tempA;
-                        tempA[j] = name;
-                        temp[i] = tempA;
-                        temp[j][i] = tempNameMap[j];
+                        temp[j][i] = name;
+                        temp[i][j] = tempNameMap[j];
                     }
                     index++;
                     reading->update(index);
@@ -260,10 +260,8 @@ int OptiMatrix::readPhylip(){
                     else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff && j < i){
-                        map<int, string> tempA;
-                        tempA[j] = name;
-                        temp[i] = tempA;
-                        temp[j][i] = tempNameMap[j];
+                        temp[j][i] = name;
+                        temp[i][j] = tempNameMap[j];
                     }
                     index++;
                     reading->update(index);

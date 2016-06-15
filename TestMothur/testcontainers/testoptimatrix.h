@@ -23,7 +23,7 @@ public:
     using OptiMatrix::readPhylip;
     using OptiMatrix::readColumn;
     
-    string columnFile;
+    string columnFile, phylipFile;
     vector<string> filenames;
     
 };
