@@ -385,7 +385,7 @@ int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){
 					}else {
 						int num = m->getNumNames(itNameMap->second);
 						
-						seqPriorityNode temp(num, seqForThisGroup[i].getAligned(), seqForThisGroup[i].getName());
+						seqPriorityNode temp(num, seqForThisGroup[i].getUnaligned(), seqForThisGroup[i].getName());
 						nameVector.push_back(temp);
 					}
 				}

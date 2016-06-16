@@ -191,7 +191,7 @@ int SequenceCountParser::getSeqs(string g, string filename, bool uchimeFormat=fa
 						error = 1;
 						m->mothurOut("[ERROR]: " + seqForThisGroup[i].getName() + " is in your fastafile, but is not in your count file, please correct."); m->mothurOutEndLine();
 					}else {
-                        seqPriorityNode temp(itCount->second, seqForThisGroup[i].getAligned(), seqForThisGroup[i].getName());
+                        seqPriorityNode temp(itCount->second, seqForThisGroup[i].getUnaligned(), seqForThisGroup[i].getName());
 						nameVector.push_back(temp);
 					}
 				}

@@ -400,6 +400,7 @@
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
@@ -849,6 +850,8 @@
 		48D6E96A1CA4262A008DF76B /* dataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = "<group>"; };
+		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
@@ -1840,6 +1843,8 @@
 				A7E9B68A12D37EC400DA6239 /* chimeraslayercommand.cpp */,
 				A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */,
 				A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */,
+				48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */,
+				48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */,
 				A7E9B68D12D37EC400DA6239 /* chopseqscommand.h */,
 				A7E9B68C12D37EC400DA6239 /* chopseqscommand.cpp */,
 				A7E9B69112D37EC400DA6239 /* classifyotucommand.h */,
@@ -2984,6 +2989,7 @@
 				A7E9B8A812D37EC400DA6239 /* clustercommand.cpp in Sources */,
 				A7E9B8A912D37EC400DA6239 /* clusterdoturcommand.cpp in Sources */,
 				A7E9B8AA12D37EC400DA6239 /* clusterfragmentscommand.cpp in Sources */,
+				48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */,
 				A7E9B8AB12D37EC400DA6239 /* clustersplitcommand.cpp in Sources */,
 				A7E9B8AC12D37EC400DA6239 /* cmdargs.cpp in Sources */,
 				A7E9B8AD12D37EC400DA6239 /* collect.cpp in Sources */,
