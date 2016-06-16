@@ -1392,7 +1392,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric, stableMetric);
+        OptiCluster cluster(&matrix, metric);
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
@@ -1406,7 +1406,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        cluster.initialize(listVectorMetric);
+        cluster.initialize(listVectorMetric, true);
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             

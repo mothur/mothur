@@ -10,7 +10,7 @@
 
 /***********************************************************************/
 //randomly assign sequences to OTUs
-int OptiCluster::initialize(double& value) {
+int OptiCluster::initialize(double& value, bool randomize) {
     try {
         numSeqs = matrix->getNumSeqs();
         
@@ -24,7 +24,7 @@ int OptiCluster::initialize(double& value) {
             randomizeSeqs.push_back(i);
         }
         
-        random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end());
+        if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
         
         vector<int> temp;
         bins.push_back(temp);

@@ -404,6 +404,7 @@
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E418561D08893A004C36AB /* distcdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E418541D08893A004C36AB /* distcdataset.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48EDB7691D11DBAF00F76E93 /* testopticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB7671D11DBAF00F76E93 /* testopticluster.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
@@ -861,6 +862,8 @@
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48E418541D08893A004C36AB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distcdataset.cpp; sourceTree = "<group>"; };
 		48E418551D08893A004C36AB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distcdataset.h; sourceTree = "<group>"; };
+		48EDB7671D11DBAF00F76E93 /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testopticluster.cpp; sourceTree = "<group>"; };
+		48EDB7681D11DBAF00F76E93 /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testopticluster.h; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
@@ -1738,6 +1741,8 @@
 				48576EA71D05F59300BBC9C0 /* distpdataset.h */,
 				4827A4DA1CB3ED2100345170 /* fastqdataset.cpp */,
 				4827A4DB1CB3ED2100345170 /* fastqdataset.h */,
+				48EDB7671D11DBAF00F76E93 /* testopticluster.cpp */,
+				48EDB7681D11DBAF00F76E93 /* testopticluster.h */,
 				48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */,
 				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
@@ -2604,6 +2609,7 @@
 				481FB64E1AC1B7F40076CFF3 /* treenode.cpp in Sources */,
 				481FB5801AC1B6EA0076CFF3 /* weighted.cpp in Sources */,
 				481FB54F1AC1B63A0076CFF3 /* memeuclidean.cpp in Sources */,
+				48EDB7691D11DBAF00F76E93 /* testopticluster.cpp in Sources */,
 				481FB5611AC1B69B0076CFF3 /* sharedjsd.cpp in Sources */,
 				481FB5AF1AC1B7300076CFF3 /* createdatabasecommand.cpp in Sources */,
 				481FB5731AC1B6EA0076CFF3 /* simpsoneven.cpp in Sources */,

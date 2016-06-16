@@ -16,15 +16,20 @@
 
 class OptiCluster : public Cluster {
     
+#ifdef UNIT_TEST
+    friend class TestOptiCluster;
+    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; } //for testing class
+    void setVariables(OptiMatrix* mt, string met) { matrix = mt; metric = met; }
+#endif
+    
 public:
-    OptiCluster(OptiMatrix* mt, string met, double mc) : Cluster() {
-        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; metricCutoff = mc;
+    OptiCluster(OptiMatrix* mt, string met) : Cluster() {
+        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0;
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { return("opti"); }
-    
-    int initialize(double&);  //randomize and place in "best" OTUs
+    int initialize(double&, bool);  //randomize and place in "best" OTUs
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats();
     ListVector* getList();
@@ -38,7 +43,6 @@ private:
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
     string metric;
     int truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs;
-    double metricCutoff;
     
     double calcMCC(double, double, double, double);
     double calcSens(double, double, double, double);
@@ -46,10 +50,7 @@ private:
     double calcTPTN(double, double, double, double);
     double calcTP2TN(double, double, double, double);
     double calcFPFN(double tp, double tn, double fp, double fn);
-    int removeDups(set<int>& left, set<int>& right);
     double moveAdjustTFValues(int bin, int seq, int newBin, double&, double&, double&, double&);
-    int eraseIndex(vector<int>& otus, int value);
-    
 };
 
 #endif /* defined(__Mothur__opticluster__) */
