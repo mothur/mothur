@@ -517,6 +517,7 @@ int ClusterSplitCommand::execute(){
                 if (m->control_pressed) { delete split; return 0; }
                 
                 singletonName = split->getSingletonNames();
+                numSingletons = split->getNumSingleton();
                 distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
                 delete split;
                 
@@ -1392,7 +1393,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric);
+        OptiCluster cluster(&matrix, metric, numSingletons);
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();

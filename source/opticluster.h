@@ -23,8 +23,8 @@ class OptiCluster : public Cluster {
 #endif
     
 public:
-    OptiCluster(OptiMatrix* mt, string met) : Cluster() {
-        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0;
+    OptiCluster(OptiMatrix* mt, string met, double ns) : Cluster() {
+        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
@@ -42,7 +42,7 @@ private:
     vector<int> randomizeSeqs;
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
     string metric;
-    int truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs;
+    double truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
     
     double calcMCC(double, double, double, double);
     double calcSens(double, double, double, double);

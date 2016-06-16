@@ -51,7 +51,7 @@ private:
 	vector<string> outputNames;
 	
 	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric;
-	double cutoff, splitcutoff, stableMetric;
+	double cutoff, splitcutoff, stableMetric, numSingletons;
 	int precision, length, processors, taxLevelCutoff, maxIters;
 	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist;
 	time_t start;

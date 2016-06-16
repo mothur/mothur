@@ -234,7 +234,8 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
         }else if (metric == "fpfn") {
             result =  calcFPFN(tp, tn, fp, fn);
         }
-
+        totalPairs = tp + tn + fn + fp;
+        
         return result;
     }
     catch(exception& e) {
@@ -341,11 +342,13 @@ double OptiCluster::calcFPFN(double tp, double tn, double fp, double fn) {
 /***********************************************************************/
 vector<double> OptiCluster::getStats() {
     try {
+        double singletn = matrix->getNumSingletons() + numSingletons;
+        numSeqs += singletn;
         
         double tp = (double) truePositives;
         double fp = (double) falsePositives;
-        double tn = (double) trueNegatives;
         double fn = (double) falseNegatives;
+        double tn = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
         
         double p = tp + fn;
         double n = fp + tn;
@@ -372,7 +375,7 @@ vector<double> OptiCluster::getStats() {
         
         vector<double> results;
         
-        results.push_back(truePositives); results.push_back(trueNegatives); results.push_back(falsePositives); results.push_back(falseNegatives);
+        results.push_back(truePositives); results.push_back(tn); results.push_back(falsePositives); results.push_back(falseNegatives);
         results.push_back(sensitivity); results.push_back(specificity); results.push_back(positivePredictiveValue); results.push_back(negativePredictiveValue);
         results.push_back(falseDiscoveryRate); results.push_back(accuracy); results.push_back(matthewsCorrCoef); results.push_back(f1Score);
         

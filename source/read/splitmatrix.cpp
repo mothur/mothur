@@ -560,6 +560,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
         if (countfile != "") { headers = m->getline(bigNameFile); m->gobble(bigNameFile); }
         
         string name, nameList;
+        numSingleton = 0;
         while(!bigNameFile.eof()){
             bigNameFile >> name >> nameList;  
             m->getline(bigNameFile); m->gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
@@ -574,6 +575,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             }else{
                 wroteExtra = true;
                 remainingNames << name << '\t' << nameList << endl;
+                numSingleton++;
             }
         }
         bigNameFile.close();
@@ -611,6 +613,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                         in >> name >> nameList;  m->gobble(in);
                         wroteExtra = true;
                         remainingNames << name << '\t' << nameList << endl;
+                        numSingleton++;
                     }
                     in.close();
                     m->mothurRemove(tempNameFile);
@@ -626,6 +629,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
 		if (!wroteExtra) { 
 			m->mothurRemove(singleton);
 			singleton = "none";
+            numSingleton = 0;
 		}else if (countfile != "") {
             //add header
             ofstream out;
@@ -671,6 +675,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         if (countfile != "") {  errorMessage = "count"; headers = m->getline(bigNameFile); m->gobble(bigNameFile); }
         
         string name, nameList;
+        numSingleton = 0;
         while(!bigNameFile.eof()){
             bigNameFile >> name >> nameList;
             m->getline(bigNameFile); m->gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
@@ -683,7 +688,9 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
                 outFile << name << '\t' << nameList << endl;
                 outFile.close();
             }else{
-                m->mothurOut("[ERROR]: " + name + " is not assigned to a group.  This indicates a file mismatch likely caused by forgetting to include the " + errorMessage + " file on a remove.seqs or remove.lineage command. Please correct.\n"); m->control_pressed = true;
+                wroteExtra = true;
+                remainingNames << name << '\t' << nameList << endl;
+                numSingleton++;
             }
         }
         bigNameFile.close();
@@ -720,6 +727,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
                         in >> name >> nameList;  m->gobble(in);
                         wroteExtra = true;
                         remainingNames << name << '\t' << nameList << endl;
+                        numSingleton++;
                     }
                     in.close();
                     m->mothurRemove(tempNameFile);
@@ -733,6 +741,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         if (!wroteExtra) {
             m->mothurRemove(singleton);
             singleton = "none";
+            numSingleton = 0;
         }else if (countfile != "") {
             //add header
             ofstream out;

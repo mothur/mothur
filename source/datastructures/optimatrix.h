@@ -30,6 +30,7 @@ public:
     bool isClose(int, int);
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
+    int getNumSingletons() { return singletons.size(); }
     map<int, string> getNameMap() { return nameMap; }
     string getName(int); //name from nameMap index
     ListVector* getListSingle();

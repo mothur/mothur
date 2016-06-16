@@ -838,7 +838,7 @@ int ClusterCommand::runOptiCluster(){
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, cutoff, false);
         
-        OptiCluster cluster(&matrix, metric);
+        OptiCluster cluster(&matrix, metric, 0);
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
