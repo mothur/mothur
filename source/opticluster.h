@@ -28,7 +28,7 @@ public:
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
-    string getTag() { return("opti"); }
+    string getTag() { string tag = "opti." + metric; return tag; }
     int initialize(double&, bool);  //randomize and place in "best" OTUs
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats();
@@ -48,8 +48,16 @@ private:
     double calcSens(double, double, double, double);
     double calcSpec(double, double, double, double);
     double calcTPTN(double, double, double, double);
-    double calcTP2TN(double, double, double, double);
+    double calcTP(double, double, double, double);
+    double calcTN(double, double, double, double);
+    double calcFP(double, double, double, double);
+    double calcFN(double, double, double, double);
     double calcFPFN(double tp, double tn, double fp, double fn);
+    double calcF1Score(double tp, double tn, double fp, double fn);
+    double calcAccuracy(double tp, double tn, double fp, double fn);
+    double calcPPV(double tp, double tn, double fp, double fn);
+    double calcNPV(double tp, double tn, double fp, double fn);
+    double calcFDR(double tp, double tn, double fp, double fn);
     double moveAdjustTFValues(int bin, int seq, int newBin, double&, double&, double&, double&);
 };
 

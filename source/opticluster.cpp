@@ -48,12 +48,20 @@ int OptiCluster::initialize(double& value, bool randomize) {
         totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
         value = 0;
-        if (metric == "mcc")        { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);    }
-        else if (metric == "sens")  { value = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "spec")  { value = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "tptn")  { value = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "tp2tn") { value = calcTP2TN(truePositives, trueNegatives, falsePositives, falseNegatives);  }
-        else if (metric == "fpfn")  { value = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        if (metric == "mcc")        { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "sens")  { value = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "spec")  { value = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "tptn")  { value = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "tp")    { value = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "tn")    { value = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fp")    { value = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fn")    { value = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fpfn")  { value = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "f1")    { value = calcF1Score(truePositives, trueNegatives, falsePositives, falseNegatives);    }
+        else if (metric == "acc")   { value = calcAccuracy(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "ppv")   { value = calcPPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "npv")   { value = calcNPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "fdr")   { value = calcFDR(truePositives, trueNegatives, falsePositives, falseNegatives);        }
        
         return value;
     }
@@ -102,8 +110,17 @@ bool OptiCluster::update(double& listMetric) {
                     }else if (metric == "tptn") {
                         singleMetric = calcTPTN(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "tp2tn") {
-                        singleMetric = calcTP2TN(tp, tn, fp, fn);
+                    }else if (metric == "tp") {
+                        singleMetric = calcTP(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "tn") {
+                        singleMetric = calcTN(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "fp") {
+                        singleMetric = calcFP(tp, tn, fp, fn);
+                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    }else if (metric == "fn") {
+                        singleMetric = calcFN(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     }else if (metric == "fpfn") {
                         singleMetric = calcFPFN(tp, tn, fp, fn);
@@ -166,7 +183,10 @@ bool OptiCluster::update(double& listMetric) {
         else if (metric == "sens")  { listMetric = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);   }
         else if (metric == "spec")  { listMetric = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);   }
         else if (metric == "tptn")  { listMetric = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "tp2tn") { listMetric = calcTP2TN(truePositives, trueNegatives, falsePositives, falseNegatives);  }
+        else if (metric == "tp")    { listMetric = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);     }
+        else if (metric == "tn")    { listMetric = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);     }
+        else if (metric == "fp")    { listMetric = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);     }
+        else if (metric == "fn")    { listMetric = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);     }
         else if (metric == "fpfn")  { listMetric = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);   }
         
         return 0;
@@ -189,8 +209,14 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
                 return calcSpec(tp, tn, fp, fn);
             }else if (metric == "tptn") {
                 return calcTPTN(tp, tn, fp, fn);
-            }else if (metric == "tp2tn") {
-                return calcTP2TN(tp, tn, fp, fn);
+            }else if (metric == "tp") {
+                return calcTP(tp, tn, fp, fn);
+            }else if (metric == "tn") {
+                return calcTN(tp, tn, fp, fn);
+            }else if (metric == "fp") {
+                return calcFP(tp, tn, fp, fn);
+            }else if (metric == "fn") {
+                return calcFN(tp, tn, fp, fn);
             }else if (metric == "fpfn") {
                 return calcFPFN(tp, tn, fp, fn);
             }
@@ -229,12 +255,17 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
             result =  calcSpec(tp, tn, fp, fn);
         }else if (metric == "tptn") {
             result =  calcTPTN(tp, tn, fp, fn);
-        }else if (metric == "tp2tn") {
-            result =  calcTP2TN(tp, tn, fp, fn);
+        }else if (metric == "tp") {
+            result =  calcTP(tp, tn, fp, fn);
+        }else if (metric == "tn") {
+            result =  calcTN(tp, tn, fp, fn);
+        }else if (metric == "fp") {
+            result =  calcFP(tp, tn, fp, fn);
+        }else if (metric == "fn") {
+            result =  calcFN(tp, tn, fp, fn);
         }else if (metric == "fpfn") {
             result =  calcFPFN(tp, tn, fp, fn);
         }
-        totalPairs = tp + tn + fn + fp;
         
         return result;
     }
@@ -309,17 +340,54 @@ double OptiCluster::calcTPTN(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTP2TN(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcTP(double tp, double tn, double fp, double fn) {
     try {
         
-        double p = tp + (2*tn);
+        double tpmax = tp / (double)(tp + tn + fp + fn);
         
-        double tptn = p / (double)(tp + tn + fp + fn);
-        
-        return tptn;
+        return tpmax;
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiCluster", "calcTP2TN");
+        m->errorOut(e, "OptiCluster", "calcTP");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcTN(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double tnmax = tn / (double)(tp + tn + fp + fn);
+        
+        return tnmax;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcTN");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcFP(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double fpmin = fp / (double)(tp + tn + fp + fn);
+        
+        return (1.0 - fpmin);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcFP");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcFN(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double fnmin = fn / (double)(tp + tn + fp + fn);
+        
+        return (1.0 - fnmin);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcFN");
         exit(1);
     }
 }
@@ -330,12 +398,84 @@ double OptiCluster::calcFPFN(double tp, double tn, double fp, double fn) {
         
         double p = fp + fn;
         
-        double tptn = 1.0 - (p / (double)(tp + tn + fp + fn)); //minimize
+        double fpfn = 1.0 - (p / (double)(tp + tn + fp + fn)); //minimize
         
-        return tptn;
+        return fpfn;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiCluster", "calcFPFN");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcF1Score(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = tp + fn;
+        double pPrime = tp + fp;
+        double f1Score = 2.0 * tp / (p + pPrime);
+        
+        return f1Score;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcF1Score");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcAccuracy(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double p = tp + fn;
+        double n = fp + tn;
+        double accuracy = (tp + tn) / (p + n);
+        
+        return accuracy;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcAccuracy");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcPPV(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double pPrime = tp + fp;
+        double positivePredictiveValue = tp / pPrime;
+        
+        return positivePredictiveValue;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcPPV");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcNPV(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double nPrime = tn + fn;
+        double negativePredictiveValue = tn / nPrime;
+        
+        return negativePredictiveValue;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcNPV");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double OptiCluster::calcFDR(double tp, double tn, double fp, double fn) {
+    try {
+        
+        double pPrime = tp + fp;
+        double falseDiscoveryRate = fp / pPrime;
+        
+        return (1.0-falseDiscoveryRate);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcFDR");
         exit(1);
     }
 }
