@@ -15,8 +15,8 @@ USEBOOST ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"6/9/2016\""
-VERSION = "\"1.37.5\""
+RELEASE_DATE = "\"6/20/2016\""
+VERSION = "\"1.37.6\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
@@ -48,7 +48,7 @@ endif
 #User specified boost library
 ifeq  ($(strip $(USEBOOST)),yes)
 
-    LDFLAGS += ${BOOST_LIBRARY_DIR}
+    LDFLAGS += -L ${BOOST_LIBRARY_DIR}
 
     LIBS += -lboost_iostreams -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
