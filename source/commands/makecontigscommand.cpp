@@ -3322,27 +3322,23 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
         
         if (nameType == poundMatch) {
             match = true;
-            //we know the location of the # matches in the forward and reverse
-            if (poundMatchPos) {
-                forward.setName(forward.getName().substr(0, poundMatchPos));
-                reverse.setName(reverse.getName().substr(0, poundMatchPos));
-            }else { //it does not match
-                string forwardName = forward.getName();
-                string reverseName = reverse.getName();
-                
-                int pos = forwardName.find_last_of('#');
-                if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                
-                int pos2 = reverseName.find_last_of('#');
-                if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                
-                if (forwardName == reverseName) {
-                    forward.setName(forwardName);
-                    reverse.setName(reverseName);
-                }else{
-                    match = false;
-                }
+            
+            string forwardName = forward.getName();
+            string reverseName = reverse.getName();
+            
+            int pos = forwardName.find_last_of('#');
+            if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
+            
+            int pos2 = reverseName.find_last_of('#');
+            if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
+            
+            if (forwardName == reverseName) {
+                forward.setName(forwardName);
+                reverse.setName(reverseName);
+            }else{
+                match = false;
             }
+            
         }else if (nameType == perfectMatch) { match = true; }
         
         return match;
