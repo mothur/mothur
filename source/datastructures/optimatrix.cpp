@@ -344,7 +344,7 @@ int OptiMatrix::readPhylip(){
 int OptiMatrix::readColumn(){
     try {
         map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = m->readNames(namefile); }
+        if (namefile != "") { nameAssignment = readNames(namefile); }
         else  { CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
         int count = 0; for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) { it->second = count; count++; }
         
@@ -381,11 +381,12 @@ int OptiMatrix::readColumn(){
             int indexA = (itA->second);
             int indexB = (itB->second);
             
+            tempNameMap[indexA] = firstName;
+            tempNameMap[indexB] = secondName;
+            
             if(distance < cutoff){
                 temp[indexA][indexB] = secondName;
                 temp[indexB][indexA] = firstName;
-                tempNameMap[indexA] = firstName;
-                tempNameMap[indexB] = secondName;
             }
             m->gobble(fileHandle);
         }
@@ -396,6 +397,14 @@ int OptiMatrix::readColumn(){
         map<int, int> closenessIndexMap;
         for (int i = 0; i < temp.size(); i++) {
             if (temp[i].size() == 0) {
+                string newName = tempNameMap[i];
+                if (namefile == "") { singletons.push_back(newName); }
+                else {
+                    map<string, string>::iterator it2 = names.find(newName);
+                    if (it2 != names.end()) { //set name = names in namefile
+                        singletons.push_back(it2->second);
+                    }else{  m->mothurOut("[ERROR]: cannot find " + newName + " in your name file, please correct.\n"); m->control_pressed = true; }
+                }
             }else {
                 string newName = tempNameMap[i];
                 int newIndex = closeness.size();
@@ -421,21 +430,6 @@ int OptiMatrix::readColumn(){
         }
         tempNameMap.clear();
         
-        if (nameAssignment.size() != nameMap.size()) { //you have singletons to remove
-            for(map<int, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {  //remove non singletons
-                nameAssignment.erase(it->second);
-            }
-            for(map<string, int>::iterator it = nameAssignment.begin(); it != nameAssignment.end(); it++) {
-                if (namefile == "") { singletons.push_back(it->first); }
-                else {  map<string, string>::iterator it2 = names.find(it->first);
-                    if (it2 != names.end()) { //set name = names in namefile
-                        singletons.push_back(it2->second);
-                    }else{  m->mothurOut("[ERROR]: cannot find " + it->first + " in your name file, please correct.\n"); m->control_pressed = true; }
-                }
-            }
-        }
-
-        
         for (int i = 0; i < closeness.size(); i++) {
             for (int j = 0; j < closeness[i].size(); j++) {
                 closeness[i][j] = closenessIndexMap[closeness[i][j]];
@@ -454,6 +448,68 @@ int OptiMatrix::readColumn(){
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "readColumn");
+        exit(1);
+    }
+}
+/**********************************************************************************************************************/
+map<string, int> OptiMatrix::readNames(string namefile) {
+    try {
+        map<string, int> nameMap;
+        
+        //open input file
+        ifstream in;
+        m->openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+        int count = 0;
+        while (!in.eof()) {
+            if (m->control_pressed) { break; }
+            
+            in.read(buffer, 4096);
+            vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    m->checkName(firstCol);
+                    m->checkName(secondCol);
+                    nameMap[firstCol] = count;
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + firstCol + ", " + toString(count) + ".\n"); }
+                    pairDone = false;
+                    count++;
+                }
+            }
+        }
+        in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    m->checkName(firstCol);
+                    m->checkName(secondCol);
+                    nameMap[firstCol] = count;
+                    pairDone = false;
+                    count++;
+                }
+            }
+        }
+        
+        return nameMap;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "readNames");
         exit(1);
     }
 }

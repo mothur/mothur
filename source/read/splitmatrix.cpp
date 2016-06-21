@@ -49,7 +49,7 @@ int SplitMatrix::split(){
         
 		if (method == "distance") {  
 			splitDistance();
-		}else if ((method == "classify") || (method == "fasta") || (method == "vsearch")) {
+		}else if ((method == "classify") || (method == "classifydist") || (method == "vsearch")) {
 			splitClassify();
 		}else {
 			m->mothurOut("Unknown splitting method, aborting split."); m->mothurOutEndLine();

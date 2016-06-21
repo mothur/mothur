@@ -37,7 +37,6 @@ public:
 private:
     MothurOut* m;
     map<int, int> seqBin;
-    ListVector* list;
     OptiMatrix* matrix;
     vector<int> randomizeSeqs;
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
