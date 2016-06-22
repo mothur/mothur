@@ -31,7 +31,7 @@ public:
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
     int getNumSingletons() { return singletons.size(); }
-    map<int, string> getNameMap() { return nameMap; }
+    //map<int, string> getNameMap() { return nameMap; }
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
     long int print(ostream&);
@@ -41,7 +41,7 @@ private:
     
     vector< vector<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector<string> singletons;
-    map<int, string> nameMap;
+    vector<string> nameMap;
     
     string distFile, namefile, countfile, format, distFormat;
     double cutoff;

@@ -28,7 +28,7 @@ public:
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
-    string getTag() { string tag = "opti." + metric; return tag; }
+    string getTag() { string tag = "opti_" + metric; return tag; }
     int initialize(double&, bool);  //randomize and place in "best" OTUs
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats();

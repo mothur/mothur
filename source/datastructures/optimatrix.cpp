@@ -92,12 +92,8 @@ long int OptiMatrix::print(ostream& out) {
 /***********************************************************************/
 string OptiMatrix::getName(int index) {
     try {
-        map<int, string>::iterator it = nameMap.find(index);
-        
-        string name = "not found";
-        if (it == nameMap.end()) { m->mothurOut("[ERROR]: cannot find name for index " + toString(index) + "\n"); m-> control_pressed = true; }
-        else { name = it->second; }
-        
+        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->control_pressed = true; return ""; }
+        string name = nameMap[index];
         return name;
     }
     catch(exception& e) {
@@ -172,7 +168,6 @@ int OptiMatrix::readPhylip(){
         int square, nseqs;
         string name;
         int count = 0;
-        map<int, string> tempNameMap;
 
         ifstream fileHandle;
         string numTest;
@@ -186,7 +181,7 @@ int OptiMatrix::readPhylip(){
         vector< map<int, string> > temp; temp.resize(nseqs);
         
         //map shorten name to real name - space saver
-        tempNameMap[0] = name;
+        nameMap.push_back(name);
         
         //square test
         char d;
@@ -218,7 +213,7 @@ int OptiMatrix::readPhylip(){
                 if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
                 
                 fileHandle >> name;
-                tempNameMap[i] = name;
+                nameMap.push_back(name);
                 
                 for(int j=0;j<i;j++){
                     
@@ -231,7 +226,7 @@ int OptiMatrix::readPhylip(){
                     
                     if(distance < cutoff){
                         temp[j][i] = name;
-                        temp[i][j] = tempNameMap[j];
+                        temp[i][j] = nameMap[j];
                     }
                     index++;
                     reading->update(index);
@@ -247,7 +242,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 fileHandle >> name;
                 
-                tempNameMap[i] = name;
+                nameMap.push_back(name);
                 
                 //list->push_back(toString(i));
                 
@@ -261,7 +256,7 @@ int OptiMatrix::readPhylip(){
                     
                     if(distance < cutoff && j < i){
                         temp[j][i] = name;
-                        temp[i][j] = tempNameMap[j];
+                        temp[i][j] = nameMap[j];
                     }
                     index++;
                     reading->update(index);
@@ -270,27 +265,25 @@ int OptiMatrix::readPhylip(){
         }
         
         map<string, string> names;
-        if (namefile != "") { m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            //update nameMap
+            for (int i = 0; i < nameMap.size(); i++) {
+                map<string, string>::iterator it = names.find(nameMap[i]);
+                nameMap[i] = it->second;  //we know its there because we read it above
+            }
+            names.clear();
+        }
         
         count = 0;
         map<int, int> closenessIndexMap;
         for (int i = 0; i < temp.size(); i++) {
             //add to singletons +1 singletons count
             if (temp[i].size() == 0) {
-                //add new Index singleton to nameMap
-                map<int, string>::iterator it = tempNameMap.find(i);
-                if (it != tempNameMap.end()) {
-                    if (namefile != "") {
-                        map<string, string>::iterator it2 = names.find(it->second);
-                        if (it2 != names.end()) { //set name = names in namefile
-                            singletons.push_back(it2->second);
-                        }else{  m->mothurOut("[ERROR]: cannot find " + it->second + " int your name file, please correct.\n"); m->control_pressed = true; }
-                    }else{
-                        singletons.push_back(it->second);
-                    }
-                }
+                singletons.push_back(nameMap[i]);
             }else {
                 int newIndex = closeness.size();
+                nameMap[newIndex] = nameMap[i];
                 
                 vector<int> thisClose;
                 for(map<int, string>:: iterator it = temp[i].begin(); it != temp[i].end(); it++) {
@@ -298,23 +291,10 @@ int OptiMatrix::readPhylip(){
                 }
                 closeness.push_back(thisClose);
                 closenessIndexMap[i] = closeness.size()-1;
-                
-                //add new Index singleton to nameMap
-                map<int, string>::iterator it = tempNameMap.find(i);
-                if (namefile != "") {
-                    map<string, string>::iterator it2 = names.find(it->second);
-                    if (it2 != names.end()) { //set name = names in namefile
-                        nameMap[newIndex] = it2->second;
-                    }else{  m->mothurOut("[ERROR]: cannot find " + it->second + " int your name file, please correct.\n"); m->control_pressed = true; }
-                }else{
-                    nameMap[newIndex] = it->second;
-                }
             
                 temp[i].clear();
             }
         }
-        tempNameMap.clear();
-        
         
         for (int i = 0; i < closeness.size(); i++) {
             for (int j = 0; j < closeness[i].size(); j++) {
@@ -344,13 +324,12 @@ int OptiMatrix::readPhylip(){
 int OptiMatrix::readColumn(){
     try {
         map<string, int> nameAssignment;
-        vector<string> tempNameMap;
         if (namefile != "") { nameAssignment = m->readNames(namefile); }
         else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
         int count = 0;
         for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
             it->second = count; count++;
-            tempNameMap.push_back(it->first);
+            nameMap.push_back(it->first);
         }
         
         string firstName, secondName;
@@ -363,7 +342,6 @@ int OptiMatrix::readColumn(){
         
         vector< map<int, string> > temp; temp.resize(nameAssignment.size());
         
-        
         while(fileHandle){  //let's assume it's a triangular matrix...
             
             fileHandle >> firstName; m->gobble(fileHandle);
@@ -373,6 +351,8 @@ int OptiMatrix::readColumn(){
             if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
             if (m->control_pressed) {  fileHandle.close();   return 0; }
+            
+            
             
             map<string,int>::iterator itA = nameAssignment.find(firstName);
             map<string,int>::iterator itB = nameAssignment.find(secondName);
@@ -390,26 +370,31 @@ int OptiMatrix::readColumn(){
                 temp[indexA][indexB] = secondName;
                 temp[indexB][indexA] = firstName;
             }
+            
             m->gobble(fileHandle);
         }
+        fileHandle.close();
         
         map<string, string> names;
-        if (namefile != "") { m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            //update nameMap
+            for (int i = 0; i < nameMap.size(); i++) {
+                map<string, string>::iterator it = names.find(nameMap[i]);
+                nameMap[i] = it->second;  //we know its there because we read it above
+            }
+            names.clear();
+        }
         
+        //nameMap will contain extra indexes and will be larger than closeness.  This should be okay since we don't allow access to nameMap
         map<int, int> closenessIndexMap;
         for (int i = 0; i < temp.size(); i++) {
             if (temp[i].size() == 0) {
-                string newName = tempNameMap[i];
-                if (namefile == "") { singletons.push_back(newName); }
-                else {
-                    map<string, string>::iterator it2 = names.find(newName);
-                    if (it2 != names.end()) { //set name = names in namefile
-                        singletons.push_back(it2->second);
-                    }else{  m->mothurOut("[ERROR]: cannot find " + newName + " in your name file, please correct.\n"); m->control_pressed = true; }
-                }
+                singletons.push_back(nameMap[i]);
             }else {
-                string newName = tempNameMap[i];
+                string newName = nameMap[i];
                 int newIndex = closeness.size();
+                nameMap[newIndex] = newName;
                 
                 vector<int> thisClose;
                 for(map<int, string>:: iterator it = temp[i].begin(); it != temp[i].end(); it++) {
@@ -418,19 +403,9 @@ int OptiMatrix::readColumn(){
                 closeness.push_back(thisClose);
                 closenessIndexMap[i] = closeness.size()-1;
                 
-                //add new Index singleton to nameMap
-                if (namefile != "") {
-                    map<string, string>::iterator it2 = names.find(newName);
-                    if (it2 != names.end()) { //set name = names in namefile
-                        nameMap[newIndex] = it2->second;
-                    }else{  m->mothurOut("[ERROR]: cannot find " + it2->second + " int your name file, please correct.\n"); m->control_pressed = true; }
-                }else{
-                    nameMap[newIndex] = newName;
-                }
                 temp[i].clear();
             }
         }
-        tempNameMap.clear();
         
         for (int i = 0; i < closeness.size(); i++) {
             for (int j = 0; j < closeness[i].size(); j++) {

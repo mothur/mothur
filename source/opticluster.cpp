@@ -48,20 +48,20 @@ int OptiCluster::initialize(double& value, bool randomize) {
         totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
         value = 0;
-        if (metric == "mcc")        { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "sens")  { value = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "spec")  { value = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "tptn")  { value = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "tp")    { value = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
-        else if (metric == "tn")    { value = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
-        else if (metric == "fp")    { value = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
-        else if (metric == "fn")    { value = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
-        else if (metric == "fpfn")  { value = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "f1")    { value = calcF1Score(truePositives, trueNegatives, falsePositives, falseNegatives);    }
-        else if (metric == "acc")   { value = calcAccuracy(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "ppv")   { value = calcPPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "npv")   { value = calcNPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "fdr")   { value = calcFDR(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        if (metric == "mcc")             { value = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "sens")       { value = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "spec")       { value = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "tptn")       { value = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "tp")         { value = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "tn")         { value = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fp")         { value = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fn")         { value = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);         }
+        else if (metric == "fpfn")       { value = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "f1score")    { value = calcF1Score(truePositives, trueNegatives, falsePositives, falseNegatives);    }
+        else if (metric == "accuracy")   { value = calcAccuracy(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "ppv")        { value = calcPPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "npv")        { value = calcNPV(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "fdr")        { value = calcFDR(truePositives, trueNegatives, falsePositives, falseNegatives);        }
        
         return value;
     }
@@ -125,10 +125,10 @@ bool OptiCluster::update(double& listMetric) {
                     }else if (metric == "fn") {
                         singleMetric = calcFN(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "f1") {
+                    }else if (metric == "f1score") {
                         singleMetric = calcF1Score(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "acc") {
+                    }else if (metric == "accuracy") {
                         singleMetric = calcAccuracy(tp, tn, fp, fn);
                         temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     }else if (metric == "ppv") {
@@ -194,20 +194,20 @@ bool OptiCluster::update(double& listMetric) {
             }
         }
         
-        if (metric == "mcc")        { listMetric = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "sens")  { listMetric = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);      }
-        else if (metric == "spec")  { listMetric = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);      }
-        else if (metric == "tptn")  { listMetric = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);      }
-        else if (metric == "tp")    { listMetric = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "tn")    { listMetric = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "fp")    { listMetric = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "fn")    { listMetric = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);        }
-        else if (metric == "f1")    { listMetric = calcF1Score(truePositives, trueNegatives, falsePositives, falseNegatives);   }
-        else if (metric == "acc")   { listMetric = calcAccuracy(truePositives, trueNegatives, falsePositives, falseNegatives);  }
-        else if (metric == "ppv")   { listMetric = calcPPV(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "npv")   { listMetric = calcNPV(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "fdr")   { listMetric = calcFDR(truePositives, trueNegatives, falsePositives, falseNegatives);       }
-        else if (metric == "fpfn")  { listMetric = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);      }
+        if (metric == "mcc")             { listMetric = calcMCC(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "sens")       { listMetric = calcSens(truePositives, trueNegatives, falsePositives, falseNegatives);      }
+        else if (metric == "spec")       { listMetric = calcSpec(truePositives, trueNegatives, falsePositives, falseNegatives);      }
+        else if (metric == "tptn")       { listMetric = calcTPTN(truePositives, trueNegatives, falsePositives, falseNegatives);      }
+        else if (metric == "tp")         { listMetric = calcTP(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "tn")         { listMetric = calcTN(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "fp")         { listMetric = calcFP(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "fn")         { listMetric = calcFN(truePositives, trueNegatives, falsePositives, falseNegatives);        }
+        else if (metric == "f1score")    { listMetric = calcF1Score(truePositives, trueNegatives, falsePositives, falseNegatives);   }
+        else if (metric == "accuracy")   { listMetric = calcAccuracy(truePositives, trueNegatives, falsePositives, falseNegatives);  }
+        else if (metric == "ppv")        { listMetric = calcPPV(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "npv")        { listMetric = calcNPV(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "fdr")        { listMetric = calcFDR(truePositives, trueNegatives, falsePositives, falseNegatives);       }
+        else if (metric == "fpfn")       { listMetric = calcFPFN(truePositives, trueNegatives, falsePositives, falseNegatives);      }
         
         return 0;
         
@@ -237,9 +237,9 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
                 return calcFP(tp, tn, fp, fn);
             }else if (metric == "fn") {
                 return calcFN(tp, tn, fp, fn);
-            }else if (metric == "f1") {
+            }else if (metric == "f1score") {
                 return calcF1Score(tp, tn, fp, fn);
-            }else if (metric == "acc") {
+            }else if (metric == "accuracy") {
                 return calcAccuracy(tp, tn, fp, fn);
             }else if (metric == "ppv") {
                 return calcPPV(tp, tn, fp, fn);
@@ -293,9 +293,9 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
             result =  calcFP(tp, tn, fp, fn);
         }else if (metric == "fn") {
             result =  calcFN(tp, tn, fp, fn);
-        }else if (metric == "f1") {
+        }else if (metric == "f1score") {
             result =  calcF1Score(tp, tn, fp, fn);
-        }else if (metric == "acc") {
+        }else if (metric == "accuracy") {
             result =  calcAccuracy(tp, tn, fp, fn);
         }else if (metric == "ppv") {
             result =  calcPPV(tp, tn, fp, fn);

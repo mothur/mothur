@@ -26,7 +26,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
-        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1-acc-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
@@ -58,7 +58,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
-        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1), accuracy (acc), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
+        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
        helpString += "The cluster command should be in the following format: \n";
@@ -270,8 +270,8 @@ ClusterCommand::ClusterCommand(string option)  {
             
             metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
             
-            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1") || (metric == "acc") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
-            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc."); m->mothurOutEndLine(); abort = true; }
+            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
 
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
             m->mothurConvert(temp, maxIters);
@@ -860,6 +860,12 @@ int ClusterCommand::runOptiCluster(){
         double delta = 1;
         
         cluster.initialize(listVectorMetric, true);
+        
+        m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        vector<double> results = cluster.getStats();
+        m->mothurOut("Initial Randomization\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
+        m->mothurOutEndLine();
     
         while ((delta > stableMetric) && (iters < maxIters)) {
             
@@ -870,7 +876,13 @@ int ClusterCommand::runOptiCluster(){
 
             delta = abs(oldMetric - listVectorMetric);
             iters++;
+            
+            results = cluster.getStats();
+            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
+            m->mothurOutEndLine();
         }
+        m->mothurOutEndLine(); m->mothurOutEndLine();
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
@@ -906,14 +918,13 @@ int ClusterCommand::runOptiCluster(){
         m->openOutputFile(sensspecFilename,	sensFile);
         outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
         
-        m->mothurOut("\ncutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        sensFile << "cutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         
-        vector<double> results = cluster.getStats();
-        m->mothurOut(toString(cutoff) + "\t");
-        sensFile << cutoff << '\t';
-        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); sensFile << results[i] << '\t'; }
-        m->mothurOut("\n\n");
+        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        
+        results = cluster.getStats();
+        
+        sensFile << cutoff << '\t' << cutoff << '\t';
+        for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
         sensFile << '\n';
         sensFile.close();
         
