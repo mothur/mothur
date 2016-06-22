@@ -344,9 +344,14 @@ int OptiMatrix::readPhylip(){
 int OptiMatrix::readColumn(){
     try {
         map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = readNames(namefile); }
-        else  { CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
-        int count = 0; for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) { it->second = count; count++; }
+        vector<string> tempNameMap;
+        if (namefile != "") { nameAssignment = m->readNames(namefile); }
+        else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
+        int count = 0;
+        for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
+            it->second = count; count++;
+            tempNameMap.push_back(it->first);
+        }
         
         string firstName, secondName;
         float distance;
@@ -357,7 +362,7 @@ int OptiMatrix::readColumn(){
         m->openInputFile(distFile, fileHandle);
         
         vector< map<int, string> > temp; temp.resize(nameAssignment.size());
-        vector<string> tempNameMap; tempNameMap.resize(nameAssignment.size(), "");
+        
         
         while(fileHandle){  //let's assume it's a triangular matrix...
             
@@ -380,9 +385,6 @@ int OptiMatrix::readColumn(){
             
             int indexA = (itA->second);
             int indexB = (itB->second);
-            
-            tempNameMap[indexA] = firstName;
-            tempNameMap[indexB] = secondName;
             
             if(distance < cutoff){
                 temp[indexA][indexB] = secondName;
@@ -448,68 +450,6 @@ int OptiMatrix::readColumn(){
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "readColumn");
-        exit(1);
-    }
-}
-/**********************************************************************************************************************/
-map<string, int> OptiMatrix::readNames(string namefile) {
-    try {
-        map<string, int> nameMap;
-        
-        //open input file
-        ifstream in;
-        m->openInputFile(namefile, in);
-        
-        string rest = "";
-        char buffer[4096];
-        bool pairDone = false;
-        bool columnOne = true;
-        string firstCol, secondCol;
-        
-        int count = 0;
-        while (!in.eof()) {
-            if (m->control_pressed) { break; }
-            
-            in.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());
-            
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) {
-                    m->checkName(firstCol);
-                    m->checkName(secondCol);
-                    nameMap[firstCol] = count;
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + firstCol + ", " + toString(count) + ".\n"); }
-                    pairDone = false;
-                    count++;
-                }
-            }
-        }
-        in.close();
-        
-        if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) {
-                    m->checkName(firstCol);
-                    m->checkName(secondCol);
-                    nameMap[firstCol] = count;
-                    pairDone = false;
-                    count++;
-                }
-            }
-        }
-        
-        return nameMap;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "OptiMatrix", "readNames");
         exit(1);
     }
 }

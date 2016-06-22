@@ -52,7 +52,7 @@ private:
     string findDistFormat(string distFile);
     int readPhylip();
     int readColumn();
-    map<string, int> readNames(string namefile);
+    map<string, int> readNames(string namefile, vector<string>&);
     
 };
 

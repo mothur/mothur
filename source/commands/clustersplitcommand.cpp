@@ -9,7 +9,7 @@
 
 #include "clustersplitcommand.h"
 #include "systemcommand.h"
-
+#include "sensspeccommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
@@ -98,6 +98,7 @@ string ClusterSplitCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
         else if (type == "column") {  pattern = "[filename],dist"; }
         else if (type == "file")   {  pattern = "[filename],file"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -121,6 +122,7 @@ ClusterSplitCommand::ClusterSplitCommand(){
 		outputTypes["column"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
@@ -161,6 +163,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			outputTypes["sabund"] = tempOutNames;
 			outputTypes["column"] = tempOutNames;
             outputTypes["file"] = tempOutNames;
+            outputTypes["sensspec"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -264,7 +267,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			else {
                 m->setTaxonomyFile(taxFile);
                 if (splitmethod != "fasta")         { splitmethod = "classify";     }
-                else if (splitmethod == "fasta")    { splitmethod = "classifydist"; }
             }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (file == "")) {
@@ -411,6 +413,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "dist", false);  if (temp == "not found") { temp = "F"; }
             makeDist = m->isTrue(temp);
+            if (method == "opti") { makeDist = true; }
             
             if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
             if (classic && makeDist) { m->mothurOut("[ERROR]: You cannot use the dist parameter with the classic parameter. Mothur will ignore the dist parameter.\n"); makeDist = false; }
@@ -587,6 +590,10 @@ int ClusterSplitCommand::execute(){
         if (!deleteFiles) { for (int i = 0; i < distName.size(); i++) {	m->mothurRemove(distName[i].begin()->first); m->mothurRemove(distName[i].begin()->second); 	} }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
+        
+        if (method == "opti") { runSensSpec();  }
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
 		//set list file as new current listfile
 		string current = "";
@@ -1647,6 +1654,63 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		m->errorOut(e, "ClusterSplitCommand", "createMergedDistanceFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+int ClusterSplitCommand::runSensSpec() {
+    try{
+        string listFile = "";
+        itTypes = outputTypes.find("list");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { listFile = (itTypes->second)[0];  }
+        }
+        
+        string columnFile = "";
+        itTypes = outputTypes.find("column");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { columnFile = (itTypes->second)[0];  }
+        }
+        
+        string inputString = "list=" + listFile + ", column=" + columnFile;
+        if (namefile != "")         {  inputString += ", name=" + namefile; }
+        else if (countfile != "")   { inputString += ", count=" + countfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
+        
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("Running command: sens.spec(" + inputString + ")"); m->mothurOutEndLine();
+        m->mothurCalling = true;
+        
+        Command* sensspecCommand = new SensSpecCommand(inputString);
+        sensspecCommand->execute();
+        
+        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
+        
+        delete sensspecCommand;
+        m->mothurCalling = false;
+        
+        string outputFileName = filenames["sensspec"][0];
+        
+        outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("Done.\n\n"); m->mothurOutEndLine();
+        
+        ifstream in;
+        m->openInputFile(outputFileName, in);
+        
+        while(!in.eof()){
+            if (m->control_pressed) { break; }
+            
+            m->mothurOut(m->getline(in)+"\n"); m->gobble(in);
+        }
+        in.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "runSensSpec");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){

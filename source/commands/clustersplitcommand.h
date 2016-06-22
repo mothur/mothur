@@ -73,6 +73,7 @@ private:
     int vsearchDriver(string, string, string, double);
     string runVsearchCluster(string, string, set<string>&, double&);
     string runOptiCluster(string, string, set<string>&, double&);
+    int runSensSpec();
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////
