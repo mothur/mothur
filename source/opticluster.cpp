@@ -70,8 +70,6 @@ int OptiCluster::initialize(double& value, bool randomize, string method) {
             }
             truePositives /= 2;
             falsePositives = numSeqs * (numSeqs-1)/2 - (trueNegatives + falseNegatives + truePositives);
-            
-            cout << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << endl; 
         }
         totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
@@ -303,7 +301,7 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
             //move into new bin
             fn-=ncCount; tn-=nfCount;  tp+=ncCount; fp+=nfCount;
         }
-
+        
         double result = 0.0;
         if (metric == "mcc") {
             result =  calcMCC(tp, tn, fp, fn);
