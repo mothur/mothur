@@ -29,14 +29,14 @@ public:
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { string tag = "opti_" + metric; return tag; }
-    int initialize(double&, bool);  //randomize and place in "best" OTUs
+    int initialize(double&, bool, string);  //randomize and place in "best" OTUs
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats();
     ListVector* getList();
     
 private:
     MothurOut* m;
-    map<int, int> seqBin;
+    map<int, int> seqBin; //sequence# -> bin#
     OptiMatrix* matrix;
     vector<int> randomizeSeqs;
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]

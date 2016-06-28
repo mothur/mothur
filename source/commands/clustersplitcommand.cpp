@@ -1418,7 +1418,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        cluster.initialize(listVectorMetric, true);
+        cluster.initialize(listVectorMetric, true, "oneotu");
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             

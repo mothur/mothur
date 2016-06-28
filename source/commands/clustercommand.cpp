@@ -859,7 +859,7 @@ int ClusterCommand::runOptiCluster(){
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        cluster.initialize(listVectorMetric, true);
+        cluster.initialize(listVectorMetric, true, "oneotu");
         
         m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         vector<double> results = cluster.getStats();

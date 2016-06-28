@@ -10,41 +10,69 @@
 
 /***********************************************************************/
 //randomly assign sequences to OTUs
-int OptiCluster::initialize(double& value, bool randomize) {
+int OptiCluster::initialize(double& value, bool randomize, string method) {
     try {
         numSeqs = matrix->getNumSeqs();
+        truePositives = 0;
+        falsePositives = 0;
+        falseNegatives = 0;
+        trueNegatives = 0;
         
         bins.resize(numSeqs); //place seqs in own bin
-        
-        for (int i = 0; i < numSeqs; i++) { bins[i].push_back(i); }
-        
-        //maps randomized sequences to bins
-        for (int i = 0; i < numSeqs; i++) {
-            seqBin[i] = bins[i][0];
-            randomizeSeqs.push_back(i);
-        }
-        
-        if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
         
         vector<int> temp;
         bins.push_back(temp);
         seqBin[numSeqs] = -1;
         insertLocation = numSeqs;
-    
-        truePositives = 0;
-        falsePositives = 0;
-        falseNegatives = 0;
-        trueNegatives = 0;
-        //for each sequence (singletons removed on read)
-        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
-            if (it->second == -1) { }
-            else {
-                int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
-                falseNegatives += numCloseSeqs;
+        
+        if (method == "singleton") {
+            for (int i = 0; i < numSeqs; i++) { bins[i].push_back(i); }
+            
+            //maps randomized sequences to bins
+            for (int i = 0; i < numSeqs; i++) {
+                seqBin[i] = bins[i][0];
+                randomizeSeqs.push_back(i);
             }
+            
+            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
+            
+            //for each sequence (singletons removed on read)
+            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+                if (it->second == -1) { }
+                else {
+                    int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                    falseNegatives += numCloseSeqs;
+                }
+            }
+            falseNegatives /= 2; //square matrix
+            trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
+        }else if (method == "oneotu") { //one otu
+            for (int i = 0; i < numSeqs; i++) { bins[0].push_back(i); }
+            
+            //maps randomized sequences to bins
+            for (int i = 0; i < numSeqs; i++) {
+                seqBin[i] = 0;
+                randomizeSeqs.push_back(i);
+            }
+            
+            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
+            
+            //fn = 0; close and cluster apart
+            //tn = 0; far apart and cluster apart
+            
+            //for each sequence (singletons removed on read)
+            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+                if (it->second == -1) { }
+                else {
+                    int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                    truePositives += numCloseSeqs;
+                }
+            }
+            truePositives /= 2;
+            falsePositives = numSeqs * (numSeqs-1)/2 - (trueNegatives + falseNegatives + truePositives);
+            
+            cout << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << endl; 
         }
-        falseNegatives /= 2; //square matrix
-        trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
         value = 0;
@@ -531,12 +559,12 @@ double OptiCluster::calcFDR(double tp, double tn, double fp, double fn) {
 vector<double> OptiCluster::getStats() {
     try {
         double singletn = matrix->getNumSingletons() + numSingletons;
-        numSeqs += singletn;
+        double tempnumSeqs = numSeqs + singletn;
         
         double tp = (double) truePositives;
         double fp = (double) falsePositives;
         double fn = (double) falseNegatives;
-        double tn = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
+        double tn = tempnumSeqs * (tempnumSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
         
         double p = tp + fn;
         double n = fp + tn;
