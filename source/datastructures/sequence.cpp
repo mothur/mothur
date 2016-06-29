@@ -733,7 +733,13 @@ void Sequence::printSequence(ostream& out){
 		out << unaligned << endl;
 	}
 }
+//********************************************************************************************************************
 
+void Sequence::printUnAlignedSequence(ostream& out){
+    
+    out << ">" << name << comment << endl;
+    out << unaligned << endl;
+}
 //********************************************************************************************************************
 
 int Sequence::getAlignLength(){

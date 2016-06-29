@@ -10,6 +10,7 @@
 #include "deconvolutecommand.h"
 #include "sequence.hpp"
 #include "systemcommand.h"
+#include "degapseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraVsearchCommand::setParameters(){
@@ -769,7 +770,7 @@ int ChimeraVsearchCommand::execute(){
         
     }
     catch(exception& e) {
-        m->errorOut(e, "ChimeraUchimeCommand", "execute");
+        m->errorOut(e, "ChimeraVsearchCommand", "execute");
         exit(1);
     }
 }
@@ -853,7 +854,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             
             //parse name - name will look like U68590/ab=1/
             string restOfName = "";
-            int pos = name.find_first_of('/');
+            int pos = name.find_first_of(';');
             if (pos != string::npos) {
                 restOfName = name.substr(pos);
                 name = name.substr(0, pos);
@@ -886,7 +887,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                 //parse parent1 names
                 if (parent1 != "*") {
                     restOfName = "";
-                    pos = parent1.find_first_of('/');
+                    pos = parent1.find_first_of(';');
                     if (pos != string::npos) {
                         restOfName = parent1.substr(pos);
                         parent1 = parent1.substr(0, pos);
@@ -900,7 +901,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                 //parse parent2 names
                 if (parent2 != "*") {
                     restOfName = "";
-                    pos = parent2.find_first_of('/');
+                    pos = parent2.find_first_of(';');
                     if (pos != string::npos) {
                         restOfName = parent2.substr(pos);
                         parent2 = parent2.substr(0, pos);
@@ -993,7 +994,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                             
                             //parse name - name will either look like U68590/ab=1/ or U68590
                             string restOfName = "";
-                            int pos = name.find_first_of('/');
+                            int pos = name.find_first_of(';');
                             if (pos != string::npos) {
                                 restOfName = name.substr(pos);
                                 name = name.substr(0, pos);
@@ -1035,7 +1036,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
         m->errorOut(e, "ChimeraVsearchCommand", "deconvoluteResults");
         exit(1);
     }
-}
+}		
 //**********************************************************************************************************************
 int ChimeraVsearchCommand::readFasta(string filename, map<string, string>& seqs){
     try {
@@ -1108,8 +1109,8 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
             int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
             int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", true); if ((error == 1) || m->control_pressed) {  return 0; } }
             
             int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
             totalSeqs += numSeqs;
@@ -1179,11 +1180,13 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
     try {
         
         outputFName = m->getFullPathName(outputFName);
+        string outputFNamec = m->getFullPathName(outputFName+"vsearch_out");
         filename = m->getFullPathName(filename);
         alns = m->getFullPathName(alns);
         
         //to allow for spaces in the path
         outputFName = "\"" + outputFName + "\"";
+        outputFNamec = "\"" + outputFNamec + "\"";
         filename = "\"" + filename + "\"";
         alns = "\"" + alns + "\"";
         
@@ -1233,12 +1236,17 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         
         char* tempO = new char[11];
         *tempO = '\0'; strncat(tempO, "--chimeras", 10);
-        //strcpy(tempO, "--uchimeout");
         cPara.push_back(tempO);
-        char* tempout = new char[outputFName.length()+1];
-        //strcpy(tempout, outputFName.c_str());
-        *tempout = '\0'; strncat(tempout, outputFName.c_str(), outputFName.length());
+        char* tempout = new char[outputFNamec.length()+1];
+        *tempout = '\0'; strncat(tempout, outputFNamec.c_str(), outputFNamec.length());
         cPara.push_back(tempout);
+        
+        char* tempchimeraout = new char[12];
+        *tempchimeraout = '\0'; strncat(tempchimeraout, "--uchimeout", 11);
+        cPara.push_back(tempchimeraout);
+        char* tempoutc = new char[outputFName.length()+1];
+        *tempoutc = '\0'; strncat(tempoutc, outputFName.c_str(), outputFName.length());
+        cPara.push_back(tempoutc);
         
         char* tempxsize = new char[8];
         *tempxsize = '\0'; strncat(tempxsize, "--xsize", 7);
@@ -1328,6 +1336,8 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         //int numArgs = cPara.size();
         
         if (m->debug) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
+        //cout << "commandString = " << commandString << endl;
+        
         system(commandString.c_str());
         
         //free memory
@@ -1336,6 +1346,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         
         //remove "" from filenames
         outputFName = outputFName.substr(1, outputFName.length()-2);
+        outputFNamec = outputFNamec.substr(1, outputFNamec.length()-2);
         filename = filename.substr(1, filename.length()-2);
         alns = alns.substr(1, alns.length()-2);
         
@@ -1343,7 +1354,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         
         //create accnos file from uchime results
         ifstream in;
-        m->openInputFile(outputFName, in);
+        m->openInputFile(outputFNamec, in, "no error");
         
         ofstream out;
         m->openOutputFile(accnos, out);
@@ -1354,30 +1365,20 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             
             if (m->control_pressed) { break; }
             
-            string name = "";
-            string chimeraFlag = "";
-            //in >> chimeraFlag >> name;
+            Sequence seq(in); m->gobble(in);
             
-            string line = m->getline(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
-            if (pieces.size() > 2) {
-                name = pieces[1];
-                //fix name if needed
-                if (templatefile == "self") {
-                    name = name.substr(0, name.length()-1); //rip off last /
-                    name = name.substr(0, name.find_last_of('/'));
-                }
-                
-                chimeraFlag = pieces[pieces.size()-1];
-            }
-            //for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
-            m->gobble(in);
+            string name = seq.getName();
             
-            if (chimeraFlag == "Y") {  out << name << endl; numChimeras++; }
+            name = name.substr(0, name.length()-1); //rip off last ;
+            name = name.substr(0, name.find_last_of(';'));
+            
+            out << name << endl; numChimeras++;
             num++;
         }
         in.close();
         out.close();
+        
+        m->mothurRemove(outputFNamec);
         
         //if (templatefile != "self") {  m->mothurRemove(filename); }
         
@@ -1404,7 +1405,7 @@ int ChimeraVsearchCommand::prepFile(string filename, string output) {
             
             Sequence seq(in); m->gobble(in);
             
-            if (seq.getName() != "") { seq.printSequence(out); }
+            if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
         }
         in.close();
         out.close();
