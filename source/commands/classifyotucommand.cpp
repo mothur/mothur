@@ -719,6 +719,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
                 ofstream outSums;
+                variables["[distance]"] = processList->getLabel() + "." + groups[i];
                 string outputSumFile = getOutputFileName("taxsummary", variables);
                 m->openOutputFile(outputSumFile, outSums);
                 outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
