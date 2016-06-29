@@ -1157,8 +1157,8 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			
 			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			totalSeqs += numSeqs;
@@ -1484,7 +1484,8 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		//int numArgs = cPara.size();
 		
 		//uchime_main(numArgs, uchimeParameters); 
-		//cout << "commandString = " << commandString << endl;
+		cout << "commandString = " << commandString << endl;
+        exit(1);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		commandString = "\"" + commandString + "\"";

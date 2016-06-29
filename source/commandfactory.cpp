@@ -151,6 +151,7 @@
 #include "makefilecommand.h"
 #include "biominfocommand.h"
 #include "renamefilecommand.h"
+#include "chimeravsearchcommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -278,6 +279,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.perseus"]		= "chimera.perseus";
 	commands["chimera.pintail"]		= "chimera.pintail";
 	commands["chimera.bellerophon"]	= "chimera.bellerophon";
+    commands["chimera.vsearch"]     = "chimera.vsearch";
 	commands["screen.seqs"]			= "screen.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
 	commands["cluster.split"]		= "cluster.split";
@@ -479,6 +481,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chimera.uchime")		{	command = new ChimeraUchimeCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	command = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	command = new ChimeraBellerophonCommand(optionString);		}
+        else if(commandName == "chimera.vsearch")       {	command = new ChimeraVsearchCommand(optionString);          }
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
@@ -651,6 +654,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "chimera.slayer")		{	pipecommand = new ChimeraSlayerCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	pipecommand = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	pipecommand = new ChimeraBellerophonCommand(optionString);		}
+        else if(commandName == "chimera.vsearch")       {	pipecommand = new ChimeraVsearchCommand(optionString);          }
 		else if(commandName == "phylotype")				{	pipecommand = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	pipecommand = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	pipecommand = new PreClusterCommand(optionString);				}
@@ -809,6 +813,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "chimera.uchime")		{	shellcommand = new ChimeraUchimeCommand();			}
 		else if(commandName == "chimera.pintail")		{	shellcommand = new ChimeraPintailCommand();			}
 		else if(commandName == "chimera.bellerophon")	{	shellcommand = new ChimeraBellerophonCommand();		}
+        else if(commandName == "chimera.vsearch")       {	shellcommand = new ChimeraVsearchCommand();         }
 		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}
 		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
 		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}

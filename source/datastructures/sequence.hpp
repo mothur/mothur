@@ -74,6 +74,7 @@ public:
 	int getLongHomoPolymer();
 	bool getIsAligned();
 	void printSequence(ostream&);
+    void printUnAlignedSequence(ostream&);
 	
 private:
 	MothurOut* m;
