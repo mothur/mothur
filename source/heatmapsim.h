@@ -26,7 +26,7 @@ class HeatMapSim {
 		string getPic(vector< vector<double> >, vector<string>);
 
 	private:
-		void printLegend(int, float);
+		void printLegend(int, float, float);
 
 		string format, groupComb, outputDir, inputfile;
 		int fontSize;
