@@ -10,7 +10,7 @@
 
 /***********************************************************************/
 //randomly assign sequences to OTUs
-int OptiCluster::initialize(double& value, bool randomize, string method) {
+int OptiCluster::initialize(double& value, bool randomize) {
     try {
         numSeqs = matrix->getNumSeqs();
         truePositives = 0;
@@ -25,52 +25,26 @@ int OptiCluster::initialize(double& value, bool randomize, string method) {
         seqBin[numSeqs] = -1;
         insertLocation = numSeqs;
         
-        if (method == "singleton") {
-            for (int i = 0; i < numSeqs; i++) { bins[i].push_back(i); }
-            
-            //maps randomized sequences to bins
-            for (int i = 0; i < numSeqs; i++) {
-                seqBin[i] = bins[i][0];
-                randomizeSeqs.push_back(i);
-            }
-            
-            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
-            
-            //for each sequence (singletons removed on read)
-            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
-                if (it->second == -1) { }
-                else {
-                    int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
-                    falseNegatives += numCloseSeqs;
-                }
-            }
-            falseNegatives /= 2; //square matrix
-            trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
-        }else if (method == "oneotu") { //one otu
-            for (int i = 0; i < numSeqs; i++) { bins[0].push_back(i); }
-            
-            //maps randomized sequences to bins
-            for (int i = 0; i < numSeqs; i++) {
-                seqBin[i] = 0;
-                randomizeSeqs.push_back(i);
-            }
-            
-            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
-            
-            //fn = 0; close and cluster apart
-            //tn = 0; far apart and cluster apart
-            
-            //for each sequence (singletons removed on read)
-            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
-                if (it->second == -1) { }
-                else {
-                    int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
-                    truePositives += numCloseSeqs;
-                }
-            }
-            truePositives /= 2;
-            falsePositives = numSeqs * (numSeqs-1)/2 - (trueNegatives + falseNegatives + truePositives);
+        for (int i = 0; i < numSeqs; i++) { bins[i].push_back(i); }
+        
+        //maps randomized sequences to bins
+        for (int i = 0; i < numSeqs; i++) {
+            seqBin[i] = bins[i][0];
+            randomizeSeqs.push_back(i);
         }
+        
+        if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
+        
+        //for each sequence (singletons removed on read)
+        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+            if (it->second == -1) { }
+            else {
+                int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                falseNegatives += numCloseSeqs;
+            }
+        }
+        falseNegatives /= 2; //square matrix
+        trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         
         value = 0;
