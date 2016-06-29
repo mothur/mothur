@@ -1484,8 +1484,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		//int numArgs = cPara.size();
 		
 		//uchime_main(numArgs, uchimeParameters); 
-		cout << "commandString = " << commandString << endl;
-        exit(1);
+		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		commandString = "\"" + commandString + "\"";
