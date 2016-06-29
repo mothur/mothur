@@ -11,7 +11,6 @@
  *
  */
 
-#include "mothur.h"
 #include "command.hpp"
 #include "sequenceparser.h"
 #include "counttable.h"

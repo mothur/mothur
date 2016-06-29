@@ -351,7 +351,7 @@ vector<Sequence> SequenceParser::getSeqs(string g){
 	}
 }
 /************************************************************/
-int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){ 
+int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, bool uchimeFormat=false){
 	try {
 		map<string, vector<Sequence> >::iterator it;
 		vector<Sequence> seqForThisGroup;
@@ -385,7 +385,7 @@ int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){
 					}else {
 						int num = m->getNumNames(itNameMap->second);
 						
-						seqPriorityNode temp(num, seqForThisGroup[i].getAligned(), seqForThisGroup[i].getName());
+						seqPriorityNode temp(num, seqForThisGroup[i].getUnaligned(), seqForThisGroup[i].getName());
 						nameVector.push_back(temp);
 					}
 				}
@@ -400,7 +400,7 @@ int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){
 					
 					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
 					
-					out << ">" <<  nameVector[i].name << "/ab=" << nameVector[i].numIdentical << "/" << endl << nameVector[i].seq << endl; //
+					out << ">" <<  nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
 				
 			}else { 
