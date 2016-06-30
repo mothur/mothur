@@ -39,6 +39,7 @@ vector<string> RenameFileCommand::setParameters(){
         CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pconstaxonomy);
         CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(poligos);
         CommandParameter pmothurgenerated("shorten", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmothurgenerated);
+        CommandParameter pdeleteold("deleteold", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdeleteold);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
