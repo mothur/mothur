@@ -638,7 +638,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 		map<double, int> labelBin;
 		vector<double> orderFloat;
 		int numSingleBins;
-		
+        
 		//read in singletons
 		if (singleton != "none") {
             
@@ -658,7 +658,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             
 			in.close();
 			m->mothurRemove(singleton);
-			
+            
 			numSingleBins = listSingle->getNumBins();
 		}else{  listSingle = NULL; numSingleBins = 0;  }
         
@@ -705,7 +705,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 				string thisLabel;
 				if (orderFloat[l] == -1) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
-
+                
 				//this file has reached the end
 				if (list == NULL) { 
 					list = input->getListVector(lastLabel, true); 
@@ -714,7 +714,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 					float labelFloat;
 					if (list->getLabel() == "unique") {  labelFloat = -1.0;  }
 					else { convert(list->getLabel(), labelFloat); }
-
+                    
 					//check for missing labels
 					if (labelFloat > orderFloat[l]) { //you are missing the label, get the next smallest one
 						//if its bigger get last label, otherwise keep it

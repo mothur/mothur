@@ -878,7 +878,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                 if (totalDiffs > pdiffs) { trashCode += "t"; goodSeq = false; }
                 
                 //trimming removed all bases
-               // if (currSeq.getUnaligned() == "") { goodSeq = false; }
+                if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
 				if(goodSeq == 1)    {
                     currSeq.printSequence(goodFile);

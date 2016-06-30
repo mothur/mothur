@@ -233,18 +233,34 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				ableToOpen = m->openInputFile(it->second, in, "noerror");
 				in.close();
 				
-				//if you can't open it, try default location
-				if (ableToOpen == 1) {
-					if (m->getDefaultPath() != "") { //default path is set
-						string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
-						m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-						in2.close();
-						container[parameter] = tryPath;
-					}
-				}
+                //if you can't open it, try default location
+                if (ableToOpen == 1) {
+                    if (m->getDefaultPath() != "") { //default path is set
+                        string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
+                        m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
+                        ifstream in2;
+                        ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                        in2.close();
+                        container[parameter] = tryPath;
+                    }
+                }
 				
+                //if you can't open it, try mothur's location
+                if (ableToOpen == 1) {
+                    //look for uchime exe
+                    string mpath = m->argv;
+                    string tempPath = mpath;
+                    for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
+                    mpath = mpath.substr(0, (tempPath.find_last_of('m')));
+                        
+                    string tryPath = mpath + m->getSimpleName(it->second);
+                    m->mothurOut("Unable to open " + it->second + ". Trying mothur's location " + tryPath); m->mothurOutEndLine();
+                    ifstream in2;
+                    ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                    in2.close();
+                    container[parameter] = tryPath;
+                }
+                    
 				//if you can't open it, try default location
 				if (ableToOpen == 1) {
 					if (m->getOutputDir() != "") { //default path is set

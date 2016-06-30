@@ -838,6 +838,8 @@
 		4888416C1CC7F1B900C5E972 /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = "<group>"; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = "<group>"; };
+		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = testcommands/testrenamefilecommand.cpp; sourceTree = "<group>"; };
+		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = testcommands/testrenamefilecommand.h; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = testcommands/testrenameseqscommand.cpp; sourceTree = "<group>"; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = testcommands/testrenameseqscommand.h; sourceTree = "<group>"; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = SOURCE_ROOT; };
@@ -1760,6 +1762,8 @@
 				48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */,
 				48C728691B69598400D40830 /* testmergegroupscommand.h */,
 				48C728681B69598400D40830 /* testmergegroupscommand.cpp */,
+				48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */,
+				48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */,
 				48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */,
 				48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */,
 				48C7286F1B6AB3B900D40830 /* testremovegroupscommand.cpp */,
@@ -1863,6 +1867,8 @@
 				A7E9B68A12D37EC400DA6239 /* chimeraslayercommand.cpp */,
 				A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */,
 				A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */,
+				48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */,
+				48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */,
 				A7E9B68D12D37EC400DA6239 /* chopseqscommand.h */,
 				A7E9B68C12D37EC400DA6239 /* chopseqscommand.cpp */,
 				A7E9B69112D37EC400DA6239 /* classifyotucommand.h */,
@@ -2788,6 +2794,7 @@
 				481FB64A1AC1B7F40076CFF3 /* suffixnodes.cpp in Sources */,
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
+				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
 				481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
@@ -3014,6 +3021,7 @@
 				A7E9B8A812D37EC400DA6239 /* clustercommand.cpp in Sources */,
 				A7E9B8A912D37EC400DA6239 /* clusterdoturcommand.cpp in Sources */,
 				A7E9B8AA12D37EC400DA6239 /* clusterfragmentscommand.cpp in Sources */,
+				48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */,
 				A7E9B8AB12D37EC400DA6239 /* clustersplitcommand.cpp in Sources */,
 				A7E9B8AC12D37EC400DA6239 /* cmdargs.cpp in Sources */,
 				A7E9B8AD12D37EC400DA6239 /* collect.cpp in Sources */,
@@ -3359,6 +3367,11 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\"\\\"1.37.1\\\"\"",
+					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -3368,6 +3381,7 @@
 					/usr/local/lib/,
 					/usr/local/include/,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx10.9;
@@ -3388,6 +3402,11 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\"\\\"1.37.1\\\"\"",
+					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3462,8 +3481,9 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.36.0\\\"\"",
-					"RELEASE_DATE=\"\\\"07/23/2015\\\"\"",
+					"VERSION=\"\\\"1.37.6\\\"\"",
+					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
@@ -3535,7 +3555,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 			};
 			name = Debug;
 		};
@@ -3561,8 +3581,8 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.0\\\"\"",
-					"RELEASE_DATE=\"\\\"04/05/2015\\\"\"",
+					"VERSION=\"\\\"1.37.6\\\"\"",
+					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -3572,7 +3592,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 			};
 			name = Release;
 		};

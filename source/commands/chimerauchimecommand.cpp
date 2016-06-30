@@ -675,7 +675,7 @@ int ChimeraUchimeCommand::execute(){
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-				m->printVsearchFile(nameMapCount, newFasta);
+                m->printVsearchFile(nameMapCount, newFasta, "/ab=", "/");
 				fastaFileNames[s] = newFasta;
 			}
 			
@@ -1157,8 +1157,8 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			
 			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			totalSeqs += numSeqs;
@@ -1484,7 +1484,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		//int numArgs = cPara.size();
 		
 		//uchime_main(numArgs, uchimeParameters); 
-		//cout << "commandString = " << commandString << endl;
+		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		commandString = "\"" + commandString + "\"";

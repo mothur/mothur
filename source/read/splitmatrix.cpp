@@ -671,14 +671,15 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         m->openInputFile(inputFile, bigNameFile);
         
         //grab header line
-        string headers = "";
-        if (countfile != "") {  errorMessage = "count"; headers = m->getline(bigNameFile); m->gobble(bigNameFile); }
+        string headers = ""; bool hasGroups = false;
+        if (countfile != "") {  errorMessage = "count"; headers = m->getline(bigNameFile); m->gobble(bigNameFile);
+            vector<string> pieces = m->splitWhiteSpace(headers); if (pieces.size() != 2) { hasGroups = true; } }
         
         string name, nameList;
         numSingleton = 0;
         while(!bigNameFile.eof()){
-            bigNameFile >> name >> nameList;
-            m->getline(bigNameFile); m->gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
+            bigNameFile >> name >> nameList; m->gobble(bigNameFile);
+            if (hasGroups) { m->getline(bigNameFile); m->gobble(bigNameFile);  }
             
             //did this sequence get assigned a group
             it = seqGroup.find(name);
@@ -694,6 +695,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
             }
         }
         bigNameFile.close();
+
         
         for(int i=0;i<numGroups;i++){
             string tempNameFile = inputFile + "." + toString(i) + ".temp";
