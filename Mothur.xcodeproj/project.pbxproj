@@ -3335,6 +3335,11 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\"\\\"1.37.1\\\"\"",
+					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -3344,6 +3349,7 @@
 					/usr/local/lib/,
 					/usr/local/include/,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
@@ -3364,6 +3370,11 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION=\"\\\"1.37.1\\\"\"",
+					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -3438,8 +3449,9 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.36.0\\\"\"",
-					"RELEASE_DATE=\"\\\"07/23/2015\\\"\"",
+					"VERSION=\"\\\"1.37.6\\\"\"",
+					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
@@ -3537,8 +3549,8 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.0\\\"\"",
-					"RELEASE_DATE=\"\\\"04/05/2015\\\"\"",
+					"VERSION=\"\\\"1.37.6\\\"\"",
+					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;

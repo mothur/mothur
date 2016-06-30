@@ -140,7 +140,7 @@ class MothurOut {
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
-        int printVsearchFile(vector<seqPriorityNode>&, string); //sorts and prints by abundance adding /ab=xxx/
+        int printVsearchFile(vector<seqPriorityNode>&, string, string); //sorts and prints by abundance adding /ab=xxx/
         bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
         bool mothurConvert(string, intDist&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.

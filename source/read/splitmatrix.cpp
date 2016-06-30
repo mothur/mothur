@@ -686,6 +686,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
             }
         }
         bigNameFile.close();
+
         
         for(int i=0;i<numGroups;i++){
             string tempNameFile = inputFile + "." + toString(i) + ".temp";

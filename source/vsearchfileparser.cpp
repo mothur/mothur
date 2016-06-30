@@ -111,7 +111,7 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         }
         in.close();
         
-        m->printVsearchFile(seqs, vsearchFasta);
+        m->printVsearchFile(seqs, vsearchFasta, "size");
         
         return vsearchFasta;
     }
