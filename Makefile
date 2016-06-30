@@ -47,11 +47,7 @@ endif
 #The boost libraries allow you to read gz files.
 ifeq  ($(strip $(USEBOOST)),yes)
 
-#User specified boost library path
-ifeq  ($(strip $(BOOST_LIBRARY_DIR)),"\"Enter_your_boost_library_path_here\"")
-else
-    LDFLAGS += ${BOOST_LIBRARY_DIR}
-endif
+    LDFLAGS += -L ${BOOST_LIBRARY_DIR}
 
     LIBS += -lboost_iostreams -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
