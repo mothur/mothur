@@ -5,6 +5,7 @@
 #include "optimatrix.h"
 #include "mothurout.h"
 #include "rabundvector.hpp"
+#include "listvector.hpp"
 
 class ListVector;
 

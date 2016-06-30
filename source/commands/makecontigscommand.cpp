@@ -3292,13 +3292,8 @@ bool MakeContigsCommand::fixName(string& forward){
         
         if (nameType == poundMatch) {
             match = true;
-            //we know the location of the # matches in the forward and reverse
-            if (poundMatchPos) {
-                forward = (forward.substr(0, poundMatchPos));
-            }else { //it does not match
-                int pos = forward.find_last_of('#');
-                if (pos != string::npos) {  forward = forward.substr(0, pos);   }
-            }
+            int pos = forward.find_last_of('#');
+            if (pos != string::npos) {  forward = forward.substr(0, pos);   }
         }else if (nameType == perfectMatch) { match = true; }
         
         return match;
