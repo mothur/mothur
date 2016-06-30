@@ -174,7 +174,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; m->gobble(in);
             
             if (recordType != "S") {
-            
+                
                 seqName = removeAbundances(seqName);
                 
                 if (format == "name") {
@@ -189,6 +189,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
                 list.set(clusterNumber, bin);
                 
             }
+            
         }
         in.close();
         
