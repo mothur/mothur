@@ -17,7 +17,6 @@ vector<string> ClassifyOtuCommand::setParameters(){
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","constaxonomy",false,true,true); parameters.push_back(ptaxonomy);
-		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
         CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
@@ -47,8 +46,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
 string ClassifyOtuCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
-		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
+		helpString += "The classify.otu command parameters are list, taxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
 		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
 		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
 		helpString += "The count parameter allows you add a count file associated with your list file. When using the count parameter mothur assumes your list file contains only uniques.\n";
@@ -166,14 +164,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
 				
-				it = parameters.find("reftaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
-				}
-				
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
@@ -214,10 +204,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			}
 			else if (taxfile == "not open") { abort = true; }
 			else { m->setTaxonomyFile(taxfile); }
-			
-			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
-			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
-			else if (refTaxonomy == "not open") { abort = true; }
 	
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }	
@@ -582,13 +568,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		out << "OTU\tSize\tTaxonomy" << endl;
 		
 		PhyloSummary* taxaSum;
-        if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund, printlevel);  }
-            else {  taxaSum = new PhyloSummary(ct,relabund, printlevel); }
-		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel);  }
-            else {  taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
-        }
+        if (countfile != "") { taxaSum = new PhyloSummary(ct,relabund, printlevel); }
+        else { taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
         
         vector<string> outs;
         vector<PhyloSummary*> taxaSums;
@@ -605,13 +586,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
                 
                 PhyloSummary* taxaSumt;
-                if (countfile != "") {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, relabund, printlevel);  }
-                    else {  taxaSumt = new PhyloSummary(ct, relabund, printlevel); }
-                }else {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,relabund, printlevel);  }
-                    else {  taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
-                }
+                if (countfile != "") { taxaSumt = new PhyloSummary(ct, relabund, printlevel);
+                }else { taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
                 taxaSums.push_back(taxaSumt);
             }
         }

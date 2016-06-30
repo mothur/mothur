@@ -17,7 +17,6 @@ vector<string> SummaryTaxCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pthreshold("threshold", "Number", "", "0", "", "", "","",false,true); parameters.push_back(pthreshold);
@@ -44,7 +43,6 @@ string SummaryTaxCommand::getHelpString(){
 		helpString += "The name parameter allows you to enter a name file associated with your taxonomy file. \n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
-		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
         helpString += "The threshold parameter allows you to specify a cutoff for the taxonomy file that is being inputted. Once the classification falls below the threshold the mothur will refer to it as unclassified when calculating the concensus.  This feature is similar to adjusting the cutoff in classify.seqs. Default=0.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
@@ -140,14 +138,6 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
 				
-				it = parameters.find("reftaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
-				}
-				
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
@@ -194,11 +184,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
             
-			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
-			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
-			else if (refTaxonomy == "not open") { refTaxonomy = ""; abort = true; }
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
+            //if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
 				outputDir += m->hasPath(taxfile); //if user entered a file with a path then preserve it	
@@ -249,13 +235,8 @@ int SummaryTaxCommand::execute(){
         }
 		
         PhyloSummary* taxaSum;
-        if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund, printlevel); }
-            else { taxaSum = new PhyloSummary(ct, relabund, printlevel); }
-        }else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel); }
-            else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel); }
-		}
+        if (countfile != "") { taxaSum = new PhyloSummary(ct, relabund, printlevel);
+        }else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel);  }
         
 		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
