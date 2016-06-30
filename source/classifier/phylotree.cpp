@@ -186,7 +186,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		map<string, int>::iterator childPointer;
 		
 		int currentNode = 0;
-		int level = 1;
+		int level = 0;
 		
 		tree[0].accessions.push_back(seqName);
 		m->removeConfidences(seqTaxonomy);

@@ -50,7 +50,7 @@ private:
 
 	int process(ListVector*);
     int processTaxMap();
-	vector<string> findConsensusTaxonomy(vector<string>, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
+	vector<string> findConsensusTaxonomy(vector<string>, int&, string&, string); 	// returns the name of the "representative" taxonomy of given bin
 	
 												
 };
