@@ -3360,8 +3360,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				"CLANG_WARN_CXX0X_EXTENSIONS[arch=*]" = NO;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
@@ -3390,7 +3390,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx10.11;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -3399,8 +3399,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3424,7 +3424,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx10.11;
 				SKIP_INSTALL = NO;
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};
@@ -3433,6 +3433,8 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
@@ -3445,7 +3447,7 @@
 					"VERSION=\"\\\"1.36.0\\\"\"",
 					"RELEASE_DATE=\"\\\"07/23/2015\\\"\"",
 				);
-				GCC_VERSION = "/usr/bin/c++";
+				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3463,6 +3465,8 @@
 					"-DBIT_VERSION",
 					"-DUSE_BOOST",
 					"-DUNIT_TEST",
+					"-stdlib=libstdc++",
+					"-std=c++11",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
 				);
@@ -3471,7 +3475,7 @@
 					"-lboost_iostreams",
 					"-lz",
 				);
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx10.11;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
@@ -3480,6 +3484,8 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
@@ -3513,6 +3519,8 @@
 					"-DUSE_READLINE",
 					"-DUSE_BOOST",
 					"-DUNIT_TEST",
+					"-std=c++11",
+					"-stdlib=libstdc++",
 					"-DBIT_VERSION",
 					"$(OTHER_CFLAGS)",
 				);
@@ -3521,7 +3529,7 @@
 					"-lboost_iostreams",
 					"-lz",
 				);
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx10.11;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
