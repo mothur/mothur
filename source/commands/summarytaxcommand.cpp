@@ -255,14 +255,14 @@ int SummaryTaxCommand::execute(){
                 
                 if (threshold != 0) {  taxon = processTaxMap(taxon);  }
                 
-                cout << taxon << endl;
+                //cout << taxon << endl;
                 
                 //add sequence to summary, countfile info included from Phylosummary constructor
                 taxaSum->addSeqToTree(name, taxon);
             }
             in.close();
         }
-		else if ((threshold != 0) && (namefile != "")) {
+		else if (namefile != "") {
 			map<string, vector<string> > nameMap;
 			map<string, vector<string> >::iterator itNames;
 			m->readNames(namefile, nameMap);
