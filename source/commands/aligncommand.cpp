@@ -347,7 +347,7 @@ int AlignCommand::execute(){
 			//delete accnos file if its blank else report to user
 			if (m->isBlank(accnosFileName)) {  m->mothurRemove(accnosFileName);  hasAccnos = false; }
 			else { 
-				m->mothurOut("Some of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+				m->mothurOut("[WARNING]: Some of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
 					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
 				}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
