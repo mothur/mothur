@@ -1615,7 +1615,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                 //check for reverse match
                 if (alignment != NULL) { delete alignment; }
                 
-                if (irbarcodes.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRPrimerLength+pdiffs+1)); }
+                if (irprimers.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRPrimerLength+pdiffs+1)); }
                 else{ alignment = NULL; }
                 
                 //can you find the barcode

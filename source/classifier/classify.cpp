@@ -45,6 +45,12 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             ifstream kmerFileTest(kmerDBName.c_str());
             if(kmerFileTest){
                 bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
+                int shortcutTimeStamp = m->getTimeStamp(kmerDBName);
+                int referenceTimeStamp = m->getTimeStamp(tempFile);
+                
+                //if the shortcut file is older then the reference file, remake shortcut file
+                if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
+
                 if (GoodFile) {  needToGenerate = false;	}
             }
         }

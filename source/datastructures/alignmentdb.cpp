@@ -67,13 +67,19 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		string kmerDBName;
 		if(method == "kmer")			{	
 			search = new KmerDB(fastaFileName, kmerSize);			
-			
-			
+
             kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+            
             ifstream kmerFileTest(kmerDBName.c_str());
 				
             if(kmerFileTest){
                 bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
+                int shortcutTimeStamp = m->getTimeStamp(kmerDBName);
+                int referenceTimeStamp = m->getTimeStamp(fastaFileName);
+                
+                //if the shortcut file is older then the reference file, remake shortcut file
+                if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
+                
                 if (GoodFile) {  needToGenerate = false;	}
             }
 			

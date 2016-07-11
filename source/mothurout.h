@@ -150,6 +150,7 @@ class MothurOut {
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);
+        int getTimeStamp(string filename);
 		bool anyLabelsToProcess(string, set<string>&, string);
 		bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
         bool inUsersGroups(vector<int>, vector< vector<int> >);

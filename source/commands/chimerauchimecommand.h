@@ -188,9 +188,9 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
             
 			int error;
             if (pDataArray->hasCount) { 
-                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
+                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
             }else {
-               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; } 
+               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; }
             }
 			
 			//int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
