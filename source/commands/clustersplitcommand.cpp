@@ -80,6 +80,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
         helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The cluster.split command should be in the following format: \n";
 		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
 		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
@@ -1542,6 +1543,10 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         //--maxaccepts=16
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
+        
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        vsearchParameters.push_back(threads);
         
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);

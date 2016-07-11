@@ -36,6 +36,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         //CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -61,6 +62,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
        helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
@@ -289,6 +291,11 @@ ClusterCommand::ClusterCommand(string option)  {
             //else                        { adjust = -1.0;                    }
             adjust=-1.0;
 			
+            bool setProcessors = true;
+            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ setProcessors=false;	temp = m->getProcessors();	}
+            m->setProcessors(temp);
+            m->mothurConvert(temp, processors);
+            
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "average"; }
 			
@@ -298,7 +305,14 @@ ClusterCommand::ClusterCommand(string option)  {
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
+            }else if (setProcessors) {
+                m->mothurOut("[WARNING]: You can only use the processors option when using the agc or dgc clustering methods. Using 1 processor.\n.");
             }
+            
+            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+            m->setProcessors(temp);
+            m->mothurConvert(temp, processors);
+            
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
@@ -527,6 +541,11 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         //--maxaccepts=16
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
+        
+        //--threads=1
+        string processorsString = "--threads=" + toString(processors);
+        char* processorsParameter = new char[processorsString.length()+1];  processorsParameter[0] = '\0'; strncat(processorsParameter, processorsString.c_str(), processorsString.length());
+        vsearchParameters.push_back(processorsParameter);
         
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);

@@ -62,7 +62,7 @@ private:
 	double cutoff, stableMetric;
     float adjust;
 	string showabund, timing;
-	int precision, length, maxIters;
+	int precision, length, maxIters, processors;
 	ofstream sabundFile, rabundFile, listFile;
 
 	bool print_start;
