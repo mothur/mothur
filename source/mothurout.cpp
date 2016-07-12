@@ -570,11 +570,16 @@ unsigned long long MothurOut::getTotalRAM() {
     try {
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    long pages = get_phys_pages();
-    long page_size = sysconf(_SC_PAGE_SIZE);
-    if ((page_size == -1) || (pages == -1))
+    #if defined _SC_PHYS_PAGES && defined _SC_PAGESIZE
+        /* This works on linux-gnu, solaris2 and cygwin.  */
+        double pages = sysconf (_SC_PHYS_PAGES);
+        double pagesize = sysconf (_SC_PAGESIZE);
+        if (0 <= pages && 0 <= pagesize)
+        return pages * pagesize;
+    #else
         mothurOut("[WARNING]: Cannot determine amount of RAM");
-    return pages * page_size;
+    #endif
+        
 #elif defined (_WIN32)
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
@@ -587,26 +592,12 @@ unsigned long long MothurOut::getTotalRAM() {
     return si.totalram * si.mem_unit;
     
 #endif
+        return 0;
     }
     catch(exception& e) {
         errorOut(e, "MothurOut", "getTotalRAM");
         exit(1);
     }
-}
-/***********************************************************************/
-unsigned long MothurOut::get_phys_pages () {
-    unsigned long phys_pages = 0;
-#if (_SC_PAGE_SIZE)
-    uint64_t mem;
-    size_t len = sizeof(mem);
-    sysctlbyname("hw.memsize", &mem, &len, NULL, 0);
-    phys_pages = mem/sysconf(_SC_PAGE_SIZE);
-#elif (_SC_PHYS_PAGES)
-    phys_pages = sysconf(_SC_PHYS_PAGES);
-#else
-     mothurOut("[WARNING]: Cannot determine number of physical pages\n");
-#endif
-    return phys_pages;
 }
 /***********************************************************************/
 int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
