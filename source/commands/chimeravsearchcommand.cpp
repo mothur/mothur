@@ -1328,6 +1328,9 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             cPara.push_back(tempDn);
         }
         
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        cPara.push_back(threads);
         
         char** vsearchParameters;
         vsearchParameters = new char*[cPara.size()];
