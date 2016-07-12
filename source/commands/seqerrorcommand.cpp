@@ -362,6 +362,7 @@ int SeqErrorCommand::execute(){
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
 		outputNames.push_back(errorCountFileName);  outputTypes["errorcount"].push_back(errorCountFileName);
+        m->mothurOut("\nMultiply error rate by 100 to obtain the percent sequencing errors.\n");
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n");
 		m->mothurOut("Errors\tSequences\n");
 		errorCountFile << "Errors\tSequences\n";		
