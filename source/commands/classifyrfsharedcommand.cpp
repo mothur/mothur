@@ -10,6 +10,7 @@
 #include "randomforest.hpp"
 #include "decisiontree.hpp"
 #include "rftreenode.hpp"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> ClassifyRFSharedCommand::setParameters(){	
@@ -20,7 +21,7 @@ vector<string> ClassifyRFSharedCommand::setParameters(){
         CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
         CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
 		CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
-        
+        //CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
             // parameters related to pruning
         CommandParameter pdopruning("prune", "Boolean", "", "T", "", "", "", "", false, false); parameters.push_back(pdopruning);
         CommandParameter ppruneaggrns("pruneaggressiveness", "Number", "", "0.9", "", "", "", "", false, false); parameters.push_back(ppruneaggrns);
@@ -51,6 +52,7 @@ string ClassifyRFSharedCommand::getHelpString(){
 		helpString += "The classify.rf command allows you to ....\n";
 		helpString += "The classify.rf command parameters are: shared, design, label, groups, otupersplit.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
+        //helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your designfile you would like analyzed.\n";
 		helpString += "The classify.rf should be in the following format: \n";
 		helpString += "classify.rf(shared=yourSharedFile, design=yourDesignFile)\n";
@@ -216,6 +218,12 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
       if (groups == "not found") { groups = ""; }
       else { m->splitAtDash(groups, Groups); }
       m->setGroups(Groups);
+        
+        //sets = validParameter.validFile(parameters, "sets", false);
+        //if (sets == "not found") { sets = ""; }
+        //else {
+           // m->splitAtDash(sets, Sets);
+        //}
       
         //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
       string label = validParameter.validFile(parameters, "label", false);
@@ -238,12 +246,32 @@ int ClassifyRFSharedCommand::execute() {
     
     if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
     
-    InputData input(sharedfile, "sharedfile");
-    vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-        
-    //read design file
-    designMap.read(designfile);
-    
+      
+      //read design file
+      designMap.read(designfile);
+      
+      /*if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
+          //make sure sets are all in designMap
+          SharedUtil* util = new SharedUtil();
+          vector<string> dGroups = designMap.getCategory();
+          util->setGroups(Sets, dGroups);
+          
+          vector<string> groupsToSelect = designMap.getNamesGroups(Sets);
+          
+          if (Groups.size() != 0) {
+              //make sure all user selected groups are in the sets asked for
+              util->setGroups(Groups, groupsToSelect);
+              m->setGroups(Groups);
+          }else {
+              m->setGroups(groupsToSelect);
+          }
+          delete util;
+      }*/
+      
+      InputData input(sharedfile, "sharedfile");
+      vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+      
+      
     string lastLabel = lookup[0]->getLabel();
     set<string> processedLabels;
     set<string> userLabels = labels;
@@ -346,9 +374,9 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
   
         map<string, int> treatmentToIntMap;
         map<int, string> intToTreatmentMap;
-        vector<string> groups = designMap.getCategory();
-        for (int  i = 0; i < groups.size(); i++) {
-            string treatmentName = groups[i];
+        //vector<string> groups = designMap.getCategory();
+        for (int i = 0; i < lookup.size(); i++) {
+            string treatmentName = designMap.get(lookup[i]->getGroup());
             treatmentToIntMap[treatmentName] = i;
             intToTreatmentMap[i] = treatmentName;
         }
@@ -375,12 +403,15 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
             }
             dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
-        
+        cout << "here" << endl;
         RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold);
-        
+        cout << "here" << endl;
         randomForest.populateDecisionTrees();
+        cout << "here" << endl;
         randomForest.calcForrestErrorRate();
+        cout << "here" << endl;
         randomForest.printConfusionMatrix(intToTreatmentMap);
+        cout << "here" << endl;
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "RF.";
@@ -388,7 +419,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
         randomForest.calcForrestVariableImportance(filename);
-        
+        cout << "here" << endl;
         //
         map<string, string> variable; 
         variable["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "misclassifications.";
@@ -397,7 +428,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         outputNames.push_back(mc_filename); outputTypes["summary"].push_back(mc_filename);
         randomForest.getMissclassifications(mc_filename, intToTreatmentMap, names);
         //
-        
+        cout << "here" << endl;
         m->mothurOutEndLine();
     }
     catch(exception& e) {

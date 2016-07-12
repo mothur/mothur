@@ -33,9 +33,9 @@ public:
 private:
     bool abort;
     string outputDir;
-    vector<string> outputNames, Groups;
+    vector<string> outputNames, Groups, Sets;
   
-    string sharedfile, designfile;
+    string sharedfile, designfile, sets;
     set<string> labels;
     bool allLines;
   
