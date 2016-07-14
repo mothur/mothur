@@ -40,7 +40,7 @@ private:
     vector<linePair> lines;
     bool abort, keepprimer, keepdots, fileAligned, pairedOligos;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
-	int start, end, processors, length, pdiffs, numFPrimers, numRPrimers;
+	int start, end, processors, length, pdiffs, rdiffs, numFPrimers, numRPrimers;
     Oligos oligos;
 	
     vector<string> outputNames;
@@ -68,13 +68,13 @@ struct pcrData {
     string goodFasta, badFasta, oligosfile, ecolifile, nomatch, locationsName;
 	unsigned long long fstart;
 	unsigned long long fend;
-	int count, start, end, length, pdiffs, pstart, pend;
+	int count, start, end, length, pdiffs, pstart, pend, rdiffs;
 	MothurOut* m;
     set<string> badSeqNames;
     bool keepprimer, keepdots, fileAligned, adjustNeeded;
 	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, string nm, bool kp, bool kd, int st, int en, int l, int pd, int rd, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -90,6 +90,7 @@ struct pcrData {
 		fstart = fst;
         fend = fen;
         pdiffs = pd;
+        rdiffs = rd;
         locationsName = loc;
 		count = 0;
         fileAligned = true;
@@ -152,7 +153,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
             numFPrimers = primers.size();
         }
         
-        TrimOligos trim(pDataArray->pdiffs, 0, primers, barcodes, revPrimer);
+        TrimOligos trim(pDataArray->pdiffs, pDataArray->rdiffs, 0, primers, barcodes, revPrimer);
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
             pDataArray->count++;
@@ -243,9 +244,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         int primerStart = 0; int primerEnd = 0;
                         vector<int> results = trim.findReverse(currSeq, primerStart, primerEnd);
                         bool good = true;
-                        if (results[0] > pDataArray->pdiffs) { good = false; }
+                        if (results[0] > pDataArray->rdiffs) { good = false; }
                         totalDiffs += results[0];
-                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pDataArray->pdiffs) + ") ";
+                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pDataArray->rdiffs) + ") ";
                         
                         if(!good){	if (pDataArray->nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{ 
@@ -324,7 +325,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     currSeq.setComment("\t" + commentString + "\t" + seqComment);
                 }
                 
-                if (totalDiffs > pDataArray->pdiffs) { trashCode += "t"; goodSeq = false; }
+                if (totalDiffs > (pDataArray->pdiffs + pDataArray->rdiffs)) { trashCode += "t"; goodSeq = false; }
                 
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }

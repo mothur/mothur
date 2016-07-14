@@ -22,7 +22,7 @@ vector<string> PcrSeqsCommand::setParameters(){
 		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pend);
  		CommandParameter pnomatch("nomatch", "Multiple", "reject-keep", "reject", "", "", "","",false,false); parameters.push_back(pnomatch);
         CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
-
+        CommandParameter prdiffs("rdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(prdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepprimer);
         CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pkeepdots);
@@ -44,7 +44,7 @@ string PcrSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The pcr.seqs command reads a fasta file.\n";
-        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, count, taxonomy, ecoli, start, end, nomatch, pdiffs, processors, keepprimer and keepdots.\n";
+        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, count, taxonomy, ecoli, start, end, nomatch, pdiffs, rdiffs, processors, keepprimer and keepdots.\n";
 		helpString += "The ecoli parameter is used to provide a fasta file containing a single reference sequence (e.g. for e. coli) this must be aligned. Mothur will trim to the start and end positions of the reference sequence.\n";
         helpString += "The start parameter allows you to provide a starting position to trim to.\n";
         helpString += "The end parameter allows you to provide a ending position to trim from.\n";
@@ -52,7 +52,8 @@ string PcrSeqsCommand::getHelpString(){
         helpString += "The processors parameter allows you to use multiple processors.\n";
         helpString += "The keepprimer parameter allows you to keep the primer, default=false.\n";
         helpString += "The keepdots parameter allows you to keep the leading and trailing .'s, default=true.\n";
-        helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
+        helpString += "The pdiffs parameter is used to specify the number of differences allowed in the forward primer. The default is 0.\n";
+        helpString += "The rdiffs parameter is used to specify the number of differences allowed in the reverse primer. The default is 0.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Pcr.seqs .\n";
 		return helpString;
@@ -269,6 +270,9 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, pdiffs);
+            
+            temp = validParameter.validFile(parameters, "rdiffs", false);		if (temp == "not found") { temp = "0"; }
+            m->mothurConvert(temp, rdiffs);
 			
             nomatch = validParameter.validFile(parameters, "nomatch", false);	if (nomatch == "not found") { nomatch = "reject"; }
 			
@@ -587,7 +591,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, locationsFile+extension, m, oligosfile, ecolifile, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
+			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, locationsFile+extension, m, oligosfile, ecolifile, nomatch, keepprimer, keepdots, start, end, length, pdiffs, rdiffs, lines[i].start, lines[i].end);
 			pDataArray.push_back(tempPcr);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -714,7 +718,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             revPrimer = oligos.getReversePrimers();
         }
         
-        TrimOligos trim(pdiffs, 0, primers, barcodes, revPrimer);
+        TrimOligos trim(pdiffs, rdiffs, 0, primers, barcodes, revPrimer);
         
 		while (!done) {
             
@@ -792,9 +796,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         int primerStart = 0; int primerEnd = 0;
                         vector<int> results = trim.findReverse(currSeq, primerStart, primerEnd);
                         bool good = true;
-                        if (results[0] > pdiffs) { good = false; }
+                        if (results[0] > rdiffs) { good = false; }
                         totalDiffs += results[0];
-                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], pdiffs) + ") ";
+                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], rdiffs) + ") ";
                         
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{
@@ -875,7 +879,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     currSeq.setComment("\t" + commentString + "\t" + seqComment);
                 }
                 
-                if (totalDiffs > pdiffs) { trashCode += "t"; goodSeq = false; }
+                if (totalDiffs > (pdiffs + rdiffs)) { trashCode += "t"; goodSeq = false; }
                 
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }

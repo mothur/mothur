@@ -24,6 +24,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
         bdiffs = b;
         ldiffs = l;
         sdiffs = s;
+        rdiffs = 0;
         
         barcodes = br;
         primers = pr;
@@ -73,6 +74,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
         bdiffs = b;
         ldiffs = l;
         sdiffs = s;
+        rdiffs = 0;
         paired = true;
         hasIndex = hi;
         
@@ -138,12 +140,13 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
 }
 /********************************************************************/
 //strip, pdiffs, bdiffs, primers, barcodes, revPrimers
-TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, vector<string> r){
+TrimOligos::TrimOligos(int p, int rd, int b, map<string, int> pr, map<string, int> br, vector<string> r){
     try {
         m = MothurOut::getInstance();
         
         pdiffs = p;
         bdiffs = b;
+        rdiffs = rd;
         
         barcodes = br;
         primers = pr;
@@ -282,7 +285,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
         string rawSequence = seq.getUnaligned();
         int maxRevPrimerLength = revPrimer[0].length();
         vector<int> success;
-        success.push_back(pdiffs + 1000);	//guilty until proven innocent
+        success.push_back(rdiffs + 1000);	//guilty until proven innocent
         success.push_back(1e6); //no matches found
         
         for(int i=0;i<revPrimer.size();i++){
@@ -310,10 +313,10 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
         }
         //cout << maxRevPrimerLength << endl;
         //if you found the barcode or if you don't want to allow for diffs
-        if ((pdiffs == 0) || (success[0] == 0)) { return success; }
+        if ((rdiffs == 0) || (success[0] == 0)) { return success; }
         else { //try aligning and see if you can find it
             Alignment* alignment;
-            if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
+            if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+rdiffs+1)); }
             else{ alignment = NULL; }
             
             //can you find the revPrimer
@@ -324,15 +327,15 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             
             for(int i=0;i<revPrimer.size();i++){
                 
-                if (rawSequence.length() < revPrimer[i].length()+pdiffs) {} //ignore primers too long for this seq
+                if (rawSequence.length() < revPrimer[i].length()+rdiffs) {} //ignore primers too long for this seq
                 else{
                     //undefined if not forced into an int.
-                    int stopSpot = rawRSequence.length()-(revPrimer[i].length()+pdiffs);
+                    int stopSpot = rawRSequence.length()-(revPrimer[i].length()+rdiffs);
                     
                     for (int j = 0; j < stopSpot; j++){
                         
                         string oligo = reverseOligo(revPrimer[i]);
-                        string rawChunk = rawRSequence.substr(j,oligo.length()+pdiffs);
+                        string rawChunk = rawRSequence.substr(j,oligo.length()+rdiffs);
                         //cout << "r before = " << oligo << '\t' << rawChunk << endl;
                         // cout << oligo << '\t' << olength << endl;
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
@@ -350,7 +353,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
                         oligo = oligo.substr(0,alnLength);
                         temp = temp.substr(0,alnLength);
                         int numDiff = countDiffs(oligo, temp);
-                        if (alnLength == 0) { numDiff = pdiffs + 1000; }
+                        if (alnLength == 0) { numDiff = rdiffs + 1000; }
                         
                         //cout << "r after = " << reverseOligo(oligo) << '\t' << reverseOligo(temp) << '\t' << numDiff << endl;
                         if(numDiff < minDiff){
@@ -367,8 +370,8 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             
             if (alignment != NULL) { delete alignment; }
             
-            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
-            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            if(minDiff > rdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
+            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = rdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
