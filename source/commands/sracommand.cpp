@@ -963,6 +963,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 thisFileName1 = pieces[1];
                 thisFileName2 = pieces[2];
                 group = pieces[0];
+                m->checkGroupName(group);
                 if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
                 if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->control_pressed = true; } }
                 else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }

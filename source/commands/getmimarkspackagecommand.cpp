@@ -467,6 +467,7 @@ int GetMIMarksPackageCommand::readFile(){
                 thisFileName1 = pieces[1];
                 thisFileName2 = pieces[2];
                 group = pieces[0];
+                m->checkGroupName(group);
             }else if (pieces.size() == 4) {
                 if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
                 thisFileName1 = pieces[0];

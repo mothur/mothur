@@ -193,6 +193,7 @@ class MothurOut {
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
+    bool checkGroupName(string name);
         map<string, vector<string> > parseClasses(string);
         string addUnclassifieds(string tax, int maxlevel, bool probs);
     

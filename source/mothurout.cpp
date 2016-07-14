@@ -2979,6 +2979,28 @@ int MothurOut::checkName(string& name) {
 		exit(1);
 	}
 }
+/************************************************************/
+bool MothurOut::checkGroupName(string name) {
+    try {
+        
+        bool goodName = true;
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') {  goodName = false; break;  }
+            else if (name[i] == '-') {  goodName = false; break;  }
+            else if (name[i] == '/') {  goodName = false; break;  }
+        }
+        
+        if (!goodName) {
+            mothurOut("[ERROR]: group " + name + " contains illegal characters in the name. Group names cannot include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n"); control_pressed = true;
+        }
+        
+        return goodName;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "checkGroupName");
+        exit(1);
+    }
+}
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<string, string>& fastamap) { 
 	try {

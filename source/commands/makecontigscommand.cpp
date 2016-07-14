@@ -2940,6 +2940,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 rindex = "";
             }else if (pieces.size() == 3) {
                 group = pieces[0];
+                m->checkGroupName(group);
                 forward = pieces[1];
                 reverse = pieces[2];
                 findex = "";
