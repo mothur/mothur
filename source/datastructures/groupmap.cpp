@@ -25,6 +25,7 @@ int GroupMap::addSeq(string name, string group) {
     try {
         int error = 0;
         
+        m->checkGroupName(group);
         setNamesOfGroups(group);
         
         if (m->debug) { m->mothurOut("[DEBUG]: name = '" + name + "', group = '" + group + "'\n"); }
@@ -65,7 +66,8 @@ int GroupMap::readMap() {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
             
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -90,7 +92,8 @@ int GroupMap::readMap() {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -135,7 +138,8 @@ int GroupMap::readDesignMap() {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -160,7 +164,8 @@ int GroupMap::readDesignMap() {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -209,7 +214,8 @@ int GroupMap::readMap(string filename) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -234,7 +240,8 @@ int GroupMap::readMap(string filename) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -282,7 +289,8 @@ int GroupMap::readDesignMap(string filename) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -307,7 +315,8 @@ int GroupMap::readDesignMap(string filename) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { 
+                if (pairDone) {
+                    m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
@@ -353,6 +362,7 @@ string GroupMap::getGroup(string sequenceName) {
 /************************************************************/
 
 void GroupMap::setGroup(string sequenceName, string groupN) {
+    m->checkGroupName(groupN);
 	setNamesOfGroups(groupN);
 	m->checkName(sequenceName);
 	it = groupmap.find(sequenceName);
