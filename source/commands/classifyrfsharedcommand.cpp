@@ -403,15 +403,15 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
             }
             dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
-        cout << "here" << endl;
+        
         RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold);
-        cout << "here" << endl;
+        
         randomForest.populateDecisionTrees();
-        cout << "here" << endl;
+        
         randomForest.calcForrestErrorRate();
-        cout << "here" << endl;
+        
         randomForest.printConfusionMatrix(intToTreatmentMap);
-        cout << "here" << endl;
+        
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "RF.";
@@ -419,7 +419,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
         randomForest.calcForrestVariableImportance(filename);
-        cout << "here" << endl;
+        
         //
         map<string, string> variable; 
         variable["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "misclassifications.";
@@ -428,7 +428,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         outputNames.push_back(mc_filename); outputTypes["summary"].push_back(mc_filename);
         randomForest.getMissclassifications(mc_filename, intToTreatmentMap, names);
         //
-        cout << "here" << endl;
+        
         m->mothurOutEndLine();
     }
     catch(exception& e) {
