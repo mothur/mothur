@@ -1,10 +1,7 @@
 #ifndef WEIGHTEDLINKAGE_H
 #define WEIGHTEDLINKAGE_H
 
-
-#include "mothur.h"
 #include "cluster.hpp"
-#include "rabundvector.hpp"
 
 /* This class implements the WPGMA, weighted average neighbor clustering algorithm */
 

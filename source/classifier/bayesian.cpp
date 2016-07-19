@@ -10,23 +10,18 @@
 #include "bayesian.h"
 #include "kmer.hpp"
 #include "phylosummary.h"
-#include "referencedb.h"
+
 /**************************************************************************************************/
 Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh) : 
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 	try {
-		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		threadID = tid;
 		flip = f;
         shortcuts = sh;
 		string baseName = tempFile;
-			
-		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
-		
 		string baseTName = tfile;
-		if (baseTName == "saved") { baseTName = rdb->getSavedTaxonomy(); }
-		
+
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
 		string tfileroot = m->getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
 		string tempfileroot = m->getRootName(m->getSimpleName(baseName));
@@ -50,23 +45,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){
 			FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3);
 		}
-		
-		//if you want to save, but you dont need to calculate then just read
-		if (rdb->save && probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood && (tempFile != "saved")) {  
-			ifstream saveIn;
-			m->openInputFile(tempFile, saveIn);
-			
-			while (!saveIn.eof()) {
-				Sequence temp(saveIn);
-				m->gobble(saveIn);
-				
-				rdb->referenceSeqs.push_back(temp); 
-			}
-			saveIn.close();			
-		}
 
-		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){	
-			if (tempFile == "saved") { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){
 			
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
@@ -78,18 +58,10 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			genusNodes = phyloTree->getGenusNodes(); 
 			genusTotals = phyloTree->getGenusTotals();
 			
-			if (tfile == "saved") { 
-				m->mothurOutEndLine();  m->mothurOut("Using probabilties from " + rdb->getSavedTaxonomy() + " that are saved in memory...    ");	cout.flush();; 
-				wordGenusProb = rdb->wordGenusProb;
-				WordPairDiffArr = rdb->WordPairDiffArr;
-			}else {
-				m->mothurOut("Reading template probabilities...     "); cout.flush();
-				readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);
-			}	
+            m->mothurOut("Reading template probabilities...     "); cout.flush();
+            readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);
 			
-			//save probabilities
-			if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
-		}else{
+        }else{
 		
 			//create search database and names vector
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
@@ -187,19 +159,13 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				
 				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
                 maxLevel = phyloTree->getMaxLevel();
-                
-				//save probabilities
-				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
 			}
 		}
 		
         if (m->debug) { m->mothurOut("[DEBUG]: about to generateWordPairDiffArr\n"); }
 		generateWordPairDiffArr();
         if (m->debug) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
-		
-		//save probabilities
-		if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
-		
+			
 		m->mothurOut("DONE."); m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
 	}
@@ -442,34 +408,7 @@ int Bayesian::generateWordPairDiffArr(){
 		exit(1);
 	}
 }
-/*************************************************************************************************
-map<string, int> Bayesian::parseTaxMap(string newTax) {
-	try{
-	
-		map<string, int> parsed;
-		
-		newTax = newTax.substr(0, newTax.length()-1);  //get rid of last ';'
-	
-		//parse taxonomy
-		string individual;
-		while (newTax.find_first_of(';') != -1) {
-			individual = newTax.substr(0,newTax.find_first_of(';'));
-			newTax = newTax.substr(newTax.find_first_of(';')+1, newTax.length());
-			parsed[individual] = 1;
-		}
-		
-		//get last one
-		parsed[newTax] = 1;
-
-		return parsed;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Bayesian", "parseTax");
-		exit(1);
-	}
-}
-**************************************************************************************************/
+/**************************************************************************************************/
 void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string inNumName) {
 	try{
 		

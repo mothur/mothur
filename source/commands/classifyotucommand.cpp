@@ -17,7 +17,6 @@ vector<string> ClassifyOtuCommand::setParameters(){
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","constaxonomy",false,true,true); parameters.push_back(ptaxonomy);
-		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
         CommandParameter poutput("output", "Multiple", "plain-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
@@ -47,8 +46,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
 string ClassifyOtuCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
-		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
+		helpString += "The classify.otu command parameters are list, taxonomy, name, group, count, persample, cutoff, label, basis, relabund and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
 		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
 		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
 		helpString += "The count parameter allows you add a count file associated with your list file. When using the count parameter mothur assumes your list file contains only uniques.\n";
@@ -166,14 +164,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
 				
-				it = parameters.find("reftaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
-				}
-				
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
@@ -214,10 +204,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			}
 			else if (taxfile == "not open") { abort = true; }
 			else { m->setTaxonomyFile(taxfile); }
-			
-			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
-			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
-			else if (refTaxonomy == "not open") { abort = true; }
 	
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }	
@@ -415,7 +401,7 @@ int ClassifyOtuCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, int& size, string& conTax) {
+vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, int& size, string& conTax, string group) {
 	try{
 		conTax = "";
 		vector<string> allNames;
@@ -427,53 +413,73 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 		
 		size = 0;
 		for (int i = 0; i < names.size(); i++) {
-	
-			//if namesfile include the names
-			if (namefile != "") {
-	
-				//is this sequence in the name file - namemap maps seqName -> repSeqName
-				it2 = nameMap.find(names[i]);
-				
-				if (it2 == nameMap.end()) { //this name is not in name file, skip it
-					m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
-				}else{
-					
-					//is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
-					it = taxMap.find(it2->second);
-			
-					if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-					
-						if (names[i] != it2->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
-						else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
-					}else{
-				
-						//add seq to tree
-						phylo->addSeqToTree(names[i], it->second);
-						size++;
-						allNames.push_back(names[i]);
-					}
-				}
-				
-			}else{
-				//is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
-				it = taxMap.find(names[i]);
-		
-				if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-					m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
-				}else{
+            
+            if (group != "") { //no need to check for name file, names already added in previous step
+                //is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
+                it = taxMap.find(names[i]);
+                
+                if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
+                    m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                }else{
                     if (countfile != "") {
-                        int numDups = ct->getNumSeqs(names[i]); 
+                        int numDups = ct->getGroupCount(names[i], group);
                         for (int j = 0; j < numDups; j++) {  phylo->addSeqToTree(names[i], it->second);  }
                         size += numDups;
                     }else{
-					//add seq to tree
+                        //add seq to tree
                         phylo->addSeqToTree(names[i], it->second);
-                        size++;  
+                        size++;
                     }
                     allNames.push_back(names[i]);
-				}
-			}
+                }
 
+            }else {
+                //if namesfile include the names
+                if (namefile != "") {
+                    
+                    //is this sequence in the name file - namemap maps seqName -> repSeqName
+                    it2 = nameMap.find(names[i]);
+                    
+                    if (it2 == nameMap.end()) { //this name is not in name file, skip it
+                        m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                    }else{
+                        
+                        //is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
+                        it = taxMap.find(it2->second);
+                        
+                        if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
+                            
+                            if (names[i] != it2->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+                            else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+                        }else{
+                            
+                            //add seq to tree
+                            phylo->addSeqToTree(names[i], it->second);
+                            size++;
+                            allNames.push_back(names[i]);
+                        }
+                    }
+                    
+                }else{
+                    //is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
+                    it = taxMap.find(names[i]);
+                    
+                    if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
+                        m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                    }else{
+                        if (countfile != "") {
+                            int numDups = ct->getNumSeqs(names[i]); 
+                            for (int j = 0; j < numDups; j++) {  phylo->addSeqToTree(names[i], it->second);  }
+                            size += numDups;
+                        }else{
+                            //add seq to tree
+                            phylo->addSeqToTree(names[i], it->second);
+                            size++;  
+                        }
+                        allNames.push_back(names[i]);
+                    }
+                }
+            }
 			
 			if (m->control_pressed) { delete phylo; return allNames; }
 			
@@ -508,7 +514,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 				
 			//is this taxonomy above cutoff
 			int consensusConfidence = ceil((bestChildSize / (float) size) * 100);
-			
+            
 			if (consensusConfidence >= cutoff) { //if yes, add it
 				if (probs) {
 					conTax += bestChild.name + "(" + toString(consensusConfidence) + ");";
@@ -523,10 +529,10 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 			//move down a level
 			currentNode = bestChild;
 		}
-		
-		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
         
-		if (conTax == "") {  conTax = "no_consensus;";  }
+        if (conTax == "") {  conTax = "unknown;";  }
+        
+		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
 		
 		delete phylo;	
 		
@@ -562,13 +568,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		out << "OTU\tSize\tTaxonomy" << endl;
 		
 		PhyloSummary* taxaSum;
-        if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,relabund, printlevel);  }
-            else {  taxaSum = new PhyloSummary(ct,relabund, printlevel); }
-		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund, printlevel);  }
-            else {  taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
-        }
+        if (countfile != "") { taxaSum = new PhyloSummary(ct,relabund, printlevel); }
+        else { taxaSum = new PhyloSummary(groupMap,relabund, printlevel); }
         
         vector<string> outs;
         vector<PhyloSummary*> taxaSums;
@@ -585,13 +586,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
                 
                 PhyloSummary* taxaSumt;
-                if (countfile != "") {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, relabund, printlevel);  }
-                    else {  taxaSumt = new PhyloSummary(ct, relabund, printlevel); }
-                }else {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,relabund, printlevel);  }
-                    else {  taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
-                }
+                if (countfile != "") { taxaSumt = new PhyloSummary(ct, relabund, printlevel);
+                }else { taxaSumt = new PhyloSummary(groupMap,relabund, printlevel); }
                 taxaSums.push_back(taxaSumt);
             }
         }
@@ -608,7 +604,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
             vector<string> thisNames;
             m->splitAtComma(binnames, thisNames);
             
-			names = findConsensusTaxonomy(thisNames, size, conTax);
+			names = findConsensusTaxonomy(thisNames, size, conTax, "");
 		
 			if (m->control_pressed) { break; }
 
@@ -683,7 +679,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 }
                 
                 for (itParsed = parsedNames.begin(); itParsed != parsedNames.end(); itParsed++) {
-                    vector<string> theseNames = findConsensusTaxonomy(itParsed->second, size, conTax);
+                    vector<string> theseNames = findConsensusTaxonomy(itParsed->second, size, conTax, itParsed->first);
                     
                     if (m->control_pressed) { break; }
                     
@@ -719,6 +715,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         if (persample) {
             for (int i = 0; i < groups.size(); i++) {
                 ofstream outSums;
+                variables["[distance]"] = processList->getLabel() + "." + groups[i];
                 string outputSumFile = getOutputFileName("taxsummary", variables);
                 m->openOutputFile(outputSumFile, outSums);
                 outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);

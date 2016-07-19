@@ -771,6 +771,7 @@ vector<map<string, string> > RenameSeqsCommand::readFiles(){
             }else if (pieces.size() == 3) {
                 thisFileName = pieces[0]+"-"+pieces[1];
                 group = pieces[2];
+                m->checkGroupName(group);
             }else {
                 m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. TThe file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->control_pressed = true;
             }

@@ -8,7 +8,6 @@
  */
 
 #include "chimeracheckcommand.h"
-#include "referencedb.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraCheckCommand::setParameters(){	
@@ -23,7 +22,6 @@ vector<string> ChimeraCheckCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -50,8 +48,7 @@ string ChimeraCheckCommand::getHelpString(){
 		helpString += "The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n";
 		helpString += "The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n";
 		helpString += "You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n";
-		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
-		helpString += "The chimera.check command should be in the following format: \n";
+        helpString += "The chimera.check command should be in the following format: \n";
 		helpString += "chimera.check(fasta=yourFastaFile, reference=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n";
 		helpString += "Example: chimera.check(fasta=AD.fasta, reference=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
@@ -94,8 +91,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(){
 ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;  
-		ReferenceDB* rdb = ReferenceDB::getInstance();
-		
+        
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -296,27 +292,10 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
-			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
-			save = m->isTrue(temp); 
-			rdb->save = save; 
-			if (save) { //clear out old references
-				rdb->clearMemory();	
-			}
-			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
 			templatefile = validParameter.validFile(parameters, "reference", true);
-			if (templatefile == "not found") { 
-				//check for saved reference sequences
-				if (rdb->referenceSeqs.size() != 0) {
-					templatefile = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					abort = true; 
-				}
+			if (templatefile == "not found") {  m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
 			}else if (templatefile == "not open") { abort = true; }	
-			else {	if (save) {	rdb->setSavedReference(templatefile);	}	}
-			
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			m->mothurConvert(temp, ksize);

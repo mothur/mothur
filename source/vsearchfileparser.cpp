@@ -7,10 +7,7 @@
 //
 
 #include "vsearchfileparser.h"
-#include "deconvolutecommand.h"
-#include "sequence.hpp"
-#include "rabundvector.hpp"
-#include "sabundvector.hpp"
+
 
 /***********************************************************************/
 VsearchFileParser::VsearchFileParser(){
@@ -114,7 +111,7 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         }
         in.close();
         
-        m->printVsearchFile(seqs, vsearchFasta, "size");
+        m->printVsearchFile(seqs, vsearchFasta, ";size=", ";");
         
         return vsearchFasta;
     }
@@ -190,6 +187,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
                 if (bin == "")  {   bin = seqName;          }
                 else            {   bin += ',' + seqName;   }
                 list.set(clusterNumber, bin);
+                
             }
             
         }
@@ -215,7 +213,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             }
         }
         out.close();
-        
+
         return 0;
     }
     catch(exception& e) {
@@ -228,7 +226,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
 string VsearchFileParser::removeAbundances(string seqName){
     try {
         
-        int pos = seqName.find_last_of("/", seqName.length()-2); //don't look at the last /
+        int pos = seqName.find_last_of(";", seqName.length()-2); //don't look at the last /
         if (pos != string::npos) { seqName = seqName.substr(0, pos); }
         
         return seqName;

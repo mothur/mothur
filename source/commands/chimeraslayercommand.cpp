@@ -9,7 +9,6 @@
 
 #include "chimeraslayercommand.h"
 #include "deconvolutecommand.h"
-#include "referencedb.h"
 #include "sequenceparser.h"
 #include "counttable.h"
 
@@ -45,7 +44,6 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -89,7 +87,6 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast and kmer. Default=blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
 		helpString += "The blastlocation parameter allows you to specify the location of your blast executable. By default mothur will look in ./blast/bin relative to mothur's executable.  \n";
-		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
 		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";
@@ -138,8 +135,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(){
 //***************************************************************************************************************
 ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		ReferenceDB* rdb = ReferenceDB::getInstance();
+		abort = false; calledHelp = false;
         hasCount = false;
         hasName = false;
 		
@@ -489,12 +485,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
-			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
-			save = m->isTrue(temp); 
-			rdb->save = save; 
-			if (save) { //clear out old references
-				rdb->clearMemory();	
-			}
 			
 			string path;
 			it = parameters.find("reference");
@@ -516,14 +506,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
 					else if (templatefile == "not found") { //check for saved reference sequences
-						if (rdb->referenceSeqs.size() != 0) {
-							templatefile = "saved";
-						}else {
-							m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-							m->mothurOutEndLine();
-							abort = true; 
-						}
-					}else {	if (save) {	rdb->setSavedReference(templatefile);	}	}	
+                        m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
+					}
 				}
 			}else if (hasName) {  templatefile = "self"; 
 				if (save) {
@@ -539,13 +523,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				}
 			}
 			else { 
-				if (rdb->referenceSeqs.size() != 0) {
-					templatefile = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					templatefile = ""; abort = true; 
-				} 
+                m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n");
+					templatefile = ""; abort = true;
 			}
 			
 			

@@ -15,6 +15,7 @@ vector<string> SensSpecCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","sensspec",false,true,true); parameters.push_back(plist);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pphylip);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pcolumn);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pcount);
 		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "","",false,false); parameters.push_back(pcutoff);
@@ -37,7 +38,7 @@ vector<string> SensSpecCommand::setParameters(){
 string SensSpecCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The sens.spec command....\n";
+		helpString += "The sens.spec command determines the quality of the clusters.\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -141,6 +142,14 @@ SensSpecCommand::SensSpecCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
+                }
 
 			}
 			//check for required parameters
@@ -167,6 +176,11 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }
 			else {  m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not found") { countfile =  "";  }
+            else if (countfile == "not open") { countfile = ""; abort = true; }
+            else {  m->setCountTableFile(countfile); }
 
 
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
@@ -183,8 +197,19 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				}
 			}else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a sens.spec command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 
-			if ((namefile == "") && (columnfile != "")) {
-                m->mothurOut("[ERROR]: you must provide a name file with a column file."); m->mothurOutEndLine(); abort = true;
+            if (columnfile != "") {
+                if ((namefile == "") && (countfile == "")){
+                    namefile = m->getNameFile();
+                    if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                    else {
+                        countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine();
+                            abort = true;
+                        }	
+                    }	
+                }
             }
 
 			if ((namefile == "") && (phylipfile != "")) {
@@ -609,17 +634,24 @@ string SensSpecCommand::preProcessList(){
             }
             phylipFile.close();
         }else {
-            ifstream nameFileHandle;
-            m->openInputFile(namefile, nameFileHandle);
-            string uniqueSeqName, redundantSeqNames;
-
-            while(nameFileHandle){
-                if (m->control_pressed) { return ""; }
-                nameFileHandle >> uniqueSeqName >> redundantSeqNames;
-                uniqueNames.insert(uniqueSeqName);
-                m->gobble(nameFileHandle);
+            if (namefile != "") {
+                ifstream nameFileHandle;
+                m->openInputFile(namefile, nameFileHandle);
+                string uniqueSeqName, redundantSeqNames;
+                
+                while(nameFileHandle){
+                    if (m->control_pressed) { return ""; }
+                    nameFileHandle >> uniqueSeqName >> redundantSeqNames;
+                    uniqueNames.insert(uniqueSeqName);
+                    m->gobble(nameFileHandle);
+                }
+                nameFileHandle.close();
+            }else if (countfile != "") {
+                CountTable ct;
+                ct.readTable(countfile, false, true);
+                vector<string> countNames = ct.getNamesOfSeqs();
+                for (int i = 0; i < countNames.size(); i++) { uniqueNames.insert(countNames[i]); }
             }
-            nameFileHandle.close();
         }
 
         //read list file, if numSeqs > unique names then remove redundant names
@@ -637,7 +669,7 @@ string SensSpecCommand::preProcessList(){
 
 			//read in list vector
 			ListVector list(in);
-
+            
             //listfile is already unique
             if (list.getNumSeqs() == uniqueNames.size()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
 

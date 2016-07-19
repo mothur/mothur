@@ -50,7 +50,6 @@
 #include "secondarystructurecommand.h"
 #include "getsharedotucommand.h"
 #include "getlistcountcommand.h"
-#include "hclustercommand.h"
 #include "classifyseqscommand.h"
 #include "phylotypecommand.h"
 #include "mgclustercommand.h"
@@ -86,7 +85,6 @@
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
 #include "parsefastaqcommand.h"
-#include "pipelinepdscommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
@@ -114,7 +112,6 @@
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
 #include "countgroupscommand.h"
-#include "clearmemorycommand.h"
 #include "summarytaxcommand.h"
 #include "chimeraperseuscommand.h"
 #include "shhhseqscommand.h"
@@ -153,6 +150,8 @@
 #include "setseedcommand.h"
 #include "makefilecommand.h"
 #include "biominfocommand.h"
+#include "renamefilecommand.h"
+#include "chimeravsearchcommand.h"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -217,7 +216,6 @@ CommandFactory::CommandFactory(){
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.otulist"]			= "get.otulist";
-	commands["hcluster"]			= "hcluster";
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
@@ -269,9 +267,7 @@ CommandFactory::CommandFactory(){
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
-	commands["clear.memory"]		= "clear.memory";
 	commands["pairwise.seqs"]		= "pairwise.seqs";
-	commands["pipeline.pds"]		= "pipeline.pds";
 	commands["classify.seqs"]		= "classify.seqs";
 	commands["dist.seqs"]			= "dist.seqs";
 	commands["filter.seqs"]			= "filter.seqs";
@@ -283,6 +279,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.perseus"]		= "chimera.perseus";
 	commands["chimera.pintail"]		= "chimera.pintail";
 	commands["chimera.bellerophon"]	= "chimera.bellerophon";
+    commands["chimera.vsearch"]     = "chimera.vsearch";
 	commands["screen.seqs"]			= "screen.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
 	commands["cluster.split"]		= "cluster.split";
@@ -308,7 +305,7 @@ CommandFactory::CommandFactory(){
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "quit";
-    commands["classify.rf"]         = "classify.rf";
+    //commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared";
     commands["primer.design"]		= "primer.design";
@@ -329,6 +326,7 @@ CommandFactory::CommandFactory(){
     commands["make.file"]           = "make.file";
     commands["biom.info"]           = "biom.info";
     commands["set.seed"]            = "set.seed";
+    commands["rename.file"]         = "rename.file";
 
 
 }
@@ -476,7 +474,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);				}
 		else if(commandName == "get.sharedseqs")		{	command = new GetSharedOTUCommand(optionString);			}
 		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);			}
-		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);				}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);			}
 		else if(commandName == "chimera.ccode")			{	command = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	command = new ChimeraCheckCommand(optionString);			}
@@ -484,6 +481,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chimera.uchime")		{	command = new ChimeraUchimeCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	command = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	command = new ChimeraBellerophonCommand(optionString);		}
+        else if(commandName == "chimera.vsearch")       {	command = new ChimeraVsearchCommand(optionString);          }
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
@@ -519,7 +517,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
         else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
-		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}
@@ -541,7 +538,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	command = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
-		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "summary.qual")			{	command = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
@@ -577,6 +573,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "set.seed")              {	command = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
+        else if(commandName == "rename.file")           {	command = new RenameFileCommand(optionString);              }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -650,7 +647,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "align.check")			{	pipecommand = new AlignCheckCommand(optionString);				}
 		else if(commandName == "get.sharedseqs")		{	pipecommand = new GetSharedOTUCommand(optionString);			}
 		else if(commandName == "get.otulist")			{	pipecommand = new GetListCountCommand(optionString);			}
-		else if(commandName == "hcluster")				{	pipecommand = new HClusterCommand(optionString);				}
 		else if(commandName == "classify.seqs")			{	pipecommand = new ClassifySeqsCommand(optionString);			}
 		else if(commandName == "chimera.ccode")			{	pipecommand = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	pipecommand = new ChimeraCheckCommand(optionString);			}
@@ -658,6 +654,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "chimera.slayer")		{	pipecommand = new ChimeraSlayerCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	pipecommand = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	pipecommand = new ChimeraBellerophonCommand(optionString);		}
+        else if(commandName == "chimera.vsearch")       {	pipecommand = new ChimeraVsearchCommand(optionString);          }
 		else if(commandName == "phylotype")				{	pipecommand = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	pipecommand = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	pipecommand = new PreClusterCommand(optionString);				}
@@ -714,7 +711,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	pipecommand = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
-		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "summary.qual")			{	pipecommand = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
@@ -750,6 +746,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "set.seed")              {	pipecommand = new SetSeedCommand(optionString);                 }
         else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
+        else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand(optionString);              }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -809,7 +806,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "align.check")			{	shellcommand = new AlignCheckCommand();				}
 		else if(commandName == "get.sharedseqs")		{	shellcommand = new GetSharedOTUCommand();			}
 		else if(commandName == "get.otulist")			{	shellcommand = new GetListCountCommand();			}
-		else if(commandName == "hcluster")				{	shellcommand = new HClusterCommand();				}
 		else if(commandName == "classify.seqs")			{	shellcommand = new ClassifySeqsCommand();			}
 		else if(commandName == "chimera.ccode")			{	shellcommand = new ChimeraCcodeCommand();			}
 		else if(commandName == "chimera.check")			{	shellcommand = new ChimeraCheckCommand();			}
@@ -817,6 +813,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "chimera.uchime")		{	shellcommand = new ChimeraUchimeCommand();			}
 		else if(commandName == "chimera.pintail")		{	shellcommand = new ChimeraPintailCommand();			}
 		else if(commandName == "chimera.bellerophon")	{	shellcommand = new ChimeraBellerophonCommand();		}
+        else if(commandName == "chimera.vsearch")       {	shellcommand = new ChimeraVsearchCommand();         }
 		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}
 		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
 		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}
@@ -873,7 +870,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	shellcommand = new CountSeqsCommand();				}
 		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
-		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
 		else if(commandName == "summary.qual")			{	shellcommand = new SummaryQualCommand();			}
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
@@ -909,6 +905,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
         else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
         else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
+        else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand();              }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

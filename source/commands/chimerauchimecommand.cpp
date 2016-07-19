@@ -9,9 +9,7 @@
 
 #include "chimerauchimecommand.h"
 #include "deconvolutecommand.h"
-//#include "uc.h"
 #include "sequence.hpp"
-#include "referencedb.h"
 #include "systemcommand.h"
 
 //**********************************************************************************************************************
@@ -139,7 +137,6 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
 		abort = false; calledHelp = false; hasName=false; hasCount=false;
-		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -500,27 +497,15 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
 					else if (templatefile == "not found") { //check for saved reference sequences
-						if (rdb->getSavedReference() != "") {
-							templatefile = rdb->getSavedReference();
-							m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
-						}else {
-							m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-							m->mothurOutEndLine();
-							abort = true; 
-						}
+						m->mothurOut("[ERROR]: The reference parameter is a required.\n"); abort = true;
 					}
 				}
 			}else if (hasName) {  templatefile = "self"; }
             else if (hasCount) {  templatefile = "self"; }
-			else { 
-				if (rdb->getSavedReference() != "") {
-					templatefile = rdb->getSavedReference();
-					m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					templatefile = ""; abort = true; 
-				} 
+			else {
+                m->mothurOut("[ERROR]: The reference parameter is a required.");
+					
+                templatefile = ""; abort = true;
 			}
 				
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
@@ -690,7 +675,7 @@ int ChimeraUchimeCommand::execute(){
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-                m->printVsearchFile(nameMapCount, newFasta, "ab");
+                m->printVsearchFile(nameMapCount, newFasta, "/ab=", "/");
 				fastaFileNames[s] = newFasta;
 			}
 			
@@ -1172,8 +1157,8 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			
 			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			totalSeqs += numSeqs;
@@ -1250,6 +1235,14 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		outputFName = "\"" + outputFName + "\"";
 		filename = "\"" + filename + "\"";
 		alns = "\"" + alns + "\"";
+        
+        if (filename.length() > 257) {
+            m->mothurOut("[ERROR]: " + filename + " filename is " + toString(filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+        }else if ((alns.length() > 257) && (chimealns)) {
+            m->mothurOut("[ERROR]: " + alns + " filename is " + toString(alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+        }else if (outputFName.length() > 257) {
+            m->mothurOut("[ERROR]: " + outputFName + " filename is " + toString(outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); m->control_pressed = true; return 0;
+        }
 				
 		vector<char*> cPara;
 		
@@ -1499,7 +1492,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		//int numArgs = cPara.size();
 		
 		//uchime_main(numArgs, uchimeParameters); 
-		//cout << "commandString = " << commandString << endl;
+		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		commandString = "\"" + commandString + "\"";

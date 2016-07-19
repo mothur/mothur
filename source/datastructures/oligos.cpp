@@ -91,6 +91,7 @@ int Oligos::readOligos(){
 		m->openInputFile(oligosfile, inOligos);
 		
 		string type, oligo, roligo, group;
+        bool pfUsesNone = false; bool prUsesNone = false; bool bfUsesNone = false; bool brUsesNone = false;
 		
 		while(!inOligos.eof()){
             
@@ -146,7 +147,13 @@ int Oligos::readOligos(){
                         roligo[i] = toupper(roligo[i]);
                         if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
                     }
-                    if (reversePairs) {  roligo = reverseOligo(roligo); }
+                    
+                    if (oligo == "NONE")        {  pfUsesNone = true; }
+                    else if (roligo == "NONE")  { prUsesNone = true;  }
+                   
+                    if (roligo != "NONE") {
+                        if (reversePairs) {  roligo = reverseOligo(roligo); }
+                    }
                     group = "";
                     
 					// get rest of line in case there is a primer name
@@ -202,7 +209,12 @@ int Oligos::readOligos(){
                             if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
                         }
                         
-                        if (reversePairs) {   reverseBarcode = reverseOligo(reverseBarcode); }
+                        if (oligo == "NONE")                {  bfUsesNone = true; }
+                        else if (reverseBarcode == "NONE")  { brUsesNone = true;  }
+                        
+                        if (reverseBarcode != "NONE") {
+                            if (reversePairs) {   reverseBarcode = reverseOligo(reverseBarcode); }
+                        }
                         oligosPair newPair(oligo, reverseBarcode);
                         
                         if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
@@ -240,6 +252,60 @@ int Oligos::readOligos(){
         if (hasPBarcodes || hasPPrimers) {
             pairedOligos = true;
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
+            
+            //check for "NONE" to make sure if none is used then all primers in that position are NONE
+            //ex. Can't have: PRIMER NONE reversePrimer and PRIMER fowardPrimer reversePrimer in same file
+            if (bfUsesNone) {
+                bool allNONE = true;
+                for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
+                    if ((itBar->second).forward != "NONE") {
+                        allNONE = false;
+                        break;
+                    }
+                }
+                if (!allNONE) {
+                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix forwardBarcode=NONE and forwardBarcode=barcodeString in same file. Mothur assumes all sequences have forward barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                }
+            }
+            
+            if (brUsesNone) {
+                bool allNONE = true;
+                for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
+                    if ((itBar->second).reverse != "NONE") {
+                        allNONE = false;
+                        break;
+                    }
+                }
+                if (!allNONE) {
+                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix reverseBarcode=NONE and reverseBarcode=barcodeString in same file. Mothur assumes all sequences have reverse barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                }
+            }
+            
+            if (pfUsesNone) {
+                bool allNONE = true;
+                for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
+                    if ((itPrimer->second).forward != "NONE") {
+                        allNONE = false;
+                        break;
+                    }
+                }
+                if (!allNONE) {
+                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix forwardPrimer=NONE and forwardPrimer=primerString in same file. Mothur assumes all sequences have forward primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                }
+            }
+            
+            if (prUsesNone) {
+                bool allNONE = true;
+                for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
+                    if ((itPrimer->second).reverse != "NONE") {
+                        allNONE = false;
+                        break;
+                    }
+                }
+                if (!allNONE) {
+                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix reversePrimer=NONE and reversePrimer=primerString in same file. Mothur assumes all sequences have reverse primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                }
+            }
         }
         
         

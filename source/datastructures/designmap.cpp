@@ -67,6 +67,7 @@ int DesignMap::read(string file) {
         //file without headers, fix it
         if (temp != "group") {
             group = temp;
+            m->checkGroupName(group);
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
@@ -74,6 +75,7 @@ int DesignMap::read(string file) {
             for (int i = 0; i < numCategories; i++) {
                 int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
                 string temp = tempColumnHeaders[i];
+                m->checkGroupName(temp);
                 categoryValues[thisIndex] = temp;
             
                 if (m->debug) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
@@ -101,7 +103,8 @@ int DesignMap::read(string file) {
             
             if (m->control_pressed) { break; }
             
-            in >> group; m->gobble(in); 
+            in >> group; m->gobble(in);
+            m->checkGroupName(group);
             if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
@@ -110,6 +113,7 @@ int DesignMap::read(string file) {
                 int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
                 string temp = "not found";
                 in >> temp; categoryValues[thisIndex] = temp; m->gobble(in);
+                m->checkGroupName(temp);
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
                 
@@ -231,6 +235,7 @@ string DesignMap::get(string groupName, string categoryName) {
 //add group, assumes order is correct
 int DesignMap::push_back(string group, vector<string> values) {
     try {
+        m->checkGroupName(group);
         map<string, int>::iterator it = indexGroupNameMap.find(group);
         if (it == indexGroupNameMap.end()) {
             if (values.size() != getNumCategories()) {  m->mothurOut("[ERROR]: Your design file has a " + toString(getNumCategories()) + " categories and " + group + " has " + toString(values.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }

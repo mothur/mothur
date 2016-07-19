@@ -8,6 +8,7 @@
 
 #include "lefsecommand.h"
 #include "linearalgebra.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> LefseCommand::setParameters(){
@@ -20,7 +21,7 @@ vector<string> LefseCommand::setParameters(){
 		//CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
         CommandParameter palpha("aalpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
         CommandParameter pwalpha("walpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(pwalpha);
-        
+        CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
         CommandParameter plda("lda", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(plda);
         CommandParameter pwilc("wilc", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pwilc);
         CommandParameter pnormmillion("norm", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pnormmillion);
@@ -68,6 +69,7 @@ string LefseCommand::getHelpString(){
         helpString += "The wilc parameter is used to indicate whether to perform the Wilcoxon test. Default=T. \n";
         helpString += "The iters parameter is used to set the number of bootstrap iteration for LDA. Default=30. \n";
         //helpString += "The wilcsamename parameter is used to indicate whether perform the wilcoxon test only among the subclasses with the same name. Default=F. \n";
+        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
         helpString += "The curv parameter is used to set whether perform the wilcoxon testing the Curtis's approach [BETA VERSION] Default=F. \n";
         helpString += "The norm parameter is used to multiply relative abundances by 1000000. Recommended when very low values are present. Default=T. \n";
         helpString += "The fboots parameter is used to set the subsampling fraction value for each bootstrap iteration. Default=0.67. \n";
@@ -249,6 +251,12 @@ LefseCommand::LefseCommand(string option)  {
 			if (temp == "not found") { temp = "10"; }
 			m->mothurConvert(temp, minC);
             
+            sets = validParameter.validFile(parameters, "sets", false);
+            if (sets == "not found") { sets = ""; }
+            else {
+                m->splitAtDash(sets, Sets);
+            }
+            
             multiClassStrat = validParameter.validFile(parameters, "multiclass", false);
             if (multiClassStrat == "not found"){	multiClassStrat = "onevall";		}
 			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall."); m->mothurOutEndLine(); abort=true; }
@@ -275,6 +283,18 @@ int LefseCommand::execute(){
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); if (subclass == "") { subclass = mclass; } }
         
+        if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
+            //make sure sets are all in designMap
+            SharedUtil* util = new SharedUtil();
+            vector<string> dGroups = designMap.getCategory(mclass);
+            util->setGroups(Sets, dGroups);
+            delete util;
+            
+            designMap.setDefaultClass(mclass);
+            vector<string> groupsToSelect = designMap.getNamesGroups(Sets);
+            m->setGroups(groupsToSelect);
+        }
+        
         InputData input(sharedfile, "sharedfile");
         vector<SharedRAbundFloatVector*> lookup = input.getSharedRAbundFloatVectors();
         string lastLabel = lookup[0]->getLabel();
@@ -282,7 +302,6 @@ int LefseCommand::execute(){
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
-        
         
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {

@@ -16,7 +16,7 @@ inline bool compareOverlap(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
 } 
 /*********************************************************************************************/
-ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms, bool h) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(ms), hclusterWanted(h) {
+ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(ms) {
 	try {
 		m = MothurOut::getInstance();
 		matrix = NULL;
@@ -53,23 +53,11 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		ofstream outOverlap;
 		
 		//create objects needed for read
-		if (!hclusterWanted) {
-			matrix = new SparseDistanceMatrix();
-            matrix->resize(nseqs);
-		}else{
-			overlapFile = m->getRootName(blastfile) + "overlap.dist";
-			distFile = m->getRootName(blastfile) + "hclusterDists.dist";
-			
-			m->openOutputFile(overlapFile, outOverlap);
-			m->openOutputFile(distFile, outDist);
-		}
+        matrix = new SparseDistanceMatrix();
+        matrix->resize(nseqs);
 		
-		if (m->control_pressed) { 
-			fileHandle.close();
-			if (!hclusterWanted) {  delete matrix; }
-			else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
-			return 0;
-		}
+		
+		if (m->control_pressed) { fileHandle.close(); delete matrix; return 0; }
 		
 		Progress* reading = new Progress("Reading blast:     ", nseqs * nseqs);
 		
@@ -101,12 +89,8 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				
 				//if there is a valid overlap, add it
 				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
-					if (!hclusterWanted) {
-						seqDist overlapValue(itA->second, itB->second, thisoverlap);
-						overlap.push_back(overlapValue);
-					}else {
-						outOverlap << itA->first << '\t' << itB->first << '\t' << thisoverlap << endl;
-					}
+                    seqDist overlapValue(itA->second, itB->second, thisoverlap);
+                    overlap.push_back(overlapValue);
 				}
 			}
 		}else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
@@ -115,13 +99,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		//read file
 		while(!fileHandle.eof()){  
 		
-			if (m->control_pressed) { 
-				fileHandle.close();
-				if (!hclusterWanted) {  delete matrix; }
-				else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
-				delete reading;
-				return 0;
-			}
+			if (m->control_pressed) { fileHandle.close(); delete matrix; delete reading; return 0; }
 			
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -155,13 +133,9 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						
 						//if there is a valid overlap, add it
 						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
-							if (!hclusterWanted) {
-								seqDist overlapValue(itA->second, itB->second, thisoverlap);
-								//cout << "overlap = " << itA->second << '\t' << itB->second << '\t' << thisoverlap << endl;
-								overlap.push_back(overlapValue);
-							}else {
-								outOverlap << itA->first << '\t' << itB->first << '\t' << thisoverlap << endl;
-							}
+                            seqDist overlapValue(itA->second, itB->second, thisoverlap);
+                            //cout << "overlap = " << itA->second << '\t' << itB->second << '\t' << thisoverlap << endl;
+                            overlap.push_back(overlapValue);
 						}
 					} //end else
 				}else { //end row
@@ -185,17 +159,13 @@ int ReadBlast::read(NameAssignment* nameMap) {
 
 							//is this distance below cutoff
 							if (distance < cutoff) {
-								if (!hclusterWanted) {
-                                    if (itA->second < it->first) {
-                                        PDistCell value(it->first, distance);
-                                        matrix->addCell(itA->second, value);
-                                    }else {
-                                        PDistCell value(itA->second, distance);
-                                        matrix->addCell(it->first, value);
-                                    }
-                                }else{
-									outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
-								}
+                                if (itA->second < it->first) {
+                                    PDistCell value(it->first, distance);
+                                    matrix->addCell(itA->second, value);
+                                }else {
+                                    PDistCell value(itA->second, distance);
+                                    matrix->addCell(it->first, value);
+                                }
 							}
 							//not going to need this again
 							dists[it->first].erase(itDist);
@@ -226,12 +196,8 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						
 						//if there is a valid overlap, add it
 						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
-							if (!hclusterWanted) {
-								seqDist overlapValue(itA->second, itB->second, thisoverlap);
-								overlap.push_back(overlapValue);
-							}else {
-								outOverlap << itA->first << '\t' << itB->first << '\t' << thisoverlap << endl;
-							}
+                            seqDist overlapValue(itA->second, itB->second, thisoverlap);
+                            overlap.push_back(overlapValue);
 						}
 					}
 				}//end if current row
@@ -257,17 +223,13 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				
 				//is this distance below cutoff
 				if (distance < cutoff) {
-					if (!hclusterWanted) {
-						if (itA->second < it->first) {
-                            PDistCell value(it->first, distance);
-                            matrix->addCell(itA->second, value);
-                        }else {
-                            PDistCell value(itA->second, distance);
-                            matrix->addCell(it->first, value);
-                        }
-					}else{
-						outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
-					}
+                    if (itA->second < it->first) {
+                        PDistCell value(it->first, distance);
+                        matrix->addCell(itA->second, value);
+                    }else {
+                        PDistCell value(itA->second, distance);
+                        matrix->addCell(it->first, value);
+                    }
 				}
 				//not going to need this again
 				dists[it->first].erase(itDist);
@@ -279,28 +241,11 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		thisRowsBlastScores.clear();
 		dists.clear();
 		
-		if (m->control_pressed) { 
-				fileHandle.close();
-				if (!hclusterWanted) {  delete matrix; }
-				else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
-				delete reading;
-				return 0;
-		}
+		if (m->control_pressed) {  fileHandle.close(); delete matrix; delete reading; return 0; }
 		
-		if (!hclusterWanted) {
-			sort(overlap.begin(), overlap.end(), compareOverlap);
-		}else {
-			outDist.close();
-			outOverlap.close();
-		}
-		
-		if (m->control_pressed) { 
-				fileHandle.close();
-				if (!hclusterWanted) {  delete matrix; }
-				else {  m->mothurRemove(overlapFile);  m->mothurRemove(distFile);  }
-				delete reading;
-				return 0;
-		}
+        sort(overlap.begin(), overlap.end(), compareOverlap);
+ 
+		if (m->control_pressed) {  fileHandle.close(); delete matrix; delete reading; return 0; }
 		
 		reading->finish();
 		delete reading;

@@ -33,7 +33,6 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "80", "", "", "","",false,true); parameters.push_back(pcutoff);
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pprobs);
 		CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,true); parameters.push_back(piters);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
         CommandParameter pshortcuts("shortcuts", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshortcuts);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
 		CommandParameter pnumwanted("numwanted", "Number", "", "10", "", "", "","",false,true); parameters.push_back(pnumwanted);
@@ -64,7 +63,6 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
-		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -127,7 +125,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(){
 ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		rdb = ReferenceDB::getInstance(); hasName = false; hasCount=false;
+		hasName = false; hasCount=false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -493,41 +491,18 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
-			
-			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
-			save = m->isTrue(temp); 
-			rdb->save = save; 
-			if (save) { //clear out old references
-				rdb->clearMemory();	
-			}
-			
+
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
 			templateFileName = validParameter.validFile(parameters, "reference", true);
-			if (templateFileName == "not found") { 
-				//check for saved reference sequences
-				if (rdb->referenceSeqs.size() != 0) {
-					templateFileName = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required for the classify.seqs command."); 
-					m->mothurOutEndLine();
-					abort = true; 
-				}
-			}else if (templateFileName == "not open") { abort = true; }	
-			else {	if (save) {	rdb->setSavedReference(templateFileName);	}	}
+			if (templateFileName == "not found") {
+					m->mothurOut("[ERROR]: The reference parameter is a required for the classify.seqs command.\n"); abort = true;
+			}else if (templateFileName == "not open") { abort = true; }
+			
 			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
-			if (taxonomyFileName == "not found") { 
-				//check for saved reference sequences
-				if (rdb->wordGenusProb.size() != 0) {
-					taxonomyFileName = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved taxonomy information and the taxonomy parameter is a required for the classify.seqs command."); 
-					m->mothurOutEndLine();
-					abort = true; 
-				}
-			}else if (taxonomyFileName == "not open") { abort = true; }	
-			else {	if (save) {	rdb->setSavedTaxonomy(taxonomyFileName);	}	}
+			if (taxonomyFileName == "not found") {  m->mothurOut("[ERROR]: The taxonomy parameter is a required for the classify.seqs command.\n"); abort = true;
+			}else if (taxonomyFileName == "not open") { abort = true; }
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			
@@ -640,7 +615,6 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string baseTName = m->getSimpleName(taxonomyFileName);
-			if (taxonomyFileName == "saved") {  baseTName = rdb->getSavedTaxonomy();	}
 			
             //set rippedTaxName to 
 			string RippedTaxName = "";

@@ -13,7 +13,6 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "mothurchimera.h"
-#include "referencedb.h"
 
 /***********************************************************/
 
@@ -37,7 +36,6 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:
-	ReferenceDB* rdb;
 	
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

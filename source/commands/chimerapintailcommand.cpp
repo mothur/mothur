@@ -26,7 +26,6 @@ vector<string> ChimeraPintailCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -50,7 +49,6 @@ string ChimeraPintailCommand::getHelpString(){
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n";
 		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences, by default no mask is applied.  You can apply an ecoli mask by typing, mask=default. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
-		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=300. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n";
 		helpString += "The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n";
@@ -101,7 +99,6 @@ ChimeraPintailCommand::ChimeraPintailCommand(){
 ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -249,26 +246,11 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "25"; }
 			m->mothurConvert(temp, increment);
 			
-			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
-			save = m->isTrue(temp); 
-			rdb->save = save; 
-			if (save) { //clear out old references
-				rdb->clearMemory();	
-			}
 			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
 			templatefile = validParameter.validFile(parameters, "reference", true);
-			if (templatefile == "not found") { 
-				//check for saved reference sequences
-				if (rdb->referenceSeqs.size() != 0) {
-					templatefile = "saved";
-				}else {
-					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
-					m->mothurOutEndLine();
-					abort = true; 
-				}
-			}else if (templatefile == "not open") { abort = true; }	
-			else {	if (save) {	rdb->setSavedReference(templatefile);	}	}
+			if (templatefile == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
+			}else if (templatefile == "not open") { abort = true; }
 			
 			
 			maskfile = validParameter.validFile(parameters, "mask", false);
@@ -368,7 +350,6 @@ int ChimeraPintailCommand::execute(){
 			
 			//check for quantile to save the time
 			string baseName = templatefile;
-			if (templatefile == "saved") { baseName = rdb->getSavedReference(); }
 			
 			string tempQuan = "";
 			if ((!filter) && (maskfile == "")) {

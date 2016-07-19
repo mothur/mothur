@@ -29,7 +29,7 @@ public:
     vector<FastqRead> getReverseFastq()         { return fastqData.getReverseFastq();   }
     vector<string> getSubsetFRFastq(int n)      { return fastqData.getSubsetFRFastq(n); }
     
-    vector<string> getSubsetFNGFiles(int);  //number of uniques, Fasta, name, group returned
+    vector<string> getSubsetFNGFiles(int);  //number of uniques passed in.  3 files returned -> Fasta, name, group.
     
 private:
     MothurOut* m;

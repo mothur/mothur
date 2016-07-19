@@ -38,13 +38,12 @@ public:
 private:
     
 	string namefile, groupfile, outputDir, groups, sharedfile;
-	bool abort, large, allLines;
+	bool abort, allLines;
 	vector<string> Groups, outputNames;
     int processors;
     set<string> labels;
     
-    unsigned long long processSmall(string);
-    unsigned long long processLarge(string);
+    unsigned long long process(string);
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     

@@ -13,7 +13,6 @@
 
 #include "command.hpp"
 #include "classify.h"
-#include "referencedb.h"
 #include "sequence.hpp"
 #include "bayesian.h"
 #include "phylotree.h"
@@ -67,7 +66,6 @@ private:
 	map<string,  vector<string> >::iterator itNames;
 	
 	Classify* classify;
-	ReferenceDB* rdb;
 	
 	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
 	int processors, kmerSize, numWanted, cutoff, iters, printlevel;

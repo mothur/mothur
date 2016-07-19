@@ -6,9 +6,11 @@
 #include "mothur.h"
 #include "sparsedistancematrix.h"
 #include "mothurout.h"
+#include "rabundvector.hpp"
+#include "listvector.hpp"
 
-class RAbundVector;
-class ListVector;
+//class RAbundVector;
+//class ListVector;
 
 class Cluster {
 	

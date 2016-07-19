@@ -10,13 +10,11 @@
 #include "mothur.h"
 #include "engine.hpp"
 #include "mothurout.h"
-#include "referencedb.h"
 
 /**************************************************************************************************/
 
 CommandFactory* CommandFactory::_uniqueInstance = 0;
 MothurOut* MothurOut::_uniqueInstance = 0;
-ReferenceDB* ReferenceDB::myInstance = 0;
 /***********************************************************************/
 volatile int ctrlc_pressed = 0;
 void ctrlc_handler ( int sig ) {
@@ -275,8 +273,11 @@ int main(int argc, char *argv[]){
         if (!createLogFile) { m->mothurRemove(newlogFileName); }
 				
 		if (mothur != NULL) { delete mothur; }
-
-		return 0;
+        
+        int returnCode = 0;
+        if (m->getNumErrors() != 0) { returnCode = 1; }
+        
+		return returnCode;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "mothur", "main");

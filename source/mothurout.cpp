@@ -570,11 +570,16 @@ unsigned long long MothurOut::getTotalRAM() {
     try {
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-    long pages = get_phys_pages();
-    long page_size = sysconf(_SC_PAGE_SIZE);
-    if ((page_size == -1) || (pages == -1))
+    #if defined _SC_PHYS_PAGES && defined _SC_PAGESIZE
+        /* This works on linux-gnu, solaris2 and cygwin.  */
+        double pages = sysconf (_SC_PHYS_PAGES);
+        double pagesize = sysconf (_SC_PAGESIZE);
+        if (0 <= pages && 0 <= pagesize)
+        return pages * pagesize;
+    #else
         mothurOut("[WARNING]: Cannot determine amount of RAM");
-    return pages * page_size;
+    #endif
+        
 #elif defined (_WIN32)
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
@@ -587,26 +592,12 @@ unsigned long long MothurOut::getTotalRAM() {
     return si.totalram * si.mem_unit;
     
 #endif
+        return 0;
     }
     catch(exception& e) {
         errorOut(e, "MothurOut", "getTotalRAM");
         exit(1);
     }
-}
-/***********************************************************************/
-unsigned long MothurOut::get_phys_pages () {
-    unsigned long phys_pages = 0;
-#if (_SC_PAGE_SIZE)
-    uint64_t mem;
-    size_t len = sizeof(mem);
-    sysctlbyname("hw.memsize", &mem, &len, NULL, 0);
-    phys_pages = mem/sysconf(_SC_PAGE_SIZE);
-#elif (_SC_PHYS_PAGES)
-    phys_pages = sysconf(_SC_PHYS_PAGES);
-#else
-     mothurOut("[WARNING]: Cannot determine number of physical pages\n");
-#endif
-    return phys_pages;
 }
 /***********************************************************************/
 int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
@@ -2988,6 +2979,28 @@ int MothurOut::checkName(string& name) {
 		exit(1);
 	}
 }
+/************************************************************/
+bool MothurOut::checkGroupName(string name) {
+    try {
+        
+        bool goodName = true;
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') {  goodName = false; break;  }
+            else if (name[i] == '-') {  goodName = false; break;  }
+            else if (name[i] == '/') {  goodName = false; break;  }
+        }
+        
+        if (!goodName) {
+            mothurOut("\n[ERROR]: group " + name + " contains illegal characters in the name. Group names cannot include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename. Quitting. \n\n"); control_pressed = true;
+        }
+        
+        return goodName;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "checkGroupName");
+        exit(1);
+    }
+}
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<string, string>& fastamap) { 
 	try {
@@ -3352,7 +3365,7 @@ int MothurOut::mothurRemove(string filename){
 bool MothurOut::mothurConvert(string item, int& num){
 	try {
 		bool error = false;
-        
+    
 		if (isNumeric1(item)) {
 			convert(item, num);
 		}else {
@@ -3927,27 +3940,6 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 		string individual = "";
 		int estimLength = estim.size();
 		bool prevEscape = false;
-		/*for(int i=0;i<estimLength;i++){
-			if(prevEscape){
-				individual += estim[i];
-				prevEscape = false;
-			}
-			else{
-				if(estim[i] == '\\'){
-					prevEscape = true;
-				}
-				else if(estim[i] == '-'){
-					container.push_back(individual);
-					individual = "";
-					prevEscape = false;				
-				}
-				else{
-					individual += estim[i];
-					prevEscape = false;
-				}
-			}
-		}*/
-        
         
         for(int i=0;i<estimLength;i++){
             if(estim[i] == '-'){
@@ -3983,28 +3975,6 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 		string individual = "";
 		int estimLength = estim.size();
 		bool prevEscape = false;
-        /*
-		for(int i=0;i<estimLength;i++){
-			if(prevEscape){
-				individual += estim[i];
-				prevEscape = false;
-			}
-			else{
-				if(estim[i] == '\\'){
-					prevEscape = true;
-				}
-				else if(estim[i] == '-'){
-					container.insert(individual);
-					individual = "";
-					prevEscape = false;				
-				}
-				else{
-					individual += estim[i];
-					prevEscape = false;
-				}
-			}
-		}
-		*/
         
         for(int i=0;i<estimLength;i++){
             if(estim[i] == '-'){
@@ -4038,28 +4008,6 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 		int lineNum;
 		int estimLength = estim.size();
 		bool prevEscape = false;
-        /*
-		for(int i=0;i<estimLength;i++){
-			if(prevEscape){
-				individual += estim[i];
-				prevEscape = false;
-			}
-			else{
-				if(estim[i] == '\\'){
-					prevEscape = true;
-				}
-				else if(estim[i] == '-'){
-					convert(individual, lineNum); //convert the string to int
-					container.insert(lineNum);
-					individual = "";
-					prevEscape = false;				
-				}
-				else{
-					individual += estim[i];
-					prevEscape = false;
-				}
-			}
-		}*/
         
         for(int i=0;i<estimLength;i++){
             if(estim[i] == '-'){
@@ -4125,20 +4073,6 @@ void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 		}
 		container.push_back(individual);
 		
-		
-		
-		
-//		string individual;
-//		
-//		while (estim.find_first_of(',') != -1) {
-//			individual = estim.substr(0,estim.find_first_of(','));
-//			if ((estim.find_first_of(',')+1) <= estim.length()) { //checks to make sure you don't have comma at end of string
-//				estim = estim.substr(estim.find_first_of(',')+1, estim.length());
-//				container.push_back(individual);
-//			}
-//		}
-//		//get last one
-//		container.push_back(estim);
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtComma");
@@ -4162,18 +4096,6 @@ void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
                 individual += prefix[i];
             }
         }
-        
-        
-        /*
-        
-		prefix = suffix.substr(0,suffix.find_first_of(c));
-		if ((suffix.find_first_of(c)+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
-			suffix = suffix.substr(suffix.find_first_of(c)+1, suffix.length());
-			string space = " ";
-			while(suffix.at(0) == ' ')
-				suffix = suffix.substr(1, suffix.length());
-		}else {  suffix = "";  }
-         */
         
     }
 	catch(exception& e) {
@@ -4428,6 +4350,63 @@ bool MothurOut::checkReleaseVersion(ifstream& file, string version) {
 		errorOut(e, "MothurOut", "checkReleaseVersion");		
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+int MothurOut::getTimeStamp(string filename) {
+    try {
+        int timeStamp = 0;
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        struct stat st;
+        int errorCode = stat (filename.c_str(), &st);
+        if (errorCode != 0) {
+            mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); control_pressed = true;
+        }else {
+            timeStamp = st.st_mtime;
+        }
+#else
+        HANDLE hFile;
+        
+        hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
+                           OPEN_EXISTING, 0, NULL);
+        
+        if(hFile == INVALID_HANDLE_VALUE) {
+            mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); control_pressed = true;
+            return timestamp;
+        }
+            
+        FILETIME ftCreate, ftAccess, ftWrite;
+        SYSTEMTIME stUTC;
+        DWORD dwRet;
+        
+        // Retrieve the file times for the file.
+        bool success = GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite);
+        
+        if (success) {
+            FileTimeToSystemTime(&ftWrite, &stUTC);
+            
+            tm time;
+            time.tm_sec = stUTC.wSecond;
+            time.tm_min = stUTC.wMinute;
+            time.tm_hour = stUTC.wHour;
+            time.tm_mday = stUTC.wDay;
+            time.tm_mon = stUTC.wMonth - 1;
+            time.tm_year = stUTC.wYear - 1900;
+            time.tm_isdst = -1;
+            time_t t = mktime(&time);
+            
+            timeStamp = t;
+        }
+        else { mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); control_pressed = true; }
+        
+#endif
+    
+        return timeStamp;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getTimeStamp");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 vector<double> MothurOut::getAverages(vector< vector<double> >& dists) {
@@ -4873,7 +4852,7 @@ int MothurOut::min(int A, int B){
     }
 }
 //**********************************************************************************************************************
-int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename, string tag){
+int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filename, string tag, string tag2){
     try {
         
         sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
@@ -4884,7 +4863,7 @@ int MothurOut::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string fi
         //print new file in order of
         for (int i = 0; i < nameMapCount.size(); i++) {
             if (control_pressed) {break;}
-            out << ">" << nameMapCount[i].name  << "/" + tag + "=" << nameMapCount[i].numIdentical << "/" << endl << nameMapCount[i].seq << endl;
+            out << ">" << nameMapCount[i].name  << tag << nameMapCount[i].numIdentical << tag2 << endl << nameMapCount[i].seq << endl;
         }
         out.close();
         

@@ -140,7 +140,7 @@ class MothurOut {
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
-        int printVsearchFile(vector<seqPriorityNode>&, string, string); //sorts and prints by abundance adding /ab=xxx/
+        int printVsearchFile(vector<seqPriorityNode>&, string, string, string); //sorts and prints by abundance adding /ab=xxx/
         bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 		bool mothurConvert(string, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
         bool mothurConvert(string, intDist&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
@@ -150,6 +150,7 @@ class MothurOut {
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);
+        int getTimeStamp(string filename);
 		bool anyLabelsToProcess(string, set<string>&, string);
 		bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
         bool inUsersGroups(vector<int>, vector< vector<int> >);
@@ -171,7 +172,6 @@ class MothurOut {
         string mothurGetpid(int);
         unsigned long long getRAMUsed();
         unsigned long long getTotalRAM();
-        unsigned long get_phys_pages();
         string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
         string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
         string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
@@ -193,6 +193,7 @@ class MothurOut {
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
+    bool checkGroupName(string name);
         map<string, vector<string> > parseClasses(string);
         string addUnclassifieds(string tax, int maxlevel, bool probs);
     
