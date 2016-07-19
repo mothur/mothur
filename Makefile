@@ -15,8 +15,8 @@ USEBOOST ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"6/20/2016\""
-VERSION = "\"1.37.6\""
+RELEASE_DATE = "\"7/20/2016\""
+VERSION = "\"1.38.0\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
