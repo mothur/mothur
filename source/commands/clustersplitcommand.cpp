@@ -1454,6 +1454,10 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
         vsearchParameters.push_back(wordlength);
         
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        vsearchParameters.push_back(threads);
+        
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;
         char* uc = new char[tempIn.length()+1];  uc[0] = '\0'; strncat(uc, tempIn.c_str(), tempIn.length());
