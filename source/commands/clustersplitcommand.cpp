@@ -346,11 +346,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             //not using file option and don't have fasta method with classic
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-            
-            cutoffNotSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
-			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));  
 			
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff); 
@@ -368,6 +363,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             #else
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
             #endif
+            
+            cutoffNotSet = false;
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
+            m->mothurConvert(temp, cutoff);
+            if ((method != "agc") && (method != "dgc")) { cutoff += (5 / (precision * 10.0)); }
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
 			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
