@@ -4372,7 +4372,7 @@ int MothurOut::getTimeStamp(string filename) {
         
         if(hFile == INVALID_HANDLE_VALUE) {
             mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); control_pressed = true;
-            return timestamp;
+            return timeStamp;
         }
             
         FILETIME ftCreate, ftAccess, ftWrite;
