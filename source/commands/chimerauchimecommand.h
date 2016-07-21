@@ -188,9 +188,9 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
             
 			int error;
             if (pDataArray->hasCount) { 
-                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
+                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
             }else {
-               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; } 
+               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; }
             }
 			
 			//int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
@@ -201,6 +201,14 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			string filename = "\"" + pDataArray->filename + "\"";
 			string alns = "\"" + pDataArray->alns+pDataArray->groups[i] + "\"";
 			string accnos = pDataArray->accnos+pDataArray->groups[i];
+            
+            if (pDataArray->filename.length() > 257) {
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+            }else if ((pDataArray->alns.length() > 257) && (pDataArray->chimealns)) {
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+            }else if (pDataArray->outputFName.length() > 257) {
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+            }
 			
 			vector<char*> cPara;
 			
@@ -543,6 +551,17 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		string alns = "\"" + pDataArray->alns+ "\"";
 		string templatefile = "\"" + pDataArray->templatefile + "\"";
 		string accnos = pDataArray->accnos;
+        
+        if (pDataArray->filename.length() > 257) {
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+        }else if ((pDataArray->alns.length() > 257) && (pDataArray->chimealns)) {
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+        }else if (pDataArray->outputFName.length() > 257) {
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+        }else if (pDataArray->templatefile.length() > 257) {
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->templatefile + " filename is " + toString(pDataArray->templatefile.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+        }
+
 		
 		vector<char*> cPara;
 		

@@ -317,6 +317,14 @@ ClusterCommand::ClusterCommand(string option)  {
 #else
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
 #endif
+            
+            //bool cutoffSet = false;
+            temp = validParameter.validFile(parameters, "cutoff", false);
+            if (temp == "not found") { temp = "10"; }
+            //else { cutoffSet = true; }
+            m->mothurConvert(temp, cutoff);
+            if ((method != "agc") && (method != "dgc")) { cutoff += (5 / (precision * 10.0)); }
+            
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
 

@@ -362,8 +362,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             //not using file option and don't have fasta method with classic
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-            
-            
+
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff);
             
@@ -393,11 +392,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             #endif
             
             cutoffNotSet = false;
+
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
             m->mothurConvert(temp, cutoff);
             if (method != "opti") { cutoff += (5 / (precision * 10.0)); }
 
-            
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
 			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
 			
@@ -1568,6 +1567,10 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         //--wordlength=8
         char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
         vsearchParameters.push_back(wordlength);
+        
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        vsearchParameters.push_back(threads);
         
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;

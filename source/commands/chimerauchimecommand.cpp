@@ -1235,6 +1235,14 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		outputFName = "\"" + outputFName + "\"";
 		filename = "\"" + filename + "\"";
 		alns = "\"" + alns + "\"";
+        
+        if (filename.length() > 257) {
+            m->mothurOut("[ERROR]: " + filename + " filename is " + toString(filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+        }else if ((alns.length() > 257) && (chimealns)) {
+            m->mothurOut("[ERROR]: " + alns + " filename is " + toString(alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+        }else if (outputFName.length() > 257) {
+            m->mothurOut("[ERROR]: " + outputFName + " filename is " + toString(outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); m->control_pressed = true; return 0;
+        }
 				
 		vector<char*> cPara;
 		

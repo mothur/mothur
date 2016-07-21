@@ -322,12 +322,10 @@
 		481FB6671AC1B8450076CFF3 /* randomnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77B7186173D4041002163C2 /* randomnumber.cpp */; };
 		481FB6681AC1B8450076CFF3 /* rarecalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */; };
 		481FB6691AC1B8520076CFF3 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
-		481FB66A1AC1B8520076CFF3 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
 		481FB66B1AC1B8520076CFF3 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
 		481FB66C1AC1B8520076CFF3 /* randomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77E1937161B201E00DB1A2A /* randomforest.cpp */; };
 		481FB66D1AC1B8520076CFF3 /* rftreenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77E193A161B289600DB1A2A /* rftreenode.cpp */; };
 		481FB66E1AC1B8520076CFF3 /* forest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83F25B0A163B031200ABE73D /* forest.cpp */; };
-		481FB66F1AC1B8520076CFF3 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
 		481FB6701AC1B8820076CFF3 /* raredisplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A712D37EC400DA6239 /* raredisplay.cpp */; };
 		481FB6711AC1B8820076CFF3 /* rarefact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A912D37EC400DA6239 /* rarefact.cpp */; };
 		481FB6721AC1B8820076CFF3 /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
@@ -371,11 +369,11 @@
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
 		48576EA81D05F59300BBC9C0 /* distpdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA61D05F59300BBC9C0 /* distpdataset.cpp */; };
+		4846AD8A1D3810DD00DE9913 /* testtrimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */; };
 		48705AC419BE32C50075E977 /* getmimarkspackagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */; };
 		48705AC519BE32C50075E977 /* oligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABD19BE32C50075E977 /* oligos.cpp */; };
 		48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */; };
 		48705AC719BE32C50075E977 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC119BE32C50075E977 /* sharedrjsd.cpp */; };
-		48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC319BE32C50075E977 /* abstractrandomforest.cpp */; };
 		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
 		487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		488841611CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -410,7 +408,6 @@
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
-		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
 		835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
 		835FE03E19F00A4D005AA754 /* svm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B21820117AD77BD00286E6A /* svm.cpp */; };
 		83F25B0C163B031200ABE73D /* forest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83F25B0A163B031200ABE73D /* forest.cpp */; };
@@ -815,6 +812,8 @@
 		4827A4DB1CB3ED2100345170 /* fastqdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fastqdataset.h; sourceTree = "<group>"; };
 		4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testbiominfocommand.cpp; sourceTree = "<group>"; };
 		4829D9661B8387D0002EEED4 /* testbiominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testbiominfocommand.h; sourceTree = "<group>"; };
+		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testtrimoligos.cpp; sourceTree = "<group>"; };
+		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testtrimoligos.hpp; sourceTree = "<group>"; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = testcontainers/testoptimatrix.cpp; sourceTree = "<group>"; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = testcontainers/testoptimatrix.h; sourceTree = "<group>"; };
@@ -829,7 +828,6 @@
 		48705AC019BE32C50075E977 /* mergesfffilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mergesfffilecommand.h; path = source/commands/mergesfffilecommand.h; sourceTree = SOURCE_ROOT; };
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = SOURCE_ROOT; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = SOURCE_ROOT; };
-		48705AC319BE32C50075E977 /* abstractrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = abstractrandomforest.cpp; path = source/randomforest/abstractrandomforest.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = SOURCE_ROOT; };
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
@@ -879,8 +877,6 @@
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = refchimeratest.h; path = source/refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = refchimeratest.cpp; path = source/refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eachgapdistignorens.h; path = source/calculators/eachgapdistignorens.h; sourceTree = SOURCE_ROOT; };
-		834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = regularizedrandomforest.cpp; path = source/randomforest/regularizedrandomforest.cpp; sourceTree = SOURCE_ROOT; };
-		834D9D571656D7C400E7FAB9 /* regularizedrandomforest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = regularizedrandomforest.h; path = source/randomforest/regularizedrandomforest.h; sourceTree = SOURCE_ROOT; };
 		83F25B0A163B031200ABE73D /* forest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = forest.cpp; path = source/randomforest/forest.cpp; sourceTree = SOURCE_ROOT; };
 		83F25B0B163B031200ABE73D /* forest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = forest.h; path = source/randomforest/forest.h; sourceTree = SOURCE_ROOT; };
 		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1750,6 +1746,8 @@
 				4827A4DB1CB3ED2100345170 /* fastqdataset.h */,
 				48C1DDC41D25C1BC00B5BA9D /* testopticluster.cpp */,
 				48C1DDC51D25C1BC00B5BA9D /* testopticluster.h */,
+				4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */,
+				4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */,
 				48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */,
 				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
@@ -1806,8 +1804,6 @@
 			children = (
 				A7386C1B1619CACB00651424 /* abstractdecisiontree.hpp */,
 				A7386C241619E52200651424 /* abstractdecisiontree.cpp */,
-				48705ABA19BE32C50075E977 /* abstractrandomforest.hpp */,
-				48705AC319BE32C50075E977 /* abstractrandomforest.cpp */,
 				A7386C1D1619CACB00651424 /* decisiontree.hpp */,
 				A7386C28161A110700651424 /* decisiontree.cpp */,
 				A7386C1E1619CACB00651424 /* macros.h */,
@@ -1817,8 +1813,6 @@
 				A77E193A161B289600DB1A2A /* rftreenode.cpp */,
 				83F25B0A163B031200ABE73D /* forest.cpp */,
 				83F25B0B163B031200ABE73D /* forest.h */,
-				834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */,
-				834D9D571656D7C400E7FAB9 /* regularizedrandomforest.h */,
 			);
 			name = randomforest;
 			path = /Users/sarahwestcott/Desktop/mothur;
@@ -2770,6 +2764,7 @@
 				481FB5E61AC1B77E0076CFF3 /* normalizesharedcommand.cpp in Sources */,
 				481FB5E71AC1B77E0076CFF3 /* nmdscommand.cpp in Sources */,
 				481FB52B1AC1B09F0076CFF3 /* setseedcommand.cpp in Sources */,
+				4846AD8A1D3810DD00DE9913 /* testtrimoligos.cpp in Sources */,
 				481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */,
 				481FB5C61AC1B74F0076CFF3 /* getrelabundcommand.cpp in Sources */,
 				481FB6571AC1B8100076CFF3 /* inputdata.cpp in Sources */,
@@ -2790,7 +2785,6 @@
 				481FB5DD1AC1B77E0076CFF3 /* matrixoutputcommand.cpp in Sources */,
 				481FB5771AC1B6EA0076CFF3 /* spearman.cpp in Sources */,
 				481FB6031AC1B7970076CFF3 /* secondarystructurecommand.cpp in Sources */,
-				481FB66F1AC1B8520076CFF3 /* regularizedrandomforest.cpp in Sources */,
 				481FB5361AC1B5DC0076CFF3 /* getopt_long.cpp in Sources */,
 				481FB5A41AC1B7300076CFF3 /* clustercommand.cpp in Sources */,
 				481FB5671AC1B6AD0076CFF3 /* sharedmorisitahorn.cpp in Sources */,
@@ -2836,7 +2830,6 @@
 				481FB5831AC1B6FF0076CFF3 /* ccode.cpp in Sources */,
 				481FB5681AC1B6B20076CFF3 /* sharedochiai.cpp in Sources */,
 				481FB66E1AC1B8520076CFF3 /* forest.cpp in Sources */,
-				481FB66A1AC1B8520076CFF3 /* abstractrandomforest.cpp in Sources */,
 				481FB56A1AC1B6B80076CFF3 /* sharedsobs.cpp in Sources */,
 				481FB6671AC1B8450076CFF3 /* randomnumber.cpp in Sources */,
 				481FB5DB1AC1B75C0076CFF3 /* makelefsecommand.cpp in Sources */,
@@ -3207,7 +3200,6 @@
 				A7E9B95D12D37EC400DA6239 /* sharedsorclass.cpp in Sources */,
 				A7E9B95E12D37EC400DA6239 /* sharedsorest.cpp in Sources */,
 				A7E9B95F12D37EC400DA6239 /* sharedthetan.cpp in Sources */,
-				48705AC819BE32C50075E977 /* abstractrandomforest.cpp in Sources */,
 				A7E9B96012D37EC400DA6239 /* sharedthetayc.cpp in Sources */,
 				A7E9B96112D37EC400DA6239 /* sharedutilities.cpp in Sources */,
 				A7E9B96212D37EC400DA6239 /* shen.cpp in Sources */,
@@ -3324,7 +3316,6 @@
 				A721AB72161C572A009860A1 /* kmertree.cpp in Sources */,
 				A721AB77161C573B009860A1 /* taxonomynode.cpp in Sources */,
 				83F25B0C163B031200ABE73D /* forest.cpp in Sources */,
-				834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */,
 				A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */,
 				A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */,
 				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
@@ -3372,7 +3363,7 @@
 				"DYLIB_CURRENT_VERSION[sdk=*]" = "";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.1\\\"\"",
 					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
@@ -3407,7 +3398,7 @@
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.1\\\"\"",
 					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
@@ -3437,11 +3428,11 @@
 				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.36.0\\\"\"",
@@ -3488,10 +3479,10 @@
 				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.6\\\"\"",
 					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",

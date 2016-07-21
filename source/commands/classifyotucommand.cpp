@@ -514,7 +514,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 				
 			//is this taxonomy above cutoff
 			int consensusConfidence = ceil((bestChildSize / (float) size) * 100);
-			
+            
 			if (consensusConfidence >= cutoff) { //if yes, add it
 				if (probs) {
 					conTax += bestChild.name + "(" + toString(consensusConfidence) + ");";
@@ -529,10 +529,10 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
 			//move down a level
 			currentNode = bestChild;
 		}
-		
-		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
         
-		if (conTax == "") {  conTax = "no_consensus;";  }
+        if (conTax == "") {  conTax = "unknown;";  }
+        
+		if (myLevel != phylo->getMaxLevel()) {  conTax = m->addUnclassifieds(conTax, phylo->getMaxLevel(), probs);  }
 		
 		delete phylo;	
 		

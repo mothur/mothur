@@ -305,7 +305,7 @@ CommandFactory::CommandFactory(){
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "quit";
-    commands["classify.rf"]         = "classify.rf";
+    //commands["classify.rf"]         = "classify.rf";
     commands["classify.svm"]        = "classify.svm";
     commands["filter.shared"]		= "filter.shared";
     commands["primer.design"]		= "primer.design";

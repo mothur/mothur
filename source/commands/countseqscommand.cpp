@@ -19,7 +19,6 @@ vector<string> CountSeqsCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "NameSHared", "NameSHared", "none","count",false,false,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-        CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -40,7 +39,6 @@ string CountSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The count.seqs aka. make.table command reads a name or shared file and outputs a .count_table file.  You may also provide a group with the names file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
-        helpString += "The large parameter indicates the name and group files are too large to fit in RAM.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
@@ -172,10 +170,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			m->splitAtDash(groups, Groups);
             m->setGroups(Groups);
             
-            string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
-			large = m->isTrue(temp);
-            
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+            string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
@@ -211,8 +206,7 @@ int CountSeqsCommand::execute(){
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
             string outputFileName = getOutputFileName("count", variables);
             
-            if (!large) { total = processSmall(outputFileName); }
-            else { total = processLarge(outputFileName);  }
+            total = process(outputFileName);
             
             if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
             
@@ -359,7 +353,7 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
 }
 //**********************************************************************************************************************
 
-unsigned long long CountSeqsCommand::processSmall(string outputFileName){
+unsigned long long CountSeqsCommand::process(string outputFileName){
 	try {
         ofstream out;
         m->openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
@@ -604,7 +598,6 @@ unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned l
         //adjust start if null strings
         if (start == 0) {  m->zapGremlins(in); m->gobble(in);  }
 
-        
 		bool done = false;
         unsigned long long total = 0;
 		while (!done) {
@@ -671,124 +664,6 @@ unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned l
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountSeqsCommand", "driver");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-unsigned long long CountSeqsCommand::processLarge(string outputFileName){
-	try {
-        set<string> namesOfGroups;
-        map<string, int> initial;
-        for (set<string>::iterator it = namesOfGroups.begin(); it != namesOfGroups.end(); it++) { initial[(*it)] = 0;  }
-        ofstream out;
-        m->openOutputFile(outputFileName, out); 
-        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal";
-        if (groupfile == "") { out << endl; }
-        
-        map<string, unsigned long long> namesToIndex;
-        string outfile = m->getRootName(groupfile) + "sorted.groups.temp";
-        string outName = m->getRootName(namefile) + "sorted.name.temp";
-        map<int, string> indexToName;
-        map<int, string> indexToGroup;
-        if (groupfile != "") { 
-            time_t estart = time(NULL);
-            //convert name file to redundant -> unique.  set unique name equal to index so we can use vectors, save name for later.
-            string newNameFile = m->getRootName(namefile) + ".name.temp";
-            string newGroupFile = m->getRootName(groupfile) + ".group.temp";
-            indexToName = processNameFile(newNameFile);
-            indexToGroup = getGroupNames(newGroupFile, namesOfGroups);
-            
-            //sort file by first column so the names of sequences will be easier to find
-            //use the unix sort 
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                string command = "sort -n " + newGroupFile + " -o " + outfile;
-                system(command.c_str());
-                command = "sort -n " + newNameFile + " -o " + outName;
-                system(command.c_str());
-            #else //sort using windows sort
-                string command = "sort " + newGroupFile + " /O " + outfile;
-                system(command.c_str());
-                command = "sort " + newNameFile + " /O " + outName;
-                system(command.c_str());
-            #endif
-            m->mothurRemove(newNameFile);
-            m->mothurRemove(newGroupFile);
-            
-            m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort and index the group and name files. "); m->mothurOutEndLine();
-        }else { outName = namefile; }
-         
-        time_t estart = time(NULL);
-        //open input file
-		ifstream in;
-		m->openInputFile(outName, in);
-        
-        //open input file
-		ifstream in2;
-		
-		unsigned long long total = 0;
-        vector< vector<int> > nameMapCount;
-        if (groupfile != "") {
-            m->openInputFile(outfile, in2);
-            nameMapCount.resize(indexToName.size());
-            for (int i = 0; i < nameMapCount.size(); i++) {
-                nameMapCount[i].resize(indexToGroup.size(), 0);
-            }
-        }
-        
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-			
-			string firstCol;
-			in >> firstCol;  m->gobble(in);
-			
-			if (groupfile != "") {
-                int uniqueIndex;
-                in >> uniqueIndex; m->gobble(in);
-                
-                string name; int groupIndex;
-                in2 >> name >> groupIndex; m->gobble(in2);
-                
-                if (name != firstCol) { m->mothurOut("[ERROR]: found " + name + " in your groupfile, but " + firstCol + " was in your namefile, please correct.\n"); m->control_pressed = true; }
-                
-                nameMapCount[uniqueIndex][groupIndex]++;
-                total++;
-            }else { 
-                string secondCol;
-                in >> secondCol; m->gobble(in);
-                int num = m->getNumNames(secondCol);
-                out << firstCol << '\t' << num << endl;
-                total += num;
-            }
-		}
-		in.close();
-        
-        if (groupfile != "") {
-            m->mothurRemove(outfile);
-            m->mothurRemove(outName);
-            in2.close();
-            for (map<int, string>::iterator it = indexToGroup.begin(); it != indexToGroup.end(); it++) { out << '\t' << it->second;  }
-            out << endl;
-            for (int i = 0; i < nameMapCount.size(); i++) {
-                string totalsLine = "";
-                int seqTotal = 0;
-                for (int j = 0; j < nameMapCount[i].size(); j++) {
-                    seqTotal += nameMapCount[i][j];
-                    totalsLine += '\t' + toString(nameMapCount[i][j]);
-                }
-                out << indexToName[i] << '\t' << seqTotal << totalsLine << endl;
-            }
-        }
-        
-        out.close();
-        
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to create the count table file. "); m->mothurOutEndLine();
-        
-        return total;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "processLarge");
 		exit(1);
 	}
 }

@@ -1018,6 +1018,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 if (oligosfile != "") { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
                 if (groupfile != "") { m->mothurOut("[ERROR]: You cannot have an groupfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
                 group = pieces[0];
+                m->checkGroupName(group);
                 forward = pieces[1];
                 reverse = pieces[2];
                 findex = "";
