@@ -31,7 +31,7 @@ string MakeFileCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The make.file command takes a input directory and creates a file file containing the fastq or gz files in the directory.\n";
-        helpString += "The make.fastq command parameters are inputdir, numcols and type.  inputdir is required.\n";
+        helpString += "The make.file command parameters are inputdir, numcols and type.  inputdir is required.\n";
         helpString += "May create more than one file. Mothur will attempt to match paired files. \n";
         helpString += "The type parameter allows you to set the type of files to look for. Options are fastq or gz.  Default=fastq. \n";
         helpString += "The numcols parameter allows you to set number of columns you mothur to make in the file.  Default=3, meaning groupName forwardFastq reverseFastq. The groupName is made from the beginning part of the forwardFastq file. Everything up to the first '_' or if no '_' is found then the root of the forwardFastq filename.\n";

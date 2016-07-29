@@ -1356,6 +1356,8 @@ vector<bool> MothurOut::isGZ(string filename){
         
         int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         
+        if (debug) { if (ableToOpen == 1) { mothurOut("[DEBUG]: unable to open gz file. \n"); } }
+        
         if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
         

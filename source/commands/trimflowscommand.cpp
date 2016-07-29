@@ -341,6 +341,7 @@ int TrimFlowsCommand::execute(){
                                 unsigned long long size;
                                 
                                 //get num bytes in file
+                                barcodePrimerComboFileNames[i][j] = m->getFullPathName(barcodePrimerComboFileNames[i][j]);
                                 pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
                                 if (pFile==NULL) perror ("Error opening file");
                                 else{
@@ -777,6 +778,7 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		unsigned long long size;
 		
 		//get num bytes in file
+        flowFileName = m->getFullPathName(flowFileName);
 		pFile = fopen (flowFileName.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
 		else{

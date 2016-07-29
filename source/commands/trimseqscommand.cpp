@@ -1646,6 +1646,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             unsigned long long size;
             
             //get num bytes in file
+            qfilename = m->getFullPathName(qfilename);
             pFile = fopen (qfilename.c_str(),"rb");
             if (pFile==NULL) perror ("Error opening file");
             else{
