@@ -52,7 +52,7 @@ private:
 	RAbundVector oldRAbund;
 	ListVector oldList;
 
-	bool abort, hard, sim;
+	bool abort, sim;
 
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation;
 	double cutoff;
