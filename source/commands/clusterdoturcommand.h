@@ -37,7 +37,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	bool abort, hard, sim;
+	bool abort, sim;
 	string method, fileroot, tag, outputDir, phylipfile, namefile, countfile;
 	double cutoff;
 	int precision, length;
