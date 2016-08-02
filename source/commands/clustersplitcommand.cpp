@@ -31,7 +31,6 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -51,7 +50,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -325,9 +324,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			length = temp.length();
 			m->mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
-			
 			temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "F"; }
 			large = m->isTrue(temp);
             
@@ -367,7 +363,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             cutoffNotSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
             m->mothurConvert(temp, cutoff);
-            if ((method != "agc") && (method != "dgc")) { cutoff += (5 / (precision * 10.0)); }
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
 			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
@@ -1147,13 +1142,8 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
 			cluster->update(cutoff);
             
 			float dist = cluster->getSmallDist();
-			float rndDist;
-			if (hard) {
-				rndDist = m->ceilDist(dist, precision); 
-			}else{
-				rndDist = m->roundDist(dist, precision); 
-			}
-            
+			float rndDist = m->ceilDist(dist, precision);
+			
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
                 oldList.print(listFile);
@@ -1286,12 +1276,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
                 cluster->update(saveCutoff);
                 
                 float dist = matrix->getSmallDist();
-                float rndDist;
-                if (hard) {
-                    rndDist = m->ceilDist(dist, precision);
-                }else{
-                    rndDist = m->roundDist(dist, precision);
-                }
+                float rndDist = m->ceilDist(dist, precision);
                 
                 if(previousDist <= 0.0000 && dist != previousDist){
                     oldList.setLabel("unique");
@@ -1336,9 +1321,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             }
             
             if (saveCutoff != cutoff) { 
-                if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-                else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-                
+                saveCutoff = m->ceilDist(saveCutoff, precision);
                 m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
             }
             
