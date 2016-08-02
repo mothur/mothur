@@ -48,7 +48,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";

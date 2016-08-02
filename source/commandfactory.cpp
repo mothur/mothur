@@ -973,11 +973,15 @@ bool CommandFactory::isValidCommand(string command, string noError) {
 /***********************************************************************/
 void CommandFactory::printCommands(ostream& out) {
 	try {
-		out << "Valid commands are: ";
-		for (it = commands.begin(); it != commands.end(); it++) {
-			out << it->first << ",";
+        it = commands.begin();
+		out << "Valid commands are: " << it->first << ", ";
+        it++;
+        out << it->first;
+        it++;
+		for (; it != commands.end(); it++) {
+			out << ", " << it->first;
 		}
-		out << endl;
+		out <<  "." << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CommandFactory", "printCommands");
