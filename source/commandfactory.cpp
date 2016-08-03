@@ -152,6 +152,7 @@
 #include "biominfocommand.h"
 #include "renamefilecommand.h"
 #include "chimeravsearchcommand.h"
+#include "mergecountcommand.hpp"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -327,6 +328,7 @@ CommandFactory::CommandFactory(){
     commands["biom.info"]           = "biom.info";
     commands["set.seed"]            = "set.seed";
     commands["rename.file"]         = "rename.file";
+    commands["merge.count"]         = "merge.count";
 
 
 }
@@ -526,6 +528,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "corr.axes")				{	command = new CorrAxesCommand(optionString);				}
 		else if(commandName == "remove.rare")			{	command = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	command = new MergeGroupsCommand(optionString);				}
+        else if(commandName == "merge.count")			{	command = new MergeCountCommand(optionString);				}
 		else if(commandName == "amova")					{	command = new AmovaCommand(optionString);					}
 		else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
 		else if(commandName == "mantel")				{	command = new MantelCommand(optionString);					}
@@ -699,6 +702,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "corr.axes")				{	pipecommand = new CorrAxesCommand(optionString);				}
 		else if(commandName == "remove.rare")			{	pipecommand = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	pipecommand = new MergeGroupsCommand(optionString);				}
+        else if(commandName == "merge.count")			{	pipecommand = new MergeCountCommand(optionString);				}
 		else if(commandName == "amova")					{	pipecommand = new AmovaCommand(optionString);					}
 		else if(commandName == "homova")				{	pipecommand = new HomovaCommand(optionString);					}
 		else if(commandName == "mantel")				{	pipecommand = new MantelCommand(optionString);					}
@@ -858,6 +862,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "corr.axes")				{	shellcommand = new CorrAxesCommand();				}
 		else if(commandName == "remove.rare")			{	shellcommand = new RemoveRareCommand();				}
 		else if(commandName == "merge.groups")			{	shellcommand = new MergeGroupsCommand();			}
+        else if(commandName == "merge.count")			{	shellcommand = new MergeCountCommand();				}
 		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
 		else if(commandName == "homova")				{	shellcommand = new HomovaCommand();					}
 		else if(commandName == "mantel")				{	shellcommand = new MantelCommand();					}

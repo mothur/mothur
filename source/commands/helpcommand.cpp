@@ -153,6 +153,7 @@
 #include "biominfocommand.h"
 #include "renamefilecommand.h"
 #include "chimeravsearchcommand.h"
+#include "mergecountcommand.hpp"
 
 
 //**********************************************************************************************************************
@@ -271,6 +272,7 @@ int HelpCommand::execute(){
                 else if(commandName == "corr.axes")				{	command = new CorrAxesCommand(optionString);				}
                 else if(commandName == "remove.rare")			{	command = new RemoveRareCommand(optionString);				}
                 else if(commandName == "merge.groups")			{	command = new MergeGroupsCommand(optionString);				}
+                else if(commandName == "merge.count")			{	command = new MergeCountCommand(optionString);				}
                 else if(commandName == "amova")					{	command = new AmovaCommand(optionString);					}
                 else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
                 else if(commandName == "mantel")				{	command = new MantelCommand(optionString);					}

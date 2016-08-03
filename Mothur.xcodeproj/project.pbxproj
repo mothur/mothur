@@ -379,6 +379,8 @@
 		488841621CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
+		48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
+		48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		489B55721BCD7F0100FB7DC8 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
@@ -821,6 +823,8 @@
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = "<group>"; };
+		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = "<group>"; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = "<group>"; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = "<group>"; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = testcommands/testrenamefilecommand.cpp; sourceTree = "<group>"; };
@@ -1964,6 +1968,8 @@
 				A7E6F69D17427D06006775E2 /* makelookupcommand.cpp */,
 				A7E9B74A12D37EC400DA6239 /* matrixoutputcommand.h */,
 				A7E9B74912D37EC400DA6239 /* matrixoutputcommand.cpp */,
+				48910D411D5243E500F60EDB /* mergecountcommand.cpp */,
+				48910D421D5243E500F60EDB /* mergecountcommand.hpp */,
 				48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */,
 				48705AC019BE32C50075E977 /* mergesfffilecommand.h */,
 				A7E9B75412D37EC400DA6239 /* mergefilecommand.h */,
@@ -2666,6 +2672,7 @@
 				481FB6881AC1B8B80076CFF3 /* weightedlinkage.cpp in Sources */,
 				480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */,
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
+				48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
 				481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */,
@@ -3011,6 +3018,7 @@
 				A7E9B8C512D37EC400DA6239 /* fileoutput.cpp in Sources */,
 				A7E9B8C612D37EC400DA6239 /* filterseqscommand.cpp in Sources */,
 				A7E9B8C812D37EC400DA6239 /* flowdata.cpp in Sources */,
+				48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
 				A7E9B8C912D37EC400DA6239 /* formatcolumn.cpp in Sources */,
 				A7E9B8CA12D37EC400DA6239 /* formatphylip.cpp in Sources */,
 				A7E9B8CB12D37EC400DA6239 /* fullmatrix.cpp in Sources */,
