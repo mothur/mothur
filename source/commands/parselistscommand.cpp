@@ -324,14 +324,7 @@ int ParseListCommand::execute(){
 /**********************************************************************************************************************/
 int ParseListCommand::parse(ListVector* thisList) {
 	try {
-        map<string, string> files;
-        map<string, string>::iterator it3;
-        
-        //set fileroot
-		map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[distance]"] = thisList->getLabel();
-		
+
 		//fill filehandles with neccessary ofstreams
 		vector<string> gGroups;
         if (groupfile != "") { gGroups = groupMap->getNamesOfGroups(); }
@@ -342,11 +335,18 @@ int ParseListCommand::parse(ListVector* thisList) {
         map<string, string>::iterator itGroup;
         map<string, int> groupNumBins;
         
+        map<string, string> files;
+        
+        //set fileroot
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[distance]"] = thisList->getLabel();
+        
 		for (int i=0; i<gGroups.size(); i++) {
             variables["[group]"] = gGroups[i];
 			string filename = getOutputFileName("list",variables);
 			ofstream temp;
-            m->openOutputFile(filename, temp);
+            m->openOutputFile(filename, temp); temp.close();
             files[gGroups[i]] = filename;
             outputNames.push_back(filename); outputTypes["list"].push_back(filename);
             groupNumBins[gGroups[i]] = 0;
@@ -404,9 +404,10 @@ int ParseListCommand::parse(ListVector* thisList) {
 		}
         
 		//end list vector
-		for (it3 = files.begin(); it3 != files.end(); it3++) {
+		for (map<string, string>::iterator it3 = files.begin(); it3 != files.end(); it3++) {
             ofstream out;
-            m->openOutputFileAppend(files[it3->second], out);
+            string filename = it3->second;
+            m->openOutputFileAppend(filename, out);
             out << groupLabels[it3->first] << endl;
 			out << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
             out.close();
