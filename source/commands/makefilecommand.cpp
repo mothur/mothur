@@ -177,23 +177,17 @@ int MakeFileCommand::execute(){
                     }
                     if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
                     else { //only one diff = paired files
-                        int pos = simpleName1.find("R1");
-                        int pos2 = simpleName2.find("R2");
-                        if ((pos != string::npos) && (pos2 != string::npos)){
-                            vector<string> temp;
-                            if (numCols == 3) {
-                                string groupName = "noGroup"+toString(i);
-                                int posUnderscore = fastqFiles[i].find_first_of('_');
-                                if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
-                                else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
-                                temp.push_back(groupName);
-                            }
-                            temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
-                            paired.push_back(temp);
-                            i++;
-                        }else {
-                            singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                        vector<string> temp;
+                        if (numCols == 3) {
+                            string groupName = "noGroup"+toString(i);
+                            int posUnderscore = fastqFiles[i].find_first_of('_');
+                            if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
+                            else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
+                            temp.push_back(groupName);
                         }
+                        temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        paired.push_back(temp);
+                        i++;
                     }
                 }else{
                     singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
