@@ -25,7 +25,7 @@ public:
 	string getCommandName()			{ return "help";		}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'"; }	
-     string getOutputPattern(string) { return "";                }
+    string getOutputPattern(string) { return "";                }
 	string getCitation() { return "no citation"; }
 	string getDescription()		{ return "help"; }
 
@@ -35,7 +35,11 @@ public:
 	
 private:
 	CommandFactory* validCommands;
-	vector<string> outputNames;	
+	vector<string> outputNames;
+    
+    bool abort, calledHelp;
+    
+    string commandName;
 		
 };
  

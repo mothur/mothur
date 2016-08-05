@@ -19,7 +19,6 @@ vector<string> ClusterDoturCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -39,7 +38,7 @@ string ClusterDoturCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The cluster.classic command clusters using the algorithm from dotur. \n";
-		helpString += "The cluster.classic command parameter options are phylip, name, count, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
+		helpString += "The cluster.classic command parameter options are phylip, name, count, method, cuttoff, sim, precision. Phylip is required, unless you have a valid current file.\n";
 		helpString += "The cluster.classic command should be in the following format: \n";
 		helpString += "cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then average is assumed.\n";	
@@ -183,11 +182,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));  
-			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
+			m->mothurConvert(temp, cutoff);
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
@@ -280,12 +275,7 @@ int ClusterDoturCommand::execute(){
 			cluster->update(cutoff);
 	
 			float dist = cluster->getSmallDist();
-			float rndDist;
-			if (hard) {
-				rndDist = m->ceilDist(dist, precision); 
-			}else{
-				rndDist = m->roundDist(dist, precision); 
-			}
+			float rndDist = m->ceilDist(dist, precision);
 
 			if(previousDist <= 0.0000 && dist != previousDist){
 				printData("unique", counts);

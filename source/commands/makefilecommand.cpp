@@ -14,6 +14,7 @@ vector<string> MakeFileCommand::setParameters(){
         CommandParameter ptype("type", "Multiple", "fastq-gz", "fastq", "", "", "","",false,false); parameters.push_back(ptype);
         CommandParameter pnumcols("numcols", "Multiple", "2-3", "3", "", "", "","",false,false, true); parameters.push_back(pnumcols);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -31,10 +32,11 @@ string MakeFileCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The make.file command takes a input directory and creates a file file containing the fastq or gz files in the directory.\n";
-        helpString += "The make.fastq command parameters are inputdir, numcols and type.  inputdir is required.\n";
+        helpString += "The make.file command parameters are inputdir, numcols, type and prefix.  inputdir is required.\n";
         helpString += "May create more than one file. Mothur will attempt to match paired files. \n";
         helpString += "The type parameter allows you to set the type of files to look for. Options are fastq or gz.  Default=fastq. \n";
         helpString += "The numcols parameter allows you to set number of columns you mothur to make in the file.  Default=3, meaning groupName forwardFastq reverseFastq. The groupName is made from the beginning part of the forwardFastq file. Everything up to the first '_' or if no '_' is found then the root of the forwardFastq filename.\n";
+        helpString += "The prefix parameter allows you to enter your own prefix for the output filename. Default=stability.";
         helpString += "The make.file command should be in the following format: \n";
         helpString += "make.file(inputdir=yourInputDirectory). \n";
         helpString += "Example make.group(inputdir=fastqFiles)\n";
@@ -51,7 +53,7 @@ string MakeFileCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "file") {  pattern = "[filename],[tag],file"; }
+        if (type == "file") {  pattern = "[filename],[tag],files-[filename],files"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -126,6 +128,8 @@ MakeFileCommand::MakeFileCommand(string option)  {
             if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3."); m->mothurOutEndLine(); temp = "3";  }
             m->mothurConvert(temp, numCols);
             
+            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { prefix = "stability"; }
+            
         }
     }
     catch(exception& e) {
@@ -177,23 +181,17 @@ int MakeFileCommand::execute(){
                     }
                     if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
                     else { //only one diff = paired files
-                        int pos = simpleName1.find("R1");
-                        int pos2 = simpleName2.find("R2");
-                        if ((pos != string::npos) && (pos2 != string::npos)){
-                            vector<string> temp;
-                            if (numCols == 3) {
-                                string groupName = "noGroup"+toString(i);
-                                int posUnderscore = fastqFiles[i].find_first_of('_');
-                                if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
-                                else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
-                                temp.push_back(groupName);
-                            }
-                            temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
-                            paired.push_back(temp);
-                            i++;
-                        }else {
-                            singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                        vector<string> temp;
+                        if (numCols == 3) {
+                            string groupName = "noGroup"+toString(i);
+                            int posUnderscore = fastqFiles[i].find_first_of('_');
+                            if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
+                            else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
+                            temp.push_back(groupName);
                         }
+                        temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        paired.push_back(temp);
+                        i++;
                     }
                 }else{
                     singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
@@ -203,8 +201,8 @@ int MakeFileCommand::execute(){
             
             if (singles.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + "fileList.";
-                variables["[tag]"] = "single";
+                variables["[filename]"] = outputDir + prefix + ".";
+                if (paired.size() != 0) { variables["[tag]"] = "single"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
                 m->openOutputFile(filename, out);
@@ -219,8 +217,8 @@ int MakeFileCommand::execute(){
             
             if (paired.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + "fileList.";
-                variables["[tag]"] = "paired";
+                variables["[filename]"] = outputDir + prefix + ".";
+                if (singles.size() != 0) { variables["[tag]"] = "paired"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
                 m->openOutputFile(filename, out);

@@ -341,9 +341,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			length = temp.length();
 			m->mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
-			
 			temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "F"; }
 			large = m->isTrue(temp);
             
@@ -395,6 +392,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
             m->mothurConvert(temp, cutoff);
+
             if (method != "opti") { cutoff += (5 / (precision * 10.0)); }
 
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
@@ -1188,13 +1186,8 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
 			cluster->update(cutoff);
             
 			float dist = cluster->getSmallDist();
-			float rndDist;
-			if (hard) {
-				rndDist = m->ceilDist(dist, precision); 
-			}else{
-				rndDist = m->roundDist(dist, precision); 
-			}
-            
+			float rndDist = m->ceilDist(dist, precision);
+			
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
                 oldList.print(listFile);
@@ -1328,12 +1321,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
                 cluster->update(saveCutoff);
                 
                 float dist = matrix->getSmallDist();
-                float rndDist;
-                if (hard) {
-                    rndDist = m->ceilDist(dist, precision);
-                }else{
-                    rndDist = m->roundDist(dist, precision);
-                }
+                float rndDist = m->ceilDist(dist, precision);
                 
                 if(previousDist <= 0.0000 && dist != previousDist){
                     oldList.setLabel("unique");
@@ -1378,9 +1366,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             }
             
             if (saveCutoff != cutoff) { 
-                if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-                else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-                
+                saveCutoff = m->ceilDist(saveCutoff, precision);
                 m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
             }
             

@@ -54,6 +54,7 @@ private:
 	double cutoff, splitcutoff, stableMetric, numSingletons;
 	int precision, length, processors, taxLevelCutoff, maxIters;
 	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist;
+
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	

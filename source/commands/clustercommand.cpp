@@ -32,8 +32,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
-		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         //CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -259,10 +258,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			m->mothurConvert(temp, precision); 
-			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
+			m->mothurConvert(temp, precision);
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
@@ -323,7 +319,6 @@ ClusterCommand::ClusterCommand(string option)  {
             if (temp == "not found") { temp = "10"; }
             //else { cutoffSet = true; }
             m->mothurConvert(temp, cutoff);
-            if ((method != "agc") && (method != "dgc")) { cutoff += (5 / (precision * 10.0)); }
             
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -356,9 +351,7 @@ int ClusterCommand::execute(){
             else if (countfile != "") { inputString += ", count=" + countfile; }
 			inputString += ", precision=" + toString(precision);
 			inputString += ", method=" + method;
-			if (hard)	{ inputString += ", hard=T";	}
-			else		{ inputString += ", hard=F";	}
-			if (sim)	{ inputString += ", sim=T";		}
+            if (sim)	{ inputString += ", sim=T";		}
 			else		{ inputString += ", sim=F";		}
 
 			
@@ -736,12 +729,7 @@ int ClusterCommand::runMothurCluster(){
             cluster->update(cutoff);
             
             float dist = matrix->getSmallDist();
-            float rndDist;
-            if (hard) {
-                rndDist = m->ceilDist(dist, precision);
-            }else{
-                rndDist = m->roundDist(dist, precision);
-            }
+            float rndDist = m->ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 printData("unique", counts);
@@ -780,10 +768,8 @@ int ClusterCommand::runMothurCluster(){
         }
         listFile.close();
         
-        if (saveCutoff != cutoff) { 
-            if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-            else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-            
+        if (saveCutoff != cutoff) {
+            saveCutoff = m->ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
         }
 
