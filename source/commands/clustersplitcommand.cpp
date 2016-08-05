@@ -1529,10 +1529,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
         
-        //--threads=1
-        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
-        vsearchParameters.push_back(threads);
-        
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
         vsearchParameters.push_back(usersort);
