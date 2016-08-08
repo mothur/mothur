@@ -87,7 +87,13 @@ class Command {
                                                 if (filename.length() > 0) { //rip off last "."
                                                     filename = filename.substr(0, filename.length()-1);
                                                 }
-                                                filename += it->second + "."; 
+                                                filename += it->second + ".";
+                                            }else if ((it->first == "[group]") || (it->first == "[tag]")) {
+                                                string group = it->second;
+                                                for (int j = 0; j < group.length(); j++) {
+                                                    if (group[j] == '-') { group[j] = '_'; }
+                                                }
+                                                filename += group + ".";
                                             }else { filename += it->second + "."; }
                                         }
                                     }
