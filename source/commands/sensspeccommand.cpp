@@ -302,6 +302,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 			if(label != "unique"){
 				origCutoff = label;
 				convert(label, cutoff);
+                cutoff = m->ceilDist(cutoff, precision);
 			}
 			else{
 				origCutoff = "unique";
