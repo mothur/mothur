@@ -49,7 +49,6 @@ private:
 
 	long int truePositives, falsePositives, trueNegatives, falseNegatives;
 	bool abort, allLines, square;
-	bool hard;
 	double cutoff;
 	int precision;
 
