@@ -14,6 +14,7 @@ TARGET_BUILD_DIRTARGET_BUILD_DIR
 nbproject/
 mothur
 Mothur.1
+DerivedData/
 
 *.stdout
 
