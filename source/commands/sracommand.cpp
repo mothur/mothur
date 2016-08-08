@@ -1327,15 +1327,19 @@ int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<strin
 	try {
         for (int i = 0; i < Groups.size(); i++) {
             
+            //correct filename issues if group name contains '-' characters
+            string thisGroup = Groups[i];
+            for (int k = 0; k < thisGroup.length(); k++) { if (thisGroup[k] == '-') { thisGroup[k] = '_'; } }
+            
             for (int j = 0; j < theseFiles.size(); j++) {
                 
                 string tempName = m->getSimpleName(theseFiles[j]);
                 //if ((tempName == "GZGO5KL01.F006D146.sff") || (tempName == "G3BMWHG01.F008D021.sff") || (tempName == "GO2JXTW01.M002D125.sff") || (tempName == "GO5715J01.M003D125.sff")) { cout << Groups[i] << '\t' << theseFiles[j] << endl; }
                 //cout << i << '\t' << j << '\t' << Groups[i] << '\t' << theseFiles[j] << endl;
-                int pos = theseFiles[j].find(Groups[i]);
+                int pos = theseFiles[j].find(thisGroup);
                 if (pos != string::npos) { //you have a potential match, make sure you dont have a case of partial name
-                    if (theseFiles[j][pos+Groups[i].length()] == '.') { //final.soil.sff vs final.soil2.sff both would match soil.
-                        map<string, vector<string> >::iterator it = files.find(Groups[i]);
+                    if (theseFiles[j][pos+thisGroup.length()] == '.') { //final.soil.sff vs final.soil2.sff both would match soil.
+                        map<string, vector<string> >::iterator it = files.find(thisGroup);
                         if (it == files.end()) {
                             vector<string> temp; temp.push_back(theseFiles[j]);
                             files[Groups[i]] = temp;
@@ -1346,6 +1350,7 @@ int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<strin
                 }
             }
         }
+        
         return 0;
     }
 	catch(exception& e) {
