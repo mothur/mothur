@@ -51,7 +51,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund, metric, delta, iters and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
@@ -274,13 +274,6 @@ ClusterCommand::ClusterCommand(string option)  {
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
             m->mothurConvert(temp, maxIters);
             
-            //bool cutoffSet = false;
-			temp = validParameter.validFile(parameters, "cutoff", false);
-            if (temp == "not found") { temp = "1.0"; cutoffNotSet = true; }
-            //else { cutoffSet = true; }
-			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));
-            
             //temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { temp = "F"; }
             //if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
             //else if (m->isTrue(temp))   { adjust = 1.0;                     }
@@ -314,10 +307,10 @@ ClusterCommand::ClusterCommand(string option)  {
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
 #endif
             
-            //bool cutoffSet = false;
+            cutOffSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);
             if (temp == "not found") { temp = "10"; }
-            //else { cutoffSet = true; }
+            else { cutOffSet = true; }
             m->mothurConvert(temp, cutoff);
             
 			showabund = validParameter.validFile(parameters, "showabund", false);
@@ -842,8 +835,7 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
 
 int ClusterCommand::runOptiCluster(){
     try {
-        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; cutoff += (5 / (precision * 10.0)); }
-        cutoff -= (5 / (precision * 10.0));
+        if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
         
         string nameOrCount = "";
         string thisNamefile = "";

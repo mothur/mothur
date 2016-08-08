@@ -20,7 +20,6 @@ vector<string> MGClusterCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "average", "", "", "","",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter pmin("min", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmin);
 		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmerge);
         CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
@@ -42,7 +41,7 @@ vector<string> MGClusterCommand::setParameters(){
 string MGClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision, hard,  method, merge, min, length, penalty and adjust. The blast parameter is required.\n";
+		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision,   method, merge, min, length, penalty and adjust. The blast parameter is required.\n";
 		helpString += "The mgcluster command reads a blast and name file and clusters the sequences into OPF units similar to the OTUs.\n";
 		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
 		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
@@ -190,8 +189,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			temp = validParameter.validFile(parameters, "cutoff", false);
             if (temp == "not found") { temp = "0.70"; }
             else { cutoffSet = true;  }
-			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));
+			m->mothurConvert(temp, cutoff);
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "average"; }
@@ -210,9 +208,6 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "merge", false);			if (temp == "not found") { temp = "true"; }
 			merge = m->isTrue(temp);
-			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
             
             temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { if (cutoffSet) { temp = "F"; }else { temp="T"; } }
             if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
@@ -342,12 +337,7 @@ int MGClusterCommand::execute(){
             }
             
             float dist = distMatrix->getSmallDist();
-            float rndDist;
-            if (hard) {
-                rndDist = m->ceilDist(dist, precision);
-            }else{
-                rndDist = m->roundDist(dist, precision);
-            }
+            float rndDist = m->ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
@@ -433,9 +423,8 @@ int MGClusterCommand::execute(){
 		m->mothurOutEndLine();
 		
 		if (saveCutoff != cutoff) { 
-			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-			
+			saveCutoff = m->ceilDist(saveCutoff, precision);	
+						
 			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
 		}
 		

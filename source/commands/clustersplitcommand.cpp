@@ -34,8 +34,7 @@ vector<string> ClusterSplitCommand::setParameters(){
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
-        CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
+       CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -55,7 +54,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, iters, delta, dist, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, iters, delta, dist, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -359,7 +358,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             //not using file option and don't have fasta method with classic
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-
+			
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff);
             
@@ -389,12 +388,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             #endif
             
             cutoffNotSet = false;
-
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
             m->mothurConvert(temp, cutoff);
-
-            if (method != "opti") { cutoff += (5 / (precision * 10.0)); }
-
+            
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
 			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
 			
@@ -1418,11 +1414,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
-        if (hard) {
-            cutoff = m->ceilDist(cutoff, precision);
-        }else{
-            cutoff = m->roundDist(cutoff, precision);
-        }
+        cutoff = m->ceilDist(cutoff, precision);
         labels.insert(toString(cutoff));
         
         ofstream listFile;
@@ -1529,6 +1521,10 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
         
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        vsearchParameters.push_back(threads);
+        
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
         vsearchParameters.push_back(usersort);
@@ -1549,10 +1545,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         //--wordlength=8
         char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
         vsearchParameters.push_back(wordlength);
-        
-        //--threads=1
-        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
-        vsearchParameters.push_back(threads);
         
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;

@@ -20,7 +20,6 @@ vector<string> SensSpecCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -223,13 +222,6 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it
 			}
 
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			temp = validParameter.validFile(parameters, "hard", false);
-			if (temp == "not found"){	hard = 1;	}
-			else if(!m->isTrue(temp))	{	hard = 0;	}
-			else if(m->isTrue(temp))	{	hard = 1;	}
-
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found") { temp = "-1.00"; }
 			m->mothurConvert(temp, cutoff);
 
@@ -310,7 +302,6 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 			if(label != "unique"){
 				origCutoff = label;
 				convert(label, cutoff);
-				if(!hard){	cutoff += (0.49 / double(precision));	}
 			}
 			else{
 				origCutoff = "unique";
@@ -459,9 +450,8 @@ int SensSpecCommand::processListFile(){
 
 		string origCutoff = "";
 		bool getCutoff = 0;
-		if(cutoff == -1.00)	{	getCutoff = 1;															}
-		else if( !hard )	{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}
-		else 				{	origCutoff = toString(cutoff);	}
+		if(cutoff == -1.00)	{	getCutoff = 1;									}
+		else 				{	origCutoff = m->ceilDist(cutoff, precision);    }
 
 		map<string, int> seqMap;
 
