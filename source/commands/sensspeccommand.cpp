@@ -451,8 +451,8 @@ int SensSpecCommand::processListFile(){
 
 		string origCutoff = "";
 		bool getCutoff = 0;
-		if(cutoff == -1.00)	{	getCutoff = 1;									}
-		else 				{	origCutoff = m->ceilDist(cutoff, precision);    }
+		if(cutoff == -1.00)	{	getCutoff = 1;                                              }
+		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));      }
 
 		map<string, int> seqMap;
 
