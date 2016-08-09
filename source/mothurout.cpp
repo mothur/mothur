@@ -1356,6 +1356,8 @@ vector<bool> MothurOut::isGZ(string filename){
         
         int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         
+        if (debug) { if (ableToOpen == 1) { mothurOut("[DEBUG]: unable to open gz file. \n"); } }
+        
         if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
         
@@ -2991,7 +2993,7 @@ bool MothurOut::checkGroupName(string name) {
         }
         
         if (!goodName) {
-            mothurOut("\n[ERROR]: group " + name + " contains illegal characters in the name. Group names cannot include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename. Quitting. \n\n"); control_pressed = true;
+            mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.  \n\n");
         }
         
         return goodName;

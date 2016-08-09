@@ -1374,6 +1374,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 unsigned long long size;
                 
                 //get num bytes in file
+                qfilename = m->getFullPathName(qfilename);
                 pFile = fopen (qfilename.c_str(),"rb");
                 if (pFile==NULL) perror ("Error opening file");
                 else{
@@ -1436,6 +1437,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 unsigned long long sizeR;
                 
                 //get num bytes in file
+                rfilename = m->getFullPathName(rfilename);
                 rFile = fopen (rfilename.c_str(),"rb");
                 if (rFile==NULL) perror ("Error opening file");
                 else{
@@ -1455,6 +1457,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		unsigned long long size;
 		
 		//get num bytes in file
+        filename = m->getFullPathName(filename);
 		pFile = fopen (filename.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
 		else{
@@ -1469,6 +1472,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
             FILE * qFile;
             
             //get num bytes in file
+            qfilename = m->getFullPathName(qfilename);
             qFile = fopen (qfilename.c_str(),"rb");
             if (qFile==NULL) perror ("Error opening file");
             else{
@@ -1486,6 +1490,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
              FILE * rFile;
              
              //get num bytes in file
+             rfilename = m->getFullPathName(rfilename);
              rFile = fopen (rfilename.c_str(),"rb");
              if (rFile==NULL) perror ("Error opening file");
              else{

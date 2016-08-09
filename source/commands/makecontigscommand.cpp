@@ -769,7 +769,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 
                 ofstream out;
                 variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
-                cout << variables["[filename]"] << endl;
+                //cout << variables["[filename]"] << endl;
                 string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
                 
                 m->openOutputFile(thisGroupName, out);
@@ -2652,6 +2652,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         unsigned long long size;
         
         //get num bytes in file
+        fasta[1] = m->getFullPathName(fasta[1]);
         pFile = fopen (fasta[1].c_str(),"rb");
         if (pFile==NULL) perror ("Error opening file");
         else{
@@ -2723,6 +2724,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 unsigned long long size;
                 
                 //get num bytes in file
+                qual[0] = m->getFullPathName(qual[0]);
                 pFile = fopen (qual[0].c_str(),"rb");
                 if (pFile==NULL) perror ("Error opening file");
                 else{
@@ -2781,6 +2783,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 FILE * pFile2;
                 
                 //get num bytes in file
+                qual[1] = m->getFullPathName(qual[1]);
                 pFile2 = fopen (qual[1].c_str(),"rb");
                 if (pFile2==NULL) perror ("Error opening file");
                 else{

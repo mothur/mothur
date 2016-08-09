@@ -51,7 +51,7 @@ private:
 	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
-	bool print_start, abort, hard, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
+	bool print_start, abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	

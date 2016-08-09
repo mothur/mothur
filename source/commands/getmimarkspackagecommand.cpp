@@ -589,7 +589,7 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
             //overwrite global oligos - assume fastq data like make.contigs
             Oligos oligos;
             if ((fileOption == 3) || (fileOption == 5)) { oligos.read(oligosfile, false);  } //like make.contigs
-            else {  oligos.read(oligosfile);  }
+            else {  oligos.read(oligosfile, false);  }
             
             map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
             map<int, oligosPair> primers = oligos.getPairedPrimers();

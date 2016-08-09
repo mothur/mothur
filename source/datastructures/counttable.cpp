@@ -11,6 +11,7 @@
 /************************************************************/
 int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>& gs) {
     try {
+        hasGroups = false;
         int numGroups = 0;
         groups.clear();
         totalGroups.clear();
@@ -81,13 +82,34 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
 /************************************************************/
 bool CountTable::testGroups(string file) {
     try {
+        vector<string> nothing;
+        return testGroups(file, nothing);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "testGroups");
+        exit(1);
+    }
+}
+
+/************************************************************/
+bool CountTable::testGroups(string file, vector<string>& groups) {
+    try {
         m = MothurOut::getInstance(); hasGroups = false; total = 0;
         ifstream in;
         m->openInputFile(file, in);
     
         string headers = m->getline(in); m->gobble(in);
         vector<string> columnHeaders = m->splitWhiteSpace(headers);
-        if (columnHeaders.size() > 2) { hasGroups = true;   }
+        if (columnHeaders.size() > 2) {
+            hasGroups = true;
+        
+            for (int i = 2; i < columnHeaders.size(); i++) {
+                groups.push_back(columnHeaders[i]);
+            }
+            //sort groups to keep consistent with how we store the groups in groupmap
+            sort(groups.begin(), groups.end());
+        }
+        
         return hasGroups;
     }
 	catch(exception& e) {

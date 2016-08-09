@@ -186,7 +186,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				//prevent giantic file name
                 map<string, string> variables; 
                 variables["[filename]"] = filename;
-				if (fastaFileNames.size() > 3) { variables["[filename]"] = outputDir + "merge"; }
+				if (fastaFileNames.size() > 3) { variables["[filename]"] = "merge"; }
 				filename = getOutputFileName("group",variables);  
 				
 				//make sure there is at least one valid file left

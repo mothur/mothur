@@ -30,8 +30,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
-		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         //CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -49,7 +48,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
@@ -249,10 +248,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			m->mothurConvert(temp, precision); 
-			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
+			m->mothurConvert(temp, precision);
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
@@ -282,7 +278,6 @@ ClusterCommand::ClusterCommand(string option)  {
             if (temp == "not found") { temp = "10"; }
             //else { cutoffSet = true; }
             m->mothurConvert(temp, cutoff);
-            if ((method != "agc") && (method != "dgc")) { cutoff += (5 / (precision * 10.0)); }
             
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -315,9 +310,7 @@ int ClusterCommand::execute(){
             else if (countfile != "") { inputString += ", count=" + countfile; }
 			inputString += ", precision=" + toString(precision);
 			inputString += ", method=" + method;
-			if (hard)	{ inputString += ", hard=T";	}
-			else		{ inputString += ", hard=F";	}
-			if (sim)	{ inputString += ", sim=T";		}
+            if (sim)	{ inputString += ", sim=T";		}
 			else		{ inputString += ", sim=F";		}
 
 			
@@ -689,12 +682,7 @@ int ClusterCommand::runMothurCluster(){
             cluster->update(cutoff);
             
             float dist = matrix->getSmallDist();
-            float rndDist;
-            if (hard) {
-                rndDist = m->ceilDist(dist, precision);
-            }else{
-                rndDist = m->roundDist(dist, precision);
-            }
+            float rndDist = m->ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 printData("unique", counts);
@@ -733,10 +721,8 @@ int ClusterCommand::runMothurCluster(){
         }
         listFile.close();
         
-        if (saveCutoff != cutoff) { 
-            if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-            else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-            
+        if (saveCutoff != cutoff) {
+            saveCutoff = m->ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
         }
 
