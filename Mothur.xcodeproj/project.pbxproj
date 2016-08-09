@@ -3326,8 +3326,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.1\\\"\"",
-					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"08/9/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3361,8 +3361,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.1\\\"\"",
-					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"8/9/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3439,8 +3439,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.6\\\"\"",
-					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"8/9/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
