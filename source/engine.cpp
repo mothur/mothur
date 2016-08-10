@@ -257,7 +257,8 @@ bool BatchEngine::getInput(){
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-
+                    
+                    if (mout->control_pressed) { break;  }
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
@@ -391,7 +392,8 @@ bool ScriptEngine::getInput(){
 					
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-							
+					
+                    if (mout->control_pressed) { break;  }
 					mout->control_pressed = 0;
 					mout->executing = false;
 									
