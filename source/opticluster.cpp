@@ -175,14 +175,14 @@ bool OptiCluster::update(double& listMetric) {
                 //choose "best" otu - which is highest value or last item in map. - shuffle for ties
                 random_shuffle(bestMetricsTPValues.begin(), bestMetricsTPValues.end());
                 int bestBin = bestMetricsTPValues[0][0];
-                truePositives = bestMetricsTPValues[0][1];
-                trueNegatives = bestMetricsTPValues[0][2];
-                falsePositives = bestMetricsTPValues[0][3];
-                falseNegatives = bestMetricsTPValues[0][4];
                 
                 if (bestBin == -1) {  bestBin = insertLocation;  }
                 
                 if (bestBin != binNumber) {
+                    truePositives = bestMetricsTPValues[0][1];
+                    trueNegatives = bestMetricsTPValues[0][2];
+                    falsePositives = bestMetricsTPValues[0][3];
+                    falseNegatives = bestMetricsTPValues[0][4];
                     //move seq from i to j
                     bins[bestBin].push_back(seqNumber); //add seq to bestbin
                     bins[binNumber].erase(remove(bins[binNumber].begin(), bins[binNumber].end(), seqNumber), bins[binNumber].end()); //remove from old bin i

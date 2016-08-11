@@ -81,6 +81,7 @@ string ClusterCommand::getOutputPattern(string type) {
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
         else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
+        else if (type == "steps") {  pattern = "[filename],[clustertag],steps"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -100,6 +101,7 @@ ClusterCommand::ClusterCommand(){
         outputTypes["sensspec"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
+        outputTypes["steps"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "ClusterCommand");
@@ -138,6 +140,7 @@ ClusterCommand::ClusterCommand(string option)  {
             outputTypes["sensspec"] = tempOutNames;
 			outputTypes["rabund"] = tempOutNames;
 			outputTypes["sabund"] = tempOutNames;
+            outputTypes["steps"] = tempOutNames;
 		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -862,6 +865,14 @@ int ClusterCommand::runOptiCluster(){
         m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string outputName = getOutputFileName("steps", variables);
+        outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
+        ofstream outStep;
+        m->openOutputFile(outputName, outStep);
+        
         int iters = 0;
         double listVectorMetric = 0; //worst state
         double delta = 1;
@@ -869,10 +880,13 @@ int ClusterCommand::runOptiCluster(){
         cluster.initialize(listVectorMetric, true);
         
         m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        outStep << "iter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         vector<double> results = cluster.getStats();
-        m->mothurOut("Initial Randomization\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
-        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
+        m->mothurOut("0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+        outStep << "0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t";
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
         m->mothurOutEndLine();
+        outStep << endl;
     
         while ((delta > stableMetric) && (iters < maxIters)) {
             
@@ -886,14 +900,11 @@ int ClusterCommand::runOptiCluster(){
             
             results = cluster.getStats();
             
-            bool stop = false;
-            for (int i = 0; i < results.size(); i++) { if (results[i] < 0) { stop = true; } }
-            if (!stop) {
-                m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
-                for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
-                m->mothurOutEndLine();
-            }else { break; }
-            
+            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+            outStep << (toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
+            m->mothurOutEndLine();
+            outStep << endl;
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         
@@ -904,7 +915,6 @@ int ClusterCommand::runOptiCluster(){
         else { list->print(listFile); }
         listFile.close();
         
-        map<string, string> variables;
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
