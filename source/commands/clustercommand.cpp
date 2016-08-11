@@ -885,9 +885,15 @@ int ClusterCommand::runOptiCluster(){
             iters++;
             
             results = cluster.getStats();
-            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
-            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
-            m->mothurOutEndLine();
+            
+            bool stop = false;
+            for (int i = 0; i < results.size(); i++) { if (results[i] < 0) { stop = true; } }
+            if (!stop) {
+                m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+                for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); }
+                m->mothurOutEndLine();
+            }else { break; }
+            
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         

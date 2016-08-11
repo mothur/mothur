@@ -408,6 +408,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "dist", false);  if (temp == "not found") { temp = "F"; }
             makeDist = m->isTrue(temp);
             if (method == "opti") { makeDist = true; }
+            if (((phylipfile != "") || (columnfile != "")) && (method == "opti")) { makeDist = false; }
             
             if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
             if (classic && makeDist) { m->mothurOut("[ERROR]: You cannot use the dist parameter with the classic parameter. Mothur will ignore the dist parameter.\n"); makeDist = false; }
@@ -1647,13 +1648,20 @@ int ClusterSplitCommand::runSensSpec() {
             if ((itTypes->second).size() != 0) { listFile = (itTypes->second)[0];  }
         }
         
-        string columnFile = "";
-        itTypes = outputTypes.find("column");
-        if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { columnFile = (itTypes->second)[0];  }
-        }
-        
-        string inputString = "list=" + listFile + ", column=" + columnFile;
+        string columnFile = ""; string phylipFile = "";
+        if (makeDist) {
+            itTypes = outputTypes.find("column");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { columnFile = (itTypes->second)[0];  }
+            }
+        }else if (columnfile != "") { columnFile = columnfile; }
+        else { phylipFile = phylipfile; }
+    
+        string inputString = "list=" + listFile;
+        if (columnfile != "") { inputString += ", column=" + columnFile;  }
+        else if (phylipfile != "")   { inputString += ", phylip=" + phylipfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a phylip or column file, skipping."); return 0;  }
+
         if (namefile != "")         {  inputString += ", name=" + namefile; }
         else if (countfile != "")   { inputString += ", count=" + countfile; }
         else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
