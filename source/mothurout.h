@@ -46,6 +46,8 @@ class MothurOut {
 		void closeLog();
 		string getDefaultPath() { return defaultPath; }
 		void setDefaultPath(string);
+        string getBlastPath() { return blastPath; }
+        void setBlastPath(string);
 		string getOutputDir() { return outputDir; }
 		void setOutputDir(string);
 		
@@ -69,7 +71,7 @@ class MothurOut {
 		vector<string> sharedBinLabelsInFile;
 		vector<string> currentSharedBinLabels;
         vector<string> listBinLabelsInFile;
-		string saveNextLabel, argv, sharedHeaderMode, groupMode, testDirectory;
+		string saveNextLabel, mothurProgramPath, sharedHeaderMode, groupMode, testDirectory;
 		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
@@ -193,7 +195,7 @@ class MothurOut {
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
         int checkName(string&);
-    bool checkGroupName(string name);
+        bool checkGroupName(string name);
         map<string, vector<string> > parseClasses(string);
         string addUnclassifieds(string tax, int maxlevel, bool probs);
     
@@ -290,7 +292,7 @@ class MothurOut {
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
 		MothurOut() { 
-			control_pressed = false; defaultPath="";
+			control_pressed = false; defaultPath=""; blastPath="";
             filefile = "";
 			phylipfile = "";
 			columnfile = "";
@@ -333,7 +335,7 @@ class MothurOut {
 		~MothurOut();
 
 		string logFileName;
-		string defaultPath, outputDir;
+		string defaultPath, outputDir, blastPath;
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
