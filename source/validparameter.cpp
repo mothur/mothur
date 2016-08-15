@@ -247,11 +247,11 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				
                 //if you can't open it, try mothur's location
                 if (ableToOpen == 1) {
-                    //look for uchime exe
-                    string mpath = m->argv;
-                    string tempPath = mpath;
-                    for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
-                    mpath = mpath.substr(0, (tempPath.find_last_of('m')));
+                    //look for mothurs exe
+                    string mpath = m->mothurProgramPath;
+                    //string tempPath = mpath;
+                    //for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
+                    //mpath = mpath.substr(0, (tempPath.find_last_of('m')));
                         
                     string tryPath = mpath + m->getSimpleName(it->second);
                     m->mothurOut("Unable to open " + it->second + ". Trying mothur's location " + tryPath); m->mothurOutEndLine();

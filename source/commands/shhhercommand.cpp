@@ -231,10 +231,10 @@ ShhherCommand::ShhherCommand(string option) {
                     
                     //if you can't open it its not in current working directory or inputDir, try mothur excutable location
                     if (ableToOpen == 1) {
-                        string exepath = m->argv;
-                        string tempPath = exepath;
-                        for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-                        exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+                        string exepath = m->mothurProgramPath;
+                        //string tempPath = exepath;
+                        //for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+                        //exepath = exepath.substr(0, (tempPath.find_last_of('m')));
                         
                         string tryPath = m->getFullPathName(exepath) + m->getSimpleName(fName);
                         m->mothurOut("Unable to open " + fName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
@@ -261,10 +261,10 @@ ShhherCommand::ShhherCommand(string option) {
 			string temp;
 			temp = validParameter.validFile(parameters, "lookup", true);
 			if (temp == "not found")	{	
-				string path = m->argv;
-                string tempPath = path;
-                for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-                path = path.substr(0, (tempPath.find_last_of('m')));
+				string path = m->mothurProgramPath;
+                //string tempPath = path;
+                //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+                //path = path.substr(0, (tempPath.find_last_of('m')));
                 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 path += "lookupFiles/";
@@ -304,10 +304,10 @@ ShhherCommand::ShhherCommand(string option) {
 				
 				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
 				if (ableToOpen == 1) {
-					string exepath = m->argv;
-					string tempPath = exepath;
-					for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-					exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+					string exepath = m->mothurProgramPath;
+					//string tempPath = exepath;
+					//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+					//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
 					
 					string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
 					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
@@ -324,10 +324,10 @@ ShhherCommand::ShhherCommand(string option) {
 				lookupFileName = validParameter.validFile(parameters, "lookup", false);
 				
 				//if you can't open it its not inputDir, try mothur excutable location
-				string exepath = m->argv;
-				string tempPath = exepath;
-				for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-				exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+				string exepath = m->mothurProgramPath;
+				//string tempPath = exepath;
+				//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+				//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
 					
 				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
