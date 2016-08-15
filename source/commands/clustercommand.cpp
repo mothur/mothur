@@ -371,11 +371,11 @@ int ClusterCommand::execute(){
 
 int ClusterCommand::runVsearchCluster(){
     try {
-        //look for uchime exe
-        string path = m->argv;
-        string tempPath = path;
-        for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-        path = path.substr(0, (tempPath.find_last_of('m')));
+        //look for vsearch exe
+        string path = m->mothurProgramPath;
+        //string tempPath = path;
+        //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+        //path = path.substr(0, (tempPath.find_last_of('m')));
         
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

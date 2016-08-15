@@ -33,10 +33,10 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		
 		//make sure blast exists in the write place
 		if (path == "") {
-			path = m->argv;
-			string tempPath = path;
-			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-			path = path.substr(0, (tempPath.find_last_of('m')));
+			path = m->getBlastPath();
+			//string tempPath = path;
+			//for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			//path = path.substr(0, (tempPath.find_last_of('m')));
 			
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			path += "blast/bin/";	
@@ -87,7 +87,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		megablastCommand = m->getFullPathName(megablastCommand);
 		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
 		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
-		
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BlastDB", "BlastDB");
@@ -105,10 +105,10 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		
 		//make sure blast exists in the write place
 		if (path == "") {
-			path = m->argv;
-			string tempPath = path;
-			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-			path = path.substr(0, (tempPath.find_last_of('m')));
+			path = m->getBlastPath();
+			//string tempPath = path;
+			//for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			//path = path.substr(0, (tempPath.find_last_of('m')));
 			
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			path += "blast/bin/";	

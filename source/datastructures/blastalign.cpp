@@ -22,8 +22,7 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 			match(ma),				//	This is the score to award for two nucleotides matching (match >= 0)
 			mismatch(mm)			//	This is the penalty to assess for a mismatch (mismatch <= 0)
 {
-	path = m->argv;
-	path = path.substr(0, (path.find_last_of('m')));
+	path = m->getBlastPath();
 	
 	gapOpen = abs(go);				//	This is the penalty to assess for opening a gap (gapOpen >= 0)
 	gapExtend = abs(ge);				//	This is the penalty to assess for extending a gap (gapExtend >= 0)

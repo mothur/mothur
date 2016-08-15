@@ -313,7 +313,7 @@ void MothurOut::setDefaultPath(string pathname)  {
 			if (lastChar != "\\") { pathname += "\\"; }	
 		#endif
 		
-		defaultPath = pathname;
+		defaultPath = getFullPathName(pathname);
 		
 	}
 	catch(exception& e) {
@@ -321,6 +321,27 @@ void MothurOut::setDefaultPath(string pathname)  {
 		exit(1);
 	}
 }
+/*********************************************************************************************/
+void MothurOut::setBlastPath(string pathname)  {
+    try {
+        
+        //add / to name if needed
+        string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { pathname += "/"; }
+#else
+        if (lastChar != "\\") { pathname += "\\"; }
+#endif
+        
+        blastPath = getFullPathName(pathname);
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setDefaultPath");
+        exit(1);
+    }
+}
+
 /*********************************************************************************************/
 void MothurOut::setOutputDir(string pathname)  {
 	try {
@@ -3884,7 +3905,7 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
         
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (ableToOpen == 1) {
-            string exepath = argv;
+            string exepath = mothurProgramPath;
             string tempPath = exepath;
             for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
             exepath = exepath.substr(0, (tempPath.find_last_of('m')));

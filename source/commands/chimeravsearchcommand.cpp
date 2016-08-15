@@ -510,10 +510,10 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
             
             //look for uchime exe
-            path = m->argv;
-            string tempPath = path;
-            for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-            path = path.substr(0, (tempPath.find_last_of('m')));
+            path = m->mothurProgramPath;
+            //string tempPath = path;
+            //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+            //path = path.substr(0, (tempPath.find_last_of('m')));
             
             string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
