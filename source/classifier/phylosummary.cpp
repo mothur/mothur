@@ -292,10 +292,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
             
             if (level > maxLevel) { maxLevel = level; }
 			
-			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
-				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
-			}
-		}
+        }
 		return 0;
 	}
 	catch(exception& e) {
@@ -368,9 +365,6 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
             
             if (level > maxLevel) { maxLevel = level; }
 			
-			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
-				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
-			}
 		}
 		return 0;
 	}
@@ -755,13 +749,15 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
 	
-			in >> tree[i].level >> tree[i].name >> num; //num contains the number of children tree[i] has
-			
+			in >> tree[i].level >> num; m->gobble(in); //num contains the number of children tree[i] has
+            tree[i].name = m->getline(in); m->gobble(in);
+            
 			//set children
 			string childName;
 			int childIndex;
 			for (int j = 0; j < num; j++) {
-				in >> childName >> childIndex;
+				in >> childIndex; m->gobble(in);
+                childName = m->getline(in); m->gobble(in);
 				tree[i].children[childName] = childIndex;
 			}
 			

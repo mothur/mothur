@@ -220,7 +220,9 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 
 int SummaryTaxCommand::execute(){
 	try{
-		
+        
+        int maxLevel = findMaxLevel(taxfile);
+        
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		int start = time(NULL);
 		
@@ -241,63 +243,45 @@ int SummaryTaxCommand::execute(){
 		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		int numSeqs = 0;
-		if ((threshold == 0) && ((namefile == "") || (countfile != ""))) { numSeqs = taxaSum->summarize(taxfile);  }
-        else if (threshold != 0) {
-            ifstream in;
-            m->openInputFile(taxfile, in);
+        map<string, vector<string> > nameMap;
+        map<string, vector<string> >::iterator itNames;
+        if (namefile != "") { m->readNames(namefile, nameMap); }
+		
+        ifstream in;
+        m->openInputFile(taxfile, in);
+        
+        string name, taxon;
+        while(!in.eof()){
             
-            string name, taxon;
-            while(!in.eof()){
+            if (m->control_pressed) { break; }
+            
+            in >> name; m->gobble(in);
+            taxon = m->getline(in); m->gobble(in);
+            
+            string newTax = m->addUnclassifieds(taxon, maxLevel, true);
+            
+            if (threshold != 0) {  newTax = processTaxMap(newTax);  }
+            
+            //add sequence to summary, countfile info included from Phylosummary constructor
+            if (namefile != "") {
+                itNames = nameMap.find(name);
                 
-                if (m->control_pressed) { break; }
-                
-                in >> name >> taxon; m->gobble(in);
-                
-                if (threshold != 0) {  taxon = processTaxMap(taxon);  }
-                
-                //cout << taxon << endl;
-                
-                //add sequence to summary, countfile info included from Phylosummary constructor
-                taxaSum->addSeqToTree(name, taxon);
+                if (itNames == nameMap.end()) {
+                    m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                }else{
+                    for (int i = 0; i < itNames->second.size(); i++) {
+                        taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
+                    }
+                    itNames->second.clear();
+                    nameMap.erase(itNames->first);
+                }
+            }else {
+                taxaSum->addSeqToTree(name, newTax);
             }
-            in.close();
+            
         }
-		else if (namefile != "") {
-			map<string, vector<string> > nameMap;
-			map<string, vector<string> >::iterator itNames;
-			m->readNames(namefile, nameMap);
-			
-			if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
-			
-			ifstream in;
-			m->openInputFile(taxfile, in);
-			
-			//read in users taxonomy file and add sequences to tree
-			string name, taxon;
-			
-			while(!in.eof()){
-                
-                if (m->control_pressed) { break; }
-                
-				in >> name >> taxon; m->gobble(in);
-                
-                if (threshold != 0) {  taxon = processTaxMap(taxon);  }
-				
-				itNames = nameMap.find(name);
-				
-				if (itNames == nameMap.end()) { 
-					m->mothurOut("[ERROR]: " + name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
-				}else{
-					for (int i = 0; i < itNames->second.size(); i++) { 
-						numSeqs++;
-						taxaSum->addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
-					}
-					itNames->second.clear();
-					nameMap.erase(itNames->first);
-				}
-			}
-			in.close();
-        }else if (threshold == 0) { numSeqs = taxaSum->summarize(taxfile);  }
+        in.close();
+        
 		
 		if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
@@ -382,16 +366,31 @@ string SummaryTaxCommand::processTaxMap(string tax) {
         if (spot != 0) {
             newTax = "";
             for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
-            for (int i = spot; i < taxLength; i++) {
-                if(tax[i] == ';'){   newTax += "unclassified;"; }
-                m->removeConfidences(newTax);
-            }
+            //for (int i = spot; i < taxLength; i++) {
+                //if(tax[i] == ';'){   newTax += "unclassified;"; }
+                //m->removeConfidences(newTax);
+            //}
         }else { m->removeConfidences(tax); newTax = tax; } //leave tax alone
         
         return newTax;
     }
     catch(exception& e) {
         m->errorOut(e, "SummaryTaxCommand", "processTaxMap");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+int SummaryTaxCommand::findMaxLevel(string file) {
+    try{
+        GroupMap* groupMap = NULL;
+        PhyloSummary taxaSum(groupMap, false, -1);
+        
+        taxaSum.summarize(file);
+       
+        return taxaSum.getMaxLevel();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummaryTaxCommand", "findMaxLevel");
         exit(1);
     }
 }

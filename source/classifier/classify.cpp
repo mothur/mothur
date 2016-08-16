@@ -101,7 +101,6 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         m->mothurOut("DONE."); m->mothurOutEndLine();
         m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
         
-        
         readTaxonomy(taxFile);
         
         //sanity check
