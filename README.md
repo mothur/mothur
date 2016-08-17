@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mothur/mothur.svg?branch=v.1.37.0)](https://travis-ci.org/mothur/mothur)
+[![Build Status](https://travis-ci.org/mothur/mothur.svg?branch=master)](https://travis-ci.org/mothur/mothur)
 
 # README
 
