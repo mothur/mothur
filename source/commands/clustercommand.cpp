@@ -28,7 +28,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.000", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
-        CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
+        CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
@@ -274,7 +274,7 @@ ClusterCommand::ClusterCommand(string option)  {
             if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
 
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
             m->mothurConvert(temp, maxIters);
             
             //temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { temp = "F"; }

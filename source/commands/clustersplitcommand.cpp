@@ -30,7 +30,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.000", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
-        CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false,true); parameters.push_back(piters);
+        CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
@@ -362,7 +362,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			m->mothurConvert(temp, taxLevelCutoff);
             
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "1000"; }
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
             m->mothurConvert(temp, maxIters);
             
             temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.000"; }
