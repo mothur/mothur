@@ -1156,8 +1156,8 @@ int SortSeqsCommand::readTax(){
             while(!in.eof()){
                 if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
-                in >> name;		m->gobble(in);		
-                in >> tax;    m->gobble(in);
+                in >> name; m->gobble(in);
+                tax = m->getline(in); m->gobble(in);
                 
                 if (name != "") {
                     map<string, int>::iterator it = names.find(name);
@@ -1186,8 +1186,8 @@ int SortSeqsCommand::readTax(){
             while(!in.eof()){
                 if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
-                in >> name;		m->gobble(in);		
-                in >> tax;    m->gobble(in);
+                in >> name; m->gobble(in);
+                tax = m->getline(in); m->gobble(in);
                 
                 if (name != "") {
                     //if this name is in the accnos file
