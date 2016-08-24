@@ -959,9 +959,9 @@ int RemoveSeqsCommand::readTax(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;	m->gobble(in);			//read from first column
-			in >> tax;			//read from second column
-			
+            in >> name; m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
+            
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
                 if (it != uniqueMap.end()) { name = it->second; }
@@ -978,8 +978,6 @@ int RemoveSeqsCommand::readTax(){
                     m->mothurOut("[WARNING]: " + name + " is in your taxonomy file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
 			}else {  removedCount++;  }
-					
-			m->gobble(in);
 		}
 		in.close();
 		out.close();
