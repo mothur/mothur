@@ -1900,7 +1900,10 @@ vector<consTax> MothurOut::readConsTax(string inputfile){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size >> tax; gobble(in);
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+            
             consTax temp(otu, tax, size);
             taxes.push_back(temp);
         }
@@ -1929,7 +1932,10 @@ int MothurOut::readConsTax(string inputfile, map<int, consTax2>& taxes){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size >> tax; gobble(in);
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+            
             consTax2 temp(otu, tax, size);
             string simpleBin = getSimpleLabel(otu);
             int bin;
