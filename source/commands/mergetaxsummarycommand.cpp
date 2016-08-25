@@ -186,14 +186,30 @@ int MergeTaxSummaryCommand::execute(){
             
             int level, daugterLevels, total;
             float totalFloat;
-            string rankId, tax; 
+            string rankId, tax;  tax = "";
             map<int, int> levelToCurrentNode;
             levelToCurrentNode[0] = 0;
             while (!in.eof()) {
                 
                 if (m->control_pressed) {   return 0;  }
                 
-                in >> level >> rankId >> tax >> daugterLevels >> totalFloat; m->gobble(in);
+                in >> level >> rankId; m->gobble(in);
+                string rest = m->getline(in); m->gobble(in);
+                vector<string> pieces = m->splitWhiteSpaceWithQuotes(rest);
+                
+                map<string, int> groupCounts;
+                int pcount = pieces.size()-1;
+                if (thisFilesGroups.size() != 0) {
+                    for (int j = thisFilesGroups.size()-1; j >= 0; j--) {
+                        int tempNum;
+                        m->mothurConvert(pieces[pcount], tempNum);
+                        groupCounts[thisFilesGroups[j]] = tempNum;
+                        pcount--;
+                    }
+                }
+                
+                //column 5
+                m->mothurConvert(pieces[pcount], totalFloat); pcount--;
                 
                 if ((totalFloat < 1) && (totalFloat > 0)) {
                     m->mothurOut("[ERROR]: cannot merge tax.summary files with relative abundances.\n"); m->control_pressed = true; in.close(); return 0;
@@ -201,19 +217,18 @@ int MergeTaxSummaryCommand::execute(){
                     total = int(totalFloat);
                 }
                 
-                map<string, int> groupCounts;
-                if (thisFilesGroups.size() != 0) {  
-                    for (int j = 0; j < thisFilesGroups.size(); j++) {  
-                        int tempNum; in >> tempNum; m->gobble(in);
-                        groupCounts[thisFilesGroups[j]] = tempNum; 
-                    } 
-                }
+                //column 4
+                m->mothurConvert(pieces[pcount], daugterLevels);
+                
+                //assemble tax - this is done in case taxonomy contains spaces
+                tax = "";
+                for (int k = 0; k < pcount; k++) { tax += pieces[k] + " "; }
                 
                 if (level == 0) {}
                 else { 
                     map<int, int>::iterator itParent = levelToCurrentNode.find(level-1);
                     int parent = 0;
-                    if (itParent == levelToCurrentNode.end()) { m->mothurOut("[ERROR]: situation I didnt expect.\n"); }
+                    if (itParent == levelToCurrentNode.end()) { m->mothurOut("[ERROR]: situation I didn't expect.\n"); }
                     else { parent = itParent->second; }
                     
                     levelToCurrentNode[level] = addTaxToTree(tree, level, parent, tax, total, groupCounts);
