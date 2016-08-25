@@ -368,7 +368,7 @@ string SummaryTaxCommand::processTaxMap(string tax) {
             for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
             //for (int i = spot; i < taxLength; i++) {
                 //if(tax[i] == ';'){   newTax += "unclassified;"; }
-                //m->removeConfidences(newTax);
+                m->removeConfidences(newTax);
             //}
         }else { m->removeConfidences(tax); newTax = tax; } //leave tax alone
         
