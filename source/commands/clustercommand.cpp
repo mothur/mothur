@@ -881,9 +881,10 @@ int ClusterCommand::runOptiCluster(){
         
         m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         outStep << "iter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        vector<double> results = cluster.getStats();
-        m->mothurOut("0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
-        outStep << "0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t";
+        unsigned long long tp, tn, fp, fn;
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        m->mothurOut("0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        outStep << "0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
         m->mothurOutEndLine();
         outStep << endl;
@@ -898,10 +899,10 @@ int ClusterCommand::runOptiCluster(){
             delta = abs(oldMetric - listVectorMetric);
             iters++;
             
-            results = cluster.getStats();
+            results = cluster.getStats(tp, tn, fp, fn);
             
-            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
-            outStep << (toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t");
+            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << (toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
             m->mothurOutEndLine();
             outStep << endl;
@@ -944,9 +945,9 @@ int ClusterCommand::runOptiCluster(){
         
         sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         
-        results = cluster.getStats();
+        results = cluster.getStats(tp, tn, fp, fn);
         
-        sensFile << cutoff << '\t' << cutoff << '\t';
+        sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
         for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
         sensFile << '\n';
         sensFile.close();

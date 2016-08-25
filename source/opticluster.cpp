@@ -90,7 +90,7 @@ bool OptiCluster::update(double& listMetric) {
             if (binNumber == -1) { }
             else {
                 
-                double tn, tp, fp, fn;
+                unsigned long long tn, tp, fp, fn;
                 double bestMetric = -1;
                 vector< vector<int> > bestMetricsTPValues;
                 //already singleton
@@ -218,7 +218,7 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp, double& tn, double& fp, double& fn) {
+double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, unsigned long long& tp, unsigned long long& tn, unsigned long long& fp, unsigned long long& fn) {
     try {
         if (bin == newBin) {
             if (metric == "mcc") {
@@ -315,13 +315,13 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, double& tp,
     }
 }
 /***********************************************************************/
-double OptiCluster::calcMCC(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcMCC(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = tp + fn;
-        double n = fp + tn;
-        double pPrime = tp + fp;
-        double nPrime = tn + fn;
+        unsigned long long p = tp + fn;
+        unsigned long long n = fp + tn;
+        unsigned long long pPrime = tp + fp;
+        unsigned long long nPrime = tn + fn;
         
         double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / sqrt(p * n * pPrime * nPrime);
         if(p == 0 || n == 0 || pPrime == 0 || nPrime == 0){	matthewsCorrCoef = 0;	}
@@ -334,10 +334,10 @@ double OptiCluster::calcMCC(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcSens(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcSens(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = tp + fn;
+        unsigned long long p = tp + fn;
         double sensitivity = tp / p;
         
         if(p == 0)	{	sensitivity = 0;	}
@@ -350,9 +350,9 @@ double OptiCluster::calcSens(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcSpec(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcSpec(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
-        double n = fp + tn;
+        unsigned long long n = fp + tn;
         double specificity = tn / n;
         
         if(n == 0)			{	specificity = 0;	}
@@ -365,10 +365,10 @@ double OptiCluster::calcSpec(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTPTN(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcTPTN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = tp + tn;
+        unsigned long long p = tp + tn;
         
         double tptn = p / (double)(tp + tn + fp + fn);
         
@@ -380,7 +380,7 @@ double OptiCluster::calcTPTN(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTP(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcTP(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
         double tpmax = tp / (double)(tp + tn + fp + fn);
@@ -393,7 +393,7 @@ double OptiCluster::calcTP(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTN(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcTN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
         double tnmax = tn / (double)(tp + tn + fp + fn);
@@ -406,7 +406,7 @@ double OptiCluster::calcTN(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFP(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcFP(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
         double fpmin = fp / (double)(tp + tn + fp + fn);
@@ -419,7 +419,7 @@ double OptiCluster::calcFP(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFN(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcFN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
         double fnmin = fn / (double)(tp + tn + fp + fn);
@@ -433,10 +433,10 @@ double OptiCluster::calcFN(double tp, double tn, double fp, double fn) {
 }
 
 /***********************************************************************/
-double OptiCluster::calcFPFN(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcFPFN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = fp + fn;
+        unsigned long long p = fp + fn;
         
         double fpfn = 1.0 - (p / (double)(tp + tn + fp + fn)); //minimize
         
@@ -448,11 +448,11 @@ double OptiCluster::calcFPFN(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcF1Score(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcF1Score(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = tp + fn;
-        double pPrime = tp + fp;
+        unsigned long long p = tp + fn;
+        unsigned long long pPrime = tp + fp;
         double f1Score = 2.0 * tp / (double) (p + pPrime);
         
         if(p + pPrime == 0)	{	f1Score = 0;	}
@@ -465,11 +465,11 @@ double OptiCluster::calcF1Score(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcAccuracy(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcAccuracy(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double p = tp + fn;
-        double n = fp + tn;
+        unsigned long long p = tp + fn;
+        unsigned long long n = fp + tn;
         double accuracy = (tp + tn) / (p + n);
         if(p + n == 0)		{	accuracy = 0;								}
         return accuracy;
@@ -480,10 +480,10 @@ double OptiCluster::calcAccuracy(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcPPV(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcPPV(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double pPrime = tp + fp;
+        unsigned long long pPrime = tp + fp;
         double positivePredictiveValue = tp / pPrime;
         
         if(pPrime == 0)		{	positivePredictiveValue = 0;		}
@@ -496,10 +496,10 @@ double OptiCluster::calcPPV(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcNPV(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcNPV(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double nPrime = tn + fn;
+        unsigned long long nPrime = tn + fn;
         double negativePredictiveValue = tn / nPrime;
         
         if(nPrime == 0)		{	negativePredictiveValue = 0;		}
@@ -512,10 +512,10 @@ double OptiCluster::calcNPV(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFDR(double tp, double tn, double fp, double fn) {
+double OptiCluster::calcFDR(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
     try {
         
-        double pPrime = tp + fp;
+        unsigned long long pPrime = tp + fp;
         double falseDiscoveryRate = fp / pPrime;
         
         if(pPrime == 0)		{	falseDiscoveryRate = 0;		}
@@ -528,30 +528,30 @@ double OptiCluster::calcFDR(double tp, double tn, double fp, double fn) {
     }
 }
 /***********************************************************************/
-vector<double> OptiCluster::getStats() {
+vector<double> OptiCluster::getStats(unsigned long long& tp, unsigned long long& tn, unsigned long long& fp, unsigned long long& fn) {
     try {
-        double singletn = matrix->getNumSingletons() + numSingletons;
-        double tempnumSeqs = numSeqs + singletn;
+        unsigned long long singletn = matrix->getNumSingletons() + numSingletons;
+        unsigned long long tempnumSeqs = numSeqs + singletn;
         
-        double tp = (double) truePositives;
-        double fp = (double) falsePositives;
-        double fn = (double) falseNegatives;
-        double tn = tempnumSeqs * (tempnumSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
+        tp = truePositives;
+        fp = falsePositives;
+        fn = falseNegatives;
+        tn = tempnumSeqs * (tempnumSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
         
-        double p = tp + fn;
-        double n = fp + tn;
-        double pPrime = tp + fp;
-        double nPrime = tn + fn;
+        unsigned long long p = tp + fn;
+        unsigned long long n = fp + tn;
+        unsigned long long pPrime = tp + fp;
+        unsigned long long nPrime = tn + fn;
         
-        double sensitivity = tp / p;
-        double specificity = tn / n;
-        double positivePredictiveValue = tp / pPrime;
-        double negativePredictiveValue = tn / nPrime;
-        double falseDiscoveryRate = fp / pPrime;
+        double sensitivity = tp /(double) p;
+        double specificity = tn / (double)n;
+        double positivePredictiveValue = tp / (double)pPrime;
+        double negativePredictiveValue = tn / (double)nPrime;
+        double falseDiscoveryRate = fp / (double)pPrime;
         
-        double accuracy = (tp + tn) / (p + n);
+        double accuracy = (tp + tn) / (double)(p + n);
         double matthewsCorrCoef = (tp * tn - fp * fn) / sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
-        double f1Score = 2.0 * tp / (p + pPrime);
+        double f1Score = 2.0 * tp / (double)(p + pPrime);
         
         
         if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}
@@ -563,7 +563,7 @@ vector<double> OptiCluster::getStats() {
         
         vector<double> results;
         
-        results.push_back(truePositives); results.push_back(tn); results.push_back(falsePositives); results.push_back(falseNegatives);
+        //results.push_back(truePositives); results.push_back(tn); results.push_back(falsePositives); results.push_back(falseNegatives);
         results.push_back(sensitivity); results.push_back(specificity); results.push_back(positivePredictiveValue); results.push_back(negativePredictiveValue);
         results.push_back(falseDiscoveryRate); results.push_back(accuracy); results.push_back(matthewsCorrCoef); results.push_back(f1Score);
         

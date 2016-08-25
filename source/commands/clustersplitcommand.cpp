@@ -1428,8 +1428,10 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
             m->mothurRemove(thisNamefile);
         }
         
+        unsigned long long tp, tn, fp, fn;
         m->mothurOut("\ntp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        vector<double> results = cluster.getStats();
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        m->mothurOut(toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
         m->mothurOut("\n\n");
     
