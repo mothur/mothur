@@ -401,6 +401,7 @@
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
+		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
@@ -853,6 +854,8 @@
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
+		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
+		48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testphylotree.hpp; path = testclassifier/testphylotree.hpp; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
@@ -1718,6 +1721,7 @@
 			children = (
 				481FB5201AC0A6B60076CFF3 /* catch.hpp */,
 				481FB51B1AC0A63E0076CFF3 /* main.cpp */,
+				48F06CCA1D74BC6F004A45DD /* testclassifier */,
 				48D6E9691CA4262A008DF76B /* dataset.cpp */,
 				48D6E96A1CA4262A008DF76B /* dataset.h */,
 				4827A4DA1CB3ED2100345170 /* fastqdataset.cpp */,
@@ -1761,6 +1765,15 @@
 				48C728761B6AB4EE00D40830 /* testsequence.h */,
 			);
 			name = testcontainers;
+			sourceTree = "<group>";
+		};
+		48F06CCA1D74BC6F004A45DD /* testclassifier */ = {
+			isa = PBXGroup;
+			children = (
+				48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */,
+				48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */,
+			);
+			name = testclassifier;
 			sourceTree = "<group>";
 		};
 		7B17437A17AF6F02004C161B /* svm */ = {
@@ -2796,6 +2809,7 @@
 				481FB5351AC1B5D90076CFF3 /* fasta.cpp in Sources */,
 				481FB6321AC1B7EA0076CFF3 /* groupmap.cpp in Sources */,
 				481FB5FF1AC1B7970076CFF3 /* removeseqscommand.cpp in Sources */,
+				48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */,
 				481FB6771AC1B88F0076CFF3 /* readcluster.cpp in Sources */,
 				481FB5831AC1B6FF0076CFF3 /* ccode.cpp in Sources */,
 				481FB5681AC1B6B20076CFF3 /* sharedochiai.cpp in Sources */,
