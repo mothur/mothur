@@ -26,6 +26,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.000", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
@@ -51,7 +52,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund, timing, metric, iters, initialize. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
@@ -59,6 +60,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
+        helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its each OTU, or oneotu meaning all sequences are assigned to oneotu. Default=singleton.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0000). \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
@@ -273,6 +275,11 @@ ClusterCommand::ClusterCommand(string option)  {
             
             if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            
+            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            
+            if ((initialize == "singleton") || (initialize == "oneotu")){ }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
             m->mothurConvert(temp, maxIters);
@@ -877,7 +884,7 @@ int ClusterCommand::runOptiCluster(){
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        cluster.initialize(listVectorMetric, true);
+        cluster.initialize(listVectorMetric, true, initialize);
         
         m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         outStep << "iter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";

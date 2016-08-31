@@ -31,6 +31,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.000", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
+        CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
@@ -54,7 +55,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, iters, delta, dist, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, iters, delta, initialize, dist, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -73,6 +74,7 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. Default=0.000\n";
+        helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its each OTU, or oneotu meaning all sequences are assigned to oneotu. Default=singleton.\n";
 		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
@@ -372,6 +374,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            
+            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            
+            if ((initialize == "singleton") || (initialize == "oneotu")){ }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+
             
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			
@@ -1401,7 +1409,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        cluster.initialize(listVectorMetric, true);
+        cluster.initialize(listVectorMetric, true, initialize);
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
