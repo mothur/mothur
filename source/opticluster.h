@@ -31,7 +31,7 @@ public:
     string getTag() { string tag = "opti_" + metric; return tag; }
     int initialize(double&, bool);  //randomize and place in "best" OTUs
     bool update(double&); //returns whether list changed and MCC
-    vector<double> getStats(unsigned long long&, unsigned long long&, unsigned long long&, unsigned long long&);
+    vector<double> getStats( long long&,  long long&,  long long&,  long long&);
     ListVector* getList();
     
 private:
@@ -41,23 +41,24 @@ private:
     vector<int> randomizeSeqs;
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
     string metric;
-    unsigned long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
+    long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
     
-    double calcMCC(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcSens(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcSpec(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcTPTN(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcTP(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcTN(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcFP(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcFN(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcFPFN(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcF1Score(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcAccuracy(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcPPV(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcNPV(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double calcFDR(unsigned long long, unsigned long long, unsigned long long, unsigned long long);
-    double moveAdjustTFValues(int bin, int seq, int newBin, unsigned long long&, unsigned long long&, unsigned long long&, unsigned long long&);
+    int findInsert();
+    double calcMCC(long long, long long, long long, long long);
+    double calcSens( long long,  long long,  long long,  long long);
+    double calcSpec( long long,  long long,  long long,  long long);
+    double calcTPTN( long long,  long long,  long long,  long long);
+    double calcTP( long long,  long long,  long long,  long long);
+    double calcTN( long long,  long long,  long long,  long long);
+    double calcFP( long long,  long long,  long long,  long long);
+    double calcFN( long long,  long long,  long long,  long long);
+    double calcFPFN( long long,  long long,  long long,  long long);
+    double calcF1Score( long long,  long long,  long long,  long long);
+    double calcAccuracy( long long,  long long,  long long,  long long);
+    double calcPPV( long long,  long long,  long long,  long long);
+    double calcNPV( long long,  long long,  long long,  long long);
+    double calcFDR( long long,  long long,  long long,  long long);
+    double moveAdjustTFValues(int bin, int seq, int newBin,  long long&,  long long&,  long long&,  long long&);
 };
 
 #endif /* defined(__Mothur__opticluster__) */

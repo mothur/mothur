@@ -39,7 +39,7 @@ int OptiCluster::initialize(double& value, bool randomize) {
         for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
             if (it->second == -1) { }
             else {
-                int numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                long long numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
                 falseNegatives += numCloseSeqs;
             }
         }
@@ -76,7 +76,7 @@ int OptiCluster::initialize(double& value, bool randomize) {
  * keep or move the sequence to the OTU where the `metric` is the largest - flip a coin on ties */
 bool OptiCluster::update(double& listMetric) {
     try {
-
+        
         //for each sequence (singletons removed on read)
         for (int i = 0; i < randomizeSeqs.size(); i++) {
             
@@ -87,16 +87,18 @@ bool OptiCluster::update(double& listMetric) {
             int seqNumber = it->first;
             int binNumber = it->second;
             
+            
             if (binNumber == -1) { }
             else {
                 
-                unsigned long long tn, tp, fp, fn;
+                long long tn, tp, fp, fn;
+                tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
+                
                 double bestMetric = -1;
-                vector< vector<int> > bestMetricsTPValues;
+                vector< vector<long long> > bestMetricsTPValues;
                 //already singleton
                 if ((bins[binNumber].size()) == 1) {
-                    tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
-                    vector<int> temp;
+                    vector<long long> temp;
                     double singleMetric;
                     if (metric == "mcc") {
                         singleMetric = calcMCC(tp, tn, fp, fn);
@@ -145,9 +147,8 @@ bool OptiCluster::update(double& listMetric) {
                     bestMetricsTPValues.push_back(temp);
                 }else {
                     //make a singleton
-                    tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, tp, tn, fp, fn);
-                    vector<int> temp;
+                    vector<long long> temp;
                     temp.push_back(-1); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     bestMetric = singleMetric;
                     bestMetricsTPValues.push_back(temp);
@@ -161,7 +162,7 @@ bool OptiCluster::update(double& listMetric) {
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, tp, tn, fp, fn);
-                    vector<int> temp;
+                    vector<long long> temp;
                     temp.push_back(*it); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
                     if (newMetric > bestMetric) { //new best
                         bestMetric = newMetric;
@@ -176,18 +177,24 @@ bool OptiCluster::update(double& listMetric) {
                 random_shuffle(bestMetricsTPValues.begin(), bestMetricsTPValues.end());
                 int bestBin = bestMetricsTPValues[0][0];
                 
-                if (bestBin == -1) {  bestBin = insertLocation;  }
+                bool usedInsert = false;
+                if (bestBin == -1) {  bestBin = insertLocation;  usedInsert = true;  }
                 
                 if (bestBin != binNumber) {
                     truePositives = bestMetricsTPValues[0][1];
                     trueNegatives = bestMetricsTPValues[0][2];
                     falsePositives = bestMetricsTPValues[0][3];
                     falseNegatives = bestMetricsTPValues[0][4];
+            
                     //move seq from i to j
                     bins[bestBin].push_back(seqNumber); //add seq to bestbin
                     bins[binNumber].erase(remove(bins[binNumber].begin(), bins[binNumber].end(), seqNumber), bins[binNumber].end()); //remove from old bin i
                 }
-                if (bins[binNumber].size() == 0) { insertLocation = binNumber;  } //set flag if old bin is empty.
+                
+                if (usedInsert) {
+                    if (bins[binNumber].size() == 0) { insertLocation = binNumber;  } //set flag if old bin is empty.
+                    insertLocation = findInsert();
+                }
                 
                 //update seqBins
                 seqBin[seqNumber] = bestBin; //set new OTU location
@@ -218,7 +225,7 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, unsigned long long& tp, unsigned long long& tn, unsigned long long& fp, unsigned long long& fn) {
+double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin,  long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
         if (bin == newBin) {
             if (metric == "mcc") {
@@ -252,11 +259,11 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, unsigned lo
             }
         }
  
-        int cCount = 0; int fCount = 0;
+        long long cCount = 0;  long long fCount = 0;
         for (int i = 0; i < bins[bin].size(); i++) { //how many close sequences are in the old bin?
             if (seq == bins[bin][i]) {}
-            else if (matrix->isClose(seq, bins[bin][i])) {  cCount++;   }
-            else { fCount++;  }
+            else if (!matrix->isClose(seq, bins[bin][i])) {  fCount++;   }
+            else { cCount++;  }
         }
 
         //move out of old bin
@@ -265,11 +272,11 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, unsigned lo
         //making a singleton bin. Close but we are forcing apart.
         if (newBin == -1) {
         }else { //merging a bin
-            int ncCount = 0; int nfCount = 0;
+            long long ncCount = 0;  long long nfCount = 0;
             for (int i = 0; i < bins[newBin].size(); i++) { //how many close sequences are in the old bin?
                 if (seq == bins[newBin][i]) {}
-                else if (matrix->isClose(seq, bins[newBin][i])) { ncCount++; }
-                else { nfCount++;  }
+                else if (!matrix->isClose(seq, bins[newBin][i])) { nfCount++; }
+                else { ncCount++;  }
             }
    
             //move into new bin
@@ -315,15 +322,15 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin, unsigned lo
     }
 }
 /***********************************************************************/
-double OptiCluster::calcMCC(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcMCC( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = tp + fn;
-        unsigned long long n = fp + tn;
-        unsigned long long pPrime = tp + fp;
-        unsigned long long nPrime = tn + fn;
+         long long p = tp + fn;
+         long long n = fp + tn;
+         long long pPrime = tp + fp;
+         long long nPrime = tn + fn;
         
-        double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / sqrt(p * n * pPrime * nPrime);
+        double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / (double) sqrt(p * n * pPrime * nPrime);
         if(p == 0 || n == 0 || pPrime == 0 || nPrime == 0){	matthewsCorrCoef = 0;	}
         
         return matthewsCorrCoef;
@@ -334,11 +341,11 @@ double OptiCluster::calcMCC(unsigned long long tp, unsigned long long tn, unsign
     }
 }
 /***********************************************************************/
-double OptiCluster::calcSens(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcSens( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = tp + fn;
-        double sensitivity = tp / p;
+         long long p = tp + fn;
+        double sensitivity = tp / (double) p;
         
         if(p == 0)	{	sensitivity = 0;	}
         
@@ -350,10 +357,10 @@ double OptiCluster::calcSens(unsigned long long tp, unsigned long long tn, unsig
     }
 }
 /***********************************************************************/
-double OptiCluster::calcSpec(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcSpec( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
-        unsigned long long n = fp + tn;
-        double specificity = tn / n;
+         long long n = fp + tn;
+        double specificity = tn / (double) n;
         
         if(n == 0)			{	specificity = 0;	}
         
@@ -365,10 +372,10 @@ double OptiCluster::calcSpec(unsigned long long tp, unsigned long long tn, unsig
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTPTN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcTPTN( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = tp + tn;
+         long long p = tp + tn;
         
         double tptn = p / (double)(tp + tn + fp + fn);
         
@@ -380,7 +387,7 @@ double OptiCluster::calcTPTN(unsigned long long tp, unsigned long long tn, unsig
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTP(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcTP( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
         double tpmax = tp / (double)(tp + tn + fp + fn);
@@ -393,7 +400,7 @@ double OptiCluster::calcTP(unsigned long long tp, unsigned long long tn, unsigne
     }
 }
 /***********************************************************************/
-double OptiCluster::calcTN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcTN( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
         double tnmax = tn / (double)(tp + tn + fp + fn);
@@ -406,7 +413,7 @@ double OptiCluster::calcTN(unsigned long long tp, unsigned long long tn, unsigne
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFP(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcFP( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
         double fpmin = fp / (double)(tp + tn + fp + fn);
@@ -419,7 +426,7 @@ double OptiCluster::calcFP(unsigned long long tp, unsigned long long tn, unsigne
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcFN( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
         double fnmin = fn / (double)(tp + tn + fp + fn);
@@ -433,10 +440,10 @@ double OptiCluster::calcFN(unsigned long long tp, unsigned long long tn, unsigne
 }
 
 /***********************************************************************/
-double OptiCluster::calcFPFN(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcFPFN( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = fp + fn;
+         long long p = fp + fn;
         
         double fpfn = 1.0 - (p / (double)(tp + tn + fp + fn)); //minimize
         
@@ -448,11 +455,11 @@ double OptiCluster::calcFPFN(unsigned long long tp, unsigned long long tn, unsig
     }
 }
 /***********************************************************************/
-double OptiCluster::calcF1Score(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcF1Score( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = tp + fn;
-        unsigned long long pPrime = tp + fp;
+         long long p = tp + fn;
+         long long pPrime = tp + fp;
         double f1Score = 2.0 * tp / (double) (p + pPrime);
         
         if(p + pPrime == 0)	{	f1Score = 0;	}
@@ -465,12 +472,12 @@ double OptiCluster::calcF1Score(unsigned long long tp, unsigned long long tn, un
     }
 }
 /***********************************************************************/
-double OptiCluster::calcAccuracy(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcAccuracy( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long p = tp + fn;
-        unsigned long long n = fp + tn;
-        double accuracy = (tp + tn) / (p + n);
+         long long p = tp + fn;
+         long long n = fp + tn;
+        double accuracy = (tp + tn) / (double) (p + n);
         if(p + n == 0)		{	accuracy = 0;								}
         return accuracy;
     }
@@ -480,11 +487,11 @@ double OptiCluster::calcAccuracy(unsigned long long tp, unsigned long long tn, u
     }
 }
 /***********************************************************************/
-double OptiCluster::calcPPV(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcPPV( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long pPrime = tp + fp;
-        double positivePredictiveValue = tp / pPrime;
+         long long pPrime = tp + fp;
+        double positivePredictiveValue = tp / (double) pPrime;
         
         if(pPrime == 0)		{	positivePredictiveValue = 0;		}
         
@@ -496,11 +503,11 @@ double OptiCluster::calcPPV(unsigned long long tp, unsigned long long tn, unsign
     }
 }
 /***********************************************************************/
-double OptiCluster::calcNPV(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcNPV( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long nPrime = tn + fn;
-        double negativePredictiveValue = tn / nPrime;
+         long long nPrime = tn + fn;
+        double negativePredictiveValue = tn / (double) nPrime;
         
         if(nPrime == 0)		{	negativePredictiveValue = 0;		}
         
@@ -512,11 +519,11 @@ double OptiCluster::calcNPV(unsigned long long tp, unsigned long long tn, unsign
     }
 }
 /***********************************************************************/
-double OptiCluster::calcFDR(unsigned long long tp, unsigned long long tn, unsigned long long fp, unsigned long long fn) {
+double OptiCluster::calcFDR( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-        unsigned long long pPrime = tp + fp;
-        double falseDiscoveryRate = fp / pPrime;
+         long long pPrime = tp + fp;
+        double falseDiscoveryRate = fp / (double) pPrime;
         
         if(pPrime == 0)		{	falseDiscoveryRate = 0;		}
         
@@ -528,20 +535,20 @@ double OptiCluster::calcFDR(unsigned long long tp, unsigned long long tn, unsign
     }
 }
 /***********************************************************************/
-vector<double> OptiCluster::getStats(unsigned long long& tp, unsigned long long& tn, unsigned long long& fp, unsigned long long& fn) {
+vector<double> OptiCluster::getStats( long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
-        unsigned long long singletn = matrix->getNumSingletons() + numSingletons;
-        unsigned long long tempnumSeqs = numSeqs + singletn;
+         long long singletn = matrix->getNumSingletons() + numSingletons;
+         long long tempnumSeqs = numSeqs + singletn;
         
         tp = truePositives;
         fp = falsePositives;
         fn = falseNegatives;
         tn = tempnumSeqs * (tempnumSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
         
-        unsigned long long p = tp + fn;
-        unsigned long long n = fp + tn;
-        unsigned long long pPrime = tp + fp;
-        unsigned long long nPrime = tn + fn;
+         long long p = tp + fn;
+         long long n = fp + tn;
+         long long pPrime = tp + fp;
+         long long nPrime = tn + fn;
         
         double sensitivity = tp /(double) p;
         double specificity = tn / (double)n;
@@ -550,7 +557,7 @@ vector<double> OptiCluster::getStats(unsigned long long& tp, unsigned long long&
         double falseDiscoveryRate = fp / (double)pPrime;
         
         double accuracy = (tp + tn) / (double)(p + n);
-        double matthewsCorrCoef = (tp * tn - fp * fn) / sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
+        double matthewsCorrCoef = (tp * tn - fp * fn) / (double) sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
         double f1Score = 2.0 * tp / (double)(p + pPrime);
         
         
@@ -607,4 +614,24 @@ ListVector* OptiCluster::getList() {
         exit(1);
     }
 }
+/***********************************************************************/
+int OptiCluster::findInsert() {
+    try {
+        
+        //for each sequence (singletons removed on read)
+        for (int i = 0; i < bins.size(); i++) {
+            
+            if (m->control_pressed) { break; }
+            
+            if (bins[i].size() == 0) { return i;  }
+        }
+        
+        return -1;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "getList");
+        exit(1);
+    }
+}
+
 /***********************************************************************/

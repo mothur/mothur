@@ -881,7 +881,7 @@ int ClusterCommand::runOptiCluster(){
         
         m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         outStep << "iter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        unsigned long long tp, tn, fp, fn;
+         long long tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         m->mothurOut("0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
         outStep << "0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
