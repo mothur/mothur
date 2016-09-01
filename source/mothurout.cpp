@@ -3522,6 +3522,22 @@ bool MothurOut::containsAlphas(string stringToCheck){
     
 }
 /***********************************************************************/
+bool MothurOut::isAllAlphas(string stringToCheck){
+    try {
+        bool allAlphas = true;
+        
+        if(stringToCheck.find_first_not_of("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOopPQqRrSsTtUuVvWwXxYyZz") != string::npos) { allAlphas = false; }
+        
+        return allAlphas;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isAllAlphas");
+        exit(1);
+    }
+    
+}
+
+/***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
 	try {
 		bool error = false;

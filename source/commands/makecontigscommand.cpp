@@ -2512,8 +2512,48 @@ int MakeContigsCommand::setNameType(string forward, string reverse) {
             if (pos2 != string::npos) {  tempReverse = reverse.substr(0, pos2);   }
             
             if (tempForward == tempReverse) { type = poundMatch;    }
+            else {
+                char delim = ':';
+                if (m->changedSeqNames) { delim = '_'; }
+                
+                int pos = forward.find_last_of(delim);
+                string tempForward = forward;
+                string tempForwardEnd = forward;
+                if (pos != string::npos) {
+                    tempForwardEnd = forward.substr(pos+1);
+                }
+                
+                int pos2 = reverse.find_last_of(delim);
+                string tempReverse = reverse;
+                string tempReverseEnd = reverse;
+                if (pos2 != string::npos) {
+                    tempReverseEnd = reverse.substr(pos2+1);
+                }
+                
+                if (tempForwardEnd == tempReverseEnd) {
+                    if ((m->isAllAlphas(tempForwardEnd)) && (m->isAllAlphas(tempReverseEnd))) {
+                        //check for off by one on rest of name
+                        if (tempForward.length() == tempReverse.length()) {
+                            int numDiffs = 0;
+                            char forwardDiff = ' '; char reverseDiff = ' '; int spot = 0;
+                            for (int i = 0; i < tempForward.length(); i++) {
+                                if (tempForward[i] != tempReverse[i]) {
+                                    numDiffs++;
+                                    forwardDiff = tempForward[i];
+                                    reverseDiff = tempReverse[i];
+                                    spot = i;
+                                }
+                            }
+                            if (numDiffs == 1) {
+                                if ((forwardDiff == '1') && (reverseDiff == '2')) { type = offByOne; offByOneTrimLength = tempForward.length()-spot+1; }
+                            }
+                            //cout << tempReverse.substr(0, (tempReverse.length()-offByOneTrimLength)) << endl;
+                        }
+                    }
+                }
+            }
         }
-
+        
         return type;
     }
     catch(exception& e) {
@@ -3355,7 +3395,11 @@ bool MakeContigsCommand::fixName(string& forward){
             int pos = forward.find_last_of('#');
             if (pos != string::npos) {  forward = forward.substr(0, pos);   }
         }else if (nameType == perfectMatch) { match = true; }
-        
+        else if (nameType == offByOne) {
+            match = true;
+            forward = forward.substr(0, (forward.length()-offByOneTrimLength));
+        }
+
         return match;
     }
     catch(exception& e) {
@@ -3372,12 +3416,12 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
     try {
         bool match = false;
         
+        string forwardName = forward.getName();
+        string reverseName = reverse.getName();
+        
         if (nameType == poundMatch) {
             match = true;
-            
-            string forwardName = forward.getName();
-            string reverseName = reverse.getName();
-            
+
             int pos = forwardName.find_last_of('#');
             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
             
@@ -3392,6 +3436,20 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
             }
             
         }else if (nameType == perfectMatch) { match = true; }
+        else if (nameType == offByOne) {
+            
+            match = true;
+            
+            reverseName = reverseName.substr(0, (reverseName.length()-offByOneTrimLength));
+            forwardName = forwardName.substr(0, (forwardName.length()-offByOneTrimLength));
+            
+            if (forwardName == reverseName) {
+                forward.setName(forwardName);
+                reverse.setName(reverseName);
+            }else{
+                match = false;
+            }
+        }
         
         return match;
     }
@@ -3407,12 +3465,12 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
 bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
     try {
         bool match = false;
+        string forwardName = forward.getName();
+        string reverseName = reverse.getName();
         
         if (nameType == poundMatch) {
             match = true;
-                string forwardName = forward.getName();
-                string reverseName = reverse.getName();
-                
+
                 int pos = forwardName.find_last_of('#');
                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                 
@@ -3426,7 +3484,21 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
                     match = false;
                 }
         }else if (nameType == perfectMatch) { match = true; }
-        
+        else if (nameType == offByOne) {
+            
+            match = true;
+            
+            reverseName = reverseName.substr(0, (reverseName.length()-offByOneTrimLength));
+            forwardName = forwardName.substr(0, (forwardName.length()-offByOneTrimLength));
+            
+            if (forwardName == reverseName) {
+                forward.setName(forwardName);
+                reverse.setName(reverseName);
+            }else{
+                match = false;
+            }
+        }
+
         return match;
     }
     catch(exception& e) {
@@ -3441,13 +3513,12 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
 bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& reverse){
     try {
         bool match = false;
-        
+        string forwardName = forward.getName();
+        string reverseName = reverse.getName();
+
         if (nameType == poundMatch) {
             match = true;
             
-                string forwardName = forward.getName();
-                string reverseName = reverse.getName();
-                
                 int pos = forwardName.find_last_of('#');
                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                 
@@ -3462,6 +3533,21 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
                 }
             
         }else if (nameType == perfectMatch) { match = true; }
+        else if (nameType == offByOne) {
+            
+            match = true;
+            
+            reverseName = reverseName.substr(0, (reverseName.length()-offByOneTrimLength));
+            forwardName = forwardName.substr(0, (forwardName.length()-offByOneTrimLength));
+            
+            if (forwardName == reverseName) {
+                forward.setName(forwardName);
+                reverse.setName(reverseName);
+            }else{
+                match = false;
+            }
+        }
+
         
         return match;
 
@@ -3479,6 +3565,8 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
 bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
     try {
         bool match = false;
+        string forwardName = forward.getName();
+        string reverseName = reverse.getName();
         
         if (nameType == poundMatch) {
             match = true;
@@ -3500,7 +3588,21 @@ bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
                 }
             
         }else if (nameType == perfectMatch) { match = true; }
-        
+        else if (nameType == offByOne) {
+            
+            match = true;
+            
+            reverseName = reverseName.substr(0, (reverseName.length()-offByOneTrimLength));
+            forwardName = forwardName.substr(0, (forwardName.length()-offByOneTrimLength));
+            
+            if (forwardName == reverseName) {
+                forward.setName(forwardName);
+                reverse.setName(reverseName);
+            }else{
+                match = false;
+            }
+        }
+
         return match;
     }
     catch(exception& e) {
