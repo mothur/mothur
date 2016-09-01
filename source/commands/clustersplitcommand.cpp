@@ -1620,7 +1620,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
 
 int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > distNames) {
 	try{
-		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
         map<string, string> variables; 
@@ -1639,9 +1638,7 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 			
 		outputTypes["column"].push_back(outputFileName); outputNames.push_back(outputFileName);
 			
-		return 0;	
-		
-		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "createMergedDistanceFile");
@@ -1668,7 +1665,7 @@ int ClusterSplitCommand::runSensSpec() {
         else { phylipFile = phylipfile; }
     
         string inputString = "list=" + listFile;
-        if (columnfile != "") { inputString += ", column=" + columnFile;  }
+        if (columnFile != "") { inputString += ", column=" + columnFile;  }
         else if (phylipfile != "")   { inputString += ", phylip=" + phylipfile; }
         else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a phylip or column file, skipping."); return 0;  }
 
