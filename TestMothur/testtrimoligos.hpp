@@ -29,8 +29,8 @@ public:
     map<int, oligosPair> pairedPrimers;
     map<int, oligosPair> pairedBarcodes;
     
-    using TrimOligos::compareDNASeq(string, string);
-    using TrimOligos::countDiffs(string, string);
+    //using TrimOligos::compareDNASeq(string, string);
+    //using TrimOligos::countDiffs(string, string);
     
 };
 

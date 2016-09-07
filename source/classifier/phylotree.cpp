@@ -233,7 +233,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
         //save maxLevel for binning the unclassified seqs
         if (level > maxLevel) { maxLevel = level; }
         
-		return 0;
+		return level;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "addSeqToTree");

@@ -9,6 +9,8 @@
 #ifndef testphylotree_hpp
 #define testphylotree_hpp
 
+#include "phylotree.h"
+
 class TestPhyloTree : public PhyloTree {
     
     
@@ -18,6 +20,8 @@ public:
     ~TestPhyloTree();
     
     MothurOut* m;
+    
+    PhyloTree phylo;
     
     //using PhyloTree::
     //using PhyloTree::  
