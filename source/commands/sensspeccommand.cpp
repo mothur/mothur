@@ -295,7 +295,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 	try {
 
 		string label = list->getLabel();
-		int numSeqs = list->getNumSeqs();
+		long long numSeqs = list->getNumSeqs();
 		int numOTUs = list->getNumBins();
 
 		if(getCutoff == 1){
@@ -431,6 +431,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 				}
 			}
 		}
+        
 		falseNegatives = distanceMap.size();
 		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 
@@ -554,25 +555,25 @@ void SensSpecCommand::setUpOutput(){
 
 void SensSpecCommand::outputStatistics(string label, string cutoff){
 	try{
-		double tp = (double) truePositives;
-		double fp = (double) falsePositives;
-		double tn = (double) trueNegatives;
-		double fn = (double) falseNegatives;
+		long long tp =  truePositives;
+		long long fp =  falsePositives;
+		long long tn =  trueNegatives;
+		long long fn =  falseNegatives;
 
-		double p = tp + fn;
-		double n = fp + tn;
-		double pPrime = tp + fp;
-		double nPrime = tn + fn;
+		long long p = tp + fn;
+		long long n = fp + tn;
+		long long pPrime = tp + fp;
+		long long nPrime = tn + fn;
 
-		double sensitivity = tp / p;
-		double specificity = tn / n;
-		double positivePredictiveValue = tp / pPrime;
-		double negativePredictiveValue = tn / nPrime;
-		double falseDiscoveryRate = fp / pPrime;
+		double sensitivity = tp / (double) p;
+		double specificity = tn / (double)n;
+		double positivePredictiveValue = tp / (double)pPrime;
+		double negativePredictiveValue = tn / (double)nPrime;
+		double falseDiscoveryRate = fp / (double)pPrime;
 
-		double accuracy = (tp + tn) / (p + n);
-		double matthewsCorrCoef = (tp * tn - fp * fn) / sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
-		double f1Score = 2.0 * tp / (p + pPrime);
+		double accuracy = (tp + tn) / (double)(p + n);
+		double matthewsCorrCoef = (tp * tn - fp * fn) / (double)sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
+		double f1Score = 2.0 * tp / (double)(p + pPrime);
 
 
 		if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}
