@@ -1801,7 +1801,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             }
 
 		}
-		m->mothurOut(toString( getpid() ) + " here\n");
+		//m->mothurOut(toString( getpid() ) + " here\n");
             
 		//do my part
 		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
