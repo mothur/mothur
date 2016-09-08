@@ -36,6 +36,8 @@ private:
     vector<string> outputNames;
     int numCols;
     bool abort;
+    
+    int fillAccnosFile(string);
 };
 
 
