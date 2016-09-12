@@ -701,15 +701,15 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
                         FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
                         
+                        string forwardName = fread.getName();
+                        string reverseName = rread.getName();
+                        
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
-                                string forwardName = fread.getName();
-                                string reverseName = rread.getName();
-                                
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -723,13 +723,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = rread.getName();
                             
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -745,16 +742,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
                             FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
+                            string forwardName = f2read.getName();
+                            string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
                             //////////////////////////////////////////////////////////////
                             fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
                                 //we know the location of the # matches in the forward and reverse
-                                
-                                    string forwardName = f2read.getName();
-                                    string reverseName = rread.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -768,14 +763,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = f2read.getName();
-                                string reverseName = rread.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -788,17 +779,16 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                                
+                                string forwardName = fread.getName();
+                                string reverseName = r2read.getName();
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
                                     //we know the location of the # matches in the forward and reverse
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2read.getName();
-                                        
-                                        int pos = forwardName.find_last_of('#');
+                                                                            int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
                                         int pos2 = reverseName.find_last_of('#');
@@ -811,14 +801,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                    
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2read.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -848,16 +834,16 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                             if (tignore) { ignore=true; }
                             findexBarcode.setAligned(firead.getSeq());
+                            
+                            string forwardName = fread.getName();
+                            string reverseName = firead.getName();
+
                             ///bool fixed = checkName(fread, firead);
                             //////////////////////////////////////////////////////////////
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
                                 //we know the location of the # matches in the forward and reverse
-                                
-                                    string forwardName = fread.getName();
-                                    string reverseName = firead.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -871,14 +857,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = fread.getName();
-                                string reverseName = firead.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -893,14 +875,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                                string forwardName = fread.getName();
+                                string reverseName = f2iread.getName();
+                                
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
                                     //we know the location of the # matches in the forward and reverse
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = f2iread.getName();
-                                        
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -914,14 +896,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = f2iread.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -940,6 +918,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         if (thisrqualindexfile != "") { //reverse index file
                             FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                            
+                            string forwardName = fread.getName();
+                            string reverseName = riread.getName();
+
                             if (tignore) { ignore=true; }
                             rindexBarcode.setAligned(riread.getSeq());
                             ///bool fixed = checkName(fread, riread);
@@ -949,9 +931,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 fixed = poundMatch;
                                 //we know the location of the # matches in the forward and reverse
                                 
-                                    string forwardName = fread.getName();
-                                    string reverseName = riread.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -965,14 +944,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = fread.getName();
-                                string reverseName = riread.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -986,14 +961,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                                
+                                string forwardName = fread.getName();
+                                string reverseName = r2iread.getName();
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    //we know the location of the # matches in the forward and reverse
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2iread.getName();
-                                        
+             
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1007,14 +981,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2iread.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1035,16 +1005,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     }else { //reading fasta and maybe qual
                         Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
                         Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
+                        string forwardName = fread.getName();
+                        string reverseName = rread.getName();
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            //we know the location of the # matches in the forward and reverse
                             
-                                string forwardName = fread.getName();
-                                string reverseName = rread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -1058,14 +1026,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = rread.getName();
-                            
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
@@ -1079,15 +1043,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
                             Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
+                            string forwardName = f2read.getName();
+                            string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
                             //////////////////////////////////////////////////////////////
                             fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                //we know the location of the # matches in the forward and reverse
-                                
-                                    string forwardName = f2read.getName();
-                                    string reverseName = rread.getName();
                                     
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
@@ -1102,14 +1064,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = f2read.getName();
-                                string reverseName = rread.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -1122,16 +1080,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
+                                string forwardName = fread.getName();
+                                string reverseName = r2read.getName();
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    //we know the location of the # matches in the forward and reverse
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2read.getName();
-                                        
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1145,14 +1101,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                    
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2read.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1177,6 +1129,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         if (thisfqualindexfile != "") {
                             fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                             rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
+                            
+                            string forwardName = fread.getName();
+                            string reverseName = rread.getName();
+                            
                             if (fQual->getName() != rQual->getName()) {
                                 ///bool fixed = checkName(fread, rread);
                                 //////////////////////////////////////////////////////////////
@@ -1184,9 +1140,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
                                     
-                                        string forwardName = fread.getName();
-                                        string reverseName = rread.getName();
-                                        
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1200,14 +1153,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = rread.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1237,15 +1186,15 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         FastqRead fread(inFF, tignore, pDataArray->format);
                         FastqRead rread(inRF, ignore, pDataArray->format);
                         
+                        string forwardName = fread.getName();
+                        string reverseName = rread.getName();
+                        
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = rread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -1259,14 +1208,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = rread.getName();
-                            
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
@@ -1280,15 +1225,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
                             FastqRead f2read(inFF, tignore, pDataArray->format);
+                            string forwardName = f2read.getName();
+                            string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
                             //////////////////////////////////////////////////////////////
                             fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                
-                                    string forwardName = f2read.getName();
-                                    string reverseName = rread.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -1302,14 +1245,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = f2read.getName();
-                                string reverseName = rread.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -1322,15 +1261,15 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 FastqRead r2read(inRF, ignore, pDataArray->format);
+                                
+                                string forwardName = fread.getName();
+                                string reverseName = r2read.getName();
+                                
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2read.getName();
-                                        
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1344,14 +1283,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2read.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1381,15 +1316,15 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             FastqRead firead(inFQ, tignore, pDataArray->format);
                             if (tignore) { ignore=true; }
                             findexBarcode.setAligned(firead.getSeq());
+                            string forwardName = fread.getName();
+                            string reverseName = firead.getName();
+                            
                             ///bool fixed = checkName(fread, firead);
                             //////////////////////////////////////////////////////////////
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
                                 
-                                    string forwardName = fread.getName();
-                                    string reverseName = firead.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -1403,14 +1338,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = fread.getName();
-                                string reverseName = firead.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -1424,12 +1355,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead f2iread(inFQ, tignore, pDataArray->format);
+                                string forwardName = fread.getName();
+                                string reverseName = f2iread.getName();
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                        string forwardName = fread.getName();
-                                        string reverseName = f2iread.getName();
-                                        
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1443,14 +1373,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = f2iread.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1471,15 +1397,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             FastqRead riread(inRQ, tignore, pDataArray->format);
                             if (tignore) { ignore=true; }
                             rindexBarcode.setAligned(riread.getSeq());
+                            string forwardName = fread.getName();
+                            string reverseName = riread.getName();
                             ///bool fixed = checkName(fread, riread);
                             //////////////////////////////////////////////////////////////
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
                                 
-                                    string forwardName = fread.getName();
-                                    string reverseName = riread.getName();
-                                    
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -1493,13 +1418,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = fread.getName();
-                                string reverseName = riread.getName();
                                 
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -1514,12 +1436,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead r2iread(inRQ, tignore, pDataArray->format);
+                                
+                                string forwardName = fread.getName();
+                                string reverseName = r2iread.getName();
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2iread.getName();
                                         
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
@@ -1534,13 +1456,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2iread.getName();
                                     
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -1562,15 +1481,15 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     }else { //reading fasta and maybe qual
                         Sequence tfSeq(inFF);
                         Sequence trSeq(inRF);
+                        string forwardName = fread.getName();
+                        string reverseName = rread.getName();
+
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = rread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -1584,13 +1503,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = rread.getName();
                             
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -1605,15 +1521,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
                             Sequence tf2Seq(inFF);
+                            string forwardName = f2read.getName();
+                            string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
                             //////////////////////////////////////////////////////////////
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                
-                                    string forwardName = f2read.getName();
-                                    string reverseName = rread.getName();
-                                    
+
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                     
@@ -1627,14 +1542,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         fixed = false;
                                     }
                                 
-                            }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                            }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
                                 
                                 fixed = true;
-                                
-                                string forwardName = f2read.getName();
-                                string reverseName = rread.getName();
-                                
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
@@ -1647,15 +1558,16 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 Sequence tr2Seq(inRF);
+                                string forwardName = fread.getName();
+                                string reverseName = r2read.getName();
+                                
+
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 bool fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
                                     
-                                        string forwardName = fread.getName();
-                                        string reverseName = r2read.getName();
-                                        
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                         
@@ -1669,14 +1581,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = r2read.getName();
-                                    
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
@@ -1701,6 +1609,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         if (thisfqualindexfile != "") {
                             fQual = new QualityScores(inFQ);
                             rQual = new QualityScores(inRQ);
+                            
+                            string forwardName = fread.getName();
+                            string reverseName = rread.getName();
                             if (fQual->getName() != rQual->getName()) {
                                 ///bool fixed = checkName(fread, rread);
                                 //////////////////////////////////////////////////////////////
@@ -1708,8 +1619,6 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
                                     
-                                        string forwardName = fread.getName();
-                                        string reverseName = rread.getName();
                                         
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
@@ -1724,13 +1633,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             fixed = false;
                                         }
                                     
-                                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
                                     
                                     fixed = true;
-                                    
-                                    string forwardName = fread.getName();
-                                    string reverseName = rread.getName();
                                     
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -2608,14 +2514,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
                 FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
                 
+                string forwardName = fread.getName();
+                string reverseName = rread.getName();
                 ///bool fixed = checkName(fread, rread);
                 bool fixed = false;
                 //////////////////////////////////////////////////////////////
                 if (pDataArray->nameType == poundMatch) {
                     fixed = poundMatch;
-                        string forwardName = fread.getName();
-                        string reverseName = rread.getName();
-                        
+
                         int pos = forwardName.find_last_of('#');
                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                         
@@ -2629,14 +2535,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             fixed = false;
                         }
                    
-                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                 else if (pDataArray->nameType == offByOne) {
                     
                     fixed = true;
-                    
-                    string forwardName = fread.getName();
-                    string reverseName = rread.getName();
-                    
                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                     
@@ -2650,15 +2552,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
                     FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
-                    ///bool fixed = checkName(f2read, rread);
+                    
+                    string forwardName = f2read.getName();
+                    string reverseName = rread.getName();
+                       ///bool fixed = checkName(f2read, rread);
                     //////////////////////////////////////////////////////////////
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
-                        
-                            string forwardName = f2read.getName();
-                            string reverseName = rread.getName();
-                            
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                             
@@ -2672,13 +2573,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 fixed = false;
                             }
                         
-                    }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                    }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
                         
                         fixed = true;
-                        
-                        string forwardName = f2read.getName();
-                        string reverseName = rread.getName();
                         
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -2692,15 +2590,15 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     if (!fixed) {
                         FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                        
+                        string forwardName = fread.getName();
+                        string reverseName = r2read.getName();
                         ///bool fixed = checkName(fread, r2read);
                         //////////////////////////////////////////////////////////////
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = r2read.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -2714,14 +2612,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = r2read.getName();
-                            
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
@@ -2751,15 +2645,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
                     findexBarcode.setAligned(firead.getSeq());
+
+                    string forwardName = fread.getName();
+                    string reverseName = firead.getName();
+
                     ///bool fixed = checkName(fread, firead);
                     //////////////////////////////////////////////////////////////
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
                         
-                            string forwardName = fread.getName();
-                            string reverseName = firead.getName();
-                            
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                             
@@ -2773,13 +2668,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 fixed = false;
                             }
                         
-                    }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                    }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
                         
                         fixed = true;
-                        
-                        string forwardName = fread.getName();
-                        string reverseName = firead.getName();
                         
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -2794,15 +2686,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                        
+                        string forwardName = fread.getName();
+                        string reverseName = f2iread.getName();
+
                         if (tignore) { ignore=true; }
                         ///bool fixed = checkName(fread, f2iread);
                         /////////////////////////////////////////////////////////////
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = f2iread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -2816,13 +2709,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = f2iread.getName();
                             
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -2845,15 +2735,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     rindexBarcode.setAligned(riread.getSeq());
+                    
+                    string forwardName = fread.getName();
+                    string reverseName = riread.getName();
+
                     ///bool fixed = checkName(fread, riread);
                     //////////////////////////////////////////////////////////////
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
                         
-                            string forwardName = fread.getName();
-                            string reverseName = riread.getName();
-                            
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                             
@@ -2867,14 +2758,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 fixed = false;
                             }
                         
-                    }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                    }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
                         
                         fixed = true;
-                        
-                        string forwardName = fread.getName();
-                        string reverseName = riread.getName();
-                        
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                         
@@ -2888,15 +2775,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                        
+                        string forwardName = fread.getName();
+                        string reverseName = r2iread.getName();
+
                         ///bool fixed = checkName(fread, r2iread);
                         /////////////////////////////////////////////////////////////
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = r2iread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -2910,13 +2798,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = r2iread.getName();
                             
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -2939,15 +2824,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             }else { //reading fasta and maybe qual
                 Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
                 Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
+                string forwardName = fread.getName();
+                string reverseName = rread.getName();
+                
+
                 ///bool fixed = checkName(fread, rread);
                 //////////////////////////////////////////////////////////////
                 bool fixed = false;
                 if (pDataArray->nameType == poundMatch) {
                     fixed = poundMatch;
                     
-                        string forwardName = fread.getName();
-                        string reverseName = rread.getName();
-                        
                         int pos = forwardName.find_last_of('#');
                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                         
@@ -2961,14 +2847,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             fixed = false;
                         }
                     
-                }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                 else if (pDataArray->nameType == offByOne) {
                     
                     fixed = true;
-                    
-                    string forwardName = fread.getName();
-                    string reverseName = rread.getName();
-                    
                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                     
@@ -2982,15 +2864,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
                     Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
+                    
+                    string forwardName = f2read.getName();
+                    string reverseName = rread.getName();
+
                     ///bool fixed = checkName(f2read, rread);
                     //////////////////////////////////////////////////////////////
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
                         
-                            string forwardName = f2read.getName();
-                            string reverseName = rread.getName();
-                            
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                             
@@ -3004,13 +2887,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 fixed = false;
                             }
                         
-                    }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                    }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
                         
                         fixed = true;
-                        
-                        string forwardName = f2read.getName();
-                        string reverseName = rread.getName();
                         
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -3024,15 +2904,15 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     if (!fixed) {
                         Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
+                        
+                        string forwardName = fread.getName();
+                        string reverseName = r2read.getName();
                         ///bool fixed = checkName(fread, r2read);
                         //////////////////////////////////////////////////////////////
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = r2read.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -3046,13 +2926,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = r2read.getName();
                             
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
@@ -3078,6 +2955,9 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
+                    
+                    string forwardName = fread.getName();
+                    string reverseName = rread.getName();
                     if (fQual->getName() != rQual->getName()) {
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
@@ -3085,9 +2965,6 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
                             
-                                string forwardName = fread.getName();
-                                string reverseName = rread.getName();
-                                
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
                                 
@@ -3101,14 +2978,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             
-                        }else if (pDataArray->nameType == perfectMatch) { fixed = true; }
+                        }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
                             
                             fixed = true;
-                            
-                            string forwardName = fread.getName();
-                            string reverseName = rread.getName();
-                            
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             

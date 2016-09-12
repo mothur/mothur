@@ -3435,7 +3435,9 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
                 match = false;
             }
             
-        }else if (nameType == perfectMatch) { match = true; }
+        }else if (nameType == perfectMatch) {
+            if (forwardName == reverseName) { match = true; }
+        }
         else if (nameType == offByOne) {
             
             match = true;
@@ -3483,7 +3485,7 @@ bool MakeContigsCommand::checkName(Sequence& forward, Sequence& reverse){
                 }else{
                     match = false;
                 }
-        }else if (nameType == perfectMatch) { match = true; }
+        }else if (nameType == perfectMatch) { if (forwardName == reverseName) { match = true; } }
         else if (nameType == offByOne) {
             
             match = true;
@@ -3532,7 +3534,7 @@ bool MakeContigsCommand::checkName(QualityScores& forward, QualityScores& revers
                     match = false;
                 }
             
-        }else if (nameType == perfectMatch) { match = true; }
+        }else if (nameType == perfectMatch) { if (forwardName == reverseName) { match = true; } }
         else if (nameType == offByOne) {
             
             match = true;
@@ -3587,7 +3589,7 @@ bool MakeContigsCommand::checkName(Sequence& forward, QualityScores& reverse){
                     match = false;
                 }
             
-        }else if (nameType == perfectMatch) { match = true; }
+        }else if (nameType == perfectMatch) { if (forwardName == reverseName) { match = true; } }
         else if (nameType == offByOne) {
             
             match = true;
