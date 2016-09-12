@@ -28,6 +28,11 @@ struct TaxNode {
 /**************************************************************************************************/
 
 class PhyloTree {
+    
+#ifdef UNIT_TEST
+    friend class TestPhyloTree;
+#endif
+
 
 public:
 	PhyloTree();

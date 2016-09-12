@@ -1731,8 +1731,8 @@ int SubSampleCommand::getTax(set<string>& subset) {
             
             if (m->control_pressed) { inTax.close(); outTax.close();  return 0; }
             
-            inTax >> tname;	m->gobble(inTax);			//read from first column
-            inTax >> tax;	m->gobble(inTax);		//read from second column
+            inTax >> tname; m->gobble(inTax);
+            tax = m->getline(inTax); m->gobble(inTax);
             
             //does the subset contain a sequence that this sequence represents
             itNameMap = nameMap.find(tname);

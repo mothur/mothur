@@ -44,7 +44,8 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 				if (m->control_pressed) {  break; }
 				
-				in >> name >> tax;   m->gobble(in);
+                in >> name;   m->gobble(in);
+                tax = m->getline(in); m->gobble(in);
 				
 				if (containsConfidence) {  m->removeConfidences(tax);	}
 				
@@ -78,7 +79,8 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 		string name, tax;
 		
 		while (in) {
-			in >> name >> tax;   m->gobble(in);
+            in >> name;   m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
 		
 			//count levels in this taxonomy
 			int thisLevel = 0;
@@ -96,10 +98,17 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 			} 
 		}
 		
-		int pos = testTax.find_first_of('(');
-
-		//if there are '(' then there are confidences we need to take out
-		if (pos != -1) {  containsConfidence = true;  }
+        int openParen = testTax.find_last_of('(');
+        int closeParen = testTax.find_last_of(')');
+        
+        if ((openParen != string::npos) && (closeParen != string::npos)) {
+            string confidenceScore = testTax.substr(openParen+1, (closeParen-(openParen+1)));
+            if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                containsConfidence = true;
+            }else { //its part of the taxon
+                containsConfidence = false;
+            }
+        }
 	
 		return level;
 					
@@ -114,18 +123,20 @@ void TaxEqualizer::extendTaxonomy(string name, string& tax, int desiredLevel) {
 	try {
 			
 		//get last taxon
-		tax = tax.substr(0, tax.length()-1);  //take off final ";"
-		int pos = tax.find_last_of(';');
-		string lastTaxon = tax.substr(pos+1);  
-		lastTaxon += ";"; //add back on delimiting char
-		tax += ";";
+		//tax = tax.substr(0, tax.length()-1);  //take off final ";"
+		//int pos = tax.find_last_of(';');
+		//string lastTaxon = tax.substr(pos+1);
+		//lastTaxon += ";"; //add back on delimiting char
+		//tax += ";";
 		
-		int currentLevel = seqLevels[name];
+		//int currentLevel = seqLevels[name];
+        
+        tax = m->addUnclassifieds(tax, desiredLevel, containsConfidence);
 		
 		//added last taxon until you get desired level
-		for (int i = currentLevel; i < desiredLevel; i++) {
-			tax += lastTaxon;
-		}
+		//for (int i = currentLevel; i < desiredLevel; i++) {
+			//tax += lastTaxon;
+		//}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TaxEqualizer", "extendTaxonomy");

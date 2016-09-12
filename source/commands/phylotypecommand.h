@@ -47,8 +47,6 @@ private:
 	map<int, int> parentNodes;
 	map<int, int>::iterator itCurrent;
 	
-	int readNamesFile();
-
 };
 
 

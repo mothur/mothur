@@ -540,13 +540,10 @@ int ListSeqsCommand::readTax(){
 		
 			if (m->control_pressed) { in.close(); return 0; }
 
-			in >> firstCol;				
-			in >> secondCol;			
+            in >> firstCol; m->gobble(in);
+            secondCol = m->getline(in); m->gobble(in);
 			
 			names.push_back(firstCol);
-			
-			m->gobble(in);
-			
 		}
 		in.close();
 		

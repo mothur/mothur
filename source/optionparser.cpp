@@ -24,7 +24,11 @@ OptionParser::OptionParser(string option) {
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
 				key = m->splitWhiteSpace(key).front();
-			    value = m->splitWhiteSpace(value).front();
+                //if value is wrapped in '' preserve spaces
+                if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
+                else {
+                    value = m->splitWhiteSpace(value).front();
+                }
 				parameters[key] = value;
 			}
 			
@@ -33,7 +37,11 @@ OptionParser::OptionParser(string option) {
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
             key = m->splitWhiteSpace(key).front();
-			option = m->splitWhiteSpace(option).front();
+            //if value is wrapped in '' preserve spaces
+            if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
+            else {
+                option = m->splitWhiteSpace(option).front();
+            }
 			parameters[key] = option;
 		}
 	}
@@ -57,7 +65,11 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
 				key = m->splitWhiteSpace(key).front();
-			    value = m->splitWhiteSpace(value).front();
+                //if value is wrapped in '' preserve spaces
+                if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
+                else {
+                    value = m->splitWhiteSpace(value).front();
+                }
 				parameters[key] = value;
 			}
 			
@@ -66,7 +78,11 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
 			key = m->splitWhiteSpace(key).front();
-			option = m->splitWhiteSpace(option).front();
+            //if value is wrapped in '' preserve spaces
+            if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
+            else {
+                option = m->splitWhiteSpace(option).front();
+            }
 			parameters[key] = option;
 		}
         

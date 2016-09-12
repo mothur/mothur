@@ -805,7 +805,9 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                 
                 if (m->control_pressed) { in.close(); return metadata; }
                 
-                in >> otuLabel >> size >> tax; m->gobble(in);
+                in >> otuLabel; m->gobble(in);
+                in >> size; m->gobble(in);
+                tax = m->getline(in); m->gobble(in);
                 
                 otuLabels.push_back(otuLabel);
                 taxs.push_back(tax);
@@ -920,7 +922,9 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundFloatVector*>& lo
                 
                 if (m->control_pressed) { in.close(); return metadata; }
                 
-                in >> otuLabel >> size >> tax; m->gobble(in);
+                in >> otuLabel; m->gobble(in);
+                in >> size; m->gobble(in);
+                tax = m->getline(in); m->gobble(in);
                 
                 otuLabels.push_back(otuLabel);
                 taxs.push_back(tax);
