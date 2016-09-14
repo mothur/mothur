@@ -539,7 +539,8 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size >> tax; m->gobble(in);
+            in >> otu >> size; m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
             
             sizes.push_back(size);
             taxonomies.push_back(tax);
