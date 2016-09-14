@@ -36,6 +36,8 @@ private:
     vector<string> outputNames;
     int numCols;
     bool abort;
+    
+    vector< vector<string> > findGroupNames(vector< vector<string> > paired);
 };
 
 

@@ -3492,6 +3492,23 @@ bool MothurOut::isNumeric1(string stringToCheck){
 	
 }
 /***********************************************************************/
+bool MothurOut::allSpaces(string stringToCheck){
+    try {
+        
+        for (int i = 0; i < stringToCheck.length(); i++) {
+            char c = stringToCheck[i];
+            if (!isspace(c)) { return false; }
+        }
+        
+        return true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isNumeric1");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 bool MothurOut::isInteger(string stringToCheck){
     try {
         bool isInt = false;
