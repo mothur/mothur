@@ -177,6 +177,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		
 		while (seqTaxonomy != "") {
 			
+            level++;
+            
 			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
@@ -287,12 +289,10 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					break;
 				}
 			}
-			
-			level++;
-            
-            if (level > maxLevel) { maxLevel = level; }
-			
         }
+        
+        if (level > maxLevel) { maxLevel = level; }
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -318,6 +318,8 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 		
 		while (seqTaxonomy != "") {
 			
+            level++;
+            
 			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
@@ -343,7 +345,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					int index = tree.size() - 1;
 					
 					tree[index].parent = currentNode;
-					tree[index].level = (level+1);
+					tree[index].level = level;
 					tree[index].total = 1;
 					tree[currentNode].children[taxon] = index;
 						
@@ -360,12 +362,10 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					break;
 				}
 			}
-			
-			level++;
-            
-            if (level > maxLevel) { maxLevel = level; }
-			
 		}
+        
+        if (level > maxLevel) { maxLevel = level; }
+        
 		return 0;
 	}
 	catch(exception& e) {
