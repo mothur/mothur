@@ -162,6 +162,7 @@ int MakeFileCommand::execute(){
             
             vector< vector<string> > paired;
             vector<string> singles;
+            set<string> groups;
             string lastFile = "";
             for (int i = 0; i < fastqFiles.size()-1; i++) {
                 
@@ -182,13 +183,6 @@ int MakeFileCommand::execute(){
                     if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
                     else { //only one diff = paired files
                         vector<string> temp;
-                        if (numCols == 3) {
-                            string groupName = "noGroup"+toString(i);
-                            int posUnderscore = fastqFiles[i].find_first_of('_');
-                            if (posUnderscore == string::npos) {   groupName = m->getSimpleName(m->getRootName(fastqFiles[i]));  }
-                            else{  groupName = m->getSimpleName(fastqFiles[i].substr(0, posUnderscore));  }
-                            temp.push_back(groupName);
-                        }
                         temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
                         paired.push_back(temp);
                         i++;
@@ -215,6 +209,9 @@ int MakeFileCommand::execute(){
                 out.close();
             }
             
+            //generates unique group names
+            if (numCols == 3) { paired = findGroupNames(paired); }
+
             if (paired.size() != 0) {
                 map<string, string> variables;
                 variables["[filename]"] = outputDir + prefix + ".";
@@ -249,6 +246,92 @@ int MakeFileCommand::execute(){
         exit(1);
     }
 }
+//**********************************************************************************************************************
+//groupName defaults to "noGroup"+toString(i);
+vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> > paired){
+    try {
+        
+        //remove any "words" in filenames that is the same in all filenames separated by delim(_ .)
+        //MI.M00833_0261.001.FLD0207.TRIN-META_16S_R2.fastq
+        //MI.M00833_0261.001.FLD0223.ERIFF-META_16S_R2.fastq
+        //would become...
+        //FLD0207.TRIN-META
+        //FLD0223.ERIFF-META
+        
+        //split all forward names into pieces
+        vector<vector<string> > words; words.resize(paired.size());
+        map<int, set<string> > posToWord;
+        
+        for (int i = 0; i < paired.size(); i++) {
+            if (m->control_pressed) { break; }
+            
+            string filename = m->getRootName(m->getSimpleName(paired[i][0]));
+            
+            int pos = 0;
+            string individual = "";
+            for(int j=0;j<filename.length();j++){
+                if((filename[j] == '.') || (filename[j] == '_')){
+                    words[i].push_back(individual);
+                    
+                    map<int, set<string> >::iterator it = posToWord.find(pos);
+                    if (it != posToWord.end()) { posToWord[pos].insert(individual); }
+                    else {
+                        set<string> temp; temp.insert(individual);
+                        posToWord[pos] = temp;
+                    }
+                    individual = "";
+                    pos++;
+                }
+                else{
+                    individual += filename[j];
+                }
+            }
+            if (!m->allSpaces(individual)) {
+                words[i].push_back(individual);
+                map<int, set<string> >::iterator it = posToWord.find(pos);
+                if (it != posToWord.end()) { posToWord[pos].insert(individual); }
+                else {
+                    set<string> temp; temp.insert(individual);
+                    posToWord[pos] = temp;
+                }
+            }
+        }
+        
+        //remove duplicate pieces
+        set<int> goodIndexes;
+        for (map<int, set<string> >::iterator it = posToWord.begin(); it != posToWord.end(); it++) {
+            set<string> w = it->second;;
+            if (w.size() != 1) { goodIndexes.insert(it->first);  }
+        }
+        
+        set<string> groups;
+        vector< vector<string> > results; results.resize(paired.size());
+        for (int i = 0; i < words.size(); i++) {
+            
+            //assemble groupNames
+            string groupName = "";
+            for (int j = 0; j < words[i].size(); j++) {
+                //include word
+                if (goodIndexes.count(j) != 0) { groupName += words[i][j] + "_"; }
+            }
+            
+            if (groupName != "") { groupName = groupName.substr(0, groupName.length()-1); }
+            
+            //is this name unique
+            if (groups.count(groupName) == 0) {  groups.insert(groupName);  }
+            else { groupName = "Group_"+ toString(i); groups.insert(groupName); }
+            
+            results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
+        }
+        
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "findGroupName");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 
 
