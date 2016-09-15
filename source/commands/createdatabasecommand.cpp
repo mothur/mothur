@@ -12,9 +12,9 @@
 //**********************************************************************************************************************
 vector<string> CreateDatabaseCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none","database",false,true,true); parameters.push_back(pfasta);
-		CommandParameter pname("repname", "InputTypes", "", "", "NameCount", "NameCount", "none","",false,false,true); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none","database",false,false,true); parameters.push_back(pfasta);
+		CommandParameter pname("repname", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pconstaxonomy);
 		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(plist);
@@ -37,8 +37,8 @@ vector<string> CreateDatabaseCommand::setParameters(){
 string CreateDatabaseCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, or count file and creates a database file.\n";
-		helpString += "The create.database command parameters are repfasta, list, shared, repname, constaxonomy, group, count and label. List, repfasta, repnames or count, and constaxonomy are required.\n";
+		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, and optional *.rep.fasta, *.rep.names, groupfile, or count file and creates a database file.\n";
+		helpString += "The create.database command parameters are repfasta, list, shared, repname, constaxonomy, group, count and label. List or shared and constaxonomy are required.\n";
         helpString += "The repfasta file is fasta file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The repname file is the name file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The count file is the count file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, count=yourCountFile). If it includes group info, mothur will give you the abundance breakdown by group. \n";
@@ -199,7 +199,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 					sharedfile = m->getSharedFile(); 
 					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("No valid current files. You must provide a shared or list file before you can use the create.database command."); m->mothurOutEndLine(); 
+						m->mothurOut("[ERROR]: No valid current files. You must provide a shared or list file before you can use the create.database command."); m->mothurOutEndLine();
 						abort = true;
 					}
 				}
@@ -216,30 +216,20 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
 
             repfastafile = validParameter.validFile(parameters, "repfasta", true);
-			if (repfastafile == "not found") {  //if there is a current list file, use it
-                repfastafile = "";  m->mothurOut("The repfasta parameter is required, aborting."); m->mothurOutEndLine(); abort = true; 
-			}
+			if (repfastafile == "not found") { repfastafile = ""; }
 			else if (repfastafile == "not open") { repfastafile = ""; abort = true; }
 
             repnamesfile = validParameter.validFile(parameters, "repname", true);
 			if (repnamesfile == "not found") {  repnamesfile = "";  			}
 			else if (repnamesfile == "not open") { repnamesfile = ""; abort = true; }
             
+            if ((repnamesfile != "") && (repfastafile == "")) { m->mothurOut("[ERROR]: You must provide a repfasta file if you are using a repnames file."); m->mothurOutEndLine();
+                abort = true; }
+            
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not found") {  countfile = "";  			}
 			else if (countfile == "not open") { countfile = ""; abort = true; }
             
-            if ((countfile == "") && (repnamesfile == "")) {
-                //if there is a current name file, use it, else look for current count file
-                string repnamesfile = m->getNameFile();
-				if (repnamesfile != "") {  m->mothurOut("Using " + repnamesfile + " as input file for the repname parameter."); m->mothurOutEndLine(); }
-				else {
-                    countfile = m->getCountTableFile();
-                    if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
-                    else { m->mothurOut("[ERROR]: You must provide a count or repname file."); m->mothurOutEndLine(); abort = true;  }
-                }
-            }
-
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
@@ -271,7 +261,8 @@ int CreateDatabaseCommand::execute(){
         if (m->control_pressed) { return 0; }
         
         vector<Sequence> seqs;
-        vector<int> repOtusSizes = readFasta(seqs);
+        vector<int> repOtusSizes;
+        if (repfastafile != "") { repOtusSizes = readFasta(seqs); }
         
         if (m->control_pressed) { return 0; }
         
@@ -280,7 +271,7 @@ int CreateDatabaseCommand::execute(){
         map<string, int> nameMap;
         int numUniqueNamesFile = 0;
         CountTable ct;
-        if (countfile == "") {
+        if (repnamesfile != "") {
             numUniqueNamesFile = m->readNames(repnamesfile, repNames, 1);
             //the repnames file does not have the same order as the list file bins so we need to sort and reassemble for the search below
             map<string, string> tempRepNames;
@@ -298,26 +289,29 @@ int CreateDatabaseCommand::execute(){
                 repNames.erase(it++);
             }
             repNames = tempRepNames;
-        }else {
+        }else if (countfile != ""){
             ct.readTable(countfile, true, false);
             numUniqueNamesFile = ct.getNumUniqueSeqs();
             nameMap = ct.getNameMap();
         }
         
-        //are there the same number of otus in the fasta and name files
-        if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
-        
         if (m->control_pressed) { return 0; }
         
-        //are there the same number of OTUs in the tax and fasta file
-        if (classifyOtuSizes.size() != repOtusSizes.size()) { m->mothurOut("[ERROR]: you have " + toString(classifyOtuSizes.size()) + " taxonomies in your contaxonomy file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
-
-        if (m->control_pressed) { return 0; }
-        
-        //at this point we have the same number of OTUs. Are the sizes we have found so far accurate?
-        for (int i = 0; i < classifyOtuSizes.size(); i++) {
-            if (classifyOtuSizes[i] != repOtusSizes[i]) {
-               m->mothurOut("[ERROR]: OTU size info does not match for bin " + toString(i+1) + ". The contaxonomy file indicated the OTU represented " + toString(classifyOtuSizes[i]) + " sequences, but the repfasta file had " + toString(repOtusSizes[i]) + ".  These should match. Make sure you are using files for the same distance.\n"); m->control_pressed = true; 
+        if (repfastafile != "") {
+            
+            //are there the same number of otus in the fasta and name files
+            if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
+            
+            //are there the same number of OTUs in the tax and fasta file
+            if (classifyOtuSizes.size() != repOtusSizes.size()) { m->mothurOut("[ERROR]: you have " + toString(classifyOtuSizes.size()) + " taxonomies in your contaxonomy file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
+            
+            if (m->control_pressed) { return 0; }
+            
+            //at this point we have the same number of OTUs. Are the sizes we have found so far accurate?
+            for (int i = 0; i < classifyOtuSizes.size(); i++) {
+                if (classifyOtuSizes[i] != repOtusSizes[i]) {
+                    m->mothurOut("[ERROR]: OTU size info does not match for bin " + toString(i+1) + ". The contaxonomy file indicated the OTU represented " + toString(classifyOtuSizes[i]) + " sequences, but the repfasta file had " + toString(repOtusSizes[i]) + ".  These should match. Make sure you are using files for the same distance.\n"); m->control_pressed = true;
+                }
             }
         }
         
@@ -362,7 +356,9 @@ int CreateDatabaseCommand::execute(){
                     for (int i = 0; i < ct.getNamesOfGroups().size(); i++) { header += '\t' + (ct.getNamesOfGroups())[i]; }
                 }
             }
-            header += "\trepSeqName\trepSeq\tOTUConTaxonomy";
+            
+            if (repfastafile != "") {  header += "\trepSeqName\trepSeq";  }
+            header += "\tOTUConTaxonomy";
             out << header << endl;
             
             vector<string> binLabels = list->getLabels();
@@ -380,9 +376,9 @@ int CreateDatabaseCommand::execute(){
                 m->splitAtComma(bin, binNames);
                 
                 string seqRepName = "";
-                int numSeqsRep = 0;
+                int numSeqsRep = binNames.size();
                 
-                if (countfile == "") {
+                if (repnamesfile != "") {
                     sort(binNames.begin(), binNames.end());
                     bin = "";
                     for (int j = 0; j < binNames.size()-1; j++) {
@@ -399,14 +395,14 @@ int CreateDatabaseCommand::execute(){
                     if (binNames.size() != classifyOtuSizes[index]) {
                         m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                     }
-                }else {
+                }else if ((countfile != "") && (repfastafile != "")) {
                     //find rep sequence in bin
                     for (int j = 0; j < binNames.size(); j++) {
                         map<string, int>::iterator itNameMap = nameMap.find(binNames[j]); //if you are in the counttable you must be the rep. because get.oturep with a countfile only includes the rep sequences in the rep.count file.
                         if (itNameMap != nameMap.end()) {
                             seqRepName = itNameMap->first;
                             numSeqsRep = itNameMap->second;
-                            j += binNames.size();
+                            j += binNames.size(); //exit loop
                         }
                     }
                     
@@ -440,15 +436,25 @@ int CreateDatabaseCommand::execute(){
                     for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << '\t' << counts[(groupmap->getNamesOfGroups())[j]];  }
                     
                     if (error) { m->control_pressed = true; }
-                }else if (countfile != "") {
+                }else if ((countfile != "") && (repfastafile != "")) {
                     if (ct.hasGroupInfo()) {
                         vector<int> groupCounts = ct.getGroupCounts(seqRepName);
                         for (int j = 0; j < groupCounts.size(); j++) { out << '\t' << groupCounts[j];  }
                     }else { out << '\t' << numSeqsRep; }
+                }else if ((countfile != "") && (repfastafile == "")) {
+                    if (ct.hasGroupInfo()) {
+                        vector<int> groupTotals; groupTotals.resize(ct.getNumGroups(), 0);
+                        for (int j = 0; j < binNames.size(); j++) {
+                            vector<int> groupCounts = ct.getGroupCounts(binNames[j]);
+                            for (int k = 0; k < groupCounts.size(); k++) { groupTotals[k] += groupCounts[k]; }
+                        }
+                        for (int j = 0; j < groupTotals.size(); j++) { out << '\t' << groupTotals[j];  }
+                    }else { out << '\t' << numSeqsRep; }
                 }else { out << '\t' << numSeqsRep; }
                 
                 //output repSeq
-                out << '\t' << seqRepName << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
+                if (repfastafile != "") { out << '\t' << seqRepName << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl; }
+                else { out << '\t' << taxonomies[index] << endl; }
             }
             
             
@@ -460,7 +466,8 @@ int CreateDatabaseCommand::execute(){
             
             header = "OTUNumber";
             for (int i = 0; i < lookup.size(); i++) { header += '\t' + lookup[i]->getGroup(); }
-            header += "\trepSeqName\trepSeq\tOTUConTaxonomy";
+            if (repfastafile != "") {  header += "\trepSeqName\trepSeq";  }
+            header += "\tOTUConTaxonomy";
             out << header << endl;
             
             for (int h = 0; h < lookup[0]->getNumBins(); h++) {
@@ -487,7 +494,8 @@ int CreateDatabaseCommand::execute(){
                 }
                 
                 //output repSeq
-                out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
+                if (repfastafile != "") { out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl; }
+                else { out << '\t' << taxonomies[index] << endl; }
             }
         }
         out.close();
