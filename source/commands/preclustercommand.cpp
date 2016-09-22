@@ -9,6 +9,7 @@
 
 #include "preclustercommand.h"
 #include "deconvolutecommand.h"
+#include "filters.h"
 
 //**********************************************************************************************************************
 vector<string> PreClusterCommand::setParameters(){	
@@ -678,7 +679,9 @@ int PreClusterCommand::process(string newMapFile){
                         
                         if (alignSeqs[j].active) {  //this sequence has not been merged yet
                             //are you within "diff" bases
-                            int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                            int mismatch = length;
+                            if (method == "unaligned") { mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned()); }
+                            else { mismatch = calcMisMatches(alignSeqs[i].filteredSeq, alignSeqs[j].filteredSeq); }
                             
                             if (mismatch <= diffs) {
                                 //merge
@@ -688,8 +691,8 @@ int PreClusterCommand::process(string newMapFile){
                                 chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
                                 
                                 alignSeqs[j].active = 0;
-                                alignSeqs[j].numIdentical = 0;
-                                alignSeqs[j].diffs = mismatch;
+                                //alignSeqs[j].numIdentical = 0;
+                                //alignSeqs[j].diffs = mismatch;
                                 count++;
                             }
                         }//end if j active
@@ -818,7 +821,6 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 	try {
 		set<int> lengths;
 		alignSeqs.clear();
-		map<string, string>::iterator it;
 		bool error = false;
         map<string, int> thisCount;
         if (countfile != "") { thisCount = cparser->getCountTable(group);  }
@@ -828,7 +830,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 			if (m->control_pressed) { return 0; }
 						
 			if (namefile != "") {
-				it = thisName.find(thisSeqs[i].getName());
+				map<string, string>::iterator it = thisName.find(thisSeqs[i].getName());
 				
 				//should never be true since parser checks for this
 				if (it == thisName.end()) { m->mothurOut(thisSeqs[i].getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); error = true; }
@@ -859,7 +861,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 		}
     
         if (lengths.size() > 1) { method = "unaligned"; }
-        else if (lengths.size() == 1) {  method = "aligned"; }
+        else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
         
         length = *(lengths.begin());
         
@@ -868,8 +870,8 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 		
 		thisSeqs.clear();
         
-        random_shuffle(alignSeqs.begin(), alignSeqs.end());
-		
+        //random_shuffle(alignSeqs.begin(), alignSeqs.end());
+        
 		return alignSeqs.size();
 	}
 	
@@ -1031,6 +1033,45 @@ void PreClusterCommand::printData(string newfasta, string newname, string group)
 		m->errorOut(e, "PreClusterCommand", "printData");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+
+int PreClusterCommand::filterSeqs(){
+    try {
+        string filterString = "";
+        Filters F;
+        
+        F.setTrump('.');
+        F.setLength(length);
+        F.initialize();
+        F.setFilter(string(length, '1'));
+        
+        for (int i = 0; i < alignSeqs.size(); i++) {
+            F.doTrump(alignSeqs[i].seq);
+            F.getFreqs(alignSeqs[i].seq);
+        }
+        
+        F.setNumSeqs(alignSeqs.size());
+        F.doVertical();
+        filterString = F.getFilter();
+        
+        //run filter
+        for (int i = 0; i < alignSeqs.size(); i++) {
+            alignSeqs[i].filteredSeq = "";
+            string align = alignSeqs[i].seq.getAligned();
+            for(int j=0;j<length;j++){
+                if(filterString[j] == '1'){
+                    alignSeqs[i].filteredSeq += align[j];
+                }
+            }
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "filterSeqs");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 

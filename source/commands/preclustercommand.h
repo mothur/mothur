@@ -27,11 +27,12 @@
 struct seqPNode {
 	int numIdentical;
 	Sequence seq;
+    string filteredSeq;
 	string names;
 	bool active;
 	int diffs;
 	seqPNode() {}
-	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; }
+	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; filteredSeq = "";}
 	~seqPNode() {}
 };
 /************************************************************/
@@ -88,6 +89,7 @@ private:
 	int driverGroups(string, string, string, int, int, vector<string> groups);
 	int createProcessesGroups(string, string, string, vector<string>);
     int mergeGroupCounts(string, string, string);
+    int filterSeqs();
 };
 
 /**************************************************************************************************/
