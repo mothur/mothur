@@ -476,6 +476,8 @@ int SharedCommand::createSharedFromBiom() {
 
             //read data
             vector<SharedRAbundVector*> lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
+            
+            eliminateZeroOTUS(lookup);
 
             m->mothurOutEndLine(); m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
             lookup[0]->printHeaders(out);
