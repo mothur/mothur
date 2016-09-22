@@ -691,8 +691,8 @@ int PreClusterCommand::process(string newMapFile){
                                 chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
                                 
                                 alignSeqs[j].active = 0;
-                                //alignSeqs[j].numIdentical = 0;
-                                //alignSeqs[j].diffs = mismatch;
+                                alignSeqs[j].numIdentical = 0;
+                                alignSeqs[j].diffs = mismatch;
                                 count++;
                             }
                         }//end if j active
@@ -860,10 +860,10 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 			}
 		}
     
+        length = *(lengths.begin());
+        
         if (lengths.size() > 1) { method = "unaligned"; }
         else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
-        
-        length = *(lengths.begin());
         
 		//sanity check
 		if (error) { m->control_pressed = true; }
@@ -1041,18 +1041,16 @@ int PreClusterCommand::filterSeqs(){
         string filterString = "";
         Filters F;
         
-        F.setTrump('.');
         F.setLength(length);
         F.initialize();
         F.setFilter(string(length, '1'));
         
         for (int i = 0; i < alignSeqs.size(); i++) {
-            F.doTrump(alignSeqs[i].seq);
             F.getFreqs(alignSeqs[i].seq);
         }
         
         F.setNumSeqs(alignSeqs.size());
-        F.doVertical();
+        F.doVerticalAllBases();
         filterString = F.getFilter();
         
         //run filter
@@ -1060,9 +1058,7 @@ int PreClusterCommand::filterSeqs(){
             alignSeqs[i].filteredSeq = "";
             string align = alignSeqs[i].seq.getAligned();
             for(int j=0;j<length;j++){
-                if(filterString[j] == '1'){
-                    alignSeqs[i].filteredSeq += align[j];
-                }
+                if(filterString[j] == '1'){ alignSeqs[i].filteredSeq += align[j]; }
             }
         }
         
