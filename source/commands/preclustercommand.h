@@ -77,9 +77,6 @@ private:
 	bool abort, bygroup, topdown;
 	string fastafile, namefile, outputDir, groupfile, countfile, method, align;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
-	map<string, string> names; //represents the names file first column maps to second column
-	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
-	map<string, int>::iterator itSize; 
 	vector<string> outputNames;
 	
 	int readFASTA();

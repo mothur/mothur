@@ -342,7 +342,6 @@ int PreClusterCommand::execute(){
 				
 		}else {
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-			if (namefile != "") { readNameFile(); }
 		
 			//reads fasta file and return number of seqs
 			int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
@@ -762,7 +761,10 @@ int PreClusterCommand::process(string newMapFile){
 /**************************************************************************************************/
 int PreClusterCommand::readFASTA(){
 	try {
-		//ifstream inNames;
+        map<string, string> nameMap;
+        map<string, string>::iterator it;
+        if (namefile != "") { m->readNames(namefile, nameMap); }
+        
 		ifstream inFasta;
 		
 		m->openInputFile(fastafile, inFasta);
@@ -776,11 +778,12 @@ int PreClusterCommand::readFASTA(){
 			
 			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 				if (namefile != "") {
-					itSize = sizes.find(seq.getName());
+					it = nameMap.find(seq.getName());
 					
-					if (itSize == sizes.end()) { m->mothurOut(seq.getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); exit(1); }
+					if (it == nameMap.end()) { m->mothurOut(seq.getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); exit(1); }
 					else{
-						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
+                        string second = it->second;
+						seqPNode tempNode(m->getNumNames(second), seq, second);
 						alignSeqs.push_back(tempNode);
 						lengths.insert(seq.getAligned().length());
 					}	
@@ -1029,32 +1032,6 @@ void PreClusterCommand::printData(string newfasta, string newname, string group)
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-void PreClusterCommand::readNameFile(){
-	try {
-		ifstream in;
-		m->openInputFile(namefile, in);
-		string firstCol, secondCol;
-				
-		while (!in.eof()) {
-			in >> firstCol >> secondCol; m->gobble(in);
-            
-            m->checkName(firstCol);
-            m->checkName(secondCol);
-            int size = m->getNumNames(secondCol);
-            
-			names[firstCol] = secondCol;
-            sizes[firstCol] = size;
-		}
-		in.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "readNameFile");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 
 
