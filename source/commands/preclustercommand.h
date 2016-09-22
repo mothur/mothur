@@ -37,17 +37,11 @@ struct seqPNode {
 /************************************************************/
 inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
     if (first.numIdentical > second.numIdentical) { return true;  }
-    else if (first.numIdentical == second.numIdentical) { 
-        if (first.seq.getName() > second.seq.getName()) { return true; }
-    }
     return false; 
 }
 /************************************************************/
 inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
     if (first.numIdentical < second.numIdentical) { return true;  }
-    else if (first.numIdentical == second.numIdentical) { 
-        if (first.seq.getName() > second.seq.getName()) { return true; }
-    }
     return false; 
 }
 //************************************************************/
@@ -86,12 +80,10 @@ private:
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
 	map<string, int>::iterator itSize; 
-//	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
 	vector<string> outputNames;
 	
 	int readFASTA();
 	void readNameFile();
-	//int readNamesFASTA();
 	int calcMisMatches(string, string);
 	void printData(string, string, string); //fasta filename, names file name
 	int process(string);

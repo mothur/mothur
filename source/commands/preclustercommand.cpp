@@ -800,6 +800,8 @@ int PreClusterCommand::readFASTA(){
         
         length = *(lengths.begin());
         
+        random_shuffle(alignSeqs.begin(), alignSeqs.end());
+        
 		return alignSeqs.size();
 	}
 	
@@ -862,6 +864,8 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 		if (error) { m->control_pressed = true; }
 		
 		thisSeqs.clear();
+        
+        random_shuffle(alignSeqs.begin(), alignSeqs.end());
 		
 		return alignSeqs.size();
 	}
