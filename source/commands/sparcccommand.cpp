@@ -607,7 +607,6 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 vector<vector<float> > SparccCommand::driver(vector<vector<float> >& sharedVector, vector<vector<float> >& origCorrMatrix, int numPerms){
 	try {
@@ -632,7 +631,7 @@ vector<vector<float> > SparccCommand::driver(vector<vector<float> >& sharedVecto
                 }
             }
             
-            float done = numPermutations * 0.05;
+            float done = ceil(numPermutations * 0.05);
             if((i+1) % (int)(done) == 0){ cout << i+1 << endl;  }
         }
         
