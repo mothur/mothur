@@ -56,60 +56,6 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 		exit(1);
 	}
 }
-/*******************************************************************************/
-string SequenceDB::readName(ifstream& in) {
-	try{
-		string name = "";
-		int c;
-		string temp;
-		
-		while ((c = in.get()) != EOF) {
-			//if c is not a line return
-			if (c != 10) {
-				name += c;
-			}else { break;  }
-		}
-			
-		return name;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceDB", "readName");
-		exit(1);
-	}
-}
-
-/*******************************************************************************/
-string SequenceDB::readSequence(ifstream& in) {
-	try{
-		string sequence = "";
-		string line;
-		int pos, c;
-		
-		while (!in.eof()) {
-			//save position in file in case next line is a new name.
-			pos = in.tellg();
-			line = "";
-			in >> line;			
-			//if you are at a new name
-			if (line[0] == '>') {
-				//put file pointer back since you are now at a new name
-				in.seekg(pos, ios::beg);
-				c = in.get();  //because you put it back to a newline char
-				break;
-			}else {  sequence += line;	}
-		}
-		
-		if (length == 0) { length = sequence.length(); }
-		if (length != sequence.length()) { samelength = false; }
-		
-		return sequence;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceDB", "readSequence");
-		exit(1);
-	}
-}
-	
 /***********************************************************************/
 
 int SequenceDB::getNumSeqs() {
