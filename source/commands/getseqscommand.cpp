@@ -968,7 +968,7 @@ int GetSeqsCommand::readGroup(){
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
-			in >> name;				//read from first column
+			in >> name;		m->gobble(in);		//read from first column
 			in >> group;			//read from second column
             
 			

@@ -21,33 +21,28 @@
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
-
+#include "filters.h"
 
 /************************************************************/
 struct seqPNode {
 	int numIdentical;
 	Sequence seq;
+    string filteredSeq;
 	string names;
 	bool active;
 	int diffs;
 	seqPNode() {}
-	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; }
+	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; filteredSeq = "";}
 	~seqPNode() {}
 };
 /************************************************************/
 inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
     if (first.numIdentical > second.numIdentical) { return true;  }
-    else if (first.numIdentical == second.numIdentical) { 
-        if (first.seq.getName() > second.seq.getName()) { return true; }
-    }
     return false; 
 }
 /************************************************************/
 inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
     if (first.numIdentical < second.numIdentical) { return true;  }
-    else if (first.numIdentical == second.numIdentical) { 
-        if (first.seq.getName() > second.seq.getName()) { return true; }
-    }
     return false; 
 }
 //************************************************************/
@@ -83,15 +78,10 @@ private:
 	bool abort, bygroup, topdown;
 	string fastafile, namefile, outputDir, groupfile, countfile, method, align;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
-	map<string, string> names; //represents the names file first column maps to second column
-	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
-	map<string, int>::iterator itSize; 
-//	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
 	vector<string> outputNames;
 	
 	int readFASTA();
 	void readNameFile();
-	//int readNamesFASTA();
 	int calcMisMatches(string, string);
 	void printData(string, string, string); //fasta filename, names file name
 	int process(string);
@@ -99,6 +89,7 @@ private:
 	int driverGroups(string, string, string, int, int, vector<string> groups);
 	int createProcessesGroups(string, string, string, vector<string>);
     int mergeGroupCounts(string, string, string);
+    int filterSeqs();
 };
 
 /**************************************************************************************************/
@@ -250,10 +241,38 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 				}
 			}
 			
-            if (lengths.size() > 1) { pDataArray->method = "unaligned"; }
-            else if (lengths.size() == 1) {  pDataArray->method = "aligned"; }
-            
             length = *(lengths.begin());
+            
+            if (lengths.size() > 1) { pDataArray->method = "unaligned"; }
+            else if (lengths.size() == 1) {
+                pDataArray->method = "aligned";
+                ////////////////////////////////////////////////////
+                //filterSeqs();
+                
+                string filterString = "";
+                Filters F;
+                
+                F.setLength(length);
+                F.initialize();
+                F.setFilter(string(length, '1'));
+                
+                for (int i = 0; i < alignSeqs.size(); i++) { F.getFreqs(alignSeqs[i].seq);}
+                
+                F.setNumSeqs(alignSeqs.size());
+                F.doVerticalAllBases();
+                filterString = F.getFilter();
+                
+                //run filter
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    alignSeqs[i].filteredSeq = "";
+                    string align = alignSeqs[i].seq.getAligned();
+                    for(int j=0;j<length;j++){
+                        if(filterString[j] == '1'){ alignSeqs[i].filteredSeq += align[j]; }
+                    }
+                }
+                ////////////////////////////////////////////////////
+            }
+            
 			//sanity check
 			if (error) { pDataArray->m->control_pressed = true; }
 			
@@ -323,9 +342,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                         if (mismatch > pDataArray->diffs) { mismatch = length; break;  } //to far to cluster
                                     }
                                 }else {
-                                    for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                    for (int k = 0; k < alignSeqs[i].filteredSeq.length(); k++) {
                                         //do they match
-                                        if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                        if (alignSeqs[i].filteredSeq[k] != alignSeqs[j].filteredSeq[k]) { mismatch++; }
                                         if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
                                     }
                                 }
@@ -396,9 +415,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                 }
                             }else {
 
-                                for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                for (int k = 0; k < alignSeqs[i].filteredSeq.length(); k++) {
                                     //do they match
-                                    if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                    if (alignSeqs[i].filteredSeq[k] != alignSeqs[j].filteredSeq[k]) { mismatch++; }
                                     if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
                                 }
                             }

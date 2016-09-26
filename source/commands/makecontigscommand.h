@@ -732,8 +732,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -771,8 +771,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    f2read.setName(forwardName);
+                                    rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -809,8 +809,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2read.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -865,8 +865,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    fread.setName(forwardName);
+                                    firead.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -904,8 +904,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        f2iread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -952,8 +952,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    fread.setName(forwardName);
+                                    riread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -989,8 +989,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2iread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1034,8 +1034,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -1072,8 +1072,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    f2read.setName(forwardName);
+                                    rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -1109,8 +1109,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2read.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1161,8 +1161,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1216,8 +1216,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -1253,8 +1253,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    f2read.setName(forwardName);
+                                    rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -1291,8 +1291,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2read.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1346,8 +1346,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    fread.setName(forwardName);
+                                    firead.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -1381,8 +1381,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        f2iread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1427,8 +1427,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    fread.setName(forwardName);
+                                    riread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -1465,8 +1465,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2iread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1512,8 +1512,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -1550,8 +1550,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                 
                                 if (forwardName == reverseName) {
-                                    forward.setName(forwardName);
-                                    reverse.setName(reverseName);
+                                    f2read.setName(forwardName);
+                                    rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
@@ -1589,8 +1589,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        r2read.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -1642,8 +1642,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                                     
                                     if (forwardName == reverseName) {
-                                        forward.setName(forwardName);
-                                        reverse.setName(reverseName);
+                                        fread.setName(forwardName);
+                                        rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
@@ -2543,8 +2543,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                     
                     if (forwardName == reverseName) {
-                        forward.setName(forwardName);
-                        reverse.setName(reverseName);
+                        fread.setName(forwardName);
+                        rread.setName(reverseName);
                     }else{
                         fixed = false;
                     }
@@ -2582,8 +2582,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                         
                         if (forwardName == reverseName) {
-                            forward.setName(forwardName);
-                            reverse.setName(reverseName);
+                            f2read.setName(forwardName);
+                            rread.setName(reverseName);
                         }else{
                             fixed = false;
                         }
@@ -2620,8 +2620,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                r2read.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -2677,8 +2677,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                         
                         if (forwardName == reverseName) {
-                            forward.setName(forwardName);
-                            reverse.setName(reverseName);
+                            fread.setName(forwardName);
+                            firead.setName(reverseName);
                         }else{
                             fixed = false;
                         }
@@ -2718,8 +2718,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                f2iread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -2766,8 +2766,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                         
                         if (forwardName == reverseName) {
-                            forward.setName(forwardName);
-                            reverse.setName(reverseName);
+                            fread.setName(forwardName);
+                            riread.setName(reverseName);
                         }else{
                             fixed = false;
                         }
@@ -2807,8 +2807,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                r2iread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -2855,8 +2855,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                     
                     if (forwardName == reverseName) {
-                        forward.setName(forwardName);
-                        reverse.setName(reverseName);
+                        fread.setName(forwardName);
+                        rread.setName(reverseName);
                     }else{
                         fixed = false;
                     }
@@ -2896,8 +2896,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                         
                         if (forwardName == reverseName) {
-                            forward.setName(forwardName);
-                            reverse.setName(reverseName);
+                            f2read.setName(forwardName);
+                            rread.setName(reverseName);
                         }else{
                             fixed = false;
                         }
@@ -2935,8 +2935,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                r2read.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
@@ -2986,8 +2986,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
                             
                             if (forwardName == reverseName) {
-                                forward.setName(forwardName);
-                                reverse.setName(reverseName);
+                                fread.setName(forwardName);
+                                rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
