@@ -9,7 +9,7 @@
 
 #include "preclustercommand.h"
 #include "deconvolutecommand.h"
-#include "filters.h"
+
 
 //**********************************************************************************************************************
 vector<string> PreClusterCommand::setParameters(){	
@@ -722,7 +722,9 @@ int PreClusterCommand::process(string newMapFile){
                     
                     if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
                         //are you within "diff" bases
-                        int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                        int mismatch = length;
+                        if (method == "unaligned") { mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned()); }
+                        else { mismatch = calcMisMatches(alignSeqs[i].filteredSeq, alignSeqs[j].filteredSeq); }
                         
                         if (mismatch <= diffs) {
                             //merge
@@ -802,11 +804,9 @@ int PreClusterCommand::readFASTA(){
 		inFasta.close();
         
         if (lengths.size() > 1) { method = "unaligned"; }
-        else if (lengths.size() == 1) {  method = "aligned"; }
+        else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
         
         length = *(lengths.begin());
-        
-        random_shuffle(alignSeqs.begin(), alignSeqs.end());
         
 		return alignSeqs.size();
 	}
@@ -869,8 +869,6 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 		if (error) { m->control_pressed = true; }
 		
 		thisSeqs.clear();
-        
-        //random_shuffle(alignSeqs.begin(), alignSeqs.end());
         
 		return alignSeqs.size();
 	}

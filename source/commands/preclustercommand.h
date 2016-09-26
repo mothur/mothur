@@ -21,7 +21,7 @@
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
-
+#include "filters.h"
 
 /************************************************************/
 struct seqPNode {
@@ -241,10 +241,38 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 				}
 			}
 			
-            if (lengths.size() > 1) { pDataArray->method = "unaligned"; }
-            else if (lengths.size() == 1) {  pDataArray->method = "aligned"; }
-            
             length = *(lengths.begin());
+            
+            if (lengths.size() > 1) { pDataArray->method = "unaligned"; }
+            else if (lengths.size() == 1) {
+                pDataArray->method = "aligned";
+                ////////////////////////////////////////////////////
+                //filterSeqs();
+                
+                string filterString = "";
+                Filters F;
+                
+                F.setLength(length);
+                F.initialize();
+                F.setFilter(string(length, '1'));
+                
+                for (int i = 0; i < alignSeqs.size(); i++) { F.getFreqs(alignSeqs[i].seq);}
+                
+                F.setNumSeqs(alignSeqs.size());
+                F.doVerticalAllBases();
+                filterString = F.getFilter();
+                
+                //run filter
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    alignSeqs[i].filteredSeq = "";
+                    string align = alignSeqs[i].seq.getAligned();
+                    for(int j=0;j<length;j++){
+                        if(filterString[j] == '1'){ alignSeqs[i].filteredSeq += align[j]; }
+                    }
+                }
+                ////////////////////////////////////////////////////
+            }
+            
 			//sanity check
 			if (error) { pDataArray->m->control_pressed = true; }
 			
@@ -314,9 +342,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                         if (mismatch > pDataArray->diffs) { mismatch = length; break;  } //to far to cluster
                                     }
                                 }else {
-                                    for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                    for (int k = 0; k < alignSeqs[i].filteredSeq.length(); k++) {
                                         //do they match
-                                        if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                        if (alignSeqs[i].filteredSeq[k] != alignSeqs[j].filteredSeq[k]) { mismatch++; }
                                         if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
                                     }
                                 }
@@ -387,9 +415,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                 }
                             }else {
 
-                                for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                for (int k = 0; k < alignSeqs[i].filteredSeq.length(); k++) {
                                     //do they match
-                                    if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                    if (alignSeqs[i].filteredSeq[k] != alignSeqs[j].filteredSeq[k]) { mismatch++; }
                                     if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
                                 }
                             }
