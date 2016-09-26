@@ -31,18 +31,18 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile) {
 		ifstream in;
 		m->openInputFile(fastafile, in);
 		
-        int fastaCount = 0;
+        //int fastaCount = 0;
 		while (!in.eof()) {
 			
 			if (m->control_pressed) { break; }
 			
 			Sequence seq(in); m->gobble(in);
-            fastaCount++;
-            if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
+            //fastaCount++;
+            //if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
 			
             if (seq.getName() != "") {
 				
-                allSeqsMap[seq.getName()] = seq.getName();
+                //allSeqsMap[seq.getName()] = seq.getName();
                 vector<int> groupCounts = countTable.getGroupCounts(seq.getName());
                 
                 for (int i = 0; i < namesOfGroups.size(); i++) {
@@ -91,7 +91,7 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
                 
                 if (seq.getName() != "") {
                     
-                    allSeqsMap[seq.getName()] = seq.getName();
+                    //allSeqsMap[seq.getName()] = seq.getName();
                     vector<int> groupCounts = countTable.getGroupCounts(seq.getName());
                     
                     for (int i = 0; i < namesOfGroups.size(); i++) {
@@ -136,6 +136,24 @@ int SequenceCountParser::getNumSeqs(string g){
 		m->errorOut(e, "SequenceCountParser", "getNumSeqs");
 		exit(1);
 	}
+}
+/************************************************************/
+map<string, string> SequenceCountParser::getAllSeqsMap(){
+    try {
+        map<string, string > allSeqsMap;
+        map<string, vector<Sequence> >::iterator it;
+        
+        for (it = seqs.begin(); it != seqs.end(); it++) {
+            vector<Sequence> temp = it->second;
+            for (int i = 0; i < temp.size(); i++) {  allSeqsMap[temp[i].getName()] = temp[i].getName(); }
+        }
+        
+        return allSeqsMap;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceCountParser", "getAllSeqsMap");
+        exit(1);
+    }
 }
 /************************************************************/
 vector<Sequence> SequenceCountParser::getSeqs(string g){ 

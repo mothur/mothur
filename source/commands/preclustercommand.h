@@ -38,11 +38,18 @@ struct seqPNode {
 /************************************************************/
 inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
     if (first.numIdentical > second.numIdentical) { return true;  }
+    //else if (first.numIdentical == second.numIdentical) {
+        //if (first.seq.getName() > second.seq.getName()) { return true; }
+    //}
+
     return false; 
 }
 /************************************************************/
 inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
     if (first.numIdentical < second.numIdentical) { return true;  }
+    //else if (first.numIdentical == second.numIdentical) {
+        //if (first.seq.getName() > second.seq.getName()) { return true; }
+    //}
     return false; 
 }
 //************************************************************/
@@ -81,7 +88,6 @@ private:
 	vector<string> outputNames;
 	
 	int readFASTA();
-	void readNameFile();
 	int calcMisMatches(string, string);
 	void printData(string, string, string); //fasta filename, names file name
 	int process(string);

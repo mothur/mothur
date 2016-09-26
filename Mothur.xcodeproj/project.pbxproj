@@ -776,12 +776,12 @@
 		};
 		8DD76FAF0486AB0100D96B5E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
-			dstPath = Users/SarahsWork/desktop/debug;
+			buildActionMask = 12;
+			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -3342,10 +3342,10 @@
 				"DYLIB_CURRENT_VERSION[sdk=*]" = "";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.1\\\"\"",
-					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"09/26/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3377,10 +3377,10 @@
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.1\\\"\"",
-					"RELEASE_DATE=\"\\\"04/11/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"09/26/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3458,8 +3458,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.37.6\\\"\"",
-					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
+					"VERSION=\"\\\"1.38.1\\\"\"",
+					"RELEASE_DATE=\"\\\"09/26/2016\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
