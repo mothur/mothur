@@ -240,7 +240,7 @@ int DistanceCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		int numSeqs = alignDB.getNumSeqs();
-		cutoff += 0.005;
+		//cutoff += 0.005;
 		
 		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting."); m->mothurOutEndLine(); return 0; }
 		
