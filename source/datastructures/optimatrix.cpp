@@ -12,36 +12,31 @@
 
 /***********************************************************************/
 
-OptiMatrix::OptiMatrix(string d, double c, bool s) : distFile(d), cutoff(c), sim(s) {
+OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), distFormat(df), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
     countfile = ""; namefile = "";
-    distFormat = findDistFormat(distFile);
     
     if (distFormat == "phylip") { readPhylip(); }
     else { readColumn();  }
 }
 /***********************************************************************/
-OptiMatrix::OptiMatrix(string d, string nc, string f, double c, bool s) : distFile(d), format(f), cutoff(c), sim(s) {
+OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
     
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
     else { countfile = ""; namefile = ""; }
     
-    distFormat = findDistFormat(distFile);
-    
     if (distFormat == "phylip") { readPhylip(); }
     else { readColumn();  }
 }
 /***********************************************************************/
-int OptiMatrix::readFile(string d, string nc, string f, double c, bool s)  {
-    distFile = d; format = f; cutoff = c; sim = s;
+int OptiMatrix::readFile(string d, string nc, string f, string df, double c, bool s)  {
+    distFile = d; format = f; cutoff = c; sim = s; distFormat = df;
     
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
     else { countfile = ""; namefile = ""; }
-    
-    distFormat = findDistFormat(distFile);
     
     if (distFormat == "phylip") { readPhylip(); }
     else { readColumn();  }

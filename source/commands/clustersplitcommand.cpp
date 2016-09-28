@@ -1393,7 +1393,7 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         string nameOrCount = "count";
         if (namefile != "") { nameOrCount = "name"; }
         
-        OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, cutoff, false);
+        OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, "column", cutoff, false);
         
         OptiCluster cluster(&matrix, metric, numSingletons);
         tag = cluster.getTag();

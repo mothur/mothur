@@ -21,8 +21,8 @@ class OptiMatrix {
     
 public:
     OptiMatrix() { m = MothurOut::getInstance(); }
-    OptiMatrix(string, double, bool); //distfile, cutoff, sim
-    OptiMatrix(string, string, string, double, bool); //distfile, name or count, format, cutoff, sim
+    OptiMatrix(string, string, double, bool); //distfile, distformat, cutoff, sim
+    OptiMatrix(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
     ~OptiMatrix(){ }
     
     vector<int> getCloseSeqs(int i) { return closeness[i]; }
@@ -35,7 +35,7 @@ public:
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
     long int print(ostream&);
-    int readFile(string, string, string, double, bool); //distfile, name or count, format, cutoff, sim
+    int readFile(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
     
 private:
     
