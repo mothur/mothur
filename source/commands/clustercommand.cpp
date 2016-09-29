@@ -886,17 +886,19 @@ int ClusterCommand::runOptiCluster(){
         
         cluster.initialize(listVectorMetric, true, initialize);
         
-        m->mothurOut("\n\niter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        outStep << "iter\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("\n\niter\ttime\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        outStep << "iter\ttime\tlabel\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
          long long tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
-        m->mothurOut("0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-        outStep << "0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
         m->mothurOutEndLine();
         outStep << endl;
     
         while ((delta > stableMetric) && (iters < maxIters)) {
+            
+            int start = time(NULL);
             
             if (m->control_pressed) { break; }
             double oldMetric = listVectorMetric;
@@ -908,8 +910,8 @@ int ClusterCommand::runOptiCluster(){
             
             results = cluster.getStats(tp, tn, fp, fn);
             
-            m->mothurOut(toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << (toString(iters) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
             m->mothurOutEndLine();
             outStep << endl;
