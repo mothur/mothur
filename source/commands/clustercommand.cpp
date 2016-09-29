@@ -886,18 +886,17 @@ int ClusterCommand::runOptiCluster(){
         
         cluster.initialize(listVectorMetric, true, initialize);
         
-        ListVector* list = cluster.getList();
+        long long numBins = cluster.getNumBins();
         m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
          long long tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
-        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(list->getNumBins()) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-        outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(list->getNumBins()) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
         m->mothurOutEndLine();
         outStep << endl;
-        delete list;
-    
+        
         while ((delta > stableMetric) && (iters < maxIters)) {
             
             int start = time(NULL);
@@ -911,18 +910,17 @@ int ClusterCommand::runOptiCluster(){
             iters++;
             
             results = cluster.getStats(tp, tn, fp, fn);
-            list = cluster.getList();
+            numBins = cluster.getNumBins();
             
-            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(list->getNumBins()) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(list->getNumBins()) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
             m->mothurOutEndLine();
             outStep << endl;
-            delete list;
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         
-        list = cluster.getList();
+        ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
         if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }

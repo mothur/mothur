@@ -562,8 +562,8 @@ double OptiCluster::calcFDR( long long tp,  long long tn,  long long fp,  long l
 /***********************************************************************/
 vector<double> OptiCluster::getStats( long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
-         long long singletn = matrix->getNumSingletons() + numSingletons;
-         long long tempnumSeqs = numSeqs + singletn;
+        long long singletn = matrix->getNumSingletons() + numSingletons;
+        long long tempnumSeqs = numSeqs + singletn;
         
         tp = truePositives;
         fp = falsePositives;
@@ -639,6 +639,25 @@ ListVector* OptiCluster::getList() {
         exit(1);
     }
 }
+/***********************************************************************/
+long long OptiCluster::getNumBins() {
+    try {
+        long long singletn = matrix->getNumSingletons();
+        
+        for (int i = 0; i < bins.size(); i++) {
+            if (bins[i].size() != 0) {
+                singletn++;
+            }
+        }
+        
+        return singletn;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "getNumBins");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 int OptiCluster::findInsert() {
     try {
