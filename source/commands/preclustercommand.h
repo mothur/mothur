@@ -92,8 +92,8 @@ private:
 	void printData(string, string, string); //fasta filename, names file name
 	int process(string);
 	int loadSeqs(map<string, string>&, vector<Sequence>&, string);
-	int driverGroups(string, string, string, int, int, vector<string> groups);
-	int createProcessesGroups(string, string, string, vector<string>);
+	int driverGroups(string, string, string, int, int, vector<string>);
+	int createProcessesGroups(string, string, string);
     int mergeGroupCounts(string, string, string);
     int filterSeqs();
 };

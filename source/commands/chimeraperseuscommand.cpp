@@ -520,7 +520,8 @@ int ChimeraPerseusCommand::execute(){
                 ct->readTable(nameFile, true, false);
                 
                 if (ct->hasGroupInfo()) {
-                    cparser = new SequenceCountParser(fastaFileNames[s], *ct);
+                    vector<string> temp;
+                    cparser = new SequenceCountParser(fastaFileNames[s], *ct, temp);
                     variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
                     newCountFile = getOutputFileName("count", variables);
                     

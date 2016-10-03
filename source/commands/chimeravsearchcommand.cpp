@@ -643,7 +643,8 @@ int ChimeraVsearchCommand::execute(){
                 vector<string> groups;
                 map<string, string> uniqueNames;
                 if (hasCount) {
-                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s]);
+                    vector<string> temp;
+                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s], temp);
                     groups = cparser->getNamesOfGroups();
                     uniqueNames = cparser->getAllSeqsMap();
                 }else{
