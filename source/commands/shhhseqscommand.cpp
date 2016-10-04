@@ -213,7 +213,8 @@ int ShhhSeqsCommand::execute() {
 		
 		if (groupfile != "") {
 			//Parse sequences by group
-			SequenceParser parser(groupfile, fastafile, namefile);
+            vector<string> temp;
+			SequenceParser parser(groupfile, fastafile, namefile, temp);
 			vector<string> groups = parser.getNamesOfGroups();
 			
 			if (m->control_pressed) {  return 0; }

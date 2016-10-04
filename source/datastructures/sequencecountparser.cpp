@@ -7,6 +7,7 @@
 //
 
 #include "sequencecountparser.h"
+#include "sharedutilities.h"
 
 /************************************************************/
 SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vector<string> groupsSelected) {
@@ -24,6 +25,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
             namesOfGroups = countTable.getNamesOfGroups();
             for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
         }else{
+            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
             namesOfGroups = groupsSelected;
             map<string, int> temp;
             for (int i = 0; i < allNames.size(); i++) {
@@ -67,6 +69,7 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
                 namesOfGroups = countTable.getNamesOfGroups();
                 for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
             }else{
+                SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
                 namesOfGroups = groupsSelected;
                 map<string, int> temp;
                 for (int i = 0; i < allNames.size(); i++) {

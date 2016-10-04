@@ -1042,7 +1042,8 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceParser*& parser, map<str
 			fileGroup[fastaFileNames[s]] = "noGroup";
 		}else {
 			//Parse sequences by group
-			parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+            vector<string> temp;
+			parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
 			vector<string> groups = parser->getNamesOfGroups();
 			
 			for (int i = 0; i < groups.size(); i++) {

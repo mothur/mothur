@@ -601,8 +601,8 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
         if (countfile != "") {
             cparser = new SequenceCountParser(countfile, fastafile, subsetGroups);
         }else {
-            if (namefile != "") { parser = new SequenceParser(groupfile, fastafile, namefile);	}
-            else				{ parser = new SequenceParser(groupfile, fastafile);			}
+            if (namefile != "") { parser = new SequenceParser(groupfile, fastafile, namefile, subsetGroups);	}
+            else				{ parser = new SequenceParser(groupfile, fastafile, subsetGroups);              }
         }
         
 		int numSeqs = 0;

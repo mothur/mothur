@@ -689,13 +689,13 @@ int ChimeraUchimeCommand::execute(){
 				//Parse sequences by group
                 vector<string> groups;
                 map<string, string> uniqueNames;
+                vector<string> temp;
                 if (hasCount) {
-                    vector<string> temp;
                     cparser = new SequenceCountParser(nameFile, fastaFileNames[s], temp);
                     groups = cparser->getNamesOfGroups();
                     uniqueNames = cparser->getAllSeqsMap();
                 }else{
-                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
                     groups = sparser->getNamesOfGroups();
                     uniqueNames = sparser->getAllSeqsMap();
                 }
