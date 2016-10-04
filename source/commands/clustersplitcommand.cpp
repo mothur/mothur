@@ -28,12 +28,12 @@ vector<string> ClusterSplitCommand::setParameters(){
         CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcluster);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
-        CommandParameter pmetriccutoff("delta", "Number", "", "0.000", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+        CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
        CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
@@ -69,13 +69,13 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
         helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
         helpString += "The dist parameter allows you to indicate whether you want a column formatted distance matrix outputted along with the list file. Default=F.";
-		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
+		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.03. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
-        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. Default=0.000\n";
+        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. Default=0.0001\n";
         helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
-		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=average.  The agc and dgc methods require a fasta file.";
+		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=opti.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
@@ -367,7 +367,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
             m->mothurConvert(temp, maxIters);
             
-            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.000"; }
+            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
             m->mothurConvert(temp, stableMetric);
 			
             metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
@@ -381,7 +381,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
             
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "opti"; }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
@@ -396,7 +396,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             #endif
             
             cutoffNotSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "1.0"; }
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.03"; }
             m->mothurConvert(temp, cutoff);
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
