@@ -641,8 +641,7 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
 			printData(newFFile, newNFile, groups[i]);
 			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
-			
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 		}
 		
         if (countfile != "") { delete cparser; }else { delete parser; }
@@ -1016,15 +1015,33 @@ void PreClusterCommand::printData(string newfasta, string newname, string group)
 		}
 		
         if ((countfile != "") && (group == ""))  { outNames << "Representative_Sequence\ttotal\n";  }
-		for (int i = 0; i < alignSeqs.size(); i++) {
-			if (alignSeqs[i].numIdentical != 0) {
-				alignSeqs[i].seq.printSequence(outFasta); 
-				if (countfile != "") {  
-                    if (group != "") {  outNames << group << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl; }
-                    else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].numIdentical << endl;  }
-                }else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;  }
-			}
-		}
+        
+        if (countfile != "") {
+            if (group != "") {
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    if (alignSeqs[i].numIdentical != 0) {
+                        alignSeqs[i].seq.printSequence(outFasta);
+                        outNames << group << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    if (alignSeqs[i].numIdentical != 0) {
+                        alignSeqs[i].seq.printSequence(outFasta);
+                        outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].numIdentical << endl;
+                    }
+                }
+            }
+        }else {
+            for (int i = 0; i < alignSeqs.size(); i++) {
+                if (alignSeqs[i].numIdentical != 0) {
+                    alignSeqs[i].seq.printSequence(outFasta);
+                    outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+                }
+            }
+        }
+
 		
 		outFasta.close();
 		outNames.close();

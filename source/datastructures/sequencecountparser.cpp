@@ -25,7 +25,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
             namesOfGroups = countTable.getNamesOfGroups();
             for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
         }else{
-            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
+            SharedUtil util;  util.setGroups(groupsSelected, allNames);
             namesOfGroups = groupsSelected;
             map<string, int> temp;
             for (int i = 0; i < allNames.size(); i++) {
@@ -69,7 +69,7 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
                 namesOfGroups = countTable.getNamesOfGroups();
                 for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
             }else{
-                SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
+                SharedUtil util;  util.setGroups(groupsSelected, allNames);
                 namesOfGroups = groupsSelected;
                 map<string, int> temp;
                 for (int i = 0; i < allNames.size(); i++) {
@@ -109,14 +109,12 @@ int SequenceCountParser::readFasta(string fastafile, CountTable& countTable) {
         ifstream in;
         m->openInputFile(fastafile, in);
         
-        int fastaCount = 0;
+       
         while (!in.eof()) {
             
             if (m->control_pressed) { break; }
             
             Sequence seq(in); m->gobble(in);
-            fastaCount++;
-            if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
             
             if (seq.getName() != "") {
                 
