@@ -26,8 +26,8 @@ class SequenceCountParser {
 	
 public:
 	
-    SequenceCountParser(string, string);			//count, fasta - file mismatches will set m->control_pressed = true
-    SequenceCountParser(string, CountTable&);		//fasta, counttable - file mismatches will set m->control_pressed = true
+    SequenceCountParser(string, string, vector<string>);			//count, fasta - file mismatches will set m->control_pressed = true
+    SequenceCountParser(string, CountTable&, vector<string>);		//fasta, counttable - file mismatches will set m->control_pressed = true
     ~SequenceCountParser();
     
     //general operations
@@ -48,10 +48,12 @@ private:
     MothurOut* m;
 	
     int numSeqs;
+    vector<int> indexes;
     //map<string, string> allSeqsMap;
     map<string, vector<Sequence> > seqs; //a vector for each group
     map<string, map<string, int> > countTablePerGroup; //countTable for each group
     vector<string> namesOfGroups;
+    int readFasta(string fastafile, CountTable&);
 };
 
 

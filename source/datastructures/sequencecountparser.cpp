@@ -7,9 +7,10 @@
 //
 
 #include "sequencecountparser.h"
+#include "sharedutilities.h"
 
 /************************************************************/
-SequenceCountParser::SequenceCountParser(string countfile, string fastafile) {
+SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vector<string> groupsSelected) {
 	try {
 		
 		m = MothurOut::getInstance();
@@ -17,58 +18,72 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile) {
 		//read count file
 		CountTable countTable;
 		countTable.readTable(countfile, true, false);
+        vector<string> allNames = countTable.getNamesOfGroups();
 		
 		//initialize maps
-		namesOfGroups = countTable.getNamesOfGroups();
+        if (groupsSelected.size() == 0) { //select all
+            namesOfGroups = countTable.getNamesOfGroups();
+            for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
+        }else{
+            SharedUtil util;  util.setGroups(groupsSelected, allNames);
+            namesOfGroups = groupsSelected;
+            map<string, int> temp;
+            for (int i = 0; i < allNames.size(); i++) {
+                for (int j = 0; j < groupsSelected.size(); j++) {
+                    if (allNames[i] == groupsSelected[j]) {
+                        temp[groupsSelected[j]] = i;
+                    }
+                }
+            }
+            for (map<string, int>::iterator it = temp.begin(); it != temp.end(); it++) {
+                indexes.push_back(it->second);
+            }
+        }
+        
 		for (int i = 0; i < namesOfGroups.size(); i++) {
 			vector<Sequence> temp;
 			map<string, int> tempMap;
 			seqs[namesOfGroups[i]] = temp;
 			countTablePerGroup[namesOfGroups[i]] = tempMap;
 		}
-		
-		//read fasta file making sure each sequence is in the group file
-		ifstream in;
-		m->openInputFile(fastafile, in);
-		
-        //int fastaCount = 0;
-		while (!in.eof()) {
-			
-			if (m->control_pressed) { break; }
-			
-			Sequence seq(in); m->gobble(in);
-            //fastaCount++;
-            //if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
-			
-            if (seq.getName() != "") {
-				
-                //allSeqsMap[seq.getName()] = seq.getName();
-                vector<int> groupCounts = countTable.getGroupCounts(seq.getName());
-                
-                for (int i = 0; i < namesOfGroups.size(); i++) {
-                    if (groupCounts[i] != 0) {
-                        seqs[namesOfGroups[i]].push_back(seq);	
-                        countTablePerGroup[namesOfGroups[i]][seq.getName()] = groupCounts[i];
-                    }
-                }
-			}
-		}
-		in.close();					
-	}
+        
+        readFasta(fastafile, countTable);
+    }
 	catch(exception& e) {
 		m->errorOut(e, "SequenceCountParser", "SequenceCountParser");
 		exit(1);
 	}
 }
 /************************************************************/
-SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTable) {
+SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTable, vector<string> groupsSelected) {
 	try {
 		
 		m = MothurOut::getInstance();
 				
 		//initialize maps
         if (countTable.hasGroupInfo()) {
-            namesOfGroups = countTable.getNamesOfGroups();
+            vector<string> allNames = countTable.getNamesOfGroups();
+            
+            //initialize maps
+            if (groupsSelected.size() == 0) { //select all
+                namesOfGroups = countTable.getNamesOfGroups();
+                for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
+            }else{
+                SharedUtil util;  util.setGroups(groupsSelected, allNames);
+                namesOfGroups = groupsSelected;
+                map<string, int> temp;
+                for (int i = 0; i < allNames.size(); i++) {
+                    for (int j = 0; j < groupsSelected.size(); j++) {
+                        if (allNames[i] == groupsSelected[j]) {
+                            temp[groupsSelected[j]] = i;
+                        }
+                    }
+                }
+                for (map<string, int>::iterator it = temp.begin(); it != temp.end(); it++) {
+                    indexes.push_back(it->second);
+                }
+            }
+
             for (int i = 0; i < namesOfGroups.size(); i++) {
                 vector<Sequence> temp;
                 map<string, int> tempMap;
@@ -76,33 +91,8 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
                 countTablePerGroup[namesOfGroups[i]] = tempMap;
             }
             
-            //read fasta file making sure each sequence is in the group file
-            ifstream in;
-            m->openInputFile(fastafile, in);
+            readFasta(fastafile, countTable);
             
-            int fastaCount = 0;
-            while (!in.eof()) {
-                
-                if (m->control_pressed) { break; }
-                
-                Sequence seq(in); m->gobble(in);
-                fastaCount++;
-                if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
-                
-                if (seq.getName() != "") {
-                    
-                    //allSeqsMap[seq.getName()] = seq.getName();
-                    vector<int> groupCounts = countTable.getGroupCounts(seq.getName());
-                    
-                    for (int i = 0; i < namesOfGroups.size(); i++) {
-                        if (groupCounts[i] != 0) {
-                            seqs[namesOfGroups[i]].push_back(seq);	
-                            countTablePerGroup[namesOfGroups[i]][seq.getName()] = groupCounts[i];
-                        }
-                    }
-                }
-            }
-            in.close();	
         }else {  m->control_pressed = true;  m->mothurOut("[ERROR]: cannot parse fasta file by group with a count table that does not include group data, please correct.\n"); }
         
 	}
@@ -110,6 +100,43 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
 		m->errorOut(e, "SequenceCountParser", "SequenceCountParser");
 		exit(1);
 	}
+}
+/************************************************************/
+int SequenceCountParser::readFasta(string fastafile, CountTable& countTable) {
+    try {
+        
+        
+        ifstream in;
+        m->openInputFile(fastafile, in);
+        
+       
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            Sequence seq(in); m->gobble(in);
+            
+            if (seq.getName() != "") {
+                
+                //allSeqsMap[seq.getName()] = seq.getName();
+                vector<int> groupCounts = countTable.getGroupCounts(seq.getName());
+                
+                for (int i = 0; i < namesOfGroups.size(); i++) {
+                    if (groupCounts[indexes[i]] != 0) {
+                        seqs[namesOfGroups[i]].push_back(seq);
+                        countTablePerGroup[namesOfGroups[i]][seq.getName()] = groupCounts[i];
+                    }
+                }
+            }
+        }
+        in.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceCountParser", "readFasta");
+        exit(1);
+    }
 }
 /************************************************************/
 SequenceCountParser::~SequenceCountParser(){  }

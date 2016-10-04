@@ -270,8 +270,8 @@ int SplitGroupCommand::execute(){
 int SplitGroupCommand::runNameGroup(){
 	try {
         SequenceParser* parser;
-		if (namefile == "") {	parser = new SequenceParser(groupfile, fastafile);				}
-		else				{	parser = new SequenceParser(groupfile, fastafile, namefile);	}
+		if (namefile == "") {	parser = new SequenceParser(groupfile, fastafile, Groups);				}
+		else				{	parser = new SequenceParser(groupfile, fastafile, namefile, Groups);	}
 		
 		if (m->control_pressed) { delete parser; return 0; }
         

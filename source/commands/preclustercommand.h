@@ -92,8 +92,8 @@ private:
 	void printData(string, string, string); //fasta filename, names file name
 	int process(string);
 	int loadSeqs(map<string, string>&, vector<Sequence>&, string);
-	int driverGroups(string, string, string, int, int, vector<string> groups);
-	int createProcessesGroups(string, string, string, vector<string>);
+	int driverGroups(string, string, string, int, int, vector<string>);
+	int createProcessesGroups(string, string, string);
     int mergeGroupCounts(string, string, string);
     int filterSeqs();
 };
@@ -163,14 +163,17 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, 1000);
         }
         
-		//parse fasta and name file by group
-		SequenceParser* parser;
+        vector<string> subsetGroups;
+        for (int i = pDataArray->start; i < pDataArray->end; i++) {  subsetGroups.push_back(pDataArray->groups[i]);  }
+        
+        //parse fasta and name file by group
         SequenceCountParser* cparser;
+        SequenceParser* parser;
         if (pDataArray->countfile != "") {
-            cparser = new SequenceCountParser(pDataArray->countfile, pDataArray->fastafile);
+            cparser = new SequenceCountParser(pDataArray->countfile, pDataArray->fastafile, subsetGroups);
         }else {
-            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
-            else				{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);			}
+            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile, subsetGroups);	}
+            else				{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, subsetGroups);              }
         }
         
  		int numSeqs = 0;
@@ -186,7 +189,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             
 			int start = time(NULL);
 			
-            if (pDataArray->m->control_pressed) {  delete parser; delete alignment;return 0; }
+            if (pDataArray->m->control_pressed) { if (pDataArray->countfile != "") { delete cparser; } else { delete parser; } delete alignment;return 0; }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Processing group " + pDataArray->groups[k] + ":"); pDataArray->m->mothurOutEndLine();
 			

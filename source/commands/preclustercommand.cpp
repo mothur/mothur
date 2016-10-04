@@ -299,25 +299,11 @@ int PreClusterCommand::execute(){
 			ofstream outNames; m->openOutputFile(newNamesFile, outNames);  outNames.close();
 			newMapFile = fileroot + "precluster.";
 			
-			//parse fasta and name file by group
-            vector<string> groups;
-			if (countfile != "") {
-                cparser = new SequenceCountParser(countfile, fastafile);
-                groups = cparser->getNamesOfGroups();
-            }else {
-                if (namefile != "") { parser = new SequenceParser(groupfile, fastafile, namefile);	}
-                else				{ parser = new SequenceParser(groupfile, fastafile);			}
-                groups = parser->getNamesOfGroups();
-			}
-            
-			if(processors == 1)	{	driverGroups(newFastaFile, newNamesFile, newMapFile, 0, groups.size(), groups);	}
-			else				{	createProcessesGroups(newFastaFile, newNamesFile, newMapFile, groups);			}
+			createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
 			
 			if (countfile != "") { 
                 mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);
-                delete cparser; 
-            }else {  
-                delete parser; 
+            }else {
                 //run unique.seqs for deconvolute results
                 string inputString = "fasta=" + newFastaFile;
                 if (namefile != "") { inputString += ", name=" + newNamesFile; }
@@ -400,7 +386,7 @@ int PreClusterCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-int PreClusterCommand::createProcessesGroups(string newFName, string newNName, string newMFile, vector<string> groups) {
+int PreClusterCommand::createProcessesGroups(string newFName, string newNName, string newMFile) {
 	try {
 		
 		vector<int> processIDS;
@@ -408,6 +394,11 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 		int num = 0;
 		bool recalc = false;
         
+        //parse fasta and name file by group
+        vector<string> groups;
+        if (countfile != "") { CountTable ct; ct.testGroups(countfile, groups); }
+        else { GroupMap gp; gp.readMap(groupfile); groups = gp.getNamesOfGroups(); }
+
 		//sanity check
 		if (groups.size() < processors) { processors = groups.size(); }
 		
@@ -603,7 +594,17 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 /**************************************************************************************************/
 int PreClusterCommand::driverGroups(string newFFile, string newNFile, string newMFile, int start, int end, vector<string> groups){
 	try {
-		
+        vector<string> subsetGroups;
+        for (int i = start; i < end; i++) {  subsetGroups.push_back(groups[i]);  }
+        
+        //parse fasta and name file by group
+        if (countfile != "") {
+            cparser = new SequenceCountParser(countfile, fastafile, subsetGroups);
+        }else {
+            if (namefile != "") { parser = new SequenceParser(groupfile, fastafile, namefile, subsetGroups);	}
+            else				{ parser = new SequenceParser(groupfile, fastafile, subsetGroups);              }
+        }
+        
 		int numSeqs = 0;
 		
 		//precluster each group
@@ -611,7 +612,7 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			
 			start = time(NULL);
 			
-			if (m->control_pressed) {  return 0; }
+			if (m->control_pressed) { if (countfile != "") { delete cparser; }else { delete parser; } return 0; }
 			
 			m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[i] + ":"); m->mothurOutEndLine();
 			
@@ -640,10 +641,11 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
 			printData(newFFile, newNFile, groups[i]);
 			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
-			
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 		}
 		
+        if (countfile != "") { delete cparser; }else { delete parser; }
+        
 		return numSeqs;
 	}
 	catch(exception& e) {
@@ -1013,15 +1015,33 @@ void PreClusterCommand::printData(string newfasta, string newname, string group)
 		}
 		
         if ((countfile != "") && (group == ""))  { outNames << "Representative_Sequence\ttotal\n";  }
-		for (int i = 0; i < alignSeqs.size(); i++) {
-			if (alignSeqs[i].numIdentical != 0) {
-				alignSeqs[i].seq.printSequence(outFasta); 
-				if (countfile != "") {  
-                    if (group != "") {  outNames << group << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl; }
-                    else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].numIdentical << endl;  }
-                }else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;  }
-			}
-		}
+        
+        if (countfile != "") {
+            if (group != "") {
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    if (alignSeqs[i].numIdentical != 0) {
+                        alignSeqs[i].seq.printSequence(outFasta);
+                        outNames << group << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < alignSeqs.size(); i++) {
+                    if (alignSeqs[i].numIdentical != 0) {
+                        alignSeqs[i].seq.printSequence(outFasta);
+                        outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].numIdentical << endl;
+                    }
+                }
+            }
+        }else {
+            for (int i = 0; i < alignSeqs.size(); i++) {
+                if (alignSeqs[i].numIdentical != 0) {
+                    alignSeqs[i].seq.printSequence(outFasta);
+                    outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+                }
+            }
+        }
+
 		
 		outFasta.close();
 		outNames.close();
