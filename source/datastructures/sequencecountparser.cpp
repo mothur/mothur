@@ -124,7 +124,7 @@ int SequenceCountParser::readFasta(string fastafile, CountTable& countTable) {
                 for (int i = 0; i < namesOfGroups.size(); i++) {
                     if (groupCounts[indexes[i]] != 0) {
                         seqs[namesOfGroups[i]].push_back(seq);
-                        countTablePerGroup[namesOfGroups[i]][seq.getName()] = groupCounts[i];
+                        countTablePerGroup[namesOfGroups[i]][seq.getName()] = groupCounts[indexes[i]];
                     }
                 }
             }
