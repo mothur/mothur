@@ -117,99 +117,53 @@ bool OptiCluster::update(double& listMetric) {
             else {
                 
                 long long tn, tp, fp, fn;
+                double bestMetric = -1;
+                int bestBin, bestTp, bestTn, bestFn, bestFp;
                 tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                 
-                double bestMetric = -1;
-                vector< vector<long long> > bestMetricsTPValues;
-                //already singleton
-                if ((bins[binNumber].size()) == 1) {
-                    vector<long long> temp;
-                    double singleMetric;
-                    if (metric == "mcc") {
-                        singleMetric = calcMCC(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "sens") {
-                        singleMetric = calcSens(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "spec") {
-                        singleMetric = calcSpec(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "tptn") {
-                        singleMetric = calcTPTN(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "tp") {
-                        singleMetric = calcTP(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "tn") {
-                        singleMetric = calcTN(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "fp") {
-                        singleMetric = calcFP(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "fn") {
-                        singleMetric = calcFN(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "fn") {
-                        singleMetric = calcFN(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "f1score") {
-                        singleMetric = calcF1Score(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "accuracy") {
-                        singleMetric = calcAccuracy(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "ppv") {
-                        singleMetric = calcPPV(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "npv") {
-                        singleMetric = calcNPV(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }else if (metric == "fdr") {
-                        singleMetric = calcFDR(tp, tn, fp, fn);
-                        temp.push_back(binNumber); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    }
-                    bestMetric = singleMetric;
-                    bestMetricsTPValues.push_back(temp);
-                }else {
+                //this calculation is used to save time in the move and adjust function.
+                //we don't need to calculate the cost of moving out of our current bin each time we
+                //test moving into a new bin. Only calc this once per iteration.
+                long long currentBinTP, currentBinTN, currentBinFP, currentBinFN;
+                currentBinFN = falseNegatives; currentBinFP = falsePositives; currentBinTN = trueNegatives; currentBinTP = truePositives;
+                
+                long long cCount = 0;  long long fCount = 0;
+                for (int i = 0; i < bins[binNumber].size(); i++) { //how many close sequences are in the old bin?
+                    if (seqNumber == bins[binNumber][i]) {}
+                    else if (!matrix->isClose(seqNumber, bins[binNumber][i])) {  fCount++;   }
+                    else { cCount++;  }
+                }
+                //move out of old bin
+                currentBinFN+=cCount; currentBinTN+=fCount; currentBinFP-=fCount; currentBinTP-=cCount;
+                
+                //metric in current bin
+                bestMetric = calcScoreCurrentBin(tp, tn, fp, fn); bestBin = binNumber; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
+                
+                //if not already singleton, then calc value if singleton was created
+                if (!((bins[binNumber].size()) == 1)) {
                     //make a singleton
-                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, tp, tn, fp, fn);
-                    vector<long long> temp;
-                    temp.push_back(-1); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
+                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, currentBinTP, currentBinTN, currentBinFP, currentBinFN);
+                    bestBin = -1; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
                     bestMetric = singleMetric;
-                    bestMetricsTPValues.push_back(temp);
                 }
                 
-                
                 set<int> binsToTry; //find bins to search eliminating dups
-                for (int j = 0; j < (matrix->getCloseSeqs(seqNumber)).size(); j++) { binsToTry.insert(seqBin[matrix->getCloseSeqs(seqNumber)[j]]); }
+                for (int j = 0; j < (matrix->getCloseSeqs(seqNumber)).size(); j++) {  binsToTry.insert(seqBin[matrix->getCloseSeqs(seqNumber)[j]]); }
                 
                 //merge into each "close" otu
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
-                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, tp, tn, fp, fn);
-                    vector<long long> temp;
-                    temp.push_back(*it); temp.push_back(tp); temp.push_back(tn); temp.push_back(fp); temp.push_back(fn);
-                    if (newMetric > bestMetric) { //new best
-                        bestMetric = newMetric;
-                        bestMetricsTPValues.clear();
-                        bestMetricsTPValues.push_back(temp);
-                    }else if (newMetric == bestMetric) { //tie
-                        bestMetricsTPValues.push_back(temp);
-                    }
+                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, currentBinTP, currentBinTN, currentBinFP, currentBinFN);
+                    
+                    //new best
+                    if (newMetric > bestMetric) { bestMetric = newMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn; }
                 }
-                
-                //choose "best" otu - which is highest value or last item in map. - shuffle for ties
-                random_shuffle(bestMetricsTPValues.begin(), bestMetricsTPValues.end());
-                int bestBin = bestMetricsTPValues[0][0];
                 
                 bool usedInsert = false;
                 if (bestBin == -1) {  bestBin = insertLocation;  usedInsert = true;  }
                 
                 if (bestBin != binNumber) {
-                    truePositives = bestMetricsTPValues[0][1];
-                    trueNegatives = bestMetricsTPValues[0][2];
-                    falsePositives = bestMetricsTPValues[0][3];
-                    falseNegatives = bestMetricsTPValues[0][4];
+                    truePositives = bestTp; trueNegatives = bestTn; falsePositives = bestFp; falseNegatives = bestFn;
             
                     //move seq from i to j
                     bins[bestBin].push_back(seqNumber); //add seq to bestbin
@@ -252,47 +206,6 @@ bool OptiCluster::update(double& listMetric) {
 /***********************************************************************/
 double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin,  long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
-        if (bin == newBin) {
-            if (metric == "mcc") {
-                return calcMCC(tp, tn, fp, fn);
-            }else if (metric == "sens") {
-                return calcSens(tp, tn, fp, fn);
-            }else if (metric == "spec") {
-                return calcSpec(tp, tn, fp, fn);
-            }else if (metric == "tptn") {
-                return calcTPTN(tp, tn, fp, fn);
-            }else if (metric == "tp") {
-                return calcTP(tp, tn, fp, fn);
-            }else if (metric == "tn") {
-                return calcTN(tp, tn, fp, fn);
-            }else if (metric == "fp") {
-                return calcFP(tp, tn, fp, fn);
-            }else if (metric == "fn") {
-                return calcFN(tp, tn, fp, fn);
-            }else if (metric == "f1score") {
-                return calcF1Score(tp, tn, fp, fn);
-            }else if (metric == "accuracy") {
-                return calcAccuracy(tp, tn, fp, fn);
-            }else if (metric == "ppv") {
-                return calcPPV(tp, tn, fp, fn);
-            }else if (metric == "npv") {
-                return calcNPV(tp, tn, fp, fn);
-            }else if (metric == "fdr") {
-                return calcFDR(tp, tn, fp, fn);
-            }else if (metric == "fpfn") {
-                return calcFPFN(tp, tn, fp, fn);
-            }
-        }
- 
-        long long cCount = 0;  long long fCount = 0;
-        for (int i = 0; i < bins[bin].size(); i++) { //how many close sequences are in the old bin?
-            if (seq == bins[bin][i]) {}
-            else if (!matrix->isClose(seq, bins[bin][i])) {  fCount++;   }
-            else { cCount++;  }
-        }
-
-        //move out of old bin
-        fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
         
         //making a singleton bin. Close but we are forcing apart.
         if (newBin == -1) {
@@ -347,13 +260,53 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin,  long long&
     }
 }
 /***********************************************************************/
+double OptiCluster::calcScoreCurrentBin( long long tp,  long long tn,  long long fp,  long long fn) {
+    try {
+        
+        if (metric == "mcc") {
+            return calcMCC(tp, tn, fp, fn);
+        }else if (metric == "sens") {
+            return calcSens(tp, tn, fp, fn);
+        }else if (metric == "spec") {
+            return calcSpec(tp, tn, fp, fn);
+        }else if (metric == "tptn") {
+            return calcTPTN(tp, tn, fp, fn);
+        }else if (metric == "tp") {
+            return calcTP(tp, tn, fp, fn);
+        }else if (metric == "tn") {
+            return calcTN(tp, tn, fp, fn);
+        }else if (metric == "fp") {
+            return calcFP(tp, tn, fp, fn);
+        }else if (metric == "fn") {
+            return calcFN(tp, tn, fp, fn);
+        }else if (metric == "f1score") {
+            return calcF1Score(tp, tn, fp, fn);
+        }else if (metric == "accuracy") {
+            return calcAccuracy(tp, tn, fp, fn);
+        }else if (metric == "ppv") {
+            return calcPPV(tp, tn, fp, fn);
+        }else if (metric == "npv") {
+            return calcNPV(tp, tn, fp, fn);
+        }else if (metric == "fdr") {
+            return calcFDR(tp, tn, fp, fn);
+        }else if (metric == "fpfn") {
+            return calcFPFN(tp, tn, fp, fn);
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "calcScoreCurrentBin");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
 double OptiCluster::calcMCC( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
         
-         long long p = tp + fn;
-         long long n = fp + tn;
-         long long pPrime = tp + fp;
-         long long nPrime = tn + fn;
+        long long p = tp + fn;
+        long long n = fp + tn;
+        long long pPrime = tp + fp;
+        long long nPrime = tn + fn;
         
         double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / (double) sqrt(p * n * pPrime * nPrime);
         if(p == 0 || n == 0 || pPrime == 0 || nPrime == 0){	matthewsCorrCoef = 0;	}

@@ -59,6 +59,7 @@ private:
     double calcPPV( long long,  long long,  long long,  long long);
     double calcNPV( long long,  long long,  long long,  long long);
     double calcFDR( long long,  long long,  long long,  long long);
+    double calcScoreCurrentBin( long long tp,  long long tn,  long long fp,  long long fn);
     double moveAdjustTFValues(int bin, int seq, int newBin,  long long&,  long long&,  long long&,  long long&);
 };
 
