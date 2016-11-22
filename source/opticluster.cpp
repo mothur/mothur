@@ -124,17 +124,12 @@ bool OptiCluster::update(double& listMetric) {
                 //this calculation is used to save time in the move and adjust function.
                 //we don't need to calculate the cost of moving out of our current bin each time we
                 //test moving into a new bin. Only calc this once per iteration.
-                long long currentBinTP, currentBinTN, currentBinFP, currentBinFN;
-                currentBinFN = falseNegatives; currentBinFP = falsePositives; currentBinTN = trueNegatives; currentBinTP = truePositives;
-                
                 long long cCount = 0;  long long fCount = 0;
                 for (int i = 0; i < bins[binNumber].size(); i++) { //how many close sequences are in the old bin?
                     if (seqNumber == bins[binNumber][i]) {}
                     else if (!matrix->isClose(seqNumber, bins[binNumber][i])) {  fCount++;   }
                     else { cCount++;  }
                 }
-                //move out of old bin
-                currentBinFN+=cCount; currentBinTN+=fCount; currentBinFP-=fCount; currentBinTP-=cCount;
                 
                 //metric in current bin
                 bestMetric = calcScoreCurrentBin(tp, tn, fp, fn); bestBin = binNumber; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
@@ -142,9 +137,13 @@ bool OptiCluster::update(double& listMetric) {
                 //if not already singleton, then calc value if singleton was created
                 if (!((bins[binNumber].size()) == 1)) {
                     //make a singleton
-                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, currentBinTP, currentBinTN, currentBinFP, currentBinFN);
-                    bestBin = -1; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
-                    bestMetric = singleMetric;
+                    //move out of old bin
+                    fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
+                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, tp, tn, fp, fn);
+                    if (singleMetric > bestMetric) {
+                        bestBin = -1; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
+                        bestMetric = singleMetric;
+                    }
                 }
                 
                 set<int> binsToTry; //find bins to search eliminating dups
@@ -153,7 +152,8 @@ bool OptiCluster::update(double& listMetric) {
                 //merge into each "close" otu
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
-                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, currentBinTP, currentBinTN, currentBinFP, currentBinFN);
+                    fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
+                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, tp, tn, fp, fn);
                     
                     //new best
                     if (newMetric > bestMetric) { bestMetric = newMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn; }
