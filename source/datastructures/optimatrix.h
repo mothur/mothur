@@ -25,8 +25,8 @@ public:
     OptiMatrix(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
     ~OptiMatrix(){ }
     
-    vector<int> getCloseSeqs(int i) { return closeness[i]; }
-    int get(int i, int j) { return closeness[i][j]; }
+    set<int> getCloseSeqs(int i) { return closeness[i]; }
+    //int get(int i, int j) { return closeness[i][j]; }
     bool isClose(int, int);
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
@@ -39,7 +39,7 @@ public:
     
 private:
     
-    vector< vector<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
+    vector< set<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector<string> singletons;
     vector<string> nameMap;
     

@@ -146,8 +146,9 @@ bool OptiCluster::update(double& listMetric) {
                     }
                 }
                 
-                set<int> binsToTry; //find bins to search eliminating dups
-                for (int j = 0; j < (matrix->getCloseSeqs(seqNumber)).size(); j++) {  binsToTry.insert(seqBin[matrix->getCloseSeqs(seqNumber)[j]]); }
+                set<int> binsToTry;
+                set<int> closeSeqs = matrix->getCloseSeqs(seqNumber);
+                for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) {  binsToTry.insert(seqBin[*itClose]); }
                 
                 //merge into each "close" otu
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {

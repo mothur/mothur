@@ -856,7 +856,11 @@ int ClusterCommand::runOptiCluster(){
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
+        int rstart = time(NULL);
+        
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+        
+        m->mothurOut("It took " + toString(time(NULL) - rstart) + " seconds to read and process matrix"); m->mothurOutEndLine();
         
         OptiCluster cluster(&matrix, metric, 0);
         tag = cluster.getTag();
