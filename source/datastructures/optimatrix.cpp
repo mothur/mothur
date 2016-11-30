@@ -231,13 +231,11 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
-                in >> name; line = m->getline(in); m->gobble(in);
-                vector<float> dists; m->splitWhiteSpace(line, dists, i);
+                in >> name;
                 
                 for(int j=0;j<i;j++){
                     
-                    //in >> distance;
-                    distance = dists[j];
+                    in >> distance;
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
