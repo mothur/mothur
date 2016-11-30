@@ -125,6 +125,7 @@ class MothurOut {
         void zapGremlins(istringstream&);
         vector<string> splitWhiteSpace(string& rest, char[], int);
         vector<string> splitWhiteSpace(string);
+        int splitWhiteSpace(string, vector<float>&, int);
         set<string> readAccnos(string);
         int readAccnos(string, vector<string>&);
         int readAccnos(string, vector<string>&, string);

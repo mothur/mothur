@@ -308,10 +308,6 @@ ClusterCommand::ClusterCommand(string option)  {
                 m->mothurOut("[WARNING]: You can only use the processors option when using the agc or dgc clustering methods. Using 1 processor.\n.");
             }
             
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-            m->setProcessors(temp);
-            m->mothurConvert(temp, processors);
-            
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
             if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
@@ -856,11 +852,11 @@ int ClusterCommand::runOptiCluster(){
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
-        int rstart = time(NULL);
+        //int rstart = time(NULL);
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
         
-        m->mothurOut("It took " + toString(time(NULL) - rstart) + " seconds to read and process matrix"); m->mothurOutEndLine();
+        //m->mothurOut("It took " + toString(time(NULL) - rstart) + " seconds to read and process matrix"); m->mothurOutEndLine();
         
         OptiCluster cluster(&matrix, metric, 0);
         tag = cluster.getTag();

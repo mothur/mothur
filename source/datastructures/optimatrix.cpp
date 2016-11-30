@@ -139,105 +139,147 @@ int OptiMatrix::readPhylip(){
         float distance;
         int square, nseqs;
         string name;
-        int count = 0;
 
         ifstream fileHandle;
         string numTest;
         
         m->openInputFile(distFile, fileHandle);
         fileHandle >> numTest >> name;
+        nameMap.push_back(name);
         
         if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
-        closeness.resize(nseqs);
-        
-        //map shorten name to real name - space saver
-        nameMap.push_back(name);
-        
         //square test
         char d;
         while((d=fileHandle.get()) != EOF){
-            
-            if(isalnum(d)){
-                square = 1;
-                fileHandle.putback(d);
-                for(int i=0;i<nseqs;i++){
-                    fileHandle >> distance;
-                }
-                break;
-            }
-            if(d == '\n'){
-                square = 0;
-                break;
-            }
+            if(isalnum(d)){ square = 1; fileHandle.putback(d); for(int i=0;i<nseqs;i++){ fileHandle >> distance;  } break; }
+            if(d == '\n'){ square = 0; break; }
         }
         
-        Progress* reading;
-       
+        map<int, int> singletonIndexSwap;
+        vector<bool> singleton; singleton.resize(nseqs, true);
+        ///////////////////// Read to eliminate singletons ///////////////////////
         if(square == 0){
             
-            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
-            
-            int index = 0;
-            
             for(int i=1;i<nseqs;i++){
-                if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                if (m->control_pressed) {  fileHandle.close();  return 0; }
                 
-                fileHandle >> name;
-                nameMap.push_back(name);
+                fileHandle >> name; nameMap.push_back(name);
                 
                 for(int j=0;j<i;j++){
                     
-                    if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
-                    
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
-                    else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff){
-                        closeness[j].insert(i);
-                        closeness[i].insert(j);
+                        singleton[i] = false;
+                        singleton[j] = false;
+                        singletonIndexSwap[i] = i;
+                        singletonIndexSwap[j] = j;
+                        
                     }
-                    index++;
-                    reading->update(index);
                 }
             }
-        }
-        else{
-            
-            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-            
-            int index = nseqs;
-            
+        }else{
             for(int i=1;i<nseqs;i++){
-                fileHandle >> name;
+                if (m->control_pressed) {  fileHandle.close();   return 0; }
                 
-                nameMap.push_back(name);
-                
-                //list->push_back(toString(i));
+                fileHandle >> name; nameMap.push_back(name);
                 
                 for(int j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
-                    if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
-                    
-                    if (distance == -1) { distance = 1000000; }
-                    else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff && j < i){
-                        closeness[j].insert(i);
-                        closeness[i].insert(j);
+                        singleton[i] = false;
+                        singleton[j] = false;
+                        singletonIndexSwap[i] = i;
+                        singletonIndexSwap[j] = j;
                     }
-                    index++;
-                    reading->update(index);
                 }
             }
         }
+        fileHandle.close();
+        //////////////////////////////////////////////////////////////////////////
         
-        map<string, string> names;
+        int nonSingletonCount = 0;
+        for (int i = 0; i < singleton.size(); i++) {
+            if (!singleton[i]) { //if you are a singleton
+                singletonIndexSwap[i] = nonSingletonCount;
+                nonSingletonCount++;
+            }else { singletons.push_back(nameMap[i]); }
+        }
+        singleton.clear();
+
+        closeness.resize(nonSingletonCount);
+        
+        Progress* reading;
+        ifstream in;
+        
+        m->openInputFile(distFile, in);
+        in >> nseqs >> name;
+        
+        string line = "";
+        if(square == 0){
+            
+            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
+            int index = 0;
+            
+            for(int i=1;i<nseqs;i++){
+                if (m->control_pressed) {  in.close();  delete reading; return 0; }
+                
+                in >> name; line = m->getline(in); m->gobble(in);
+                vector<float> dists; m->splitWhiteSpace(line, dists, i);
+                
+                for(int j=0;j<i;j++){
+                    
+                    //in >> distance;
+                    distance = dists[j];
+                    
+                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    
+                    if(distance < cutoff){
+                        int newB = singletonIndexSwap[j];
+                        int newA = singletonIndexSwap[i];
+                        closeness[newA].insert(newB);
+                        closeness[newB].insert(newA);
+                    }
+                    index++; reading->update(index);
+                }
+            }
+        }else{
+            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+            int index = nseqs;
+            
+            for(int i=1;i<nseqs;i++){
+                if (m->control_pressed) {  in.close();  delete reading; return 0; }
+                
+                in >> name;
+                
+                for(int j=0;j<nseqs;j++){
+                    in >> distance;
+
+                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    
+                    if(distance < cutoff && j < i){
+                        int newB = singletonIndexSwap[j];
+                        int newA = singletonIndexSwap[i];
+                        closeness[newA].insert(newB);
+                        closeness[newB].insert(newA);
+                    }
+                    index++; reading->update(index);
+                }
+            }
+        }
+        in.close();
+        reading->finish();
+        delete reading;
+
         if (namefile != "") {
+            map<string, string> names;
             m->readNames(namefile, names);
             //update nameMap
             for (int i = 0; i < nameMap.size(); i++) {
@@ -247,48 +289,11 @@ int OptiMatrix::readPhylip(){
             names.clear();
         }
         
-        map<int, int> singletonIndexSwap;
-        for (int i = 0; i < closeness.size(); i++) { singletonIndexSwap[i] = i; }
         for (int i = 0; i < closeness.size(); i++) {
-            if (closeness[i].size() == 0) {
-                singletons.push_back(nameMap[i]);
-                
-                //update indexSwap
-                for (map<int, int>::iterator it = singletonIndexSwap.begin(); it != singletonIndexSwap.end(); it++) { if (it->first > i) { it->second++; } }
-            }
-            
+            string newName = nameMap[i];
+            int newIndex = singletonIndexSwap[i];
+            nameMap[newIndex] = newName;
         }
-        
-        //update matrix indexes
-        for (int i = 0; i < closeness.size(); i++) {
-            set<int> newIndexes;
-            for (set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) { newIndexes.insert(singletonIndexSwap[*it]); }
-            closeness[i] = newIndexes;
-        }
-        
-        for (int i = 0; i < closeness.size(); i++) {
-            //if you are a singleton we don't include you in the matrix. You are added to the list later
-            if (closeness[i].size() == 0) {
-                
-                //remove row from
-                closeness.erase (closeness.begin()+i);
-            }else {
-                //update namemap
-                string newName = nameMap[i];
-                int newIndex = singletonIndexSwap[i];
-                nameMap[newIndex] = newName;
-            }
-        }
-        
-        return 1;
-        
-        if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
-        
-        reading->finish();
-        delete reading;
-        
-        //list->setLabel("0");
-        fileHandle.close();
         
         return 0;
         
@@ -347,10 +352,9 @@ int OptiMatrix::readColumn(){
                 singletonIndexSwap[indexA] = indexA;
                 singletonIndexSwap[indexB] = indexB;
             }
-            
-            
         }
         fileHandle.close();
+        //////////////////////////////////////////////////////////////////////////
         
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
@@ -359,7 +363,8 @@ int OptiMatrix::readColumn(){
                 nonSingletonCount++;
             }else { singletons.push_back(nameMap[i]); }
         }
-        //////////////////////////////////////////////////////////////////////////
+        singleton.clear();
+        
         ifstream in;
         m->openInputFile(distFile, in);
         
@@ -410,9 +415,6 @@ int OptiMatrix::readColumn(){
         
         
         for (int i = 0; i < closeness.size(); i++) {
-            
-            if (m->control_pressed) { break; }
-    
             string newName = nameMap[i];
             int newIndex = singletonIndexSwap[i];
             nameMap[newIndex] = newName;
