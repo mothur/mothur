@@ -97,7 +97,6 @@ string OptiMatrix::getName(int index) {
     }
 }
 /***********************************************************************/
-//assumes sorted optimatrix
 bool OptiMatrix::isClose(int i, int toFind){
     try {
         bool found = false;
@@ -207,7 +206,7 @@ int OptiMatrix::readPhylip(){
         
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
-            if (!singleton[i]) { //if you are a singleton
+            if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
             }else { singletons.push_back(nameMap[i]); }
@@ -222,6 +221,8 @@ int OptiMatrix::readPhylip(){
         m->openInputFile(distFile, in);
         in >> nseqs >> name;
         
+        int fivepercent = (int)(0.05 * nseqs);
+        
         string line = "";
         if(square == 0){
             
@@ -229,6 +230,7 @@ int OptiMatrix::readPhylip(){
             int index = 0;
             
             for(int i=1;i<nseqs;i++){
+                
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
                 in >> name;
@@ -247,10 +249,19 @@ int OptiMatrix::readPhylip(){
                     }
                     index++; reading->update(index);
                 }
+                
+                if (m->debug) {
+                    if((i % fivepercent) == 0){
+                        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+                        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
+                    }
+                }
             }
         }else{
             reading = new Progress("Reading matrix:     ", nseqs * nseqs);
             int index = nseqs;
+            
+            for(int i=0;i<nseqs;i++){ in >> distance;  } m->gobble(in);
             
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
@@ -270,11 +281,21 @@ int OptiMatrix::readPhylip(){
                     }
                     index++; reading->update(index);
                 }
+                
+                if (m->debug) {
+                    if((i % fivepercent) == 0){
+                        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+                        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
+                    }
+                }
             }
         }
         in.close();
         reading->finish();
         delete reading;
+
+        if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+            m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
 
         if (namefile != "") {
             map<string, string> names;
@@ -417,7 +438,7 @@ int OptiMatrix::readColumn(){
             int newIndex = singletonIndexSwap[i];
             nameMap[newIndex] = newName;
         }
- 
+        
         return 1;
         
     }
