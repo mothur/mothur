@@ -1383,7 +1383,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         int currentSeqsDiffs = 0;
         
         string seq = read.bases;
-        
+        cout << header.clipQualLeft << endl;
         if (trim) {
             if(header.clipQualRight < header.clipQualLeft){
                 if (header.clipQualRight == 0) { //don't trim right

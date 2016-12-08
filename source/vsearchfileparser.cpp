@@ -62,7 +62,7 @@ string VsearchFileParser::getVsearchFile() {
         if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->control_pressed = true;  }
         
         //Run unique.seqs on the data if a name or count file is not given
-        if ((namefile == "") && (countfile == ""))  {  countfile = getNamesFile(fastafile);     }
+        if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                }
         else if (namefile != "")                    {  counts = m->readNames(namefile);        }
         
         if (countfile != "") { CountTable countTable; countTable.readTable(countfile, false, false);  counts = countTable.getNameMap(); }
@@ -124,7 +124,6 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
 
 string VsearchFileParser::getNamesFile(string& inputFile){
     try {
-        string nameFile = "";
         
         m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
         
@@ -146,7 +145,7 @@ string VsearchFileParser::getNamesFile(string& inputFile){
         countfile = filenames["count"][0];
         fastafile = filenames["fasta"][0];
         
-        return nameFile;
+        return countfile;
     }
     catch(exception& e) {
         m->errorOut(e, "VsearchFileParser", "getNamesFile");
