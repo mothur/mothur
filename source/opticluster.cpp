@@ -118,7 +118,7 @@ bool OptiCluster::update(double& listMetric) {
                 
                 long long tn, tp, fp, fn;
                 double bestMetric = -1;
-                int bestBin, bestTp, bestTn, bestFn, bestFp;
+                long long bestBin, bestTp, bestTn, bestFn, bestFp;
                 tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                 
                 //this calculation is used to save time in the move and adjust function.
