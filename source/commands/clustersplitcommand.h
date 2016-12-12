@@ -51,11 +51,12 @@ private:
 	vector<string> outputNames;
 	
 	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric, initialize;
-	double cutoff, splitcutoff, stableMetric, numSingletons;
+	double cutoff, splitcutoff, stableMetric;
 	int precision, length, processors, taxLevelCutoff, maxIters;
 	bool print_start, abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
+    long long numSingletons;
 	
 	void printData(ListVector*);
 	vector<string> createProcesses(vector< map<string, string> >, set<string>&);

@@ -23,7 +23,7 @@ class OptiCluster : public Cluster {
 #endif
     
 public:
-    OptiCluster(OptiMatrix* mt, string met, double ns) : Cluster() {
+    OptiCluster(OptiMatrix* mt, string met, long long ns) : Cluster() {
         m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
     }
     ~OptiCluster() {}

@@ -215,12 +215,21 @@ int OptiMatrix::readPhylip(){
 
         closeness.resize(nonSingletonCount);
         
+        map<string, string> names;
+        if (namefile != "") {  m->readNames(namefile, names); }
+        
         Progress* reading;
         ifstream in;
         
         m->openInputFile(distFile, in);
         in >> nseqs >> name;
         
+        int newA = singletonIndexSwap[0];
+        if (namefile != "") {
+            name = names[name];  //redundant names
+        }
+        nameMap[newA] = name;
+
         int fivepercent = (int)(0.05 * nseqs);
         
         string line = "";
@@ -246,6 +255,11 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
+                        
+                        if (namefile != "") {
+                            name = names[name];  //redundant names
+                        }
+                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
@@ -278,6 +292,11 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
+                        
+                        if (namefile != "") {
+                            name = names[name];  //redundant names
+                        }
+                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
@@ -297,23 +316,6 @@ int OptiMatrix::readPhylip(){
         if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
             m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
 
-        if (namefile != "") {
-            map<string, string> names;
-            m->readNames(namefile, names);
-            //update nameMap
-            for (int i = 0; i < nameMap.size(); i++) {
-                map<string, string>::iterator it = names.find(nameMap[i]);
-                nameMap[i] = it->second;  //we know its there because we read it above
-            }
-            names.clear();
-        }
-        
-        for (int i = 0; i < closeness.size(); i++) {
-            string newName = nameMap[i];
-            int newIndex = singletonIndexSwap[i];
-            nameMap[newIndex] = newName;
-        }
-        
         return 0;
         
     }
@@ -389,6 +391,9 @@ int OptiMatrix::readColumn(){
         
         closeness.resize(nonSingletonCount);
         
+        map<string, string> names;
+        if (namefile != "") {  m->readNames(namefile, names); }
+        
         while(in){  //let's assume it's a triangular matrix...
             
             in >> firstName; m->gobble(in);
@@ -416,28 +421,18 @@ int OptiMatrix::readColumn(){
                 int newA = singletonIndexSwap[indexA];
                 closeness[newA].insert(newB);
                 closeness[newB].insert(newA);
+                
+                if (namefile != "") {
+                    firstName = names[firstName];  //redundant names
+                    secondName = names[secondName]; //redundant names
+                }
+                
+                nameMap[newA] = firstName;
+                nameMap[newB] = secondName;
             }
         }
         in.close();
         nameAssignment.clear();
-        
-        if (namefile != "") {
-            map<string, string> names;
-            m->readNames(namefile, names);
-            //update nameMap
-            for (int i = 0; i < nameMap.size(); i++) {
-                map<string, string>::iterator it = names.find(nameMap[i]);
-                nameMap[i] = it->second;  //we know its there because we read it above
-            }
-            names.clear();
-        }
-        
-        
-        for (int i = 0; i < closeness.size(); i++) {
-            string newName = nameMap[i];
-            int newIndex = singletonIndexSwap[i];
-            nameMap[newIndex] = newName;
-        }
         
         return 1;
         

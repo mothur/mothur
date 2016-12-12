@@ -654,16 +654,18 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             if (countfile != "") { m->getline(in); m->gobble(in); }
             
 			while (!in.eof()) {
-				in >> firstCol >> secondCol; m->getline(in); m->gobble(in);
+				in >> firstCol >> secondCol;
+                m->getline(in);
 				if (countfile == "") { listSingle->push_back(secondCol); }
                 else { listSingle->push_back(firstCol); }
+                m->gobble(in);
 			}
             
 			in.close();
 			m->mothurRemove(singleton);
             
 			numSingleBins = listSingle->getNumBins();
-		}else{  listSingle = NULL; numSingleBins = 0;  }
+        }else{  listSingle = NULL; numSingleBins = 0;  }
 		
         //go through users set and make them floats so we can sort them
         double tcutoff = cutoff * 1000; tcutoff = ceil(tcutoff);

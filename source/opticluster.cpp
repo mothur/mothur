@@ -171,10 +171,7 @@ bool OptiCluster::update(double& listMetric) {
                     bins[binNumber].erase(remove(bins[binNumber].begin(), bins[binNumber].end(), seqNumber), bins[binNumber].end()); //remove from old bin i
                 }
                 
-                if (usedInsert) {
-                    if (bins[binNumber].size() == 0) { insertLocation = binNumber;  } //set flag if old bin is empty.
-                    insertLocation = findInsert();
-                }
+                if (usedInsert) { insertLocation = findInsert(); }
                 
                 //update seqBins
                 seqBin[seqNumber] = bestBin; //set new OTU location
