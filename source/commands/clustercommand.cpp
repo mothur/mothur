@@ -402,14 +402,16 @@ int ClusterCommand::runVsearchCluster(){
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
             //check to see if uchime is in the path??
             
-            string uLocation = m->findProgramPath("vsearch");
+            string uLocation = "";m->findProgramPath("vsearch");
             
             
             ifstream in2;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            uLocation = m->findProgramPath("vsearch");
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+            uLocation = m->findProgramPath("vsearch.exe");
+            ableToOpen = m->openInputFile((uLocation), in2, "no error"); in2.close();
 #endif
             
             if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }
