@@ -268,10 +268,6 @@ ClusterCommand::ClusterCommand(string option)  {
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
             }
-//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-//#else
-//            if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
-//#endif
             
             //bool cutoffSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);
@@ -401,17 +397,15 @@ int ClusterCommand::runVsearchCluster(){
         if(ableToOpen == 1) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
             //check to see if uchime is in the path??
-            
-            string uLocation = "";m->findProgramPath("vsearch");
-            
-            
+
             ifstream in2;
+            string uLocation = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             uLocation = m->findProgramPath("vsearch");
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
             uLocation = m->findProgramPath("vsearch.exe");
-            ableToOpen = m->openInputFile((uLocation), in2, "no error"); in2.close();
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
             if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }

@@ -355,10 +355,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
                 if (classic) { m->mothurOut("[ERROR]: You cannot use cluster.classic with the agc or dgc clustering methods, aborting\n."); abort = true; }
             }
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            #else
-            if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
-            #endif
             
             cutoffNotSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
@@ -1705,7 +1701,7 @@ bool ClusterSplitCommand::findVsearch(){
             delete newCommand;
         }
 #else
-        vsearchCommand = path + "vsearch.exe";
+        vsearchCommand = path + "\\vsearch.exe";
 #endif
         
         //test to make sure uchime exists
@@ -1716,14 +1712,14 @@ bool ClusterSplitCommand::findVsearch(){
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
             //check to see if uchime is in the path??
             
-            string uLocation = m->findProgramPath("vsearch");
-            
-            
             ifstream in2;
+            string uLocation = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            uLocation = m->findProgramPath("vsearch");
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+            uLocation = m->findProgramPath("vsearch.exe");
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
             if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
