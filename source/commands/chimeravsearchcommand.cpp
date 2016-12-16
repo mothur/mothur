@@ -519,7 +519,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
             if (m->debug) {
-                m->mothurOut("[DEBUG]: Uchime location using \"which vsearch\" = ");
+                m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
                 Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
                 newCommand->execute();
                 delete newCommand;
@@ -529,10 +529,9 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 delete newCommand;
             }
 #else
-            m->mothurOut("[ERROR]: The chimera.vsearch command is not available for windows.  The vsearch program is not supported on the Windows platform, aborting."); m->mothurOutEndLine(); abort=true;
+            vsearchCommand = path + "\\vsearch.exe";
 #endif
             
-    #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             //test to make sure uchime exists
             ifstream in;
             vsearchCommand = m->getFullPathName(vsearchCommand);
@@ -541,20 +540,23 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 
-                string vLocation = m->findProgramPath("vsearch");
-                
-                
                 ifstream in2;
-                ableToOpen = m->openInputFile(vLocation, in2, "no error"); in2.close();
-
-
+                string uLocation = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                uLocation = m->findProgramPath("vsearch");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#else
+                uLocation = m->findProgramPath("vsearch.exe");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#endif
                 
-                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + vLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
-                else {  m->mothurOut("Found vsearch in your path, using " + vLocation + "\n");vsearchLocation = vLocation; }
+                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+                else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
             }else {  vsearchLocation = vsearchCommand; }
             
             vsearchLocation = m->getFullPathName(vsearchLocation);
-    #endif
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
         }
     }
     catch(exception& e) {
