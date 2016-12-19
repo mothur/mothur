@@ -1383,6 +1383,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         int currentSeqsDiffs = 0;
         
         string seq = read.bases;
+        for (int i = 0; i < seq.length(); i++) { seq[i] = toupper(seq[i]); }
         
         if (trim) {
             if(header.clipQualRight < header.clipQualLeft){
@@ -1397,16 +1398,6 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
             }
             else {
                 seq = seq.substr(header.clipQualLeft-1);
-            }
-        }else{
-            //if you wanted the sfftxt then you already converted the bases to the right case
-            if (!sfftxt) {
-                int endValue = header.clipQualRight;
-                //make the bases you want to clip lowercase and the bases you want to keep upper case
-                if(endValue == 0){	endValue = seq.length();	}
-                for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
-                for (int i = (header.clipQualLeft-1); i < (endValue-1); i++)  {   seq[i] = toupper(seq[i]);  }
-                for (int i = (endValue-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
             }
         }
         
