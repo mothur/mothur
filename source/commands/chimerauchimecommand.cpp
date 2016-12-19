@@ -575,7 +575,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 delete newCommand;
             }
 #else
-			uchimeCommand = path + "uchime.exe";
+			uchimeCommand = path + "\\uchime.exe";
 #endif
         
 			//test to make sure uchime exists
@@ -586,14 +586,15 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 
-                string uLocation = m->findProgramPath("uchime");
-                
+                string uLocation = ""; 
                 
                 ifstream in2;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                uLocation = m->findProgramPath("uchime");
                 ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-                ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+                uLocation = m->findProgramPath("uchime.exe");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
 
                 if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; } 
