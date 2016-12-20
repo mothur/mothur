@@ -257,7 +257,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
-        findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + " > " + tempFile;
+        findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
         if (m->debug) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
 #else
