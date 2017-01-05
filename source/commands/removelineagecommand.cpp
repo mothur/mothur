@@ -1070,9 +1070,9 @@ int RemoveLineageCommand::readTax(){
 
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
-			in >> name;				//read from first column
-			in >> tax;			//read from second column
-			
+            in >> name; m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
+            
 			bool remove = false;
 			
             string noQuotesTax = m->removeQuotes(tax);
@@ -1176,7 +1176,6 @@ int RemoveLineageCommand::readTax(){
 			}
 			
 			if (!remove) {  wroteSomething = true; out << name << '\t' << tax << endl; }
-			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1237,7 +1236,7 @@ int RemoveLineageCommand::readConsTax(){
             
 			in >> otuLabel;	 		m->gobble(in);
             in >> numReps;          m->gobble(in);
-			in >> tax;              m->gobble(in);
+			tax = m->getline(in);   m->gobble(in);
 			
             bool remove = false;
 			

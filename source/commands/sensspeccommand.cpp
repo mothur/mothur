@@ -302,7 +302,8 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 			if(label != "unique"){
 				origCutoff = label;
 				convert(label, cutoff);
-                cutoff = m->ceilDist(cutoff, precision);
+        cutoff = m->ceilDist(cutoff, precision);
+        origCutoff = toString(m->ceilDist(cutoff, precision));
 			}
 			else{
 				origCutoff = "unique";
@@ -452,8 +453,9 @@ int SensSpecCommand::processListFile(){
 
 		string origCutoff = "";
 		bool getCutoff = 0;
-		if(cutoff == -1.00)	{	getCutoff = 1;                                              }
-		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));      }
+
+		if(cutoff == -1.00)	{	getCutoff = 1;                                          }
+		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));	}
 
 		map<string, int> seqMap;
 

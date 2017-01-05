@@ -2192,14 +2192,15 @@ int ScreenSeqsCommand::screenTaxonomy(map<string, string> badSeqNames){
 		while(!input.eof()){
 			if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
 			
-			input >> seqName; m->gobble(input); input >> tax;
+            input >> seqName; m->gobble(input);
+            tax = m->getline(input); m->gobble(input);
+            
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){ badSeqNames.erase(it); }
 			else{
 				goodTaxOut << seqName << '\t' << tax << endl;
 			}
-			m->gobble(input);
 		}
 		
 		if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }

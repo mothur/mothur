@@ -17,6 +17,12 @@
 
 
 class TrimOligos {
+    
+#ifdef UNIT_TEST
+    friend class TestTrimOligos;
+    TrimOligos() {};
+    //add set variables function when completeing unit tests for this class
+#endif
 	
 	public:
         TrimOligos(int,int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers

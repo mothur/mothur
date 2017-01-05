@@ -161,7 +161,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { readNamesFile(); m->setNameFile(namefile); }
+			else { m->readNames(namefile, namemap); m->setNameFile(namefile); }
             
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not open") { abort = true; countfile = ""; }
@@ -384,32 +384,4 @@ int PhylotypeCommand::execute(){
 		exit(1);
 	}
 }
-/*****************************************************************/
-int PhylotypeCommand::readNamesFile() {
-	try {
-				
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			itNames = namemap.find(first);
-			if (itNames == namemap.end()) {  
-				namemap[first] = second; 
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); namemap.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "readNamesFile");
-		exit(1);
-	}
-}
-
 /**********************************************************************************************************************/

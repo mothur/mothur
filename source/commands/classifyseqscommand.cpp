@@ -721,7 +721,8 @@ int ClassifySeqsCommand::execute(){
             while (!inTax.eof()) {
                 if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                 
-                inTax >> name >> taxon; m->gobble(inTax);
+                inTax >> name; m->gobble(inTax);
+                taxon = m->getline(inTax); m->gobble(inTax);
                 
                 string newTax = m->addUnclassifieds(taxon, maxLevel, probs);
                 
@@ -747,7 +748,7 @@ int ClassifySeqsCommand::execute(){
             outTax.close();
             
             m->mothurRemove(newTaxonomyFile);
-            rename(unclass.c_str(), newTaxonomyFile.c_str());
+            m->renameFile(unclass, newTaxonomyFile);
             
             if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
             

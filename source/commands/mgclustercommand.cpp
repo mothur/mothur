@@ -424,7 +424,6 @@ int MGClusterCommand::execute(){
 		
 		if (saveCutoff != cutoff) { 
 			saveCutoff = m->ceilDist(saveCutoff, precision);	
-						
 			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
 		}
 		

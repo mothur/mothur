@@ -1865,10 +1865,10 @@ bool ClusterSplitCommand::findVsearch(){
         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
         //look for uchime exe
-        string path = m->argv;
-        string tempPath = path;
-        for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-        path = path.substr(0, (tempPath.find_last_of('m')));
+        string path = m->mothurProgramPath;
+        //string tempPath = path;
+        //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+        //path = path.substr(0, (tempPath.find_last_of('m')));
         
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

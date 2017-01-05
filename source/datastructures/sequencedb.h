@@ -41,8 +41,6 @@ public:
 		
 private:
 	vector<Sequence> data;
-	string readName(ifstream&);
-	string readSequence(ifstream&);
 	MothurOut* m;
 	bool samelength;
 	int length;

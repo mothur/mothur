@@ -62,6 +62,18 @@ public:
 		}
 	
 	}
+    
+    void doVerticalAllBases() {
+        
+        for(int i=0;i<alignmentLength;i++){
+            if(gap[i] == numSeqs)       {	filter[i] = '0';	}
+            else if(a[i] == numSeqs)	{	filter[i] = '0';	}
+            else if(t[i] == numSeqs)	{	filter[i] = '0';	}
+            else if(c[i] == numSeqs)	{	filter[i] = '0';	}
+            else if(g[i] == numSeqs)	{	filter[i] = '0';	}
+        }
+        
+    }
 	
 	void doTrump(Sequence seq) {
 	

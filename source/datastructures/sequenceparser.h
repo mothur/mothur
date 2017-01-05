@@ -28,8 +28,8 @@ class SequenceParser {
 	
 	public:
 	
-		SequenceParser(string, string);			//group, fasta - file mismatches will set m->control_pressed = true
-		SequenceParser(string, string, string);	//group, fasta, name  - file mismatches will set m->control_pressed = true
+		SequenceParser(string, string, vector<string>);			//group, fasta, groups (if blanks then all) - file mismatches will set m->control_pressed = true
+		SequenceParser(string, string, string, vector<string>);	//group, fasta, name, groups (if blanks then all) - file mismatches will set m->control_pressed = true
 		~SequenceParser();
 		
 		//general operations

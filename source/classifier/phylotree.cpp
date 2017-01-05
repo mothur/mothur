@@ -46,7 +46,8 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
         in >> maxLevel; m->gobble(in);
         
         for (int i = 0; i < tree.size(); i++) {
-            in >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(in);
+            tree[i].name = m->getline(in); m->gobble(in);
+            in >> tree[i].level >> tree[i].parent; m->gobble(in);
         }
         
         //read genus nodes
@@ -232,7 +233,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
         //save maxLevel for binning the unclassified seqs
         if (level > maxLevel) { maxLevel = level; }
         
-		return 0;
+		return level;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "addSeqToTree");
@@ -454,11 +455,12 @@ void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 				
 		for (int i = 0; i < copy.size(); i++) {
 				
-			out << copy[i].level << '\t'<< copy[i].name << '\t' << copy[i].children.size();
+			out << copy[i].level << '\t' << copy[i].children.size() << endl;
+            out << copy[i].name << endl;
 			
 			map<string,int>::iterator it;
 			for(it=copy[i].children.begin();it!=copy[i].children.end();it++){
-				out << '\t' << it->first << '\t' << it->second;
+				out << it->second << '\t' << it->first << endl;
 			}
 			out << endl;
 		}
@@ -485,7 +487,8 @@ void PhyloTree::printTreeNodes(string treefilename) {
         outTree << maxLevel << endl;
         
         for (int i = 0; i < tree.size(); i++) {
-            outTree << tree[i].name << '\t' << tree[i].level << '\t' << tree[i].parent << endl;
+            outTree << tree[i].name << endl;
+            outTree << tree[i].level << '\t' << tree[i].parent << endl;
         }
         
         //print genus nodes

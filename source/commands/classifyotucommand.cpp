@@ -790,11 +790,11 @@ int ClassifyOtuCommand::processTaxMap() {
             if (spot != 0) {
                 string newTax = "";
                 for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
-                for (int i = spot; i < taxLength; i++) {
-                    if(tax[i] == ';'){   newTax += "unclassified;"; }
+                //for (int i = spot; i < taxLength; i++) {
+                    //if(tax[i] == ';'){   newTax += "unclassified;"; }
                     m->removeConfidences(newTax);
                     it->second = newTax;
-                }
+                //}
             }else { m->removeConfidences(tax); it->second = tax; } //leave tax alone
         }
         return 0;
