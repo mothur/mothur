@@ -397,7 +397,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 		
 	}
 	catch(exception& e) {
-		pDataArray->m->errorOut(e, "ChimeraUchimeCommand", "MyPerseusThreadFunction");
+		pDataArray->m->errorOut(e, "ChimeraPersuesCommand", "MyPerseusThreadFunction");
 		exit(1);
 	}
 } 

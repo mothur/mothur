@@ -1685,7 +1685,7 @@ bool ClusterSplitCommand::findVsearch(){
         
         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
-        //look for uchime exe
+        //look for vsearch exe
         string path = m->argv;
         string tempPath = path;
         for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
@@ -1708,13 +1708,13 @@ bool ClusterSplitCommand::findVsearch(){
         vsearchCommand = path + "vsearch.exe";
 #endif
         
-        //test to make sure uchime exists
+        //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
         int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
         if(ableToOpen == 1) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if uchime is in the path??
+            //check to see if vsearch is in the path??
             
             string uLocation = m->findProgramPath("vsearch");
             
