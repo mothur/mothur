@@ -24,6 +24,8 @@
 #include "inputdata.h"
 #include "clustercommand.h"
 #include "clusterclassic.h"
+#include "vsearchfileparser.h"
+#include "opticluster.h"
 
 class ClusterSplitCommand : public Command {
 	
@@ -48,20 +50,21 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation;
-	double cutoff, splitcutoff;
-	int precision, length, processors, taxLevelCutoff;
-	bool print_start, abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet;
+	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric, initialize;
+	double cutoff, splitcutoff, stableMetric;
+	int precision, length, processors, taxLevelCutoff, maxIters;
+	bool print_start, abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
+    long long numSingletons;
 	
 	void printData(ListVector*);
 	vector<string> createProcesses(vector< map<string, string> >, set<string>&);
 	vector<string> cluster(vector< map<string, string> >, set<string>&);
     string clusterFile(string, string, set<string>&, double&);
     string clusterClassicFile(string, string, set<string>&, double&);
-	int mergeLists(vector<string>, map<float, int>, ListVector*);
-	map<float, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
+	int mergeLists(vector<string>, map<double, int>, ListVector*);
+	map<double, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
 	int createMergedDistanceFile(vector< map<string, string> >);
     int createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund);
     string readFile(vector< map<string, string> >&);
@@ -70,6 +73,8 @@ private:
     bool findVsearch();
     int vsearchDriver(string, string, string, double);
     string runVsearchCluster(string, string, set<string>&, double&);
+    string runOptiCluster(string, string, set<string>&, double&);
+    int runSensSpec();
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////

@@ -1,23 +1,21 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-//test change
-
-#include "mothur.h"
 #include "sparsedistancematrix.h"
+#include "optimatrix.h"
 #include "mothurout.h"
 #include "rabundvector.hpp"
 #include "listvector.hpp"
 
-//class RAbundVector;
-//class ListVector;
+class ListVector;
 
 class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
+    Cluster(){}
     virtual ~Cluster() {}
-    virtual void update(double&);				
+    virtual bool update(double&);
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  
 	virtual map<string, int> getSeqtoBin()  {  return seq2Bin;	}
