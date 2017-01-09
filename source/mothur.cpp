@@ -145,8 +145,6 @@ int main(int argc, char *argv[]){
 			m->mothurOut("Department of Microbiology & Immunology");
 			m->mothurOutEndLine();	
 			m->mothurOut("University of Michigan");
-			m->mothurOutEndLine();			
-			m->mothurOut("pschloss@umich.edu");
 			m->mothurOutEndLine();		
 			m->mothurOut("http://www.mothur.org");
 			m->mothurOutEndLine();
@@ -161,7 +159,10 @@ int main(int argc, char *argv[]){
 			m->mothurOutEndLine();			
 			m->mothurOut("Type 'help()' for information on the commands that are available");
 			m->mothurOutEndLine();
-			m->mothurOutEndLine();			
+            m->mothurOutEndLine();
+            m->mothurOut("For questions and analysis support, please visit our forum at https://www.mothur.org/forum");
+			m->mothurOutEndLine();
+            m->mothurOutEndLine();
 			m->mothurOut("Type 'quit()' to exit program");
 			m->mothurOutEndLine();
 		}

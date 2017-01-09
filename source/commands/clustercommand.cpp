@@ -296,7 +296,10 @@ ClusterCommand::ClusterCommand(string option)  {
             m->mothurConvert(temp, processors);
             
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "opti"; }
+			if (method == "not found") {
+                method = "opti";
+                m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
+            }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
