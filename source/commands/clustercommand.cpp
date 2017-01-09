@@ -369,9 +369,6 @@ int ClusterCommand::runVsearchCluster(){
     try {
         //look for vsearch exe
         string path = m->mothurProgramPath;
-        //string tempPath = path;
-        //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-        //path = path.substr(0, (tempPath.find_last_of('m')));
         
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -387,16 +384,16 @@ int ClusterCommand::runVsearchCluster(){
             delete newCommand;
         }
 #else
-        vsearchCommand = path + "vsearch.exe";
+        vsearchCommand = path + "\\vsearch.exe";
 #endif
         
-        //test to make sure uchime exists
+        //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
         int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
         if(ableToOpen == 1) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if uchime is in the path??
+            //check to see if vsearch is in the path??
 
             ifstream in2;
             string uLocation = "";
