@@ -294,7 +294,8 @@ int SplitGroupCommand::runNameGroup(){
             variables["[filename]"] = namefileRoot;
 			string newName = getOutputFileName("name",variables);
 			
-			parser->getSeqs(Groups[i], newFasta, "/ab=", "/", false);
+            long long numSeqs = 0;
+			parser->getSeqs(Groups[i], newFasta, "/ab=", "/", numSeqs, false);
 			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
 			if (m->control_pressed) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
             
