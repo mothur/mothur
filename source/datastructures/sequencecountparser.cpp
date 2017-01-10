@@ -204,7 +204,7 @@ vector<Sequence> SequenceCountParser::getSeqs(string g){
 	}
 }
 /************************************************************/
-int SequenceCountParser::getSeqs(string g, string filename, string tag, string tag2, bool uchimeFormat=false){
+int SequenceCountParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
 	try {
 		map<string, vector<Sequence> >::iterator it;
 		vector<Sequence> seqForThisGroup;
@@ -214,11 +214,13 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 		if(it == seqs.end()) {
 			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
-			
+
 			ofstream out;
 			m->openOutputFile(filename, out);
 			
 			seqForThisGroup = it->second;
+            
+            numSeqs = seqForThisGroup.size();
 			
 			if (uchimeFormat) {
 				// format should look like 
