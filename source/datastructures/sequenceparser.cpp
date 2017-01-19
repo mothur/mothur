@@ -8,10 +8,10 @@
  */
 
 #include "sequenceparser.h"
-
+#include "sharedutilities.h"
 
 /************************************************************/
-SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFile) {
+SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFile, vector<string> groupsSelected) {
 	try {
 		
 		m = MothurOut::getInstance();
@@ -24,220 +24,86 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		if (error == 1) { m->control_pressed = true; }
 		
 		//initialize maps
-		vector<string> namesOfGroups = groupMap->getNamesOfGroups();
-		for (int i = 0; i < namesOfGroups.size(); i++) {
-			vector<Sequence> temp;
-			map<string, string> tempMap;
-			seqs[namesOfGroups[i]] = temp;
-			nameMapPerGroup[namesOfGroups[i]] = tempMap;
-		}
-		
+        vector<string> namesOfGroups = groupMap->getNamesOfGroups();
+        set<string> selectedGroups;
+        if (groupsSelected.size() != 0) {
+            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
+            namesOfGroups = groupsSelected;
+        }
+        
+        for (int i = 0; i < namesOfGroups.size(); i++) {
+            vector<Sequence> temp;
+            map<string, string> tempMap;
+            seqs[namesOfGroups[i]] = temp;
+            nameMapPerGroup[namesOfGroups[i]] = tempMap;
+            selectedGroups.insert(namesOfGroups[i]);
+        }
+        
+        map<string, string>::iterator it;
+        map<string, string> nameMap;
+        m->readNames(nameFile, nameMap);
+        
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
 		m->openInputFile(fastaFile, in);
-		
-		map<string, string> seqName; //stores name -> sequence string so we can make new "unique" sequences when we parse the name file
-        int fastaCount = 0;
-		while (!in.eof()) {
-			
-			if (m->control_pressed) { break; }
-			
-			Sequence seq(in); m->gobble(in);
-            fastaCount++;
-            if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
-			
-        if (seq.getName() != "") {
-				
-				 string group = groupMap->getGroup(seq.getName());
-				 if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
-				 else {	
-					 seqs[group].push_back(seq);	
-					 seqName[seq.getName()] = seq.getAligned();
-				 }
-			}
-		}
+        
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            Sequence seq(in); m->gobble(in);
+            
+            if (seq.getName() != "") {
+                
+                it = nameMap.find(seq.getName());
+                
+                if (it != nameMap.end()) { //in namefile
+                    
+                    vector<string> names;
+                    string secondCol = it->second;
+                    m->splitAtChar(secondCol, names, ',');
+                    
+                    map<string, string> splitMap; //group -> name1,name2,...
+                    map<string, string>::iterator itSplit;
+                    for (int i = 0; i < names.size(); i++) {
+                        string group = groupMap->getGroup(names[i]);
+                        
+                        if (selectedGroups.count(group) != 0) { //this is a group we want
+                            if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + names[i] + " is in your names file and not in your group file, please correct.\n");  }
+                            else {
+                                allSeqsMap[names[i]] = names[0];
+                                
+                                itSplit = splitMap.find(group);
+                                if (itSplit != splitMap.end()) { //adding seqs to this group
+                                    (itSplit->second) += "," + names[i];
+                                }else { //first sighting of this group
+                                    splitMap[group] = names[i];
+                                }
+                            }
+                        }
+                    }
+                    
+                    //fill nameMapPerGroup - holds all lines in namefile separated by group
+                    for (itSplit = splitMap.begin(); itSplit != splitMap.end(); itSplit++) {
+                        //grab first name
+                        string firstName = "";
+                        for(int i = 0; i < (itSplit->second).length(); i++) {
+                            if (((itSplit->second)[i]) != ',') {
+                                firstName += ((itSplit->second)[i]);
+                            }else { break; }
+                        }
+                        
+                        //group1 -> seq1 -> seq1,seq2,seq3
+                        nameMapPerGroup[itSplit->first][firstName] = itSplit->second;
+                        seqs[itSplit->first].push_back(Sequence(firstName, seq.getAligned()));
+                    }
+
+                }else { error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, please correct.\n"); }
+            }
+        }
 		in.close();
 				 
 		if (error == 1) { m->control_pressed = true; }
-		
-		//read name file
-		ifstream inName;
-		m->openInputFile(nameFile, inName);
-		
-		//string first, second;
-		int countName = 0;
-		set<string> thisnames1;
-		
-        string rest = "";
-        char buffer[4096];
-        bool pairDone = false;
-        bool columnOne = true;
-        string firstCol, secondCol;
-        
-		while (!inName.eof()) {
-			if (m->control_pressed) { break; }
-			
-            inName.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, inName.gcount());
-            
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) { //save one line
-                    if (m->debug) { m->mothurOut("[DEBUG]: reading names: " + firstCol + '\t' + secondCol + ".\n"); }
-                    vector<string> names;
-                    m->splitAtChar(secondCol, names, ',');
-                    
-                    //get aligned string for these seqs from the fasta file
-                    string alignedString = "";
-                    map<string, string>::iterator itAligned = seqName.find(names[0]);
-                    if (itAligned == seqName.end()) {
-                        error = 1; m->mothurOut("[ERROR]: " + names[0] + " is in your name file and not in your fasta file, please correct."); m->mothurOutEndLine();
-                    }else {
-                        alignedString = itAligned->second;
-                    }
-                    
-                    //separate by group - parse one line in name file
-                    map<string, string> splitMap; //group -> name1,name2,...
-                    map<string, string>::iterator it;
-                    for (int i = 0; i < names.size(); i++) {
-                        
-                        string group = groupMap->getGroup(names[i]);
-                        if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + names[i] + " is in your name file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
-                        else {	
-                            
-                            it = splitMap.find(group);
-                            if (it != splitMap.end()) { //adding seqs to this group
-                                (it->second) += "," + names[i];
-                                thisnames1.insert(names[i]);
-                                countName++;
-                            }else { //first sighting of this group
-                                splitMap[group] = names[i];
-                                countName++;
-                                thisnames1.insert(names[i]);
-                                
-                                //is this seq in the fasta file?
-                                if (i != 0) { //if not then we need to add a duplicate sequence to the seqs for this group so the new "fasta" and "name" files will match
-                                    Sequence tempSeq(names[i], alignedString); //get the first guys sequence string since he's in the fasta file.
-                                    seqs[group].push_back(tempSeq);
-                                }
-                            }
-                        }
-                        
-                        allSeqsMap[names[i]] = names[0];
-                    }
-                    
-                    
-                    //fill nameMapPerGroup - holds all lines in namefile separated by group
-                    for (it = splitMap.begin(); it != splitMap.end(); it++) {
-                        //grab first name
-                        string firstName = "";
-                        for(int i = 0; i < (it->second).length(); i++) {
-                            if (((it->second)[i]) != ',') {
-                                firstName += ((it->second)[i]);
-                            }else { break; }
-                        }
-                        
-                        //group1 -> seq1 -> seq1,seq2,seq3
-                        nameMapPerGroup[it->first][firstName] = it->second;
-                    }
-
-                    pairDone = false; 
-                }
-            }
-		}
-		inName.close();
-        
-        //in case file does not end in white space
-        if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
-            
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) { //save one line
-                    if (m->debug) { m->mothurOut("[DEBUG]: reading names: " + firstCol + '\t' + secondCol + ".\n"); }
-                    vector<string> names;
-                    m->splitAtChar(secondCol, names, ',');
-                    
-                    //get aligned string for these seqs from the fasta file
-                    string alignedString = "";
-                    map<string, string>::iterator itAligned = seqName.find(names[0]);
-                    if (itAligned == seqName.end()) {
-                        error = 1; m->mothurOut("[ERROR]: " + names[0] + " is in your name file and not in your fasta file, please correct."); m->mothurOutEndLine();
-                    }else {
-                        alignedString = itAligned->second;
-                    }
-                    
-                    //separate by group - parse one line in name file
-                    map<string, string> splitMap; //group -> name1,name2,...
-                    map<string, string>::iterator it;
-                    for (int i = 0; i < names.size(); i++) {
-                        
-                        string group = groupMap->getGroup(names[i]);
-                        if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + names[i] + " is in your name file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
-                        else {	
-                            
-                            it = splitMap.find(group);
-                            if (it != splitMap.end()) { //adding seqs to this group
-                                (it->second) += "," + names[i];
-                                thisnames1.insert(names[i]);
-                                countName++;
-                            }else { //first sighting of this group
-                                splitMap[group] = names[i];
-                                countName++;
-                                thisnames1.insert(names[i]);
-                                
-                                //is this seq in the fasta file?
-                                if (i != 0) { //if not then we need to add a duplicate sequence to the seqs for this group so the new "fasta" and "name" files will match
-                                    Sequence tempSeq(names[i], alignedString); //get the first guys sequence string since he's in the fasta file.
-                                    seqs[group].push_back(tempSeq);
-                                }
-                            }
-                        }
-                        
-                        allSeqsMap[names[i]] = names[0];
-                    }
-                    
-                    
-                    //fill nameMapPerGroup - holds all lines in namefile separated by group
-                    for (it = splitMap.begin(); it != splitMap.end(); it++) {
-                        //grab first name
-                        string firstName = "";
-                        for(int i = 0; i < (it->second).length(); i++) {
-                            if (((it->second)[i]) != ',') {
-                                firstName += ((it->second)[i]);
-                            }else { break; }
-                        }
-                        
-                        //group1 -> seq1 -> seq1,seq2,seq3
-                        nameMapPerGroup[it->first][firstName] = it->second;
-                    }
-                    
-                    pairDone = false; 
-                }
-            }
-        }
-		
-		if (error == 1) { m->control_pressed = true; }
-		        
-		if (countName != (groupMap->getNumSeqs())) {
-			vector<string> groupseqsnames = groupMap->getNamesSeqs();
-			
-			for (int i = 0; i < groupseqsnames.size(); i++) {
-				set<string>::iterator itnamesfile = thisnames1.find(groupseqsnames[i]);
-				if (itnamesfile == thisnames1.end()){
-					cout << "missing name " + groupseqsnames[i] << '\t' << allSeqsMap[groupseqsnames[i]] << endl;
-				}
-			}
-			
-			m->mothurOutEndLine();
-			m->mothurOut("[ERROR]: Your name file contains " + toString(countName) + " valid sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct.");
-			m->mothurOutEndLine();
-			m->control_pressed = true;
-		}
 		
 	}
 	catch(exception& e) {
@@ -246,7 +112,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 	}
 }
 /************************************************************/
-SequenceParser::SequenceParser(string groupFile, string fastaFile) {
+SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string> groupsSelected) {
 	try {
 		
 		m = MothurOut::getInstance();
@@ -259,16 +125,22 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile) {
 		if (error == 1) { m->control_pressed = true; }
 		
 		//initialize maps
-		vector<string> namesOfGroups = groupMap->getNamesOfGroups();
+        vector<string> namesOfGroups = groupMap->getNamesOfGroups();
+        set<string> selectedGroups;
+        if (groupsSelected.size() != 0) {
+            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
+            namesOfGroups = groupsSelected;
+        }
+        
 		for (int i = 0; i < namesOfGroups.size(); i++) {
 			vector<Sequence> temp;
 			seqs[namesOfGroups[i]] = temp;
+            selectedGroups.insert(namesOfGroups[i]);
 		}
 		
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
 		m->openInputFile(fastaFile, in);
-		int count = 0;
 		
 		while (!in.eof()) {
 			
@@ -277,23 +149,19 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile) {
 			Sequence seq(in); m->gobble(in);
 			
 			if (seq.getName() != "") {
-				
+                
 				string group = groupMap->getGroup(seq.getName());
-				if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
-				else {	seqs[group].push_back(seq);	count++; }
+                if (selectedGroups.count(group) != 0) { //this is a group we want
+                    if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
+                    else {
+                        seqs[group].push_back(seq);
+                    }
+                }
 			}
 		}
 		in.close();
 		
 		if (error == 1) { m->control_pressed = true; }
-		
-		if (count != (groupMap->getNumSeqs())) {
-			m->mothurOutEndLine();
-			m->mothurOut("[ERROR]: Your fasta file contains " + toString(count) + " valid sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct.");
-			if (count < (groupMap->getNumSeqs())) { m->mothurOut(" Did you forget to include the name file?"); }
-			m->mothurOutEndLine();
-			m->control_pressed = true;
-		}
 		
 	}
 	catch(exception& e) {
@@ -351,7 +219,7 @@ vector<Sequence> SequenceParser::getSeqs(string g){
 	}
 }
 /************************************************************/
-int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, bool uchimeFormat=false){
+int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
 	try {
 		map<string, vector<Sequence> >::iterator it;
 		vector<Sequence> seqForThisGroup;
@@ -361,11 +229,14 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 		if(it == seqs.end()) {
 			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
-			
+
 			ofstream out;
 			m->openOutputFile(filename, out);
 			
 			seqForThisGroup = it->second;
+            
+            numSeqs = seqForThisGroup.size();
+
 			
 			if (uchimeFormat) {
 				// format should look like 

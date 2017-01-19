@@ -313,7 +313,7 @@ void MothurOut::setDefaultPath(string pathname)  {
 			if (lastChar != "\\") { pathname += "\\"; }	
 		#endif
 		
-		defaultPath = pathname;
+		defaultPath = getFullPathName(pathname);
 		
 	}
 	catch(exception& e) {
@@ -321,6 +321,27 @@ void MothurOut::setDefaultPath(string pathname)  {
 		exit(1);
 	}
 }
+/*********************************************************************************************/
+void MothurOut::setBlastPath(string pathname)  {
+    try {
+        
+        //add / to name if needed
+        string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { pathname += "/"; }
+#else
+        if (lastChar != "\\") { pathname += "\\"; }
+#endif
+        
+        blastPath = getFullPathName(pathname);
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setDefaultPath");
+        exit(1);
+    }
+}
+
 /*********************************************************************************************/
 void MothurOut::setOutputDir(string pathname)  {
 	try {
@@ -1879,7 +1900,10 @@ vector<consTax> MothurOut::readConsTax(string inputfile){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size >> tax; gobble(in);
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+            
             consTax temp(otu, tax, size);
             taxes.push_back(temp);
         }
@@ -1908,7 +1932,10 @@ int MothurOut::readConsTax(string inputfile, map<int, consTax2>& taxes){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size >> tax; gobble(in);
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+            
             consTax2 temp(otu, tax, size);
             string simpleBin = getSimpleLabel(otu);
             int bin;
@@ -2419,6 +2446,34 @@ vector<string> MothurOut::splitWhiteSpace(string input){
 	}
 }
 /***********************************************************************/
+int MothurOut::splitWhiteSpace(string input, vector<float>& pieces, int index){
+    try {
+        pieces.clear();
+        string rest = "";
+        int count = 0;
+        
+        for (int i = 0; i < input.length(); i++) {
+            if (!isspace(input[i]))  { rest += input[i];  }
+            else {
+                if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
+                while (i < input.length()) {  //gobble white space
+                    if (isspace(input[i])) { i++; }
+                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                }
+                if (count > index) { return 0; }
+            }
+        }
+        
+        if (rest != "") { float tdist; mothurConvert(rest, tdist); count++; pieces.push_back(tdist); }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "splitWhiteSpace");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	try {
         vector<string> pieces;
@@ -2459,78 +2514,39 @@ vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	}
 }
 //**********************************************************************************************************************
-int MothurOut::readTax(string namefile, map<string, string>& taxMap, bool removeConfidence) {
+int MothurOut::readTax(string taxfile, map<string, string>& taxMap, bool removeConfidence) {
 	try {
         //open input file
 		ifstream in;
-		openInputFile(namefile, in);
+		openInputFile(taxfile, in);
         
-        string rest = "";
-        char buffer[4096];
-        bool pairDone = false;
-        bool columnOne = true;
-        string firstCol, secondCol;
         bool error = false;
+        string name, taxonomy;
         
 		while (!in.eof()) {
 			if (control_pressed) { break; }
 			
-            in.read(buffer, 4096);
-            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            in >> name; gobble(in);
+            taxonomy = getline(in); gobble(in);
             
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) { 
-                    checkName(firstCol);
-                    //are there confidence scores, if so remove them
-                    if (removeConfidence) { if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
-                    map<string, string>::iterator itTax = taxMap.find(firstCol);
-                    
-                    if(itTax == taxMap.end()) {
-                        bool ignore = false;
-                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
-                        }
-                        if (!ignore) { taxMap[firstCol] = secondCol; }
-                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
-                    }else {
-                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique.\n"); error = true;
-                    }
-                    pairDone = false; 
+            checkName(name);
+            //are there confidence scores, if so remove them
+            if (removeConfidence) {  if (taxonomy.find_first_of('(') != -1) {  removeConfidences(taxonomy);	} }
+            map<string, string>::iterator itTax = taxMap.find(name);
+            
+            if(itTax == taxMap.end()) {
+                bool ignore = false;
+                if (taxonomy != "") { if (taxonomy[taxonomy.length()-1] != ';') { mothurOut("[ERROR]: " + name + " is missing the final ';', ignoring.\n"); ignore=true; }
                 }
+                if (!ignore) { taxMap[name] = taxonomy; }
+                if (debug) {  mothurOut("[DEBUG]: name = '" + name + "' tax = '" + taxonomy + "'\n");  }
+            }else {
+                mothurOut("[ERROR]: " + name + " is already in your taxonomy file, names must be unique./n"); error = true;
             }
-		}
+
+        }
 		in.close();
         
-        if (rest != "") {
-            vector<string> pieces = splitWhiteSpace(rest);
-            
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-                
-                if (pairDone) { 
-                    checkName(firstCol);
-                    //are there confidence scores, if so remove them
-                    if (removeConfidence) {  if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	} }
-                    map<string, string>::iterator itTax = taxMap.find(firstCol);
-                    
-                    if(itTax == taxMap.end()) {
-                        bool ignore = false;
-                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
-                        }
-                        if (!ignore) { taxMap[firstCol] = secondCol; }
-                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
-                    }else {
-                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); error = true;
-                    }
-
-                    pairDone = false; 
-                }
-            } 
-        }
-		
         if (error) { control_pressed = true; }
         if (debug) {  mothurOut("[DEBUG]: numSeqs saved = '" + toString(taxMap.size()) + "'\n"); }
 		return taxMap.size();
@@ -3446,13 +3462,16 @@ bool MothurOut::mothurConvert(string item, intDist& num){
 string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
     try{
         string newTax, taxon;
-        int level = 1;
         
+        string savedTax = tax;
         vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
         vector<int> confidences;
         
+        if (taxons.size() == maxlevel) { return savedTax; }
+        
         int index = 0;
         int confidence = 0;
+        int level = 1;
         for (int i = 0; i < taxons.size(); i++) {
             index = i;
             string thisTax = taxons[i]+";";
@@ -3462,7 +3481,7 @@ string MothurOut::addUnclassifieds(string tax, int maxlevel, bool probs) {
             if (thisTax == "unclassified;"){ index--; break; }
             else{ newTax += taxons[i] + ";";  }
         }
-        level = index+2;
+        level = index+1;
         
         string thisTax = taxons[index]+";";
         
@@ -3504,6 +3523,23 @@ bool MothurOut::isNumeric1(string stringToCheck){
 	
 }
 /***********************************************************************/
+bool MothurOut::allSpaces(string stringToCheck){
+    try {
+        
+        for (int i = 0; i < stringToCheck.length(); i++) {
+            char c = stringToCheck[i];
+            if (!isspace(c)) { return false; }
+        }
+        
+        return true;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isNumeric1");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 bool MothurOut::isInteger(string stringToCheck){
     try {
         bool isInt = false;
@@ -3533,6 +3569,22 @@ bool MothurOut::containsAlphas(string stringToCheck){
     }
     
 }
+/***********************************************************************/
+bool MothurOut::isAllAlphas(string stringToCheck){
+    try {
+        bool allAlphas = true;
+        
+        if(stringToCheck.find_first_not_of("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOopPQqRrSsTtUuVvWwXxYyZz") != string::npos) { allAlphas = false; }
+        
+        return allAlphas;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isAllAlphas");
+        exit(1);
+    }
+    
+}
+
 /***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
 	try {
@@ -3798,7 +3850,24 @@ int  MothurOut::sum(vector<int> x) {
         return value;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "average - int");
+        errorOut(e, "MothurOut", "sum - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double  MothurOut::sum(vector<double> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "sum - double");
         exit(1);
     }
 }
@@ -3884,7 +3953,7 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
         
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (ableToOpen == 1) {
-            string exepath = argv;
+            string exepath = mothurProgramPath;
             string tempPath = exepath;
             for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
             exepath = exepath.substr(0, (tempPath.find_last_of('m')));

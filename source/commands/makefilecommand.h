@@ -37,7 +37,7 @@ private:
     int numCols;
     bool abort;
     
-    int fillAccnosFile(string);
+    vector< vector<string> > findGroupNames(vector< vector<string> > paired);
 };
 
 

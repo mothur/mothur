@@ -20,7 +20,6 @@ vector<string> SensSpecCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -223,13 +222,6 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it
 			}
 
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			temp = validParameter.validFile(parameters, "hard", false);
-			if (temp == "not found"){	hard = 1;	}
-			else if(!m->isTrue(temp))	{	hard = 0;	}
-			else if(m->isTrue(temp))	{	hard = 1;	}
-
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found") { temp = "-1.00"; }
 			m->mothurConvert(temp, cutoff);
 
@@ -303,14 +295,15 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 	try {
 
 		string label = list->getLabel();
-		int numSeqs = list->getNumSeqs();
+		long long numSeqs = list->getNumSeqs();
 		int numOTUs = list->getNumBins();
 
 		if(getCutoff == 1){
 			if(label != "unique"){
 				origCutoff = label;
 				convert(label, cutoff);
-				if(!hard){	cutoff += (0.49 / double(precision));	}
+        cutoff = m->ceilDist(cutoff, precision);
+        origCutoff = toString(m->ceilDist(cutoff, precision));
 			}
 			else{
 				origCutoff = "unique";
@@ -439,6 +432,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, ListVector*& list, bool& 
 				}
 			}
 		}
+        
 		falseNegatives = distanceMap.size();
 		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 
@@ -459,9 +453,9 @@ int SensSpecCommand::processListFile(){
 
 		string origCutoff = "";
 		bool getCutoff = 0;
-		if(cutoff == -1.00)	{	getCutoff = 1;															}
-		else if( !hard )	{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}
-		else 				{	origCutoff = toString(cutoff);	}
+
+		if(cutoff == -1.00)	{	getCutoff = 1;                                          }
+		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));	}
 
 		map<string, int> seqMap;
 
@@ -563,25 +557,25 @@ void SensSpecCommand::setUpOutput(){
 
 void SensSpecCommand::outputStatistics(string label, string cutoff){
 	try{
-		double tp = (double) truePositives;
-		double fp = (double) falsePositives;
-		double tn = (double) trueNegatives;
-		double fn = (double) falseNegatives;
+		long long tp =  truePositives;
+		long long fp =  falsePositives;
+		long long tn =  trueNegatives;
+		long long fn =  falseNegatives;
 
-		double p = tp + fn;
-		double n = fp + tn;
-		double pPrime = tp + fp;
-		double nPrime = tn + fn;
+		long long p = tp + fn;
+		long long n = fp + tn;
+		long long pPrime = tp + fp;
+		long long nPrime = tn + fn;
 
-		double sensitivity = tp / p;
-		double specificity = tn / n;
-		double positivePredictiveValue = tp / pPrime;
-		double negativePredictiveValue = tn / nPrime;
-		double falseDiscoveryRate = fp / pPrime;
+		double sensitivity = tp / (double) p;
+		double specificity = tn / (double)n;
+		double positivePredictiveValue = tp / (double)pPrime;
+		double negativePredictiveValue = tn / (double)nPrime;
+		double falseDiscoveryRate = fp / (double)pPrime;
 
-		double accuracy = (tp + tn) / (p + n);
-		double matthewsCorrCoef = (tp * tn - fp * fn) / sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
-		double f1Score = 2.0 * tp / (p + pPrime);
+		double accuracy = (tp + tn) / (double)(p + n);
+		double matthewsCorrCoef = (tp * tn - fp * fn) / (double)sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
+		double f1Score = 2.0 * tp / (double)(p + pPrime);
 
 
 		if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}

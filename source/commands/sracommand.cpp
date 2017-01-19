@@ -34,7 +34,7 @@ vector<string> SRACommand::setParameters(){
         CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
 		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
-        
+        CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptrim);
          //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -67,6 +67,7 @@ string SRACommand::getHelpString(){
         helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
 		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
         helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. The default is false.\n";
+        helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  sff files only Default=True. \n";
         helpString += "The includescrap parameter is used to indicate whether or not to include the scrapped sequences in your submission. The default is true.\n";
         helpString += "The platform parameter is used to specify platform you are using choices are: _LS454,ILLUMINA,ION_TORRENT,PACBIO_SMRT. Default=_LS454. This is a controlled vocabulary section in the XML file that will be generated.\n";
         helpString += "The orientation parameter is used to specify sequence orientation. Choices are: forward and reverse. Default=forward. This is a controlled vocabulary section in the XML file that will be generated.\n";
@@ -288,6 +289,8 @@ SRACommand::SRACommand(string option)  {
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
             
             checkorient = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
+            
+            trim = validParameter.validFile(parameters, "trim", false);					if (trim == "not found"){	temp = "T";				}
             
             temp = validParameter.validFile(parameters, "includescrap", false);		if (temp == "not found") { temp = "T"; }
             includeScrap = m->isTrue(temp);
@@ -1245,6 +1248,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         if (sdiffs != 0) { commandString += ", sdiffs=" + toString(sdiffs); }
         if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
         if (m->isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
+        if (m->isTrue(trim)) { commandString += ", trim=" + trim; }
         
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();

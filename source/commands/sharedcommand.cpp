@@ -529,7 +529,7 @@ vector<SharedRAbundVector*> SharedCommand::readData(string matrixFormat, string 
                     inBrackets = false;
                     int temp;
                     float temp2;
-                    if (matrixElementType == "float") { m->mothurConvert(num, temp2); temp = (int)temp2; }
+                    if (matrixElementType == "float") { m->mothurConvert(num, temp2); temp = floor(temp2); }
                     else { m->mothurConvert(num, temp); }
                     nums.push_back(temp);
                     num = "";
@@ -558,7 +558,9 @@ vector<SharedRAbundVector*> SharedCommand::readData(string matrixFormat, string 
                 if (inBrackets) {
                     if (line[i] == ',') {
                         int temp;
-                        m->mothurConvert(num, temp);
+                        float temp2;
+                        if (matrixElementType == "float") { m->mothurConvert(num, temp2); temp = floor(temp2); }
+                        else { m->mothurConvert(num, temp); }
                         nums.push_back(temp);
                         num = "";
                     }else { if (!isspace(line[i])) { num += line[i]; }  }

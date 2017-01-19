@@ -28,8 +28,8 @@ class SequenceParser {
 	
 	public:
 	
-		SequenceParser(string, string);			//group, fasta - file mismatches will set m->control_pressed = true
-		SequenceParser(string, string, string);	//group, fasta, name  - file mismatches will set m->control_pressed = true
+		SequenceParser(string, string, vector<string>);			//group, fasta, groups (if blanks then all) - file mismatches will set m->control_pressed = true
+		SequenceParser(string, string, string, vector<string>);	//group, fasta, name, groups (if blanks then all) - file mismatches will set m->control_pressed = true
 		~SequenceParser();
 		
 		//general operations
@@ -41,7 +41,7 @@ class SequenceParser {
 		vector<Sequence> getSeqs(string); //returns unique sequences in a specific group
 		map<string, string> getNameMap(string); //returns seqName -> namesOfRedundantSeqs separated by commas for a specific group - the name file format, but each line is parsed by group.
 		
-		int getSeqs(string, string, string, string, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag(/ab= or ;size=), tag2(/ or ;)
+		int getSeqs(string, string, string, string, long long&, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag(/ab= or ;size=), tag2(/ or ;)
 		int getNameMap(string, string); //print seqName -> namesOfRedundantSeqs separated by commas for a specific group - group, filename
 		
 		map<string, string> getAllSeqsMap(){ return allSeqsMap; }  //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing

@@ -177,6 +177,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		
 		while (seqTaxonomy != "") {
 			
+            level++;
+            
 			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
@@ -287,15 +289,10 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					break;
 				}
 			}
-			
-			level++;
-            
-            if (level > maxLevel) { maxLevel = level; }
-			
-			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
-				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
-			}
-		}
+        }
+        
+        if (level > maxLevel) { maxLevel = level; }
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -321,6 +318,8 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 		
 		while (seqTaxonomy != "") {
 			
+            level++;
+            
 			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
@@ -346,7 +345,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					int index = tree.size() - 1;
 					
 					tree[index].parent = currentNode;
-					tree[index].level = (level+1);
+					tree[index].level = level;
 					tree[index].total = 1;
 					tree[currentNode].children[taxon] = index;
 						
@@ -363,15 +362,10 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					break;
 				}
 			}
-			
-			level++;
-            
-            if (level > maxLevel) { maxLevel = level; }
-			
-			if ((seqTaxonomy == "") && (level < maxLevel)) {  //if you think you are done and you are not.
-				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
-			}
 		}
+        
+        if (level > maxLevel) { maxLevel = level; }
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -755,13 +749,15 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
 	
-			in >> tree[i].level >> tree[i].name >> num; //num contains the number of children tree[i] has
-			
+			in >> tree[i].level >> num; m->gobble(in); //num contains the number of children tree[i] has
+            tree[i].name = m->getline(in); m->gobble(in);
+            
 			//set children
 			string childName;
 			int childIndex;
 			for (int j = 0; j < num; j++) {
-				in >> childName >> childIndex;
+				in >> childIndex; m->gobble(in);
+                childName = m->getline(in); m->gobble(in);
 				tree[i].children[childName] = childIndex;
 			}
 			

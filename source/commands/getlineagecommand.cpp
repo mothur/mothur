@@ -350,7 +350,7 @@ int GetLineageCommand::execute(){
                 m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
         }
-		
+        
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{
             readTax(); //fills the set of names to get
@@ -1081,8 +1081,8 @@ int GetLineageCommand::readTax(){
 
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
-			in >> name;				//read from first column
-			in >> tax;			//read from second column
+            in >> name; m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
 			
             string noQuotesTax = m->removeQuotes(tax);
             
@@ -1178,8 +1178,6 @@ int GetLineageCommand::readTax(){
 				}
 			
 			}
-			
-			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1239,7 +1237,7 @@ int GetLineageCommand::readConsTax(){
             
 			in >> otuLabel;	 		m->gobble(in);
             in >> numReps;          m->gobble(in);
-			in >> tax;              m->gobble(in);
+            tax = m->getline(in);   m->gobble(in);
 			
             string noQuotesTax = m->removeQuotes(tax);
             

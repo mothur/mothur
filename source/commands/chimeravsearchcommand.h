@@ -37,7 +37,6 @@ public:
 private:
     vector<int> processIDS;   //processid
     int driver(string, string, string, string, int&);
-    int createProcesses(string, string, string, string, int&);
     
     bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, hasName, dups;
     string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
@@ -54,7 +53,6 @@ private:
     int readFasta(string, map<string, string>&);
     int deconvoluteResults(map<string, string>&, string, string, string);
     int driverGroups(string, string, string, string, string, int, int, vector<string>);
-    int createProcessesGroups(string, string, string, string, string, vector<string>, string, string, string);
     int prepFile(string filename, string);
     
     
@@ -63,4 +61,3 @@ private:
 /***********************************************************/
 
 #endif
-

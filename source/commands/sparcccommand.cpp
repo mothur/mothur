@@ -199,6 +199,9 @@ int SparccCommand::execute(){
         vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup[0]->getLabel();
         
+        int numOTUs = lookup[0]->getNumBins();
+        if (numOTUs >= maxIterations) {  m->mothurOut("[WARNING]: The number of iterations is set higher than the number of OTUs, reducing to " + toString(numOTUs-1) + "\n"); maxIterations = numOTUs-1; }
+        
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;

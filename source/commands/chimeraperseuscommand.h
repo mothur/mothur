@@ -122,14 +122,15 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 		//parse fasta and name file by group
 		SequenceParser* parser;
         SequenceCountParser* cparser;
+        vector<string> temp;
 		if (pDataArray->hasCount) {
             CountTable* ct = new CountTable();
             ct->readTable(pDataArray->namefile, true, false);
-            cparser = new SequenceCountParser(pDataArray->fastafile, *ct);
+            cparser = new SequenceCountParser(pDataArray->fastafile, *ct, temp);
             delete ct;
         }else {
-            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
-            else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);						}
+            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile, temp);	}
+            else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, temp);						}
         }
     
 		int totalSeqs = 0;

@@ -36,8 +36,10 @@ InteractEngine::InteractEngine(string path){
 	
 	//this will happen if you set the path variable to contain mothur's exe location
 	if (temppath == "") { path = mout->findProgramPath("mothur"); }
+    else { path = temppath; }
 	
-	mout->argv = path;
+	mout->mothurProgramPath = mout->getFullPathName(path);
+    mout->setBlastPath(mout->mothurProgramPath);
 
     //if you haven't set your own location
     #ifdef MOTHUR_FILES
@@ -173,8 +175,10 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	
 		//this will happen if you set the path variable to contain mothur's exe location
 		if (temppath == "") { path = mout->findProgramPath("mothur"); }
+        else { path = temppath; }
 		
-		mout->argv = path;
+		mout->mothurProgramPath = mout->getFullPathName(path);
+        mout->setBlastPath(mout->mothurProgramPath);
         
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
@@ -257,7 +261,8 @@ bool BatchEngine::getInput(){
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-
+                    
+                    if (mout->control_pressed) { break;  }
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
@@ -307,8 +312,10 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 
 		//this will happen if you set the path variable to contain mothur's exe location
 		if (temppath == "") { path = mout->findProgramPath("mothur"); }
+        else { path = temppath; }
 		
-		mout->argv = path;
+		mout->mothurProgramPath = mout->getFullPathName(path);
+        mout->setBlastPath(mout->mothurProgramPath);
     
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
@@ -391,7 +398,8 @@ bool ScriptEngine::getInput(){
 					
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-							
+					
+                    if (mout->control_pressed) { break;  }
 					mout->control_pressed = 0;
 					mout->executing = false;
 									

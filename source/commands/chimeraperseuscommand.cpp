@@ -520,7 +520,8 @@ int ChimeraPerseusCommand::execute(){
                 ct->readTable(nameFile, true, false);
                 
                 if (ct->hasGroupInfo()) {
-                    cparser = new SequenceCountParser(fastaFileNames[s], *ct);
+                    vector<string> temp;
+                    cparser = new SequenceCountParser(fastaFileNames[s], *ct, temp);
                     variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
                     newCountFile = getOutputFileName("count", variables);
                     
@@ -599,7 +600,8 @@ int ChimeraPerseusCommand::execute(){
             }else {
                 if (groupFile != "") {
                     //Parse sequences by group
-                    parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+                    vector<string> temp;
+                    parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
                     vector<string> groups = parser->getNamesOfGroups();
                     
                     if (m->control_pressed) { delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }

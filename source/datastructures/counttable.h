@@ -50,7 +50,7 @@ class CountTable {
         //reads and creates smart enough to eliminate groups with zero counts 
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames 
         int createTable(string, string, bool); //namefile, groupfile, createGroup
-        int readTable(string, bool, bool); //file, readGroups, mothurRunning
+        int readTable(string, bool, bool); //filename, readGroups, mothurRunning
     
         int printTable(string);
         int printHeaders(ofstream&);

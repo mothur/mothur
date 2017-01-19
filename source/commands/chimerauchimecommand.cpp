@@ -556,10 +556,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 			
 			//look for uchime exe
-			path = m->argv;
-			string tempPath = path;
-			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-			path = path.substr(0, (tempPath.find_last_of('m')));
+			path = m->mothurProgramPath;
 			
 			string uchimeCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -575,7 +572,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 delete newCommand;
             }
 #else
-			uchimeCommand = path + "uchime.exe";
+			uchimeCommand = path + "\\uchime.exe";
 #endif
         
 			//test to make sure uchime exists
@@ -586,14 +583,15 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 
-                string uLocation = m->findProgramPath("uchime");
-                
+                string uLocation = ""; 
                 
                 ifstream in2;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                uLocation = m->findProgramPath("uchime");
                 ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-                ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+                uLocation = m->findProgramPath("uchime.exe");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
 
                 if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; } 
@@ -689,12 +687,13 @@ int ChimeraUchimeCommand::execute(){
 				//Parse sequences by group
                 vector<string> groups;
                 map<string, string> uniqueNames;
+                vector<string> temp;
                 if (hasCount) {
-                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s]);
+                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s], temp);
                     groups = cparser->getNamesOfGroups();
                     uniqueNames = cparser->getAllSeqsMap();
                 }else{
-                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
                     groups = sparser->getNamesOfGroups();
                     uniqueNames = sparser->getAllSeqsMap();
                 }
@@ -1157,11 +1156,12 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", true); if ((error == 1) || m->control_pressed) {  return 0; } }
-			
-			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
+            long long numSeqs = 0;
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			totalSeqs += numSeqs;
+            
+			driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			
 			if (m->control_pressed) { return 0; }
 			
@@ -1659,7 +1659,8 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		//divide file
 		int count = 0;
 		int spot = 0;
-		
+        files.resize(processors, "");
+        
 		for (int i = 0; i < processors; i++) {
             ofstream temp;
 			files[i] = filename+toString(i)+".temp";
@@ -1801,7 +1802,6 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             }
 
 		}
-		//m->mothurOut(toString( getpid() ) + " here\n");
             
 		//do my part
 		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);

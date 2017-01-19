@@ -165,14 +165,15 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 		//parse fasta and name file by group
 		SequenceParser* parser;
         SequenceCountParser* cparser;
+        vector<string> temp;
 		if (pDataArray->hasCount) {
             CountTable* ct = new CountTable();
             ct->readTable(pDataArray->namefile, true, false);
-            cparser = new SequenceCountParser(pDataArray->fastafile, *ct);
+            cparser = new SequenceCountParser(pDataArray->fastafile, *ct, temp);
             delete ct;
         }else {
-            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
-            else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);						}
+            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile, temp);	}
+            else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, temp);						}
         }
 		
 		int totalSeqs = 0;
@@ -186,13 +187,14 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			int error;
+            long long numSeqs = 0;
             if (pDataArray->hasCount) { 
-                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
+                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
             }else {
-               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; }
+               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; }
             }
 			
-			//int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
+			//driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			//to allow for spaces in the path

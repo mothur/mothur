@@ -103,7 +103,8 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 	try {
 		
 		//parse fasta and name file by group
-		SequenceParser parser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);
+        vector<string> temp;
+        SequenceParser parser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile, temp);
 						
 		//precluster each group
 		for (int k = pDataArray->start; k < pDataArray->end; k++) {

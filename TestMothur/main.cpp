@@ -19,7 +19,6 @@ To compile TestMothur you need to uncomment
  
  //MothurOut* MothurOut::_uniqueInstance; in mothurout.cpp
  
- //ReferenceDB* ReferenceDB::myInstance; in referencedb.cpp
  
  */
 //***********************************************************//

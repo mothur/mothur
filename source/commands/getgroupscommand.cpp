@@ -992,8 +992,8 @@ int GetGroupsCommand::readTax(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;				//read from first column
-			in >> tax;			//read from second column
+            in >> name; m->gobble(in);
+            tax = m->getline(in); m->gobble(in);
 			
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
@@ -1007,8 +1007,6 @@ int GetGroupsCommand::readTax(){
 					out << it->second << '\t' << tax << endl;
 				}
 			}
-			
-			m->gobble(in);
 		}
 		in.close();
 		out.close();

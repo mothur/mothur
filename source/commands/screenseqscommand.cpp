@@ -259,6 +259,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				}
 			}
 
+            fileType = "name file";
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { 			
@@ -287,7 +288,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { m->setCountTableFile(countfile); fileType = "count file"; }
             
             contigsreport = validParameter.validFile(parameters, "contigsreport", true);
 			if (contigsreport == "not open") { contigsreport = ""; abort = true; }
@@ -545,21 +546,22 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
 	try{
         int numFastaSeqs = 0;
         bool summarizedFasta = false;
+        //use the namefile to optimize correctly
+        if (namefile != "") { nameMap = m->readNames(namefile); }
+        else if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile, true, false);
+            nameMap = ct.getNameMap();
+        }
+
         
         //did not provide a summary file, but set a parameter that requires summarizing the fasta file
         //or did provide a summary file, but set maxn parameter so we must summarize the fasta file 
         vector<unsigned long long> positions;
         if (((summaryfile == "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) || ((summaryfile != "") && m->inUsersGroups("maxn", optimize))) {  
-            //use the namefile to optimize correctly
-            if (namefile != "") { nameMap = m->readNames(namefile); }
-            else if (countfile != "") {
-                CountTable ct;
-                ct.readTable(countfile, true, false);
-                nameMap = ct.getNameMap();
-            }
-            getSummary(positions); 
+            getSummary(positions);
             summarizedFasta = true;
-        } else {
+        }else {
             #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 positions = m->divideFile(fastafile, processors);
                 for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
@@ -582,12 +584,6 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
         }
         
         if ((summaryfile != "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize))) && !summarizedFasta) { //summarize based on summaryfile
-            if (namefile != "") { nameMap = m->readNames(namefile); }
-            else if (countfile != "") {
-                CountTable ct;
-                ct.readTable(countfile, true, false);
-                nameMap = ct.getNameMap();
-            }
             getSummaryReport();
         }else if ((contigsreport != "") && ((m->inUsersGroups("minoverlap", optimize)) || (m->inUsersGroups("ostart", optimize)) || (m->inUsersGroups("oend", optimize)) || (m->inUsersGroups("mismatches", optimize)))) { //optimize settings based on contigs file
             optimizeContigs();
@@ -1060,7 +1056,7 @@ int ScreenSeqsCommand::getSummaryReport(){
                 //make sure this sequence is in the namefile, else error
                 map<string, int>::iterator it = nameMap.find(name);
                 
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
                 else { num = it->second; }
             }
             
@@ -1194,7 +1190,7 @@ int ScreenSeqsCommand::driverContigsSummary(vector<int>& oLength, vector<int>& o
                 //make sure this sequence is in the namefile, else error 
                 map<string, int>::iterator it = nameMap.find(name);
                 
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
                 else { num = it->second; }
             }
             
@@ -1462,12 +1458,12 @@ int ScreenSeqsCommand::optimizeAlign(){
         sort(inserts.begin(), inserts.end());
         
         //numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-        int criteriaPercentile	= int(sims.size() * (criteria / (float) 100));
+        //int criteriaPercentile	= int(sims.size() * (criteria / (float) 100));
         
         for (int i = 0; i < optimize.size(); i++) {
             if (optimize[i] == "minsim") { int mincriteriaPercentile = int(sims.size() * ((100 - criteria) / (float) 100)); minSim = sims[mincriteriaPercentile];  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
             else if (optimize[i] == "minscore") { int mincriteriaPercentile = int(scores.size() * ((100 - criteria) / (float) 100)); minScore = scores[mincriteriaPercentile];  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxinsert") { maxInsert = inserts[criteriaPercentile]; m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxinsert") { int criteriaPercentile = int(inserts.size() * ((100 - criteria) / (float) 100)); maxInsert = inserts[criteriaPercentile]; m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
         }
         
 		return 0;
@@ -1509,7 +1505,7 @@ int ScreenSeqsCommand::driverAlignSummary(vector<float>& sims, vector<float>& sc
                 //make sure this sequence is in the namefile, else error 
                 map<string, int>::iterator it = nameMap.find(name);
                 
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
                 else { num = it->second; }
             }
             
@@ -1823,7 +1819,7 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { num = it->second; }
 				}
                 
@@ -2192,14 +2188,15 @@ int ScreenSeqsCommand::screenTaxonomy(map<string, string> badSeqNames){
 		while(!input.eof()){
 			if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
 			
-			input >> seqName; m->gobble(input); input >> tax;
+            input >> seqName; m->gobble(input);
+            tax = m->getline(input); m->gobble(input);
+            
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){ badSeqNames.erase(it); }
 			else{
 				goodTaxOut << seqName << '\t' << tax << endl;
 			}
-			m->gobble(input);
 		}
 		
 		if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
