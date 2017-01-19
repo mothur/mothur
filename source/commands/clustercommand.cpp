@@ -412,7 +412,6 @@ int ClusterCommand::runVsearchCluster(){
     try {
         //look for vsearch exe
         string path = m->mothurProgramPath;
-        
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability

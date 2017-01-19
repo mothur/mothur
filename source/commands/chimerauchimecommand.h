@@ -186,7 +186,6 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 		for (int i = pDataArray->start; i < pDataArray->end; i++) {
 			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
-            
 			int error;
             long long numSeqs = 0;
             if (pDataArray->hasCount) { 
@@ -521,7 +520,8 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 		
         if (pDataArray->hasCount && pDataArray->dups) { outCountList.close(); }
 		pDataArray->count = totalSeqs;
-		if (pDataArray->hasCount) { delete cparser; } { delete parser; }
+		if (pDataArray->hasCount) { delete cparser; }
+        else { delete parser; }
 		return totalSeqs;
 		
 	}

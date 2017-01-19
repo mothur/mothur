@@ -9,11 +9,13 @@ xcuserdata
 project.xcworkspace
 *.xcuserdata
 TARGET_BUILD_DIRTARGET_BUILD_DIR
+DerivedData
 *.xcuserdata
 *.xml
 nbproject/
 mothur
 Mothur.1
+DerivedData/
 
 *.stdout
 

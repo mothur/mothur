@@ -602,7 +602,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
         }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "ChimeraSlayerCommand");
+		m->errorOut(e, "ChimeraUchimeCommand", "ChimeraUchimeCommand");
 		exit(1);
 	}
 }

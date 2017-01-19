@@ -145,9 +145,7 @@ int MakeFileCommand::execute(){
         
         //find all .fastq files
         string tempFile = inputDir + "fileList.temp";
-        string findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\"  > \"" + tempFile + "\"";
-        if (m->debug) { m->mothurOut(findCommand + "\n"); }
-        system(findCommand.c_str());
+        fillAccnosFile(tempFile);
         
         //read in list of files
         vector<string> fastqFiles;
@@ -332,6 +330,34 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
     }
 }
 
+//**********************************************************************************************************************
+
+int MakeFileCommand::fillAccnosFile(string tempFile){
+    try {
+        
+        string findCommand = "";
+        tempFile = "\"" + tempFile + "\"";
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
+        findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
+        if (m->debug) { m->mothurOut(findCommand + "\n"); }
+        system(findCommand.c_str());
+#else
+        //use ls command
+        
+        findCommand = "ls *." + typeFile + " > " + tempFile;
+        if (m->debug) { m->mothurOut(findCommand + "\n"); }
+        system(findCommand.c_str());
+#endif
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "fillAccnosFile");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 
 
