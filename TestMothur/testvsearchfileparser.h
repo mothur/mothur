@@ -22,7 +22,6 @@ public:
     ~TestVsearchFileParser();
     
     MothurOut* m;
-    TestDataSet data;
     vector<string> filenames;
     CountTable* ct;
     

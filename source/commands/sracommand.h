@@ -44,7 +44,7 @@ private:
     bool abort, isSFF, pairedOligos, setOligosParameter, includeScrap;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, fileOption;
     
-    string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile;
+    string sfffile, fastqfile, outputDir, file, oligosfile, contactfile, inputfile, mimarksfile, trim;
     string libStrategy, libSource, libSelection, libLayout, platform, instrumentModel, fileType, dataType, checkorient;
     string submissionName, lastName, firstName, email, centerName, centerType, ownership, description, website, orientation, packageType;
     string projectName, projectTitle, inputDir;

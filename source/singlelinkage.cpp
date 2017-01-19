@@ -1,5 +1,4 @@
 
-#include "mothur.h"
 #include "cluster.hpp"
 
 

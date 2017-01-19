@@ -127,6 +127,7 @@ class MothurOut {
         void zapGremlins(istringstream&);
         vector<string> splitWhiteSpace(string& rest, char[], int);
         vector<string> splitWhiteSpace(string);
+        int splitWhiteSpace(string, vector<float>&, int);
         set<string> readAccnos(string);
         int readAccnos(string, vector<string>&);
         int readAccnos(string, vector<string>&, string);
@@ -216,6 +217,7 @@ class MothurOut {
         int median(vector<int>);
         int average(vector<int>);
         int sum(vector<int>);
+        double sum(vector<double>);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);

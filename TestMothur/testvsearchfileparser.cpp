@@ -101,13 +101,13 @@ TEST_CASE("Testing VsearchParser Class") {
         
         ifstream in2;
         testVParser.m->openInputFile("temp.list", in2);
-        ListVector list(in2);
+        ListVector list2(in2);
         in2.close();
         testVParser.m->mothurRemove("temp.list"); testVParser.m->mothurRemove("temp.rabund"); testVParser.m->mothurRemove("temp.sabund");
         
         //for each bin
-        for (int i = 0; i < list.getNumBins(); i++) {
-            string binnames = list.get(i);
+        for (int i = 0; i < list2.getNumBins(); i++) {
+            string binnames = list2.get(i);
             
             CAPTURE(binnames);
             

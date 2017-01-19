@@ -2446,6 +2446,34 @@ vector<string> MothurOut::splitWhiteSpace(string input){
 	}
 }
 /***********************************************************************/
+int MothurOut::splitWhiteSpace(string input, vector<float>& pieces, int index){
+    try {
+        pieces.clear();
+        string rest = "";
+        int count = 0;
+        
+        for (int i = 0; i < input.length(); i++) {
+            if (!isspace(input[i]))  { rest += input[i];  }
+            else {
+                if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
+                while (i < input.length()) {  //gobble white space
+                    if (isspace(input[i])) { i++; }
+                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                }
+                if (count > index) { return 0; }
+            }
+        }
+        
+        if (rest != "") { float tdist; mothurConvert(rest, tdist); count++; pieces.push_back(tdist); }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "splitWhiteSpace");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
 	try {
         vector<string> pieces;
@@ -3822,7 +3850,24 @@ int  MothurOut::sum(vector<int> x) {
         return value;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "average - int");
+        errorOut(e, "MothurOut", "sum - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double  MothurOut::sum(vector<double> x) {
+    try {
+        int value = 0;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            value += x[i];
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "sum - double");
         exit(1);
     }
 }

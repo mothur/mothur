@@ -26,6 +26,7 @@ class SplitMatrix  {
 		int split();
 		vector< map<string, string> > getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		string getSingletonNames() { return singleton; } //returns namesfile containing singletons
+        long long getNumSingleton() { return numSingleton; } //returns namesfile containing singletons
 	
 	private:
 		MothurOut* m;
@@ -34,7 +35,8 @@ class SplitMatrix  {
 		vector< map< string, string> > dists;
 		float cutoff, distCutoff;
 		bool large, classic;
-		int processors;
+        int processors;
+        long long numSingleton;
 				
 		int splitDistance();
 		int splitClassify();

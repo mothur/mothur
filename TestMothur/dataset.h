@@ -25,11 +25,7 @@ public:
     GroupMap* getGroupMap()                     { fillGroup(); return gMap;             }
     CountTable* getCountTable()                 { createCountTable(); return ct;        }
     vector<SharedRAbundVector*> getLookup()     { fillLookup(); return lookup;          }
-    vector<FastqRead> getForwardFastq()         { return fastqData.getForwardFastq();   }
-    vector<FastqRead> getReverseFastq()         { return fastqData.getReverseFastq();   }
-    vector<string> getSubsetFRFastq(int n)      { return fastqData.getSubsetFRFastq(n); }
-    
-    vector<string> getSubsetFNGFiles(int);  //number of uniques passed in.  3 files returned -> Fasta, name, group.
+    vector<string> getSubsetFNGFiles(int);  //number of uniques, Fasta, name, group returned
     
 private:
     MothurOut* m;
@@ -39,15 +35,11 @@ private:
     CountTable* ct;
     GroupMap* gMap;
     vector<SharedRAbundVector*> lookup;
-    vector<FastqRead> ffastqReads; //F8D0 Sample
-    vector<FastqRead> rfastqReads; //F8D0 Sample
     void fillNames();
     void fillSeqs();
     void fillGroup();
     void createCountTable();
     void fillLookup();
-    void fillForwardFastq();
-    void fillReverseFastq();
     
 };
 

@@ -11,10 +11,9 @@
 #include "readphylip.h"
 #include "readcolumn.h"
 #include "readmatrix.hpp"
-#include "clusterdoturcommand.h"
 #include "sequence.hpp"
-#include "vsearchfileparser.h"
 #include "systemcommand.h"
+#include "sensspeccommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -24,15 +23,20 @@ vector<string> ClusterCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName","rabund-sabund",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
-		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
+        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+        CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+        CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         //CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -48,14 +52,19 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund and timing. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cutoff, precision, sim, showabund, timing, metric, iters, initialize. Fasta or Phylip or column and name are required.\n";
 		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
         helpString += "The phylip and column parameter allow you to enter your distance file. \n";
         helpString += "The fasta parameter allows you to enter your fasta file for use with the agc or dgc methods. \n";
         helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format.\n";
-        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
-        helpString += "The cluster command should be in the following format: \n";
+        helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
+        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
+        helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
+        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
+        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=opti.  The agc and dgc methods require a fasta file.";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+       helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
 		return helpString;
@@ -73,6 +82,8 @@ string ClusterCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
+        else if (type == "steps") {  pattern = "[filename],[clustertag],steps"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -89,8 +100,10 @@ ClusterCommand::ClusterCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
+        outputTypes["steps"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "ClusterCommand");
@@ -126,8 +139,10 @@ ClusterCommand::ClusterCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["list"] = tempOutNames;
+            outputTypes["sensspec"] = tempOutNames;
 			outputTypes["rabund"] = tempOutNames;
 			outputTypes["sabund"] = tempOutNames;
+            outputTypes["steps"] = tempOutNames;
 		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -253,26 +268,53 @@ ClusterCommand::ClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
 			
+            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
+            m->mothurConvert(temp, stableMetric);
+            
+            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            
+            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            
+            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            
+            if ((initialize == "singleton") || (initialize == "oneotu")){ }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
+            m->mothurConvert(temp, maxIters);
+            
             //temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { temp = "F"; }
             //if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
             //else if (m->isTrue(temp))   { adjust = 1.0;                     }
             //else                        { adjust = -1.0;                    }
             adjust=-1.0;
 			
+            bool setProcessors = true;
+            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ setProcessors=false;	temp = m->getProcessors();	}
+            m->setProcessors(temp);
+            m->mothurConvert(temp, processors);
+            
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "average"; }
+			if (method == "not found") {
+                method = "opti";
+                m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
+            }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
+        
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
+            }else if (setProcessors) {
+                m->mothurOut("[WARNING]: You can only use the processors option when using the agc or dgc clustering methods. Using 1 processor.\n.");
             }
             
-            //bool cutoffSet = false;
+            cutOffSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);
-            if (temp == "not found") { temp = "10"; }
-            //else { cutoffSet = true; }
+            if (temp == "not found") { temp = "0.03"; }
+            else { cutOffSet = true; }
             m->mothurConvert(temp, cutoff);
             
 			showabund = validParameter.validFile(parameters, "showabund", false);
@@ -297,7 +339,7 @@ int ClusterCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//phylip file given and cutoff not given - use cluster.classic because it uses less memory and is faster
-		if ((format == "phylip") && (cutoff > 10.0)) {
+		if ((format == "phylip") && (!cutOffSet) && (method != "opti")) {
 			m->mothurOutEndLine(); m->mothurOut("You are using a phylip file and no cutoff.  I will run cluster.classic to save memory and time."); m->mothurOutEndLine();
 			
 			//run unique.seqs for deconvolute results
@@ -325,8 +367,9 @@ int ClusterCommand::execute(){
 		
         time_t estart = time(NULL);
         
-        if (format == "fasta")  {   runVsearchCluster();    }
-        else                    {   runMothurCluster();     }
+        if (format == "fasta")      {   runVsearchCluster();    }
+        else if (method == "opti")  {   runOptiCluster();       }
+        else                        {   runMothurCluster();     }
         
 		if (m->control_pressed) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
         
@@ -495,6 +538,11 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         //--maxaccepts=16
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
+        
+        //--threads=1
+        string processorsString = "--threads=" + toString(processors);
+        char* processorsParameter = new char[processorsString.length()+1];  processorsParameter[0] = '\0'; strncat(processorsParameter, processorsString.c_str(), processorsString.length());
+        vsearchParameters.push_back(processorsParameter);
         
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
@@ -784,6 +832,141 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
 		m->errorOut(e, "ClusterCommand", "createRabund");
 		exit(1);
 	}
+    
+}
+//**********************************************************************************************************************
+
+int ClusterCommand::runOptiCluster(){
+    try {
+        if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
+        
+        string nameOrCount = "";
+        string thisNamefile = "";
+        map<string, int> counts;
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        
+        string distfile = columnfile;
+        if (format == "phylip") { distfile = phylipfile; }
+        
+        //int rstart = time(NULL);
+        
+        OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+        
+        //m->mothurOut("It took " + toString(time(NULL) - rstart) + " seconds to read and process matrix"); m->mothurOutEndLine();
+        
+        OptiCluster cluster(&matrix, metric, 0);
+        tag = cluster.getTag();
+        
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
+        
+        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        
+        string listFileName = fileroot+ tag + ".list";
+        
+        ofstream listFile;
+        m->openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string outputName = getOutputFileName("steps", variables);
+        outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
+        ofstream outStep;
+        m->openOutputFile(outputName, outStep);
+        
+        int iters = 0;
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        cluster.initialize(listVectorMetric, true, initialize);
+        
+        long long numBins = cluster.getNumBins();
+        m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        long long tp, tn, fp, fn;
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
+        m->mothurOutEndLine();
+        outStep << endl;
+        
+        while ((delta > stableMetric) && (iters < maxIters)) {
+            
+            int start = time(NULL);
+            
+            if (m->control_pressed) { break; }
+            double oldMetric = listVectorMetric;
+            
+            cluster.update(listVectorMetric);
+
+            delta = abs(oldMetric - listVectorMetric);
+            iters++;
+            
+            results = cluster.getStats(tp, tn, fp, fn);
+            numBins = cluster.getNumBins();
+            
+            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
+            m->mothurOutEndLine();
+            outStep << endl;
+        }
+        m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        ListVector* list = cluster.getList();
+        list->setLabel(toString(cutoff));
+        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list->printHeaders(listFile); }
+        if(countfile != "") { list->print(listFile, counts); }
+        else { list->print(listFile); }
+        listFile.close();
+        
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+            SAbundVector sabund = list->getSAbundVector();
+            sabund.print(sabundFile);
+            sabundFile.close();
+            
+            RAbundVector rabund = list->getRAbundVector();
+            rabund.print(rabundFile);
+            rabundFile.close();
+        }
+        delete list;
+        
+        string sensspecFilename = fileroot+ tag + ".sensspec";
+        ofstream sensFile;
+        m->openOutputFile(sensspecFilename,	sensFile);
+        outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+        
+        
+        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        
+        results = cluster.getStats(tp, tn, fp, fn);
+        
+        sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+        for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
+        sensFile << '\n';
+        sensFile.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "runOptiCluster");
+        exit(1);
+    }
     
 }
 //**********************************************************************************************************************

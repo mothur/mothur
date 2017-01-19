@@ -8,8 +8,8 @@
  */
 
 #include "clustersplitcommand.h"
-#include "vsearchfileparser.h"
 #include "systemcommand.h"
+#include "sensspeccommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
@@ -28,9 +28,14 @@ vector<string> ClusterSplitCommand::setParameters(){
         CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcluster);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+        CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
+        CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
+        CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
+        CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+        CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+       CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -50,7 +55,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, iters, delta, initialize, dist, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -63,14 +68,20 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
         helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
-		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
+        helpString += "The dist parameter allows you to indicate whether you want a column formatted distance matrix outputted along with the list file. Default=F.";
+		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.03. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
-		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc and dgc. Default=average.  The agc and dgc methods require a fasta file.";
+        helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
+        helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
+        helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method. Default=0.0001\n";
+        helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
+		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=opti.  The agc and dgc methods require a fasta file.";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
         helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The cluster.split command should be in the following format: \n";
 		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
 		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
@@ -89,6 +100,7 @@ string ClusterSplitCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
         else if (type == "column") {  pattern = "[filename],dist"; }
         else if (type == "file")   {  pattern = "[filename],file"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -110,7 +122,9 @@ ClusterSplitCommand::ClusterSplitCommand(){
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
@@ -151,6 +165,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			outputTypes["sabund"] = tempOutNames;
 			outputTypes["column"] = tempOutNames;
             outputTypes["file"] = tempOutNames;
+            outputTypes["sensspec"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -251,7 +266,10 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { taxFile = ""; abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
-			else {  m->setTaxonomyFile(taxFile); if (splitmethod != "fasta") { splitmethod = "classify"; } }
+			else {
+                m->setTaxonomyFile(taxFile);
+                if (splitmethod != "fasta")         { splitmethod = "classify";     }
+            }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (file == "")) {
 				//is there are current file available for either of these?
@@ -344,12 +362,29 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
 			
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
-			m->mothurConvert(temp, taxLevelCutoff); 
+			m->mothurConvert(temp, taxLevelCutoff);
+            
+            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
+            m->mothurConvert(temp, maxIters);
+            
+            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
+            m->mothurConvert(temp, stableMetric);
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
+            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            
+            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            
+            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            
+            if ((initialize == "singleton") || (initialize == "oneotu")){ }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+
+            
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "opti"; m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine(); }
 			
-            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc")) { }
-            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc and dgc."); m->mothurOutEndLine(); abort = true; }
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -357,7 +392,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             }
             
             cutoffNotSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.25"; }
+            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.03"; }
             m->mothurConvert(temp, cutoff);
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
@@ -373,6 +408,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "islist", false);  if (temp == "not found") { temp = "F"; }
             isList = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "dist", false);  if (temp == "not found") { temp = "F"; }
+            makeDist = m->isTrue(temp);
+            if (method == "opti") { makeDist = true; }
+            if (((phylipfile != "") || (columnfile != "")) && (method == "opti")) { makeDist = false; }
+            
+            if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
+            if (classic && makeDist) { m->mothurOut("[ERROR]: You cannot use the dist parameter with the classic parameter. Mothur will ignore the dist parameter.\n"); makeDist = false; }
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
@@ -480,13 +523,14 @@ int ClusterSplitCommand::execute(){
                 if (m->control_pressed) { delete split; return 0; }
                 
                 singletonName = split->getSingletonNames();
+                numSingletons = split->getNumSingleton();
                 distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
                 delete split;
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
                 
                 //output a merged distance file
-                //if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
+                if (makeDist)		{ createMergedDistanceFile(distName); }
 				
                 if (m->control_pressed) { return 0; }
                 
@@ -533,7 +577,7 @@ int ClusterSplitCommand::execute(){
 		m->mothurOut("Merging the clustered files..."); m->mothurOutEndLine();
 
 		ListVector* listSingle;
-		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
+		map<double, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
 		
 		if (m->control_pressed) { if (listSingle != NULL) { delete listSingle; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 		
@@ -545,7 +589,11 @@ int ClusterSplitCommand::execute(){
         if (!deleteFiles) { for (int i = 0; i < distName.size(); i++) {	m->mothurRemove(distName[i].begin()->first); m->mothurRemove(distName[i].begin()->second); 	} }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
-		
+        
+        if (method == "opti") { runSensSpec();  }
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        
 		//set list file as new current listfile
 		string current = "";
 		itTypes = outputTypes.find("list");
@@ -564,6 +612,12 @@ int ClusterSplitCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
 		}
+        
+        //set sabund file as new current sabundfile
+        itTypes = outputTypes.find("column");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+        }
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -578,10 +632,10 @@ int ClusterSplitCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
+map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
 	try {
-		map<float, int> labelBin;
-		vector<float> orderFloat;
+		map<double, int> labelBin;
+		vector<double> orderFloat;
 		int numSingleBins;
         
 		//read in singletons
@@ -596,16 +650,18 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
             if (countfile != "") { m->getline(in); m->gobble(in); }
             
 			while (!in.eof()) {
-				in >> firstCol >> secondCol; m->getline(in); m->gobble(in);
+				in >> firstCol >> secondCol;
+                m->getline(in);
 				if (countfile == "") { listSingle->push_back(secondCol); }
                 else { listSingle->push_back(firstCol); }
+                m->gobble(in);
 			}
             
 			in.close();
 			m->mothurRemove(singleton);
             
 			numSingleBins = listSingle->getNumBins();
-		}else{  listSingle = NULL; numSingleBins = 0;  }
+        }else{  listSingle = NULL; numSingleBins = 0;  }
 		
         //go through users set and make them floats so we can sort them
         double tcutoff = cutoff * 1000; tcutoff = ceil(tcutoff);
@@ -626,7 +682,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		//sort order
 		sort(orderFloat.begin(), orderFloat.end());
 		userLabels.clear();
-			
+        
 		//get the list info from each file
 		for (int k = 0; k < listNames.size(); k++) {
             
@@ -646,7 +702,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
             
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
-			
+                
 				string thisLabel;
 				if (orderFloat[l] == -1) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
@@ -697,7 +753,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 	}
 }
 //**********************************************************************************************************************
-int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> userLabels, ListVector* listSingle){
+int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> userLabels, ListVector* listSingle){
 	try {
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
@@ -728,7 +784,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		m->openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
-		map<float, int>::iterator itLabel;
+		map<double, int>::iterator itLabel;
         
         //clears out junk for autocompleting of list files above.  Perhaps there is a beter way to handle this from within the data structure?
         m->printedListHeaders = false;
@@ -844,8 +900,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //for each file group figure out which process will complete it
         //want to divide the load intelligently so the big files are spread between processes
-        for (int i = 0; i < distName.size(); i++) { 
-            //cout << i << endl;
+        for (int i = 0; i < distName.size(); i++) {
             int processToAssign = (i+1) % processors; 
             if (processToAssign == 0) { processToAssign = processors; }
             
@@ -855,7 +910,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //now lets reverse the order of ever other process, so we balance big files running with little ones
         for (int i = 0; i < processors; i++) {
-            //cout << i << endl;
             int remainder = ((i+1) % processors);
             if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
         }
@@ -927,7 +981,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             //for each file group figure out which process will complete it
             //want to divide the load intelligently so the big files are spread between processes
             for (int i = 0; i < distName.size(); i++) {
-                //cout << i << endl;
                 int processToAssign = (i+1) % processors;
                 if (processToAssign == 0) { processToAssign = processors; }
                 
@@ -937,7 +990,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             
             //now lets reverse the order of ever other process, so we balance big files running with little ones
             for (int i = 0; i < processors; i++) {
-                //cout << i << endl;
                 int remainder = ((i+1) % processors);
                 if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
             }
@@ -1029,14 +1081,15 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         deleteFiles = true;
         
-        //delete the temp files now that we are done
-        for (int i = 0; i < distName.size(); i++) {
-            string thisNamefile = distName[i].begin()->second;
-            string thisDistFile = distName[i].begin()->first;
-            m->mothurRemove(thisNamefile);
-            m->mothurRemove(thisDistFile);
+        if (deleteFiles) {
+            //delete the temp files now that we are done
+            for (int i = 0; i < distName.size(); i++) {
+                string thisNamefile = distName[i].begin()->second;
+                string thisDistFile = distName[i].begin()->first;
+                m->mothurRemove(thisNamefile);
+                m->mothurRemove(thisDistFile);
+            }
         }
-
     #else
     #endif
         
@@ -1069,10 +1122,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
 				listFileNames.clear(); return listFileNames;
 			}
-            
             listFileNames.push_back(listFileName);
         }
-		
 		cutoff = smallestCutoff;
         
 		return listFileNames;
@@ -1194,6 +1245,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         string listFileName = "";
         
         if ((method == "agc") || (method == "dgc")) {  listFileName = runVsearchCluster(thisDistFile, thisNamefile, labels, smallestCutoff);  }
+        else if (method == "opti")                  {  listFileName = runOptiCluster(thisDistFile, thisNamefile, labels, smallestCutoff);     }
         else {
             
             Cluster* cluster = NULL;
@@ -1332,6 +1384,72 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
 	}
 }
 //**********************************************************************************************************************
+string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
+    try {
+        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
+        
+        string nameOrCount = "count";
+        if (namefile != "") { nameOrCount = "name"; }
+        
+        OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, "column", cutoff, false);
+        
+        OptiCluster cluster(&matrix, metric, numSingletons);
+        tag = cluster.getTag();
+        
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
+        
+        if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
+        
+        string listFileName = fileroot+ tag + ".list";
+        
+        int iters = 0;
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        cluster.initialize(listVectorMetric, true, initialize);
+        
+        while ((delta > stableMetric) && (iters < maxIters)) {
+            
+            if (m->control_pressed) { if (deleteFiles) { m->mothurRemove(thisDistFile);  m->mothurRemove(thisNamefile); } return listFileName; }
+            double oldMetric = listVectorMetric;
+            cluster.update(listVectorMetric);
+            
+            delta = abs(oldMetric - listVectorMetric);
+            iters++;
+        }
+        
+        ListVector* list = cluster.getList();
+        list->setLabel(toString(smallestCutoff));
+        cutoff = m->ceilDist(cutoff, precision);
+        labels.insert(toString(cutoff));
+        
+        ofstream listFile;
+        m->openOutputFile(listFileName,	listFile);
+        list->print(listFile);
+        listFile.close();
+        
+        if (deleteFiles) {
+            m->mothurRemove(thisDistFile);
+            m->mothurRemove(thisNamefile);
+        }
+        
+         long long tp, tn, fp, fn;
+        m->mothurOut("\ntp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        m->mothurOut(toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
+        m->mothurOut("\n\n");
+    
+        return listFileName;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "runOptiCluster");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 
 string ClusterSplitCommand::runVsearchCluster(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
     try {
@@ -1412,6 +1530,10 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", 15);
         vsearchParameters.push_back(maxaccepts);
         
+        //--threads=1
+        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        vsearchParameters.push_back(threads);
+        
         //--usersort
         char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", 10);
         vsearchParameters.push_back(usersort);
@@ -1432,10 +1554,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
         //--wordlength=8
         char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", 14);
         vsearchParameters.push_back(wordlength);
-        
-        //--threads=1
-        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
-        vsearchParameters.push_back(threads);
         
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;
@@ -1500,7 +1618,6 @@ int ClusterSplitCommand::vsearchDriver(string inputFile, string ucClusteredFile,
 
 int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > distNames) {
 	try{
-		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
         map<string, string> variables; 
@@ -1519,14 +1636,76 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 			
 		outputTypes["column"].push_back(outputFileName); outputNames.push_back(outputFileName);
 			
-		return 0;	
-		
-		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "createMergedDistanceFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+int ClusterSplitCommand::runSensSpec() {
+    try{
+        string listFile = "";
+        itTypes = outputTypes.find("list");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { listFile = (itTypes->second)[0];  }
+        }
+        
+        string columnFile = ""; string phylipFile = "";
+        if (makeDist) {
+            itTypes = outputTypes.find("column");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { columnFile = (itTypes->second)[0];  }
+            }
+        }else if (columnfile != "") { columnFile = columnfile; }
+        else { phylipFile = phylipfile; }
+    
+        string inputString = "list=" + listFile;
+        if (columnFile != "") { inputString += ", column=" + columnFile;  }
+        else if (phylipfile != "")   { inputString += ", phylip=" + phylipfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a phylip or column file, skipping."); return 0;  }
+
+        if (namefile != "")         {  inputString += ", name=" + namefile; }
+        else if (countfile != "")   { inputString += ", count=" + countfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
+        
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("Running command: sens.spec(" + inputString + ")"); m->mothurOutEndLine();
+        m->mothurCalling = true;
+        
+        Command* sensspecCommand = new SensSpecCommand(inputString);
+        sensspecCommand->execute();
+        
+        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
+        
+        delete sensspecCommand;
+        m->mothurCalling = false;
+        
+        string outputFileName = filenames["sensspec"][0];
+        
+        outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("Done.\n\n"); m->mothurOutEndLine();
+        
+        ifstream in;
+        m->openInputFile(outputFileName, in);
+        
+        while(!in.eof()){
+            if (m->control_pressed) { break; }
+            
+            m->mothurOut(m->getline(in)+"\n"); m->gobble(in);
+        }
+        in.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "runSensSpec");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){
@@ -1617,7 +1796,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
             }
             
             ListVector* listSingle;
-            map<float, int> labelBins = completeListFile(listFileNames, singleton, listLabels, listSingle);
+            map<double, int> labelBins = completeListFile(listFileNames, singleton, listLabels, listSingle);
             
             mergeLists(listFileNames, labelBins, listSingle);
         

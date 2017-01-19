@@ -14,8 +14,12 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsedistancematrix.h"
 #include "counttable.h"
+#include "vsearchfileparser.h"
+#include "clusterdoturcommand.h"
+#include "opticluster.h"
+#include "optimatrix.h"
+
 
 /* The cluster() command:
 	The cluster command outputs a .list , .rabund and .sabund files.  
@@ -52,13 +56,13 @@ private:
 	RAbundVector oldRAbund;
 	ListVector oldList;
 
-	bool abort, sim;
+	bool abort, sim, cutOffSet;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation;
-	double cutoff;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation, metric, initialize;
+	double cutoff, stableMetric;
     float adjust;
 	string showabund, timing;
-	int precision, length;
+	int precision, length, maxIters, processors;
 	ofstream sabundFile, rabundFile, listFile;
 
 	bool print_start;
@@ -71,6 +75,7 @@ private:
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
     int vsearchDriver(string, string, string);
     int runVsearchCluster();
+    int runOptiCluster();
     int runMothurCluster();
 };
 

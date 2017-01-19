@@ -560,6 +560,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
         if (countfile != "") { headers = m->getline(bigNameFile); m->gobble(bigNameFile); }
         
         string name, nameList;
+        numSingleton = 0;
         while(!bigNameFile.eof()){
             bigNameFile >> name >> nameList;  
             m->getline(bigNameFile); m->gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
@@ -574,6 +575,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             }else{
                 wroteExtra = true;
                 remainingNames << name << '\t' << nameList << endl;
+                numSingleton++;
             }
         }
         bigNameFile.close();
@@ -585,6 +587,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             //if there are valid distances
             ifstream fileHandle;
             fileHandle.open(tempDistFile.c_str());
+            bool removeDist = false;
             if(fileHandle) 	{
                 m->gobble(fileHandle);
                 if (!fileHandle.eof()) {  //check
@@ -610,12 +613,15 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                         in >> name >> nameList;  m->gobble(in);
                         wroteExtra = true;
                         remainingNames << name << '\t' << nameList << endl;
+                        numSingleton++;
                     }
                     in.close();
                     m->mothurRemove(tempNameFile);
+                    removeDist = true;
                 }
             }
             fileHandle.close();
+            if (removeDist) { m->mothurRemove(tempDistFile); }
 		}
 		
 		remainingNames.close();
@@ -623,6 +629,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
 		if (!wroteExtra) { 
 			m->mothurRemove(singleton);
 			singleton = "none";
+            numSingleton = 0;
 		}else if (countfile != "") {
             //add header
             ofstream out;
@@ -669,6 +676,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
             vector<string> pieces = m->splitWhiteSpace(headers); if (pieces.size() != 2) { hasGroups = true; } }
         
         string name, nameList;
+        numSingleton = 0;
         while(!bigNameFile.eof()){
             bigNameFile >> name >> nameList; m->gobble(bigNameFile);
             if (hasGroups) { m->getline(bigNameFile); m->gobble(bigNameFile);  }
@@ -680,9 +688,10 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
                 m->openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
                 outFile << name << '\t' << nameList << endl;
                 outFile.close();
-            }else{//taxonomic groups of one
+            }else{
                 wroteExtra = true;
                 remainingNames << name << '\t' << nameList << endl;
+                numSingleton++;
             }
         }
         bigNameFile.close();
@@ -720,6 +729,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
                         in >> name >> nameList;  m->gobble(in);
                         wroteExtra = true;
                         remainingNames << name << '\t' << nameList << endl;
+                        numSingleton++;
                     }
                     in.close();
                     m->mothurRemove(tempNameFile);
@@ -733,6 +743,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         if (!wroteExtra) {
             m->mothurRemove(singleton);
             singleton = "none";
+            numSingleton = 0;
         }else if (countfile != "") {
             //add header
             ofstream out;
