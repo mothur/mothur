@@ -1383,6 +1383,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         int currentSeqsDiffs = 0;
         
         string seq = read.bases;
+
         for (int i = 0; i < seq.length(); i++) { seq[i] = toupper(seq[i]); }
         
         if (trim) {

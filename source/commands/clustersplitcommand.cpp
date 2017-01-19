@@ -390,10 +390,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
                 if (classic) { m->mothurOut("[ERROR]: You cannot use cluster.classic with the agc or dgc clustering methods, aborting\n."); abort = true; }
             }
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            #else
-            if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
-            #endif
             
             cutoffNotSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.03"; }
@@ -1864,12 +1860,9 @@ bool ClusterSplitCommand::findVsearch(){
         
         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
-        //look for uchime exe
+        //look for vsearch exe
         string path = m->mothurProgramPath;
-        //string tempPath = path;
-        //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-        //path = path.substr(0, (tempPath.find_last_of('m')));
-        
+       
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
@@ -1884,25 +1877,25 @@ bool ClusterSplitCommand::findVsearch(){
             delete newCommand;
         }
 #else
-        vsearchCommand = path + "vsearch.exe";
+        vsearchCommand = path + "\\vsearch.exe";
 #endif
         
-        //test to make sure uchime exists
+        //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
         int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
         if(ableToOpen == 1) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if uchime is in the path??
-            
-            string uLocation = m->findProgramPath("vsearch");
-            
+            //check to see if vsearch is in the path??
             
             ifstream in2;
+            string uLocation = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            uLocation = m->findProgramPath("vsearch");
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+            uLocation = m->findProgramPath("vsearch.exe");
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
             if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
@@ -1911,9 +1904,7 @@ bool ClusterSplitCommand::findVsearch(){
         
         vsearchLocation = m->getFullPathName(vsearchLocation);
         
-        if (m->debug) {
-            m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n");
-        }
+        if (m->debug) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
         
         if (!abort) { return true; }
         

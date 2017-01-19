@@ -311,11 +311,6 @@ ClusterCommand::ClusterCommand(string option)  {
                 m->mothurOut("[WARNING]: You can only use the processors option when using the agc or dgc clustering methods. Using 1 processor.\n.");
             }
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-            if ((method == "agc") || (method == "dgc")) { m->mothurOut("[ERROR]: The agc and dgc clustering methods are not available for Windows, aborting\n."); abort = true; }
-#endif
-            
             cutOffSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);
             if (temp == "not found") { temp = "0.03"; }
@@ -417,9 +412,6 @@ int ClusterCommand::runVsearchCluster(){
     try {
         //look for vsearch exe
         string path = m->mothurProgramPath;
-        //string tempPath = path;
-        //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-        //path = path.substr(0, (tempPath.find_last_of('m')));
         
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -435,30 +427,32 @@ int ClusterCommand::runVsearchCluster(){
             delete newCommand;
         }
 #else
-        vsearchCommand = path + "vsearch.exe";
+        vsearchCommand = path + "\\vsearch.exe";
 #endif
         
-        //test to make sure uchime exists
+        //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
         int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
         if(ableToOpen == 1) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if uchime is in the path??
-            
-            string uLocation = m->findProgramPath("vsearch");
-            
-            
+            //check to see if vsearch is in the path??
+
             ifstream in2;
+            string uLocation = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            uLocation = m->findProgramPath("vsearch");
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #else
-            ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+            uLocation = m->findProgramPath("vsearch.exe");
+            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
-            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }
             else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
         }else {  vsearchLocation = vsearchCommand; }
+        
+        if (m->control_pressed) {  return 0; }
         
         vsearchLocation = m->getFullPathName(vsearchLocation);
         

@@ -510,16 +510,12 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
             
             //look for uchime exe
-            path = m->mothurProgramPath;
-            //string tempPath = path;
-            //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-            //path = path.substr(0, (tempPath.find_last_of('m')));
-            
+            path = m->mothurProgramPath;            
             string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
             if (m->debug) {
-                m->mothurOut("[DEBUG]: Uchime location using \"which vsearch\" = ");
+                m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
                 Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
                 newCommand->execute();
                 delete newCommand;
@@ -529,10 +525,9 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 delete newCommand;
             }
 #else
-            m->mothurOut("[ERROR]: The chimera.vsearch command is not available for windows.  The vsearch program is not supported on the Windows platform, aborting."); m->mothurOutEndLine(); abort=true;
+            vsearchCommand = path + "\\vsearch.exe";
 #endif
             
-    #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             //test to make sure uchime exists
             ifstream in;
             vsearchCommand = m->getFullPathName(vsearchCommand);
@@ -541,20 +536,23 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 
-                string vLocation = m->findProgramPath("vsearch");
-                
-                
                 ifstream in2;
-                ableToOpen = m->openInputFile(vLocation, in2, "no error"); in2.close();
-
-
+                string uLocation = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                uLocation = m->findProgramPath("vsearch");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#else
+                uLocation = m->findProgramPath("vsearch.exe");
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#endif
                 
-                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + vLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
-                else {  m->mothurOut("Found vsearch in your path, using " + vLocation + "\n");vsearchLocation = vLocation; }
+                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+                else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
             }else {  vsearchLocation = vsearchCommand; }
             
             vsearchLocation = m->getFullPathName(vsearchLocation);
-    #endif
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
         }
     }
     catch(exception& e) {
@@ -598,6 +596,7 @@ int ChimeraVsearchCommand::execute(){
                 newCountFile = getOutputFileName("count", variables);
             }
             
+            //setup fasta file if denovo and no groups
             if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
                 
                 if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
@@ -612,20 +611,14 @@ int ChimeraVsearchCommand::execute(){
                 vector<seqPriorityNode> nameMapCount;
                 int error;
                 if (hasCount) {
-                    CountTable ct;
-                    ct.readTable(nameFile, true, false);
+                    CountTable ct; ct.readTable(nameFile, true, false);
                     for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                         int num = ct.getNumSeqs(it->first);
                         if (num == 0) { error = 1; }
-                        else {
-                            seqPriorityNode temp(num, it->second, it->first);
-                            nameMapCount.push_back(temp);
-                        }
+                        else { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
                     }
-                }else {
-                    error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                }else { error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed || (error == 1)) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}return 0; }
                 }
-                if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 
                 m->printVsearchFile(nameMapCount, newFasta, ";size=", ";");
@@ -661,29 +654,26 @@ int ChimeraVsearchCommand::execute(){
                 m->openOutputFile(accnosFileName, out1); out1.close();
                 if (chimealns) { m->openOutputFile(alnsFileName, out2); out2.close(); }
                 
-                if(processors == 1)	{ driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
-                    
-                    if (hasCount && dups) {
-                        CountTable c; c.readTable(nameFile, true, false);
-                        if (!m->isBlank(newCountFile)) {
-                            ifstream in2;
-                            m->openInputFile(newCountFile, in2);
-                            
-                            string name, group;
-                            while (!in2.eof()) {
-                                in2 >> name >> group; m->gobble(in2);
-                                c.setAbund(name, group, 0);
-                            }
-                            in2.close();
+                //paralellized in vsearch
+                driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
+                if (hasCount && dups) {
+                    CountTable c; c.readTable(nameFile, true, false);
+                    if (!m->isBlank(newCountFile)) {
+                        ifstream in2;
+                        m->openInputFile(newCountFile, in2);
+                        
+                        string name, group;
+                        while (!in2.eof()) {
+                            in2 >> name >> group; m->gobble(in2);
+                            c.setAbund(name, group, 0);
                         }
-                        m->mothurRemove(newCountFile);
-                        c.printTable(newCountFile);
+                        in2.close();
                     }
-                    
-                }else{ createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s]);			}
+                    m->mothurRemove(newCountFile);
+                    c.printTable(newCountFile);
+                }
                 
                 if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
-                
                 
                 if (!dups) {
                     int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
@@ -724,8 +714,8 @@ int ChimeraVsearchCommand::execute(){
                 
                 int numChimeras = 0;
                 
-                if(processors == 1){ driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
-                else{ createProcesses(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
+                //paralellized in vsearch
+                driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras);
                 
                 //add headings
                 ofstream out;
@@ -1128,15 +1118,16 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
             int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
             int error;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            long long thisGroupsSeqs = 0;
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
             
-            int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
-            totalSeqs += numSeqs;
+            totalSeqs += thisGroupsSeqs;
+            driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
             
             if (m->control_pressed) { return 0; }
             
-            //remove file made for uchime
+            //remove file made for vsearch
             if (!m->debug) {  m->mothurRemove(filename);  }
             else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
             
@@ -1180,7 +1171,7 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
             m->appendFiles((accnos+groups[i]), accnos); m->mothurRemove((accnos+groups[i]));
             if (chimealns) { m->appendFiles((alns+groups[i]), alns); m->mothurRemove((alns+groups[i])); }
             
-            m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();
+            m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();
         }
         
         if (hasCount && dups) { outCountList.close(); }
@@ -1214,11 +1205,11 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         string vsearchCommand = vsearchLocation;
         vsearchCommand = "\"" + vsearchCommand + "\" ";
         
-        char* tempUchime;
-        tempUchime= new char[vsearchCommand.length()+1];
-        *tempUchime = '\0';
-        strncat(tempUchime, vsearchCommand.c_str(), vsearchCommand.length());
-        cPara.push_back(tempUchime);
+        char* tempVsearch;
+        tempVsearch= new char[vsearchCommand.length()+1];
+        *tempVsearch = '\0';
+        strncat(tempVsearch, vsearchCommand.c_str(), vsearchCommand.length());
+        cPara.push_back(tempVsearch);
         
         //are you using a reference file
         if (templatefile != "self") {
@@ -1244,7 +1235,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             cPara.push_back(temp);
 
         }else { //denovo
-            char* tempIn = new char[8];
+            char* tempIn = new char[16];
             *tempIn = '\0'; strncat(tempIn, "--uchime_denovo", 15);
             cPara.push_back(tempIn);
             char* temp = new char[filename.length()+1];
@@ -1320,8 +1311,8 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             char* tempmindiv = new char[9];
             *tempmindiv = '\0'; strncat(tempmindiv, "--mindiffs", 10);
             cPara.push_back(tempmindiv);
-            char* tempMindiv = new char[mindiv.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, mindiv.c_str(), mindiv.length());
+            char* tempMindiv = new char[mindiffs.length()+1];
+            *tempMindiv = '\0'; strncat(tempMindiv, mindiffs.c_str(), mindiffs.length());
             cPara.push_back(tempMindiv);
         }
         
@@ -1348,14 +1339,23 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         }
         
         //--threads=1
-        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", 11);
+        char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
         cPara.push_back(threads);
+        string numProcessors = toString(processors);
+        char* tempThreads = new char[numProcessors.length()+1];
+        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
+        cPara.push_back(tempThreads);
         
         char** vsearchParameters;
         vsearchParameters = new char*[cPara.size()];
         string commandString = "";
         for (int i = 0; i < cPara.size(); i++) {  vsearchParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
         //int numArgs = cPara.size();
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
         
         if (m->debug) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
         //cout << "commandString = " << commandString << endl;
@@ -1434,227 +1434,6 @@ int ChimeraVsearchCommand::prepFile(string filename, string output) {
     }
     catch(exception& e) {
         m->errorOut(e, "ChimeraVsearchCommand", "prepFile");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-
-int ChimeraVsearchCommand::createProcesses(string outputFileName, string filename, string accnos, string alns, int& numChimeras) {
-    try {
-        
-        processIDS.clear();
-        int process = 1;
-        int num = 0;
-        vector<string> files;
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-        //break up file into multiple files
-        m->divideFile(filename, processors, files);
-        
-        if (m->control_pressed) {  return 0;  }
-        
-        //loop through and create all the processes you want
-        while (process != processors) {
-            pid_t pid = fork();
-            
-            if (pid > 0) {
-                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                process++;
-            }else if (pid == 0){
-                num = driver(outputFileName + toString(m->mothurGetpid(process)) + ".temp", files[process], accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", numChimeras);
-                
-                //pass numSeqs to parent
-                ofstream out;
-                string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                m->openOutputFile(tempFile, out);
-                out << num << endl;
-                out << numChimeras << endl;
-                out.close();
-                
-                exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                exit(0);
-            }
-        }
-        
-        //do my part
-        num = driver(outputFileName, files[0], accnos, alns, numChimeras);
-        
-        //force parent to wait until all the processes are done
-        for (int i=0;i<processIDS.size();i++) { 
-            int temp = processIDS[i];
-            wait(&temp);
-        }
-        
-        for (int i = 0; i < processIDS.size(); i++) {
-            ifstream in;
-            string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-            m->openInputFile(tempFile, in);
-            if (!in.eof()) { 
-                int tempNum = 0; 
-                in >> tempNum; m->gobble(in);
-                num += tempNum; 
-                in >> tempNum;
-                numChimeras += tempNum;
-            }
-            in.close(); m->mothurRemove(tempFile);
-        }
-#endif
-        //append output files
-        for(int i=0;i<processIDS.size();i++){
-            m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-            m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
-            
-            m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-            m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-            
-            if (chimealns) {
-                m->appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
-                m->mothurRemove((alns + toString(processIDS[i]) + ".temp"));
-            }
-        }
-        
-        //get rid of the file pieces.
-        for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }
-        
-        return num;	
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "createProcesses");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-
-int ChimeraVsearchCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
-    try {
-        
-        processIDS.clear();
-        int process = 1;
-        int num = 0;
-        
-        CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(nameFile, true, false); }
-        
-        //sanity check
-        if (groups.size() < processors) { processors = groups.size(); }
-        
-        //divide the groups between the processors
-        vector<linePair> lines;
-        int remainingPairs = groups.size();
-        int startIndex = 0;
-        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-            int numPairs = remainingPairs; //case for last processor
-            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-            lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
-            startIndex = startIndex + numPairs;
-            remainingPairs = remainingPairs - numPairs;
-        }
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-        
-        //loop through and create all the processes you want
-        while (process != processors) {
-            pid_t pid = fork();
-            
-            if (pid > 0) {
-                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                process++;
-            }else if (pid == 0){
-                num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", filename + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", alns + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
-                
-                //pass numSeqs to parent
-                ofstream out;
-                string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
-                m->openOutputFile(tempFile, out);
-                out << num << endl;
-                out.close();
-                
-                exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                exit(0);
-            }
-            
-        }
-        m->mothurOut(toString( getpid() ) + " here\n");
-        
-        //do my part
-        num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
-        
-        //force parent to wait until all the processes are done
-        for (int i=0;i<processIDS.size();i++) { 
-            int temp = processIDS[i];
-            wait(&temp);
-        }
-        
-        for (int i = 0; i < processIDS.size(); i++) {
-            ifstream in;
-            string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
-            m->openInputFile(tempFile, in);
-            if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-            in.close(); m->mothurRemove(tempFile);
-        }
-        
-#endif
-        
-        //read my own
-        if (hasCount && dups) {
-            if (!m->isBlank(accnos + ".byCount")) {
-                ifstream in2;
-                m->openInputFile(accnos + ".byCount", in2);
-                
-                string name, group;
-                while (!in2.eof()) {
-                    in2 >> name >> group; m->gobble(in2);
-                    newCount.setAbund(name, group, 0);
-                }
-                in2.close();
-            }
-            m->mothurRemove(accnos + ".byCount");
-        }
-        
-        //append output files
-        for(int i=0;i<processIDS.size();i++){
-            m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
-            m->mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
-            
-            m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-            m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-            
-            if (chimealns) {
-                m->appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
-                m->mothurRemove((alns + toString(processIDS[i]) + ".temp"));
-            }
-            
-            if (hasCount && dups) {
-                if (!m->isBlank(accnos + ".byCount." + toString(processIDS[i]) + ".temp")) {
-                    ifstream in2;
-                    m->openInputFile(accnos + ".byCount." + toString(processIDS[i]) + ".temp", in2);
-                    
-                    string name, group;
-                    while (!in2.eof()) {
-                        in2 >> name >> group; m->gobble(in2);
-                        newCount.setAbund(name, group, 0);
-                    }
-                    in2.close();
-                }
-                m->mothurRemove(accnos + ".byCount." + toString(processIDS[i]) + ".temp");
-            }
-            
-        }
-        
-        //print new *.pick.count_table
-        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
-        
-        return num;	
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "createProcessesGroups");
         exit(1);
     }
 }

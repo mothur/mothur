@@ -62,7 +62,7 @@ private:
     int createProcessesAlignSummary(vector<float>&, vector<float>&, vector<int>&, vector<linePair>);
  
     bool abort;
-	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile;
+	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile, fileType;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
     float minSim, minScore, criteria;
 	vector<string> outputNames;
