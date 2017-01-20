@@ -38,6 +38,7 @@ private:
     bool abort;
     
     vector< vector<string> > findGroupNames(vector< vector<string> > paired);
+    int fillAccnosFile(string tempFile);
 };
 
 
