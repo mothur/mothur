@@ -15,9 +15,9 @@
  
 To compile TestMothur you need to uncomment 
  
- //CommandFactory* CommandFactory::_uniqueInstance; in commandfactory.cpp
+ CommandFactory* CommandFactory::_uniqueInstance; in commandfactory.cpp
  
- //MothurOut* MothurOut::_uniqueInstance; in mothurout.cpp
+ MothurOut* MothurOut::_uniqueInstance; in mothurout.cpp
  
  
  */
@@ -28,5 +28,3 @@ To compile TestMothur you need to uncomment
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
-
-
