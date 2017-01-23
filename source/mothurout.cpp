@@ -44,6 +44,7 @@ set<string> MothurOut::getCurrentTypes()  {
         types.insert("sff");
         types.insert("shared");
         types.insert("taxonomy");
+        types.insert("constaxonomy");
         types.insert("tree");
         types.insert("flow");
         types.insert("biom");
@@ -83,6 +84,7 @@ void MothurOut::printCurrentFiles(string filename)  {
             if (sfffile != "")			{  mothurOut("sff=" + sfffile, out); mothurOutEndLine(out);					}
             if (sharedfile != "")		{  mothurOut("shared=" + sharedfile, out); mothurOutEndLine(out);			}
             if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile, out); mothurOutEndLine(out);		}
+            if (constaxonomyfile != "")	{  mothurOut("constaxonomy=" + constaxonomyfile, out); mothurOutEndLine(out);}
             if (treefile != "")			{  mothurOut("tree=" + treefile, out); mothurOutEndLine(out);				}
             if (flowfile != "")			{  mothurOut("flow=" + flowfile, out); mothurOutEndLine(out);				}
             if (biomfile != "")			{  mothurOut("biom=" + biomfile, out); mothurOutEndLine(out);				}
@@ -112,6 +114,7 @@ void MothurOut::printCurrentFiles(string filename)  {
             if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
             if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
             if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
+            if (constaxonomyfile != "")	{  mothurOut("constaxonomy=" + constaxonomyfile); mothurOutEndLine();}
             if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
             if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
             if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
@@ -150,6 +153,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (sfffile != "")			{  return true;			}
 		if (sharedfile != "")		{  return true;			}
 		if (taxonomyfile != "")		{  return true;			}
+        if (constaxonomyfile != "")	{  return true;			}
 		if (treefile != "")			{  return true;			}
 		if (flowfile != "")			{  return true;			}
         if (biomfile != "")			{  return true;			}

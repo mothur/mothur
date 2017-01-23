@@ -41,7 +41,7 @@ private:
 	vector<string> types;
 	
 	string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, countfile, summaryfile, currentFile, outputDir;
-	string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, filefile;
+	string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, filefile, constaxonomyfile;
 
     int readCurrentFiles();
 	

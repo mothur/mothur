@@ -258,6 +258,7 @@ class MothurOut {
         string getSummaryFile()     { return summaryfile;       }
         string getFileFile()        { return filefile;          }
 		string getProcessors()		{ return processors;		}
+        string getConsTaxonomyFile(){ return constaxonomyfile;  }
         int getNumErrors()          { return numErrors;         }
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -283,6 +284,7 @@ class MothurOut {
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
         void setSummaryFile(string f)		{ summaryfile = getFullPathName(f);			}
         void setFileFile(string f)          { filefile = getFullPathName(f);			}
+        void setConsTaxonomyFile(string f)  { constaxonomyfile = getFullPathName(f);	}
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
@@ -317,6 +319,7 @@ class MothurOut {
 			oligosfile = "";
 			accnosfile = "";
 			taxonomyfile = "";
+            constaxonomyfile = "";
 			processors = "1";
 			flowfile = "";
             biomfile = "";
@@ -343,7 +346,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;

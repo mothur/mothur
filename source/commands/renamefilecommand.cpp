@@ -584,7 +584,7 @@ int RenameFileCommand::execute(){
         if (constaxonomyfile != "") {
             newName = getNewName(constaxonomyfile, "constaxonomy");
             renameOrCopy(constaxonomyfile, newName);
-            m->setTaxonomyFile(newName);
+            m->setConsTaxonomyFile(newName);
         }
         if (flowfile != "") {
             newName = getNewName(flowfile, "flow");
@@ -644,8 +644,8 @@ string RenameFileCommand::getNewName(string name, string type){
             }else { basicName = prefix; }
             
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {
-                vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn.");
-                vector<string> newTags; newTags.push_back("an"); newTags.push_back("tx");  newTags.push_back("agc"); newTags.push_back("dgc"); newTags.push_back("nn"); newTags.push_back("fn"); newTags.push_back("wn");
+                vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn."); tags.push_back(".opti.");
+                vector<string> newTags; newTags.push_back("an"); newTags.push_back("tx");  newTags.push_back("agc"); newTags.push_back("dgc"); newTags.push_back("nn"); newTags.push_back("fn"); newTags.push_back("wn"); tags.push_back(".opti.");
                 
                 for (int i = 0; i < tags.size(); i++) {
                     int pos2 = name.find_first_of(tags[i]);

@@ -192,6 +192,12 @@ int BiomInfoCommand::execute(){
             if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
         }
         
+        //set constaxonomy file as new current constaxonomyfile
+        itTypes = outputTypes.find("constaxonomy");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setConsTaxonomyFile(current); }
+        }
+        
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

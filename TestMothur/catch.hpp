@@ -91,6 +91,10 @@
 
 // All the C++11 features can be disabled with CATCH_CONFIG_NO_CPP11
 
+//inline std::string toString( std::nullptr_t null ) {
+//    return "nullptr";
+//}
+
 #ifdef __cplusplus
 
 #  if __cplusplus >= 201103L

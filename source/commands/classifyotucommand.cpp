@@ -388,6 +388,13 @@ int ClassifyOtuCommand::execute(){
 				
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
+        //set constaxonomy file as new current constaxonomyfile
+        string current = "";
+        itTypes = outputTypes.find("constaxonomy");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setConsTaxonomyFile(current); }
+        }
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

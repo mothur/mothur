@@ -416,6 +416,12 @@ int RemoveLineageCommand::execute(){
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 			}
+            
+            //set constaxonomy file as new current constaxonomyfile
+            itTypes = outputTypes.find("constaxonomy");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setConsTaxonomyFile(current); }
+            }
 		}
 		
 		return 0;		

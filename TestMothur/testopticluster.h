@@ -26,7 +26,6 @@ public:
     using OptiCluster::calcSens;
     using OptiCluster::calcSpec;
     using OptiCluster::calcTPTN;
-    using OptiCluster::calcTP2TN;
     using OptiCluster::calcFPFN;
     using OptiCluster::moveAdjustTFValues;
     using OptiCluster::setVariables;
