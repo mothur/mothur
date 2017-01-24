@@ -295,7 +295,7 @@ int AlignCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
-		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, rand());
+		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, rand(), true);
 		
 		for (int s = 0; s < candidateFileNames.size(); s++) {
 			if (m->control_pressed) { outputTypes.clear(); return 0; }

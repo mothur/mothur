@@ -13,7 +13,7 @@
 #include "blastdb.hpp"
 
 /**************************************************************************************************/
-AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid){		//	This assumes that the template database is in fasta format, may 
+AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid, bool writeShortcut){		//	This assumes that the template database is in fasta format, may
 	try {											//	need to alter this in the future?
 		m = MothurOut::getInstance();
 		longest = 0;
@@ -104,8 +104,8 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				
 				if (m->control_pressed) {  templateSequences.clear();  }
 				
-				search->generateDB();
-				
+                if ((method != "kmer") || ((method == "kmer") && (writeShortcut))) { search->generateDB(); }
+                
 			}else if ((method == "kmer") && (!needToGenerate)) {
 				ifstream kmerFileTest(kmerDBName.c_str());
 				search->readKmerDB(kmerFileTest);	

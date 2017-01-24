@@ -908,7 +908,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			
-			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip, writeShortcuts);
+			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip, false);
 			pDataArray.push_back(tempclass);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.

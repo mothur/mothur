@@ -463,13 +463,14 @@ RenameFileCommand::RenameFileCommand(string option)  {
             temp = validParameter.validFile(parameters, "deleteold", false);		if (temp == "not found") { temp = "T"; }
             deleteOld = m->isTrue(temp);
             
-            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { temp = ""; }
+            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { prefix = ""; }
             
             outputfile = validParameter.validFile(parameters, "new", false);
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
                 outputfile = "";
-            }else if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
+            }else { mothurGenerated=false; }
+            if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
             
             if ((!mothurGenerated) && (numFiles > 1)) {
                 m->mothurOut("[ERROR]: You cannot use more than one file parameter unless mothur is generating the output filenames for you.\n"); abort= true;
@@ -632,6 +633,7 @@ int RenameFileCommand::execute(){
 string RenameFileCommand::getNewName(string name, string type){
     try {
         string newName = outputfile;
+        name = m->getFullPathName(name);
         
         if (mothurGenerated) {
             string extension = m->getExtension(name);
@@ -644,12 +646,15 @@ string RenameFileCommand::getNewName(string name, string type){
             }else { basicName = prefix; }
             
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {
-                vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn."); tags.push_back(".opti.");
-                vector<string> newTags; newTags.push_back("an"); newTags.push_back("tx");  newTags.push_back("agc"); newTags.push_back("dgc"); newTags.push_back("nn"); newTags.push_back("fn"); newTags.push_back("wn"); tags.push_back(".opti.");
+                vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn."); tags.push_back(".opti_");
                 
                 for (int i = 0; i < tags.size(); i++) {
-                    int pos2 = name.find_first_of(tags[i]);
-                    if (pos2 != string::npos) { tag = newTags[i]; break; }
+                    int pos2 = name.find(tags[i]);
+                    if (pos2 != string::npos) {
+                        int pos3 = name.substr(pos2+1).find_first_of('.');
+                        tag = name.substr(pos2+1, pos3);
+                        break;
+                    }
                 }
             }else if (type == "constaxonomy") {
                 extension = ".cons.taxonomy";

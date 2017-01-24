@@ -20,7 +20,7 @@ ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string n, bool s,
 		kmerSize = k;
 		outputDir = o; 
 		
-		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0, rand());
+		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0, rand(), true);
 		m->mothurOutEndLine();
 		
 		kmer = new Kmer(kmerSize);

@@ -123,7 +123,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 }
 
 /**************************************************************************************************/
-
+//print shortcut file
 void KmerDB::generateDB(){
 	try {
 		

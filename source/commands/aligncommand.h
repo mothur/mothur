@@ -135,7 +135,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
 		
-		AlignmentDB* templateDB = new AlignmentDB(pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
+		AlignmentDB* templateDB = new AlignmentDB(pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID, false);
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
