@@ -59,8 +59,8 @@ string RenameFileCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The rename.file command allows you to rename files and updates the current files saved by mothur.\n";
-        helpString += "The rename.file command parameters are: phylip, column, list, rabund, sabund, name, group, design, tree, shared, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, taxonomy, constaxonomy, input, output, prefix, deletedold and shorten.\n";
-        helpString += "The output parameter allows you to provide an output file name for the input file you provide.\n";
+        helpString += "The rename.file command parameters are: phylip, column, list, rabund, sabund, name, group, design, tree, shared, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, taxonomy, constaxonomy, input, new, prefix, deletedold and shorten.\n";
+        helpString += "The new parameter allows you to provide an output file name for the input file you provide.\n";
         helpString += "The shorten parameter is used to inicate you want mothur to generate output file names for you. For example: stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.an.unique_list.shared would become stability.an.shared. Default=true.";
         helpString += "The prefix parameter allows you to enter your own prefix for shortened names.";
         helpString += "The deleteold parameter indicates whether you want to delete the old file.  Default=true.";
@@ -470,7 +470,6 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
                 outputfile = "";
             }else { mothurGenerated=false; }
-            if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
             
             if ((!mothurGenerated) && (numFiles > 1)) {
                 m->mothurOut("[ERROR]: You cannot use more than one file parameter unless mothur is generating the output filenames for you.\n"); abort= true;
@@ -479,6 +478,8 @@ RenameFileCommand::RenameFileCommand(string option)  {
             if ((mothurGenerated) && (outputfile != "") && (numFiles != 1)) {
                 m->mothurOut("[ERROR]: You must allow mothur to generate the filenames or input one file at a time with a new name, not both.\n"); abort= true;
             }
+            
+            if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
         }
         
     }
