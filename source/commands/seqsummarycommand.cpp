@@ -197,18 +197,20 @@ int SeqSummaryCommand::execute(){
 				
 		long long numSeqs = 0;
         long long size = 0;
+        long long numUniques = 0;
 		map<int, long long> startPosition;
 		map<int, long long> endPosition;
 		map<int, long long> seqLength;
 		map<int, long long> ambigBases;
 		map<int, long long> longHomoPolymer;
 		
-		if (namefile != "") { nameMap = m->readNames(namefile); }
+        if (namefile != "") { nameMap = m->readNames(namefile); numUniques = nameMap.size(); }
         else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, false, false);
             nameMap = ct.getNameMap();
             size = ct.getNumSeqs();
+            numUniques = ct.getNumUniqueSeqs();
         }
 		
 		if (m->control_pressed) { return 0; }
@@ -244,8 +246,18 @@ int SeqSummaryCommand::execute(){
         
         //set size
         if (countfile != "") {}//already set
-        else if (namefile == "") { size = numSeqs;  }
+        else if (namefile == "") { size = numSeqs; }
         else { for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) { size += it->second; } }
+        
+        if ((namefile != "") || (countfile != "")) {
+            string type = "count";
+            if (namefile != "") { type = "name"; }
+            if (numSeqs != numUniques) { // do fasta and name/count files match
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(numUniques) + " unique sequences, but your fasta file contains " + toString(numSeqs) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+            }
+        }
+        
+        if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
         
         long long ptile0_25	= 1+(long long)(size * 0.025); //number of sequences at 2.5%
         long long ptile25		= 1+(long long)(size * 0.250); //number of sequences at 25%
