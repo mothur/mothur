@@ -27,9 +27,6 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-#CPP_11
-    CXXFLAGS += -std=c++11
-
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -O3
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")

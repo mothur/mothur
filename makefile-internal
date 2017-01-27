@@ -7,8 +7,6 @@ VERSION = "\"1.39.0\""
 # Optimize to level 3:
     CXXFLAGS += -O3
 
-#CPP_11
-    CXXFLAGS += -std=c++11
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     #if you are a mac user use the following line
