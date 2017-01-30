@@ -790,7 +790,8 @@ int PreClusterCommand::readFASTA(){
 					if (it == nameMap.end()) { m->mothurOut(seq.getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); exit(1); }
 					else{
                         string second = it->second;
-						seqPNode tempNode(m->getNumNames(second), seq, second);
+                        int numReps = m->getNumNames(second);
+						seqPNode tempNode(numReps, seq, second);
 						alignSeqs.push_back(tempNode);
 						lengths.insert(seq.getAligned().length());
 					}	
@@ -805,10 +806,11 @@ int PreClusterCommand::readFASTA(){
 		}
 		inFasta.close();
         
+        length = *(lengths.begin());
+        
         if (lengths.size() > 1) { method = "unaligned"; }
         else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
         
-        length = *(lengths.begin());
         
 		return alignSeqs.size();
 	}
