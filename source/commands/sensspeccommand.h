@@ -52,7 +52,7 @@ private:
 	double cutoff;
 	int precision;
 
-	int process(map<string, int>&, ListVector*&, bool&, string&);
+	int process(ListVector*&, bool&, string&);
 };
 
 #endif
