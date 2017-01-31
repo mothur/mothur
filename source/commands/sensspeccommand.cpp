@@ -419,7 +419,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 				}
 			}
 		}
-        cout << m->getRAMUsed()/(double)GIG << endl;
+        
 		falseNegatives = distanceMap.size();
 		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 
