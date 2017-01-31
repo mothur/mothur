@@ -384,7 +384,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			}
 			columnFile.close();
 		}
-        cout << m->getRAMUsed()/(double)GIG << endl;
+        
 		for(int otu=0;otu<numOTUs;otu++){
 			if (m->control_pressed) { return 0; }
 
@@ -392,19 +392,8 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			string seqList = list->get(otu);
 
 			//count number of sequences in the bin
-			int nSeqsInOTU = 1;
-			for(int i=0;i<seqList.length();i++){
-				if(seqList[i] == ','){	nSeqsInOTU++;	}
-			}
-
-			string seqName = "";
-			istringstream seqListStream(seqList);
-
-			int index = 0;
-			vector<string> otuVector(nSeqsInOTU);
-			while(getline(seqListStream, seqName, ',')) {
-				otuVector[index++] = seqName;
-			}
+            vector<string> otuVector;
+			m->splitAtComma(seqList, otuVector);
 
 			// indicate that a pair of sequences are in the same OTU; will
 			// assume that if they don't show up in the map that they're in
@@ -430,7 +419,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 				}
 			}
 		}
-        
+        cout << m->getRAMUsed()/(double)GIG << endl;
 		falseNegatives = distanceMap.size();
 		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 
