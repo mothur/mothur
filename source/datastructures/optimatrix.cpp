@@ -216,7 +216,12 @@ int OptiMatrix::readPhylip(){
         closeness.resize(nonSingletonCount);
         
         map<string, string> names;
-        if (namefile != "") {  m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            for (int i = 0; i < singletons.size(); i++) {
+                singletons[i] = names[singletons[i]];
+            }
+        }
         
         Progress* reading;
         ifstream in;
@@ -392,7 +397,12 @@ int OptiMatrix::readColumn(){
         closeness.resize(nonSingletonCount);
         
         map<string, string> names;
-        if (namefile != "") {  m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            for (int i = 0; i < singletons.size(); i++) {
+                singletons[i] = names[singletons[i]];
+            }
+        }
         
         while(in){  //let's assume it's a triangular matrix...
             
