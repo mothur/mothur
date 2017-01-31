@@ -805,10 +805,10 @@ int PreClusterCommand::readFASTA(){
 		}
 		inFasta.close();
         
+        length = *(lengths.begin());
+        
         if (lengths.size() > 1) { method = "unaligned"; }
         else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
-        
-        length = *(lengths.begin());
         
 		return alignSeqs.size();
 	}
