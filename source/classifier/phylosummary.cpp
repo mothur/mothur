@@ -233,7 +233,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					int index = tree.size() - 1;
 				
 					tree[index].parent = currentNode;
-					tree[index].level = (level+1);
+					tree[index].level = level;
 					tree[currentNode].children[taxon] = index;
                     int thisCount = 1;
 					
