@@ -469,8 +469,8 @@ RenameFileCommand::RenameFileCommand(string option)  {
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
                 outputfile = "";
-            }else { mothurGenerated=false; }
-            if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
+            }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  } }
+            
             
             if ((!mothurGenerated) && (numFiles > 1)) {
                 m->mothurOut("[ERROR]: You cannot use more than one file parameter unless mothur is generating the output filenames for you.\n"); abort= true;
