@@ -27,7 +27,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -O3
+CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
