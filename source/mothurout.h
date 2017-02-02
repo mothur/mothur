@@ -167,6 +167,7 @@ class MothurOut {
 		bool isContainingOnlyDigits(string);
         bool containsAlphas(string);
         bool isAllAlphas(string);
+        bool isAllAlphaNumerics(string);
 		bool isNumeric1(string);
         bool isNumeric1(char);
         bool isInteger(string);
