@@ -341,7 +341,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 				for(int j=0;j<i;j++){
 					phylipFile >> distance;
 
-					if(distance <= cutoff){
+					if(distance < cutoff){
 
 						string seqNamePair;
 						if(seqNameVector[i] < seqNameVector[j]){

@@ -184,7 +184,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  fileHandle.close();   return 0; }
                 
-                fileHandle >> name; nameMap.push_back(name);
+                fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
                 for(int j=0;j<nseqs;j++){
                     fileHandle >> distance;
@@ -206,6 +206,7 @@ int OptiMatrix::readPhylip(){
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
+                cout << i << '\t' << nameMap[i] << '\t' << singletonIndexSwap[i] << endl;
             }else { singletons.push_back(nameMap[i]); }
         }
         singleton.clear();
@@ -226,11 +227,8 @@ int OptiMatrix::readPhylip(){
         m->openInputFile(distFile, in);
         in >> nseqs >> name;
         
-        int newA = singletonIndexSwap[0];
-        if (namefile != "") {
-            name = names[name];  //redundant names
-        }
-        nameMap[newA] = name;
+        if (namefile != "") { name = names[name]; } //redundant names
+        nameMap[singletonIndexSwap[0]] = name;
 
         int fivepercent = (int)(0.05 * nseqs);
         
@@ -244,14 +242,14 @@ int OptiMatrix::readPhylip(){
                 
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
-                in >> name;
+                in >> name; m->gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<i;j++){
                     
-                    in >> distance;
+                    in >> distance; m->gobble(in);
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -280,13 +278,13 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
-                in >> name;
+                in >> name; m->gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<nseqs;j++){
-                    in >> distance;
+                    in >> distance; m->gobble(in);
 
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
