@@ -327,16 +327,16 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			int pNumSeqs;
 			phylipFile >> pNumSeqs;
 
-			double distance;
+            double distance; string name;
 
-			vector<string> seqNameVector(pNumSeqs);
+            vector<string> seqNameVector;
 			m->mothurOut(label); m->mothurOutEndLine();
 
 			for(int i=0;i<pNumSeqs;i++){
 
 				if (m->control_pressed) { return 0; }
 
-				phylipFile >> seqNameVector[i];
+                phylipFile >> name; seqNameVector.push_back(name);
 
 				for(int j=0;j<i;j++){
 					phylipFile >> distance;
@@ -371,10 +371,10 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 				columnFile >> seqNameA >> seqNameB >> distance;
 				m->gobble(columnFile);
 
-				if(distance <= cutoff){
+				if(distance < cutoff){
 					string seqNamePair;
 
-					if(seqNameA < seqNameB){
+					if(seqNameA <= seqNameB){
 						seqNamePair = seqNameA + '-' + seqNameB;
 					} else {
 						seqNamePair = seqNameB + '-' + seqNameA;
@@ -384,7 +384,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			}
 			columnFile.close();
 		}
-        
+        //cout << distanceMap.size() << endl;;
 		for(int otu=0;otu<numOTUs;otu++){
 			if (m->control_pressed) { return 0; }
 
@@ -420,6 +420,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			}
 		}
         
+        //cout << *(distanceMap.begin()) << endl;
 		falseNegatives = distanceMap.size();
 		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
 
