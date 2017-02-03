@@ -135,16 +135,19 @@ string OptiMatrix::findDistFormat(string distFile){
 
 int OptiMatrix::readPhylip(){
     try {
+        nameMap.clear();
         float distance;
         int square, nseqs;
         string name;
-
+        map<int, int> singletonIndexSwap;
+        
         ifstream fileHandle;
         string numTest;
         
         m->openInputFile(distFile, fileHandle);
         fileHandle >> numTest >> name;
         nameMap.push_back(name);
+        singletonIndexSwap[0] = 0;
         
         if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
@@ -156,7 +159,6 @@ int OptiMatrix::readPhylip(){
             if(d == '\n'){ square = 0; break; }
         }
         
-        map<int, int> singletonIndexSwap;
         vector<bool> singleton; singleton.resize(nseqs, true);
         ///////////////////// Read to eliminate singletons ///////////////////////
         if(square == 0){
@@ -164,7 +166,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  fileHandle.close();  return 0; }
                 
-                fileHandle >> name; nameMap.push_back(name);
+                fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
                 for(int j=0;j<i;j++){
                     
@@ -175,9 +177,6 @@ int OptiMatrix::readPhylip(){
                     if(distance < cutoff){
                         singleton[i] = false;
                         singleton[j] = false;
-                        singletonIndexSwap[i] = i;
-                        singletonIndexSwap[j] = j;
-                        
                     }
                 }
             }
@@ -195,15 +194,13 @@ int OptiMatrix::readPhylip(){
                     if(distance < cutoff && j < i){
                         singleton[i] = false;
                         singleton[j] = false;
-                        singletonIndexSwap[i] = i;
-                        singletonIndexSwap[j] = j;
                     }
                 }
             }
         }
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
-        
+       
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
@@ -249,6 +246,9 @@ int OptiMatrix::readPhylip(){
                 
                 in >> name;
                 
+                if (namefile != "") { name = names[name]; } //redundant names
+                nameMap[singletonIndexSwap[i]] = name;
+                
                 for(int j=0;j<i;j++){
                     
                     in >> distance;
@@ -260,11 +260,6 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
-                        
-                        if (namefile != "") {
-                            name = names[name];  //redundant names
-                        }
-                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
@@ -287,6 +282,9 @@ int OptiMatrix::readPhylip(){
                 
                 in >> name;
                 
+                if (namefile != "") { name = names[name]; } //redundant names
+                nameMap[singletonIndexSwap[i]] = name;
+                
                 for(int j=0;j<nseqs;j++){
                     in >> distance;
 
@@ -297,11 +295,6 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
-                        
-                        if (namefile != "") {
-                            name = names[name];  //redundant names
-                        }
-                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
