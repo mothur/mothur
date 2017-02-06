@@ -2515,39 +2515,43 @@ int MakeContigsCommand::setNameType(string forward, string reverse) {
             else {
                 char delim = ':';
                 if (m->changedSeqNames) { delim = '_'; }
+                vector<char> delims; delims.push_back(delim); delims.push_back('/');
                 
-                int pos = forward.find_last_of(delim);
-                string tempForward = forward;
-                string tempForwardEnd = forward;
-                if (pos != string::npos) {
-                    tempForwardEnd = forward.substr(pos+1);
-                }
-                
-                int pos2 = reverse.find_last_of(delim);
-                string tempReverse = reverse;
-                string tempReverseEnd = reverse;
-                if (pos2 != string::npos) {
-                    tempReverseEnd = reverse.substr(pos2+1);
-                }
-                
-                if (tempForwardEnd == tempReverseEnd) {
-                    if ((m->isAllAlphas(tempForwardEnd)) && (m->isAllAlphas(tempReverseEnd))) {
-                        //check for off by one on rest of name
-                        if (tempForward.length() == tempReverse.length()) {
-                            int numDiffs = 0;
-                            char forwardDiff = ' '; char reverseDiff = ' '; int spot = 0;
-                            for (int i = 0; i < tempForward.length(); i++) {
-                                if (tempForward[i] != tempReverse[i]) {
-                                    numDiffs++;
-                                    forwardDiff = tempForward[i];
-                                    reverseDiff = tempReverse[i];
-                                    spot = i;
+                for (int j = 0; j < delims.size(); j++) {
+                    delim = delims[j];
+                    int pos = forward.find_last_of(delim);
+                    string tempForward = forward;
+                    string tempForwardEnd = forward;
+                    if (pos != string::npos) {
+                        tempForwardEnd = forward.substr(pos+1);
+                    }
+                    
+                    int pos2 = reverse.find_last_of(delim);
+                    string tempReverse = reverse;
+                    string tempReverseEnd = reverse;
+                    if (pos2 != string::npos) {
+                        tempReverseEnd = reverse.substr(pos2+1);
+                    }
+                    
+                    if (tempForwardEnd != tempReverseEnd) {
+                        if ((m->isAllAlphaNumerics(tempForwardEnd)) && (m->isAllAlphaNumerics(tempReverseEnd))) {
+                            //check for off by one on rest of name
+                            if (tempForward.length() == tempReverse.length()) {
+                                int numDiffs = 0;
+                                char forwardDiff = ' '; char reverseDiff = ' '; int spot = 0;
+                                for (int i = 0; i < tempForward.length(); i++) {
+                                    if (tempForward[i] != tempReverse[i]) {
+                                        numDiffs++;
+                                        forwardDiff = tempForward[i];
+                                        reverseDiff = tempReverse[i];
+                                        spot = i;
+                                    }
                                 }
+                                if (numDiffs == 1) {
+                                    if ((forwardDiff == '1') && (reverseDiff == '2')) { type = offByOne; offByOneTrimLength = tempForward.length()-spot+1; }
+                                }
+                                //cout << tempReverse.substr(0, (tempReverse.length()-offByOneTrimLength)) << endl;
                             }
-                            if (numDiffs == 1) {
-                                if ((forwardDiff == '1') && (reverseDiff == '2')) { type = offByOne; offByOneTrimLength = tempForward.length()-spot+1; }
-                            }
-                            //cout << tempReverse.substr(0, (tempReverse.length()-offByOneTrimLength)) << endl;
                         }
                     }
                 }

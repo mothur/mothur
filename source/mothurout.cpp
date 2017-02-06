@@ -3588,7 +3588,21 @@ bool MothurOut::isAllAlphas(string stringToCheck){
     }
     
 }
-
+/***********************************************************************/
+bool MothurOut::isAllAlphaNumerics(string stringToCheck){
+    try {
+        bool allAlphaNumerics = true;
+        
+        if(stringToCheck.find_first_not_of("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOopPQqRrSsTtUuVvWwXxYyZz0123456789") != string::npos) { allAlphaNumerics = false; }
+        
+        return allAlphaNumerics;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "isAllAlphas");
+        exit(1);
+    }
+    
+}
 /***********************************************************************/
 bool MothurOut::mothurConvert(string item, float& num){
 	try {

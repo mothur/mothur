@@ -135,16 +135,19 @@ string OptiMatrix::findDistFormat(string distFile){
 
 int OptiMatrix::readPhylip(){
     try {
+        nameMap.clear();
         float distance;
         int square, nseqs;
         string name;
-
+        map<int, int> singletonIndexSwap;
+        
         ifstream fileHandle;
         string numTest;
         
         m->openInputFile(distFile, fileHandle);
         fileHandle >> numTest >> name;
         nameMap.push_back(name);
+        singletonIndexSwap[0] = 0;
         
         if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
@@ -156,7 +159,6 @@ int OptiMatrix::readPhylip(){
             if(d == '\n'){ square = 0; break; }
         }
         
-        map<int, int> singletonIndexSwap;
         vector<bool> singleton; singleton.resize(nseqs, true);
         ///////////////////// Read to eliminate singletons ///////////////////////
         if(square == 0){
@@ -164,7 +166,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  fileHandle.close();  return 0; }
                 
-                fileHandle >> name; nameMap.push_back(name);
+                fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
                 for(int j=0;j<i;j++){
                     
@@ -175,9 +177,6 @@ int OptiMatrix::readPhylip(){
                     if(distance < cutoff){
                         singleton[i] = false;
                         singleton[j] = false;
-                        singletonIndexSwap[i] = i;
-                        singletonIndexSwap[j] = j;
-                        
                     }
                 }
             }
@@ -185,7 +184,7 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  fileHandle.close();   return 0; }
                 
-                fileHandle >> name; nameMap.push_back(name);
+                fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
                 for(int j=0;j<nseqs;j++){
                     fileHandle >> distance;
@@ -195,15 +194,13 @@ int OptiMatrix::readPhylip(){
                     if(distance < cutoff && j < i){
                         singleton[i] = false;
                         singleton[j] = false;
-                        singletonIndexSwap[i] = i;
-                        singletonIndexSwap[j] = j;
                     }
                 }
             }
         }
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
-        
+       
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
@@ -216,7 +213,12 @@ int OptiMatrix::readPhylip(){
         closeness.resize(nonSingletonCount);
         
         map<string, string> names;
-        if (namefile != "") {  m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            for (int i = 0; i < singletons.size(); i++) {
+                singletons[i] = names[singletons[i]];
+            }
+        }
         
         Progress* reading;
         ifstream in;
@@ -224,11 +226,8 @@ int OptiMatrix::readPhylip(){
         m->openInputFile(distFile, in);
         in >> nseqs >> name;
         
-        int newA = singletonIndexSwap[0];
-        if (namefile != "") {
-            name = names[name];  //redundant names
-        }
-        nameMap[newA] = name;
+        if (namefile != "") { name = names[name]; } //redundant names
+        nameMap[singletonIndexSwap[0]] = name;
 
         int fivepercent = (int)(0.05 * nseqs);
         
@@ -242,11 +241,14 @@ int OptiMatrix::readPhylip(){
                 
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
-                in >> name;
+                in >> name; m->gobble(in);
+                
+                if (namefile != "") { name = names[name]; } //redundant names
+                nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<i;j++){
                     
-                    in >> distance;
+                    in >> distance; m->gobble(in);
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -255,11 +257,6 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
-                        
-                        if (namefile != "") {
-                            name = names[name];  //redundant names
-                        }
-                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
@@ -280,10 +277,13 @@ int OptiMatrix::readPhylip(){
             for(int i=1;i<nseqs;i++){
                 if (m->control_pressed) {  in.close();  delete reading; return 0; }
                 
-                in >> name;
+                in >> name; m->gobble(in);
+                
+                if (namefile != "") { name = names[name]; } //redundant names
+                nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<nseqs;j++){
-                    in >> distance;
+                    in >> distance; m->gobble(in);
 
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -292,11 +292,6 @@ int OptiMatrix::readPhylip(){
                         int newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
-                        
-                        if (namefile != "") {
-                            name = names[name];  //redundant names
-                        }
-                        nameMap[newA] = name;
                     }
                     index++; reading->update(index);
                 }
@@ -392,7 +387,12 @@ int OptiMatrix::readColumn(){
         closeness.resize(nonSingletonCount);
         
         map<string, string> names;
-        if (namefile != "") {  m->readNames(namefile, names); }
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            for (int i = 0; i < singletons.size(); i++) {
+                singletons[i] = names[singletons[i]];
+            }
+        }
         
         while(in){  //let's assume it's a triangular matrix...
             

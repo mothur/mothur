@@ -325,8 +325,9 @@ int ClassifyOtuCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (allLines == 1 || labels.count(list->getLabel()) == 1){
-			
-					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
+                    string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
+                
+					m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
 					process(list);
 					if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; return 0; }
 										
@@ -339,7 +340,9 @@ int ClassifyOtuCommand::execute(){
 					
 					delete list;
 					list = input->getListVector(lastLabel);
-					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
+                
+                    string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
+					m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
 					process(list);
 				
 					
@@ -374,7 +377,8 @@ int ClassifyOtuCommand::execute(){
 		if (needToRun == true)  {
 			if (list != NULL) {	delete list;	}
 			list = input->getListVector(lastLabel);
-			m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
+            string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
+			m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
 			
 			process(list);
 			delete list;
@@ -733,7 +737,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         }
 		
 		delete taxaSum;
-		
+    
 		return 0;
 
 	}
