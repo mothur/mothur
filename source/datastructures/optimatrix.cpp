@@ -206,7 +206,6 @@ int OptiMatrix::readPhylip(){
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
-                cout << i << '\t' << nameMap[i] << '\t' << singletonIndexSwap[i] << endl;
             }else { singletons.push_back(nameMap[i]); }
         }
         singleton.clear();
