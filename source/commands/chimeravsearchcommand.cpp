@@ -1390,8 +1390,10 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             
             string name = seq.getName();
             
-            name = name.substr(0, name.length()-1); //rip off last ;
-            name = name.substr(0, name.find_last_of(';'));
+            if (templatefile == "self") {
+                name = name.substr(0, name.length()-1); //rip off last ;
+                name = name.substr(0, name.find_last_of(';'));
+            }
             
             out << name << endl; numChimeras++;
         }

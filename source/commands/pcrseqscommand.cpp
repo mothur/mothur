@@ -1161,16 +1161,14 @@ int PcrSeqsCommand::readGroup(set<string> names){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;				//read from first column
-			in >> group;			//read from second column
+			in >> name;		m->gobble(in);		//read from first column
+			in >> group;	m->gobble(in);		//read from second column
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << group << endl;
 			}else {  removedCount++;  }
-            
-			m->gobble(in);
 		}
 		in.close();
 		out.close();

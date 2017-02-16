@@ -825,6 +825,10 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int>& totalGroupCounts, vector<string>& theseOutputFileNames, map<string, string>& theseAllFileNames) {
     try {
+        
+        //read file
+        vector< vector<string> > fileInputs = readFileNames(file);  if (m->control_pressed) { return 0; }
+        
         unsigned long long numReads = 0;
         
         map<string, string> cvars;
@@ -860,10 +864,6 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
         theseOutputFileNames.push_back(compositeFastaFile);
         theseOutputFileNames.push_back(compositeQualFile);
         theseOutputFileNames.push_back(compositeMisMatchFile);
-        
-        
-        //read file
-        vector< vector<string> > fileInputs = readFileNames(file);
         
         if (gz) {
             numReads = createProcessesGroups(fileInputs, compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, totalGroupCounts, theseAllFileNames); theseOutputFileNames.push_back(compositeGroupFile);
@@ -2976,6 +2976,9 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             
             bool skip = false;
             string line = m->getline(in);  m->gobble(in);
+            
+            if (m->debug) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
+            
             vector<string> pieces = m->splitWhiteSpace(line);
             
             string group = "";
@@ -3266,6 +3269,8 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
         if (allGZ) {
             gz = true;
         }else { gz = false; }
+        
+        if (files.size() == 0) { m->control_pressed = true; }
         
         return files;
     }

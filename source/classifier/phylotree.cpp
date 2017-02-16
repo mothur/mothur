@@ -18,6 +18,7 @@ PhyloTree::PhyloTree(){
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
+        tree[0].level = 0;
 		maxLevel = 0;
 		calcTotals = true;
 		addSeqToTree("unknown", "unknown;");
@@ -78,6 +79,7 @@ PhyloTree::PhyloTree(string tfile){
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
+        tree[0].level = 0;
 		maxLevel = 0;
 		calcTotals = true;
 		string name, tax;
@@ -219,6 +221,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				tree.push_back(TaxNode(taxon));
 				numNodes++;
 				tree[currentNode].children[taxon] = numNodes-1;
+                tree[currentNode].level = level;
 				tree[numNodes-1].parent = currentNode;
 				
 				currentNode = tree[currentNode].children[taxon];
@@ -296,7 +299,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
                 
 			tree[it->second].heirarchyID = tree[index].heirarchyID + '.' + toString(counter);
 			counter++;
-			tree[it->second].level = tree[index].level + 1;
+			//tree[it->second].level = tree[index].level + 1;
 						
 			//save maxLevel for binning the unclassified seqs
 			if (tree[it->second].level > maxLevel) { maxLevel = tree[it->second].level; } 
