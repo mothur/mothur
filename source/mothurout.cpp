@@ -1092,7 +1092,7 @@ string MothurOut::getFullPathName(string fileName){
 
 				
 				//rip off first '/'
-				string simpleCWD;
+				string simpleCWD; simpleCWD="";
 				if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
 				
 				//break apart the current working directory
