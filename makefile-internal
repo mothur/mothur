@@ -1,7 +1,7 @@
 64BIT_VERSION ?= yes
-USEREADLINE ?= yes
-USEBOOST ?= yes
-RELEASE_DATE = "\"2/2/2017\""
+USEREADLINE ?= no
+USEBOOST ?= no
+RELEASE_DATE = "\"2/7/2017\""
 VERSION = "\"1.39.1\""
 
 # Optimize to level 3:
@@ -10,12 +10,12 @@ VERSION = "\"1.39.1\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     #if you are a mac user use the following line
-    TARGET_ARCH += -arch x86_64
+    #TARGET_ARCH += -arch x86_64
 
     #if you using cygwin to build Windows the following line
-    #CXX = x86_64-w64-mingw32-g++
-    #CC = x86_64-w64-mingw32-g++
-    #TARGET_ARCH += -m64 -static
+    CXX = x86_64-w64-mingw32-g++
+    CC = x86_64-w64-mingw32-g++
+    TARGET_ARCH += -m64 -static
 
     #if you are a linux user use the following line - specific processor builds in future??
     #CXXFLAGS += -mtune=generic
