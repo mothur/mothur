@@ -309,14 +309,16 @@ void MothurOut::setFileName(string filename)  {
 void MothurOut::setDefaultPath(string pathname)  {
 	try {
 	
-		//add / to name if needed
-		string lastChar = pathname.substr(pathname.length()-1);
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			if (lastChar != "/") { pathname += "/"; }
-		#else
-			if (lastChar != "\\") { pathname += "\\"; }	
-		#endif
-		
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            if (lastChar != "/") { pathname += "/"; }
+#else
+            if (lastChar != "\\") { pathname += "\\"; }
+#endif
+        }
+        
 		defaultPath = getFullPathName(pathname);
 		
 	}
@@ -329,14 +331,15 @@ void MothurOut::setDefaultPath(string pathname)  {
 void MothurOut::setBlastPath(string pathname)  {
     try {
         
-        //add / to name if needed
-        string lastChar = pathname.substr(pathname.length()-1);
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if (lastChar != "/") { pathname += "/"; }
+            if (lastChar != "/") { pathname += "/"; }
 #else
-        if (lastChar != "\\") { pathname += "\\"; }
+            if (lastChar != "\\") { pathname += "\\"; }
 #endif
-        
+        }
         blastPath = getFullPathName(pathname);
         
     }
