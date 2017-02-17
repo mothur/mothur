@@ -205,24 +205,48 @@ void MothurOut::clearCurrentFiles()  {
 		exit(1);
 	}
 }
-/***********************************************************************/
+
+/*********************************************************************************************/
+bool MothurOut::fileExists(string name)  {
+    try {
+        bool exists = false;
+        name = getFullPathName(name);
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+
+        ifstream in;
+        openInputFile(name, in, "");
+        
+        //if this file exists
+        if (in) { in.close(); exists = true;  }
+
+#else
+        DWORD attributes = GetFileAttributes(name.c_str());
+        exists = (attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY));
+#endif
+        
+        return exists;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "clearCurrentFiles");
+        exit(1);
+    }
+}
+/********************************************************************/
 string MothurOut::findProgramPath(string programName){
 	try {
         string pPath = "";
         
         //look in ./
         //is this the programs path?
-        ifstream in5;
         string tempIn = ".";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         tempIn += "/" + programName;
 #else
         tempIn += "\\" + programName;
 #endif
-        openInputFile(tempIn, in5, "");
-        
         //if this file exists
-        if (in5) { in5.close(); pPath = getFullPathName(tempIn); if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
+        if (fileExists(tempIn)) { pPath = getFullPathName(tempIn); if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
 		
 		string envPath = getenv("PATH");
 		
@@ -272,17 +296,15 @@ string MothurOut::findProgramPath(string programName){
                 if (debug) { mothurOut("[DEBUG]: looking in " + dirs[i] + " for " + programName + " \n"); }
                 
 				//is this the programs path?
-				ifstream in;
 				string tempIn = dirs[i];
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 tempIn += "/" + programName;
 #else
                 tempIn += "\\" + programName;
 #endif
-				openInputFile(tempIn, in, "");
 				
 				//if this file exists
-				if (in) { in.close(); pPath = tempIn; if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
+				if (fileExists(tempIn)) { pPath = tempIn; if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
 			}
 		}
 		

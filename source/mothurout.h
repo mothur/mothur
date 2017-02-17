@@ -116,7 +116,7 @@ class MothurOut {
 		int openInputFile(string, ifstream&, string); //no error given
         vector<bool> allGZFiles(vector<string>&);
         vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
-    
+        bool fileExists(string name);
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
 		string getline(istringstream&);
