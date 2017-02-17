@@ -336,6 +336,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
     try {
         
         string findCommand = "";
+        string tempOut = tempFile;
         tempFile = "\"" + tempFile + "\"";
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -343,12 +344,37 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
         if (m->debug) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
+        
 #else
         //use ls command
-        
-        findCommand = "ls *." + typeFile + " > " + tempFile;
+        findCommand = "find \"\" "  + inputDir.substr(0, inputDir.length()-1) + "\\*." + typeFile + " > " + tempFile;
         if (m->debug) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
+
+        ifstream in;
+        ofstream out;
+        tempOut += ".temp";
+        
+        tempFile = tempFile.substr(1, tempFile.length()-2); //remove ""
+        
+        m->openOutputFile(tempOut, out);
+        
+        m->openInputFile(tempFile, in);
+        
+        string junk, filename;
+        while (!in.eof()) {
+            if (m->control_pressed) { break; }
+            in >> junk; m->gobble(in);
+            in >> filename; m->gobble(in);
+            
+            out << filename << endl;
+        }
+        in.close();
+        out.close();
+        
+        m->mothurRemove(tempFile);
+        m->renameFile(tempOut, tempFile);
+        
 #endif
         
         return 0;
