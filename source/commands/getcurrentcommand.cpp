@@ -164,6 +164,8 @@ int GetCurrentCommand::execute(){
 					m->setTaxonomyFile("");
                 }else if (types[i] == "constaxonomy") {
                     m->setConsTaxonomyFile("");
+                }else if (types[i] == "contigsreport") {
+                    m->setContigsReportFile("");
 				}else if (types[i] == "flow") {
 					m->setFlowFile("");
                 }else if (types[i] == "biom") {

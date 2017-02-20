@@ -26,6 +26,7 @@ vector<string> SetCurrentCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(ptaxonomy);
         CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pconstaxonomy);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcontigsreport);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pqfile);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);		
 		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(prabund);
@@ -59,9 +60,9 @@ string SetCurrentCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
-		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, constaxonomy and taxonomy.\n";
+		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, contigsreport, constaxonomy and taxonomy.\n";
         helpString += "The current parameter is used to input the output file from get.current.  This function is intended to allow you to input filenames from previous instances on mothur.  NOTE: If you have a current file set in the file *.current_files.summary file, and also set a value for that file type, the value set takes precedence.  For example, if you run set.current(current=current_files.summary, fasta=abrecovery.fasta) and your have fasta=final.fasta in the *.current_files.summary file the current fasta file will be set to abrecovery.fasta.\n";
-		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
 		helpString += "set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n";
 		return helpString;
@@ -307,6 +308,14 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("contigsreport");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
+                }
 				
 				it = parameters.find("flow");
 				//user has given a template file
@@ -458,6 +467,11 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 			else if (taxonomyfile == "not found") {  taxonomyfile = "";  }	
 			if (taxonomyfile != "") { m->setTaxonomyFile(taxonomyfile); }
             
+            contigsreportfile = validParameter.validFile(parameters, "contigsreport", true);
+            if (contigsreportfile == "not open") { m->mothurOut("Ignoring: " + parameters["contigsreport"]); m->mothurOutEndLine(); contigsreportfile = ""; }
+            else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
+            if (contigsreportfile != "") { m->setContigsReportFile(contigsreportfile); }
+            
             constaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
             if (constaxonomyfile == "not open") { m->mothurOut("Ignoring: " + parameters["constaxonomy"]); m->mothurOutEndLine(); constaxonomyfile = ""; }
             else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
@@ -552,6 +566,8 @@ int SetCurrentCommand::execute(){
 					m->setTaxonomyFile("");
                 }else if (types[i] == "constaxonomy") {
                     m->setConsTaxonomyFile("");
+                }else if (types[i] == "contigsreport") {
+                    m->setContigsReportFile("");
 				}else if (types[i] == "flow") {
 					m->setFlowFile("");
                 }else if (types[i] == "biom") {

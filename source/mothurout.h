@@ -233,7 +233,7 @@ class MothurOut {
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
 		
-		//current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes. add a get and set function.
+		//current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes/hasCurrentFiles. add a get and set function.
 		string getPhylipFile()		{ return phylipfile;		}
 		string getColumnFile()		{ return columnfile;		}
 		string getListFile()		{ return listfile;			}
@@ -260,6 +260,7 @@ class MothurOut {
         string getFileFile()        { return filefile;          }
 		string getProcessors()		{ return processors;		}
         string getConsTaxonomyFile(){ return constaxonomyfile;  }
+        string getContigsReportFile(){ return contigsreportfile;  }
         int getNumErrors()          { return numErrors;         }
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -286,6 +287,7 @@ class MothurOut {
         void setSummaryFile(string f)		{ summaryfile = getFullPathName(f);			}
         void setFileFile(string f)          { filefile = getFullPathName(f);			}
         void setConsTaxonomyFile(string f)  { constaxonomyfile = getFullPathName(f);	}
+        void setContigsReportFile(string f) { contigsreportfile = getFullPathName(f);	}
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
@@ -326,6 +328,7 @@ class MothurOut {
             biomfile = "";
             counttablefile = "";
             summaryfile = "";
+            contigsreportfile = "";
 			gui = false;
 			printedSharedHeaders = false;
             printedListHeaders = false;
@@ -347,7 +350,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile, contigsreportfile;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;

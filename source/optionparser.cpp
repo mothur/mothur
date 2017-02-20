@@ -150,6 +150,8 @@ map<string, string> OptionParser::getParameters() {
                         it->second = m->getTaxonomyFile();
                     }else if (it->first == "constaxonomy") {
                         it->second = m->getConsTaxonomyFile();
+                    }else if (it->first == "contigsreport") {
+                            it->second = m->getContigsReportFile();
                     }else if (it->first == "biom") {
                         it->second = m->getBiomFile();
                     }else if (it->first == "count") {

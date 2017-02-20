@@ -583,7 +583,7 @@ int MakeContigsCommand::execute(){
         string currentReport = "";
         itTypes = outputTypes.find("report");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { currentReport = (itTypes->second)[0];  }
+            if ((itTypes->second).size() != 0) { currentReport = (itTypes->second)[0]; m->setContigsReportFile(currentReport); }
         }
 
 		//output group counts
