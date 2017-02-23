@@ -21,6 +21,7 @@ PhyloTree::PhyloTree(){
         tree[0].level = 0;
 		maxLevel = 0;
 		calcTotals = true;
+        
 		addSeqToTree("unknown", "unknown;");
 	}
 	catch(exception& e) {
@@ -92,15 +93,14 @@ PhyloTree::PhyloTree(string tfile){
             temp.erase(itTemp++);
         }
         
-		assignHeirarchyIDs(0);
-        
         string unknownTax = "unknown;";
         //added last taxon until you get desired level
 		for (int i = 1; i < maxLevel; i++) {
 			unknownTax += "unknown_unclassfied;";
 		}
-        
         addSeqToTree("unknown", unknownTax);
+        
+        assignHeirarchyIDs(0);
         
 		//create file for summary if needed
 		setUp(tfile);
@@ -193,8 +193,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		
 		tree[0].accessions.push_back(seqName);
 		m->removeConfidences(seqTaxonomy);
-		
-		string taxon;// = getNextTaxon(seqTaxonomy);
+        string taxon;// = getNextTaxon(seqTaxonomy);
 	
 		while(seqTaxonomy != ""){
 			
@@ -219,12 +218,13 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			}
 			else{											//otherwise, create it
 				tree.push_back(TaxNode(taxon));
-				numNodes++;
-				tree[currentNode].children[taxon] = numNodes-1;
-                tree[currentNode].level = level;
-				tree[numNodes-1].parent = currentNode;
 				
-				currentNode = tree[currentNode].children[taxon];
+				tree[currentNode].children[taxon] = numNodes;
+                tree[numNodes].level = level;
+				tree[numNodes].parent = currentNode;
+                currentNode = numNodes;
+                numNodes++;
+				
 				tree[currentNode].accessions.push_back(seqName);
 				name2Taxonomy[seqName] = currentNode;
 			}
@@ -377,12 +377,12 @@ void PhyloTree::binUnclassified(string file){
 				}
 				else{											//otherwise, create it
 					copy.push_back(TaxNode(taxon));
-					copyNodes++;
-					copy[currentNode].children[taxon] = copyNodes-1;
-					copy[copyNodes-1].parent = currentNode;
-					copy[copyNodes-1].level = copy[currentNode].level + 1;
-									
-					currentNode = copy[currentNode].children[taxon];
+					
+					copy[currentNode].children[taxon] = copyNodes;
+					copy[copyNodes].parent = currentNode;
+					copy[copyNodes].level = copy[currentNode].level + 1;
+                    currentNode = copyNodes;
+                    copyNodes++;
 				}
 			}
 		}

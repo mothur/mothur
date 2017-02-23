@@ -123,26 +123,16 @@ int Classify::readTaxonomy(string file) {
 		phyloTree = new PhyloTree();
 		string name, taxInfo;
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
+		m->mothurOut("\nReading in the " + file + " taxonomy...\t");	cout.flush();
         if (m->debug) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
-        
         
         taxonomy.clear(); 
         m->readTax(file, taxonomy, true);
         
-        //commented out to save time with large templates. 6/12/13
-        //map<string, string> tempTaxonomy;
-        for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {  
-            //if (m->inUsersGroups(itTax->first, names)) {
-                phyloTree->addSeqToTree(itTax->first, itTax->second);
+        for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {
+            phyloTree->addSeqToTree(itTax->first, itTax->second);
             if (m->control_pressed) { break; }
-                //tempTaxonomy[itTax->first] = itTax->second;
-           // }else {
-            //    m->mothurOut("[WARNING]: " + itTax->first + " is in your taxonomy file and not in your reference file, ignoring.\n");
-            //}
         }
-        //taxonomy = tempTaxonomy;
 
 		phyloTree->assignHeirarchyIDs(0);
         
