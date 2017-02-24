@@ -271,12 +271,14 @@ int SummaryTaxCommand::execute(){
                 }else{
                     for (int i = 0; i < itNames->second.size(); i++) {
                         taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
+                        numSeqs++;
                     }
                     itNames->second.clear();
                     nameMap.erase(itNames->first);
                 }
             }else {
                 taxaSum->addSeqToTree(name, newTax);
+                numSeqs++;
             }
             
         }
@@ -295,7 +297,7 @@ int SummaryTaxCommand::execute(){
 		outTaxTree.close();
 		
 		delete taxaSum;
-        if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; }
+        if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { numSeqs = ct->getNumSeqs();  delete ct; }
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
