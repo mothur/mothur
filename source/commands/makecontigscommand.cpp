@@ -2098,6 +2098,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                         outScrapQual << ">" << fSeq.getName() << " | " << trashCode << '\t' << commentString << endl;
                         for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << " "; }  outScrapQual << endl;
                     }
+                    
                 }
             }
             num++;
@@ -2302,17 +2303,18 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
             for (int i = overlapEnd; i < length; i++) {  contig += seq1[i];  if (hasQuality) { if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
             }
         }
-        //cout << contig << endl;
+        //cout << "contig = " << contig << endl;
         
         if (trimOverlap) {
             contig = contig.substr(overlapStart, oend-oStart);
-            if (contig.length() == 0) { trashCode += "l"; }
             if (hasQuality) {
                 vector<int> newContigScores;
                 for (int i = overlapStart; i < oend; i++)  { newContigScores.push_back(contigScores[i]);  }
                 contigScores = newContigScores;
             }
         }
+        
+        if (contig == "") { trashCode += "l"; contig = "NNNN"; contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); }
 
         return contigScores;
     }

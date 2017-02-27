@@ -1939,6 +1939,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                     }
                     
+                    if (contig == "") { trashCode += "l"; contig = "NNNN"; contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); }
+                    
                     if(trashCode.length() == 0){
                         bool ignore = false;
                         
@@ -3280,6 +3282,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         contigScores = newContigScores;
                     }
                 }
+                
+                if (contig == "") { trashCode += "l"; contig = "NNNN"; contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); }
                 
                 if(trashCode.length() == 0){
                     bool ignore = false;
