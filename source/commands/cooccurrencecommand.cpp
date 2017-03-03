@@ -447,7 +447,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                     if (m->control_pressed) { return 0; }
                 nextnum2:
                     previous = 0.0;
-                    randnum = rand() / double(RAND_MAX);
+                    randnum = m->getRandomDouble0to1();
                     for(int i=0;i<nrows;i++) {
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
@@ -466,7 +466,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             
             else if (matrix == "sim2") {
                 for(int i=0;i<nrows;i++) {
-                    random_shuffle( co_matrix[i].begin(), co_matrix[i].end() ); 
+                    m->mothurRandomShuffle(co_matrix[i]);
                 }
                 //do this for the scoring since those all have nullmatrix as a parameter
                 //nullmatrix gets cleared at the begining of each run
@@ -479,7 +479,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                     while(count < rowtotal[i]) {
                         previous = 0.0;
                         if (m->control_pressed) { return 0; }
-                        randnum = rand() / double(RAND_MAX);
+                        randnum = m->getRandomDouble0to1();
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
@@ -500,7 +500,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                     count = 0;
                     while(count < columntotal[j]) {
                         if (m->control_pressed) { return 0; }
-                        randnum = rand() / double(RAND_MAX);
+                        randnum = m->getRandomDouble0to1();
                         for(int i=0;i<nrows;i++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {

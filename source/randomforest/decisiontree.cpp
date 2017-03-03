@@ -176,7 +176,7 @@ void DecisionTree::randomlyShuffleAttribute(const vector< vector<int> >& samples
             if (m->control_pressed) { return; }
             featureVectors[j] = samples[j][featureIndex];
         }
-        random_shuffle(featureVectors.begin(), featureVectors.end());
+        m->mothurRandomShuffle(featureVectors);
         for (int j = 0; j < samples.size(); j++) {
             if (m->control_pressed) { return; }
             shuffledSample[j][featureIndex] = featureVectors[j];
@@ -386,8 +386,7 @@ vector<int> DecisionTree::selectFeatureSubsetRandomly(vector<int> globalDiscarde
             
             if (m->control_pressed) { return featureSubsetIndices; }
             
-            // TODO: optimize rand() call here
-            int randomIndex = rand() % numFeatures;
+            int randomIndex = m->getRandomIndex(numFeatures);
             vector<int>::iterator it = find(featureSubsetIndices.begin(), featureSubsetIndices.end(), randomIndex);
             if (it == featureSubsetIndices.end()){    // NOT FOUND
                 vector<int>::iterator it2 = find(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end(), randomIndex);

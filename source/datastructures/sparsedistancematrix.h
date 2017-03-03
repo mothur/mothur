@@ -15,22 +15,7 @@
 
 class ListVector;
 
-
-/* For each distance in a sparse matrix we have a row, column and distance.  
- The PDistCell consists of the column and distance.
- We know the row by the distances row in the seqVec matrix.  
- SeqVec is square and each row is sorted so the column values are ascending to save time in the search for the smallest distance. */
-
 /***********************************************************************/
-struct PDistCellMin{
-	ull row;
-    ull col;
-	//PDistCell* cell;
-	PDistCellMin(ull r, ull c) :  col(c), row(r) {}
-};
-/***********************************************************************/
-
-
 
 class SparseDistanceMatrix {
 	

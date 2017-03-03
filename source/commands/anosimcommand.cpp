@@ -460,7 +460,7 @@ map<string, vector<int> > AnosimCommand::getRandomizedGroups(map<string, vector<
 			sampleIndices.insert(sampleIndices.end(), indices.begin(), indices.end());
 		}
 		
-		random_shuffle(sampleIndices.begin(), sampleIndices.end());
+		m->mothurRandomShuffle(sampleIndices);
 		
 		int index = 0;
 		map<string, vector<int> > randomizedGroups = origMapping;

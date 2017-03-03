@@ -1471,9 +1471,9 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
         
 		MothurChimera* chimera;
 		if (templatefile != "self") { //you want to run slayer with a reference template
-			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, m->getRandomNumber());
 		}else {
-			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, m->getRandomNumber());	
 		}
 		
 		if (m->control_pressed) { delete chimera; return 0; }

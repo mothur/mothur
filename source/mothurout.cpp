@@ -831,14 +831,115 @@ string MothurOut::getSimpleName(string longName){
 		exit(1);
 	}
 }
-
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<int>& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<string>& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<item>& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<PCell*>& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<PDistCellMin>& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector< vector<double> >& randomize){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
+}
 /***********************************************************************/
 
 int MothurOut::getRandomIndex(int highest){
 	try {
         if (highest == 0) { return 0; }
         
-		int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+		//int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+        
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        uniform_int_distribution<int> dis(0, highest);
+        
+        int random = dis(mersenne_twister_engine);
 		
 		return random;
 	}
@@ -847,6 +948,40 @@ int MothurOut::getRandomIndex(int highest){
 		exit(1);
 	}	
 	
+}
+/***********************************************************************/
+int MothurOut::getRandomNumber(){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        uniform_int_distribution<int> dis;
+        
+        int random = dis(mersenne_twister_engine);
+        
+        return random;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }	
+    
+}
+/***********************************************************************/
+double MothurOut::getRandomDouble0to1(){
+    try {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        mt19937_64 mersenne_twister_engine(seed);
+        uniform_int_distribution<double> dis(0, 1);
+        
+        double random = dis(mersenne_twister_engine);
+        
+        return random;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getRandomNumber");
+        exit(1);
+    }
+    
 }
 /**********************************************************************/
 

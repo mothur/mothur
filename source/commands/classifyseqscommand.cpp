@@ -595,8 +595,8 @@ int ClassifySeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         string outputMethodTag = method;
-		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	}
-		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
+		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, m->getRandomNumber(), flip, writeShortcuts);	}
+		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, m->getRandomNumber());				}
         else if(method == "zap"){	
             outputMethodTag = search + "_" + outputMethodTag;
             if (search == "kmer") {   classify = new KmerTree(templateFileName, taxonomyFileName, kmerSize, cutoff); }
@@ -605,7 +605,7 @@ int ClassifySeqsCommand::execute(){
 		else {
 			m->mothurOut(search + " is not a valid method option. I will run the command using wang.");
 			m->mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, m->getRandomNumber(), flip, writeShortcuts);	
 		}
 		
 		if (m->control_pressed) { delete classify; return 0; }

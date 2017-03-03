@@ -534,7 +534,7 @@ int SubSampleCommand::getSubSampleFasta() {
             if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
 
 		}
-		random_shuffle(names.begin(), names.end());
+		m->mothurRandomShuffle(names);
 		
 		set<string> subset; //dont want repeat sequence names added
 		if (persample) {
@@ -1124,7 +1124,7 @@ int SubSampleCommand::getSubSampleList() {
                 }
             }
             
-            random_shuffle(names.begin(), names.end());
+            m->mothurRandomShuffle(names);
 			
             //randomly select a subset of those names to include in the subsample
             if (persample) {
@@ -1499,13 +1499,13 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 			
 		if (thisSize != size) {
 				
-			OrderVector* order = new OrderVector();
+			vector<int> order;
 			for(int p=0;p<numBins;p++){
 				for(int j=0;j<rabund->get(p);j++){
-					order->push_back(p);
+					order.push_back(p);
 				}
 			}
-			random_shuffle(order->begin(), order->end());
+			m->mothurRandomShuffle(order);
 			
 			RAbundVector* temp = new RAbundVector(numBins);
 			temp->setLabel(rabund->getLabel());
@@ -1515,15 +1515,13 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 			
 			for (int j = 0; j < size; j++) {
 				
-				if (m->control_pressed) { delete order; return 0; }
+				if (m->control_pressed) {  return 0; }
 				
-				int bin = order->get(j);
+				int bin = order[j];
 				
 				int abund = rabund->get(bin);
 				rabund->set(bin, (abund+1));
 			}
-			
-			delete order;
 		}
 		
 		if (m->control_pressed) { return 0; }
@@ -1660,13 +1658,13 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 	
 		if (thisSize != size) {
 			
-			OrderVector* order = new OrderVector();
+			vector<int> order;
 			for(int p=0;p<numBins;p++){
 				for(int j=0;j<rabund->get(p);j++){
-					order->push_back(p);
+					order.push_back(p);
 				}
 			}
-			random_shuffle(order->begin(), order->end());
+			m->mothurRandomShuffle(order);
 			
 			RAbundVector* temp = new RAbundVector(numBins);
 			temp->setLabel(rabund->getLabel());
@@ -1676,15 +1674,13 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 			
 			for (int j = 0; j < size; j++) {
 	
-				if (m->control_pressed) { delete order; return 0; }
+				if (m->control_pressed) {  return 0; }
 				
-				int bin = order->get(j);
+				int bin = order[j];
 				
 				int abund = rabund->get(bin);
 				rabund->set(bin, (abund+1));
 			}
-			
-			delete order;
 		}
 		
 		if (m->control_pressed) { return 0; }

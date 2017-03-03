@@ -837,7 +837,7 @@ void Tree::randomLabels(vector<string> g) {
 		for(int i = 0; i < numLeaves; i++){
 			int z;
 			//get random index to switch with
-			z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
+			z = m->getRandomIndex(i);
 			
 			//you only want to randomize the nodes that are from a group the user wants analyzed, so
 			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
@@ -878,7 +878,7 @@ void Tree::randomLabels(vector<string> g) {
 void Tree::randomBlengths()  {
 	try {
 		for(int i=numNodes-1;i>=0;i--){
-			int z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
+			int z = m->getRandomIndex(i);	
 		
 			float bl_hold = tree[z].getBranchLength();
 			tree[z].setBranchLength(tree[i].getBranchLength());
@@ -923,7 +923,7 @@ void Tree::randomTopology() {
 			int escape =0;
 			int rnd_index1, rnd_index2;
 			while(escape == 0){
-				rnd_index1 = (int)(((double)rand() / (double) RAND_MAX)*i);
+				rnd_index1 = m->getRandomIndex(i);
 				if(tree[rnd_index1].getParent() == -1){escape = 1;}
 			}
 		

@@ -117,7 +117,7 @@ void Libshuff::randomizeGroups(int x, int y){
 		for(int k=0;k<groupSizes[y];k++)	{	v[index++] = groups[y][k];	}
 		
 		for(int k=nv-1;k>0;k--){
-			int z = (int)(rand() % k);
+			int z = m->getRandomIndex(k);
 			swap(v[z],v[k]);
 		}
 		

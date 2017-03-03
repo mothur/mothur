@@ -49,6 +49,7 @@
 #include <math.h>
 #include <algorithm>
 #include <numeric>
+#include <random>
 
 //misc
 #include <cerrno>
@@ -125,6 +126,37 @@ struct diffPair {
 		prob = p;
 		reverseProb = rp;
 	}
+};
+
+struct item {
+    string name;
+    string group;
+    
+    item() {}
+    item(string n, string g) : name(n), group(g) {}
+    ~item() {}
+};
+
+struct PCell{
+    ull row;
+    ull column;
+    float dist;
+    PCell** vectorMap;
+    PCell() : row(0), column(0), dist(0), vectorMap(NULL) {};
+    PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(NULL) {};
+};
+
+/* For each distance in a sparse matrix we have a row, column and distance.
+ The PDistCell consists of the column and distance.
+ We know the row by the distances row in the seqVec matrix.
+ SeqVec is square and each row is sorted so the column values are ascending to save time in the search for the smallest distance. */
+
+/***********************************************************************/
+struct PDistCellMin{
+    ull row;
+    ull col;
+    //PDistCell* cell;
+    PDistCellMin(ull r, ull c) :  col(c), row(r) {}
 };
 
 /**********************************************************/

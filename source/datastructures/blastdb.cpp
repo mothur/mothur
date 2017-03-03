@@ -21,7 +21,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		path = b;
 		threadID = tid;
 
-		int randNumber = rand();
+		int randNumber = m->getRandomNumber();;
 		//int randNumber = 12345;
 		string pid = m->mothurGetpid(threadID);
 		
@@ -117,7 +117,7 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 #endif			
 		}
 		
-		int randNumber = rand();
+		int randNumber = m->getRandomNumber();;
 		string pid = m->mothurGetpid(threadID);
 		dbFileName = pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = pid + toString(randNumber) + ".candidate.unaligned.fasta";
@@ -202,7 +202,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		int randNumber = rand();
+		int randNumber = m->getRandomNumber();;
 		string pid = scrubName(seq->getName());
 		
 		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
@@ -266,7 +266,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		Scores.clear();
 		
 		ofstream queryFile;
-		int randNumber = rand();
+		int randNumber = m->getRandomNumber();
 		string pid = scrubName(seq->getName());
 		
 		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);

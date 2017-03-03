@@ -299,13 +299,13 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 			vector<snps> selectedLeft;
 
 			for (int j = 0; j < numLeft; j++) {
-				int index = int(rand() % left.size());
+				int index = m->getRandomIndex(left.size());
 				selectedLeft.push_back(left[index]);
 			}
 
 			vector<snps> selectedRight;
 			for (int j = 0; j < numRight; j++) {
-				int index = int(rand() % right.size());
+				int index = m->getRandomIndex(right.size());
 				selectedRight.push_back(right[index]);
 			}
 		

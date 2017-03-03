@@ -153,7 +153,7 @@ PCell* SparseMatrix::getSmallestCell(){
 				}
 
 			}
-			random_shuffle(mins.begin(), mins.end());  //randomize the order of the iterators in the mins vector
+			m->mothurRandomShuffle(mins);  //randomize the order of the iterators in the mins vector
 
 			for(int i=0;i<mins.size();i++){
 				mins[i]->vectorMap = &mins[i];  //assign vectorMap to the address for the container

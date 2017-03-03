@@ -461,7 +461,7 @@ double ClusterClassic::getSmallCell() {
 			int zrand = 0;
 			if (mins.size() > 1) {
 				//pick random number between 0 and mins.size()
-				zrand = (int)((float)(rand()) / (RAND_MAX / (mins.size()-1) + 1));
+				zrand = m->getRandomIndex(mins.size());
 			}
 			
 			smallRow = mins[zrand].row;

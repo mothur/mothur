@@ -79,7 +79,7 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 		//sample all the members
 		for(int i=0;i<numSeqs;i++){
 			//get random number
-			int random = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+            int random = m->getRandomIndex(i);
 			individual chosen = order->get(random);
 
 			int abundance; 

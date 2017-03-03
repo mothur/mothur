@@ -600,7 +600,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
         
         
 		for (int l = 0; l < numIters; l++) {
-            random_shuffle(randomLeaf.begin(), randomLeaf.end());
+            m->mothurRandomShuffle(randomLeaf);
             
             //initialize counts
             map<string, int> counts;

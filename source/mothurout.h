@@ -202,6 +202,12 @@ class MothurOut {
         bool checkGroupName(string name);
         map<string, vector<string> > parseClasses(string);
         string addUnclassifieds(string tax, int maxlevel, bool probs);
+        int mothurRandomShuffle(vector<int>&);
+        int mothurRandomShuffle(vector< vector<double> >&);
+        int mothurRandomShuffle(vector<string>&);
+        int mothurRandomShuffle(vector<item>&);
+        int mothurRandomShuffle(vector<PCell*>&);
+        int mothurRandomShuffle(vector<PDistCellMin>&);
     
 		
 		//math operation
@@ -220,6 +226,8 @@ class MothurOut {
         int sum(vector<int>);
         double sum(vector<double>);
 		int getRandomIndex(int); //highest
+        int getRandomNumber();
+        double getRandomDouble0to1();
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);
         vector<double> getStandardDeviation(vector< vector<double> >&, vector<double>&);

@@ -9,18 +9,6 @@ class ListVector;
 
 /***********************************************************************/
 
-
- struct PCell{
-	ull row;
-	ull column;
-	float dist;
-	PCell** vectorMap;
-	PCell() : row(0), column(0), dist(0), vectorMap(NULL) {};
-	PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(NULL) {};
-};
-
-/***********************************************************************/
-
 typedef list<PCell>::iterator MatData;
 
 class SparseMatrix {

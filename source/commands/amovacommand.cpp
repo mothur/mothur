@@ -377,7 +377,7 @@ map<string, vector<int> > AmovaCommand::getRandomizedGroups(map<string, vector<i
 			sampleIndices.insert(sampleIndices.end(), indices.begin(), indices.end());
 		}
 		
-		random_shuffle(sampleIndices.begin(), sampleIndices.end());
+		m->mothurRandomShuffle(sampleIndices);
 		
 		int index = 0;
 		map<string, vector<int> > randomizedGroups = origMapping;

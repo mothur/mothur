@@ -36,7 +36,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
                 randomizeSeqs.push_back(i);
             }
             
-            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
+            if (randomize) { m->mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
@@ -58,7 +58,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
                 randomizeSeqs.push_back(i);
             }
             
-            if (randomize) { random_shuffle(randomizeSeqs.begin(), randomizeSeqs.end()); }
+            if (randomize) { m->mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {

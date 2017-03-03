@@ -57,8 +57,8 @@ int AbstractDecisionTree::createBootStrappedSamples(){
         
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { return 0; }
-            // TODO: optimize the rand() function call + double check if it's working properly
-            int randomIndex = rand() % numSamples;
+        
+            int randomIndex = m->getRandomIndex(numSamples);
             bootstrappedTrainingSamples.push_back(baseDataSet[randomIndex]);
             isInTrainingSamples[randomIndex] = true;
         }

@@ -15,14 +15,6 @@
 #include "tree.h"
 #include "counttable.h"
 
-struct item {
-    string name;
-    string group;
-    
-    item() {}
-    item(string n, string g) : name(n), group(g) {}
-    ~item() {}
-};
 
 //subsampling overwrites the sharedRabunds.  If you need to reuse the original use the getSamplePreserve function.
 

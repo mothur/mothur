@@ -16,6 +16,7 @@ Oligos::Oligos(string o){
         hasPPrimers = false; hasPBarcodes = false; pairedOligos = false; reversePairs = true;
         indexBarcode = 0; indexPairedBarcode = 0; indexPrimer = 0; indexPairedPrimer = 0;
 		oligosfile = o;
+        reversePairs = true;
         readOligos();
 		if (pairedOligos) {
             numBarcodes = pairedBarcodes.size();
@@ -35,6 +36,7 @@ Oligos::Oligos(string o){
 Oligos::Oligos(){
 	try {
 		m = MothurOut::getInstance();
+        reversePairs = true;
         hasPPrimers = false; hasPBarcodes = false; pairedOligos = false; reversePairs = true;
         indexBarcode = 0; indexPairedBarcode = 0; indexPrimer = 0; indexPairedPrimer = 0;
         numFPrimers = 0; numBarcodes = 0;

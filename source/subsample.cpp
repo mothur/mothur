@@ -35,7 +35,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
                         int num = ct->getGroupCount(names[j], Groups[i]);
                         for (int k = 0; k < num; k++) { random.push_back(j); }
                     }
-                    random_shuffle(random.begin(), random.end());
+                    m->mothurRandomShuffle(random);
                     
                     vector<int> sampleRandoms; sampleRandoms.resize(names.size(), 0);
                     for (int j = 0; j < size; j++) { sampleRandoms[random[j]]++; }
@@ -110,6 +110,8 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
+        //unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        //mt19937_64 mersenne_twister_engine(seed);
 		
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
@@ -119,13 +121,14 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 				
 				string thisgroup = thislookup[i]->getGroup();
 				
-				OrderVector order;
+				vector<int> order;
 				for(int p=0;p<numBins;p++){
 					for(int j=0;j<thislookup[i]->getAbundance(p);j++){
 						order.push_back(p);
 					}
 				}
-				random_shuffle(order.begin(), order.end());
+                
+                m->mothurRandomShuffle(order);
 				
 				SharedRAbundVector* temp = new SharedRAbundVector(numBins);
 				temp->setLabel(thislookup[i]->getLabel());
@@ -139,7 +142,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 					
 					if (m->control_pressed) {  return m->currentSharedBinLabels; }
 					
-					int bin = order.get(j);
+					int bin = order[j];
 					
 					int abund = thislookup[i]->getAbundance(bin);
 					thislookup[i]->set(bin, (abund+1), thisgroup);
@@ -155,6 +158,8 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		//save mothurOut's binLabels to restore for next label
         vector<string> subsampleBinLabels = m->currentSharedBinLabels;
 		m->currentSharedBinLabels = saveBinLabels;
+        
+        thislookup[0]->print(cout);
 		
 		return subsampleBinLabels;
 		
@@ -286,7 +291,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
                 for (int k = 0; k < num; k++) { allNames.push_back(names[j]); }
             }
             
-            random_shuffle(allNames.begin(), allNames.end());
+            m->mothurRandomShuffle(allNames);
             
             if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->control_pressed = true; }
             else{
@@ -352,7 +357,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 }
             }
             
-            random_shuffle(allNames.begin(), allNames.end());
+            m->mothurRandomShuffle(allNames);
             
             if (allNames.size() < size) { 
                 if (pickedGroups) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); } 
@@ -396,7 +401,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
             
             if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->control_pressed = true; return sampledCt; }
             else {
-                random_shuffle(allNames.begin(), allNames.end());
+                m->mothurRandomShuffle(allNames);
                 
                 for (int j = 0; j < size; j++) {
                     if (m->control_pressed) { return sampledCt; }
