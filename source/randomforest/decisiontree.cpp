@@ -386,7 +386,7 @@ vector<int> DecisionTree::selectFeatureSubsetRandomly(vector<int> globalDiscarde
             
             if (m->control_pressed) { return featureSubsetIndices; }
             
-            int randomIndex = m->getRandomIndex(numFeatures);
+            int randomIndex = m->getRandomIndex(numFeatures-1);
             vector<int>::iterator it = find(featureSubsetIndices.begin(), featureSubsetIndices.end(), randomIndex);
             if (it == featureSubsetIndices.end()){    // NOT FOUND
                 vector<int>::iterator it2 = find(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end(), randomIndex);

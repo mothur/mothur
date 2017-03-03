@@ -95,7 +95,7 @@ static DWORD WINAPI MySparccThreadFunction(LPVOID lpParam){
             
             for(int k=0;k<numGroups;k++){
                 for(int j=0;j<numOTUs;j++){
-                    sharedShuffled[k][j] = pDataArray->sharedVector[pDataArray->m->getRandomIndex(numGroups)][j];
+                    sharedShuffled[k][j] = pDataArray->sharedVector[pDataArray->m->getRandomIndex(numGroups-1)][j];
                 }
             }
             /////////////////////////////////////////////////////////

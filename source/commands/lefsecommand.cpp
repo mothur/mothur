@@ -801,11 +801,11 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
                 save = h;
                 rand_s.clear();
-                for (int k = 0; k < fractionNumGroups; k++) {  int index = m->getRandomIndex(numGroups-1); rand_s.push_back(index);
-                    //if (m->debug) { m->mothurOut("[DEBUG]: index = " + toString(index) + "\n."); }
-                }
+                
+                for (int k = 0; k < fractionNumGroups; k++) {  int index = m->getRandomIndex(numGroups-1); rand_s.push_back(index); }
                 if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
+            
             if (m->control_pressed) { return sigOTUS; }
             
             if (m->debug) { m->mothurOut("[DEBUG]: after 1000. \n."); }

@@ -303,7 +303,7 @@ vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >
         
         for(int i=0;i<numGroups;i++){
             for(int j=0;j<numOTUs;j++){
-                shuffledVector[i][j] = sharedVector[m->getRandomIndex(numGroups)][j];
+                shuffledVector[i][j] = sharedVector[m->getRandomIndex(numGroups-1)][j];
             }
         }
         

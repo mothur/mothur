@@ -158,8 +158,6 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		//save mothurOut's binLabels to restore for next label
         vector<string> subsampleBinLabels = m->currentSharedBinLabels;
 		m->currentSharedBinLabels = saveBinLabels;
-        
-        thislookup[0]->print(cout);
 		
 		return subsampleBinLabels;
 		
