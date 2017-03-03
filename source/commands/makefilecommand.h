@@ -32,7 +32,7 @@ public:
 
 private:
     
-    string inputDir, outputDir, typeFile, prefix;
+    string inputDir, outputDir, typeFile, prefix, delim;
     vector<string> outputNames;
     int numCols;
     bool abort;
