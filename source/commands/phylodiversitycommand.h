@@ -95,7 +95,7 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
 		vector<string> mGroups = pDataArray->m->getGroups();
         
 		for (int l = 0; l < pDataArray->numIters; l++) {
-            m->mothurRandomShuffle(pDataArray->randomLeaf);
+            pDataArray->m->mothurRandomShuffle(pDataArray->randomLeaf);
             
             //initialize counts
             map<string, int> counts;
