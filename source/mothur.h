@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
+#include <chrono>
 
 //misc
 #include <cerrno>
