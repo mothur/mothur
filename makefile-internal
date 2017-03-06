@@ -1,8 +1,8 @@
 64BIT_VERSION ?= yes
 USEREADLINE ?= no
 USEBOOST ?= no
-RELEASE_DATE = "\"2/23/2017\""
-VERSION = "\"1.39.3\""
+RELEASE_DATE = "\"3/6/2017\""
+VERSION = "\"1.39.4\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3
