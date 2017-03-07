@@ -5,7 +5,7 @@ RELEASE_DATE = "\"3/6/2017\""
 VERSION = "\"1.39.4\""
 
 # Optimize to level 3:
-    CXXFLAGS += -O3
+    CXXFLAGS += -O3 -std=c++0x
 
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
