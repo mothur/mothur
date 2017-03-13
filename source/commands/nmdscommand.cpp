@@ -389,7 +389,7 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 				
 				//generate random int between 0 and 99999
                 int myrand = m->getRandomIndex(99999);
-				
+                
 				//generate random sign
 				int mysign = m->getRandomIndex(99999);
 				
