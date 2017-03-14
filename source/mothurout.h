@@ -208,6 +208,7 @@ class MothurOut {
         int mothurRandomShuffle(vector<item>&);
         int mothurRandomShuffle(vector<PCell*>&);
         int mothurRandomShuffle(vector<PDistCellMin>&);
+        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); }
     
 		
 		//math operation
@@ -350,6 +351,8 @@ class MothurOut {
             modifyNames = true;
             numErrors = 0;
             numWarnings = 0;
+            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+            mersenne_twister_engine.seed(seed);
 		}
 		~MothurOut();
 
@@ -359,6 +362,7 @@ class MothurOut {
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile, contigsreportfile;
+        mt19937_64 mersenne_twister_engine;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;
