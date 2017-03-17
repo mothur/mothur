@@ -7,13 +7,12 @@
 //
 
 #include "testopticluster.h"
-#include "catch.hpp"
 #include "optimatrix.h"
 #include "distancecommand.h"
 #include "dataset.h"
 
 /**************************************************************************************************/
-TestOptiCluster::TestOptiCluster() {  //setup
+void TestOptiCluster::SetUp() {  //setup
     m = MothurOut::getInstance();
     TestDataSet data;
     filenames = data.getSubsetFNGFiles(100); //Fasta, name, group returned
@@ -32,101 +31,67 @@ TestOptiCluster::TestOptiCluster() {  //setup
     m->mothurCalling = false;
     
     columnFile = outputFilenames["column"][0];
+    
+    matrix = new OptiMatrix(columnFile, filenames[1], "name", "column", 0.03, false);
+    
+    setVariables(matrix, "mcc");
 }
 /**************************************************************************************************/
-TestOptiCluster::~TestOptiCluster() {
+void TestOptiCluster::TearDown() {
     for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
     m->mothurRemove(columnFile);
+    delete matrix;
 }
 /**************************************************************************************************/
-TEST_CASE("Testing OptiCluster Class") {
-    TestOptiCluster testOcluster;
-    OptiMatrix matrix(testOcluster.columnFile, testOcluster.filenames[1], "name", "column", 0.03, false);
-    testOcluster.setVariables(&matrix, "mcc");
+TEST_F(TestOptiCluster, myInitialize) {
+    double initialMetricValue;
     
-    SECTION("Testing Initialize") {
-        INFO("Using First 100 sequences of final.fasta and final.names") // Only appears on a FAIL
-        
-        double initialMetricValue;
-        
-        CAPTURE(testOcluster.initialize(initialMetricValue, true, "singleton")); //
-        
-        CHECK(testOcluster.initialize(initialMetricValue, true, "singleton") == 0); //metric value
-    }
+    EXPECT_EQ(0,(initialize(initialMetricValue, true, "singleton")));
+}
+
+TEST_F(TestOptiCluster, calcMCC) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     
-    SECTION("Testing calcMCC") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200") // Only appears on a FAIL
-        
-        long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        
-        CAPTURE(testOcluster.calcMCC(tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.calcMCC(tp,tn,fp,fn)*10000) == 9694); //metric value
-    }
+    EXPECT_EQ(9694, (calcMCC(tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, calcSens) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     
-    SECTION("Testing calcSens") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200") // Only appears on a FAIL
-        
-        long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        
-        CAPTURE(testOcluster.calcSens(tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.calcSens(tp,tn,fp,fn)*10000) == 9615); //metric value
-    }
+    EXPECT_EQ(9615, (calcSens(tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, calcSpec) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     
-    SECTION("Testing calcSpec") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200") // Only appears on a FAIL
-        
-        long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        
-        CAPTURE(testOcluster.calcSpec(tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.calcSpec(tp,tn,fp,fn)*10000) == 9990); //metric value
-    }
+    EXPECT_EQ(9990, (calcSpec(tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, calcTPTN) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     
-    SECTION("Testing calcTPTN") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200") // Only appears on a FAIL
-        
-        long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        
-        CAPTURE(testOcluster.calcTPTN(tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.calcTPTN(tp,tn,fp,fn)*10000) == 9861); //metric value
-    }
+    EXPECT_EQ(9861, (calcTPTN(tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, calcFPFN) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     
-    SECTION("Testing calcFPFN") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200") // Only appears on a FAIL
-        
-        double tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        
-        CAPTURE(testOcluster.calcFPFN(tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.calcFPFN(tp,tn,fp,fn)*10000) == 9861); //metric value
-    }
+    EXPECT_EQ(9861, (calcFPFN(tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, moveAdjustTFValues) {
+    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+    double initialMetricValue;
+    initialize(initialMetricValue, false, "singleton"); //no randomization
     
-    SECTION("Testing moveAdjustTFValues") {
-        INFO("Using tp=5000, tn=10000, fp=10, fn=200 and mcc") // Only appears on a FAIL
-        
-        long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
-        double initialMetricValue;
-        testOcluster.initialize(initialMetricValue, false, "singleton"); //no randomization
-        
-        CAPTURE(testOcluster.moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)); // Displays this variable on a FAIL
-        
-        CHECK((int)(testOcluster.moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)*10000) == 9700); //metric value
-    }
+    EXPECT_EQ(9700, (moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)*10000)); //metric value
+}
+
+TEST_F(TestOptiCluster, update) {
+    double initialMetricValue;
+    initialize(initialMetricValue, false, "singleton"); //no randomization
+    update(initialMetricValue);
     
-    SECTION("Testing update") {
-        INFO("Using mcc") // Only appears on a FAIL
-        
-        double initialMetricValue;
-        testOcluster.initialize(initialMetricValue, false, "singleton"); //no randomization
-        testOcluster.update(initialMetricValue);
-        
-        CAPTURE(initialMetricValue); // Displays this variable on a FAIL
-        
-        CHECK((int)(initialMetricValue*10000) == 7853); //metric value
-    }
-    
+    EXPECT_EQ(7853, initialMetricValue); //metric value
 }
 /**************************************************************************************************/

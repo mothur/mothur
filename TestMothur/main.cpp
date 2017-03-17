@@ -7,24 +7,12 @@
 //
 
 
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-/*
- 
-To compile TestMothur you need to uncomment 
- 
- CommandFactory* CommandFactory::_uniqueInstance; in commandfactory.cpp
- 
- MothurOut* MothurOut::_uniqueInstance; in mothurout.cpp
- 
- 
- */
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
+#include "mothurout.h"
+#include "gtest/gtest.h"
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include "catch.hpp"
+#define UNIT_TEST
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

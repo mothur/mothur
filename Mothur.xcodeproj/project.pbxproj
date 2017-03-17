@@ -806,7 +806,6 @@
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		481FB51B1AC0A63E0076CFF3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = TestMothur/main.cpp; sourceTree = SOURCE_ROOT; };
-		481FB5201AC0A6B60076CFF3 /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hpp; path = TestMothur/catch.hpp; sourceTree = SOURCE_ROOT; };
 		481FB5281AC19F8B0076CFF3 /* setseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = setseedcommand.cpp; path = source/commands/setseedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		481FB5291AC19F8B0076CFF3 /* setseedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = setseedcommand.h; path = source/commands/setseedcommand.h; sourceTree = SOURCE_ROOT; };
 		481FB52D1AC1B0CB0076CFF3 /* testsetseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsetseedcommand.cpp; path = TestMothur/testcommands/testsetseedcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1661,8 +1660,6 @@
 				A7E9B73A12D37EC400DA6239 /* libshuff.h */,
 				A7FC480C12D788F20055BC5C /* linearalgebra.h */,
 				A7FC480D12D788F20055BC5C /* linearalgebra.cpp */,
-				A7D9378B17B15215001E90B0 /* wilcox.h */,
-				A7D9378917B146B5001E90B0 /* wilcox.cpp */,
 				A7E9BA5612D39BD800DA6239 /* metastats */,
 				A7E9B75B12D37EC400DA6239 /* mothur.cpp */,
 				A7E9B75C12D37EC400DA6239 /* mothur.h */,
@@ -1722,6 +1719,8 @@
 				A7E9B87912D37EC400DA6239 /* venn.h */,
 				489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */,
 				489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */,
+				A7D9378B17B15215001E90B0 /* wilcox.h */,
+				A7D9378917B146B5001E90B0 /* wilcox.cpp */,
 				A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */,
 			);
 			name = Source;
@@ -1739,7 +1738,6 @@
 		481FB51A1AC0A63E0076CFF3 /* TestMothur */ = {
 			isa = PBXGroup;
 			children = (
-				481FB5201AC0A6B60076CFF3 /* catch.hpp */,
 				481FB51B1AC0A63E0076CFF3 /* main.cpp */,
 				48F06CCA1D74BC6F004A45DD /* testclassifier */,
 				48D6E9691CA4262A008DF76B /* dataset.cpp */,
@@ -3439,7 +3437,7 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
@@ -3493,7 +3491,7 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEPLOYMENT_LOCATION = NO;
@@ -3548,7 +3546,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = NO;
@@ -3563,7 +3561,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -3586,7 +3584,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = NO;
@@ -3602,6 +3600,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.37.6\\\"\"",
 					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
