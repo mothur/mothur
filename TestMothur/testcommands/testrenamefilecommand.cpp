@@ -8,7 +8,7 @@
 
 #include "testrenamefilecommand.h"
 #include "dataset.h"
-#include "catch.hpp"
+
 
 /**************************************************************************************************/
 TestRenameFileCommand::TestRenameFileCommand() {  //setup
@@ -20,7 +20,7 @@ TestRenameFileCommand::TestRenameFileCommand() {  //setup
 TestRenameFileCommand::~TestRenameFileCommand() {
     for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 TEST_CASE("Testing RenameFileCommand Class") {
     TestRenameFileCommand testRename;
     
@@ -93,5 +93,5 @@ TEST_CASE("Testing RenameFileCommand Class") {
         
         testRename.filenames[0] = testRename.getNewName(testRename.filenames[0], "fasta");  //for teardown
     }
-}
+}*/
 /**************************************************************************************************/

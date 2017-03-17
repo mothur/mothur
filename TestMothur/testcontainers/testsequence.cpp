@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
-#include "testsequence.h"
 
+#include "testsequence.h"
+/*
 TEST_CASE("Testing Sequence Class") {
     Sequence seq;
     TestSequence seq2;
@@ -57,3 +57,4 @@ TEST_CASE("Testing Sequence Class") {
    //more tests need to be added - just a start to set up testing project and model
 }
 
+*/

@@ -6,7 +6,6 @@
 //  Copyright (c) 2016 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
 #include "testoptimatrix.h"
 #include "distancecommand.h"
 #include "dataset.h"

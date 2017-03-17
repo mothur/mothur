@@ -7,7 +7,7 @@
 //
 
 #include "testbiominfocommand.h"
-#include "catch.hpp"
+/*
 
 
 TEST_CASE("Testing Biom.Info Command") {
@@ -69,5 +69,6 @@ TEST_CASE("Testing Biom.Info Command") {
     
     
     //more tests need to be added - just a start to set up testing project and model
-}
+}*/
+
 

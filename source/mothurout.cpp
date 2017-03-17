@@ -356,6 +356,28 @@ void MothurOut::setDefaultPath(string pathname)  {
 	}
 }
 /*********************************************************************************************/
+void MothurOut::setTestFilePath(string pathname)  {
+    try {
+        
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            if (lastChar != "/") { pathname += "/"; }
+#else
+            if (lastChar != "\\") { pathname += "\\"; }
+#endif
+        }
+        
+        testFilePath = getFullPathName(pathname);
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setTestFilePath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
 void MothurOut::setBlastPath(string pathname)  {
     try {
         

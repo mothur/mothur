@@ -6,7 +6,7 @@
 //  Copyright © 2016 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
+
 #include "testtrimoligos.hpp"
 
 /**************************************************************************************************/

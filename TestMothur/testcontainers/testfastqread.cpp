@@ -6,7 +6,6 @@
 //  Copyright (c) 2016 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
 #include "testfastqread.h"
 #include "dataset.h"
 
@@ -23,9 +22,9 @@ TestFastqRead::~TestFastqRead() {
      //teardown
 }
 /**************************************************************************************************/
-
+/*
 TEST_CASE("Testing FastqRead Class") {
-    /*
+    
     TestFastqRead testFastq;
     
     SECTION("Testing (Sequence, Quality) Constructor ") {
@@ -61,6 +60,6 @@ TEST_CASE("Testing FastqRead Class") {
         
         CHECK(read.getScores()[0] == testFastq.reads[0].getScores()[0]);
     }
-    */
-}
+ 
+}*/
 /**************************************************************************************************/

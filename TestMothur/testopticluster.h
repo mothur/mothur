@@ -13,17 +13,14 @@
 #include "gtest/gtest.h"
 
 
-class TestOptiCluster : public ::testing::Test, OptiCluster  {
+class TestOptiCluster : public OptiCluster, ::testing::Test  {
     
 public:
     
-    TestOptiCluster() {}
-    ~TestOptiCluster() {}
+    TestOptiCluster();
+    ~TestOptiCluster();
     
 protected:
-    virtual void SetUp();
-    virtual void TearDown();
-    
     MothurOut* m;
     string columnFile, phylipFile;
     vector<string> filenames;
