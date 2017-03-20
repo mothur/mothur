@@ -298,7 +298,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") {
                 method = "opti";
-                m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
+                //m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
             }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
@@ -313,7 +313,7 @@ ClusterCommand::ClusterCommand(string option)  {
             
             cutOffSet = false;
             temp = validParameter.validFile(parameters, "cutoff", false);
-            if (temp == "not found") { temp = "0.03"; }
+            if (temp == "not found") { if ((method == "opti") || (method == "agc") || (method == "dgc")) { temp = "0.03"; }else { temp = "0.15"; } }
             else { cutOffSet = true; }
             m->mothurConvert(temp, cutoff);
             

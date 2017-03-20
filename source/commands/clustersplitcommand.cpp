@@ -397,7 +397,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             }
             
             cutoffNotSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { cutoffNotSet = true; temp = "0.03"; }
+            temp = validParameter.validFile(parameters, "cutoff", false);
+            if (temp == "not found") { cutoffNotSet = true; if ((method == "opti") || (method == "agc") || (method == "dgc")) { temp = "0.03"; }else { temp = "0.15"; } }
             m->mothurConvert(temp, cutoff);
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
