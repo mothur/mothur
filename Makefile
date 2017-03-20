@@ -22,8 +22,8 @@ USEBOOST ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/6/2017\""
-VERSION = "\"1.39.4\""
+RELEASE_DATE = "\"3/20/2017\""
+VERSION = "\"1.39.5\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
@@ -35,6 +35,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
 endif
 
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -std=c++0x
+LDFLAGS += -std=c++0x
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
