@@ -8,6 +8,10 @@
  */
 
 #include "mothurout.h"
+#include "ordervector.hpp"
+#include "sharedordervector.h"
+#include "sharedrabundvector.h"
+
 
 //needed for testing project
 //MothurOut* MothurOut::_uniqueInstance;
@@ -861,7 +865,46 @@ int MothurOut::mothurRandomShuffle(vector<int>& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(OrderVector& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(vector<SharedRAbundVector*>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
+int MothurOut::mothurRandomShuffle(SharedOrderVector& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     
@@ -874,7 +917,7 @@ int MothurOut::mothurRandomShuffle(vector<string>& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     
@@ -887,7 +930,7 @@ int MothurOut::mothurRandomShuffle(vector<item>& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     
@@ -900,7 +943,7 @@ int MothurOut::mothurRandomShuffle(vector<PCell*>& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     
@@ -913,7 +956,7 @@ int MothurOut::mothurRandomShuffle(vector<PDistCellMin>& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     
@@ -926,7 +969,7 @@ int MothurOut::mothurRandomShuffle(vector< vector<double> >& randomize){
         return 0;
     }
     catch(exception& e) {
-        errorOut(e, "MothurOut", "getRandomNumber");
+        errorOut(e, "MothurOut", "mothurRandomShuffle");
         exit(1);
     }
     

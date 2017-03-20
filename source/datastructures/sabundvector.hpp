@@ -48,7 +48,7 @@ public:
 		
 	RAbundVector getRAbundVector();		
 	SAbundVector getSAbundVector();
-	OrderVector getOrderVector(map<string,int>*);
+	OrderVector getOrderVector(map<string,int>* hold = NULL);
 	
 private:
 	vector<int> data;

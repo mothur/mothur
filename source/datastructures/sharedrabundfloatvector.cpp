@@ -489,7 +489,7 @@ SharedOrderVector SharedRAbundFloatVector::getSharedOrderVector() {
 				ov.push_back(data[i].bin, round, data[i].group);
 			}
 		}
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 
 		ov.setLabel(label);	
 		ov.updateStats();
@@ -513,7 +513,7 @@ OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = N
 				ov.push_back(i);
 			}
 		}
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 
 		ov.setLabel(label);	
 		return ov;

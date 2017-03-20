@@ -426,7 +426,7 @@ int RareFactCommand::execute(){
                     map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(order, rDisplays, processors, ends);
+					rCurve = new Rarefact(*order, rDisplays, processors, ends);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -444,7 +444,7 @@ int RareFactCommand::execute(){
 					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(order, rDisplays, processors, ends);
+					rCurve = new Rarefact(*order, rDisplays, processors, ends);
 
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
@@ -488,7 +488,7 @@ int RareFactCommand::execute(){
 				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                 set<int> ends;
                 if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-                rCurve = new Rarefact(order, rDisplays, processors, ends);
+                rCurve = new Rarefact(*order, rDisplays, processors, ends);
 
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;

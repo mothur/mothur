@@ -69,15 +69,15 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 				displays[i]->init(label);
 			}
 		
-			RAbundVector* lookup	= new RAbundVector(order->getNumBins());
-			SAbundVector* rank	= new SAbundVector(order->getMaxRank()+1);
-			random_shuffle(order->begin(), order->end());
+			RAbundVector* lookup	= new RAbundVector(order.getNumBins());
+			SAbundVector* rank	= new SAbundVector(order.getMaxRank()+1);
+			m->mothurRandomShuffle(order);
 		
 			for(int i=0;i<numSeqs;i++){
 			
 				if (m->control_pressed) { delete lookup; delete rank; delete rcd; return 0;  }
 			
-				int binNumber = order->get(i);
+				int binNumber = order.get(i);
 				int abundance = lookup->get(binNumber);
 			
 				rank->set(abundance, rank->get(abundance)-1);
@@ -251,7 +251,7 @@ try {
 			
 			if (m->jumble == true)  {
 				//randomize the groups
-				random_shuffle(lookup.begin(), lookup.end());
+				m->mothurRandomShuffle(lookup);
 			}
 			
 			//make merge the size of lookup[0]

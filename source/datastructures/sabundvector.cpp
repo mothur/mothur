@@ -223,7 +223,7 @@ SAbundVector SAbundVector::getSAbundVector(){
 
 /***********************************************************************/
 
-OrderVector SAbundVector::getOrderVector(map<string,int>* hold = NULL){
+OrderVector SAbundVector::getOrderVector(map<string,int>* hold){
 	try {
 		OrderVector ov;
 	
@@ -238,7 +238,7 @@ OrderVector SAbundVector::getOrderVector(map<string,int>* hold = NULL){
 			}
 		}
 	
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 
 		ov.setLabel(label);
 		ov.getNumBins();

@@ -304,7 +304,7 @@ OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
 				ov.push_back(i);
 			}
 		}
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 		ov.setLabel(label);	
 		ov.getNumBins();
 

@@ -448,7 +448,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					ov.push_back(i);
 				}
 			}
-			random_shuffle(ov.begin(), ov.end());
+			m->mothurRandomShuffle(ov);
 			ov.setLabel(label);
 			ov.getNumBins();
 		

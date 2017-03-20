@@ -29,6 +29,9 @@ struct logger {
     
 }; 
 /***********************************************/
+class OrderVector;
+class SharedOrderVector;
+class SharedRAbundVector;
 
 class MothurOut {
 	
@@ -210,6 +213,9 @@ class MothurOut {
         int mothurRandomShuffle(vector<item>&);
         int mothurRandomShuffle(vector<PCell*>&);
         int mothurRandomShuffle(vector<PDistCellMin>&);
+        int mothurRandomShuffle(OrderVector&);
+        int mothurRandomShuffle(SharedOrderVector&);
+        int mothurRandomShuffle(vector<SharedRAbundVector*>&);
         void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); }
     
 		
