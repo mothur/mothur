@@ -398,7 +398,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
 
             if (seed)  {
-                srand(random);
+                m->setRandomSeed(random);
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
         }

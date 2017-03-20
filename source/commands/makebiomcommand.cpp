@@ -1034,11 +1034,10 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             if (thisPos != string::npos) {
                 OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
                 thisPos = OTUTaxonomy.find_last_of(";"); //remove rest of parent taxon
-                if (thisPos != string::npos) {
-                    OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
-                }
+                if (thisPos != string::npos) { OTUTaxonomy = OTUTaxonomy.substr(0, thisPos); }
+                OTUTaxonomy += ";";
             }
-            
+           
             //get list of reference ids that map to this taxonomy
             vector<string> referenceIds = phylo.getSeqs(OTUTaxonomy);
             

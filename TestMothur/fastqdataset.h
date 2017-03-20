@@ -23,8 +23,8 @@ public:
     
 private:
     MothurOut* m;
-    vector<FastqRead> ffastqReads; //F8D0 Sample (first 2000 reads)
-    vector<FastqRead> rfastqReads; //F8D0 Sample (first 2000 reads)
+    vector<FastqRead> ffastqReads;
+    vector<FastqRead> rfastqReads; 
     void fillForwardFastq();
     void fillReverseFastq();
     

@@ -259,7 +259,7 @@ OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
 			}
 		}
 	
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 
 		ov.setLabel(label);
 		ov.getNumBins();

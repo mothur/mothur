@@ -29,6 +29,9 @@ struct logger {
     
 }; 
 /***********************************************/
+class OrderVector;
+class SharedOrderVector;
+class SharedRAbundVector;
 
 class MothurOut {
 	
@@ -46,6 +49,8 @@ class MothurOut {
 		void closeLog();
 		string getDefaultPath() { return defaultPath; }
 		void setDefaultPath(string);
+        string getTestFilePath() { return testFilePath; }
+        void setTestFilePath(string);
         string getBlastPath() { return blastPath; }
         void setBlastPath(string);
 		string getOutputDir() { return outputDir; }
@@ -208,6 +213,10 @@ class MothurOut {
         int mothurRandomShuffle(vector<item>&);
         int mothurRandomShuffle(vector<PCell*>&);
         int mothurRandomShuffle(vector<PDistCellMin>&);
+        int mothurRandomShuffle(OrderVector&);
+        int mothurRandomShuffle(SharedOrderVector&);
+        int mothurRandomShuffle(vector<SharedRAbundVector*>&);
+        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); }
     
 		
 		//math operation
@@ -309,7 +318,7 @@ class MothurOut {
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
 		MothurOut() { 
-			control_pressed = false; defaultPath=""; blastPath="";
+			control_pressed = false; defaultPath=""; blastPath=""; testFilePath = "";
             filefile = "";
 			phylipfile = "";
 			columnfile = "";
@@ -350,6 +359,8 @@ class MothurOut {
             modifyNames = true;
             numErrors = 0;
             numWarnings = 0;
+            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+            mersenne_twister_engine.seed(seed);
 		}
 		~MothurOut();
 
@@ -357,8 +368,9 @@ class MothurOut {
 		string defaultPath, outputDir, blastPath;
 		string releaseDate, version;
 	
-		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile;
+		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath;
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile, contigsreportfile;
+        mt19937_64 mersenne_twister_engine;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;

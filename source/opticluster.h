@@ -15,6 +15,8 @@
 /***********************************************************************/
 
 class OptiCluster : public Cluster {
+
+public:
     
 #ifdef UNIT_TEST
     friend class TestOptiCluster;
@@ -22,7 +24,6 @@ class OptiCluster : public Cluster {
     void setVariables(OptiMatrix* mt, string met) { matrix = mt; metric = met; }
 #endif
     
-public:
     OptiCluster(OptiMatrix* mt, string met, long long ns) : Cluster() {
         m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
     }

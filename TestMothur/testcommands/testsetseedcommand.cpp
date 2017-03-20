@@ -6,10 +6,9 @@
 //  Copyright (c) 2015 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
 #include "setseedcommand.h"
 
-
+/*
 TEST_CASE("Testing set.seed command") {
     string optionString = "seed=12345";
     Command* setseed = new SetSeedCommand(optionString);
@@ -25,6 +24,6 @@ TEST_CASE("Testing set.seed command") {
     }
     
     delete setseed;
-}
+}*/
 
 

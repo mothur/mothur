@@ -6,7 +6,7 @@
 //  Copyright (c) 2016 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
+
 #include "testvsearchfileparser.h"
 
 /**************************************************************************************************/
@@ -21,7 +21,7 @@ TestVsearchFileParser::~TestVsearchFileParser() {
     delete ct;
     for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 
 TEST_CASE("Testing VsearchParser Class") {
     TestVsearchFileParser testVParser;
@@ -114,5 +114,5 @@ TEST_CASE("Testing VsearchParser Class") {
             CHECK(binnames == binNames[i]);
         }
     }
-}
+}*/
 /**************************************************************************************************/

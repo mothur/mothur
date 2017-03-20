@@ -6,7 +6,6 @@
 //  Copyright (c) 2016 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
 #include "testoptimatrix.h"
 #include "distancecommand.h"
 #include "dataset.h"
@@ -55,7 +54,7 @@ TestOptiMatrix::~TestOptiMatrix() {
     m->mothurRemove(columnFile);
     m->mothurRemove(phylipFile);
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 TEST_CASE("Testing OptiMatrix Class") {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", 0.03, false);
@@ -83,7 +82,7 @@ TEST_CASE("Testing OptiMatrix Class") {
      16	25	33	48
      38
      22	45	52
-     */
+     
     
     SECTION("Testing isClose") {
         INFO("Sequences 0 and 1") // Only appears on a FAIL
@@ -97,5 +96,5 @@ TEST_CASE("Testing OptiMatrix Class") {
         CAPTURE(matrix.isClose(1, 36));
         CHECK(matrix.isClose(1, 36) == true);
     }
-}
+}*/
 /**************************************************************************************************/

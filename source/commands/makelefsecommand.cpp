@@ -302,11 +302,11 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
                     string fixedName = "";
                     //remove confidences and change ; to |
                     m->removeConfidences(nameOfOtu);
-                    for (int j = 0; j < nameOfOtu.length()-1; j++) {
-                        if (nameOfOtu[j] == ';') { fixedName += "_" + m->currentSharedBinLabels[i] + '|'; }
+                    for (int j = 0; j < nameOfOtu.length(); j++) {
+                        if (nameOfOtu[j] == ';') { fixedName += '|'; }
                         else { fixedName += nameOfOtu[j]; }
                     }
-                    nameOfOtu = fixedName;
+                    nameOfOtu = fixedName + m->currentSharedBinLabels[i] + "|";
                 }else {
                     m->mothurOut("[ERROR]: can't find " + nameOfOtu + " in constaxonomy file. Do the distances match, did you forget to use the label parameter?\n"); m->control_pressed = true;
                 }

@@ -110,8 +110,6 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
-        //unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        //mt19937_64 mersenne_twister_engine(seed);
 		
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
@@ -121,12 +119,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 				
 				string thisgroup = thislookup[i]->getGroup();
 				
-				vector<int> order;
-				for(int p=0;p<numBins;p++){
-					for(int j=0;j<thislookup[i]->getAbundance(p);j++){
-						order.push_back(p);
-					}
-				}
+				OrderVector order = thislookup[i]->getOrderVector(NULL);
                 
                 m->mothurRandomShuffle(order);
 				
@@ -142,7 +135,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 					
 					if (m->control_pressed) {  return m->currentSharedBinLabels; }
 					
-					int bin = order[j];
+					int bin = order.get(j);
 					
 					int abund = thislookup[i]->getAbundance(bin);
 					thislookup[i]->set(bin, (abund+1), thisgroup);
@@ -228,39 +221,33 @@ int SubSample::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 int SubSample::getSample(SAbundVector*& sabund, int size) {
 	try {
 		
-        OrderVector* order = new OrderVector();
-        *order = sabund->getOrderVector(NULL);
-        
-		int numBins = order->getNumBins();
-		int thisSize = order->getNumSeqs();
+        int numBins = sabund->getNumBins();
+        int thisSize = sabund->getNumSeqs();
+
+        OrderVector order = sabund->getOrderVector();
         
 		if (thisSize > size) {
-			random_shuffle(order->begin(), order->end());
+			m->mothurRandomShuffle(order);
 			
-            RAbundVector* rabund = new RAbundVector(numBins);
-			rabund->setLabel(order->getLabel());
+            RAbundVector rabund(numBins);
+			rabund.setLabel(sabund->getLabel());
 
 			for (int j = 0; j < size; j++) {
                 
-				if (m->control_pressed) { delete order; delete rabund; return 0; }
+				if (m->control_pressed) { return 0; }
 				
-				int bin = order->get(j);
-				
-				int abund = rabund->get(bin);
-				rabund->set(bin, (abund+1));
+                int abund = rabund.get(order.get(j));
+				rabund.set(order.get(j), (abund+1));
 			}
-			
+
             delete sabund;
             sabund = new SAbundVector();
-            *sabund = rabund->getSAbundVector();
-            delete rabund;
+            *sabund = rabund.getSAbundVector();
             
 		}else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->control_pressed = true; }
 		
 		if (m->control_pressed) { return 0; }
         
-		delete order;
-		
 		return 0;
 		
 	}

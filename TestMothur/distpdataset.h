@@ -18,11 +18,11 @@ public:
     DistPDataSet();
     ~DistPDataSet() {}
     
-    string getPhylipFile() { return writePhylipFile(); }
+    string getPhylipFile() { return phylipFile; }
     
 private:
     MothurOut* m;
-    string writePhylipFile();
+    string phylipFile;
     
 };
 

@@ -7,8 +7,8 @@
 //
 
 #include "testgetgroupscommand.h"
-#include "catch.hpp"
 
+/*
 
 TEST_CASE("Testing GetGroupsCommand Class") {
     TestGetGroupsCommand tGetGroupsCommand;
@@ -16,3 +16,4 @@ TEST_CASE("Testing GetGroupsCommand Class") {
     //how do we unit test this??
     //each private function reads files processes them and writes new ones.
 }
+*/

@@ -274,7 +274,7 @@ OrderVector SharedOrderVector::getOrderVector(map<string,int>* nameMap = NULL) {
 			ov.push_back(data[i].bin);
 		}
 		
-		random_shuffle(ov.begin(), ov.end());
+		m->mothurRandomShuffle(ov);
 
 		ov.setLabel(label);	
 		return ov;
@@ -352,7 +352,7 @@ SharedSAbundVector SharedOrderVector::getSharedSAbundVector(string group) {
 /***********************************************************************/
 
 SharedOrderVector SharedOrderVector::getSharedOrderVector(){
-	random_shuffle(data.begin(), data.end());
+	m->mothurRandomShuffle(*this);
 	return *this;			
 }
 

@@ -156,6 +156,11 @@ int MakeFileCommand::execute(){
         m->readAccnos(tempFile, fastqFiles, "no error");
         m->mothurRemove(tempFile);
         
+        if (m->debug) {
+            m->mothurOut("[DEBUG]: Found " + toString(fastqFiles.size()) + " files of type " + typeFile + ".\n");
+            for (int i = 0; i < fastqFiles.size(); i++) { m->mothurOut("[DEBUG]: " + toString(i) + " = " + fastqFiles[i] + "\n");}
+        }
+        
         if (fastqFiles.size() == 0) { m->mothurOut("[WARNING]: Unable to find any " + typeFile + " files in your directory.\n"); }
         else {
             
@@ -168,6 +173,7 @@ int MakeFileCommand::execute(){
             string lastFile = "";
             for (int i = 0; i < fastqFiles.size()-1; i++) {
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) + ".\n"); }
                 if (m->debug) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
                 
                 if (m->control_pressed) { break; }
@@ -186,6 +192,7 @@ int MakeFileCommand::execute(){
                     else { //only one diff = paired files
                         vector<string> temp;
                         temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        if (m->debug) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
                         paired.push_back(temp);
                         i++;
                     }
@@ -252,7 +259,7 @@ int MakeFileCommand::execute(){
 //groupName defaults to "noGroup"+toString(i);
 vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> > paired){
     try {
-        vector< vector<string> > results;
+        vector< vector<string> > results; results.resize(paired.size());
         
         if (delim == "*") {
             //remove any "words" in filenames that is the same in all filenames separated by delim(_ .)
@@ -309,7 +316,6 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             }
             
             set<string> groups;
-            results.resize(paired.size());
             for (int i = 0; i < words.size(); i++) {
                 
                 //assemble groupNames
@@ -335,7 +341,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                 string groupName = "Group_" + toString(i);
                 
                 int pos = paired[i][0].find_first_of(delim);
-                if (pos != string::npos) { groupName = paired[i][0].substr(0, pos); }
+                if (pos != string::npos) { groupName = m->getSimpleName(paired[i][0].substr(0, pos)); }
                 
                 results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
             }

@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 Schloss Lab. All rights reserved.
 //
 
-#include "catch.hpp"
-#include "testrenameseqscommand.h"
 
+#include "testrenameseqscommand.h"
+/*
 TEST_CASE("Testing Rename.seqs Command") {
     TestRenameSeqsCommand tRename;
     MothurOut* m = MothurOut::getInstance();
@@ -37,3 +37,5 @@ TEST_CASE("Testing Rename.seqs Command") {
     //add more tests...
     
 }
+*/
+

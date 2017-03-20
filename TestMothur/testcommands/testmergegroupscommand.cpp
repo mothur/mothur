@@ -7,9 +7,9 @@
 //
 
 #include "testmergegroupscommand.h"
-#include "catch.hpp"
 
 
+/*
 TEST_CASE("Testing MergeGroupsCommand Class") {
     TestMergeGroupsCommand tMergeGroupsCommand;
     
@@ -17,3 +17,4 @@ TEST_CASE("Testing MergeGroupsCommand Class") {
     //each private function reads files processes them and writes new ones.
 }
 
+*/

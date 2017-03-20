@@ -7,6 +7,13 @@
 #
 # Macros
 #
+# 64BIT_VERSION - set to no if you are using a 32bit arch.
+# OPTIMIZE - yes will increase speed of executable.
+# USEREADLINE - link with readline libraries.  Must have readline installed. Windows set to no.
+# USEBOOST - link with boost libraries. Must install boost. Allows the make.contigs command to read .gz files.
+# BOOST_LIBRARY_DIR - location of boost libraries
+# BOOST_INCLUDE_DIR - location of boost include files
+# MOTHUR_FILES - default location for mothur to look for input files at runtime. Most often used for reference files.
 
 64BIT_VERSION ?= yes
 OPTIMIZE ?= yes

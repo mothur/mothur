@@ -17,14 +17,13 @@ public:
     
     DistCDataSet();
     ~DistCDataSet() {}
-    string getColumnFile() { return writeColumnFile(); }
+    string getColumnFile() { return columnFile; }
     vector<string> getFiles(int);
-    string getCountFile()  { return writeCountFile();  }
+    string getCountFile()  { return countFile;  }
     
 private:
     MothurOut* m;
-    string writeColumnFile();
-    string writeCountFile();
+    string columnFile, countFile;
     
 };
 

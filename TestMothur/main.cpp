@@ -7,24 +7,26 @@
 //
 
 
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-/*
- 
-To compile TestMothur you need to uncomment 
- 
- CommandFactory* CommandFactory::_uniqueInstance; in commandfactory.cpp
- 
- MothurOut* MothurOut::_uniqueInstance; in mothurout.cpp
- 
- 
- */
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
-//***********************************************************//
+#include "mothurout.h"
+#include "gtest/gtest.h"
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include "catch.hpp"
+#define UNIT_TEST
+
+int main(int argc, char **argv) {
+    MothurOut* m; m = MothurOut::getInstance();
+    string pathname = m->mothurProgramPath;
+    if (pathname != "") {
+        //add / to name if needed
+        string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { pathname += "/TestMothur/TestFiles/"; }
+#else
+        if (lastChar != "\\") { pathname += "\\TestMothur\\TestFiles\\"; }
+#endif
+    }
+    
+    m->setTestFilePath(pathname);
+    
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
