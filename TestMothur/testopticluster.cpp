@@ -12,7 +12,7 @@
 #include "dataset.h"
 
 /**************************************************************************************************/
-TestOptiCluster::TestOptiCluster() {  //setup
+TestOptiCluster::TestOptiCluster()  {  //setup
     m = MothurOut::getInstance();
     TestDataSet data;
     filenames = data.getSubsetFNGFiles(100); //Fasta, name, group returned
@@ -32,65 +32,56 @@ TestOptiCluster::TestOptiCluster() {  //setup
     
     columnFile = outputFilenames["column"][0];
     
-    matrix = new OptiMatrix(columnFile, filenames[1], "name", "column", 0.03, false);
+    OptiMatrix testMatrix(columnFile, filenames[1], "name", "column", 0.03, false);
     
-    setVariables(matrix, "mcc");
+    setVariables(&testMatrix, "mcc");
 }
 /**************************************************************************************************/
 TestOptiCluster::~TestOptiCluster() {
     for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
     m->mothurRemove(columnFile);
-    delete matrix;
 }
 /**************************************************************************************************/
-TEST_F(TestOptiCluster, myInitialize) {
+TEST(TestOptiCluster, myInitialize) {
+    TestOptiCluster test;
     double initialMetricValue;
     
-    EXPECT_EQ(0,(initialize(initialMetricValue, true, "singleton")));
+    EXPECT_EQ(0,(test.initialize(initialMetricValue, true, "singleton")));
 }
 
-TEST_F(TestOptiCluster, calcMCC) {
-    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+TEST(TestOptiCluster, calcs) {
+    TestOptiCluster test; long long tp,tn,fp,fn;
     
-    ASSERT_DOUBLE_EQ(0.9694, calcMCC(tp,tn,fp,fn)); //metric value
-}
-
-TEST_F(TestOptiCluster, calcSens) {
-    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+    tp=5000; tn=10000; fp=10; fn=200;
+    ASSERT_DOUBLE_EQ(0.9694, test.calcMCC(tp,tn,fp,fn)); //metric value
     
-    ASSERT_DOUBLE_EQ(0.9615, calcSens(tp,tn,fp,fn)); //metric value
-}
-
-TEST_F(TestOptiCluster, calcSpec) {
-    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+    tp=5000; tn=10000; fp=10; fn=200;
+    ASSERT_DOUBLE_EQ(0.9615, test.calcSens(tp,tn,fp,fn));
     
-    ASSERT_DOUBLE_EQ(0.9990, calcSpec(tp,tn,fp,fn)); //metric value
-}
-
-TEST_F(TestOptiCluster, calcTPTN) {
-    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+    tp=5000; tn=10000; fp=10; fn=200;
+    ASSERT_DOUBLE_EQ(0.9990, test.calcSpec(tp,tn,fp,fn));
     
-    ASSERT_DOUBLE_EQ(0.9861, calcTPTN(tp,tn,fp,fn)); //metric value
-}
-
-TEST_F(TestOptiCluster, calcFPFN) {
-    long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
+    tp=5000; tn=10000; fp=10; fn=200;
+    ASSERT_DOUBLE_EQ(0.9861, test.calcTPTN(tp,tn,fp,fn));
     
-    ASSERT_DOUBLE_EQ(0.9861, calcFPFN(tp,tn,fp,fn)); //metric value
+    tp=5000; tn=10000; fp=10; fn=200;
+    ASSERT_DOUBLE_EQ(0.9861, test.calcFPFN(tp,tn,fp,fn));
 }
 
-TEST_F(TestOptiCluster, moveAdjustTFValues) {
+TEST(TestOptiCluster, myMoveAdjustTFValues) {
+    TestOptiCluster test;
     long long tp,tn,fp,fn; tp=5000; tn=10000; fp=10; fn=200;
     double initialMetricValue;
-    initialize(initialMetricValue, false, "singleton"); //no randomization
+    test.initialize(initialMetricValue, false, "singleton"); //no randomization
     
-    ASSERT_DOUBLE_EQ(0.9700, moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)); //metric value
+    ASSERT_DOUBLE_EQ(0.9700, test.moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)); //metric value
 }
 
-TEST_F(TestOptiCluster, update) {
+TEST(TestOptiCluster, myUpdate) {
+    TestOptiCluster test;
     double initialMetricValue;
-    initialize(initialMetricValue, false, "singleton"); //no randomization
-    update(initialMetricValue);
+    test.initialize(initialMetricValue, false, "singleton"); //no randomization
+    test.update(initialMetricValue);
     
     ASSERT_DOUBLE_EQ(0.7853, initialMetricValue); //metric value
 }

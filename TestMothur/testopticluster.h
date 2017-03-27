@@ -9,11 +9,12 @@
 #ifndef __Mothur__testopticluster__
 #define __Mothur__testopticluster__
 
-#include "opticluster.h"
+
 #include "gtest/gtest.h"
+#include "opticluster.h"
 
 
-class TestOptiCluster : public OptiCluster, ::testing::Test  {
+class TestOptiCluster : public OptiCluster   {
     
 public:
     
@@ -24,7 +25,6 @@ protected:
     MothurOut* m;
     string columnFile, phylipFile;
     vector<string> filenames;
-    OptiMatrix* matrix;
     
     using OptiCluster::calcMCC;
     using OptiCluster::calcSens;
@@ -36,6 +36,11 @@ protected:
     using OptiCluster::initialize;
     using OptiCluster::update;
     
+    FRIEND_TEST(TestOptiCluster, myInitialize);
+    FRIEND_TEST(TestOptiCluster, myMoveAdjustTFValues);
+    FRIEND_TEST(TestOptiCluster, myUpdate);
+    FRIEND_TEST(TestOptiCluster, calcs);
+
 };
 
 #endif /* defined(__Mothur__testopticluster__) */
