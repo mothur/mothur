@@ -117,6 +117,11 @@ int main(int argc, char *argv[]){
 				m->mothurOutJustToLog("Using ReadLine");
 				m->mothurOutEndLine(); m->mothurOutEndLine();
 			#endif
+            
+            #ifdef USE_BOOST
+                m->mothurOutJustToLog("Using Boost");
+                m->mothurOutEndLine(); m->mothurOutEndLine();
+            #endif
 			
 			#ifdef MOTHUR_FILES
 				m->mothurOutJustToLog("Using default file location " + temp);

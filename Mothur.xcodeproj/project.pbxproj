@@ -3368,7 +3368,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				"CLANG_WARN_CXX0X_EXTENSIONS[arch=*]" = NO;
@@ -3383,8 +3383,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.39.3\\\"\"",
-					"RELEASE_DATE=\"\\\"2/23/2017\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
+					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3405,7 +3405,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
@@ -3416,8 +3416,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.39.3\\\"\"",
-					"RELEASE_DATE=\"\\\"2/23/2017\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
+					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3449,8 +3449,8 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.39.1\\\"\"",
-					"RELEASE_DATE=\"\\\"2/2/2017\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
+					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
@@ -3500,8 +3500,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.39.3\\\"\"",
-					"RELEASE_DATE=\"\\\"2/23/2017\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
+					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -3576,6 +3576,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
 			name = Debug;
 		};
@@ -3614,6 +3615,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
 			};
 			name = Release;
 		};
