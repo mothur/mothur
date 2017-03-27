@@ -276,7 +276,7 @@ int SeqSummaryCommand::execute(){
         long long totalSoFar = 0;
         //set all values to min
         starts[1] = starts[0]; starts[2] = starts[0]; starts[3] = starts[0]; starts[4] = starts[0]; starts[5] = starts[0];
-        int lastValue = 0;
+        long long lastValue = 0;
         for (map<int, long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
             meanStartPosition += (value*it->second);

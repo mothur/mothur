@@ -379,6 +379,7 @@
 		488841621CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
+		4889EA221E8962D50054E0BB /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
 		48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D461D58CAD700F60EDB /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
@@ -833,6 +834,8 @@
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
+		4889EA201E8962D50054E0BB /* summary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summary.cpp; path = source/summary.cpp; sourceTree = "<group>"; };
+		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = "<group>"; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = "<group>"; };
@@ -1706,6 +1709,8 @@
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
 				A7876A28152A018B00A0AE86 /* subsample.h */,
 				A7876A25152A017C00A0AE86 /* subsample.cpp */,
+				4889EA201E8962D50054E0BB /* summary.cpp */,
+				4889EA211E8962D50054E0BB /* summary.hpp */,
 				7B17437A17AF6F02004C161B /* svm */,
 				A7C3DC0E14FE469500FE1924 /* trialswap2.h */,
 				A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */,
@@ -3254,6 +3259,7 @@
 				A7E9B97F12D37EC400DA6239 /* tree.cpp in Sources */,
 				A7E9B98012D37EC400DA6239 /* treegroupscommand.cpp in Sources */,
 				A7E9B98112D37EC400DA6239 /* treemap.cpp in Sources */,
+				4889EA221E8962D50054E0BB /* summary.cpp in Sources */,
 				A7E9B98212D37EC400DA6239 /* treenode.cpp in Sources */,
 				A7E9B98312D37EC400DA6239 /* trimflowscommand.cpp in Sources */,
 				A7E9B98412D37EC400DA6239 /* trimseqscommand.cpp in Sources */,

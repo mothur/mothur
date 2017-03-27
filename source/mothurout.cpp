@@ -11,6 +11,7 @@
 #include "ordervector.hpp"
 #include "sharedordervector.h"
 #include "sharedrabundvector.h"
+#include "counttable.h"
 
 
 //needed for testing project
@@ -2160,6 +2161,38 @@ int MothurOut::readConsTax(string inputfile, map<int, consTax2>& taxes){
 		errorOut(e, "MothurOut", "readConsTax");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+bool MothurOut::isCountFile(string inputfile){
+    try {
+        bool isCount = true;
+        
+        ifstream in;
+        openInputFile(inputfile, in);
+        
+        //read headers
+        string line = getline(in);
+        
+        in.close();
+        
+        vector<string> pieces = splitWhiteSpace(line);
+        
+        if (pieces.size() >= 2) {
+            CountTable ct;
+            vector<string> defaultHeaders = ct.getHardCodedHeaders();
+            if (defaultHeaders.size() >= 2) {
+                if (pieces[0] != defaultHeaders[0]) { isCount = false; }
+                if (pieces[1] != defaultHeaders[1]) { isCount = false; }
+            }else { isCount = false; }
+        }else { isCount = false; }
+        
+        
+        return isCount;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "readConsTax");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& num) {

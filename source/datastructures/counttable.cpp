@@ -385,6 +385,17 @@ int CountTable::printTable(string file) {
 	}
 }
 /************************************************************/
+vector<string> CountTable::getHardCodedHeaders() {
+    try {
+        vector<string> headers; headers.push_back("Representative_Sequence"); headers.push_back("total");
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printHeaders");
+        exit(1);
+    }
+}
+/************************************************************/
 int CountTable::printHeaders(ofstream& out) {
     try {
 		out << "Representative_Sequence\ttotal";

@@ -107,6 +107,7 @@ class MothurOut {
 		string getSimpleName(string);
 		string getRootName(string);
 		bool isBlank(string);
+        bool isCountFile(string);
 		int openOutputFile(string, ofstream&);
         int openOutputFileBinary(string, ofstream&);
 		int openOutputFileAppend(string, ofstream&);
