@@ -25,8 +25,10 @@ public:
     Summary(string n); //provide name or count file to include in counts
     ~Summary() {}
     
-    int summarize(string f); //provide fasta file to summarize, paralellized
-    int addSeq(Sequence);
+    long long summarize(string f, string o); //provide fasta file to summarize (paralellized) and output file for individual seqs info. To skip output file, o = ""
+    string addSeq(Sequence); //return summary output line
+    vector<long long> getDefaults();
+
     vector<long long> getStart(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getStart(double value); //2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
     vector<long long> getEnd(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
@@ -37,7 +39,10 @@ public:
     long long getLength(double value); // 25 = min length of 25% of sequences
     vector<long long> getHomop(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getHomop(double value);
-
+    
+    long long getTotalSeqs() { return total; }
+    long long getUniqueSeqs() { return numUniques; }
+    
 private:
     
     MothurOut* m;
@@ -53,8 +58,7 @@ private:
     map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
     
-    int driverSummarize(string, linePair lines);
-    vector<long long> getDefaults();
+    int driverSummarize(string, string, linePair lines);
     
     
 };
@@ -68,7 +72,7 @@ struct seqSumData {
     map<int, long long> seqLength;
     map<int, long long> ambigBases;
     map<int, long long> longHomoPolymer;
-    string filename;
+    string filename, summaryFile;
     unsigned long long start;
     unsigned long long end;
     long long count;
@@ -79,7 +83,7 @@ struct seqSumData {
     
     
     seqSumData(){}
-    seqSumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+    seqSumData(string f, string sum, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
         filename = f;
         m = mout;
         start = st;
@@ -87,6 +91,7 @@ struct seqSumData {
         hasNameMap = na;
         nameMap = nam;
         count = 0;
+        summaryFile = sum;
     }
 };
 
@@ -98,6 +103,8 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
     pDataArray = (seqSumData*)lpParam;
     
     try {
+        ofstream out;
+        if (pDataArray->summaryFile != "") { pDataArray->m->openOutputFile(pDataArray->summaryFile, out); }
         
         ifstream in;
         pDataArray->m->openInputFile(pDataArray->filename, in);
@@ -153,9 +160,18 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                 else { it->second += num; } //add counts
                 
                 pDataArray->count++;
+                
+                string output = "";
+                output += seq.getName() + '\t';
+                output += thisStartPosition + '\t' + thisEndPosition + '\t';
+                output += thisSeqLength + '\t' + thisAmbig + '\t';
+                output += thisHomoP + '\t' + num;
+                
+                if (pDataArray->summaryFile != "") { out << output << endl; }
             }
         }
         
+        if (pDataArray->summaryFile != "") { out.close(); }
         in.close();
         
         return 0;

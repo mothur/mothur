@@ -12,14 +12,17 @@
 //**********************************************************************************************************************
 Summary::Summary(string n) { //name or count file to include in counts
     try {
-        m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = true;
+        m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false;
         
-        if (m->isCountFile(n)) {
-            CountTable ct;
-            ct.readTable(n, false, false);
-            nameMap = ct.getNameMap();
-            type = "count";
-        }else { nameMap = m->readNames(n); type = "name"; }
+        if (n != "") {
+            hasNameOrCount = true;
+            if (m->isCountFile(n)) {
+                CountTable ct;
+                ct.readTable(n, false, false);
+                nameMap = ct.getNameMap();
+                type = "count";
+            }else { nameMap = m->readNames(n); type = "name"; }
+        }
         
         nameCountNumUniques = nameMap.size();
     }
@@ -29,15 +32,16 @@ Summary::Summary(string n) { //name or count file to include in counts
     }
 }
 //**********************************************************************************************************************
-int Summary::addSeq(Sequence seq) {
+string Summary::addSeq(Sequence seq) {
     try {
         long long num = 1;
+        
         if (hasNameOrCount) {
             //make sure this sequence is in the namefile, else error
             itFindName = nameMap.find(seq.getName());
             
             if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-            else { num = it->second; }
+            else { num = itFindName->second; }
         }
         
         int thisStartPosition = seq.getStartPos();
@@ -68,7 +72,13 @@ int Summary::addSeq(Sequence seq) {
         numUniques++;
         total += num;
         
-        return num;
+        string output = "";
+        output += seq.getName() + '\t';
+        output += thisStartPosition + '\t' + thisEndPosition + '\t';
+        output += thisSeqLength + '\t' + thisAmbig + '\t';
+        output += thisHomoP + '\t' + num;
+        
+        return output;
     }
     catch(exception& e) {
         m->errorOut(e, "Summary", "addSeq");
@@ -87,7 +97,7 @@ vector<long long> Summary::getDefaults() {
         long long ptile97_5	= 1+(long long)(total * 0.975);
         long long ptile100	= (long long)(total);
         
-        locations.push_back(0); locations.push_back(ptile0_25); locations.push_back(ptile25); locations.push_back(ptile50);
+        locations.push_back(1); locations.push_back(ptile0_25); locations.push_back(ptile25); locations.push_back(ptile50);
         locations.push_back(ptile75); locations.push_back(ptile97_5); locations.push_back(ptile100);
         
         return locations;
@@ -124,7 +134,9 @@ vector<long long> Summary::getStart() {
             lastValue = totalSoFar;
         }
         starts[6] = (startPosition.rbegin())->first;
-        starts.push_back(meanStartPosition);
+        
+        double meanstartPosition = meanStartPosition / (double) total;
+        starts.push_back(meanstartPosition);
         
         return starts;
     }
@@ -186,7 +198,9 @@ vector<long long> Summary::getEnd() {
             lastValue = totalSoFar;
         }
         ends[6] = (endPosition.rbegin())->first;
-        ends.push_back(meanEndPosition);
+        
+        double meanendPosition = meanEndPosition / (double) total;
+        ends.push_back(meanendPosition);
         
         return ends;
     }
@@ -222,13 +236,205 @@ long long Summary::getEnd(double value) {
     }
 }
 //**********************************************************************************************************************
-int Summary::summarize(string fastafile) {
+vector<long long> Summary::getAmbig() {
+    try {
+        vector<long long> defaults = getDefaults();
+        vector<long long> ambigs; ambigs.resize(7,0);
+        long long meanAmbigBases; meanAmbigBases = 0;
+        long long lastValue = 0;
+        long long totalSoFar = 0;
+        
+        if ((ambigBases.begin())->first == -1) { ambigs[0] = 0; }
+        else {ambigs[0] = (ambigBases.begin())->first; }
+        ambigs[1] = ambigs[0]; ambigs[2] = ambigs[0]; ambigs[3] = ambigs[0]; ambigs[4] = ambigs[0]; ambigs[5] = ambigs[0];
+        
+        for (map<int, long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            meanAmbigBases += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= defaults[1]) && (totalSoFar > 1)) || ((lastValue < defaults[1]) && (totalSoFar > defaults[1]))){  ambigs[1] = value;   } //save value
+            if (((totalSoFar <= defaults[2]) && (totalSoFar > defaults[1])) ||  ((lastValue < defaults[2]) && (totalSoFar > defaults[2]))) { ambigs[2] = value;  } //save value
+            if (((totalSoFar <= defaults[3]) && (totalSoFar > defaults[2])) ||  ((lastValue < defaults[3]) && (totalSoFar > defaults[3]))) {  ambigs[3] = value; } //save value
+            if (((totalSoFar <= defaults[4]) && (totalSoFar > defaults[3])) ||  ((lastValue < defaults[4]) && (totalSoFar > defaults[4]))) {  ambigs[4] = value; } //save value
+            if (((totalSoFar <= defaults[5]) && (totalSoFar > defaults[4])) ||  ((lastValue < defaults[5]) && (totalSoFar > defaults[5]))) {  ambigs[5] = value;  } //save value
+            if ((totalSoFar <= defaults[6]) && (totalSoFar > defaults[5])) {  ambigs[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+        ambigs[6] = (ambigBases.rbegin())->first;
+        double meanambigBases = meanAmbigBases / (double) total;
+        ambigs.push_back(meanambigBases);
+        
+        return ambigs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getAmbig");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+long long Summary::getAmbig(double value) {
+    try {
+        long long percentage = 1+(long long)(total * value * 0.01);
+        long long ambig = 0;
+        long long totalSoFar = 0;
+        long long lastValue = 0;
+        
+        //minimum
+        if ((ambigBases.begin())->first == -1) { ambig = 0; }
+        else {ambig = (ambigBases.begin())->first; }
+        
+        for (map<int, long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            totalSoFar += it->second;
+            if (((totalSoFar <= percentage) && (totalSoFar > 1)) || ((lastValue < percentage) && (totalSoFar > percentage))){  ambig = value;   } //save value
+            lastValue = totalSoFar;
+        }
+        
+        return ambig;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getAmbig");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<long long> Summary::getLength() {
+    try {
+        vector<long long> defaults = getDefaults();
+        vector<long long> lengths; lengths.resize(7,0);
+        long long meanSeqLength; meanSeqLength = 0;
+        long long lastValue = 0;
+        long long totalSoFar = 0;
+        
+        if ((seqLength.begin())->first == -1) { lengths[0] = 0; }
+        else {lengths[0] = (seqLength.begin())->first; }
+        lengths[1] = lengths[0]; lengths[2] = lengths[0]; lengths[3] = lengths[0]; lengths[4] = lengths[0]; lengths[5] = lengths[0];
+        
+        for (map<int, long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            meanSeqLength += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= defaults[1]) && (totalSoFar > 1)) || ((lastValue < defaults[1]) && (totalSoFar > defaults[1]))){  lengths[1] = value;   } //save value
+            if (((totalSoFar <= defaults[2]) && (totalSoFar > defaults[1])) ||  ((lastValue < defaults[2]) && (totalSoFar > defaults[2]))) { lengths[2] = value;  } //save value
+            if (((totalSoFar <= defaults[3]) && (totalSoFar > defaults[2])) ||  ((lastValue < defaults[3]) && (totalSoFar > defaults[3]))) {  lengths[3] = value; } //save value
+            if (((totalSoFar <= defaults[4]) && (totalSoFar > defaults[3])) ||  ((lastValue < defaults[4]) && (totalSoFar > defaults[4]))) {  lengths[4] = value; } //save value
+            if (((totalSoFar <= defaults[5]) && (totalSoFar > defaults[4])) ||  ((lastValue < defaults[5]) && (totalSoFar > defaults[5]))) {  lengths[5] = value;  } //save value
+            if ((totalSoFar <= defaults[6]) && (totalSoFar > defaults[5])) {  lengths[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+        lengths[6] = (seqLength.rbegin())->first;
+        
+        double meanseqLength = meanSeqLength / (double) total;
+        lengths.push_back(meanseqLength);
+        
+        return lengths;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getLength");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+long long Summary::getLength(double value) {
+    try {
+        long long percentage = 1+(long long)(total * value * 0.01);
+        long long length = 0;
+        long long totalSoFar = 0;
+        long long lastValue = 0;
+        
+        //minimum
+        if ((seqLength.begin())->first == -1) { length = 0; }
+        else {length = (seqLength.begin())->first; }
+        
+        for (map<int, long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            totalSoFar += it->second;
+            if (((totalSoFar <= percentage) && (totalSoFar > 1)) || ((lastValue < percentage) && (totalSoFar > percentage))){  length = value;   } //save value
+            lastValue = totalSoFar;
+        }
+        
+        return length;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getLength");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<long long> Summary::getHomop() {
+    try {
+        vector<long long> defaults = getDefaults();
+        vector<long long> homops; homops.resize(7,0);
+        long long meanLongHomoPolymer; meanLongHomoPolymer = 0;
+        long long lastValue = 0;
+        long long totalSoFar = 0;
+        
+        if ((longHomoPolymer.begin())->first == -1) { homops[0] = 0; }
+        else {homops[0] = (longHomoPolymer.begin())->first; }
+        homops[1] = homops[0]; homops[2] = homops[0]; homops[3] = homops[0]; homops[4] = homops[0]; homops[5] = homops[0];
+        
+        for (map<int, long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            meanLongHomoPolymer += (value*it->second);
+            totalSoFar += it->second;
+            
+            if (((totalSoFar <= defaults[1]) && (totalSoFar > 1)) || ((lastValue < defaults[1]) && (totalSoFar > defaults[1]))){  homops[1] = value;   } //save value
+            if (((totalSoFar <= defaults[2]) && (totalSoFar > defaults[1])) ||  ((lastValue < defaults[2]) && (totalSoFar > defaults[2]))) { homops[2] = value;  } //save value
+            if (((totalSoFar <= defaults[3]) && (totalSoFar > defaults[2])) ||  ((lastValue < defaults[3]) && (totalSoFar > defaults[3]))) {  homops[3] = value; } //save value
+            if (((totalSoFar <= defaults[4]) && (totalSoFar > defaults[3])) ||  ((lastValue < defaults[4]) && (totalSoFar > defaults[4]))) {  homops[4] = value; } //save value
+            if (((totalSoFar <= defaults[5]) && (totalSoFar > defaults[4])) ||  ((lastValue < defaults[5]) && (totalSoFar > defaults[5]))) {  homops[5] = value;  } //save value
+            if ((totalSoFar <= defaults[6]) && (totalSoFar > defaults[5])) {  homops[6] = value; } //save value
+            lastValue = totalSoFar;
+        }
+        homops[6] = (longHomoPolymer.rbegin())->first;
+        
+        double meanlongHomoPolymer = meanLongHomoPolymer / (double) total;
+        homops.push_back(meanlongHomoPolymer);
+
+        
+        return homops;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getHomop");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+long long Summary::getHomop(double value) {
+    try {
+        long long percentage = 1+(long long)(total * value * 0.01);
+        long long homop = 0;
+        long long totalSoFar = 0;
+        long long lastValue = 0;
+        
+        //minimum
+        if ((longHomoPolymer.begin())->first == -1) { homop = 0; }
+        else {homop = (longHomoPolymer.begin())->first; }
+        
+        for (map<int, long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++) {
+            int value = it->first; if (value == -1) { value = 0; }
+            totalSoFar += it->second;
+            if (((totalSoFar <= percentage) && (totalSoFar > 1)) || ((lastValue < percentage) && (totalSoFar > percentage))){  homop = value;   } //save value
+            lastValue = totalSoFar;
+        }
+        
+        return homop;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getHomop");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+long long Summary::summarize(string fastafile, string output) {
     try {
         vector<unsigned long long> positions;
         vector<linePair> lines;
+        string p = m->getProcessors();
+        int processors = 1; m->mothurConvert(p, processors);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        int processors = 1;
-        m->mothurConvert(m->getProcessors(), processors);
         positions = m->divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
@@ -245,7 +451,7 @@ int Summary::summarize(string fastafile) {
 #endif
         
         int process = 1;
-        int num = 0;
+        long long num = 0;
         vector<int> processIDS;
         bool recalc = false;
         
@@ -259,7 +465,7 @@ int Summary::summarize(string fastafile) {
                 processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                 process++;
             }else if (pid == 0){
-                num = driverSummarize(fastafile, lines[process]);
+                num = driverSummarize(fastafile, (output + m->mothurGetpid(process) + ".temp"), lines[process]);
                 
                 //pass numSeqs to parent
                 ofstream out;
@@ -267,6 +473,7 @@ int Summary::summarize(string fastafile) {
                 m->openOutputFile(tempFile, out);
                 
                 out << num << endl;
+                out << total << endl;
                 out << startPosition.size() << endl;
                 for (map<int,  long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
                 out << endPosition.size() << endl;
@@ -324,7 +531,9 @@ int Summary::summarize(string fastafile) {
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    num = driverSummarize(fastafile, lines[process]);
+                    string outputName = output + m->mothurGetpid(process) + ".temp";
+                    if (output == "") {  outputName = "";  }
+                    num = driverSummarize(fastafile, outputName, lines[process]);
                     
                     //pass numSeqs to parent
                     ofstream out;
@@ -354,9 +563,8 @@ int Summary::summarize(string fastafile) {
             }
         }
         
-        
         //do your part
-        num = driverSummarize(fastafile, lines[0]);
+        num = driverSummarize(fastafile, output, lines[0]);
         
         //force parent to wait until all the processes are done
         for (int i=0;i<processIDS.size();i++) {
@@ -438,7 +646,11 @@ int Summary::summarize(string fastafile) {
         for( int i=0; i<processors-1; i++ ){
             
             // Allocate memory for thread data.
-            seqSumData* tempSum = new seqSumData(fastafile, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            string extension = "";
+            if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
+            string outputName = output + extension;
+            if (output == "") {  outputName = "";  }
+            seqSumData* tempSum = new seqSumData(fastafile, outputName, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
             pDataArray.push_back(tempSum);
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -447,7 +659,10 @@ int Summary::summarize(string fastafile) {
         }
         
         //do your part
-        num = driverSummarize(fastafile, lines[processors-1]);
+        string extension = toString(processors-1) + ".temp";
+        string outputName = output + extension;
+        if (output == "") {  outputName = "";  }
+        num = driverSummarize(fastafile, outputName, lines[processors-1]);
         processIDS.push_back(processors-1);
         
         //Wait until all threads have terminated.
@@ -494,12 +709,21 @@ int Summary::summarize(string fastafile) {
             delete pDataArray[i];
         }
 #endif
+        //append files
+        for(int i=0;i<processIDS.size();i++){
+            if (output != "") {
+                m->appendFiles((output + toString(processIDS[i]) + ".temp"), output);
+                m->mothurRemove((output + toString(processIDS[i]) + ".temp"));
+            }
+        }
         
         if (hasNameOrCount) {
             if (nameCountNumUniques != num) { // do fasta and name/count files match
                 m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
             }
         }
+        
+        numUniques = num;
         
         return num; //number of uniques
     }
@@ -509,8 +733,11 @@ int Summary::summarize(string fastafile) {
     }
 }
 //**********************************************************************************************************************
-int Summary::driverSummarize(string fastafile, linePair lines) {
+int Summary::driverSummarize(string fastafile, string output, linePair lines) {
     try {
+        ofstream out;
+        if (output != "") { m->openOutputFile(output, out); }
+        
         ifstream in;
         m->openInputFile(fastafile, in);
         
@@ -532,7 +759,8 @@ int Summary::driverSummarize(string fastafile, linePair lines) {
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
     
-                addSeq(current); count++;
+                string seqInfo = addSeq(current); count++;
+                if (output != "") { out << seqInfo << endl; }
             }
             
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -543,6 +771,7 @@ int Summary::driverSummarize(string fastafile, linePair lines) {
 #endif
         }
         
+        if (output != "") { out.close(); }
         in.close();
         
         return count;
