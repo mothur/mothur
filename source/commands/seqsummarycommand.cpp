@@ -14,8 +14,9 @@
 //**********************************************************************************************************************
 vector<string> SeqSummaryCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pfasta);
-        CommandParameter psummary("summary", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(psummary);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "FastaReport", "none", "none","summary",false,true,true); parameters.push_back(pfasta);
+        CommandParameter psummary("summary", "InputTypes", "", "", "FastaReport", "none", "none","",false,false,true); parameters.push_back(psummary);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "FastaReport", "none", "none","",false,false,true); parameters.push_back(pcontigsreport);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -36,8 +37,8 @@ vector<string> SeqSummaryCommand::setParameters(){
 string SeqSummaryCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The summary.seqs command reads a fastafile or summary file and summarizes the sequences.\n";
-		helpString += "The summary.seqs command parameters are fasta, name, count, summary and processors, fasta or summary is required, unless you have a valid current fasta file.\n";
+		helpString += "The summary.seqs command reads a fastafile, summary, contigsreport file and summarizes it.\n";
+		helpString += "The summary.seqs command parameters are fasta, name, count, summary. contigsreport and processors, fasta, contigsreport or summary is required, unless you have a valid current files.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
         helpString += "The count parameter allows you to enter a count file associated with your fasta file. \n";
 		helpString += "The summary.seqs command should be in the following format: \n";
@@ -123,6 +124,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["summary"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("contigsreport");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
+                }
 				
 				it = parameters.find("name");
 				//user has given a template file
@@ -155,15 +164,28 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
             if (summaryfile == "not open") { abort = true; }
             else if (summaryfile == "not found") {  summaryfile = "";  }
             else { m->setSummaryFile(summaryfile); }
+            
+            contigsfile = validParameter.validFile(parameters, "contigsreport", true);
+            if (contigsfile == "not open") { abort = true; }
+            else if (contigsfile == "not found") {  contigsfile = "";  }
+            else { m->setContigsReportFile(contigsfile); }
 
-            if ((summaryfile == "") && (fastafile == "")) {
+            if ((summaryfile == "") && (fastafile == "") && (contigsfile == "")) {
                 fastafile = m->getFastaFile();
                 if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
                 else {
                     summaryfile = m->getSummaryFile();
-                    if (summaryfile != "") { m->mothurOut("Using " + summaryfile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-                    else { 	m->mothurOut("You have no current fastafile or summaryfile, one is required."); m->mothurOutEndLine(); abort = true; }
+                    if (summaryfile != "") { m->mothurOut("Using " + summaryfile + " as input file for the summary parameter."); m->mothurOutEndLine(); }
+                    else {
+                        contigsfile = m->getContigsReportFile();
+                        if (contigsfile != "") { m->mothurOut("Using " + contigsfile + " as input file for the contigsreport parameter."); m->mothurOutEndLine(); }
+                        else { 	m->mothurOut("You have no current fastafile, summaryfile or contigsreport, one is required."); m->mothurOutEndLine(); abort = true; }
+                    }
                 }
+            }
+            
+            if (((fastafile != "") && ((summaryfile != "") || (contigsfile != ""))) || ((summaryfile != "") && ((fastafile != "") || (contigsfile != ""))) || ((contigsfile != "") && ((summaryfile != "") || (fastafile != "")))) {
+                m->mothurOut("[ERROR]: you may only use one of the following: fasta, summary or contigsreport."); m->mothurOutEndLine(); abort = true;
             }
             
 			namefile = validParameter.validFile(parameters, "name", true);
@@ -220,41 +242,63 @@ int SeqSummaryCommand::execute(){
         Summary sum;
         if (fastafile != "") {  sum.summarizeFasta(fastafile, nameOrCount, outputFile);  }
         else if (summaryfile != "") {  sum.summarizeFastaSummary(summaryfile, nameOrCount);  }
-        
-        vector<long long> starts = sum.getStart();
-        vector<long long> ends = sum.getEnd();
-        vector<long long> ambigs = sum.getAmbig();
-        vector<long long> lengths = sum.getLength();
-        vector<long long> homops = sum.getHomop();
-        vector <long long> ptiles = sum.getDefaults();
-        
-		long long numSeqs = 0;
+        else if (contigsfile != "") {  sum.summarizeContigsSummary(contigsfile, nameOrCount);  }
+
         long long size = sum.getTotalSeqs();
         long long numUniques = sum.getUniqueSeqs();
         
         if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
         
-        m->mothurOutEndLine();
-        m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer\tNumSeqs"); m->mothurOutEndLine();
-        m->mothurOut("Minimum:\t" + toString(starts[0]) + "\t" + toString(ends[0]) + "\t" + toString(lengths[0]) + "\t" + toString(ambigs[0]) + "\t" + toString(homops[0]) + "\t" + toString(ptiles[0])); m->mothurOutEndLine();
-        m->mothurOut("2.5%-tile:\t" + toString(starts[1]) + "\t" + toString(ends[1]) + "\t" + toString(lengths[1]) + "\t" + toString(ambigs[1]) + "\t" + toString(homops[1]) + "\t" + toString(ptiles[1])); m->mothurOutEndLine();
-        m->mothurOut("25%-tile:\t" + toString(starts[2]) + "\t" + toString(ends[2]) + "\t" + toString(lengths[2]) + "\t" + toString(ambigs[2]) + "\t" + toString(homops[2]) + "\t" + toString(ptiles[2])); m->mothurOutEndLine();
-        m->mothurOut("Median: \t" + toString(starts[3]) + "\t" + toString(ends[3]) + "\t" + toString(lengths[3]) + "\t" + toString(ambigs[3]) + "\t" + toString(homops[3]) + "\t" + toString(ptiles[3])); m->mothurOutEndLine();
-        m->mothurOut("75%-tile:\t" + toString(starts[4]) + "\t" + toString(ends[4]) + "\t" + toString(lengths[4]) + "\t" + toString(ambigs[4]) + "\t" + toString(homops[4]) + "\t" + toString(ptiles[4])); m->mothurOutEndLine();
-        m->mothurOut("97.5%-tile:\t" + toString(starts[5]) + "\t" + toString(ends[5]) + "\t" + toString(lengths[5]) + "\t" + toString(ambigs[5]) + "\t" + toString(homops[5]) + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
-        m->mothurOut("Maximum:\t" + toString(starts[6]) + "\t" + toString(ends[6]) + "\t" + toString(lengths[6]) + "\t" + toString(ambigs[6]) + "\t" + toString(homops[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
-        m->mothurOut("Mean:\t" + toString(starts[7]) + "\t" + toString(ends[7]) + "\t" + toString(lengths[7]) + "\t" + toString(ambigs[7]) + "\t" + toString(homops[7])); m->mothurOutEndLine();
-        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
-        else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
+        vector <long long> ptiles = sum.getDefaults();
+
+        if ((fastafile != "") || (summaryfile != "")) {
+            vector<long long> starts = sum.getStart();
+            vector<long long> ends = sum.getEnd();
+            vector<long long> ambigs = sum.getAmbig();
+            vector<long long> lengths = sum.getLength();
+            vector<long long> homops = sum.getHomop();
+            
+            m->mothurOutEndLine();
+            m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer\tNumSeqs"); m->mothurOutEndLine();
+            m->mothurOut("Minimum:\t" + toString(starts[0]) + "\t" + toString(ends[0]) + "\t" + toString(lengths[0]) + "\t" + toString(ambigs[0]) + "\t" + toString(homops[0]) + "\t" + toString(ptiles[0])); m->mothurOutEndLine();
+            m->mothurOut("2.5%-tile:\t" + toString(starts[1]) + "\t" + toString(ends[1]) + "\t" + toString(lengths[1]) + "\t" + toString(ambigs[1]) + "\t" + toString(homops[1]) + "\t" + toString(ptiles[1])); m->mothurOutEndLine();
+            m->mothurOut("25%-tile:\t" + toString(starts[2]) + "\t" + toString(ends[2]) + "\t" + toString(lengths[2]) + "\t" + toString(ambigs[2]) + "\t" + toString(homops[2]) + "\t" + toString(ptiles[2])); m->mothurOutEndLine();
+            m->mothurOut("Median: \t" + toString(starts[3]) + "\t" + toString(ends[3]) + "\t" + toString(lengths[3]) + "\t" + toString(ambigs[3]) + "\t" + toString(homops[3]) + "\t" + toString(ptiles[3])); m->mothurOutEndLine();
+            m->mothurOut("75%-tile:\t" + toString(starts[4]) + "\t" + toString(ends[4]) + "\t" + toString(lengths[4]) + "\t" + toString(ambigs[4]) + "\t" + toString(homops[4]) + "\t" + toString(ptiles[4])); m->mothurOutEndLine();
+            m->mothurOut("97.5%-tile:\t" + toString(starts[5]) + "\t" + toString(ends[5]) + "\t" + toString(lengths[5]) + "\t" + toString(ambigs[5]) + "\t" + toString(homops[5]) + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
+            m->mothurOut("Maximum:\t" + toString(starts[6]) + "\t" + toString(ends[6]) + "\t" + toString(lengths[6]) + "\t" + toString(ambigs[6]) + "\t" + toString(homops[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
+            m->mothurOut("Mean:\t" + toString(starts[7]) + "\t" + toString(ends[7]) + "\t" + toString(lengths[7]) + "\t" + toString(ambigs[7]) + "\t" + toString(homops[7])); m->mothurOutEndLine();
+            if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
+            else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
+        }else if (contigsfile != "") {
+            vector<long long> ostarts = sum.getOStart();
+            vector<long long> oends = sum.getOEnd();
+            vector<long long> length = sum.getLength();
+            vector<long long> olengths = sum.getOLength();
+            vector<long long> numns = sum.getNumNs();
+            vector<long long> mismatches = sum.getMisMatches();
+            
+            m->mothurOutEndLine();
+            m->mothurOut("\t\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\tNumSeqs"); m->mothurOutEndLine();
+            m->mothurOut("Minimum:\t" + toString(length[0]) + "\t" + toString(olengths[0]) + "\t" + toString(ostarts[0]) + "\t" + toString(oends[0]) + "\t" + toString(mismatches[0]) + "\t" + toString(numns[0]) + "\t" + toString(ptiles[0])); m->mothurOutEndLine();
+            m->mothurOut("2.5%-tile:\t" + toString(length[1]) + "\t" + toString(olengths[1]) + "\t" + toString(ostarts[1]) + "\t" + toString(oends[1]) + "\t" + toString(mismatches[1]) + "\t" + toString(numns[1]) + "\t" + toString(ptiles[1])); m->mothurOutEndLine();
+            m->mothurOut("25%-tile:\t" + toString(length[2]) + "\t" + toString(olengths[2]) + "\t" + toString(ostarts[2]) + "\t" + toString(oends[2]) + "\t" + toString(mismatches[2]) + "\t" + toString(numns[2]) + "\t" + toString(ptiles[2])); m->mothurOutEndLine();
+            m->mothurOut("Median: \t" + toString(length[3]) + "\t" + toString(olengths[3]) + "\t" + toString(ostarts[3]) + "\t" + toString(oends[3]) + "\t" + toString(mismatches[3]) + "\t" + toString(numns[3]) + "\t" + toString(ptiles[3])); m->mothurOutEndLine();
+            m->mothurOut("75%-tile:\t" + toString(length[4]) + "\t" + toString(olengths[4]) + "\t" + toString(ostarts[4]) + "\t" + toString(oends[4]) + "\t" + toString(mismatches[4]) + "\t" + toString(numns[4])  + "\t" + toString(ptiles[4])); m->mothurOutEndLine();
+            m->mothurOut("97.5%-tile:\t" + toString(length[5]) + "\t" + toString(olengths[5]) + "\t" + toString(ostarts[5]) + "\t" + toString(oends[5]) + "\t" + toString(mismatches[5]) + "\t" + toString(numns[5])  + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
+            m->mothurOut("Maximum:\t" + toString(length[6]) + "\t" + toString(olengths[6]) + "\t" + toString(ostarts[6]) + "\t" + toString(oends[6]) + "\t" + toString(mismatches[6]) + "\t" + toString(numns[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
+            m->mothurOut("Mean:\t" + toString(length[7]) + "\t" + toString(olengths[7]) + "\t" + toString(ostarts[7]) + "\t" + toString(oends[7]) + "\t" + toString(mismatches[7]) + "\t" + toString(numns[7]) ); m->mothurOutEndLine();
+            m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine();
+        }
         
         if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-        if (summaryfile == "") { m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);  }
+        if ((summaryfile == "") && (contigsfile == "")) { m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);  }
         m->mothurOutEndLine();
         
-        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numSeqs) + " sequences.\n");  }
+        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
         else{  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
         
         //set fasta file as new current fastafile

@@ -28,17 +28,33 @@ public:
     long long summarizeFasta(string f, string o); //provide fasta file to summarize (paralellized) and optional outputfile for individual seqs info. To skip output file, o=""
     long long summarizeFastaSummary(string f); //provide summary of fasta file to summarize (paralellized)
     long long summarizeFastaSummary(string f, string n); //provide summary of fasta file and name or count file to summarize (paralellized)
+    long long summarizeContigsSummary(string f); //provide summary of contigs summary file to summarize (paralellized)
+    long long summarizeContigsSummary(string f, string n); //provide summary of contigs summary file and name or count file to summarize (paralellized)
+    
     vector<long long> getDefaults();
-    vector<long long> getStart(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
-    long long getStart(double value); //2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
-    vector<long long> getEnd(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
-    long long getEnd(double value); //2.5 = 2.5% of sequences of sequences end after, 25 = location 25% of sequences end after
-    vector<long long> getAmbig(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
-    long long getAmbig(double value); //25 = max abigous bases 25% of sequences contain
-    vector<long long> getLength(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
-    long long getLength(double value); // 25 = min length of 25% of sequences
-    vector<long long> getHomop(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
-    long long getHomop(double value);
+    //fasta and summary
+    vector<long long> getStart() { return (getValues(startPosition)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getStart(double value) { return (getValue(startPosition, value)); } //2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
+    vector<long long> getEnd() { return (getValues(endPosition)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getEnd(double value) { return (getValue(endPosition, value)); } //2.5 = 2.5% of sequences of sequences end after, 25 = location 25% of sequences end after
+    vector<long long> getAmbig() { return (getValues(ambigBases)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getAmbig(double value) { return (getValue(ambigBases, value)); } //25 = max abigous bases 25% of sequences contain
+    vector<long long> getLength() { return (getValues(seqLength)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getLength(double value) { return (getValue(seqLength, value)); } // 25 = min length of 25% of sequences
+    vector<long long> getHomop() { return (getValues(longHomoPolymer)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getHomop(double value) { return (getValue(longHomoPolymer, value)); }
+    
+    //contigs
+    vector<long long> getOStart() { return (getValues(ostartPosition)); } //contigs overlap start - returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getOStart(double value) { return (getValue(ostartPosition, value)); } //contigs overlap start - 2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
+    vector<long long> getOEnd() { return (getValues(oendPosition)); } //contigs overlap end -returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getOEnd(double value) { return (getValue(oendPosition, value)); } //contigs overlap end -2.5 = 2.5% of sequences of sequences end after, 25 = location 25% of sequences end after
+    vector<long long> getOLength() { return (getValues(oseqLength)); } //contigs overlap length - returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getOLength(double value) { return (getValue(oseqLength, value)); } //contigs overlap length - 25 = min length of 25% of sequences
+    vector<long long> getMisMatches() { return (getValues(misMatches)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getMisMatches(double value) { return (getValue(misMatches, value)); }
+    vector<long long> getNumNs() { return (getValues(numNs)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getNumNs(double value) { return (getValue(numNs, value)); } //25 = max abigous bases 25% of sequences contain
     
     long long getTotalSeqs() { return total; }
     long long getUniqueSeqs() { return numUniques; }
@@ -54,15 +70,24 @@ private:
     map<int, long long> seqLength;
     map<int, long long> ambigBases;
     map<int, long long> longHomoPolymer;
+    map<int, long long> ostartPosition;
+    map<int, long long> oendPosition;
+    map<int, long long> oseqLength;
+    map<int, long long> misMatches;
+    map<int, long long> numNs;
     map<string, int> nameMap;
     map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
     
     string addSeq(Sequence); //return summary output line
+    string addSeq(string name, int length, int olength, int ostart, int oend, int mismatches, int numns);
+    string addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps);
     int driverSummarize(string, string, linePair lines); //fastafile, outputfile (optional set to "" to ignore), file positions
     void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
     int driverFastaSummarySummarize(string, linePair lines); //summaryfile, file positions
-    string addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps);
+    int driverContigsSummarySummarize(string, linePair lines); //summaryfile, file positions
+    vector<long long> getValues(map<int, long long>& positions);
+    long long getValue(map<int, long long>& positions, double);
 
     
 };
@@ -76,7 +101,13 @@ struct seqSumData {
     map<int, long long> seqLength;
     map<int, long long> ambigBases;
     map<int, long long> longHomoPolymer;
-    string filename, summaryFile;
+    map<int, long long> ostartPosition;
+    map<int, long long> oendPosition;
+    map<int, long long> oseqLength;
+    map<int, long long> misMatches;
+    map<int, long long> numNs;
+
+    string filename, summaryFile, contigsfile;
     unsigned long long start;
     unsigned long long end;
     long long count;
@@ -207,7 +238,7 @@ static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
     
     try {
         ifstream in;
-        pDataArray->m->openInputFile(pDataArray->filename, in);
+        pDataArray->m->openInputFile(pDataArray->summaryFile, in);
         
         //print header if you are process 0
         if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
@@ -260,12 +291,6 @@ static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
                 else { it->second += numReps; } //add counts
                 
                 pDataArray->count++;
-                
-                string output = "";
-                output += name + '\t';
-                output += toString(start) + '\t' + toString(end) + '\t';
-                output += toString(length) + '\t' + toString(ambigs) + '\t';
-                output += toString(polymer) + '\t' + toString(numReps);
             }
         }
         in.close();
@@ -275,6 +300,84 @@ static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
     }
     catch(exception& e) {
         pDataArray->m->errorOut(e, "SeqSummaryCommand", "MySeqFastaSumThreadFunction");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+static DWORD WINAPI MySeqContigsSumThreadFunction(LPVOID lpParam){
+    seqSumData* pDataArray;
+    pDataArray = (seqSumData*)lpParam;
+    
+    try {
+        ifstream in;
+        pDataArray->m->openInputFile(pDataArray->contigsfile, in);
+        
+        //print header if you are process 0
+        if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+            in.seekg(0);
+            pDataArray->m->zapGremlins(in); pDataArray->m->gobble(in);
+            pDataArray->m->getline(in); pDataArray->m->gobble(in);
+        }else { //this accounts for the difference in line endings.
+            in.seekg(pDataArray->start-1); pDataArray->m->gobble(in);
+        }
+        
+        string name;
+        int length, OLength, thisOStart, thisOEnd, numMisMatches, numns, numReps; //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
+        
+
+        for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+            
+            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; pDataArray->m->gobble(in);
+
+            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(OLength) + "\n"); }
+            
+            numReps = 1;
+            if (name != "") {
+                if (pDataArray->hasNameMap){
+                    //make sure this sequence is in the namefile, else error
+                    map<string, int>::iterator it = pDataArray->nameMap.find(name);
+                    
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    else { numReps = it->second; }
+                }
+                
+                map<int, long long>::iterator it = pDataArray->ostartPosition.find(thisOStart);
+                if (it == pDataArray->ostartPosition.end()) { pDataArray->ostartPosition[thisOStart] = numReps; } //first finding of this start position, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->oendPosition.find(thisOEnd);
+                if (it == pDataArray->oendPosition.end()) { pDataArray->oendPosition[thisOEnd] = numReps; } //first finding of this end position, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->seqLength.find(length);
+                if (it == pDataArray->seqLength.end()) { pDataArray->seqLength[length] = numReps; } //first finding of this length, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->oseqLength.find(OLength);
+                if (it == pDataArray->oseqLength.end()) { pDataArray->oseqLength[OLength] = numReps; } //first finding of this ambig, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->misMatches.find(numMisMatches);
+                if (it == pDataArray->misMatches.end()) { pDataArray->misMatches[numMisMatches] = numReps; } //first finding of this ambig, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->numNs.find(numns);
+                if (it == pDataArray->numNs.end()) { pDataArray->numNs[numns] = numReps; } //first finding of this homop, set count.
+                else { it->second += numReps; } //add counts
+                
+                pDataArray->count++;
+            }
+        }
+        in.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        pDataArray->m->errorOut(e, "SeqSummaryCommand", "MySeqContigsSumThreadFunction");
         exit(1);
     }
 }

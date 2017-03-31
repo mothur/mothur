@@ -35,7 +35,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 private:
 	bool abort;
-	string fastafile, outputDir, namefile, countfile, summaryfile;
+	string fastafile, outputDir, namefile, countfile, summaryfile, contigsfile;
 	int processors;
 	vector<string> outputNames;
 };
