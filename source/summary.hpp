@@ -30,7 +30,9 @@ public:
     long long summarizeFastaSummary(string f, string n); //provide summary of fasta file and name or count file to summarize (paralellized)
     long long summarizeContigsSummary(string f); //provide summary of contigs summary file to summarize (paralellized)
     long long summarizeContigsSummary(string f, string n); //provide summary of contigs summary file and name or count file to summarize (paralellized)
-    
+    long long summarizeAlignSummary(string f); //provide summary of contigs summary file to summarize (paralellized)
+    long long summarizeAlignSummary(string f, string n); //provide summary of contigs summary file and name or count file to summarize (paralellized)
+
     vector<long long> getDefaults();
     //fasta and summary
     vector<long long> getStart() { return (getValues(startPosition)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
@@ -55,6 +57,13 @@ public:
     long long getMisMatches(double value) { return (getValue(misMatches, value)); }
     vector<long long> getNumNs() { return (getValues(numNs)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getNumNs(double value) { return (getValue(numNs, value)); } //25 = max abigous bases 25% of sequences contain
+    vector<long long> getSims() { return (getValues(sims)); } //contigs overlap length - returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getSims(double value) { return (getValue(sims, value)); } //contigs overlap length - 25 = min length of 25% of sequences
+    vector<long long> getScores() { return (getValues(scores)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getScores(double value) { return (getValue(scores, value)); }
+    vector<long long> getNumInserts() { return (getValues(inserts)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
+    long long getNumInserts(double value) { return (getValue(inserts, value)); } //25 = max abigous bases 25% of sequences contain
+
     
     long long getTotalSeqs() { return total; }
     long long getUniqueSeqs() { return numUniques; }
@@ -75,6 +84,10 @@ private:
     map<int, long long> oseqLength;
     map<int, long long> misMatches;
     map<int, long long> numNs;
+    map<float, long long> sims;
+    map<float, long long> scores;
+    map<int, long long> inserts;
+
     map<string, int> nameMap;
     map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
@@ -82,12 +95,17 @@ private:
     string addSeq(Sequence); //return summary output line
     string addSeq(string name, int length, int olength, int ostart, int oend, int mismatches, int numns);
     string addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps);
+    string addSeq(string name, int length, float SimBtwnQueryTemplate, float SearchScore, int LongestInsert);
     int driverSummarize(string, string, linePair lines); //fastafile, outputfile (optional set to "" to ignore), file positions
     void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
     int driverFastaSummarySummarize(string, linePair lines); //summaryfile, file positions
     int driverContigsSummarySummarize(string, linePair lines); //summaryfile, file positions
+    int driverAlignSummarySummarize(string, linePair lines); //summaryfile, file positions
     vector<long long> getValues(map<int, long long>& positions);
     long long getValue(map<int, long long>& positions, double);
+    vector<long long> getValues(map<float, long long>& positions);
+    long long getValue(map<float, long long>& positions, double);
+
 
     
 };
