@@ -15,6 +15,7 @@
 vector<string> SeqSummaryCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pfasta);
+        CommandParameter psummary("summary", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(psummary);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -35,8 +36,8 @@ vector<string> SeqSummaryCommand::setParameters(){
 string SeqSummaryCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The summary.seqs command reads a fastafile and summarizes the sequences.\n";
-		helpString += "The summary.seqs command parameters are fasta, name, count and processors, fasta is required, unless you have a valid current fasta file.\n";
+		helpString += "The summary.seqs command reads a fastafile or summary file and summarizes the sequences.\n";
+		helpString += "The summary.seqs command parameters are fasta, name, count, summary and processors, fasta or summary is required, unless you have a valid current fasta file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
         helpString += "The count parameter allows you to enter a count file associated with your fasta file. \n";
 		helpString += "The summary.seqs command should be in the following format: \n";
@@ -114,6 +115,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("summary");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = m->hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["summary"] = inputDir + it->second;		}
+                }
 				
 				it = parameters.find("name");
 				//user has given a template file
@@ -139,12 +148,24 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastafile); }	
+            else if (fastafile == "not found") {  fastafile = "";  }
+            else { m->setFastaFile(fastafile); }
 			
+            summaryfile = validParameter.validFile(parameters, "summary", true);
+            if (summaryfile == "not open") { abort = true; }
+            else if (summaryfile == "not found") {  summaryfile = "";  }
+            else { m->setSummaryFile(summaryfile); }
+
+            if ((summaryfile == "") && (fastafile == "")) {
+                fastafile = m->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                else {
+                    summaryfile = m->getSummaryFile();
+                    if (summaryfile != "") { m->mothurOut("Using " + summaryfile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                    else { 	m->mothurOut("You have no current fastafile or summaryfile, one is required."); m->mothurOutEndLine(); abort = true; }
+                }
+            }
+            
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
@@ -191,13 +212,14 @@ int SeqSummaryCommand::execute(){
         
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
-		string summaryFile = getOutputFileName("summary",variables);
+		string outputFile = getOutputFileName("summary",variables);
         
         string nameOrCount = countfile;
         if (namefile != "") { nameOrCount = namefile; }
         
-        Summary sum(nameOrCount);
-        sum.summarize(fastafile, summaryFile);
+        Summary sum;
+        if (fastafile != "") {  sum.summarizeFasta(fastafile, nameOrCount, outputFile);  }
+        else if (summaryfile != "") {  sum.summarizeFastaSummary(summaryfile, nameOrCount);  }
         
         vector<long long> starts = sum.getStart();
         vector<long long> ends = sum.getEnd();
@@ -210,7 +232,7 @@ int SeqSummaryCommand::execute(){
         long long size = sum.getTotalSeqs();
         long long numUniques = sum.getUniqueSeqs();
         
-        if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
+        if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
         
         m->mothurOutEndLine();
         m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer\tNumSeqs"); m->mothurOutEndLine();
@@ -222,18 +244,18 @@ int SeqSummaryCommand::execute(){
         m->mothurOut("97.5%-tile:\t" + toString(starts[5]) + "\t" + toString(ends[5]) + "\t" + toString(lengths[5]) + "\t" + toString(ambigs[5]) + "\t" + toString(homops[5]) + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
         m->mothurOut("Maximum:\t" + toString(starts[6]) + "\t" + toString(ends[6]) + "\t" + toString(lengths[6]) + "\t" + toString(ambigs[6]) + "\t" + toString(homops[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
         m->mothurOut("Mean:\t" + toString(starts[7]) + "\t" + toString(ends[7]) + "\t" + toString(lengths[7]) + "\t" + toString(ambigs[7]) + "\t" + toString(homops[7])); m->mothurOutEndLine();
-        if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
+        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
         else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
         
-        if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
+        if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-        m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
+        if (summaryfile == "") { m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);  }
         m->mothurOutEndLine();
         
-        if ((namefile == "") && (countfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numSeqs) + " sequences.\n");  }
-        else{ m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
+        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numSeqs) + " sequences.\n");  }
+        else{  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
         
         //set fasta file as new current fastafile
         string current = "";

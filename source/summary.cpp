@@ -10,10 +10,9 @@
 
 
 //**********************************************************************************************************************
-Summary::Summary(string n) { //name or count file to include in counts
+void Summary::processNameCount(string n) { //name or count file to include in counts
     try {
-        m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false;
-        
+        nameMap.clear(); nameCountNumUniques = 0;
         if (n != "") {
             hasNameOrCount = true;
             if (m->isCountFile(n)) {
@@ -23,7 +22,6 @@ Summary::Summary(string n) { //name or count file to include in counts
                 type = "count";
             }else { nameMap = m->readNames(n); type = "name"; }
         }
-        
         nameCountNumUniques = nameMap.size();
     }
     catch(exception& e) {
@@ -31,6 +29,7 @@ Summary::Summary(string n) { //name or count file to include in counts
         exit(1);
     }
 }
+
 //**********************************************************************************************************************
 string Summary::addSeq(Sequence seq) {
     try {
@@ -74,14 +73,63 @@ string Summary::addSeq(Sequence seq) {
         
         string output = "";
         output += seq.getName() + '\t';
-        output += thisStartPosition + '\t' + thisEndPosition + '\t';
-        output += thisSeqLength + '\t' + thisAmbig + '\t';
-        output += thisHomoP + '\t' + num;
+        output += toString(thisStartPosition) + '\t' + toString(thisEndPosition) + '\t';
+        output += toString(thisSeqLength) + '\t' + toString(thisAmbig) + '\t';
+        output += toString(thisHomoP) + '\t' + toString(num);
         
         return output;
     }
     catch(exception& e) {
-        m->errorOut(e, "Summary", "addSeq");
+        m->errorOut(e, "Summary", "addSeq - FastaFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//string seqInfo = addSeq(name, start, end, length, ambigs, polymer, numReps);
+string Summary::addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps) {
+    try {
+        
+        if ((numReps == 1) && hasNameOrCount) {
+            //make sure this sequence is in the namefile, else error
+            itFindName = nameMap.find(name);
+            
+            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+            else { numReps = itFindName->second; }
+        }
+        
+        it = startPosition.find(start);
+        if (it == startPosition.end()) { startPosition[start] = numReps; } //first finding of this start position, set count.
+        else { it->second += numReps; } //add counts
+        
+        it = endPosition.find(end);
+        if (it == endPosition.end()) { endPosition[end] = numReps; } //first finding of this end position, set count.
+        else { it->second += numReps; } //add counts
+        
+        it = seqLength.find(length);
+        if (it == seqLength.end()) { seqLength[length] = numReps; } //first finding of this length, set count.
+        else { it->second += numReps; } //add counts
+        
+        it = ambigBases.find(ambigs);
+        if (it == ambigBases.end()) { ambigBases[ambigs] = numReps; } //first finding of this ambig, set count.
+        else { it->second += numReps; } //add counts
+        
+        it = longHomoPolymer.find(polymer);
+        if (it == longHomoPolymer.end()) { longHomoPolymer[polymer] = numReps; } //first finding of this homop, set count.
+        else { it->second += numReps; } //add counts
+        
+        numUniques++;
+        total += numReps;
+        
+        string output = "";
+        output += name + '\t';
+        output += toString(start) + '\t' + toString(end) + '\t';
+        output += toString(length) + '\t' + toString(ambigs) + '\t';
+        output += toString(polymer) + '\t' + toString(numReps);
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "addSeq - FastaSummaryFile");
         exit(1);
     }
 }
@@ -428,8 +476,21 @@ long long Summary::getHomop(double value) {
     }
 }
 //**********************************************************************************************************************
-long long Summary::summarize(string fastafile, string output) {
+long long Summary::summarizeFasta(string fastafile, string n, string output) {
     try {
+        //fill namemap
+        processNameCount(n);
+        return (summarizeFasta(fastafile, output));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "getHomop");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+long long Summary::summarizeFasta(string fastafile, string output) {
+    try {
+        
         vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors();
@@ -446,7 +507,7 @@ long long Summary::summarize(string fastafile, string output) {
         for (int i = 0; i < processors; i++) {
             int startIndex =  i * numSeqsPerProcessor;
             if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-            lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
         }
 #endif
         
@@ -650,7 +711,7 @@ long long Summary::summarize(string fastafile, string output) {
             if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
             string outputName = output + extension;
             if (output == "") {  outputName = "";  }
-            seqSumData* tempSum = new seqSumData(fastafile, outputName, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            seqSumData* tempSum = new seqSumData(fastafile, outputName, m, lines[i].start, lines[i].end, hasNameOrCount, nameMap);
             pDataArray.push_back(tempSum);
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -728,7 +789,7 @@ long long Summary::summarize(string fastafile, string output) {
         return num; //number of uniques
     }
     catch(exception& e) {
-        m->errorOut(e, "Summary", "summarize");
+        m->errorOut(e, "Summary", "summarizeFasta");
         exit(1);
     }
 }
@@ -744,7 +805,11 @@ int Summary::driverSummarize(string fastafile, string output, linePair lines) {
         in.seekg(lines.start);
         
         //print header if you are process 0
-        if (lines.start == 0) { m->zapGremlins(in); m->gobble(in); }
+        if (lines.start == 0) {
+            m->zapGremlins(in); m->gobble(in);
+            //print header if you are process 0
+            out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;
+        }
         
         bool done = false;
         long long count = 0;
@@ -782,5 +847,355 @@ int Summary::driverSummarize(string fastafile, string output, linePair lines) {
     }
 }
 //**********************************************************************************************************************
+long long Summary::summarizeFastaSummary(string summaryfile, string n) {
+    try {
+        //fill namemap
+        processNameCount(n);
+        return (summarizeFastaSummary(summaryfile));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "summarizeFastaSummary");
+        exit(1);
+    }
+}
+/**********************************************************************************************************************/
+long long Summary::summarizeFastaSummary(string summaryfile) {
+    try {
+        
+        vector<unsigned long long> positions;
+        vector<linePair> lines;
+        string p = m->getProcessors();
+        int processors = 1; m->mothurConvert(p, processors);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        positions = m->divideFile(summaryfile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+        positions = m->setFilePosFasta(summaryfile, numSeqs);
+        if (numSeqs < processors) { processors = numSeqs; }
+        
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
+        
+        int process = 1;
+        long long num = 0;
+        vector<int> processIDS;
+        bool recalc = false;
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+        //loop through and create all the processes you want
+        while (process != processors) {
+            pid_t pid = fork();
+            
+            if (pid > 0) {
+                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                process++;
+            }else if (pid == 0){
+                num = driverFastaSummarySummarize(summaryfile, lines[process]);
+                
+                //pass numSeqs to parent
+                ofstream out;
+                string tempFile = m->mothurGetpid(process) + ".num.temp";
+                m->openOutputFile(tempFile, out);
+                
+                out << num << endl;
+                out << total << endl;
+                out << startPosition.size() << endl;
+                for (map<int,  long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << endPosition.size() << endl;
+                for (map<int,  long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << seqLength.size() << endl;
+                for (map<int,  long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << ambigBases.size() << endl;
+                for (map<int,  long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out << longHomoPolymer.size() << endl;
+                for (map<int,  long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out.close();
+                
+                exit(0);
+            }else {
+                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
+                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                //wait to die
+                for (int i=0;i<processIDS.size();i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                m->control_pressed = false;
+                for (int i=0;i<processIDS.size();i++) {
+                    m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
+                }
+                recalc = true;
+                break;
+            }
+        }
+        
+        if (recalc) {
+            //test line, also set recalc to true.
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            
+            //redo file divide
+            lines.clear();
+            vector<unsigned long long> positions = m->divideFile(summaryfile, processors);
+            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
+            
+            startPosition.clear();
+            endPosition.clear();
+            seqLength.clear();
+            ambigBases.clear();
+            longHomoPolymer.clear();
+            
+            num = 0;
+            processIDS.resize(0);
+            process = 1;
+            
+            //loop through and create all the processes you want
+            while (process != processors) {
+                pid_t pid = fork();
+                
+                if (pid > 0) {
+                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    process++;
+                }else if (pid == 0){
+                    
+                    num = driverFastaSummarySummarize(summaryfile, lines[process]);
+                    
+                    //pass numSeqs to parent
+                    ofstream out;
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    m->openOutputFile(tempFile, out);
+                    
+                    out << num << endl;
+                    out << total << endl;
+                    out << startPosition.size() << endl;
+                    for (map<int,  long long>::iterator it = startPosition.begin(); it != startPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out << endPosition.size() << endl;
+                    for (map<int,  long long>::iterator it = endPosition.begin(); it != endPosition.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out << seqLength.size() << endl;
+                    for (map<int,  long long>::iterator it = seqLength.begin(); it != seqLength.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out << ambigBases.size() << endl;
+                    for (map<int,  long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out << longHomoPolymer.size() << endl;
+                    for (map<int,  long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out.close();
+                    
+                    exit(0);
+                }else {
+                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                    exit(0);
+                }
+            }
+        }
+        
+        //do your part
+        num = driverFastaSummarySummarize(summaryfile, lines[0]);
+        
+        //force parent to wait until all the processes are done
+        for (int i=0;i<processIDS.size();i++) {
+            int temp = processIDS[i];
+            wait(&temp);
+        }
+        
+        //parent reads in and combine Filter info
+        for (int i = 0; i < processIDS.size(); i++) {
+            string tempFilename = toString(processIDS[i]) + ".num.temp";
+            ifstream in;
+            m->openInputFile(tempFilename, in);
+            
+            long long  tempNum;
+            in >> tempNum; m->gobble(in); num += tempNum;
+            in >> tempNum; m->gobble(in); total += tempNum;
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = startPosition.find(first);
+                if (it == startPosition.end()) { startPosition[first] = second; } //first finding of this start position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = endPosition.find(first);
+                if (it == endPosition.end()) { endPosition[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = seqLength.find(first);
+                if (it == seqLength.end()) { seqLength[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = ambigBases.find(first);
+                if (it == ambigBases.end()) { ambigBases[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = longHomoPolymer.find(first);
+                if (it == longHomoPolymer.end()) { longHomoPolymer[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            
+            in.close();
+            m->mothurRemove(tempFilename);
+        }
+        
+#else
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Windows version shared memory, so be careful when passing variables through the seqSumData struct.
+        //Above fork() will clone, so memory is separate, but that's not the case with windows,
+        //Taking advantage of shared memory to allow both threads to add info to vectors.
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        vector<seqSumData*> pDataArray;
+        DWORD   dwThreadIdArray[processors-1];
+        HANDLE  hThreadArray[processors-1];
+        
+        //Create processor worker threads.
+        for( int i=0; i<processors-1; i++ ){
+            
+            // Allocate memory for thread data.
+            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            pDataArray.push_back(tempSum);
+            
+            //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+            //default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+            hThreadArray[i] = CreateThread(NULL, 0, MySeqFastaSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
+        }
+        
+        //do your part
+        num = driverFastaSummarySummarize(fastafile, lines[processors-1]);
+        processIDS.push_back(processors-1);
+        
+        //Wait until all threads have terminated.
+        WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+        
+        //Close all thread handles and free memory allocations.
+        for(int i=0; i < pDataArray.size(); i++){
+            num += pDataArray[i]->count;
+            total += pDataArray[i]->total;
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->startPosition.begin(); it != pDataArray[i]->startPosition.end(); it++)		{
+                map<int, long long>::iterator itMain = startPosition.find(it->first);
+                if (itMain == startPosition.end()) { //newValue
+                    startPosition[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->endPosition.begin(); it != pDataArray[i]->endPosition.end(); it++)		{
+                map<int, long long>::iterator itMain = endPosition.find(it->first);
+                if (itMain == endPosition.end()) { //newValue
+                    endPosition[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->seqLength.begin(); it != pDataArray[i]->seqLength.end(); it++)		{
+                map<int, long long>::iterator itMain = seqLength.find(it->first);
+                if (itMain == seqLength.end()) { //newValue
+                    seqLength[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->ambigBases.begin(); it != pDataArray[i]->ambigBases.end(); it++)		{
+                map<int, long long>::iterator itMain = ambigBases.find(it->first);
+                if (itMain == ambigBases.end()) { //newValue
+                    ambigBases[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            for (map<int, long long>::iterator it = pDataArray[i]->longHomoPolymer.begin(); it != pDataArray[i]->longHomoPolymer.end(); it++)		{
+                map<int, long long>::iterator itMain = longHomoPolymer.find(it->first);
+                if (itMain == longHomoPolymer.end()) { //newValue
+                    longHomoPolymer[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
+            CloseHandle(hThreadArray[i]);
+            delete pDataArray[i];
+        }
+#endif
+        
+        if (hasNameOrCount) {
+            if (nameCountNumUniques != num) { // do fasta and name/count files match
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+            }
+        }
+        
+        numUniques = num;
+        
+        return num; //number of uniques
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "summarizeFastaSummary");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int Summary::driverFastaSummarySummarize(string fastafile, linePair lines) {
+    try {
+        ifstream in;
+        m->openInputFile(fastafile, in);
+        
+        in.seekg(lines.start);
+        
+        //print header if you are process 0
+        if (lines.start == 0) { m->zapGremlins(in); m->getline(in); m->gobble(in); }
+        
+        bool done = false;
+        long long count = 0;
+        string name;
+        int start, end, length, ambigs, polymer, numReps;
+        
+        while (!done) {
+            
+            if (m->control_pressed) { in.close(); return 1; }
+            
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
+            
+            if (name != "") {
+                string seqInfo = addSeq(name, start, end, length, ambigs, polymer, numReps); count++;
+            }
+            
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            unsigned long long pos = in.tellg();
+            if ((pos == -1) || (pos >= lines.end)) { break; }
+#else
+            if (in.eof()) { break; }
+#endif
+        }
+        
+        in.close();
+        
+        return count;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "driverSummarize");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
 
 

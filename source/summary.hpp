@@ -22,13 +22,13 @@ public:
 #endif
     
     Summary() { m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false; nameCountNumUniques = 0; type = "count"; }
-    Summary(string n); //provide name or count file to include in counts
     ~Summary() {}
     
-    long long summarize(string f, string o); //provide fasta file to summarize (paralellized) and output file for individual seqs info. To skip output file, o = ""
-    string addSeq(Sequence); //return summary output line
+    long long summarizeFasta(string f, string n, string o); //provide fasta file to summarize (paralellized) and optional nameorCountfile and optional outputfile for individual seqs info. To skip nameCount or output file, n="" and / or o=""
+    long long summarizeFasta(string f, string o); //provide fasta file to summarize (paralellized) and optional outputfile for individual seqs info. To skip output file, o=""
+    long long summarizeFastaSummary(string f); //provide summary of fasta file to summarize (paralellized)
+    long long summarizeFastaSummary(string f, string n); //provide summary of fasta file and name or count file to summarize (paralellized)
     vector<long long> getDefaults();
-
     vector<long long> getStart(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getStart(double value); //2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
     vector<long long> getEnd(); //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
@@ -58,8 +58,12 @@ private:
     map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
     
-    int driverSummarize(string, string, linePair lines);
-    
+    string addSeq(Sequence); //return summary output line
+    int driverSummarize(string, string, linePair lines); //fastafile, outputfile (optional set to "" to ignore), file positions
+    void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
+    int driverFastaSummarySummarize(string, linePair lines); //summaryfile, file positions
+    string addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps);
+
     
 };
 /**************************************************************************************************/
@@ -83,6 +87,7 @@ struct seqSumData {
     
     
     seqSumData(){}
+    //FastaSummarize
     seqSumData(string f, string sum, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
         filename = f;
         m = mout;
@@ -92,6 +97,17 @@ struct seqSumData {
         nameMap = nam;
         count = 0;
         summaryFile = sum;
+    }
+    
+    //FastaSummarySummarize
+    seqSumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+        filename = f;
+        m = mout;
+        start = st;
+        end = en;
+        hasNameMap = na;
+        nameMap = nam;
+        count = 0;
     }
 };
 
@@ -113,6 +129,7 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
         if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
             in.seekg(0);
             pDataArray->m->zapGremlins(in);
+            out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;
         }else { //this accounts for the difference in line endings.
             in.seekg(pDataArray->start-1); pDataArray->m->gobble(in);
         }
@@ -163,9 +180,9 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                 
                 string output = "";
                 output += seq.getName() + '\t';
-                output += thisStartPosition + '\t' + thisEndPosition + '\t';
-                output += thisSeqLength + '\t' + thisAmbig + '\t';
-                output += thisHomoP + '\t' + num;
+                output += toString(thisStartPosition) + '\t' + toString(thisEndPosition) + '\t';
+                output += toString(thisSeqLength) + '\t' + toString(thisAmbig) + '\t';
+                output += toString(thisHomoP) + '\t' + toString(num);
                 
                 if (pDataArray->summaryFile != "") { out << output << endl; }
             }
@@ -182,8 +199,88 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
         exit(1);
     }
 } 
-#endif
+/**************************************************************************************************/
 
+static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
+    seqSumData* pDataArray;
+    pDataArray = (seqSumData*)lpParam;
+    
+    try {
+        ifstream in;
+        pDataArray->m->openInputFile(pDataArray->filename, in);
+        
+        //print header if you are process 0
+        if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+            in.seekg(0);
+            pDataArray->m->zapGremlins(in);
+        }else { //this accounts for the difference in line endings.
+            in.seekg(pDataArray->start-1); pDataArray->m->gobble(in);
+        }
+        
+        string name;
+        int start, end, length, ambigs, polymer, numReps;
+        
+        for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+            
+            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; pDataArray->m->gobble(in);
+            
+            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
+            
+            if (name != "") {
+                
+                if ((numReps == 1) && pDataArray->hasNameMap){
+                    //make sure this sequence is in the namefile, else error
+                    map<string, int>::iterator it = pDataArray->nameMap.find(name);
+                    
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    else { numReps = it->second; }
+                }
+                
+                map<int, long long>::iterator it = pDataArray->startPosition.find(start);
+                if (it == pDataArray->startPosition.end()) { pDataArray->startPosition[start] = numReps; } //first finding of this start position, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->endPosition.find(end);
+                if (it == pDataArray->endPosition.end()) { pDataArray->endPosition[end] = numReps; } //first finding of this end position, set count.
+                else { it->second += numReps; } //add counts
+                
+                it = pDataArray->seqLength.find(length);
+                if (it == pDataArray->seqLength.end()) { pDataArray->seqLength[length] = numReps; } //first finding of this length, set count.
+                else { it->second += numReps; } //add counts
+;
+                it = pDataArray->ambigBases.find(ambigs);
+                if (it == pDataArray->ambigBases.end()) { pDataArray->ambigBases[ambigs] = numReps; } //first finding of this ambig, set count.
+                else { it->second += numReps; } //add counts
+
+                it = pDataArray->longHomoPolymer.find(polymer);
+                if (it == pDataArray->longHomoPolymer.end()) { pDataArray->longHomoPolymer[polymer] = numReps; } //first finding of this homop, set count.
+                else { it->second += numReps; } //add counts
+                
+                pDataArray->count++;
+                
+                string output = "";
+                output += name + '\t';
+                output += toString(start) + '\t' + toString(end) + '\t';
+                output += toString(length) + '\t' + toString(ambigs) + '\t';
+                output += toString(polymer) + '\t' + toString(numReps);
+            }
+        }
+        in.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        pDataArray->m->errorOut(e, "SeqSummaryCommand", "MySeqFastaSumThreadFunction");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
+#endif
 
 
 
