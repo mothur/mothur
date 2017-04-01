@@ -124,6 +124,10 @@ struct seqSumData {
     map<int, long long> oseqLength;
     map<int, long long> misMatches;
     map<int, long long> numNs;
+    map<float, long long> sims;
+    map<float, long long> scores;
+    map<int, long long> inserts;
+
 
     string filename, summaryFile, contigsfile;
     unsigned long long start;
@@ -223,6 +227,11 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                 int thisHomoP = current.getLongHomoPolymer();
                 it = pDataArray->longHomoPolymer.find(thisHomoP);
                 if (it == pDataArray->longHomoPolymer.end()) { pDataArray->longHomoPolymer[thisHomoP] = num; } //first finding of this homop, set count.
+                else { it->second += num; } //add counts
+                
+                int thisNumNs = current.getNumNs();
+                it = pDataArray->numNs.find(thisNumNs);
+                if (it == pDataArray->numNs.end()) { pDataArray->numNs[thisNumNs] = num; } //first finding of this homop, set count.
                 else { it->second += num; } //add counts
                 
                 pDataArray->count++;
@@ -328,7 +337,7 @@ static DWORD WINAPI MySeqContigsSumThreadFunction(LPVOID lpParam){
     
     try {
         ifstream in;
-        pDataArray->m->openInputFile(pDataArray->contigsfile, in);
+        pDataArray->m->openInputFile(pDataArray->filename, in);
         
         //print header if you are process 0
         if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
@@ -396,6 +405,76 @@ static DWORD WINAPI MySeqContigsSumThreadFunction(LPVOID lpParam){
     }
     catch(exception& e) {
         pDataArray->m->errorOut(e, "SeqSummaryCommand", "MySeqContigsSumThreadFunction");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+static DWORD WINAPI MySeqAlignSumThreadFunction(LPVOID lpParam){
+    seqSumData* pDataArray;
+    pDataArray = (seqSumData*)lpParam;
+    
+    try {
+        ifstream in;
+        pDataArray->m->openInputFile(pDataArray->filename, in);
+        
+        //print header if you are process 0
+        if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+            in.seekg(0);
+            pDataArray->m->zapGremlins(in); pDataArray->m->gobble(in);
+            pDataArray->m->getline(in); pDataArray->m->gobble(in);
+        }else { //this accounts for the difference in line endings.
+            in.seekg(pDataArray->start-1); pDataArray->m->gobble(in);
+        }
+        
+        string name, TemplateName, SearchMethod, AlignmentMethod;
+        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
+        float SearchScore, SimBtwnQueryTemplate;  //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
+        //checking for minScore, maxInsert, minSim
+        
+        for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+            
+            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            
+            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; pDataArray->m->gobble(in);
+            
+            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(length) + "\t" + toString(SearchScore) + "\t" + toString(SimBtwnQueryTemplate) + "\n"); }
+            
+            numReps = 1;
+            if (name != "") {
+                if (pDataArray->hasNameMap){
+                    //make sure this sequence is in the namefile, else error
+                    map<string, int>::iterator it = pDataArray->nameMap.find(name);
+                    
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    else { numReps = it->second; }
+                }
+                
+                map<int, long long>::iterator it = pDataArray->seqLength.find(length);
+                if (it == pDataArray->seqLength.end()) { pDataArray->seqLength[length] = numReps; } //first finding of this start position, set count.
+                else { it->second += numReps; } //add counts
+                
+                map<float, long long>::iterator itFloat = pDataArray->sims.find(SimBtwnQueryTemplate);
+                if (itFloat == pDataArray->sims.end()) { pDataArray->sims[SimBtwnQueryTemplate] = numReps; } //first finding of this end position, set count.
+                else { itFloat->second += numReps; } //add counts
+                
+                itFloat = pDataArray->scores.find(SearchScore);
+                if (itFloat == pDataArray->scores.end()) { pDataArray->scores[SearchScore] = numReps; } //first finding of this length, set count.
+                else { itFloat->second += numReps; } //add counts
+                
+                it = pDataArray->inserts.find(LongestInsert);
+                if (it == pDataArray->inserts.end()) { pDataArray->inserts[LongestInsert] = numReps; } //first finding of this ambig, set count.
+                else { it->second += numReps; } //add counts
+                
+                pDataArray->count++;
+            }
+        }
+        in.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        pDataArray->m->errorOut(e, "SeqSummaryCommand", "MySeqAlignSumThreadFunction");
         exit(1);
     }
 }

@@ -42,7 +42,7 @@ string Summary::addSeq(Sequence seq) {
             if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
             else { num = itFindName->second; }
         }
-        
+
         int thisStartPosition = seq.getStartPos();
         it = startPosition.find(thisStartPosition);
         if (it == startPosition.end()) { startPosition[thisStartPosition] = num; } //first finding of this start position, set count.
@@ -66,6 +66,11 @@ string Summary::addSeq(Sequence seq) {
         int thisHomoP = seq.getLongHomoPolymer();
         it = longHomoPolymer.find(thisHomoP);
         if (it == longHomoPolymer.end()) { longHomoPolymer[thisHomoP] = num; } //first finding of this homop, set count.
+        else { it->second += num; } //add counts
+        
+        int numns = seq.getNumNs();
+        it = numNs.find(numns);
+        if (it == numNs.end()) { numNs[numns] = num; } //first finding of this homop, set count.
         else { it->second += num; } //add counts
 
         numUniques++;
@@ -291,7 +296,7 @@ vector<long long> Summary::getValues(map<int, long long>& positions) {
     }
 }
 //**********************************************************************************************************************
-long long Summary::getValue(map<int, long long>& positions, double value) {
+long long Summary::getValue(map<int, long long>& spots, double value) {
     try {
         long long percentage = 1+(long long)(total * value * 0.01);
         long long result = 0;
@@ -299,12 +304,13 @@ long long Summary::getValue(map<int, long long>& positions, double value) {
         long long lastValue = 0;
         
         //minimum
-        if ((positions.begin())->first == -1) { result = 0; }
-        else {result = (positions.begin())->first; }
+        if ((spots.begin())->first == -1) { result = 0; }
+        else {result = (spots.begin())->first; }
     
-        for (map<int, long long>::iterator it = positions.begin(); it != positions.end(); it++) {
-            int value = it->first; if (value == -1) { value = 0; }
+        for (it = spots.begin(); it != spots.end(); it++) {
+            long long value = it->first; if (value == -1) { value = 0; }
             totalSoFar += it->second;
+            
             if (((totalSoFar <= percentage) && (totalSoFar > 1)) || ((lastValue < percentage) && (totalSoFar > percentage))){  result = value;   } //save value
             lastValue = totalSoFar;
         }
@@ -331,7 +337,7 @@ vector<long long> Summary::getValues(map<float, long long>& positions) {
         results[1] = results[0]; results[2] = results[0]; results[3] = results[0]; results[4] = results[0]; results[5] = results[0];
         
         for (map<float, long long>::iterator it = positions.begin(); it != positions.end(); it++) {
-            int value = it->first; if (value == -1) { value = 0; }
+            long long value = it->first; if (value == -1) { value = 0; }
             meanPosition += (value*it->second);
             totalSoFar += it->second;
             if (((totalSoFar <= defaults[1]) && (totalSoFar > 1)) || ((lastValue < defaults[1]) && (totalSoFar > defaults[1]))){  results[1] = value;   } //save value
@@ -364,11 +370,12 @@ long long Summary::getValue(map<float, long long>& positions, double value) {
         
         //minimum
         if ((positions.begin())->first == -1) { result = 0; }
-        else {result = (positions.begin())->first; }
+        else { result = (positions.begin())->first; }
         
         for (map<float, long long>::iterator it = positions.begin(); it != positions.end(); it++) {
-            int value = it->first; if (value == -1) { value = 0; }
+            long long value = it->first; if (value == -1) { value = 0; }
             totalSoFar += it->second;
+            
             if (((totalSoFar <= percentage) && (totalSoFar > 1)) || ((lastValue < percentage) && (totalSoFar > percentage))){  result = value;   } //save value
             lastValue = totalSoFar;
         }
@@ -395,11 +402,10 @@ long long Summary::summarizeFasta(string fastafile, string n, string output) {
 //**********************************************************************************************************************
 long long Summary::summarizeFasta(string fastafile, string output) {
     try {
-        
-        vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors();
         int processors = 1; m->mothurConvert(p, processors);
+        vector<unsigned long long> positions;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         positions = m->divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
@@ -450,6 +456,9 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                 for (map<int,  long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
                 out << longHomoPolymer.size() << endl;
                 for (map<int,  long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                out.close();
+                out << numNs.size() << endl;
+                for (map<int,  long long>::iterator it = numNs.begin(); it != numNs.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
                 out.close();
                 
                 exit(0);
@@ -518,6 +527,8 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                     for (map<int,  long long>::iterator it = ambigBases.begin(); it != ambigBases.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
                     out << longHomoPolymer.size() << endl;
                     for (map<int,  long long>::iterator it = longHomoPolymer.begin(); it != longHomoPolymer.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
+                    out << numNs.size() << endl;
+                    for (map<int,  long long>::iterator it = numNs.begin(); it != numNs.end(); it++)		{		out << it->first << '\t' << it->second << endl; }
                     out.close();
                     
                     exit(0);
@@ -589,6 +600,15 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                 in >> first; m->gobble(in); in >> second; m->gobble(in);
                 map<int,  long long>::iterator it = longHomoPolymer.find(first);
                 if (it == longHomoPolymer.end()) { longHomoPolymer[first] = second; } //first finding of this end position, set count.
+                else { it->second += second; } //add counts
+            }
+            m->gobble(in);
+            in >> tempNum; m->gobble(in);
+            for (int k = 0; k < tempNum; k++)			{
+                long long first, second;
+                in >> first; m->gobble(in); in >> second; m->gobble(in);
+                map<int,  long long>::iterator it = numNs.find(first);
+                if (it == numNs.end()) { numNs[first] = second; } //first finding of this end position, set count.
                 else { it->second += second; } //add counts
             }
             m->gobble(in);
@@ -671,6 +691,12 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                     longHomoPolymer[it->first] = it->second;
                 }else { itMain->second += it->second; } //merge counts
             }
+            for (map<int, long long>::iterator it = pDataArray[i]->numNs.begin(); it != pDataArray[i]->numNs.end(); it++)		{
+                map<int, long long>::iterator itMain = numNs.find(it->first);
+                if (itMain == numNs.end()) { //newValue
+                    numNs[it->first] = it->second;
+                }else { itMain->second += it->second; } //merge counts
+            }
             CloseHandle(hThreadArray[i]);
             delete pDataArray[i];
         }
@@ -713,7 +739,7 @@ int Summary::driverSummarize(string fastafile, string output, linePair lines) {
         if (lines.start == 0) {
             m->zapGremlins(in); m->gobble(in);
             //print header if you are process 0
-            out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;
+            if (output != "") { out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl; }
         }
         
         bool done = false;
@@ -1080,9 +1106,7 @@ int Summary::driverFastaSummarySummarize(string fastafile, linePair lines) {
             
             if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
             
-            if (name != "") {
-                string seqInfo = addSeq(name, start, end, length, ambigs, polymer, numReps); count++;
-            }
+            if (name != "") {  addSeq(name, start, end, length, ambigs, polymer, numReps); count++; }
             
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             unsigned long long pos = in.tellg();
@@ -1351,7 +1375,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
             //default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-            hThreadArray[i] = CreateThread(NULL, 0, MySeqFastaSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
+            hThreadArray[i] = CreateThread(NULL, 0, MySeqContigsSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
         }
         
         //do your part
@@ -1690,7 +1714,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
             //default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-            hThreadArray[i] = CreateThread(NULL, 0, MySeqFastaSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
+            hThreadArray[i] = CreateThread(NULL, 0, MySeqAlignThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
         }
         
         //do your part
@@ -1752,10 +1776,10 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
     }
 }
 //**********************************************************************************************************************
-int Summary::driverAlignSummarySummarize(string fastafile, linePair lines) {
+int Summary::driverAlignSummarySummarize(string alignfile, linePair lines) {
     try {
         ifstream in;
-        m->openInputFile(fastafile, in);
+        m->openInputFile(alignfile, in);
         
         in.seekg(lines.start);
         

@@ -406,6 +406,9 @@
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48E418561D08893A004C36AB /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
+		48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
+		48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
@@ -834,8 +837,8 @@
 		48844B261AA74AF9006EF2B8 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
-		4889EA201E8962D50054E0BB /* summary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summary.cpp; path = source/summary.cpp; sourceTree = "<group>"; };
-		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = "<group>"; };
+		4889EA201E8962D50054E0BB /* summary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summary.cpp; path = source/summary.cpp; sourceTree = SOURCE_ROOT; };
+		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = SOURCE_ROOT; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = "<group>"; };
@@ -2690,6 +2693,7 @@
 				481FB5B81AC1B74F0076CFF3 /* getcoremicrobiomecommand.cpp in Sources */,
 				481FB54E1AC1B6340076CFF3 /* memchord.cpp in Sources */,
 				481FB6021AC1B7970076CFF3 /* screenseqscommand.cpp in Sources */,
+				48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */,
 				481FB52E1AC1B0CB0076CFF3 /* testsetseedcommand.cpp in Sources */,
 				481FB65A1AC1B8100076CFF3 /* wilcox.cpp in Sources */,
 				481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */,
@@ -2726,6 +2730,7 @@
 				48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */,
 				481FB6391AC1B7EA0076CFF3 /* ordervector.cpp in Sources */,
 				481FB59A1AC1B71B0076CFF3 /* chimeraslayercommand.cpp in Sources */,
+				48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */,
 				481FB5901AC1B71B0076CFF3 /* aligncommand.cpp in Sources */,
 				481FB6081AC1B7970076CFF3 /* setdircommand.cpp in Sources */,
 				481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */,
@@ -2768,6 +2773,7 @@
 				481FB6171AC1B7AC0076CFF3 /* summarysharedcommand.cpp in Sources */,
 				481FB68C1AC1BA9E0076CFF3 /* bayesian.cpp in Sources */,
 				481FB5F41AC1B77E0076CFF3 /* preclustercommand.cpp in Sources */,
+				48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,

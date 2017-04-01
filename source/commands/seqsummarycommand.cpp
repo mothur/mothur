@@ -286,8 +286,6 @@ int SeqSummaryCommand::execute(){
             m->mothurOut("97.5%-tile:\t" + toString(starts[5]) + "\t" + toString(ends[5]) + "\t" + toString(lengths[5]) + "\t" + toString(ambigs[5]) + "\t" + toString(homops[5]) + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
             m->mothurOut("Maximum:\t" + toString(starts[6]) + "\t" + toString(ends[6]) + "\t" + toString(lengths[6]) + "\t" + toString(ambigs[6]) + "\t" + toString(homops[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
             m->mothurOut("Mean:\t" + toString(starts[7]) + "\t" + toString(ends[7]) + "\t" + toString(lengths[7]) + "\t" + toString(ambigs[7]) + "\t" + toString(homops[7])); m->mothurOutEndLine();
-            if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
-            else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
         }else if (contigsfile != "") {
             vector<long long> ostarts = sum.getOStart();
             vector<long long> oends = sum.getOEnd();
@@ -306,7 +304,6 @@ int SeqSummaryCommand::execute(){
             m->mothurOut("97.5%-tile:\t" + toString(length[5]) + "\t" + toString(olengths[5]) + "\t" + toString(ostarts[5]) + "\t" + toString(oends[5]) + "\t" + toString(mismatches[5]) + "\t" + toString(numns[5])  + "\t" + toString(ptiles[5])); m->mothurOutEndLine();
             m->mothurOut("Maximum:\t" + toString(length[6]) + "\t" + toString(olengths[6]) + "\t" + toString(ostarts[6]) + "\t" + toString(oends[6]) + "\t" + toString(mismatches[6]) + "\t" + toString(numns[6]) + "\t" + toString(ptiles[6])); m->mothurOutEndLine();
             m->mothurOut("Mean:\t" + toString(length[7]) + "\t" + toString(olengths[7]) + "\t" + toString(ostarts[7]) + "\t" + toString(oends[7]) + "\t" + toString(mismatches[7]) + "\t" + toString(numns[7]) ); m->mothurOutEndLine();
-            m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine();
         }else if (alignfile != "") {
             vector<long long> sims = sum.getSims();
             vector<long long> scores = sum.getScores();
@@ -323,10 +320,15 @@ int SeqSummaryCommand::execute(){
             m->mothurOut("97.5%-tile:\t" + toString(length[5]) + "\t" + toString(sims[5]) + "\t" + toString(inserts[5]) + "\t" + toString(scores[5]) + "\t" +  toString(ptiles[5])); m->mothurOutEndLine();
             m->mothurOut("Maximum:\t" + toString(length[6]) + "\t" + toString(sims[6]) + "\t" + toString(inserts[6]) + "\t" + toString(scores[6]) + "\t" +  toString(ptiles[6])); m->mothurOutEndLine();
             m->mothurOut("Mean:\t" + toString(length[7]) + "\t" + toString(sims[7]) + "\t" + toString(inserts[7]) + "\t" + toString(scores[7])); m->mothurOutEndLine();
-            m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine();
         }
         
         if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
+        
+        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
+        else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
+        
+        if (((namefile == "") && (countfile == "")) && (summaryfile == "")) {  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
+        else{  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -339,11 +341,7 @@ int SeqSummaryCommand::execute(){
             }
         }
         m->mothurOutEndLine();
-        
-        if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
-        else{  m->mothurOut("It took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
-        
-        
+
 		return 0;
 	}
 	catch(exception& e) {
