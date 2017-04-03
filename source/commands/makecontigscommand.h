@@ -95,7 +95,7 @@ private:
     vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, bool, Alignment*& alignment, string& contig, string&, int&, int&, int&);
     
     //main processing functions
-    unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
+    unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, string);
     unsigned long long createProcessesGroups(vector< vector<string> >, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>&);
     unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&, map<string, string>&);
     unsigned long long driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);

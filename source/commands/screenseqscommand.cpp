@@ -9,6 +9,8 @@
 
 #include "screenseqscommand.h"
 #include "counttable.h"
+#include "summary.hpp"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ScreenSeqsCommand::setParameters(){	
@@ -444,27 +446,101 @@ int ScreenSeqsCommand::execute(){
 		
         map<string, string> badSeqNames;
         int start = time(NULL);
-        int numFastaSeqs = 0;
+        long long numFastaSeqs = 0;
         
+        //use the namefile to optimize correctly
+        if (namefile != "") { nameMap = m->readNames(namefile); }
+        else if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile, true, false);
+            nameMap = ct.getNameMap();
+        }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        badAccnosFile =  getOutputFileName("accnos",variables);
+        outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile);
+
         if ((contigsreport == "") && (summaryfile == "") && (alignreport == "")) {   numFastaSeqs = screenFasta(badSeqNames);  }
         else {   numFastaSeqs = screenReports(badSeqNames);   }
 		
         if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
-                
-		if(namefile != "" && groupfile != "")	{	
-			screenNameGroupFile(badSeqNames);	
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
-		}else if(namefile != "")	{	
-			screenNameGroupFile(badSeqNames);
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }	
-		}else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the group
-		else if (countfile != "") {     screenCountFile(badSeqNames);		}
+        
+        //use remove.seqs to create new name, group and count file
+        if ((countfile != "") || (namefile != "") || (groupfile != "") || (qualfile != "") || (taxonomy != "")) {
+            string inputString = "accnos=" + badAccnosFile;
             
-                
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
-
-		if(qualfile != "")						{	screenQual(badSeqNames);			}
-		if(taxonomy != "")						{	screenTaxonomy(badSeqNames);		}
+            if (countfile != "") {  inputString += ", count=" + countfile;  }
+            else{
+                if (namefile != "") {  inputString += ", name=" + namefile;  }
+                if (groupfile != "") {  inputString += ", group=" + groupfile;  }
+            }
+            if(qualfile != "")						{	inputString += ", qfile=" + qualfile;       }
+            if(taxonomy != "")						{	inputString += ", taxonomy=" + taxonomy;	}
+            
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurCalling = true;
+            
+            Command* removeCommand = new RemoveSeqsCommand(inputString);
+            removeCommand->execute();
+            
+            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+            
+            delete removeCommand;
+            m->mothurCalling = false;
+            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            
+            if (groupfile != "") {
+                string thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+                variables["[extension]"] = m->getExtension(groupfile);
+                string outGroup = getOutputFileName("group", variables);
+                m->renameFile(filenames["group"][0], outGroup);
+                outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
+            }
+            
+            if (namefile != "") {
+                string thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
+                variables["[extension]"] = m->getExtension(namefile);
+                string outName = getOutputFileName("name", variables);
+                m->renameFile(filenames["name"][0], outName);
+                outputNames.push_back(outName); outputTypes["name"].push_back(outName);
+            }
+            
+            if (countfile != "") {
+                string thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+                variables["[extension]"] = m->getExtension(countfile);
+                string outCount = getOutputFileName("count", variables);
+                m->renameFile(filenames["count"][0], outCount);
+                outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);
+            }
+            
+            if (qualfile != "") {
+                string thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
+                variables["[extension]"] = m->getExtension(qualfile);
+                string outQual = getOutputFileName("qfile", variables);
+                m->renameFile(filenames["qfile"][0], outQual);
+                outputNames.push_back(outQual); outputTypes["name"].push_back(outQual);
+            }
+            
+            if (taxonomy != "") {
+                string thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += m->hasPath(taxonomy);  }
+                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxonomy));
+                variables["[extension]"] = m->getExtension(taxonomy);
+                string outTax = getOutputFileName("taxonomy", variables);
+                m->renameFile(filenames["taxonomy"][0], outTax);
+                outputNames.push_back(outTax); outputTypes["count"].push_back(outTax);
+            }
+        }
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
 
@@ -505,6 +581,11 @@ int ScreenSeqsCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
+        
+        itTypes = outputTypes.find("accnos");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+        }
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
 		m->mothurOutEndLine();
@@ -522,11 +603,30 @@ int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
         int numFastaSeqs = 0;
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
-        string badAccnosFile =  getOutputFileName("accnos",variables);
         variables["[extension]"] = m->getExtension(fastafile);
 		string goodSeqFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(goodSeqFile); outputTypes["fasta"].push_back(goodSeqFile);
-		outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile);
+		
+        vector<unsigned long long> positions;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        positions = m->divideFile(fastafile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
+#else
+        if(processors == 1){ lines.push_back(linePair(0, 1000));  }
+        else {
+            int numFastaSeqs = 0;
+            positions = m->setFilePosFasta(fastafile, numFastaSeqs);
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFastaSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+            }
+        }
+#endif
         
         if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}
         else{ numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); }
@@ -545,22 +645,12 @@ int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
 	try{
         int numFastaSeqs = 0;
-        bool summarizedFasta = false;
-        //use the namefile to optimize correctly
-        if (namefile != "") { nameMap = m->readNames(namefile); }
-        else if (countfile != "") {
-            CountTable ct;
-            ct.readTable(countfile, true, false);
-            nameMap = ct.getNameMap();
-        }
-
         
         //did not provide a summary file, but set a parameter that requires summarizing the fasta file
         //or did provide a summary file, but set maxn parameter so we must summarize the fasta file 
         vector<unsigned long long> positions;
         if (((summaryfile == "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) || ((summaryfile != "") && m->inUsersGroups("maxn", optimize))) {  
-            getSummary(positions);
-            summarizedFasta = true;
+            getSummary();
         }else {
             #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 positions = m->divideFile(fastafile, processors);
@@ -583,14 +673,13 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             #endif
         }
         
-        if ((summaryfile != "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize))) && !summarizedFasta) { //summarize based on summaryfile
+        if ((summaryfile != "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) { //summarize based on summaryfile
             getSummaryReport();
         }else if ((contigsreport != "") && ((m->inUsersGroups("minoverlap", optimize)) || (m->inUsersGroups("ostart", optimize)) || (m->inUsersGroups("oend", optimize)) || (m->inUsersGroups("mismatches", optimize)))) { //optimize settings based on contigs file
             optimizeContigs();
         }else if ((alignreport != "") && ((m->inUsersGroups("minsim", optimize)) || (m->inUsersGroups("minscore", optimize)) || (m->inUsersGroups("maxinsert", optimize)))) { //optimize settings based on contigs file
             optimizeAlign();
         }
-        
         
         //provided summary file, and did not set maxn so no need to summarize fasta
         if (summaryfile != "")      {   numFastaSeqs = screenSummary(badSeqNames);  }
@@ -608,12 +697,12 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
 }
 //***************************************************************************************************************
 int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
-	try {
+    try {
         
-        map<string, string> variables; 
+        map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(alignreport));
         string outSummary =  getOutputFileName("alignreport",variables);
-		outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
+        outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
         
         string name, TemplateName, SearchMethod, AlignmentMethod;
         //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
@@ -629,15 +718,15 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         m->openInputFile(alignreport, in);
         out << (m->getline(in)) << endl;   //skip headers
         
-		int count = 0;
+        int count = 0;
         
-		while (!in.eof()) {
+        while (!in.eof()) {
             
             if (m->control_pressed) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in);
-
+            
             bool goodSeq = 1;		//	innocent until proven guilty
             string trashCode = "";
             if(maxInsert != -1 && maxInsert < LongestInsert)    {	goodSeq = 0; trashCode += "insert|";	}
@@ -676,7 +765,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
                 in2 >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
-                    out2 << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;		
+                    out2 << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;
                 }
             }
             in2.close();
@@ -689,22 +778,22 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         
         return count;
         
-		return 0;
+        return 0;
         
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenAlignReport");
-		exit(1);
-	}
-	
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ScreenSeqsCommand", "screenAlignReport");
+        exit(1);
+    }
+    
 }
 //***************************************************************************************************************/
 int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
-	try{
-        map<string, string> variables; 
+    try{
+        map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(contigsreport));
         string outSummary =  getOutputFileName("contigsreport",variables);
-		outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
+        outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
         
         string name;
         //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
@@ -718,9 +807,9 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         m->openInputFile(contigsreport, in);
         out << (m->getline(in)) << endl;   //skip headers
         
-		int count = 0;
+        int count = 0;
         
-		while (!in.eof()) {
+        while (!in.eof()) {
             
             if (m->control_pressed) { in.close(); out.close(); return 0; }
             
@@ -736,7 +825,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             if(mismatches != -1 && mismatches < numMisMatches)	{	goodSeq = 0;	trashCode += "mismatches|"; }
             
             if(goodSeq == 1){
-                out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;	
+                out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
             }
             else{ badSeqNames[name] = trashCode; }
             count++;
@@ -767,7 +856,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
                 in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
-                    out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;		
+                    out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
                 }
             }
             in2.close();
@@ -781,10 +870,10 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         return count;
         
     }
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenContigs");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "ScreenSeqsCommand", "screenContigs");
+        exit(1);
+    }
 }
 //***************************************************************************************************************/
 int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
@@ -877,47 +966,13 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
 //***************************************************************************************************************/
 int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 	try{
-        
-        
-        //if the user want to optimize we need to know the 90% mark
-		vector<unsigned long long> positions;
-		if (optimize.size() != 0) {  //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
-			//use the namefile to optimize correctly
-			if (namefile != "") { nameMap = m->readNames(namefile); }
-            else if (countfile != "") {
-                CountTable ct;
-                ct.readTable(countfile, true, false);
-                nameMap = ct.getNameMap();
-            }
-			getSummary(positions); 
-		}else { 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            positions = m->divideFile(fastafile, processors);
-            for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
-#else 
-            if(processors == 1){ lines.push_back(linePair(0, 1000));  }
-            else {
-                int numFastaSeqs = 0;
-                positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                
-                //figure out how many sequences you have to process
-                int numSeqsPerProcessor = numFastaSeqs / processors;
-                for (int i = 0; i < processors; i++) {
-                    int startIndex =  i * numSeqsPerProcessor;
-                    if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                    lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-                }
-            }
-#endif
-		}
-        
+        if (optimize.size() != 0) {   getSummary();  }
+    
         if (m->control_pressed) { return 0; }
         
         int numFastaSeqs = runFastaScreening(badSeqNames);
         
         return numFastaSeqs;
-        
     }
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "screenFasta");
@@ -925,170 +980,22 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 	}
 }	
 //***************************************************************************************************************
-
-int ScreenSeqsCommand::screenNameGroupFile(map<string, string> badSeqNames){
-	try {
-		ifstream inputNames;
-		m->openInputFile(namefile, inputNames);
-		map<string, string> badSeqGroups;
-		string seqName, seqList, group;
-		map<string, string>::iterator it;
-        map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
-		string goodNameFile = getOutputFileName("name", variables);
-		outputNames.push_back(goodNameFile);  outputTypes["name"].push_back(goodNameFile);
-		
-		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
-		
-		while(!inputNames.eof()){
-			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); m->mothurRemove(goodNameFile);  return 0; }
-
-			inputNames >> seqName; m->gobble(inputNames); inputNames >> seqList;
-			it = badSeqNames.find(seqName);
-				
-			if(it != badSeqNames.end()){
-				if(namefile != ""){
-					int start = 0;
-					for(int i=0;i<seqList.length();i++){
-						if(seqList[i] == ','){
-							badSeqGroups[seqList.substr(start,i-start)] = it->second;
-							start = i+1;
-						}					
-					}
-					badSeqGroups[seqList.substr(start,seqList.length()-start)] = it->second;
-				}
-                badSeqNames.erase(it);
-			}
-			else{
-				goodNameOut << seqName << '\t' << seqList << endl;
-			}
-			m->gobble(inputNames);
-		}
-		inputNames.close();
-		goodNameOut.close();
-	
-		//we were unable to remove some of the bad sequences
-		if (badSeqNames.size() != 0) {
-			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your namefile does not include the sequence " + it->first + " please correct."); 
-				m->mothurOutEndLine();
-			}
-		}
-
-		if(groupfile != ""){
-			
-			ifstream inputGroups;
-			m->openInputFile(groupfile, inputGroups);
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(groupfile));
-            variables["[extension]"] = m->getExtension(groupfile);
-            string goodGroupFile = getOutputFileName("group", variables);
-			
-			outputNames.push_back(goodGroupFile);   outputTypes["group"].push_back(goodGroupFile);
-			
-			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
-			
-			while(!inputGroups.eof()){
-				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodNameFile);  m->mothurRemove(goodGroupFile); return 0; }
-
-				inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group;
-				
-				it = badSeqGroups.find(seqName);
-				
-				if(it != badSeqGroups.end()){
-					badSeqGroups.erase(it);
-				}
-				else{
-					goodGroupOut << seqName << '\t' << group << endl;
-				}
-				m->gobble(inputGroups);
-			}
-			inputGroups.close();
-			goodGroupOut.close();
-			
-			//we were unable to remove some of the bad sequences
-			if (badSeqGroups.size() != 0) {
-				for (it = badSeqGroups.begin(); it != badSeqGroups.end(); it++) {  
-					m->mothurOut("Your groupfile does not include the sequence " + it->first + " please correct."); 
-					m->mothurOutEndLine();
-				}
-			}
-		}
-		
-		
-		return 0;
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenNameGroupFile");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
 int ScreenSeqsCommand::getSummaryReport(){
 	try {
-		
-		vector<int> startPosition;
-		vector<int> endPosition;
-		vector<int> seqLength;
-		vector<int> ambigBases;
-		vector<int> longHomoPolymer;
+        Summary sum;
+        sum.summarizeFastaSummary(summaryfile);
         
-        //read summary file
-        ifstream in;
-        m->openInputFile(summaryfile, in);
-        m->getline(in);
+        double criteriaPercentile = criteria;
+        double mincriteriaPercentile = (100 - criteria);
         
-        string name;
-        int start, end, length, ambigs, polymer, numReps;
-        
-        while (!in.eof()) {
-            
-            if (m->control_pressed) { in.close(); return 0; }
-            
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
-            
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
-            
-            int num = 1;
-            if ((namefile != "") || (countfile !="")) {
-                //make sure this sequence is in the namefile, else error
-                map<string, int>::iterator it = nameMap.find(name);
-                
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-                else { num = it->second; }
-            }
-            
-            //for each sequence this sequence represents
-            for (int i = 0; i < num; i++) {
-                startPosition.push_back(start);
-                endPosition.push_back(end);
-                seqLength.push_back(length);
-                ambigBases.push_back(ambigs);
-                longHomoPolymer.push_back(polymer);
-            }
-            
+        for (int i = 0; i < optimize.size(); i++) {
+            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
+            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
+            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
         }
-        in.close();
-
-        sort(startPosition.begin(), startPosition.end());
-		sort(endPosition.begin(), endPosition.end());
-		sort(seqLength.begin(), seqLength.end());
-		sort(ambigBases.begin(), ambigBases.end());
-		sort(longHomoPolymer.begin(), longHomoPolymer.end());
-		
-		//numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-		int criteriaPercentile	= int(startPosition.size() * (criteria / (float) 100));
-		
-		for (int i = 0; i < optimize.size(); i++) {
-			if (optimize[i] == "start") { startPos = startPosition[criteriaPercentile]; m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
-			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
-			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
-		}
         
         return 0;
         
@@ -1100,321 +1007,25 @@ int ScreenSeqsCommand::getSummaryReport(){
 }
 //***************************************************************************************************************
 int ScreenSeqsCommand::optimizeContigs(){
-	try {
-		vector<int> olengths;
-		vector<int> oStarts;
-		vector<int> oEnds;
-		vector<int> numMismatches;
-        vector<int> numNs;
-		
-        vector<unsigned long long> positions;
-        vector<linePair> contigsLines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = m->divideFilePerLine(contigsreport, processors);
-		for (int i = 0; i < (positions.size()-1); i++) { contigsLines.push_back(linePair(positions[i], positions[(i+1)])); }	
-#else
-		if(processors == 1){ contigsLines.push_back(linePair(0, 1000));  }
-        else {
-            int numContigsSeqs = 0;
-            positions = m->setFilePosEachLine(contigsreport, numContigsSeqs); 
-            if (positions.size() < processors) { processors = positions.size(); }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numContigsSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numContigsSeqs - i * numSeqsPerProcessor; 	}
-                contigsLines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-            }
+	try{
+        Summary sum;
+        sum.summarizeContigsSummary(contigsreport);
+        
+        double criteriaPercentile = criteria;
+        double mincriteriaPercentile = (100 - criteria);
+
+        for (int i = 0; i < optimize.size(); i++) {
+            if (optimize[i] == "ostart") { oStart = sum.getOStart(criteriaPercentile); m->mothurOut("Optimizing ostart to " + toString(oStart) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "oend") {  endPos = sum.getOEnd(mincriteriaPercentile); m->mothurOut("Optimizing oend to " + toString(oEnd) + "."); m->mothurOutEndLine();}
+            else if (optimize[i] == "mismatches") { mismatches = sum.getMisMatches(criteriaPercentile); m->mothurOut("Optimizing mismatches to " + toString(mismatches) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minoverlap") {  minOverlap = sum.getOLength(mincriteriaPercentile); m->mothurOut("Optimizing minoverlap to " + toString(minOverlap) + "."); m->mothurOutEndLine(); }
         }
-#endif
-		
-
-            createProcessesContigsSummary(olengths, oStarts, oEnds, numMismatches, numNs, contigsLines); 
-            
-			if (m->control_pressed) {  return 0; }
-
-            sort(olengths.begin(), olengths.end());
-            sort(oStarts.begin(), oStarts.end());
-            sort(oEnds.begin(), oEnds.end());
-            sort(numMismatches.begin(), numMismatches.end());
-            sort(numNs.begin(), numNs.end());
-            
-            //numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-            int criteriaPercentile	= int(oStarts.size() * (criteria / (float) 100));
-            
-            for (int i = 0; i < optimize.size(); i++) {
-                if (optimize[i] == "ostart") { oStart = oStarts[criteriaPercentile]; m->mothurOut("Optimizing ostart to " + toString(oStart) + "."); m->mothurOutEndLine(); }
-                else if (optimize[i] == "oend") { int endcriteriaPercentile = int(oEnds.size() * ((100 - criteria) / (float) 100));  oEnd = oEnds[endcriteriaPercentile]; m->mothurOut("Optimizing oend to " + toString(oEnd) + "."); m->mothurOutEndLine();}
-                else if (optimize[i] == "mismatches") { mismatches = numMismatches[criteriaPercentile]; m->mothurOut("Optimizing mismatches to " + toString(mismatches) + "."); m->mothurOutEndLine(); }
-                else if (optimize[i] == "maxn") { maxN = numNs[criteriaPercentile]; m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
-                else if (optimize[i] == "minoverlap") { int mincriteriaPercentile = int(olengths.size() * ((100 - criteria) / (float) 100)); minOverlap = olengths[mincriteriaPercentile]; m->mothurOut("Optimizing minoverlap to " + toString(minOverlap) + "."); m->mothurOutEndLine(); }
-
-            }
-            
+        
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "optimizeContigs");
-		exit(1);
-	}
-}
-/**************************************************************************************/
-int ScreenSeqsCommand::driverContigsSummary(vector<int>& oLength, vector<int>& ostartPosition, vector<int>& oendPosition, vector<int>& omismatches, vector<int>& numNs, linePair filePos) {	
-	try {
-		
-        string name;
-        //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
-        int length, OLength, thisOStart, thisOEnd, numMisMatches, numns;
-        
-  		ifstream in;
-		m->openInputFile(contigsreport, in);
-        
-		in.seekg(filePos.start);
-        if (filePos.start == 0) { //read headers
-            m->zapGremlins(in); m->gobble(in); m->getline(in); m->gobble(in);
-        }
-        
-		bool done = false;
-		int count = 0;
-        
-		while (!done) {
-            
-			if (m->control_pressed) { in.close(); return 1; }
-            
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; m->gobble(in);
-            
-            int num = 1;
-            if ((namefile != "") || (countfile !="")){
-                //make sure this sequence is in the namefile, else error 
-                map<string, int>::iterator it = nameMap.find(name);
-                
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-                else { num = it->second; }
-            }
-            
-            //for each sequence this sequence represents
-            for (int i = 0; i < num; i++) {
-                ostartPosition.push_back(thisOStart);
-                oendPosition.push_back(thisOEnd);
-                oLength.push_back(OLength);
-                omismatches.push_back(numMisMatches);
-                numNs.push_back(numns);
-            }
-            
-            count++;
-			
-			//if((count) % 100 == 0){	m->mothurOut("Optimizing sequence: " + toString(count)); m->mothurOutEndLine();		}
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            unsigned long long pos = in.tellg();
-            if ((pos == -1) || (pos >= filePos.end)) { break; }
-#else
-            if (in.eof()) { break; }
-#endif
-		}
-		
-		in.close();
-		
-		return count;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "driverContigsSummary");
-		exit(1);
-	}
-}
-
-/**************************************************************************************************/
-int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vector<int>& ostartPosition, vector<int>& oendPosition, vector<int>& omismatches, vector<int>& numNs, vector<linePair> contigsLines) {
-	try {
-        
-        int process = 1;
-		int num = 0;
-		vector<int> processIDS;
-        bool recalc = false;
-        
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[process]);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = contigsreport + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				
-				out << num << endl;
-				out << ostartPosition.size() << endl;
-				for (int k = 0; k < ostartPosition.size(); k++)		{		out << ostartPosition[k] << '\t';   }  out << endl;
-				for (int k = 0; k < oendPosition.size(); k++)		{		out << oendPosition[k] << '\t';     }  out << endl;
-				for (int k = 0; k < oLength.size(); k++)			{		out << oLength[k] << '\t';          }  out << endl;
-				for (int k = 0; k < omismatches.size(); k++)        {		out << omismatches[k] << '\t';      }  out << endl;
-                for (int k = 0; k < numNs.size(); k++)              {		out << numNs[k] << '\t';            }  out << endl;
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->control_pressed = false;
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            vector<unsigned long long> positions;
-            contigsLines.clear();
-            positions = m->divideFilePerLine(contigsreport, processors);
-            for (int i = 0; i < (positions.size()-1); i++) { contigsLines.push_back(linePair(positions[i], positions[(i+1)])); }
-            
-            //redo file divide
-            lines.clear(); positions.clear();
-            positions = m->divideFile(fastafile, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
-            
-            ostartPosition.clear();
-            oendPosition.clear();
-            oLength.clear();
-            omismatches.clear();
-            numNs.clear();
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[process]);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = contigsreport + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    
-                    out << num << endl;
-                    out << ostartPosition.size() << endl;
-                    for (int k = 0; k < ostartPosition.size(); k++)		{		out << ostartPosition[k] << '\t';   }  out << endl;
-                    for (int k = 0; k < oendPosition.size(); k++)		{		out << oendPosition[k] << '\t';     }  out << endl;
-                    for (int k = 0; k < oLength.size(); k++)			{		out << oLength[k] << '\t';          }  out << endl;
-                    for (int k = 0; k < omismatches.size(); k++)        {		out << omismatches[k] << '\t';      }  out << endl;
-                    for (int k = 0; k < numNs.size(); k++)              {		out << numNs[k] << '\t';            }  out << endl;
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-		
-		num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[0]);
-        
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//parent reads in and combine Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = contigsreport + toString(processIDS[i]) + ".num.temp";
-			ifstream in;
-			m->openInputFile(tempFilename, in);
-			
-			int temp, tempNum;
-			in >> tempNum; m->gobble(in); num += tempNum;
-			in >> tempNum; m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; ostartPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; oendPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; oLength.push_back(temp);			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; omismatches.push_back(temp);        }		m->gobble(in);
-            for (int k = 0; k < tempNum; k++)			{		in >> temp; numNs.push_back(temp);              }		m->gobble(in);
-            
-			in.close();
-			m->mothurRemove(tempFilename);
-		}
-		
-		
-#else 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the seqSumData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to vectors.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<contigsSumData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-            
-			// Allocate memory for thread data.
-			contigsSumData* tempSum = new contigsSumData(contigsreport, m, contigsLines[i].start, contigsLines[i].end, namefile, countfile, nameMap);
-			pDataArray.push_back(tempSum);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyContigsSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		*/
-        contigsLines[processors-1].start = 0;
-        //do your part
-		num = driverContigsSummary(oLength, ostartPosition, oendPosition, omismatches, numNs, contigsLines[processors-1]);
-        /*
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
-            }
-            for (int k = 0; k < pDataArray[i]->ostartPosition.size(); k++)  {	ostartPosition.push_back(pDataArray[i]->ostartPosition[k]);     }
-			for (int k = 0; k < pDataArray[i]->oendPosition.size(); k++)    {	oendPosition.push_back(pDataArray[i]->oendPosition[k]);         }
-            for (int k = 0; k < pDataArray[i]->oLength.size(); k++)         {	oLength.push_back(pDataArray[i]->oLength[k]);                   }
-            for (int k = 0; k < pDataArray[i]->omismatches.size(); k++)     {	omismatches.push_back(pDataArray[i]->omismatches[k]);           }
-            for (int k = 0; k < pDataArray[i]->numNs.size(); k++)           {	numNs.push_back(pDataArray[i]->numNs[k]);                       }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-        */
-#endif		
-        return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "createProcessesContigsSummary");
 		exit(1);
 	}
 }
@@ -1422,882 +1033,50 @@ int ScreenSeqsCommand::createProcessesContigsSummary(vector<int>& oLength, vecto
 int ScreenSeqsCommand::optimizeAlign(){
 	try {
         
-		vector<float> sims;
-		vector<float> scores;
-		vector<int> inserts;
-		
-        vector<unsigned long long> positions;
-        vector<linePair> alignLines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = m->divideFilePerLine(alignreport, processors);
-		for (int i = 0; i < (positions.size()-1); i++) { alignLines.push_back(linePair(positions[i], positions[(i+1)])); }	
-#else
-		if(processors == 1){ alignLines.push_back(linePair(0, 1000));  }
-        else {
-            int numAlignSeqs = 0;
-            positions = m->setFilePosEachLine(alignreport, numAlignSeqs); 
-            if (positions.size() < processors) { processors = positions.size(); }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numAlignSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numAlignSeqs - i * numSeqsPerProcessor; 	}
-                alignLines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-        }
-#endif
-		
-        
-        createProcessesAlignSummary(sims, scores, inserts, alignLines);
-        
-        if (m->control_pressed) {  return 0; }
-        
-        sort(sims.begin(), sims.end());
-        sort(scores.begin(), scores.end());
-        sort(inserts.begin(), inserts.end());
-        
-        //numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-        //int criteriaPercentile	= int(sims.size() * (criteria / (float) 100));
+        Summary sum;
+        sum.summarizeAlignSummary(alignreport);
+       
+        double mincriteriaPercentile = (100 - criteria);
         
         for (int i = 0; i < optimize.size(); i++) {
-            if (optimize[i] == "minsim") { int mincriteriaPercentile = int(sims.size() * ((100 - criteria) / (float) 100)); minSim = sims[mincriteriaPercentile];  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
-            else if (optimize[i] == "minscore") { int mincriteriaPercentile = int(scores.size() * ((100 - criteria) / (float) 100)); minScore = scores[mincriteriaPercentile];  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxinsert") { int criteriaPercentile = int(inserts.size() * ((100 - criteria) / (float) 100)); maxInsert = inserts[criteriaPercentile]; m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
+            if (optimize[i] == "minsim") {  minSim = sum.getSims(mincriteriaPercentile);  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
+            else if (optimize[i] == "minscore") {  minScore = sum.getScores(mincriteriaPercentile);  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxinsert") { maxInsert = sum.getNumInserts(mincriteriaPercentile); m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
         }
         
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "optimizeContigs");
-		exit(1);
-	}
-}
-/**************************************************************************************/
-int ScreenSeqsCommand::driverAlignSummary(vector<float>& sims, vector<float>& scores, vector<int>& inserts, linePair filePos) {	
-	try {
-		
-        string name, TemplateName, SearchMethod, AlignmentMethod;
-        //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
-        //checking for minScore, maxInsert, minSim
-        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
-        float SearchScore, SimBtwnQueryTemplate;
-         
-  		ifstream in;
-		m->openInputFile(alignreport, in);
-        
-		in.seekg(filePos.start);
-        if (filePos.start == 0) { //read headers
-            m->zapGremlins(in); m->gobble(in); m->getline(in); m->gobble(in);
-        }
-        
-		bool done = false;
-		int count = 0;
-        
-		while (!done) {
-            
-			if (m->control_pressed) { in.close(); return 1; }
-            
-            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in);
-            
-            int num = 1;
-            if ((namefile != "") || (countfile !="")){
-                //make sure this sequence is in the namefile, else error 
-                map<string, int>::iterator it = nameMap.find(name);
-                
-                if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-                else { num = it->second; }
-            }
-            
-            //for each sequence this sequence represents
-            for (int i = 0; i < num; i++) {
-                sims.push_back(SimBtwnQueryTemplate);
-                scores.push_back(SearchScore);
-                inserts.push_back(LongestInsert);
-            }
-            
-            count++;
-			
-			//if((count) % 100 == 0){	m->mothurOut("Optimizing sequence: " + toString(count)); m->mothurOutEndLine();		}
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            unsigned long long pos = in.tellg();
-            if ((pos == -1) || (pos >= filePos.end)) { break; }
-#else
-            if (in.eof()) { break; }
-#endif
-		}
-		
-		in.close();
-		
-		return count;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "driverAlignSummary");
-		exit(1);
-	}
-}
-
-/**************************************************************************************************/
-int ScreenSeqsCommand::createProcessesAlignSummary(vector<float>& sims, vector<float>& scores, vector<int>& inserts, vector<linePair> alignLines) {
-	try {
-        
-        int process = 1;
-		int num = 0;
-		vector<int> processIDS;
-        bool recalc = false;
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driverAlignSummary(sims, scores, inserts, alignLines[process]);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = alignreport + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				
-				out << num << endl;
-				out << sims.size() << endl;
-				for (int k = 0; k < sims.size(); k++)		{		out << sims[k] << '\t';         }  out << endl;
-				for (int k = 0; k < scores.size(); k++)		{		out << scores[k] << '\t';       }  out << endl;
-				for (int k = 0; k < inserts.size(); k++)	{		out << inserts[k] << '\t';      }  out << endl;
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->control_pressed = false;
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            vector<unsigned long long> positions;
-            alignLines.clear();
-            positions = m->divideFilePerLine(contigsreport, processors);
-            for (int i = 0; i < (positions.size()-1); i++) { alignLines.push_back(linePair(positions[i], positions[(i+1)])); }
-            
-            //redo file divide
-            lines.clear(); positions.clear();
-            positions = m->divideFile(fastafile, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
-            
-            sims.clear();
-            scores.clear();
-            inserts.clear();
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driverAlignSummary(sims, scores, inserts, alignLines[process]);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = alignreport + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    
-                    out << num << endl;
-                    out << sims.size() << endl;
-                    for (int k = 0; k < sims.size(); k++)		{		out << sims[k] << '\t';         }  out << endl;
-                    for (int k = 0; k < scores.size(); k++)		{		out << scores[k] << '\t';       }  out << endl;
-                    for (int k = 0; k < inserts.size(); k++)	{		out << inserts[k] << '\t';      }  out << endl;
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-		
-		num = driverAlignSummary(sims, scores, inserts, alignLines[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//parent reads in and combine Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = alignreport + toString(processIDS[i]) + ".num.temp";
-			ifstream in;
-			m->openInputFile(tempFilename, in);
-			
-			int temp, tempNum;
-            float temp2;
-			in >> tempNum; m->gobble(in); num += tempNum;
-			in >> tempNum; m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp2; sims.push_back(temp2);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp2; scores.push_back(temp2);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; inserts.push_back(temp);	}		m->gobble(in);
-			  
-			in.close();
-			m->mothurRemove(tempFilename);
-		}
-		
-		
-#else 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the seqSumData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to vectors.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<alignsData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-            
-			// Allocate memory for thread data.
-			alignsData* tempSum = new alignsData(alignreport, m, alignLines[i].start, alignLines[i].end, namefile, countfile, nameMap);
-			pDataArray.push_back(tempSum);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyAlignsThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}*/
-		alignLines[processors-1].start = 0;
-        //do your part
-		num = driverAlignSummary(sims, scores, inserts, alignLines[processors-1]);
-       /*
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
-            }
-            for (int k = 0; k < pDataArray[i]->sims.size(); k++)        {	sims.push_back(pDataArray[i]->sims[k]);         }
-			for (int k = 0; k < pDataArray[i]->scores.size(); k++)      {	scores.push_back(pDataArray[i]->scores[k]);     }
-            for (int k = 0; k < pDataArray[i]->inserts.size(); k++)     {	inserts.push_back(pDataArray[i]->inserts[k]);   }
-           	CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-        */
-#endif		
-        return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "createProcessesAlignSummary");
+		m->errorOut(e, "ScreenSeqsCommand", "optimizeAlign");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
+int ScreenSeqsCommand::getSummary(){
 	try {
-		
-		vector<int> startPosition;
-		vector<int> endPosition;
-		vector<int> seqLength;
-		vector<int> ambigBases;
-		vector<int> longHomoPolymer;
-        vector<int> numNs;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = m->divideFile(fastafile, processors);
-		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }	
-#else
-		if(processors == 1){ lines.push_back(linePair(0, 1000));  }
-        else {
-            int numFastaSeqs = 0;
-            positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numFastaSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-        }
-#endif
-		
-
-		int numSeqs = 0;
-		
-        if(processors == 1){
-            numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
-        }else{
-            numSeqs = createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile);
-        }
+        Summary sum;
+        sum.summarizeFasta(fastafile, "");
         
-        if (m->control_pressed) {  return 0; }
-
-		sort(startPosition.begin(), startPosition.end());
-		sort(endPosition.begin(), endPosition.end());
-		sort(seqLength.begin(), seqLength.end());
-		sort(ambigBases.begin(), ambigBases.end());
-		sort(longHomoPolymer.begin(), longHomoPolymer.end());
-        sort(numNs.begin(), numNs.end());
-		
 		//numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
-		int criteriaPercentile	= int(startPosition.size() * (criteria / (float) 100));
-		
-		for (int i = 0; i < optimize.size(); i++) {
-			if (optimize[i] == "start") { startPos = startPosition[criteriaPercentile]; m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
-			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
-			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxn") { maxN = numNs[criteriaPercentile]; m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
-		}
+		double criteriaPercentile = criteria;
+        double mincriteriaPercentile = (100 - criteria);
         
-        
+        for (int i = 0; i < optimize.size(); i++) {
+            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
+            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
+            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
+            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
+        }
+
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "getSummary");
 		exit(1);
 	}
-}
-/**************************************************************************************/
-int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, vector<int>& numNs, string filename, linePair filePos) {	
-	try {
-		
-		ifstream in;
-		m->openInputFile(filename, in);
-				
-		in.seekg(filePos.start);
-        
-        //adjust start if null strings
-        if (filePos.start == 0) {  m->zapGremlins(in); m->gobble(in);  }
-        
-        m->gobble(in);
-
-		bool done = false;
-		int count = 0;
-	
-		while (!done) {
-				
-			if (m->control_pressed) { in.close(); return 1; }
-					
-			Sequence current(in); m->gobble(in);
-	
-			if (current.getName() != "") {
-				int num = 1;
-				if ((namefile != "") || (countfile !="")){
-					//make sure this sequence is in the namefile, else error 
-					map<string, int>::iterator it = nameMap.find(current.getName());
-					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your " + fileType + " please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-					else { num = it->second; }
-				}
-                
-                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t" + toString(current.getNumBases()) + "\n"); }
-				
-				//for each sequence this sequence represents
-                int numns = current.getNumNs();
-				for (int i = 0; i < num; i++) {
-					startPosition.push_back(current.getStartPos());
-					endPosition.push_back(current.getEndPos());
-					seqLength.push_back(current.getNumBases());
-					ambigBases.push_back(current.getAmbigBases());
-					longHomoPolymer.push_back(current.getLongHomoPolymer());
-                    numNs.push_back(numns);
-				}
-				
-				count++;
-			}
-			//if((count) % 100 == 0){	m->mothurOut("Optimizing sequence: " + toString(count)); m->mothurOutEndLine();		}
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				unsigned long long pos = in.tellg();
-				if ((pos == -1) || (pos >= filePos.end)) { break; }
-			#else
-				if (in.eof()) { break; }
-			#endif
-			
-		}
-		
-		in.close();
-		
-		return count;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "driverCreateSummary");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, vector<int>& numNs, string filename) {
-	try {
-        
-        int process = 1;
-		int num = 0;
-		vector<int> processIDS;
-        bool recalc = false;
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[process]);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = fastafile + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				
-				out << num << endl;
-				out << startPosition.size() << endl;
-				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
-				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
-				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
-				for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
-				for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
-                for (int k = 0; k < numNs.size(); k++)	{		out << numNs[k] << '\t'; }  out << endl;
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->control_pressed = false;
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(contigsreport + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            vector<unsigned long long> positions;
-            lines.clear();
-            positions = m->divideFile(fastafile, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
-            
-            startPosition.clear();
-            endPosition.clear();
-            seqLength.clear();
-            ambigBases.clear();
-            longHomoPolymer.clear();
-            numNs.clear();
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[process]);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = fastafile + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    
-                    out << num << endl;
-                    out << startPosition.size() << endl;
-                    for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < numNs.size(); k++)	{		out << numNs[k] << '\t'; }  out << endl;
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		
-		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//parent reads in and combine Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = fastafile + toString(processIDS[i]) + ".num.temp";
-			ifstream in;
-			m->openInputFile(tempFilename, in);
-			
-			int temp, tempNum;
-			in >> tempNum; m->gobble(in); num += tempNum;
-			in >> tempNum; m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
-            for (int k = 0; k < tempNum; k++)			{		in >> temp; numNs.push_back(temp);	}		m->gobble(in);
-				
-			in.close();
-			m->mothurRemove(tempFilename);
-		}
-		
-		
-#else 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the seqSumData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to vectors.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<sumData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-            
-			// Allocate memory for thread data.
-			sumData* tempSum = new sumData(filename, m, lines[i].start, lines[i].end, namefile, countfile, nameMap);
-			pDataArray.push_back(tempSum);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MySumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-        //do your part
-		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[processors-1]);
-         
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
-            }
-            for (int k = 0; k < pDataArray[i]->startPosition.size(); k++) {	startPosition.push_back(pDataArray[i]->startPosition[k]);       }
-			for (int k = 0; k < pDataArray[i]->endPosition.size(); k++) {	endPosition.push_back(pDataArray[i]->endPosition[k]);       }
-            for (int k = 0; k < pDataArray[i]->seqLength.size(); k++) {	seqLength.push_back(pDataArray[i]->seqLength[k]);       }
-            for (int k = 0; k < pDataArray[i]->ambigBases.size(); k++) {	ambigBases.push_back(pDataArray[i]->ambigBases[k]);       }
-            for (int k = 0; k < pDataArray[i]->longHomoPolymer.size(); k++) {	longHomoPolymer.push_back(pDataArray[i]->longHomoPolymer[k]);       }
-            for (int k = 0; k < pDataArray[i]->numNs.size(); k++) {	numNs.push_back(pDataArray[i]->numNs[k]);       }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-
-#endif		
-        return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "createProcessesCreateSummary");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-int ScreenSeqsCommand::screenGroupFile(map<string, string> badSeqNames){
-	try {
-		ifstream inputGroups;
-		m->openInputFile(groupfile, inputGroups);
-		string seqName, group;
-		map<string, string>::iterator it;
-		map<string, string> variables;
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
-        string goodGroupFile = getOutputFileName("group", variables);
-        outputNames.push_back(goodGroupFile);  outputTypes["group"].push_back(goodGroupFile);
-		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
-		
-		while(!inputGroups.eof()){
-			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodGroupFile); return 0; }
-
-			inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group; m->gobble(inputGroups);
-			it = badSeqNames.find(seqName);
-			
-			if(it != badSeqNames.end()){
-				badSeqNames.erase(it);
-			}
-			else{
-				goodGroupOut << seqName << '\t' << group << endl;
-			}
-		}
-		
-		if (m->control_pressed) { goodGroupOut.close();  inputGroups.close(); m->mothurRemove(goodGroupFile);  return 0; }
-
-		//we were unable to remove some of the bad sequences
-		if (badSeqNames.size() != 0) {
-			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your groupfile does not include the sequence " + it->first + " please correct."); 
-				m->mothurOutEndLine();
-			}
-		}
-		
-		inputGroups.close();
-		goodGroupOut.close();
-		
-		if (m->control_pressed) { m->mothurRemove(goodGroupFile);   }
-		
-		return 0;
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenGroupFile");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
-	try {
-		ifstream in;
-		m->openInputFile(countfile, in);
-		map<string, string>::iterator it;
-		map<string, string> variables;
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
-        string goodCountFile = getOutputFileName("count", variables);
-		
-        outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
-		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
-		
-        string headers = m->getline(in); m->gobble(in);
-        goodCountOut << headers << endl;
-        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
-        
-        string name, rest; int thisTotal; rest = "";
-        while (!in.eof()) {
-
-			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
-            
-			in >> name; m->gobble(in); 
-            in >> thisTotal; m->gobble(in); 
-            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
-            
-			it = badSeqNames.find(name);
-			
-			if(it != badSeqNames.end()){
-				badSeqNames.erase(it); 
-			}
-			else{
-				goodCountOut << name << '\t' << thisTotal << '\t' << rest << endl;
-			}
-		}
-		if (m->control_pressed) { goodCountOut.close();  in.close(); m->mothurRemove(goodCountFile);  return 0; }
-        
-		//we were unable to remove some of the bad sequences
-		if (badSeqNames.size() != 0) {
-			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your count file does not include the sequence " + it->first + " please correct."); 
-				m->mothurOutEndLine();
-			}
-		}
-		
-		in.close();
-		goodCountOut.close();
-        
-        //check for groups that have been eliminated
-        CountTable ct;
-        if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile, true, false);
-            ct.printTable(goodCountFile);
-        }
-		
-		if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
-		
-		return 0;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenCountFile");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-
-int ScreenSeqsCommand::screenTaxonomy(map<string, string> badSeqNames){
-	try {
-		ifstream input;
-		m->openInputFile(taxonomy, input);
-		string seqName, tax;
-		map<string, string>::iterator it;
-        map<string, string> variables;
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxonomy));
-        variables["[extension]"] = m->getExtension(taxonomy);
-        string goodTaxFile = getOutputFileName("taxonomy", variables);
-
-		outputNames.push_back(goodTaxFile);  outputTypes["taxonomy"].push_back(goodTaxFile);
-		ofstream goodTaxOut;	m->openOutputFile(goodTaxFile, goodTaxOut);
-				
-		while(!input.eof()){
-			if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
-			
-            input >> seqName; m->gobble(input);
-            tax = m->getline(input); m->gobble(input);
-            
-			it = badSeqNames.find(seqName);
-			
-			if(it != badSeqNames.end()){ badSeqNames.erase(it); }
-			else{
-				goodTaxOut << seqName << '\t' << tax << endl;
-			}
-		}
-		
-		if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
-		
-		//we were unable to remove some of the bad sequences
-		if (badSeqNames.size() != 0) {
-			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your taxonomy file does not include the sequence " + it->first + " please correct."); 
-				m->mothurOutEndLine();
-			}
-		}
-		
-		input.close();
-		goodTaxOut.close();
-		
-		if (m->control_pressed) {  m->mothurRemove(goodTaxFile);  return 0; }
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenTaxonomy");
-		exit(1);
-	}
-	
-}
-//***************************************************************************************************************
-
-int ScreenSeqsCommand::screenQual(map<string, string> badSeqNames){
-	try {
-		ifstream in;
-		m->openInputFile(qualfile, in);
-		map<string, string>::iterator it;
-		map<string, string> variables;
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qualfile));
-        variables["[extension]"] = m->getExtension(qualfile);
-        string goodQualFile = getOutputFileName("qfile", variables);
-		
-		outputNames.push_back(goodQualFile);  outputTypes["qfile"].push_back(goodQualFile);
-		ofstream goodQual;	m->openOutputFile(goodQualFile, goodQual);
-		
-		while(!in.eof()){	
-			
-			if (m->control_pressed) { goodQual.close(); in.close(); m->mothurRemove(goodQualFile); return 0; }
-
-			string saveName = "";
-			string name = "";
-			string scores = "";
-			
-			in >> name; 
-			
-			if (name.length() != 0) { 
-				saveName = name.substr(1);
-				while (!in.eof())	{	
-					char c = in.get(); 
-					if (c == 10 || c == 13 || c == -1){	break;	}
-					else { name += c; }	
-				} 
-				m->gobble(in);
-			}
-			
-			while(in){
-				char letter= in.get();
-				if(letter == '>'){	in.putback(letter);	break;	}
-				else{ scores += letter; }
-			}
-			
-			m->gobble(in);
-			
-			it = badSeqNames.find(saveName);
-			
-			if(it != badSeqNames.end()){
-				badSeqNames.erase(it);
-			}else{				
-				goodQual << name << endl << scores;
-			}
-			
-			m->gobble(in);
-		}
-		
-		in.close();
-		goodQual.close();
-		
-		//we were unable to remove some of the bad sequences
-		if (badSeqNames.size() != 0) {
-			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your qual file does not include the sequence " + it->first + " please correct."); 
-				m->mothurOutEndLine();
-			}
-		}
-		
-		if (m->control_pressed) {  m->mothurRemove(goodQualFile);  return 0; }
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "screenQual");
-		exit(1);
-	}
-	
 }
 //**********************************************************************************************************************
 
@@ -2312,7 +1091,10 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(filePos.start);
+        inFASTA.seekg(filePos.start);
+
+        //print header if you are process 0
+        if (filePos.start == 0) { m->zapGremlins(inFASTA); m->gobble(inFASTA); }
 
 		bool done = false;
 		int count = 0;

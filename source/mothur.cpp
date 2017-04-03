@@ -172,8 +172,8 @@ int main(int argc, char *argv[]){
 			m->mothurOutEndLine();
 		}
 		
-		//srand(54321);
-		srand( (unsigned)time( NULL ) );
+		//m->setRandomSeed(54321);
+		m->setRandomSeed( (unsigned)time( NULL ) );
 		
 		Engine* mothur = NULL;
 		bool bail = 0;

@@ -107,6 +107,7 @@ class MothurOut {
 		string getSimpleName(string);
 		string getRootName(string);
 		bool isBlank(string);
+        bool isCountFile(string);
 		int openOutputFile(string, ofstream&);
         int openOutputFileBinary(string, ofstream&);
 		int openOutputFileAppend(string, ofstream&);
@@ -216,7 +217,7 @@ class MothurOut {
         int mothurRandomShuffle(OrderVector&);
         int mothurRandomShuffle(SharedOrderVector&);
         int mothurRandomShuffle(vector<SharedRAbundVector*>&);
-        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); }
+        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); srand(s); }
     
 		
 		//math operation

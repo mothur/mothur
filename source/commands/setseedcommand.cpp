@@ -86,7 +86,7 @@ int SetSeedCommand::execute(){
         
         if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        srand(random);
+        m->setRandomSeed(random);
         m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
        
         return 0;

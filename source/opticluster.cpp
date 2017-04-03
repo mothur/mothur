@@ -260,36 +260,39 @@ double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin,  long long&
 /***********************************************************************/
 double OptiCluster::calcScoreCurrentBin( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
+        double result = 0.0;
         
         if (metric == "mcc") {
-            return calcMCC(tp, tn, fp, fn);
+            result = calcMCC(tp, tn, fp, fn);
         }else if (metric == "sens") {
-            return calcSens(tp, tn, fp, fn);
+            result = calcSens(tp, tn, fp, fn);
         }else if (metric == "spec") {
-            return calcSpec(tp, tn, fp, fn);
+            result = calcSpec(tp, tn, fp, fn);
         }else if (metric == "tptn") {
-            return calcTPTN(tp, tn, fp, fn);
+            result = calcTPTN(tp, tn, fp, fn);
         }else if (metric == "tp") {
-            return calcTP(tp, tn, fp, fn);
+            result = calcTP(tp, tn, fp, fn);
         }else if (metric == "tn") {
-            return calcTN(tp, tn, fp, fn);
+            result = calcTN(tp, tn, fp, fn);
         }else if (metric == "fp") {
-            return calcFP(tp, tn, fp, fn);
+            result = calcFP(tp, tn, fp, fn);
         }else if (metric == "fn") {
-            return calcFN(tp, tn, fp, fn);
+            result = calcFN(tp, tn, fp, fn);
         }else if (metric == "f1score") {
-            return calcF1Score(tp, tn, fp, fn);
+            result = calcF1Score(tp, tn, fp, fn);
         }else if (metric == "accuracy") {
-            return calcAccuracy(tp, tn, fp, fn);
+            result = calcAccuracy(tp, tn, fp, fn);
         }else if (metric == "ppv") {
-            return calcPPV(tp, tn, fp, fn);
+            result = calcPPV(tp, tn, fp, fn);
         }else if (metric == "npv") {
-            return calcNPV(tp, tn, fp, fn);
+            result = calcNPV(tp, tn, fp, fn);
         }else if (metric == "fdr") {
-            return calcFDR(tp, tn, fp, fn);
+            result = calcFDR(tp, tn, fp, fn);
         }else if (metric == "fpfn") {
-            return calcFPFN(tp, tn, fp, fn);
+            result = calcFPFN(tp, tn, fp, fn);
         }
+        
+        return result;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiCluster", "calcScoreCurrentBin");
