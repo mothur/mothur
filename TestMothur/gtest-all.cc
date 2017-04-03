@@ -36,6 +36,10 @@
 
 // This line ensures that gtest.h can be compiled on its own, even
 // when it's fused.
+
+#ifndef GTEST_ALL_H_
+#define GTEST_ALL_H_
+
 #include "gtest.h"
 
 // The following lines pull in the real gtest *.cc files.
@@ -46,3 +50,5 @@
 #include "gtest-printers.cc"
 #include "gtest-test-part.cc"
 #include "gtest-typed-test.cc"
+
+#endif

@@ -53,19 +53,19 @@ TEST(TestOptiCluster, calcs) {
     TestOptiCluster test; long long tp,tn,fp,fn;
     
     tp=5000; tn=10000; fp=10; fn=200;
-    ASSERT_DOUBLE_EQ(0.9694, test.calcMCC(tp,tn,fp,fn)); //metric value
+    ASSERT_NEAR(0.9694, test.calcMCC(tp,tn,fp,fn), 0.0001); //metric value
     
     tp=5000; tn=10000; fp=10; fn=200;
-    ASSERT_DOUBLE_EQ(0.9615, test.calcSens(tp,tn,fp,fn));
+    ASSERT_NEAR(0.9615, test.calcSens(tp,tn,fp,fn), 0.0001);
     
     tp=5000; tn=10000; fp=10; fn=200;
-    ASSERT_DOUBLE_EQ(0.9990, test.calcSpec(tp,tn,fp,fn));
+    ASSERT_NEAR(0.9990, test.calcSpec(tp,tn,fp,fn), 0.0001);
     
     tp=5000; tn=10000; fp=10; fn=200;
-    ASSERT_DOUBLE_EQ(0.9861, test.calcTPTN(tp,tn,fp,fn));
+    ASSERT_NEAR(0.9861, test.calcTPTN(tp,tn,fp,fn), 0.0001);
     
     tp=5000; tn=10000; fp=10; fn=200;
-    ASSERT_DOUBLE_EQ(0.9861, test.calcFPFN(tp,tn,fp,fn));
+    ASSERT_NEAR(0.9861, test.calcFPFN(tp,tn,fp,fn), 0.0001);
 }
 
 TEST(TestOptiCluster, myMoveAdjustTFValues) {
@@ -74,7 +74,7 @@ TEST(TestOptiCluster, myMoveAdjustTFValues) {
     double initialMetricValue;
     test.initialize(initialMetricValue, false, "singleton"); //no randomization
     
-    ASSERT_DOUBLE_EQ(0.9700, test.moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn)); //metric value
+    ASSERT_NEAR(0.9700, test.moveAdjustTFValues(0, 10, 1, tp,tn,fp,fn), 0.0001); //metric value
 }
 
 TEST(TestOptiCluster, myUpdate) {
@@ -83,6 +83,6 @@ TEST(TestOptiCluster, myUpdate) {
     test.initialize(initialMetricValue, false, "singleton"); //no randomization
     test.update(initialMetricValue);
     
-    ASSERT_DOUBLE_EQ(0.7853, initialMetricValue); //metric value
+    ASSERT_NEAR(0.7853, initialMetricValue, 0.0001); //metric value
 }
 /**************************************************************************************************/

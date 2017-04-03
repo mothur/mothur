@@ -6,8 +6,8 @@
 /***********************************************************************/
 DistCDataSet::DistCDataSet() {
     m = MothurOut::getInstance();
-    columnFile = m->getTestFilePath() + "stability.MISeq_SOP.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.dist";
-    countFile = m->getTestFilePath() + "stability.count_table";
+    columnFile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/stability.MISeq_SOP.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.dist";
+    countFile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/stability.count_table";
 }
 /***********************************************************************/
 vector<string> DistCDataSet::getFiles(int numSeqs) {

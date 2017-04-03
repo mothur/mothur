@@ -17,6 +17,7 @@
 
 int main(int argc, char **argv) {
     MothurOut* m; m = MothurOut::getInstance();
+    m->setTestFilePath("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/");
     string pathname = m->mothurProgramPath;
     if (pathname != "") {
         //add / to name if needed

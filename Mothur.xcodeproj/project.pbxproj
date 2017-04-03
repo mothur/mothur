@@ -411,11 +411,9 @@
 		48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
 		48E543EE1E92B91100FF6AB8 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544131E92C49700FF6AB8 /* gtest-port.cc */; };
-		48E544351E92C49700FF6AB8 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544141E92C49700FF6AB8 /* gtest-all.cc */; };
 		48E544361E92C49700FF6AB8 /* gtest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544151E92C49700FF6AB8 /* gtest.cc */; };
 		48E544371E92C49700FF6AB8 /* gtest-death-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544161E92C49700FF6AB8 /* gtest-death-test.cc */; };
 		48E544381E92C49700FF6AB8 /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544171E92C49700FF6AB8 /* gtest-test-part.cc */; };
-		48E544391E92C49700FF6AB8 /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544191E92C49700FF6AB8 /* gtest_main.cc */; };
 		48E5443A1E92C49700FF6AB8 /* gtest-filepath.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */; };
 		48E5443B1E92C49700FF6AB8 /* gtest-printers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544291E92C49700FF6AB8 /* gtest-printers.cc */; };
 		48E5443C1E92C49700FF6AB8 /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */; };
@@ -889,12 +887,10 @@
 		48E544111E92C49700FF6AB8 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-port.h"; path = "TestMothur/gtest-port.h"; sourceTree = SOURCE_ROOT; };
 		48E544121E92C49700FF6AB8 /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest.h; path = TestMothur/gtest.h; sourceTree = SOURCE_ROOT; };
 		48E544131E92C49700FF6AB8 /* gtest-port.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-port.cc"; path = "TestMothur/gtest-port.cc"; sourceTree = SOURCE_ROOT; };
-		48E544141E92C49700FF6AB8 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "TestMothur/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
 		48E544151E92C49700FF6AB8 /* gtest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest.cc; path = TestMothur/gtest.cc; sourceTree = SOURCE_ROOT; };
 		48E544161E92C49700FF6AB8 /* gtest-death-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-death-test.cc"; path = "TestMothur/gtest-death-test.cc"; sourceTree = SOURCE_ROOT; };
 		48E544171E92C49700FF6AB8 /* gtest-test-part.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-test-part.cc"; path = "TestMothur/gtest-test-part.cc"; sourceTree = SOURCE_ROOT; };
 		48E544181E92C49700FF6AB8 /* custom */ = {isa = PBXFileReference; lastKnownFileType = folder; path = custom; sourceTree = "<group>"; };
-		48E544191E92C49700FF6AB8 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = TestMothur/gtest_main.cc; sourceTree = SOURCE_ROOT; };
 		48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_pred_impl.h; path = TestMothur/gtest_pred_impl.h; sourceTree = SOURCE_ROOT; };
 		48E5441B1E92C49700FF6AB8 /* gtest_prod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_prod.h; path = TestMothur/gtest_prod.h; sourceTree = SOURCE_ROOT; };
 		48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-death-test-internal.h"; path = "TestMothur/gtest-death-test-internal.h"; sourceTree = SOURCE_ROOT; };
@@ -1796,12 +1792,10 @@
 				48E544111E92C49700FF6AB8 /* gtest-port.h */,
 				48E544121E92C49700FF6AB8 /* gtest.h */,
 				48E544131E92C49700FF6AB8 /* gtest-port.cc */,
-				48E544141E92C49700FF6AB8 /* gtest-all.cc */,
 				48E544151E92C49700FF6AB8 /* gtest.cc */,
 				48E544161E92C49700FF6AB8 /* gtest-death-test.cc */,
 				48E544171E92C49700FF6AB8 /* gtest-test-part.cc */,
 				48E544181E92C49700FF6AB8 /* custom */,
-				48E544191E92C49700FF6AB8 /* gtest_main.cc */,
 				48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */,
 				48E5441B1E92C49700FF6AB8 /* gtest_prod.h */,
 				48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */,
@@ -2942,7 +2936,6 @@
 				481FB5681AC1B6B20076CFF3 /* sharedochiai.cpp in Sources */,
 				481FB66E1AC1B8520076CFF3 /* forest.cpp in Sources */,
 				481FB56A1AC1B6B80076CFF3 /* sharedsobs.cpp in Sources */,
-				48E544351E92C49700FF6AB8 /* gtest-all.cc in Sources */,
 				481FB6671AC1B8450076CFF3 /* randomnumber.cpp in Sources */,
 				481FB5DB1AC1B75C0076CFF3 /* makelefsecommand.cpp in Sources */,
 				481FB6371AC1B7EA0076CFF3 /* nameassignment.cpp in Sources */,
@@ -2950,7 +2943,6 @@
 				481FB5561AC1B6520076CFF3 /* shannon.cpp in Sources */,
 				481FB6591AC1B8100076CFF3 /* linearalgebra.cpp in Sources */,
 				481FB5411AC1B6070076CFF3 /* coverage.cpp in Sources */,
-				48E544391E92C49700FF6AB8 /* gtest_main.cc in Sources */,
 				480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */,
 				481FB6231AC1B7BA0076CFF3 /* pam.cpp in Sources */,
 				481FB5BA1AC1B74F0076CFF3 /* getdistscommand.cpp in Sources */,

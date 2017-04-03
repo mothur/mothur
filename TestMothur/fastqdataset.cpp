@@ -31,7 +31,7 @@ void TestFastqDataSet::fillForwardFastq() {
     ffastqReads.clear();
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "F8D0_S345_L001_R1_001.fastq";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/F8D0_S345_L001_R1_001.fastq";
     
     ifstream in;
     m->openInputFile(testfile, in);
@@ -53,7 +53,7 @@ void TestFastqDataSet::fillReverseFastq() {
     rfastqReads.clear();
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "F8D0_S345_L001_R2_001.fastq";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/F8D0_S345_L001_R2_001.fastq";
     
     ifstream in;
     m->openInputFile(testfile, in);

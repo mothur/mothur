@@ -83,7 +83,8 @@ void TestDataSet::fillSeqs() {
     seqs.clear();
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "testFile.fasta";
+    //string testfile = m->getTestFilePath() + "testFile.fasta";
+     string testfile ="/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.fasta";
     
     ifstream in;
     m->openInputFile(testfile, in);
@@ -101,7 +102,7 @@ void TestDataSet::fillNames() {
     nameMap.clear();
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "testFile.names";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.names";
     m->readNames(testfile, nameMap);
 }
 /***********************************************************************/
@@ -109,7 +110,7 @@ void TestDataSet::fillGroup() {
     if (gMap != NULL) { delete gMap; gMap = NULL; }
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "testFile.groups";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.groups";
     
     gMap = new GroupMap();
     gMap->readMap(testfile);
@@ -120,7 +121,7 @@ void TestDataSet::fillLookup() {
     lookup.clear();
     
     //read info from stable file
-    string testfile = m->getTestFilePath() + "testFile.opti_mcc.shared";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.opti_mcc.shared";
 
     InputData input(testfile, "sharedfile");
     lookup = input.getSharedRAbundVectors();

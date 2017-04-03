@@ -11,6 +11,6 @@
 /***********************************************************************/
 DistPDataSet::DistPDataSet() {
     m = MothurOut::getInstance();
-    phylipFile = m->getTestFilePath() + "stability.MISeq_SOP.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.phylip.dist";
+    phylipFile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/stability.MISeq_SOP.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.phylip.dist";
 }
 /***********************************************************************/

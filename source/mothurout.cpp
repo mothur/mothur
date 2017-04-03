@@ -15,7 +15,7 @@
 
 
 //needed for testing project
-//MothurOut* MothurOut::_uniqueInstance;
+MothurOut* MothurOut::_uniqueInstance;
 
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
