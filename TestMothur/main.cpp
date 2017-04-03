@@ -1,3 +1,6 @@
+#ifndef MAIN_TEST
+#define MAIN_TEST
+
 //
 //  main.cpp
 //  TestMothur
@@ -8,7 +11,7 @@
 
 
 #include "mothurout.h"
-#include "gtest/gtest.h"
+#include "gtest.h"
 
 #define UNIT_TEST
 
@@ -30,3 +33,5 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+#endif

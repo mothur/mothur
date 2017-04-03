@@ -10,7 +10,7 @@
 #define __Mothur__testopticluster__
 
 
-#include "gtest/gtest.h"
+#include "gtest.h"
 #include "opticluster.h"
 
 
