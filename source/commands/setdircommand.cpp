@@ -120,7 +120,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
             if (seed)  {
-                srand(random);
+                m->setRandomSeed(random);
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
             

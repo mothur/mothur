@@ -29,7 +29,7 @@ vector<string> AlignCommand::setParameters(){
 		CommandParameter pgapopen("gapopen", "Number", "", "-5.0", "", "", "","",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapextend);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pflip);
+		CommandParameter pflip("flip", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pflip);
 		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -60,7 +60,7 @@ string AlignCommand::getHelpString(){
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.";
 		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.";
 		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.";
-		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.";
+		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported. Default=t";
 		helpString += "The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.";
 		helpString += "The align.seqs command should be in the following format:";
 		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty)";
@@ -256,7 +256,7 @@ AlignCommand::AlignCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
 			
-			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
+			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "t";				}
 			flip = m->isTrue(temp);
 			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
@@ -309,6 +309,9 @@ int AlignCommand::execute(){
 			string accnosFileName = getOutputFileName("accnos", variables);
             
 			bool hasAccnos = true;
+            vector<long long> numFlipped;
+            numFlipped.push_back(0); //numflipped because reverse was better
+            numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
 			
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
@@ -337,9 +340,9 @@ int AlignCommand::execute(){
 		#endif
 			
 			if(processors == 1){
-				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
 			}else{
-				numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
+				numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
 			}
 				
 			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(alignFileName); m->mothurRemove(reportFileName); outputTypes.clear();  return 0; }
@@ -347,10 +350,10 @@ int AlignCommand::execute(){
 			//delete accnos file if its blank else report to user
 			if (m->isBlank(accnosFileName)) {  m->mothurRemove(accnosFileName);  hasAccnos = false; }
 			else { 
-				m->mothurOut("[WARNING]: Some of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+				m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
-					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
-				}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
+				}else{  m->mothurOut("[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
 				m->mothurOutEndLine();
 			}
 
@@ -384,7 +387,7 @@ int AlignCommand::execute(){
 }
 
 //**********************************************************************************************************************
-int AlignCommand::driver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename){
+long long AlignCommand::driver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& numFlipped){
 	try {
 		ofstream alignmentFile;
 		m->openOutputFile(alignFName, alignmentFile);
@@ -400,7 +403,9 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 		inFASTA.seekg(filePos->start);
 
 		bool done = false;
-		int count = 0;
+		long long count = 0;
+        numFlipped[0] = 0;
+        numFlipped[1] = 0;
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
@@ -449,7 +454,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 												
 				//if there is a possibility that this sequence should be reversed
 				if (candidateSeq->getNumBases() < numBasesNeeded) {
-					
+					numFlipped[1]++;
 					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (flip) {
@@ -481,6 +486,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 							nast = nast2;
 							needToDeleteCopy = true;
 							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
+                            numFlipped[0]++;
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;
@@ -538,7 +544,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 }
 /**************************************************************************************************/
 
-int AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename) {
+long long AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename, vector<long long>& numFlipped) {
 	try {
 		int num = 0;
 		processIDS.resize(0);
@@ -555,13 +561,14 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename);
+				num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename, numFlipped);
 				
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = alignFileName + toString(m->mothurGetpid(process)) + ".num.temp";
 				m->openOutputFile(tempFile, out);
 				out << num << endl;
+                out << numFlipped[0] << endl << numFlipped[1] << endl;
 				out.close();
 				
 				exit(0);
@@ -598,13 +605,14 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename);
+                    num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename, numFlipped);
                     
                     //pass numSeqs to parent
                     ofstream out;
                     string tempFile = alignFileName + toString(m->mothurGetpid(process)) + ".num.temp";
                     m->openOutputFile(tempFile, out);
                     out << num << endl;
+                    out << numFlipped[0] << endl << numFlipped[1] << endl;
                     out.close();
                     
                     exit(0);
@@ -617,7 +625,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
         }
         
 		//do my part
-		num = driver(lines[0], alignFileName, reportFileName, accnosFName, filename);
+		num = driver(lines[0], alignFileName, reportFileName, accnosFName, filename, numFlipped);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -633,7 +641,12 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			ifstream in;
 			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			if (!in.eof()) {
+                int tempNum = 0;
+                in >> tempNum; num += tempNum; m->gobble(in);
+                in >> tempNum; numFlipped[0] += tempNum; m->gobble(in);
+                in >> tempNum; numFlipped[1] += tempNum; m->gobble(in);
+            }
 			in.close(); m->mothurRemove(tempFile);
 			
 			m->appendFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
@@ -701,7 +714,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		
 		//using the main process as a worker saves time and memory
 		//do my part - do last piece because windows is looking for eof
-		num = driver(lines[processors-1], (alignFileName + toString(processors-1) + ".temp"), (reportFileName + toString(processors-1) + ".temp"), (accnosFName + toString(processors-1) + ".temp"), filename);
+		num = driver(lines[processors-1], (alignFileName + toString(processors-1) + ".temp"), (reportFileName + toString(processors-1) + ".temp"), (accnosFName + toString(processors-1) + ".temp"), filename, numFlipped);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -712,6 +725,8 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
                 m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
             }
 			num += pDataArray[i]->count;
+            numFlipped[0] += pDataArray[i]->numFlipped[0];
+            numFlipped[1] += pDataArray[i]->numFlipped[1];
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}

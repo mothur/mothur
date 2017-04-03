@@ -409,6 +409,16 @@
 		48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
 		48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
 		48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
+		48E543EE1E92B91100FF6AB8 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
+		48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544131E92C49700FF6AB8 /* gtest-port.cc */; };
+		48E544351E92C49700FF6AB8 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544141E92C49700FF6AB8 /* gtest-all.cc */; };
+		48E544361E92C49700FF6AB8 /* gtest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544151E92C49700FF6AB8 /* gtest.cc */; };
+		48E544371E92C49700FF6AB8 /* gtest-death-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544161E92C49700FF6AB8 /* gtest-death-test.cc */; };
+		48E544381E92C49700FF6AB8 /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544171E92C49700FF6AB8 /* gtest-test-part.cc */; };
+		48E544391E92C49700FF6AB8 /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544191E92C49700FF6AB8 /* gtest_main.cc */; };
+		48E5443A1E92C49700FF6AB8 /* gtest-filepath.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */; };
+		48E5443B1E92C49700FF6AB8 /* gtest-printers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544291E92C49700FF6AB8 /* gtest-printers.cc */; };
+		48E5443C1E92C49700FF6AB8 /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
@@ -875,6 +885,41 @@
 		48D6E96A1CA4262A008DF76B /* dataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dataset.h; path = TestMothur/dataset.h; sourceTree = SOURCE_ROOT; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48E544101E92C49700FF6AB8 /* gtest-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-internal.h"; path = "TestMothur/gtest-internal.h"; sourceTree = SOURCE_ROOT; };
+		48E544111E92C49700FF6AB8 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-port.h"; path = "TestMothur/gtest-port.h"; sourceTree = SOURCE_ROOT; };
+		48E544121E92C49700FF6AB8 /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest.h; path = TestMothur/gtest.h; sourceTree = SOURCE_ROOT; };
+		48E544131E92C49700FF6AB8 /* gtest-port.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-port.cc"; path = "TestMothur/gtest-port.cc"; sourceTree = SOURCE_ROOT; };
+		48E544141E92C49700FF6AB8 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "TestMothur/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
+		48E544151E92C49700FF6AB8 /* gtest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest.cc; path = TestMothur/gtest.cc; sourceTree = SOURCE_ROOT; };
+		48E544161E92C49700FF6AB8 /* gtest-death-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-death-test.cc"; path = "TestMothur/gtest-death-test.cc"; sourceTree = SOURCE_ROOT; };
+		48E544171E92C49700FF6AB8 /* gtest-test-part.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-test-part.cc"; path = "TestMothur/gtest-test-part.cc"; sourceTree = SOURCE_ROOT; };
+		48E544181E92C49700FF6AB8 /* custom */ = {isa = PBXFileReference; lastKnownFileType = folder; path = custom; sourceTree = "<group>"; };
+		48E544191E92C49700FF6AB8 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = TestMothur/gtest_main.cc; sourceTree = SOURCE_ROOT; };
+		48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_pred_impl.h; path = TestMothur/gtest_pred_impl.h; sourceTree = SOURCE_ROOT; };
+		48E5441B1E92C49700FF6AB8 /* gtest_prod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_prod.h; path = TestMothur/gtest_prod.h; sourceTree = SOURCE_ROOT; };
+		48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-death-test-internal.h"; path = "TestMothur/gtest-death-test-internal.h"; sourceTree = SOURCE_ROOT; };
+		48E5441D1E92C49700FF6AB8 /* gtest-death-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-death-test.h"; path = "TestMothur/gtest-death-test.h"; sourceTree = SOURCE_ROOT; };
+		48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-filepath.cc"; path = "TestMothur/gtest-filepath.cc"; sourceTree = SOURCE_ROOT; };
+		48E5441F1E92C49700FF6AB8 /* gtest-filepath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-filepath.h"; path = "TestMothur/gtest-filepath.h"; sourceTree = SOURCE_ROOT; };
+		48E544211E92C49700FF6AB8 /* gtest-linked_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-linked_ptr.h"; path = "TestMothur/gtest-linked_ptr.h"; sourceTree = SOURCE_ROOT; };
+		48E544221E92C49700FF6AB8 /* gtest-message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-message.h"; path = "TestMothur/gtest-message.h"; sourceTree = SOURCE_ROOT; };
+		48E544231E92C49700FF6AB8 /* gtest-param-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-test.h"; path = "TestMothur/gtest-param-test.h"; sourceTree = SOURCE_ROOT; };
+		48E544241E92C49700FF6AB8 /* gtest-param-test.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-param-test.h.pump"; path = "TestMothur/gtest-param-test.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544251E92C49700FF6AB8 /* gtest-param-util-generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-util-generated.h"; path = "TestMothur/gtest-param-util-generated.h"; sourceTree = SOURCE_ROOT; };
+		48E544261E92C49700FF6AB8 /* gtest-param-util-generated.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-param-util-generated.h.pump"; path = "TestMothur/gtest-param-util-generated.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544271E92C49700FF6AB8 /* gtest-param-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-util.h"; path = "TestMothur/gtest-param-util.h"; sourceTree = SOURCE_ROOT; };
+		48E544281E92C49700FF6AB8 /* gtest-port-arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-port-arch.h"; path = "TestMothur/gtest-port-arch.h"; sourceTree = SOURCE_ROOT; };
+		48E544291E92C49700FF6AB8 /* gtest-printers.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-printers.cc"; path = "TestMothur/gtest-printers.cc"; sourceTree = SOURCE_ROOT; };
+		48E5442A1E92C49700FF6AB8 /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-printers.h"; path = "TestMothur/gtest-printers.h"; sourceTree = SOURCE_ROOT; };
+		48E5442B1E92C49700FF6AB8 /* gtest-spi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-spi.h"; path = "TestMothur/gtest-spi.h"; sourceTree = SOURCE_ROOT; };
+		48E5442C1E92C49700FF6AB8 /* gtest-string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-string.h"; path = "TestMothur/gtest-string.h"; sourceTree = SOURCE_ROOT; };
+		48E5442D1E92C49700FF6AB8 /* gtest-test-part.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-test-part.h"; path = "TestMothur/gtest-test-part.h"; sourceTree = SOURCE_ROOT; };
+		48E5442E1E92C49700FF6AB8 /* gtest-tuple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-tuple.h"; path = "TestMothur/gtest-tuple.h"; sourceTree = SOURCE_ROOT; };
+		48E5442F1E92C49700FF6AB8 /* gtest-tuple.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-tuple.h.pump"; path = "TestMothur/gtest-tuple.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544301E92C49700FF6AB8 /* gtest-type-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-type-util.h"; path = "TestMothur/gtest-type-util.h"; sourceTree = SOURCE_ROOT; };
+		48E544311E92C49700FF6AB8 /* gtest-type-util.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-type-util.h.pump"; path = "TestMothur/gtest-type-util.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-typed-test.cc"; path = "TestMothur/gtest-typed-test.cc"; sourceTree = SOURCE_ROOT; };
+		48E544331E92C49700FF6AB8 /* gtest-typed-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-typed-test.h"; path = "TestMothur/gtest-typed-test.h"; sourceTree = SOURCE_ROOT; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
@@ -1747,6 +1792,41 @@
 			isa = PBXGroup;
 			children = (
 				481FB51B1AC0A63E0076CFF3 /* main.cpp */,
+				48E544101E92C49700FF6AB8 /* gtest-internal.h */,
+				48E544111E92C49700FF6AB8 /* gtest-port.h */,
+				48E544121E92C49700FF6AB8 /* gtest.h */,
+				48E544131E92C49700FF6AB8 /* gtest-port.cc */,
+				48E544141E92C49700FF6AB8 /* gtest-all.cc */,
+				48E544151E92C49700FF6AB8 /* gtest.cc */,
+				48E544161E92C49700FF6AB8 /* gtest-death-test.cc */,
+				48E544171E92C49700FF6AB8 /* gtest-test-part.cc */,
+				48E544181E92C49700FF6AB8 /* custom */,
+				48E544191E92C49700FF6AB8 /* gtest_main.cc */,
+				48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */,
+				48E5441B1E92C49700FF6AB8 /* gtest_prod.h */,
+				48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */,
+				48E5441D1E92C49700FF6AB8 /* gtest-death-test.h */,
+				48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */,
+				48E5441F1E92C49700FF6AB8 /* gtest-filepath.h */,
+				48E544211E92C49700FF6AB8 /* gtest-linked_ptr.h */,
+				48E544221E92C49700FF6AB8 /* gtest-message.h */,
+				48E544231E92C49700FF6AB8 /* gtest-param-test.h */,
+				48E544241E92C49700FF6AB8 /* gtest-param-test.h.pump */,
+				48E544251E92C49700FF6AB8 /* gtest-param-util-generated.h */,
+				48E544261E92C49700FF6AB8 /* gtest-param-util-generated.h.pump */,
+				48E544271E92C49700FF6AB8 /* gtest-param-util.h */,
+				48E544281E92C49700FF6AB8 /* gtest-port-arch.h */,
+				48E544291E92C49700FF6AB8 /* gtest-printers.cc */,
+				48E5442A1E92C49700FF6AB8 /* gtest-printers.h */,
+				48E5442B1E92C49700FF6AB8 /* gtest-spi.h */,
+				48E5442C1E92C49700FF6AB8 /* gtest-string.h */,
+				48E5442D1E92C49700FF6AB8 /* gtest-test-part.h */,
+				48E5442E1E92C49700FF6AB8 /* gtest-tuple.h */,
+				48E5442F1E92C49700FF6AB8 /* gtest-tuple.h.pump */,
+				48E544301E92C49700FF6AB8 /* gtest-type-util.h */,
+				48E544311E92C49700FF6AB8 /* gtest-type-util.h.pump */,
+				48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */,
+				48E544331E92C49700FF6AB8 /* gtest-typed-test.h */,
 				48F06CCA1D74BC6F004A45DD /* testclassifier */,
 				48D6E9691CA4262A008DF76B /* dataset.cpp */,
 				48D6E96A1CA4262A008DF76B /* dataset.h */,
@@ -2696,6 +2776,7 @@
 				48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */,
 				481FB52E1AC1B0CB0076CFF3 /* testsetseedcommand.cpp in Sources */,
 				481FB65A1AC1B8100076CFF3 /* wilcox.cpp in Sources */,
+				48E5443C1E92C49700FF6AB8 /* gtest-typed-test.cc in Sources */,
 				481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */,
 				481FB5C51AC1B74F0076CFF3 /* getrabundcommand.cpp in Sources */,
 				481FB56E1AC1B6C30076CFF3 /* sharedsorest.cpp in Sources */,
@@ -2724,6 +2805,7 @@
 				480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */,
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
 				48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
+				48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
 				481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */,
@@ -2831,6 +2913,7 @@
 				481FB5AA1AC1B7300076CFF3 /* consensusseqscommand.cpp in Sources */,
 				481FB5AE1AC1B7300076CFF3 /* countseqscommand.cpp in Sources */,
 				48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */,
+				48E544361E92C49700FF6AB8 /* gtest.cc in Sources */,
 				481FB5811AC1B6EA0076CFF3 /* whittaker.cpp in Sources */,
 				481FB58E1AC1B7060076CFF3 /* completelinkage.cpp in Sources */,
 				481FB6301AC1B7EA0076CFF3 /* flowdata.cpp in Sources */,
@@ -2841,6 +2924,7 @@
 				481FB5E01AC1B77E0076CFF3 /* mergegroupscommand.cpp in Sources */,
 				481FB56B1AC1B6BB0076CFF3 /* sharedsobscollectsummary.cpp in Sources */,
 				481FB57F1AC1B6EA0076CFF3 /* uvest.cpp in Sources */,
+				48E543EE1E92B91100FF6AB8 /* chimeravsearchcommand.cpp in Sources */,
 				481FB5791AC1B6EA0076CFF3 /* structchi2.cpp in Sources */,
 				481FB63B1AC1B7EA0076CFF3 /* rabundvector.cpp in Sources */,
 				481FB5A91AC1B7300076CFF3 /* collectsharedcommand.cpp in Sources */,
@@ -2858,6 +2942,7 @@
 				481FB5681AC1B6B20076CFF3 /* sharedochiai.cpp in Sources */,
 				481FB66E1AC1B8520076CFF3 /* forest.cpp in Sources */,
 				481FB56A1AC1B6B80076CFF3 /* sharedsobs.cpp in Sources */,
+				48E544351E92C49700FF6AB8 /* gtest-all.cc in Sources */,
 				481FB6671AC1B8450076CFF3 /* randomnumber.cpp in Sources */,
 				481FB5DB1AC1B75C0076CFF3 /* makelefsecommand.cpp in Sources */,
 				481FB6371AC1B7EA0076CFF3 /* nameassignment.cpp in Sources */,
@@ -2865,11 +2950,13 @@
 				481FB5561AC1B6520076CFF3 /* shannon.cpp in Sources */,
 				481FB6591AC1B8100076CFF3 /* linearalgebra.cpp in Sources */,
 				481FB5411AC1B6070076CFF3 /* coverage.cpp in Sources */,
+				48E544391E92C49700FF6AB8 /* gtest_main.cc in Sources */,
 				480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */,
 				481FB6231AC1B7BA0076CFF3 /* pam.cpp in Sources */,
 				481FB5BA1AC1B74F0076CFF3 /* getdistscommand.cpp in Sources */,
 				481FB6191AC1B7AC0076CFF3 /* systemcommand.cpp in Sources */,
 				481FB6611AC1B8450076CFF3 /* nastreport.cpp in Sources */,
+				48E5443B1E92C49700FF6AB8 /* gtest-printers.cc in Sources */,
 				48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				481FB6181AC1B7AC0076CFF3 /* summarytaxcommand.cpp in Sources */,
 				481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */,
@@ -2923,6 +3010,7 @@
 				481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */,
 				481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */,
 				481FB64C1AC1B7F40076CFF3 /* tree.cpp in Sources */,
+				48E5443A1E92C49700FF6AB8 /* gtest-filepath.cc in Sources */,
 				481FB6631AC1B8450076CFF3 /* needlemanoverlap.cpp in Sources */,
 				481FB6931AC1BAA60076CFF3 /* taxonomynode.cpp in Sources */,
 				481FB60E1AC1B7AC0076CFF3 /* shhhseqscommand.cpp in Sources */,
@@ -2947,8 +3035,10 @@
 				481FB6101AC1B7AC0076CFF3 /* sparcccommand.cpp in Sources */,
 				481FB5E81AC1B77E0076CFF3 /* otuassociationcommand.cpp in Sources */,
 				481FB5B31AC1B7300076CFF3 /* deuniquetreecommand.cpp in Sources */,
+				48E544381E92C49700FF6AB8 /* gtest-test-part.cc in Sources */,
 				481FB5D91AC1B75C0076CFF3 /* makefastqcommand.cpp in Sources */,
 				481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */,
+				48E544371E92C49700FF6AB8 /* gtest-death-test.cc in Sources */,
 				48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */,
 				481FB5851AC1B6FF0076CFF3 /* chimeracheckrdp.cpp in Sources */,
 				481FB55C1AC1B6660076CFF3 /* sharedbraycurtis.cpp in Sources */,
@@ -3493,10 +3583,11 @@
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
+					"-pthreads",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
 			};
 			name = Debug;
 		};
@@ -3546,10 +3637,11 @@
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
+					"-pthreads",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
 			};
 			name = Release;
 		};
@@ -3588,7 +3680,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
 			};
 			name = Debug;
 		};
@@ -3627,7 +3719,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = /usr/local/include/;
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
 			};
 			name = Release;
 		};

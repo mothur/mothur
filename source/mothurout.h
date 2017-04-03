@@ -217,7 +217,7 @@ class MothurOut {
         int mothurRandomShuffle(OrderVector&);
         int mothurRandomShuffle(SharedOrderVector&);
         int mothurRandomShuffle(vector<SharedRAbundVector*>&);
-        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); }
+        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); srand(s); }
     
 		
 		//math operation
