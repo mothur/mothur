@@ -536,8 +536,8 @@ int MakeContigsCommand::execute(){
                     }
                 }
                 
-                vector<string> mapFiles = filenames["map"]; cout << mapFiles.size() << endl;
-                for (int i = 0; i < mapFiles.size(); i++) { outputNames.push_back(mapFiles[i]);  cout << mapFiles[i] << endl; }
+                vector<string> mapFiles = filenames["map"];
+                for (int i = 0; i < mapFiles.size(); i++) { outputNames.push_back(mapFiles[i]);   }
                 
                 //rename renamed allfiles to original filenames and add to outputNames and outputTypes
                 int countGroups = 0;
@@ -618,8 +618,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         string inputFile = "";
         vector<string> fileInputs;
         vector<string> qualOrIndexInputs;
-        vector<linePair> lines;
-        vector<linePair> qLines;
         delim = '>';
         map<string, string> variables;
         string thisOutputDir = outputDir;
@@ -703,9 +701,11 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         allGZ = false;
 #endif
         
-        if (allGZ) {
+        if (allGZ)  {
             gz = true;
-        }else { gz = false; }
+        }else        {
+            gz = false;
+        }
         
         variables["[tag]"] = "trim";
         outFastaFile = getOutputFileName("fasta",variables);
@@ -713,9 +713,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         outScrapFastaFile = getOutputFileName("fasta",variables);
         variables["[tag]"] = "";
         outMisMatchFile = getOutputFileName("report",variables);
-        
-        //divides the files so that the processors can share the workload.
-        setLines(fileInputs, qualOrIndexInputs, lines, qLines, delim);
         
         vector<vector<string> > fastaFileNames, qualFileNames;
         map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
@@ -730,7 +727,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         if (createFileGroup) {  createOligosGroup = false; }
         
         m->mothurOut("Making contigs...\n");
-        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, lines, qLines, group);
+        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group);
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
         
@@ -769,7 +766,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 
                 ofstream out;
                 variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
-                //cout << variables["[filename]"] << endl;
                 string thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
                 
                 m->openOutputFile(thisGroupName, out);
@@ -1442,11 +1438,27 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
 //...
 //if using index files and only have 1 then the file name = NONE, and entries are duds. Copies of other index file.
 //if no index files are given, then qualOrIndexFiles.size() == 0.
-unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<linePair> lines, vector<linePair> qLines, string group) {
+unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, string group) {
 	try {
 		int num = 0;
 		vector<int> processIDS;
         bool recalc = false;
+        vector<linePair> lines;
+        vector<linePair> qLines;
+        
+        if (gz)  {
+            nameType = setNameType(fileInputs[0], fileInputs[1], delim);
+            for (int i = 0; i < fileInputs.size(); i++) {
+                //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
+                lines.push_back(linePair(0, 1000));
+                qLines.push_back(linePair(0, 1000));
+            }
+            processors = fileInputs.size() / 2;
+        }else        {
+            //divides the files so that the processors can share the workload.
+            setLines(fileInputs, qualOrIndexFiles, lines, qLines, delim);
+        }
+        
        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -1532,7 +1544,18 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             
             //redo file divide
             lines.clear();
-            setLines(fileInputs, qualOrIndexFiles, lines, qLines, delim);
+            if (gz)  {
+                for (int i = 0; i < fileInputs.size(); i++) {
+                    //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
+                    lines.push_back(linePair(0, 1000));
+                    qLines.push_back(linePair(0, 1000));
+                }
+                processors = fileInputs.size() / 2;
+            }else        {
+                //divides the files so that the processors can share the workload.
+                setLines(fileInputs, qualOrIndexFiles, lines, qLines, delim);
+            }
+
             
             num = 0;
             processIDS.resize(0);
@@ -1806,7 +1829,6 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair linesInput, linePair linesInputReverse, linePair qlinesInput, linePair qlinesInputReverse, string group){
     try {
-        
         vector< vector<double> > qual_match_simple_bayesian;
         qual_match_simple_bayesian.resize(47);
         for (int i = 0; i < qual_match_simple_bayesian.size(); i++) { qual_match_simple_bayesian[i].resize(47);  }
@@ -2215,7 +2237,6 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
             delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
         }
         
-        //if (num == 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; exit(1); }
         int overlapStart = fSeq.getStartPos()-1;
         int seq2Start = rSeq.getStartPos()-1;
         
@@ -2233,7 +2254,6 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
         if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
         
         oStart = contig.length();
-        //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
         
         int firstForward = 0; int seq2FirstForward = 0; int lastReverse = seq1.length(); int seq2lastReverse = seq2.length(); bool firstChooseSeq1 = false; bool lastChooseSeq1 = false;
         if (hasQuality) {
@@ -2245,10 +2265,7 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
             if (lastReverse > seq2lastReverse) { lastReverse = seq2lastReverse; lastChooseSeq1 = true; }
         }
         
-        //cout << firstForward << '\t' << lastReverse << endl;
-        
         for (int i = overlapStart; i < overlapEnd; i++) {
-            //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
             if (seq1[i] == seq2[i]) {
                 contig += seq1[i];
                 if (hasQuality) {
@@ -2303,7 +2320,6 @@ vector<int> MakeContigsCommand::assembleFragments(vector< vector<double> >&qual_
             for (int i = overlapEnd; i < length; i++) {  contig += seq1[i];  if (hasQuality) { if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
             }
         }
-        //cout << "contig = " << contig << endl;
         
         if (trimOverlap) {
             contig = contig.substr(overlapStart, oend-oStart);
@@ -2332,8 +2348,8 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
         
         if (delim == '@') { //fastq files
             bool tignore;
-            FastqRead fread(inFF, tignore, format);
-            FastqRead rread(inRF, ignore, format);
+            FastqRead fread(inFF, tignore, format);  m->gobble(inFF);
+            FastqRead rread(inRF, ignore, format); m->gobble(inRF);
             if (!checkName(fread, rread)) {
                 FastqRead f2read(inFF, tignore, format);
                 if (!checkName(f2read, rread)) {
@@ -2401,7 +2417,6 @@ bool MakeContigsCommand::read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQ
             }
             if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
         }
-
         return ignore;
         
     }
@@ -2552,7 +2567,6 @@ int MakeContigsCommand::setNameType(string forward, string reverse) {
                                 if (numDiffs == 1) {
                                     if ((forwardDiff == '1') && (reverseDiff == '2')) { type = offByOne; offByOneTrimLength = tempForward.length()-spot+1; }
                                 }
-                                //cout << tempReverse.substr(0, (tempReverse.length()-offByOneTrimLength)) << endl;
                             }
                         }
                     }
@@ -2632,7 +2646,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         vector<unsigned long long> temp;
         
         nameType = setNameType(fasta[0], fasta[1], delim);
-        
+    
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         //set file positions for fasta file
         fastaFilePos = m->divideFile(fasta[0], processors, delim);
@@ -3370,7 +3384,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
                         
                         fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                         m->openOutputFile(fastaFileName, temp);		temp.close();
-                        //cout << fastaFileName << endl;
                         
                         qualFileNames[itBar->first][itPrimer->first] = qualFileName;
                         m->openOutputFile(qualFileName, temp2);		temp2.close();
@@ -3463,7 +3476,6 @@ bool MakeContigsCommand::checkName(FastqRead& forward, FastqRead& reverse){
                 match = false;
             }
         }
-        
         return match;
     }
     catch(exception& e) {

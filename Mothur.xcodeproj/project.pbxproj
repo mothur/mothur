@@ -3485,9 +3485,9 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DBIT_VERSION",
 					"-DUNIT_TEST",
+					"-DUSE_BOOST",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
-					"-DUSE_BOOST",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
@@ -3539,8 +3539,8 @@
 					"-DUSE_READLINE",
 					"-DUNIT_TEST",
 					"-DBIT_VERSION",
-					"$(OTHER_CFLAGS)",
 					"-DUSE_BOOST",
+					"$(OTHER_CFLAGS)",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
