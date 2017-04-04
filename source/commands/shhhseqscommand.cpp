@@ -581,41 +581,48 @@ vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newF
 			start = time(NULL);
 			
 			if (m->control_pressed) {  return mapFileNames; }
-			
-			m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[i] + ":"); m->mothurOutEndLine();
-			
-			map<string, string> thisNameMap;
-			thisNameMap = parser.getNameMap(groups[i]); 
-			vector<Sequence> thisSeqs = parser.getSeqs(groups[i]);
-			
-			vector<string> sequences;
-			vector<string> uniqueNames;
-			vector<string> redundantNames;
-			vector<int> seqFreq;
-			
-			seqNoise noise;
-			correctDist* correct = new correctDist(1); //we use one processor since we already split up the work load.
-			
-			//load this groups info in order
-			loadData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq, thisNameMap, thisSeqs);
-			if (m->control_pressed) { return mapFileNames; }
-			
-			//calc distances for cluster
-			string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
-			correct->execute(distFileName);
-			delete correct;
-			
-			if (m->control_pressed) { m->mothurRemove(distFileName); return mapFileNames; }
-			
-			driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map"); 
-			
-			if (m->control_pressed) { return mapFileNames; }
-			
-			m->appendFiles(newFFile+groups[i], newFFile); m->mothurRemove(newFFile+groups[i]);
-			m->appendFiles(newNFile+groups[i], newNFile); m->mothurRemove(newNFile+groups[i]);
-			mapFileNames.push_back(newMFile+groups[i]+".map");
-			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + groups[i] + "."); m->mothurOutEndLine(); 
+            
+            string lowerCaseName = groups[i];
+            for (int j = 0; j < lowerCaseName.length(); j++) { lowerCaseName[j] = tolower(lowerCaseName[j]);    }
+            
+            if (lowerCaseName == "ignore") {   }
+            else {
+                
+                m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[i] + ":"); m->mothurOutEndLine();
+                
+                map<string, string> thisNameMap;
+                thisNameMap = parser.getNameMap(groups[i]);
+                vector<Sequence> thisSeqs = parser.getSeqs(groups[i]);
+                
+                vector<string> sequences;
+                vector<string> uniqueNames;
+                vector<string> redundantNames;
+                vector<int> seqFreq;
+                
+                seqNoise noise;
+                correctDist* correct = new correctDist(1); //we use one processor since we already split up the work load.
+                
+                //load this groups info in order
+                loadData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq, thisNameMap, thisSeqs);
+                if (m->control_pressed) { return mapFileNames; }
+                
+                //calc distances for cluster
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
+                correct->execute(distFileName);
+                delete correct;
+                
+                if (m->control_pressed) { m->mothurRemove(distFileName); return mapFileNames; }
+                
+                driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
+                
+                if (m->control_pressed) { return mapFileNames; }
+                
+                m->appendFiles(newFFile+groups[i], newFFile); m->mothurRemove(newFFile+groups[i]);
+                m->appendFiles(newNFile+groups[i], newNFile); m->mothurRemove(newNFile+groups[i]);
+                mapFileNames.push_back(newMFile+groups[i]+".map");
+                
+                m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + groups[i] + "."); m->mothurOutEndLine();
+            }
 		}
 		
 		return mapFileNames;

@@ -86,7 +86,7 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The cluster.split command should be in the following format: \n";
 		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
-		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
+		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=opti, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
 		return helpString;
 	}
 	catch(exception& e) {
