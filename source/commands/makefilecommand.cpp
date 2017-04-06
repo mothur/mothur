@@ -133,7 +133,6 @@ MakeFileCommand::MakeFileCommand(string option)  {
             prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { prefix = "stability"; }
             
             delim = validParameter.validFile(parameters, "delim", false);			if (delim == "not found") { delim = "_"; }
-            cout << delim << endl;
             
         }
     }
@@ -336,13 +335,12 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             }
             
         }else { //separate by the user selected deliminator. default='_'
-            cout << "here" << endl;
             for (int i = 0; i < paired.size(); i++) {
                 
                 string groupName = "Group_" + toString(i);
                 string filename = m->getSimpleName(paired[i][0]);
                 int pos = filename.find(delim);
-                cout << pos << '\t' << filename << '\t' << delim << endl;
+                
                 if (pos != string::npos) { groupName = filename.substr(0, pos); }
                 
                 results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
