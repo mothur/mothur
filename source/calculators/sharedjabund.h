@@ -25,7 +25,7 @@ public:
 	EstOutput getValues(vector<SharedRAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Jabund"; }
 private:
-	UVEst* uv;
+	
 	
 };
 

@@ -33,7 +33,6 @@
 		481FB53B1AC1B5EF0076CFF3 /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66612D37EC400DA6239 /* boneh.cpp */; };
 		481FB53C1AC1B5F10076CFF3 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
 		481FB53D1AC1B5F80076CFF3 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
-		481FB53E1AC1B5FC0076CFF3 /* calculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66E12D37EC400DA6239 /* calculator.cpp */; };
 		481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67012D37EC400DA6239 /* canberra.cpp */; };
 		481FB5401AC1B6030076CFF3 /* chao1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67612D37EC400DA6239 /* chao1.cpp */; };
 		481FB5411AC1B6070076CFF3 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BB12D37EC400DA6239 /* coverage.cpp */; };
@@ -509,7 +508,6 @@
 		A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66612D37EC400DA6239 /* boneh.cpp */; };
 		A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
 		A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
-		A7E9B89112D37EC400DA6239 /* calculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66E12D37EC400DA6239 /* calculator.cpp */; };
 		A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67012D37EC400DA6239 /* canberra.cpp */; };
 		A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */; };
 		A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67412D37EC400DA6239 /* ccode.cpp */; };
@@ -1103,7 +1101,6 @@
 		A7E9B66912D37EC400DA6239 /* bootstrap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bootstrap.h; path = source/calculators/bootstrap.h; sourceTree = SOURCE_ROOT; };
 		A7E9B66C12D37EC400DA6239 /* bstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bstick.cpp; path = source/calculators/bstick.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66D12D37EC400DA6239 /* bstick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bstick.h; path = source/calculators/bstick.h; sourceTree = SOURCE_ROOT; };
-		A7E9B66E12D37EC400DA6239 /* calculator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = calculator.cpp; path = source/calculators/calculator.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66F12D37EC400DA6239 /* calculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = calculator.h; path = source/calculators/calculator.h; sourceTree = SOURCE_ROOT; };
 		A7E9B67012D37EC400DA6239 /* canberra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = canberra.cpp; path = source/calculators/canberra.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B67112D37EC400DA6239 /* canberra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = canberra.h; path = source/calculators/canberra.h; sourceTree = SOURCE_ROOT; };
@@ -2242,7 +2239,6 @@
 				A7E9B66912D37EC400DA6239 /* bootstrap.h */,
 				A7E9B66C12D37EC400DA6239 /* bstick.cpp */,
 				A7E9B66D12D37EC400DA6239 /* bstick.h */,
-				A7E9B66E12D37EC400DA6239 /* calculator.cpp */,
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
 				A7E9B67012D37EC400DA6239 /* canberra.cpp */,
 				A7E9B67112D37EC400DA6239 /* canberra.h */,
@@ -2967,7 +2963,6 @@
 				481FB61C1AC1B7AC0076CFF3 /* trimseqscommand.cpp in Sources */,
 				481FB5311AC1B5CD0076CFF3 /* clearcut.cpp in Sources */,
 				481FB5651AC1B6A70076CFF3 /* sharedlennon.cpp in Sources */,
-				481FB53E1AC1B5FC0076CFF3 /* calculator.cpp in Sources */,
 				481FB6241AC1B7BA0076CFF3 /* qFinderDMM.cpp in Sources */,
 				481FB6311AC1B7EA0076CFF3 /* fullmatrix.cpp in Sources */,
 				481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */,
@@ -3101,7 +3096,6 @@
 				A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */,
 				A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */,
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
-				A7E9B89112D37EC400DA6239 /* calculator.cpp in Sources */,
 				A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */,
 				A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */,
 				A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */,

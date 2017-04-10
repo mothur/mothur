@@ -8,6 +8,7 @@
  */
 
 #include "sharedjabund.h"
+#include "uvest.h"
 
 /***********************************************************************/
 
@@ -17,7 +18,8 @@ EstOutput JAbund::getValues(vector<SharedRAbundVector*> shared) {
 		UVest.resize(2,0);
 		data.resize(1,0);
 		
-		UVest = uv->getUVest(shared);
+        UVEst uv;
+        uv.getUVest(shared);
 		
 		//UVest[0] is Uest UVest[1] is Vest
 		data[0] = 1.0-(UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1] - (UVest[0] * UVest[1])));

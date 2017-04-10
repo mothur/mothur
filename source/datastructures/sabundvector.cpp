@@ -8,7 +8,6 @@
  */
 
 #include "sabundvector.hpp"
-#include "calculator.h"
 
 /***********************************************************************/
 
@@ -126,8 +125,7 @@ void SAbundVector::quicksort(){
 /***********************************************************************/
 
 int SAbundVector::sum(){
-	VecCalc vecCalc;
-	return vecCalc.sumElements(data);
+	return m->sum(data);
 }
 
 /***********************************************************************/

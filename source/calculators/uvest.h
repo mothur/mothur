@@ -13,7 +13,7 @@
 It is used by sharedJAbund and SharedSorensonAbund. */
  
 
-#include "mothur.h"
+#include "mothurout.h"
 #include "sharedrabundvector.h"
 
 typedef vector<double> EstOutput;
@@ -22,7 +22,10 @@ typedef vector<double> EstOutput;
 class UVEst {
 	public:
 		UVEst() { m = MothurOut::getInstance(); }
-		EstOutput getUVest(vector<SharedRAbundVector*>);	
+        ~UVEst() {}
+    
+		EstOutput getUVest(vector<SharedRAbundVector*>);
+    
 	private:
 		MothurOut* m;
 };
