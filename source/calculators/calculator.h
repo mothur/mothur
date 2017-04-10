@@ -50,5 +50,28 @@ protected:
 };
 
 /**************************************************************************************************/
+
+
+class ClusterMetric {
+    
+public:
+    ClusterMetric(){ m = MothurOut::getInstance();  }
+    ClusterMetric(string n){ m = MothurOut::getInstance();  name = n; }
+    virtual ~ClusterMetric(){};
+    
+    virtual double getValues(long long, long long, long long, long long) = 0; //tp, tn, fp, fn
+    
+    virtual string getName()		{	return name;        }
+    virtual string getCitation() = 0;
+    void citation() { m->mothurOut(getCitation()); m->mothurOutEndLine(); }
+    
+protected:
+    MothurOut* m;
+    string name;
+    
+    
+};
+/***********************************************************************/
+
 #endif
 
