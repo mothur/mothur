@@ -11,7 +11,7 @@
  */
 
 #include "mothurchimera.h"
-#include "dist.h"
+#include "calculator.h"
 #include "decalc.h"
 
 /***********************************************************/
@@ -35,7 +35,7 @@ class Pintail : public MothurChimera {
 
 	private:
 	
-		Dist* distcalculator;
+		DistCalc* distcalculator;
 		DeCalculator* decalc;
 		int iters, window, increment, processors;
 		string fastafile, quanfile, consfile;

@@ -537,7 +537,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 		}
         
         ValidCalculators validCalculator;
-        Dist* distCalculator;
+        DistCalc* distCalculator;
         if (countends) {
             if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
                 if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
@@ -637,7 +637,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 		}
 		
         ValidCalculators validCalculator;
-        Dist* distCalculator;
+        DistCalc* distCalculator;
         if (countends) {
             if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
                 if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}

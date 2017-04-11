@@ -522,7 +522,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
 int DistanceCommand::driver(int startLine, int endLine, string dFileName, float cutoff){
 	try {
 		ValidCalculators validCalculator;
-		Dist* distCalculator;
+		DistCalc* distCalculator;
 		if (m->isTrue(countends) == true) {
 			for (int i=0; i<Estimators.size(); i++) {
 				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
@@ -599,7 +599,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 int DistanceCommand::driver(int startLine, int endLine, string dFileName, string square){
 	try {
 		ValidCalculators validCalculator;
-		Dist* distCalculator;
+		DistCalc* distCalculator;
 		if (m->isTrue(countends) == true) {
 			for (int i=0; i<Estimators.size(); i++) {
 				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 

@@ -11,7 +11,7 @@
  */
 
 #include "mothurchimera.h"
-#include "dist.h"
+#include "calculator.h"
 #include "decalc.h"
 
 /***********************************************************/
@@ -32,7 +32,7 @@ class Ccode : public MothurChimera {
     
 	private:
 	
-		Dist* distCalc;
+		DistCalc* distCalc;
 		DeCalculator* decalc;
 		int iters, window, numWanted;
 		string fastafile, mapInfo;

@@ -12,7 +12,7 @@
 
 
 #include "mothur.h"
-#include "dist.h"
+#include "calculator.h"
 
 class DistanceDB : public Database {
 	
@@ -28,7 +28,7 @@ public:
 	
 private:
 	vector<Sequence> data;
-	Dist* distCalculator;
+	DistCalc* distCalculator;
 	
 	int templateSeqsLength;
 	bool templateAligned;

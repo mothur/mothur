@@ -9,7 +9,7 @@
 
 #include "decalc.h"
 #include "mothurchimera.h"
-#include "dist.h"
+#include "calculator.h"
 #include "eachgapdist.h"
 #include "ignoregaps.h"
 #include "eachgapdist.h"
@@ -692,7 +692,7 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
-		Dist* distcalculator = new eachGapDist();
+		DistCalc* distcalculator = new eachGapDist();
 		
 		string queryUnAligned = querySeq.getUnaligned();
 		int numBases = int(queryUnAligned.length() * 0.33);
@@ -862,7 +862,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		
 		Sequence* seqsMatch;  
 		
-		Dist* distcalculator = new eachGapDist();
+		DistCalc* distcalculator = new eachGapDist();
 		int index = 0;
 		int smallest = 1000000;
 		

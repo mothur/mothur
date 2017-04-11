@@ -14,7 +14,7 @@
 #include "mothurchimera.h"
 #include "sparsematrix.hpp"
 #include "sequence.hpp"
-#include "dist.h"
+#include "calculator.h"
 
 typedef list<PCell>::iterator MatData;
 typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeunce
@@ -39,7 +39,7 @@ class Bellerophon : public MothurChimera {
 		
 		vector<linePair> lines;
 	
-		Dist* distCalculator;
+		DistCalc* distCalculator;
 		vector<Sequence*> seqs;
 		vector< vector<Preference> > pref; //pref[0] = preference scores for all seqs in window 0.
 		string fastafile;

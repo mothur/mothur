@@ -9,14 +9,14 @@
  *
  */
 
-#include "dist.h"
+#include "calculator.h"
 
 /**************************************************************************************************/
 
 //	this class calculates distances by ignoring all gap characters.  so if seq a has an "A" and seq
 //	b has a '-', there is no penalty
 
-class ignoreGaps : public Dist {
+class ignoreGaps : public DistCalc {
 	
 public:
 	
