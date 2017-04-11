@@ -434,6 +434,16 @@
 		48E5445E1E9C2F0F00FF6AB8 /* fn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5445B1E9C2F0F00FF6AB8 /* fn.cpp */; };
 		48E544611E9C2FB800FF6AB8 /* fpfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5445F1E9C2FB800FF6AB8 /* fpfn.cpp */; };
 		48E544621E9C2FB800FF6AB8 /* fpfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5445F1E9C2FB800FF6AB8 /* fpfn.cpp */; };
+		48E5446C1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5446A1E9D3A8C00FF6AB8 /* f1score.cpp */; };
+		48E5446D1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5446A1E9D3A8C00FF6AB8 /* f1score.cpp */; };
+		48E544701E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5446E1E9D3B2D00FF6AB8 /* accuracy.cpp */; };
+		48E544711E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5446E1E9D3B2D00FF6AB8 /* accuracy.cpp */; };
+		48E544741E9D3C1200FF6AB8 /* ppv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544721E9D3C1200FF6AB8 /* ppv.cpp */; };
+		48E544751E9D3C1200FF6AB8 /* ppv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544721E9D3C1200FF6AB8 /* ppv.cpp */; };
+		48E544781E9D3CE400FF6AB8 /* npv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544761E9D3CE400FF6AB8 /* npv.cpp */; };
+		48E544791E9D3CE400FF6AB8 /* npv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544761E9D3CE400FF6AB8 /* npv.cpp */; };
+		48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
+		48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
@@ -950,6 +960,16 @@
 		48E5445C1E9C2F0F00FF6AB8 /* fn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fn.hpp; path = source/calculators/fn.hpp; sourceTree = "<group>"; };
 		48E5445F1E9C2FB800FF6AB8 /* fpfn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fpfn.cpp; path = source/calculators/fpfn.cpp; sourceTree = SOURCE_ROOT; };
 		48E544601E9C2FB800FF6AB8 /* fpfn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fpfn.hpp; path = source/calculators/fpfn.hpp; sourceTree = "<group>"; };
+		48E5446A1E9D3A8C00FF6AB8 /* f1score.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = f1score.cpp; path = source/calculators/f1score.cpp; sourceTree = SOURCE_ROOT; };
+		48E5446B1E9D3A8C00FF6AB8 /* f1score.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = f1score.hpp; path = source/calculators/f1score.hpp; sourceTree = SOURCE_ROOT; };
+		48E5446E1E9D3B2D00FF6AB8 /* accuracy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = accuracy.cpp; path = source/calculators/accuracy.cpp; sourceTree = SOURCE_ROOT; };
+		48E5446F1E9D3B2D00FF6AB8 /* accuracy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = accuracy.hpp; path = source/calculators/accuracy.hpp; sourceTree = "<group>"; };
+		48E544721E9D3C1200FF6AB8 /* ppv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ppv.cpp; path = source/calculators/ppv.cpp; sourceTree = SOURCE_ROOT; };
+		48E544731E9D3C1200FF6AB8 /* ppv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ppv.hpp; path = source/calculators/ppv.hpp; sourceTree = "<group>"; };
+		48E544761E9D3CE400FF6AB8 /* npv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npv.cpp; path = source/calculators/npv.cpp; sourceTree = SOURCE_ROOT; };
+		48E544771E9D3CE400FF6AB8 /* npv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = npv.hpp; path = source/calculators/npv.hpp; sourceTree = "<group>"; };
+		48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fdr.cpp; path = source/calculators/fdr.cpp; sourceTree = SOURCE_ROOT; };
+		48E5447B1E9D3F0400FF6AB8 /* fdr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fdr.hpp; path = source/calculators/fdr.hpp; sourceTree = "<group>"; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
@@ -1910,6 +1930,12 @@
 		48E5443E1E9C28CC00FF6AB8 /* clustercalcs */ = {
 			isa = PBXGroup;
 			children = (
+				48E5446E1E9D3B2D00FF6AB8 /* accuracy.cpp */,
+				48E5446F1E9D3B2D00FF6AB8 /* accuracy.hpp */,
+				48E5446B1E9D3A8C00FF6AB8 /* f1score.hpp */,
+				48E5446A1E9D3A8C00FF6AB8 /* f1score.cpp */,
+				48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */,
+				48E5447B1E9D3F0400FF6AB8 /* fdr.hpp */,
 				48E5445B1E9C2F0F00FF6AB8 /* fn.cpp */,
 				48E5445C1E9C2F0F00FF6AB8 /* fn.hpp */,
 				48E544581E9C2E6500FF6AB8 /* fp.hpp */,
@@ -1918,6 +1944,10 @@
 				48E544601E9C2FB800FF6AB8 /* fpfn.hpp */,
 				48E544401E9C292900FF6AB8 /* mcc.hpp */,
 				48E5443F1E9C292900FF6AB8 /* mcc.cpp */,
+				48E544761E9D3CE400FF6AB8 /* npv.cpp */,
+				48E544771E9D3CE400FF6AB8 /* npv.hpp */,
+				48E544721E9D3C1200FF6AB8 /* ppv.cpp */,
+				48E544731E9D3C1200FF6AB8 /* ppv.hpp */,
 				48E544431E9C2B1000FF6AB8 /* sensitivity.cpp */,
 				48E544441E9C2B1000FF6AB8 /* sensitivity.hpp */,
 				48E544471E9C2BE100FF6AB8 /* specificity.cpp */,
@@ -2832,6 +2862,7 @@
 				481FB6721AC1B8820076CFF3 /* refchimeratest.cpp in Sources */,
 				481FB6051AC1B7970076CFF3 /* seqerrorcommand.cpp in Sources */,
 				481FB6871AC1B8B80076CFF3 /* venn.cpp in Sources */,
+				48E544791E9D3CE400FF6AB8 /* npv.cpp in Sources */,
 				481FB5D71AC1B75C0076CFF3 /* makebiomcommand.cpp in Sources */,
 				481FB6601AC1B8450076CFF3 /* nast.cpp in Sources */,
 				48E544461E9C2B1000FF6AB8 /* sensitivity.cpp in Sources */,
@@ -2848,6 +2879,7 @@
 				481FB63F1AC1B7EA0076CFF3 /* sequencecountparser.cpp in Sources */,
 				481FB67E1AC1B8960076CFF3 /* sharedutilities.cpp in Sources */,
 				481FB67C1AC1B88F0076CFF3 /* splitmatrix.cpp in Sources */,
+				48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
 				481FB59C1AC1B71B0076CFF3 /* chopseqscommand.cpp in Sources */,
 				481FB5DE1AC1B77E0076CFF3 /* mergesfffilecommand.cpp in Sources */,
 				481FB6421AC1B7EA0076CFF3 /* sharedlistvector.cpp in Sources */,
@@ -2867,6 +2899,7 @@
 				481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */,
 				481FB5C51AC1B74F0076CFF3 /* getrabundcommand.cpp in Sources */,
 				481FB56E1AC1B6C30076CFF3 /* sharedsorest.cpp in Sources */,
+				48E544751E9D3C1200FF6AB8 /* ppv.cpp in Sources */,
 				481FB6161AC1B7AC0076CFF3 /* summaryqualcommand.cpp in Sources */,
 				481FB56F1AC1B6C70076CFF3 /* sharedthetan.cpp in Sources */,
 				481FB5B21AC1B7300076CFF3 /* deuniqueseqscommand.cpp in Sources */,
@@ -2912,6 +2945,7 @@
 				481FB6641AC1B8450076CFF3 /* optionparser.cpp in Sources */,
 				481FB68B1AC1BA9E0076CFF3 /* aligntree.cpp in Sources */,
 				481FB5FB1AC1B77E0076CFF3 /* removelineagecommand.cpp in Sources */,
+				48E5446D1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */,
 				481FB57A1AC1B6EA0076CFF3 /* structchord.cpp in Sources */,
 				481FB6651AC1B8450076CFF3 /* overlap.cpp in Sources */,
 				481FB6841AC1B8B80076CFF3 /* trimoligos.cpp in Sources */,
@@ -3020,6 +3054,7 @@
 				481FB6211AC1B7BA0076CFF3 /* communitytype.cpp in Sources */,
 				48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */,
 				48C1DDC61D25C1BC00B5BA9D /* (null) in Sources */,
+				48E544711E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
 				481FB5621AC1B69E0076CFF3 /* sharedkstest.cpp in Sources */,
 				481FB5E91AC1B77E0076CFF3 /* otuhierarchycommand.cpp in Sources */,
 				481FB5351AC1B5D90076CFF3 /* fasta.cpp in Sources */,
@@ -3226,6 +3261,7 @@
 				A7E9B8AA12D37EC400DA6239 /* clusterfragmentscommand.cpp in Sources */,
 				48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */,
 				A7E9B8AB12D37EC400DA6239 /* clustersplitcommand.cpp in Sources */,
+				48E5446C1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */,
 				A7E9B8AC12D37EC400DA6239 /* cmdargs.cpp in Sources */,
 				A7E9B8AD12D37EC400DA6239 /* collect.cpp in Sources */,
 				A7E9B8AE12D37EC400DA6239 /* collectcommand.cpp in Sources */,
@@ -3270,6 +3306,7 @@
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
 				A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
+				48E544701E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
 				A7E9B8DB12D37EC400DA6239 /* goodscoverage.cpp in Sources */,
 				A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */,
 				A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */,
@@ -3387,6 +3424,7 @@
 				A7E9B94B12D37EC400DA6239 /* sharedjackknife.cpp in Sources */,
 				A7E9B94C12D37EC400DA6239 /* sharedjclass.cpp in Sources */,
 				A7E9B94D12D37EC400DA6239 /* sharedjest.cpp in Sources */,
+				48E544741E9D3C1200FF6AB8 /* ppv.cpp in Sources */,
 				A7E9B94E12D37EC400DA6239 /* sharedkstest.cpp in Sources */,
 				A7E9B94F12D37EC400DA6239 /* sharedkulczynski.cpp in Sources */,
 				A7E9B95012D37EC400DA6239 /* sharedkulczynskicody.cpp in Sources */,
@@ -3516,6 +3554,7 @@
 				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
 				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
+				48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
@@ -3555,6 +3594,7 @@
 				A7D395C4184FA3A200A350D7 /* kmeans.cpp in Sources */,
 				A7222D731856277C0055A993 /* sharedjsd.cpp in Sources */,
 				A7B093C018579F0400843CD1 /* pam.cpp in Sources */,
+				48E544781E9D3CE400FF6AB8 /* npv.cpp in Sources */,
 				A7A09B1018773C0E00FAA081 /* shannonrange.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
