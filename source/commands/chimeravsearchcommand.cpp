@@ -919,7 +919,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                     else {	out << itUnique->second << restOfName << '\t';	}
                 }else { out << parent3 << '\t'; }
                 
-                out << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << temp13 << '\t' << flag << endl;
+                out << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << '\t' << temp13 << '\t' << flag << endl;
             }
         }
         in.close();
