@@ -19,6 +19,7 @@
 #include "clusterdoturcommand.h"
 #include "opticluster.h"
 #include "optimatrix.h"
+#include "calculator.h"
 
 
 /* The cluster() command:
@@ -61,7 +62,7 @@ private:
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation, metric, initialize;
 	double cutoff, stableMetric;
     float adjust;
-	string showabund, timing;
+	string showabund, timing, metricName;
 	int precision, length, maxIters, processors;
 	ofstream sabundFile, rabundFile, listFile;
 

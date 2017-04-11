@@ -26,6 +26,7 @@
 #include "clusterclassic.h"
 #include "vsearchfileparser.h"
 #include "opticluster.h"
+#include "calculator.h"
 
 class ClusterSplitCommand : public Command {
 	
@@ -50,7 +51,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metric, initialize;
+	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metricName, initialize;
 	double cutoff, splitcutoff, stableMetric;
 	int precision, length, processors, taxLevelCutoff, maxIters;
 	bool print_start, abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist, runsensSpec;

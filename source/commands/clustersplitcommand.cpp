@@ -10,6 +10,20 @@
 #include "clustersplitcommand.h"
 #include "systemcommand.h"
 #include "sensspeccommand.h"
+#include "mcc.hpp"
+#include "sensitivity.hpp"
+#include "specificity.hpp"
+#include "fdr.hpp"
+#include "npv.hpp"
+#include "ppv.hpp"
+#include "f1score.hpp"
+#include "tp.hpp"
+#include "fp.hpp"
+#include "fpfn.hpp"
+#include "tptn.hpp"
+#include "tn.hpp"
+#include "fn.hpp"
+#include "accuracy.hpp"
 
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
@@ -375,9 +389,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
             m->mothurConvert(temp, stableMetric);
 			
-            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            metricName = validParameter.validFile(parameters, "metric", false);		if (metricName == "not found") { metricName = "mcc"; }
             
-            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
+            if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
             
             initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
@@ -385,7 +399,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
-            
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "opti"; m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine(); }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
@@ -1399,6 +1412,22 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, "column", cutoff, false);
         
+        ClusterMetric* metric = NULL;
+        if (metricName == "mcc")             { metric = new MCC();              }
+        else if (metricName == "sens")       { metric = new Sensitivity();      }
+        else if (metricName == "spec")       { metric = new Specificity();      }
+        else if (metricName == "tptn")       { metric = new TPTN();             }
+        else if (metricName == "tp")         { metric = new TP();               }
+        else if (metricName == "tn")         { metric = new TN();               }
+        else if (metricName == "fp")         { metric = new FP();               }
+        else if (metricName == "fn")         { metric = new FN();               }
+        else if (metricName == "f1score")    { metric = new F1Score();          }
+        else if (metricName == "accuracy")   { metric = new Accuracy();         }
+        else if (metricName == "ppv")        { metric = new PPV();              }
+        else if (metricName == "npv")        { metric = new NPV();              }
+        else if (metricName == "fdr")        { metric = new FDR();              }
+        else if (metricName == "fpfn")       { metric = new FPFN();             }
+        
         OptiCluster cluster(&matrix, metric, numSingletons);
         tag = cluster.getTag();
         
@@ -1424,6 +1453,8 @@ string ClusterSplitCommand::runOptiCluster(string thisDistFile, string thisNamef
             delta = abs(oldMetric - listVectorMetric);
             iters++;
         }
+        
+        if (m->control_pressed) { delete metric; metric = NULL; return 0; }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
