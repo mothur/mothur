@@ -107,15 +107,9 @@ bool OptiCluster::update(double& listMetric) {
                 long long bestBin, bestTp, bestTn, bestFn, bestFp;
                 tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                 
-                //this calculation is used to save time in the move and adjust function.
-                //we don't need to calculate the cost of moving out of our current bin each time we
-                //test moving into a new bin. Only calc this once per iteration.
-                long long cCount = 0;  long long fCount = 0;
-                for (int i = 0; i < bins[binNumber].size(); i++) { //how many close sequences are in the old bin?
-                    if (seqNumber == bins[binNumber][i]) {}
-                    else if (!matrix->isClose(seqNumber, bins[binNumber][i])) {  fCount++;   }
-                    else { cCount++;  }
-                }
+                //close / far count in current bin
+                vector<long long> results = getCloseFarCounts(binNumber, seqNumber, binNumber);
+                long long cCount = results[0];  long long fCount = results[1];
                 
                 //metric in current bin
                 bestMetric = metric->getValue(tp, tn, fp, fn); bestBin = binNumber; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
@@ -125,7 +119,7 @@ bool OptiCluster::update(double& listMetric) {
                     //make a singleton
                     //move out of old bin
                     fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
-                    double singleMetric = moveAdjustTFValues(binNumber, seqNumber, -1, tp, tn, fp, fn);
+                    double singleMetric = metric->getValue(tp, tn, fp, fn);
                     if (singleMetric > bestMetric) {
                         bestBin = -1; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
                         bestMetric = singleMetric;
@@ -139,8 +133,10 @@ bool OptiCluster::update(double& listMetric) {
                 //merge into each "close" otu
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
-                    fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount;
-                    double newMetric = moveAdjustTFValues(binNumber, seqNumber, *it, tp, tn, fp, fn);
+                    fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount; //move out of old bin
+                    results = getCloseFarCounts(binNumber, seqNumber, *it);
+                    fn-=results[0]; tn-=results[1];  tp+=results[0]; fp+=results[1]; //move into new bin
+                    double newMetric = metric->getValue(tp, tn, fp, fn); //score when sequence is moved
                     
                     //new best
                     if (newMetric > bestMetric) { bestMetric = newMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn; }
@@ -175,32 +171,27 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-double OptiCluster::moveAdjustTFValues(int bin, int seq, int newBin,  long long& tp,  long long& tn,  long long& fp,  long long& fn) {
+vector<long long> OptiCluster::getCloseFarCounts(int bin, int seq, int newBin) {
     try {
+        vector<long long> results; results.push_back(0); results.push_back(0);
         
-        //making a singleton bin. Close but we are forcing apart.
-        if (newBin == -1) {
-        }else { //merging a bin
-            long long ncCount = 0;  long long nfCount = 0;
-            for (int i = 0; i < bins[newBin].size(); i++) { //how many close sequences are in the old bin?
-                if (seq == bins[newBin][i]) {}
-                else if (!matrix->isClose(seq, bins[newBin][i])) { nfCount++; }
-                else { ncCount++;  }
+        if (newBin == -1) { }  //making a singleton bin. Close but we are forcing apart.
+        else { //merging a bin
+            for (int i = 0; i < bins[newBin].size(); i++) {
+                if (seq == bins[newBin][i]) {} //ignore self
+                else if (!matrix->isClose(seq, bins[newBin][i])) { results[1]++; }  //this sequence is "far away" from sequence i - above the cutoff
+                else { results[0]++;  }  //this sequence is "close" to sequence i - distance between them is less than cutoff
             }
-   
-            //move into new bin
-            fn-=ncCount; tn-=nfCount;  tp+=ncCount; fp+=nfCount;
         }
         
-        double result = metric->getValue(tp, tn, fp, fn);
-        
-        return result;
+        return results;
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiCluster", "moveAdjustTFValues");
+        m->errorOut(e, "OptiCluster", "getCloseFarCounts");
         exit(1);
     }
 }
+
 /***********************************************************************/
 vector<double> OptiCluster::getStats( long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
@@ -212,34 +203,16 @@ vector<double> OptiCluster::getStats( long long& tp,  long long& tn,  long long&
         fn = falseNegatives;
         tn = tempnumSeqs * (tempnumSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //adds singletons to tn
         
-         long long p = tp + fn;
-         long long n = fp + tn;
-         long long pPrime = tp + fp;
-         long long nPrime = tn + fn;
-        
-        double sensitivity = tp /(double) p;
-        double specificity = tn / (double)n;
-        double positivePredictiveValue = tp / (double)pPrime;
-        double negativePredictiveValue = tn / (double)nPrime;
-        double falseDiscoveryRate = fp / (double)pPrime;
-        
-        double accuracy = (tp + tn) / (double)(p + n);
-        double matthewsCorrCoef = (tp * tn - fp * fn) / (double) sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
-        double f1Score = 2.0 * tp / (double)(p + pPrime);
-        
-        
-        if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}
-        if(n == 0)			{	specificity = 0;	matthewsCorrCoef = 0;	}
-        if(p + n == 0)		{	accuracy = 0;								}
-        if(p + pPrime == 0)	{	f1Score = 0;								}
-        if(pPrime == 0)		{	positivePredictiveValue = 0;	falseDiscoveryRate = 0;	matthewsCorrCoef = 0;	}
-        if(nPrime == 0)		{	negativePredictiveValue = 0;	matthewsCorrCoef = 0;							}
-        
         vector<double> results;
         
-        //results.push_back(truePositives); results.push_back(tn); results.push_back(falsePositives); results.push_back(falseNegatives);
-        results.push_back(sensitivity); results.push_back(specificity); results.push_back(positivePredictiveValue); results.push_back(negativePredictiveValue);
-        results.push_back(falseDiscoveryRate); results.push_back(accuracy); results.push_back(matthewsCorrCoef); results.push_back(f1Score);
+        Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn); results.push_back(sensitivity);
+        Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn); results.push_back(specificity);
+        PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn); results.push_back(positivePredictiveValue);
+        NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn); results.push_back(negativePredictiveValue);
+        FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn); results.push_back(falseDiscoveryRate);
+        Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn); results.push_back(accuracy);
+        MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn); results.push_back(matthewsCorrCoef);
+        F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn); results.push_back(f1Score);
         
         return results;
     }
@@ -304,18 +277,18 @@ long long OptiCluster::getNumBins() {
 int OptiCluster::findInsert() {
     try {
         
-        //for each sequence (singletons removed on read)
+        //initially there are bins for each sequence (excluding singletons removed on read)
         for (int i = 0; i < bins.size(); i++) {
             
             if (m->control_pressed) { break; }
             
-            if (bins[i].size() == 0) { return i;  }
+            if (bins[i].size() == 0) { return i;  } //this bin is empty
         }
         
         return -1;
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiCluster", "getList");
+        m->errorOut(e, "OptiCluster", "findInsert");
         exit(1);
     }
 }

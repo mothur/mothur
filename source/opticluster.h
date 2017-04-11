@@ -12,6 +12,20 @@
 #include "cluster.hpp"
 #include "optimatrix.h"
 #include "calculator.h"
+#include "mcc.hpp"
+#include "sensitivity.hpp"
+#include "specificity.hpp"
+#include "fdr.hpp"
+#include "npv.hpp"
+#include "ppv.hpp"
+#include "f1score.hpp"
+#include "tp.hpp"
+#include "fp.hpp"
+#include "fpfn.hpp"
+#include "tptn.hpp"
+#include "tn.hpp"
+#include "fn.hpp"
+#include "accuracy.hpp"
 
 /***********************************************************************/
 
@@ -47,7 +61,7 @@ private:
     long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
     
     int findInsert();
-    double moveAdjustTFValues(int bin, int seq, int newBin,  long long&,  long long&,  long long&,  long long&);
+    vector<long long> getCloseFarCounts(int bin, int seq, int newBin);
 };
 
 #endif /* defined(__Mothur__opticluster__) */
