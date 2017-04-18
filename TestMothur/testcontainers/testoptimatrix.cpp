@@ -14,25 +14,11 @@
 TestOptiMatrix::TestOptiMatrix() {  //setup
     m = MothurOut::getInstance();
     TestDataSet data;
-    filenames = data.getSubsetFNGFiles(100); //Fasta, name, group returned
+    filenames = data.getSubsetFNGFiles(); //Fasta, name, group returned
     
-    string inputString = "fasta=" + filenames[0];
-    m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-    m->mothurOut("Running command: dist.seqs(" + inputString + ")"); m->mothurOutEndLine();
-    m->mothurCalling = true;
+    columnFile = data.getSubsetFNGDistFile();
     
-    Command* distCommand = new DistanceCommand(inputString);
-    distCommand->execute();
-    
-    map<string, vector<string> > outputFilenames = distCommand->getOutputFiles();
-    
-    delete distCommand;
-    m->mothurCalling = false;
-    
-    columnFile = outputFilenames["column"][0];
-    m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-    
-    inputString = "fasta=" + filenames[0] + ", output=lt";
+    string inputString = "fasta=" + filenames[0] + ", output=lt";
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
     m->mothurOut("Running command: dist.seqs(" + inputString + ")"); m->mothurOutEndLine();
     m->mothurCalling = true;
@@ -40,7 +26,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     Command* dist2Command = new DistanceCommand(inputString);
     dist2Command->execute();
     
-    outputFilenames = dist2Command->getOutputFiles();
+    map<string, vector<string> > outputFilenames = dist2Command->getOutputFiles();
     
     delete dist2Command;
     m->mothurCalling = false;
@@ -50,8 +36,6 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
 }
 /**************************************************************************************************/
 TestOptiMatrix::~TestOptiMatrix() {
-    for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
-    m->mothurRemove(columnFile);
     m->mothurRemove(phylipFile);
 }
 /**************************************************************************************************
