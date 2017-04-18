@@ -73,7 +73,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
         }
         
         value = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
-       
+        
         return value;
     }
     catch(exception& e) {
@@ -137,7 +137,6 @@ bool OptiCluster::update(double& listMetric) {
                     results = getCloseFarCounts(binNumber, seqNumber, *it);
                     fn-=results[0]; tn-=results[1];  tp+=results[0]; fp+=results[1]; //move into new bin
                     double newMetric = metric->getValue(tp, tn, fp, fn); //score when sequence is moved
-                    
                     //new best
                     if (newMetric > bestMetric) { bestMetric = newMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn; }
                 }

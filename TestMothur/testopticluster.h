@@ -12,6 +12,7 @@
 
 #include "gtest.h"
 #include "opticluster.h"
+#include "optimatrix.h"
 
 
 class TestOptiCluster : public OptiCluster   {
@@ -25,13 +26,9 @@ protected:
     MothurOut* m;
     string columnFile, phylipFile;
     vector<string> filenames;
+    ClusterMetric* metric;
+    OptiMatrix* testMatrix;
     
-    using OptiCluster::calcMCC;
-    using OptiCluster::calcSens;
-    using OptiCluster::calcSpec;
-    using OptiCluster::calcTPTN;
-    using OptiCluster::calcFPFN;
-    using OptiCluster::moveAdjustTFValues;
     using OptiCluster::setVariables;
     using OptiCluster::initialize;
     using OptiCluster::update;
