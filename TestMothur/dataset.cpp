@@ -56,27 +56,15 @@ void TestDataSet::createCountTable() {
 }
 /***********************************************************************/
 
-vector<string> TestDataSet::getSubsetFNGFiles(int numSeqs) {
-    fillSeqs();
-    vector<Sequence> subsetSeqs;
-    for (int i = 0; i < numSeqs; i++) { subsetSeqs.push_back(seqs[i]); }
-    seqs.clear();
-    
-    fillNames();
-    fillGroup();
-    ofstream out, out2, out3;
-    m->openOutputFile("tempSeqs.txt", out); m->openOutputFile("tempNames.txt", out2); m->openOutputFile("tempGroup.txt", out3);
-    for (int i = 0; i < subsetSeqs.size(); i++) {
-        subsetSeqs[i].printSequence(out);
-        out2 << subsetSeqs[i].getName() << '\t' << nameMap[subsetSeqs[i].getName()] << '\n';
-        out3 << subsetSeqs[i].getName() << '\t' << gMap->getGroup(subsetSeqs[i].getName()) << '\n';
-    }
-    nameMap.clear();
-    delete gMap; gMap = NULL;
-    
-    vector<string> filenames; filenames.push_back("tempSeqs.txt"); filenames.push_back("tempNames.txt"); filenames.push_back("tempGroup.txt");
+vector<string> TestDataSet::getSubsetFNGFiles() {
+    vector<string> filenames; filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempSeqs.txt"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempNames.txt"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempGroup.txt");
     
     return filenames;
+}
+/***********************************************************************/
+string TestDataSet::getSubsetFNGDistFile() {
+    
+    return "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempSeqs.dist";
 }
 /***********************************************************************/
 void TestDataSet::fillSeqs() {
