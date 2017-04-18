@@ -14,12 +14,10 @@
 TestRenameFileCommand::TestRenameFileCommand() {  //setup
     m = MothurOut::getInstance();
     TestDataSet data;
-    filenames = data.getSubsetFNGFiles(100);
+    filenames = data.getSubsetFNGFiles();
 }
 /**************************************************************************************************/
-TestRenameFileCommand::~TestRenameFileCommand() {
-    for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
-}
+TestRenameFileCommand::~TestRenameFileCommand() {}
 /**************************************************************************************************
 TEST_CASE("Testing RenameFileCommand Class") {
     TestRenameFileCommand testRename;
