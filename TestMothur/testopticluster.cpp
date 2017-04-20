@@ -7,7 +7,6 @@
 //
 
 #include "testopticluster.h"
-
 #include "distancecommand.h"
 #include "dataset.h"
 
