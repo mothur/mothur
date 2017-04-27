@@ -160,6 +160,7 @@ bool OptiCluster::update(double& listMetric) {
         }
         
         listMetric = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
+        if (m->debug) { ListVector* list = getList(); list->print(cout); delete list; }
         
         return 0;
         
