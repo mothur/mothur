@@ -12,12 +12,12 @@
 #include "mothurout.h"
 
 
-class FakeClusterCalc {
+class FakeClusterCalcValues {
     
 public:
     
-    FakeClusterCalc() { m = MothurOut::getInstance(); tp = 823; tn = 1944106; fp = 95; fn = 354; }
-    ~FakeClusterCalc() {}
+    FakeClusterCalcValues() { m = MothurOut::getInstance(); tp = 823; tn = 1944106; fp = 95; fn = 354; }
+    ~FakeClusterCalcValues() {}
     
     
     long long tp, tn, fp, fn;

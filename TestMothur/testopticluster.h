@@ -12,7 +12,7 @@
 
 #include "gtest.h"
 #include "opticluster.h"
-#include "optimatrix.h"
+#include "fakeoptimatrix.hpp"
 
 
 class TestOptiCluster : public OptiCluster   {
@@ -24,19 +24,17 @@ public:
     
 protected:
     MothurOut* m;
-    string columnFile, phylipFile;
-    vector<string> filenames;
     ClusterMetric* metric;
-    OptiMatrix* testMatrix;
+    FakeOptiMatrix testMatrix;
     
     using OptiCluster::setVariables;
     using OptiCluster::initialize;
     using OptiCluster::update;
+    using OptiCluster::getCloseFarCounts;
     
     FRIEND_TEST(TestOptiCluster, myInitialize);
-    FRIEND_TEST(TestOptiCluster, myMoveAdjustTFValues);
+    FRIEND_TEST(TestOptiCluster, getCloseFarCounts);
     FRIEND_TEST(TestOptiCluster, myUpdate);
-    FRIEND_TEST(TestOptiCluster, calcs);
 
 };
 

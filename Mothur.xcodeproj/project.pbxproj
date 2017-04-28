@@ -10,6 +10,7 @@
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
+		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
 		480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
@@ -842,6 +843,8 @@
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclustercalcs.cpp; sourceTree = "<group>"; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testclustercalcs.hpp; sourceTree = "<group>"; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
+		480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fakeoptimatrix.cpp; path = TestMothur/fakes/fakeoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
+		480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakeoptimatrix.hpp; path = fakes/fakeoptimatrix.hpp; sourceTree = "<group>"; };
 		480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testfastqread.cpp; path = TestMothur/testcontainers/testfastqread.cpp; sourceTree = SOURCE_ROOT; };
 		480E8DB01CAB12ED00A0D137 /* testfastqread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testfastqread.h; path = TestMothur/testcontainers/testfastqread.h; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1844,6 +1847,8 @@
 			isa = PBXGroup;
 			children = (
 				480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */,
+				480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */,
+				480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */,
 			);
 			name = fakes;
 			sourceTree = "<group>";
@@ -1897,8 +1902,8 @@
 				4827A4DB1CB3ED2100345170 /* fastqdataset.h */,
 				480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */,
 				480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */,
-				48910D4D1D58E26C00F60EDB /* testopticluster.cpp */,
 				48910D4E1D58E26C00F60EDB /* testopticluster.h */,
+				48910D4D1D58E26C00F60EDB /* testopticluster.cpp */,
 				4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */,
 				4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */,
 				48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */,
@@ -2865,6 +2870,7 @@
 				481FB5C01AC1B74F0076CFF3 /* getlineagecommand.cpp in Sources */,
 				481FB5F71AC1B77E0076CFF3 /* rarefactcommand.cpp in Sources */,
 				481FB61F1AC1B7AC0076CFF3 /* venncommand.cpp in Sources */,
+				480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */,
 				48E5445A1E9C2E6500FF6AB8 /* fp.cpp in Sources */,
 				481FB61A1AC1B7AC0076CFF3 /* treegroupscommand.cpp in Sources */,
 				481FB66B1AC1B8520076CFF3 /* decisiontree.cpp in Sources */,

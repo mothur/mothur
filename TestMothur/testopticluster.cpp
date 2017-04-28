@@ -13,20 +13,11 @@
 /**************************************************************************************************/
 TestOptiCluster::TestOptiCluster()  {  //setup
     m = MothurOut::getInstance();
-    TestDataSet data;
-    filenames = data.getSubsetFNGFiles(); //Fasta, name, group returned
-    columnFile = data.getSubsetFNGDistFile();
-    
-    testMatrix = new OptiMatrix(columnFile, filenames[1], "name", "column", 0.03, false);
-    
     metric = new MCC();
-    
-    setVariables(testMatrix, metric);
+    setVariables(&testMatrix, metric);
 }
 /**************************************************************************************************/
-TestOptiCluster::~TestOptiCluster() {
-    delete metric; delete testMatrix;
-}
+TestOptiCluster::~TestOptiCluster() { delete metric; }
 /**************************************************************************************************/
 TEST(TestOptiCluster, myInitialize) {
     TestOptiCluster test;
@@ -42,6 +33,23 @@ TEST(TestOptiCluster, myUpdate) {
     test.update(initialMetricValue);
     
     //first round
-    ASSERT_NEAR(0.95524, initialMetricValue, 0.00001); //metric value
+    ASSERT_NEAR(1, initialMetricValue, 0.00001); //metric value
+    
+    test.update(initialMetricValue);
+    
+    //first round
+    ASSERT_NEAR(1, initialMetricValue, 0.00001); //metric value
+}
+
+TEST(TestOptiCluster, getCloseFarCounts) {
+    TestOptiCluster test;
+    double initialMetricValue;
+    test.initialize(initialMetricValue, false, "singleton"); //no randomization
+    test.update(initialMetricValue);
+    
+    vector<long long> results = test.getCloseFarCounts(0, 31);
+    
+    ASSERT_EQ(results[0], 0); //number of close sequences in bin 31 to seq 0
+    ASSERT_EQ(results[1], 10); //number of far sequences in bin 31 to seq 0
 }
 /**************************************************************************************************/
