@@ -23,8 +23,7 @@ public:
     ~TestMCCCalc();
     
     MothurOut* m;
-    FakeClusterCalc fake;
-    
+    FakeClusterCalcValues fake;
 };
 
 

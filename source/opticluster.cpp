@@ -108,7 +108,7 @@ bool OptiCluster::update(double& listMetric) {
                 tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                 
                 //close / far count in current bin
-                vector<long long> results = getCloseFarCounts(binNumber, seqNumber, binNumber);
+                vector<long long> results = getCloseFarCounts(seqNumber, binNumber);
                 long long cCount = results[0];  long long fCount = results[1];
                 
                 //metric in current bin
@@ -134,7 +134,7 @@ bool OptiCluster::update(double& listMetric) {
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount; //move out of old bin
-                    results = getCloseFarCounts(binNumber, seqNumber, *it);
+                    results = getCloseFarCounts(seqNumber, *it);
                     fn-=results[0]; tn-=results[1];  tp+=results[0]; fp+=results[1]; //move into new bin
                     double newMetric = metric->getValue(tp, tn, fp, fn); //score when sequence is moved
                     //new best
@@ -160,6 +160,7 @@ bool OptiCluster::update(double& listMetric) {
         }
         
         listMetric = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
+        
         if (m->debug) { ListVector* list = getList(); list->print(cout); delete list; }
         
         return 0;
@@ -171,7 +172,7 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiCluster::getCloseFarCounts(int bin, int seq, int newBin) {
+vector<long long> OptiCluster::getCloseFarCounts(int seq, int newBin) {
     try {
         vector<long long> results; results.push_back(0); results.push_back(0);
         

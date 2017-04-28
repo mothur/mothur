@@ -51,7 +51,7 @@ public:
     vector<double> getStats( long long&,  long long&,  long long&,  long long&);
     ListVector* getList();
     
-private:
+protected:
     MothurOut* m;
     map<int, int> seqBin; //sequence# -> bin#
     OptiMatrix* matrix;
@@ -61,7 +61,7 @@ private:
     long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
     
     int findInsert();
-    vector<long long> getCloseFarCounts(int bin, int seq, int newBin);
+    vector<long long> getCloseFarCounts(int seq, int newBin);
 };
 
 #endif /* defined(__Mothur__opticluster__) */
