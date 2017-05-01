@@ -11,19 +11,36 @@
 
 #include "gtest.h"
 #include "mcc.hpp"
+#include "sensitivity.hpp"
+#include "specificity.hpp"
+#include "fdr.hpp"
+#include "npv.hpp"
+#include "ppv.hpp"
+#include "f1score.hpp"
+#include "tp.hpp"
+#include "fp.hpp"
+#include "fpfn.hpp"
+#include "tptn.hpp"
+#include "tn.hpp"
+#include "fn.hpp"
+#include "accuracy.hpp"
 #include "fakemcc.hpp"
-#include "optimatrix.h"
 
 
-class TestMCCCalc  : public MCC  {
+class TestClusterCalcs   {
     
 public:
     
-    TestMCCCalc();
-    ~TestMCCCalc();
+    TestClusterCalcs(string);
+    ~TestClusterCalcs();
     
-    MothurOut* m;
     FakeClusterCalcValues fake;
+    ClusterMetric* metric;
+    
+private:
+    MothurOut* m;
+    
+   
 };
 
 

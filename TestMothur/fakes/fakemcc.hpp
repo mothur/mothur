@@ -16,15 +16,10 @@ class FakeClusterCalcValues {
     
 public:
     
-    FakeClusterCalcValues() { m = MothurOut::getInstance(); tp = 823; tn = 1944106; fp = 95; fn = 354; }
+    FakeClusterCalcValues() {  tp = 823; tn = 1944106; fp = 95; fn = 354; }
     ~FakeClusterCalcValues() {}
     
-    
     long long tp, tn, fp, fn;
-    
-protected:
-    MothurOut* m;
-    
 };
 
 
