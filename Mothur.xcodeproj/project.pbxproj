@@ -910,6 +910,7 @@
 		48C728761B6AB4EE00D40830 /* testsequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testsequence.h; path = TestMothur/testcontainers/testsequence.h; sourceTree = SOURCE_ROOT; };
 		48C728771B728D6B00D40830 /* biominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = biominfocommand.cpp; path = source/commands/biominfocommand.cpp; sourceTree = SOURCE_ROOT; };
 		48C728781B728D6B00D40830 /* biominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = biominfocommand.h; path = source/commands/biominfocommand.h; sourceTree = SOURCE_ROOT; };
+		48CC010E1EB79E49009D61E6 /* fakeoligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fakeoligos.h; path = fakes/fakeoligos.h; sourceTree = "<group>"; };
 		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testvsearchfileparser.cpp; path = TestMothur/testvsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testvsearchfileparser.h; path = TestMothur/testvsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataset.cpp; path = TestMothur/dataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -1847,6 +1848,7 @@
 			isa = PBXGroup;
 			children = (
 				480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */,
+				48CC010E1EB79E49009D61E6 /* fakeoligos.h */,
 				480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */,
 				480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */,
 			);

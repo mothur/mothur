@@ -19,14 +19,14 @@ class TrimOligos {
     
 #ifdef UNIT_TEST
     friend class TestTrimOligos;
-    TrimOligos() {};
+    TrimOligos() { m = MothurOut::getInstance(); }
 #endif
 	
 	public:
         TrimOligos(int,int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers
         TrimOligos(int,int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
         TrimOligos(int,int, int, int, map<int, oligosPair>, map<int, oligosPair>, bool); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, hasIndex
-		~TrimOligos();
+    ~TrimOligos(){}
 	
     
         //codes : 10 means sequence shorter than barcode, 100 means multiple matches, 1e6 no matches, 0 found match.
@@ -58,7 +58,7 @@ class TrimOligos {
         string reverseOligo(string);
         string getCodeValue(int, int);
 	
-	private:
+	protected:
 		int pdiffs, bdiffs, ldiffs, sdiffs, rdiffs;
         bool paired, hasIndex;
 	
@@ -86,7 +86,8 @@ class TrimOligos {
         vector<int> stripPairedBarcode(Sequence& seq,  int& group);
         vector<int> stripPairedPrimers(Sequence& seq,  int& group);
     
-        int process(int,int, int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
+        int preProcess(int,int, int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
+    int preProcess(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br, bool hi);
 
 };
 

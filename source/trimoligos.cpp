@@ -12,11 +12,23 @@
 #include "needlemanoverlap.hpp"
 
 /********************************************************************/
+//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
+TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br, bool hi){
+    try {
+        m = MothurOut::getInstance();
+        preProcess(p,b,l,s,pr,br,hi);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimOligos", "TrimOligos");
+        exit(1);
+    }
+}
+/********************************************************************/
 TrimOligos::TrimOligos(int p, int rd, int b, map<string, int> pr, map<string, int> br, vector<string> r){
     try {
         m = MothurOut::getInstance();
         int l = 0; int s = 0; vector<string> lk, sp;
-        process(p,b,l,s,rd,pr,br,r,lk,sp);
+        preProcess(p,b,l,s,rd,pr,br,r,lk,sp);
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "TrimOligos");
@@ -27,7 +39,7 @@ TrimOligos::TrimOligos(int p, int rd, int b, map<string, int> pr, map<string, in
 TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
     try {
         m = MothurOut::getInstance();
-        process(p,b,l,s,0,pr,br,r,lk,sp);
+        preProcess(p,b,l,s,0,pr,br,r,lk,sp);
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "TrimOligos");
@@ -35,8 +47,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
     }
 }
 /********************************************************************/
-//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
-int TrimOligos::process(int p, int b, int l, int s, int rd, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
+int TrimOligos::preProcess(int p, int b, int l, int s, int rd, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
     try {
         paired = false;
         hasIndex = false;
@@ -83,16 +94,14 @@ int TrimOligos::process(int p, int b, int l, int s, int rd, map<string, int> pr,
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "TrimOligos", "process");
+        m->errorOut(e, "TrimOligos", "preProcess");
         exit(1);
     }
 }
 /********************************************************************/
 //strip, pdiffs, bdiffs, primers, barcodes, revPrimers
-TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br, bool hi){
+int TrimOligos::preProcess(int p, int b, int l, int s, map<int, oligosPair> pr, map<int, oligosPair> br, bool hi){
     try {
-        m = MothurOut::getInstance();
-        
         pdiffs = p;
         bdiffs = b;
         ldiffs = l;
@@ -155,14 +164,14 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
         
         ipbarcodes = br;
         ipprimers = pr;
+
+        return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "TrimOligos", "TrimOligos");
+        m->errorOut(e, "TrimOligos", "preProcess");
         exit(1);
     }
 }
-/********************************************************************/
-TrimOligos::~TrimOligos() {}
 //********************************************************************/
 vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
     try {
