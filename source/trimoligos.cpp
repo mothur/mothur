@@ -11,12 +11,33 @@
 #include "alignment.hpp"
 #include "needlemanoverlap.hpp"
 
-
 /********************************************************************/
-//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
+TrimOligos::TrimOligos(int p, int rd, int b, map<string, int> pr, map<string, int> br, vector<string> r){
+    try {
+        m = MothurOut::getInstance();
+        int l = 0; int s = 0; vector<string> lk, sp;
+        process(p,b,l,s,rd,pr,br,r,lk,sp);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimOligos", "TrimOligos");
+        exit(1);
+    }
+}
+/********************************************************************/
 TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
     try {
         m = MothurOut::getInstance();
+        process(p,b,l,s,0,pr,br,r,lk,sp);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimOligos", "TrimOligos");
+        exit(1);
+    }
+}
+/********************************************************************/
+//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
+int TrimOligos::process(int p, int b, int l, int s, int rd, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
+    try {
         paired = false;
         hasIndex = false;
         
@@ -24,7 +45,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
         bdiffs = b;
         ldiffs = l;
         sdiffs = s;
-        rdiffs = 0;
+        rdiffs = rd;
         
         barcodes = br;
         primers = pr;
@@ -58,9 +79,11 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
                 maxSpacerLength = spacer[i].length();
             }
         }
+        
+        return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "TrimOligos", "TrimOligos");
+        m->errorOut(e, "TrimOligos", "process");
         exit(1);
     }
 }
@@ -132,45 +155,6 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
         
         ipbarcodes = br;
         ipprimers = pr;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TrimOligos", "TrimOligos");
-        exit(1);
-    }
-}
-/********************************************************************/
-//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
-TrimOligos::TrimOligos(int p, int rd, int b, map<string, int> pr, map<string, int> br, vector<string> r){
-    try {
-        m = MothurOut::getInstance();
-        
-        pdiffs = p;
-        bdiffs = b;
-        rdiffs = rd;
-        
-        barcodes = br;
-        primers = pr;
-        revPrimer = r;
-        paired = false;
-        hasIndex = false;
-        
-        maxFBarcodeLength = 0;
-        for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
-            string oligo = it->first;
-            if(oligo.length() > maxFBarcodeLength){
-                maxFBarcodeLength = oligo.length();
-            }
-        }
-        maxRBarcodeLength = maxFBarcodeLength;
-        
-        maxFPrimerLength = 0;
-        for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
-            string oligo = it->first;
-            if(oligo.length() > maxFPrimerLength){
-                maxFPrimerLength = oligo.length();
-            }
-        }
-        maxRPrimerLength = maxFPrimerLength;
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "TrimOligos");

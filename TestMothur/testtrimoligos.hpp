@@ -10,7 +10,7 @@
 #define testtrimoligos_hpp
 
 #include "trimoligos.h"
-#include "sequence.hpp"
+
 
 class TestTrimOligos : public TrimOligos {
     
@@ -21,14 +21,8 @@ public:
     ~TestTrimOligos();
     
     MothurOut* m;
-    vector<Sequence> seqs;
-    vector<Sequence> pairedSeqs;
     
-    map<string, int> barcodes;
-    map<string, int> primers;
-    map<int, oligosPair> pairedPrimers;
-    map<int, oligosPair> pairedBarcodes;
-    
+    Sequence* fseq;
     //using TrimOligos::compareDNASeq(string, string);
     //using TrimOligos::countDiffs(string, string);
     

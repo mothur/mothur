@@ -10,7 +10,6 @@
  *
  */
 
-#include "mothur.h"
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "qualityscores.h"
@@ -21,7 +20,6 @@ class TrimOligos {
 #ifdef UNIT_TEST
     friend class TestTrimOligos;
     TrimOligos() {};
-    //add set variables function when completeing unit tests for this class
 #endif
 	
 	public:
@@ -87,6 +85,8 @@ class TrimOligos {
         vector<int> stripPairedPrimers(Sequence& seq, QualityScores& qual, int& group, bool);
         vector<int> stripPairedBarcode(Sequence& seq,  int& group);
         vector<int> stripPairedPrimers(Sequence& seq,  int& group);
+    
+        int process(int,int, int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
 
 };
 
