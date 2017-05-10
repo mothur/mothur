@@ -42,7 +42,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
                 if (it->second == -1) { }
                 else {
-                    long long numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                    long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
                     falseNegatives += numCloseSeqs;
                 }
             }
@@ -64,7 +64,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
                 if (it->second == -1) { }
                 else {
-                    long long numCloseSeqs = (matrix->getCloseSeqs(it->first)).size(); //does not include self
+                    long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
                     truePositives += numCloseSeqs;
                 }
             }

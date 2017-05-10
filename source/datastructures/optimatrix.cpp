@@ -100,6 +100,7 @@ string OptiMatrix::getName(int index) {
 bool OptiMatrix::isClose(int i, int toFind){
     try {
         bool found = false;
+        if (toFind < i) { mothurSwap(i, toFind); }
         if (closeness[i].count(toFind) != 0) { found = true; }
         return found;
         
@@ -338,8 +339,6 @@ int OptiMatrix::readColumn(){
         ///////////////////// Read to eliminate singletons ///////////////////////
         ifstream fileHandle;
         m->openInputFile(distFile, fileHandle);
-        
-        map<int, int> singletonIndexSwap;
         vector<bool> singleton; singleton.resize(nameAssignment.size(), true);
         while(fileHandle){  //let's assume it's a triangular matrix...
             
@@ -365,34 +364,32 @@ int OptiMatrix::readColumn(){
                 int indexB = (itB->second);
                 singleton[indexA] = false;
                 singleton[indexB] = false;
-                singletonIndexSwap[indexA] = indexA;
-                singletonIndexSwap[indexB] = indexB;
             }
         }
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
         
-        int nonSingletonCount = 0;
-        for (int i = 0; i < singleton.size(); i++) {
-            if (!singleton[i]) { //if you are a singleton
-                singletonIndexSwap[i] = nonSingletonCount;
-                nonSingletonCount++;
-            }else { singletons.push_back(nameMap[i]); }
-        }
-        singleton.clear();
+        map<string, string> names;
+        if (namefile != "") { m->readNames(namefile, names); }
         
-        ifstream in;
-        m->openInputFile(distFile, in);
+        int nonSingletonCount = 0;
+        vector<string> newNameMap(nameMap.size(), "noname");
+        for (int i = 0; i < singleton.size(); i++) {
+            string name = nameMap[i]; string dupName = nameMap[i];
+            if (namefile != "") { dupName = names[name]; }
+            if (!singleton[i]) { //if you are a singleton
+                nameAssignment[name] = nonSingletonCount;
+                newNameMap[nonSingletonCount] = dupName;
+                nonSingletonCount++;
+            }else { singletons.push_back(dupName); }
+        }
+        singleton.clear(); nameMap.clear();
+        nameMap = newNameMap; newNameMap.clear();
         
         closeness.resize(nonSingletonCount);
         
-        map<string, string> names;
-        if (namefile != "") {
-            m->readNames(namefile, names);
-            for (int i = 0; i < singletons.size(); i++) {
-                singletons[i] = names[singletons[i]];
-            }
-        }
+        ifstream in;
+        m->openInputFile(distFile, in);
         
         while(in){  //let's assume it's a triangular matrix...
             
@@ -417,22 +414,20 @@ int OptiMatrix::readColumn(){
                 int indexA = (itA->second);
                 int indexB = (itB->second);
                 
-                int newB = singletonIndexSwap[indexB];
-                int newA = singletonIndexSwap[indexA];
-                closeness[newA].insert(newB);
-                closeness[newB].insert(newA);
+                if (indexB < indexA) { mothurSwap(indexA, indexB); }
                 
-                if (namefile != "") {
-                    firstName = names[firstName];  //redundant names
-                    secondName = names[secondName]; //redundant names
-                }
-                
-                nameMap[newA] = firstName;
-                nameMap[newB] = secondName;
+                closeness[indexA].insert(indexB);
+                closeness[indexB].insert(indexA);
             }
         }
         in.close();
         nameAssignment.clear();
+        
+        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
+        
+        if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+            m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
         
         return 1;
         

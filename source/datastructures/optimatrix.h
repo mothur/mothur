@@ -27,7 +27,6 @@ public:
     ~OptiMatrix(){ }
     
     set<int> getCloseSeqs(int i) { return closeness[i]; }
-    //int get(int i, int j) { return closeness[i][j]; }
     bool isClose(int, int);
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
