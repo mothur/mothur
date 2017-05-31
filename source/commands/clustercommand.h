@@ -77,6 +77,7 @@ private:
     int runVsearchCluster();
     int runOptiCluster();
     int runMothurCluster();
+    int runUniqueCluster();
 };
 
 #endif
