@@ -10,7 +10,7 @@
 #include "gower.h"
 
 /***********************************************************************/
-EstOutput Gower::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Gower::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,20 +20,20 @@ EstOutput Gower::getValues(vector<SharedRAbundVector*> shared) {
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			
 			//set otus min and max to first one
-			minOtus[i] = shared[0]->getAbundance(i);
-			maxOtus[i] = shared[0]->getAbundance(i);
+			minOtus[i] = shared[0]->get(i);
+			maxOtus[i] = shared[0]->get(i);
 			
 			//for each group
 			for (int j = 1; j < shared.size(); j++) { 
-				maxOtus[i] = max(shared[j]->getAbundance(i), maxOtus[i]);
-				minOtus[i] = min(shared[j]->getAbundance(i), minOtus[i]);
+				maxOtus[i] = max(shared[j]->get(i), maxOtus[i]);
+				minOtus[i] = min(shared[j]->get(i), minOtus[i]);
 			}
 		}
 		
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			int A = shared[0]->getAbundance(i);
-			int B = shared[1]->getAbundance(i);
+			int A = shared[0]->get(i);
+			int B = shared[1]->get(i);
 			
 			double numerator = abs(A - B);
 			double denominator = maxOtus[i] - minOtus[i];

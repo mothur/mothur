@@ -27,7 +27,7 @@ public:
 		data[0] = (double)rank->getNumBins();
 		return data;
 	}
-	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	EstOutput getValues(vector<RAbundVector*>) {return data;};
 	string getCitation() { return "http://www.mothur.org/wiki/Sobs"; }
 };
 

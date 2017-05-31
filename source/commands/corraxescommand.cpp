@@ -233,30 +233,28 @@ int CorrAxesCommand::execute(){
 			getSharedFloat(input); 
 			delete input;
 			
-			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
-			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+            if (m->control_pressed) {  delete lookupFloat; return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (relabundfile != "") { 
 			InputData* input = new InputData(relabundfile, "relabund");
 			getSharedFloat(input); 
 			delete input;
 			
-			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
-			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+			if (m->control_pressed) {  delete lookupFloat; return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (metadatafile != "") { 
 			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
-			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
-			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading metadata file."); m->mothurOutEndLine(); return 0; }
-			
-			if (pickedGroups) { eliminateZeroOTUS(lookupFloat); }
-			
+			if (m->control_pressed) {  delete lookupFloat; return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading metadata file."); m->mothurOutEndLine(); return 0; }
 		}else {	m->mothurOut("[ERROR]: no file given."); m->mothurOutEndLine(); return 0; }
 		
-		if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
+		if (m->control_pressed) {  delete lookupFloat; return 0; }
 		
 		//this is for a sanity check to make sure the axes file and shared file match
-		for (int i = 0; i < lookupFloat.size(); i++) { names.insert(lookupFloat[i]->getGroup()); }
+        vector<string> lookupGroups = lookupFloat->getNamesGroups();
+        for (int i = 0; i < lookupGroups.size(); i++) { names.insert(lookupGroups[i]); }
 		
 		/*************************************************************************************/
 		// read axes file and check for file mismatches with shared or relabund file         //
@@ -265,19 +263,19 @@ int CorrAxesCommand::execute(){
 		//read axes file
 		map<string, vector<float> > axes = readAxes();
 		
-		if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
+		if (m->control_pressed) {  delete lookupFloat; return 0; }
 		
 		//sanity check, the read only adds groups that are in the shared or relabund file, but we want to make sure the axes file isn't missing anyone
-		if (axes.size() != lookupFloat.size()) { 
+		if (axes.size() != lookupGroups.size()) {
 			map<string, vector<float> >::iterator it;
-			for (int i = 0; i < lookupFloat.size(); i++) {
-				it = axes.find(lookupFloat[i]->getGroup());
-				if (it == axes.end()) { m->mothurOut(lookupFloat[i]->getGroup() + " is in your shared of relabund file but not in your axes file, please correct."); m->mothurOutEndLine(); }
+			for (int i = 0; i < lookupGroups.size(); i++) {
+				it = axes.find(lookupGroups[i]);
+				if (it == axes.end()) { m->mothurOut(lookupGroups[i] + " is in your shared of relabund file but not in your axes file, please correct."); m->mothurOutEndLine(); }
 			}
 			m->control_pressed = true;
 		}
 		
-		if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
+		if (m->control_pressed) {  delete lookupFloat; return 0; }
 		
 		/*************************************************************************************/
 		// calc the r values																//
@@ -304,7 +302,7 @@ int CorrAxesCommand::execute(){
 		else { m->mothurOut("[ERROR]: Invalid method."); m->mothurOutEndLine(); }
 		
 		out.close();
-		for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+		delete lookupFloat;
 		
 		if (m->control_pressed) {  return 0; }
 
@@ -325,6 +323,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
    try {
 	   
        LinearAlgebra linear;
+       vector<string> lookupGroups = lookupFloat->getNamesGroups();
        
 	   //find average of each axis - X
 	   vector<float> averageAxes; averageAxes.resize(numaxes, 0.0);
@@ -338,17 +337,14 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
 	   
 	   //for each otu
-	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
+	   for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		   
 		   if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 		   else {  out << metadataLabels[i];		}
 		   		   
 		   //find the averages this otu - Y
-		   float sumOtu = 0.0;
-		   for (int j = 0; j < lookupFloat.size(); j++) {
-			   sumOtu += lookupFloat[j]->getAbundance(i);
-		   }
-		   float Ybar = sumOtu / (float) lookupFloat.size();
+		   float sumOtu = lookupFloat->getOTUTotal(i);
+		   float Ybar = sumOtu / (float) lookupFloat->size();
 		   
 		   vector<float> rValues(averageAxes.size());
 
@@ -359,9 +355,9 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 			   double numerator = 0.0;
 			   double denomTerm1 = 0.0;
 			   double denomTerm2 = 0.0;
-			   for (int j = 0; j < lookupFloat.size(); j++) {
-				   float Yi = lookupFloat[j]->getAbundance(i);
-				   float Xi = axes[lookupFloat[j]->getGroup()][k];
+			   for (int j = 0; j < lookupFloat->size(); j++) {
+				   float Yi = lookupFloat->get(i, lookupGroups[j]);
+				   float Xi = axes[lookupGroups[j]][k];
 				   
 				   numerator += ((Xi - averageAxes[k]) * (Yi - Ybar));
 				   denomTerm1 += ((Xi - averageAxes[k]) * (Xi - averageAxes[k]));
@@ -377,7 +373,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 			   rValues[k] = r;
 			   out << '\t' << r; 
                
-               double sig = linear.calcPearsonSig(lookupFloat.size(), r);
+               double sig = linear.calcPearsonSig(lookupFloat->size(), r);
                
                out << '\t' << sig;
 		   }
@@ -401,6 +397,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 	try {
 		
         LinearAlgebra linear;
+        vector<string> lookupGroups = lookupFloat->getNamesGroups();
         vector<double> sf; 
         
 		//format data
@@ -473,7 +470,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		
 				
 		//for each otu
-		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
+		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 			
 			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
@@ -481,8 +478,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
 			map<float, int> tableY;
-			for (int j = 0; j < lookupFloat.size(); j++) {
-				spearmanRank member(lookupFloat[j]->getGroup(), lookupFloat[j]->getAbundance(i));
+			for (int j = 0; j < lookupFloat->size(); j++) {
+				spearmanRank member(lookupGroups[j], lookupFloat->get(i, lookupGroups[j]));
 				otuScores.push_back(member);
 				
 				itTable = tableY.find(member.score);
@@ -537,17 +534,17 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			for (int j = 0; j < numaxes; j++) {
 				
 				double di = 0.0;
-				for (int k = 0; k < lookupFloat.size(); k++) {
+				for (int k = 0; k < lookupFloat->size(); k++) {
 					
-					float xi = rankAxes[lookupFloat[k]->getGroup()][j];
-					float yi = rankOtus[lookupFloat[k]->getGroup()];
+					float xi = rankAxes[lookupGroups[k]][j];
+					float yi = rankOtus[lookupGroups[k]];
 					
 					di += ((xi - yi) * (xi - yi));
 				}
 				
 				double p = 0.0;
 				
-				double n = (double) lookupFloat.size();
+				double n = (double) lookupFloat->size();
 				
 				double SX2 = ((pow(n, 3.0) - n) / 12.0) - Lx[j];
 				double SY2 = ((pow(n, 3.0) - n) / 12.0) - Ly;
@@ -584,6 +581,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 	try {
 		
         LinearAlgebra linear;
+        vector<string> lookupGroups = lookupFloat->getNamesGroups();
         
 		//format data
 		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
@@ -626,15 +624,15 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		}
 		
 		//for each otu
-		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
+		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		
 			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
-			for (int j = 0; j < lookupFloat.size(); j++) {
-				spearmanRank member(lookupFloat[j]->getGroup(), lookupFloat[j]->getAbundance(i));
+			for (int j = 0; j < lookupFloat->size(); j++) {
+				spearmanRank member(lookupGroups[j], lookupFloat->get(i, lookupGroups[j]));
 				otuScores.push_back(member);
 			}
 						
@@ -726,7 +724,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 int CorrAxesCommand::getSharedFloat(InputData* input){
 	try {
 		lookupFloat = input->getSharedRAbundFloatVectors();
-		string lastLabel = lookupFloat[0]->getLabel();
+		string lastLabel = lookupFloat->getLabel();
 		
 		if (label == "") { label = lastLabel;  return 0; }
 		
@@ -736,35 +734,35 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat[0] != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
 			if (m->control_pressed) {  return 0;  }
 			
-			if(labels.count(lookupFloat[0]->getLabel()) == 1){
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+			if(labels.count(lookupFloat->getLabel()) == 1){
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookupFloat[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookupFloat->getLabel();
 				
-				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } 
+				delete lookupFloat;
 				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 				
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat[0]->setLabel(saveLabel);
+				lookupFloat->setLabel(saveLabel);
 				break;
 			}
 			
-			lastLabel = lookupFloat[0]->getLabel();			
+			lastLabel = lookupFloat->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } 
+			delete lookupFloat;
 			lookupFloat = input->getSharedRAbundFloatVectors();
 		}
 		
@@ -786,71 +784,14 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookupFloat.size(); i++) {  if (lookupFloat[i] != NULL) {	delete lookupFloat[i];	} } 
-			lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+            delete lookupFloat;
+			lookupFloat = input->getSharedRAbundFloatVectors();
 		}	
 		
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CorrAxesCommand", "getSharedFloat");	
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int CorrAxesCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundFloatVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		vector<string> newBinLabels;
-		string snumBins = toString(thislookup[0]->getNumBins());
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-			
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-				
-				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu";
-				string sbinNumber = toString(i+1);
-				if (sbinNumber.length() < snumBins.length()) { 
-					int diff = snumBins.length() - sbinNumber.length();
-					for (int h = 0; h < diff; h++) { binLabel += "0"; }
-				}
-				binLabel += sbinNumber; 
-				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-				
-				newBinLabels.push_back(binLabel);
-			}
-		}
-		
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-		
-		thislookup = newLookup;
-		m->currentSharedBinLabels = newBinLabels;
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "eliminateZeroOTUS");
 		exit(1);
 	}
 }
@@ -933,6 +874,7 @@ int CorrAxesCommand::getMetadata(){
 		int count = metadataLabels.size();
 			
 		//read rest of file
+        lookupFloat = new SharedRAbundFloatVectors();
 		while (!in.eof()) {
 			
 			if (m->control_pressed) { in.close(); return 0; }
@@ -941,40 +883,22 @@ int CorrAxesCommand::getMetadata(){
 			in >> group; m->gobble(in);
 			groupNames.push_back(group);
 				
-			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
-			tempLookup->setGroup(group);
+			RAbundFloatVector* tempLookup = new RAbundFloatVector();
 			tempLookup->setLabel("1");
-			
+        
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
 				in >> temp; 
-				tempLookup->push_back(temp, group);
+				tempLookup->push_back(temp);
 			}
-			
-			lookupFloat.push_back(tempLookup);
+            lookupFloat->push_back(tempLookup, group);
 			
 			m->gobble(in);
 		}
 		in.close();
 		
-		//remove any groups the user does not want, and set globaldata->groups with only valid groups
-		SharedUtil* util;
-		util = new SharedUtil();
-		Groups = m->getGroups();
-		util->setGroups(Groups, groupNames);
-		m->setGroups(Groups);
-		
-		for (int i = 0; i < lookupFloat.size(); i++) {
-			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util->isValidGroup(lookupFloat[i]->getGroup(), m->getGroups()) == false) { 
-				delete lookupFloat[i]; lookupFloat[i] = NULL;
-				lookupFloat.erase(lookupFloat.begin()+i); 
-				i--; 
-			}
-		}
-		
-		delete util;
-		
+        lookupFloat->eliminateZeroOTUS();
+        
 		return 0;
 	}
 	catch(exception& e) {

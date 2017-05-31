@@ -10,7 +10,7 @@
 #define Mothur_filtersharedcommand_h
 
 #include "command.hpp"
-#include "sharedrabundvector.h"
+
 #include "inputdata.h"
 
 

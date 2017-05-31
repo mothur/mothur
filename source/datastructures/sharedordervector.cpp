@@ -155,9 +155,6 @@ int SharedOrderVector::getMaxRank(){
 
 
 /***********************************************************************/
-
-
-
 void SharedOrderVector::set(int index, int binNumber, int abund, string groupName){
 	
 	data[index].group = groupName;

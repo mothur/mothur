@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput SorClass::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput SorClass::getValues(vector<RAbundVector*> shared) {
 	try {
 		double S1, S2, S12, tempA, tempB;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; 
@@ -23,8 +23,8 @@ EstOutput SorClass::getValues(vector<SharedRAbundVector*> shared) {
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared[0]->getAbundance(i);
-			tempB = shared[1]->getAbundance(i);
+			tempA = shared[0]->get(i);
+			tempB = shared[1]->get(i);
 
 			//find number of bins in shared1 and shared2
 			if (tempA != 0) { S1++; }

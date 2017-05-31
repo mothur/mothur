@@ -716,29 +716,28 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 		
 		//read first line
 		InputData input(filename, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-		
+		SharedRAbundVectors* shared = input.getSharedRAbundVectors();
+        groups = shared->getNamesGroups();
 		string sharedFileRoot = outputDir + m->getRootName(m->getSimpleName(filename));
 		
 		//clears file before we start to write to it below
-		for (int i=0; i<lookup.size(); i++) {
-			m->mothurRemove((sharedFileRoot + lookup[i]->getGroup() + ".sabund"));
-			filenames.push_back((sharedFileRoot + lookup[i]->getGroup() + ".sabund"));
-			groups.push_back(lookup[i]->getGroup());
+		for (int i=0; i<groups.size(); i++) {
+			m->mothurRemove((sharedFileRoot + groups[i] + ".sabund"));
+			filenames.push_back((sharedFileRoot + groups[i] + ".sabund"));
 		}
-		
-		while(lookup[0] != NULL) {
-			
+    
+		while(shared != NULL) {
+            vector<RAbundVector*> lookup = shared->getSharedRAbundVectors();
 			for (int i = 0; i < lookup.size(); i++) {
 				SAbundVector sav = lookup[i]->getSAbundVector();
 				ofstream out;
-				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".sabund", out);
+				m->openOutputFileAppend(sharedFileRoot + groups[i] + ".sabund", out);
 				sav.print(out);
 				out.close();
 			}
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input.getSharedRAbundVectors();
+            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } lookup[i] = NULL; }
+			shared = input.getSharedRAbundVectors();
 		}
 		
 		return filenames;

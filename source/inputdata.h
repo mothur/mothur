@@ -6,7 +6,8 @@
 #include "sharedlistvector.h"
 #include "sharedordervector.h"
 #include "listvector.hpp"
-#include "sharedrabundfloatvector.h"
+#include "sharedrabundvectors.hpp"
+#include "sharedrabundfloatvectors.hpp"
 
 
 class InputData {
@@ -28,11 +29,11 @@ public:
 	SAbundVector* getSAbundVector(string);  //pass the label you want
 	RAbundVector* getRAbundVector();
 	RAbundVector* getRAbundVector(string);  //pass the label you want
-	vector<SharedRAbundVector*> getSharedRAbundVectors();
-	vector<SharedRAbundVector*> getSharedRAbundVectors(string);  //pass the label you want
-	vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
-	vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors(string);  //pass the label you want
-	
+	SharedRAbundVectors* getSharedRAbundVectors();
+	SharedRAbundVectors* getSharedRAbundVectors(string);  //pass the label you want
+	SharedRAbundFloatVectors* getSharedRAbundFloatVectors();
+	SharedRAbundFloatVectors* getSharedRAbundFloatVectors(string);  //pass the label you want
+    
 private:
 	string format;
 	ifstream fileHandle;

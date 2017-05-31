@@ -12,7 +12,7 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
+#include "sharedrabundvectors.hpp"
 #include "mothurmetastats.h"
 #include "designmap.h"
 
@@ -39,8 +39,7 @@ private:
 	vector<linePair> lines;
 	
 	DesignMap* designMap;
-	InputData* input;
-	vector<SharedRAbundVector*> lookup;
+	SharedRAbundVectors* lookup;
 		
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
@@ -50,10 +49,10 @@ private:
 	int iters, processors;
 	float threshold;
 	
-	int process(vector<SharedRAbundVector*>&);
-	int driver(unsigned long long, unsigned long long, vector<SharedRAbundVector*>&);
+	int process(SharedRAbundVectors*);
+	int driver(unsigned long long, unsigned long long, SharedRAbundVectors*);
     int convertToShared(string filename);
-    int convertToInput(vector<SharedRAbundVector*>&, string);
+    int convertToInput(vector<RAbundVector*>&, vector<string>, string);
     bool convertSharedToInput;
 };
 
@@ -62,7 +61,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct metastatsData {
-    vector<SharedRAbundVector*> thisLookUp;
+    SharedRAbundVectors* thisLookUp;
     vector< vector<string> > namesOfGroupCombos;
     vector<string> designMapGroups;
     vector<string> outputNames;
@@ -74,7 +73,7 @@ struct metastatsData {
     string outputDir;
 	
 	metastatsData(){}
-	metastatsData(string sf, string oDir, MothurOut* mout, int st, int en, vector< vector<string> > ns, vector<SharedRAbundVector*> lu, vector<string> dg, int i, float thr) {
+	metastatsData(string sf, string oDir, MothurOut* mout, int st, int en, vector< vector<string> > ns, SharedRAbundVectors* lu, vector<string> dg, int i, float thr) {
 		sharedfile = sf;
         outputDir = oDir;
 		m = mout;
@@ -97,6 +96,9 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 	
 	try {
 		
+        vector<string> thisLookupNames = pDataArray->thisLookUp->getNamesGroups();
+        vector<RAbundVector*> thisLookupRabunds = pDataArray->thisLookUp->getSharedRAbundVectors();
+        
         //for each combo
 		for (int c = pDataArray->start; c < (pDataArray->start+pDataArray->num); c++) {
 			pDataArray->count++;
@@ -110,17 +112,17 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			
 			vector< vector<double> > data2; data2.resize(pDataArray->thisLookUp[0]->getNumBins());
 			
-			vector<SharedRAbundVector*> subset;
+			vector<RAbundVector*> subset;
 			int setACount = 0;
 			int setBCount = 0;
 			for (int i = 0; i < pDataArray->thisLookUp.size(); i++) {
 				//is this group for a set we want to compare??
 				//sorting the sets by putting setB at the back and setA in the front
 				if (pDataArray->designMapGroups[i] == setB) {  
-					subset.push_back(pDataArray->thisLookUp[i]);
+                    subset.push_back(thisLookupRabunds[i]);
 					setBCount++;
 				}else if (pDataArray->designMapGroups[i] == setA) {
-					subset.insert(subset.begin()+setACount, pDataArray->thisLookUp[i]);
+                    subset.insert(subset.begin()+setACount, thisLookupRabunds[i]);
 					setACount++;
 				}
 			}
@@ -147,6 +149,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			}
         }
 		
+        for(int i = 0; i < thisLookupRabunds.size(); i++)  {  delete thisLookupRabunds[i];  }
 		return 0;
 		
 	}

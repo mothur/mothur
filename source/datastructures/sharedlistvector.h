@@ -13,8 +13,8 @@
 #include "datavector.hpp"
 #include "groupmap.h"
 #include "counttable.h"
-#include "sharedrabundvector.h"
-#include "sharedsabundvector.h"
+#include "sharedrabundvectors.hpp"
+#include "sharedrabundfloatvectors.hpp"
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A sharedlistvector can be converted into a sharedordervector, sharedrabundvector or sharedsabundvectorand 
@@ -55,8 +55,8 @@ public:
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector* getSharedOrderVector();
 	SharedRAbundVector getSharedRAbundVector(string);  //get sharedrabundvector for a certain group
-	SharedSAbundVector getSharedSAbundVector(string);			//get sharedsabundvector for a certain group
-	vector<SharedRAbundVector*> getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
+	SharedRAbundVectors* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
+    SharedRAbundFloatVectors* getSharedRAbundFloatVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.

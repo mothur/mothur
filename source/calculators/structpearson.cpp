@@ -10,7 +10,7 @@
 #include "structpearson.h"
 
 /***********************************************************************/
-EstOutput StructPearson::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput StructPearson::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -23,8 +23,8 @@ EstOutput StructPearson::getValues(vector<SharedRAbundVector*> shared) {
 		double denomTerm2 = 0.0;
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			int Aij =  shared[0]->getAbundance(i);
-			int Bij =  shared[1]->getAbundance(i);
+			int Aij =  shared[0]->get(i);
+			int Bij =  shared[1]->get(i);
 			
 			
 			numTerm += ((Aij - averageA) * (Bij - averageB));

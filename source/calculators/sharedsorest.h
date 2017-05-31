@@ -22,7 +22,7 @@ class SorEst : public Calculator  {
 public:
 	SorEst() :  Calculator("sorest", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<SharedRAbundVector*>);
+	EstOutput getValues(vector<RAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Sorest"; }
 private:
 	

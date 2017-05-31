@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Odum::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Odum::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,8 +20,8 @@ EstOutput Odum::getValues(vector<SharedRAbundVector*> shared) {
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			sumNum += abs(Aij - Bij);
 			sumDenom += (Aij + Bij);

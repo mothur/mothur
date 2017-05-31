@@ -12,8 +12,6 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
-
 
 class GetRelAbundCommand : public Command {
 
@@ -37,14 +35,14 @@ public:
 	
 private:
 	InputData* input;
-	vector<SharedRAbundVector*> lookup;
+	SharedRAbundVectors* lookup;
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, scale, sharedfile;
 	vector<string> Groups, outputNames;
 	
-	int getRelAbundance(vector<SharedRAbundVector*>&, ofstream&);
+	int getRelAbundance(SharedRAbundVectors*, ofstream&);
 
 };
 

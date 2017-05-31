@@ -14,7 +14,7 @@
 #include "command.hpp"
 #include "trialswap2.h"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
+
 
 
 class CooccurrenceCommand : public Command {
@@ -46,7 +46,7 @@ private:
     vector<string> outputNames, Groups;
     int runs;
     
-    int getCooccurrence(vector<SharedRAbundVector*>&, ofstream&);
+    int getCooccurrence(SharedRAbundVectors*, ofstream&);
 	
 };
 

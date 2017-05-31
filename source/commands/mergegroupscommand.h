@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
+
 #include "designmap.h"
 
 class MergeGroupsCommand : public Command {

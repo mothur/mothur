@@ -10,7 +10,7 @@
 #include "hamming.h"
 
 /***********************************************************************/
-EstOutput Hamming::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Hamming::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,8 +20,8 @@ EstOutput Hamming::getValues(vector<SharedRAbundVector*> shared) {
 		
 		//calc the 2 denominators
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			int A = shared[0]->getAbundance(i);
-			int B = shared[1]->getAbundance(i);
+			int A = shared[0]->get(i);
+			int B = shared[1]->get(i);
 			
 			if (A != 0) { numA++; }
 			if (B != 0) { numB++; }

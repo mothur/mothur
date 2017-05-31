@@ -20,7 +20,7 @@ class MemChord : public Calculator  {
 public:
 	MemChord() :  Calculator("memchord", 1, false) {};  
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<SharedRAbundVector*>);
+	EstOutput getValues(vector<RAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Memchord"; }
 private:
 	

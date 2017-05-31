@@ -10,7 +10,7 @@
 #include "sharedthetayc.h"
 
 /***********************************************************************/
-EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput ThetaYC::getValues(vector<RAbundVector*> shared) {
 	try {	
 		data.resize(3,0.0000);
 		
@@ -31,15 +31,15 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		//get the total values we need to calculate the theta denominator sums
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			Atotal += (double)shared[0]->getAbundance(i);
-			Btotal += (double)shared[1]->getAbundance(i);
+			Atotal += (double)shared[0]->get(i);
+			Btotal += (double)shared[1]->get(i);
 		}
 		
 		//calculate the theta denominator sums
 		for (int j = 0; j < shared[0]->getNumBins(); j++) {
 			//store in temps to avoid multiple repetitive function calls
-			pi = shared[0]->getAbundance(j) / Atotal;
-			qi = shared[1]->getAbundance(j) / Btotal;
+			pi = shared[0]->get(j) / Atotal;
+			qi = shared[1]->get(j) / Btotal;
 					
 			a += pi * pi;
 			b += qi * qi;

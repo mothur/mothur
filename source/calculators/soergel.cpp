@@ -10,7 +10,7 @@
 #include "soergel.h"
 
 /***********************************************************************/
-EstOutput Soergel::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Soergel::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,8 +20,8 @@ EstOutput Soergel::getValues(vector<SharedRAbundVector*> shared) {
 		//calc the 2 denominators
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			sumNum += abs((Aij - Bij));
 			sumMax += max(Aij, Bij);

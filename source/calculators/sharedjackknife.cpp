@@ -32,7 +32,7 @@ double* SharedJackknife::jackknife(){
 	double numInd = 0;
 	for(int i = 0; i < numGroups; i++)
 		for(int j = 0; j < numBins; j++) {
-			int curAbund = groups.at(i)->get(j+1).abundance;
+			int curAbund = groups.at(i)->get(j+1);
 			cArray[j] += curAbund;
 			numInd += (double)curAbund;
 		}
@@ -43,9 +43,9 @@ double* SharedJackknife::jackknife(){
 	double jackknifeEstimate = 0;
 	for(int i = 0; i < numGroups; i++) {
 		for(int j = 0; j < numBins-1; j++) {
-			int abundDiff = -groups.at(i)->get(j+1).abundance;
+			int abundDiff = -groups.at(i)->get(j+1);
 			if(i > 0)
-				abundDiff += groups.at(i-1)->get(j+1).abundance;
+				abundDiff += groups.at(i-1)->get(j+1);
 
 			cArray[j] += abundDiff;
 			numInd += abundDiff;	
@@ -124,10 +124,8 @@ double SharedJackknife::getConfLimit(int row, int col) //Rows are the degrees of
 
 /************************************************************************************************/
 
-EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ //Fix this for collect, mistake was that it was made with summary in mind.
+EstOutput SharedJackknife::getValues(vector<RAbundVector*> vectorShared){ //Fix this for collect, mistake was that it was made with summary in mind.
 	try {
-		SharedRAbundVector* shared1 = vectorShared[0];
-		SharedRAbundVector* shared2 = vectorShared[1];
 		if(numGroups == -1) {
 			numGroups = m->getNumGroups();
 		}
@@ -144,9 +142,10 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 		}
 		
 		if(groups.size() != numGroups) {	
-			if(groups.size() == 0)
-				groups.push_back(shared1);
-			groups.push_back(shared2);
+            if(groups.size() == 0)
+				groups.push_back(vectorShared[0]);
+            groups.push_back(vectorShared[1]);
+            
 		}
 		
 		if(groups.size() == numGroups && callCount < numGroups) {

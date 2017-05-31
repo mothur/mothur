@@ -2,7 +2,6 @@
 #define COLLECTDISPLAY_H
 
 #include "sabundvector.hpp"
-#include "sharedsabundvector.h"
 #include "calculator.h"
 #include "fileoutput.h"
 #include "display.h"
@@ -23,7 +22,7 @@ public:
 		output->output(nSeqs, data);	
 	};
 	
-	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups){
+	void update(vector<RAbundVector*> shared, int numSeqs, vector<string> groups){
 		timesCalled++;
 		data = estimate->getValues(shared);  //passes estimators a shared vector from each group to be compared
 		
@@ -33,11 +32,12 @@ public:
 		
 		vector<string> mGroups = m->getGroups();
 		for (int i = 0; i < mGroups.size(); i++) {
-			if (shared[0]->getGroup() == mGroups[i]) { group1Index = i; }
-			if (shared[1]->getGroup() == mGroups[i]) { group2Index = i; }
+			if (groups[0] == mGroups[i]) { group1Index = i; }
+			if (groups[1] == mGroups[i]) { group2Index = i; }
 		}
 		
 		numGroupComb = 0;
+        int numGroups = groups.size();
 		int n = 1;
 		for (int i = 0; i < (numGroups - 1); i++) {
 			for (int l = n; l < numGroups; l++) {

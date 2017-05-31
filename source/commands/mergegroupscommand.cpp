@@ -334,7 +334,7 @@ int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstrea
         
         if (method == "average") {
             //create sharedRabundFloatVectors
-            vector<SharedRAbundFloatVector*> temp = thisLookUp[0]->getSharedRAbundFloatVectors(thisLookUp);
+            vector<SharedRAbundFloatVector*> temp = thisLookUp->getSharedRAbundFloatVectors();
             
             //follow code below
             map<string, SharedRAbundFloatVector> merged;

@@ -14,7 +14,7 @@
 
 /***********************************************************************/
 
-EstOutput Jest::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Jest::getValues(vector<RAbundVector*> shared) {
 	try {
 		EstOutput S1, S2, S12;
 		S12.resize(1,0);

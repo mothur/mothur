@@ -22,7 +22,7 @@ class ThetaYC : public Calculator  {
 public:
 	ThetaYC() :  Calculator("thetayc", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<SharedRAbundVector*>);
+	EstOutput getValues(vector<RAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Thetayc"; }
 private:
 	

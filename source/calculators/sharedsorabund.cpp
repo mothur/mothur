@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 
-EstOutput SorAbund::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput SorAbund::getValues(vector<RAbundVector*> shared) {
 	try {
 		EstOutput UVest;
 		UVest.resize(2,0);

@@ -179,51 +179,51 @@ int GetRelAbundCommand::execute(){
 		
 		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->control_pressed) {  outputTypes.clear();  delete lookup; m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 	
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
 				getRelAbundance(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 			
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
 				getRelAbundance(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			delete lookup;
 			
 			if (m->control_pressed) {  outputTypes.clear();  m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();				
+			lookup = input->getSharedRAbundVectors();
 		}
 		
 		if (m->control_pressed) { outputTypes.clear(); m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
@@ -243,14 +243,14 @@ int GetRelAbundCommand::execute(){
 	
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+            delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			if (!m->printedSharedHeaders) { lookup[0]->printHeaders(out); }
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
 			getRelAbundance(lookup, out);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
 	
 		//reset groups parameter
@@ -281,34 +281,32 @@ int GetRelAbundCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
+int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors* thisLookUp, ofstream& out){
 	try {
-		
-		 for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins();
+        vector<string> groups = thisLookUp->getNamesGroups();
+		 for (int i = 0; i < thisLookUp->size(); i++) {
+			out << thisLookUp->getLabel() << '\t' << groups[i] << '\t' << thisLookUp->getNumBins();
 			
-			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
+			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 			
 				if (m->control_pressed) { return 0; }
 			
-				int abund = thisLookUp[i]->getAbundance(j);
+				int abund = thisLookUp->get(j, groups[i]);
 				
 				float relabund = 0.0;
 				
 				if (scale == "totalgroup") { 
-					relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+					relabund = abund / (float) thisLookUp->getNumSeqs(groups[i]);
 				}else if (scale == "totalotu") {
 					//calc the total in this otu
-					int totalOtu = 0;
-					for (int l = 0; l < thisLookUp.size(); l++) {  totalOtu += thisLookUp[l]->getAbundance(j); }
+					int totalOtu = thisLookUp->getOTUTotal(j);
 					relabund = abund / (float) totalOtu;
 				}else if (scale == "averagegroup") {
-					relabund = abund / (float) (thisLookUp[i]->getNumSeqs() / (float) thisLookUp[i]->getNumBins());
+					relabund = abund / (float) (thisLookUp->getNumSeqs(groups[i]) / (float) thisLookUp->getNumBins());
 				}else if (scale == "averageotu") {
 					//calc the total in this otu
-					int totalOtu = 0;
-					for (int l = 0; l < thisLookUp.size(); l++) {  totalOtu += thisLookUp[l]->getAbundance(j); }
-					float averageOtu = totalOtu / (float) thisLookUp.size();
+					int totalOtu = thisLookUp->getOTUTotal(j);
+					float averageOtu = totalOtu / (float) thisLookUp->size();
 					
 					relabund = abund / (float) averageOtu;
 				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }

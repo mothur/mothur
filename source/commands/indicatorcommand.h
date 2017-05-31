@@ -13,8 +13,8 @@
 #include "command.hpp"
 #include "readtree.h"
 #include "counttable.h"
-#include "sharedrabundvector.h"
-#include "sharedrabundfloatvector.h"
+
+
 #include "inputdata.h"
 #include "designmap.h"
 
@@ -44,26 +44,26 @@ private:
 	bool abort;
 	int iters, processors;
 	vector<string> outputNames, Groups;
-	vector<SharedRAbundVector*> lookup;
-	vector<SharedRAbundFloatVector*> lookupFloat;
+	SharedRAbundVectors* lookup;
+	SharedRAbundFloatVectors* lookupFloat;
 	
 	int getShared();
 	int getSharedFloat();
 	int GetIndicatorSpecies(Tree*&);
 	int GetIndicatorSpecies();
 	set<string> getDescendantList(Tree*&, int, map<int, set<string> >, map<int, set<int> >&);
-	vector<float> getValues(vector< vector<SharedRAbundVector*> >&, vector<string>&, map< vector<int>, vector<int> >);
-	vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >&, vector<string>&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<RAbundVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
     
 	map<int, float> getDistToRoot(Tree*&);
-	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundVector*> >&, int);
-	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >&, int);
+	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<RAbundVector*> >&, int);
+	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<RAbundFloatVector*> >&, int);
     
-	vector<float> driver(vector< vector<SharedRAbundFloatVector*> >&, int, vector<float>, int);
-	vector<float> driver(vector< vector<SharedRAbundVector*> >&, int, vector<float>, int);
+	vector<float> driver(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>, int);
+	vector<float> driver(vector< vector<RAbundVector*> >&, vector< vector<string> >&, int, vector<float>, int);
     
-	vector<float> getPValues(vector< vector<SharedRAbundFloatVector*> >&, int, vector<float>);
-	vector<float> getPValues(vector< vector<SharedRAbundVector*> >&, int, vector<float>);
+	vector<float> getPValues(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>);
+	vector<float> getPValues(vector< vector<RAbundVector*> >&, vector< vector<string> >&, int, vector<float>);
 
 	
 };
@@ -71,14 +71,14 @@ private:
 /**************************************************************************************************/
 
 struct indicatorData {
-    vector< vector<SharedRAbundFloatVector*> > groupings;
+    vector< vector<RAbundFloatVector*> > groupings;
    	MothurOut* m;
     int iters, num;
     vector<float> indicatorValues;
     vector<float> pvalues;
 	
 	indicatorData(){}
-	indicatorData(MothurOut* mout, int it, vector< vector<SharedRAbundFloatVector*> > ng, int n, vector<float> iv) {
+	indicatorData(MothurOut* mout, int it, vector< vector<RAbundFloatVector*> > ng, int n, vector<float> iv) {
 		m = mout;
         iters = it;
         groupings = ng;
@@ -148,11 +148,11 @@ static DWORD WINAPI MyIndicatorThreadFunction(LPVOID lpParam){
                         it = randomGroupings.find(temp);
                         
                         if (it == randomGroupings.end()) { //this one didnt get moved
-                            totalAbund += pDataArray->groupings[j][k]->getAbundance(i);
-                            if (pDataArray->groupings[j][k]->getAbundance(i) != 0.0) { numNotZero++; }
+                            totalAbund += pDataArray->groupings[j][k]->get(i);
+                            if (pDataArray->groupings[j][k]->get(i) != 0.0) { numNotZero++; }
                         }else {
-                            totalAbund += pDataArray->groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i);
-                            if (pDataArray->groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i) != 0.0) { numNotZero++; }
+                            totalAbund += pDataArray->groupings[(it->second)[0]][(it->second)[1]]->get(i);
+                            if (pDataArray->groupings[(it->second)[0]][(it->second)[1]]->get(i) != 0.0) { numNotZero++; }
                         }
                         
                     }

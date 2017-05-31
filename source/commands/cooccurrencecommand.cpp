@@ -183,9 +183,9 @@ int CooccurrenceCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData* input = new InputData(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		InputData input(sharedfile, "sharedfile");
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -201,46 +201,45 @@ int CooccurrenceCommand::execute(){
         out << "metric\tlabel\tScore\tzScore\tstandardDeviation\tnp_Pvalue\n";
 
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } delete input; out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->control_pressed) { delete lookup; out.close(); m->mothurRemove(outputFileName); return 0; }
 	
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				getCooccurrence(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 			
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				delete lookup;
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				getCooccurrence(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			lastLabel = lookup->getLabel();
+			delete lookup;
 			
-			if (m->control_pressed) {  outputTypes.clear(); delete input; out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();				
+			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { delete input; out.close(); m->mothurRemove(outputFileName); return 0; }
+		if (m->control_pressed) { out.close(); m->mothurRemove(outputFileName); return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -257,20 +256,19 @@ int CooccurrenceCommand::execute(){
 	
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			delete lookup;
+			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			
 			getCooccurrence(lookup, out);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
 	
         out.close(); 
         
-		//reset groups parameter 
-		delete input; 
+		//reset groups parameter
         m->clearGroups(); 
 
         m->mothurOutEndLine();
@@ -287,24 +285,26 @@ int CooccurrenceCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
+int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors* thisLookUp, ofstream& out){
     try {
-        int numOTUS = thisLookUp[0]->getNumBins();
+        int numOTUS = thisLookUp->getNumBins();
         
         if(numOTUS < 2) {
             m->mothurOut("Not enough OTUs for co-occurrence analysis, skipping"); m->mothurOutEndLine();
             return 0;
         }
         
-        vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
-        for (int i = 0; i < thisLookUp[0]->getNumBins(); i++) { co_matrix[i].resize((thisLookUp.size()), 0); }
-        vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
+        vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp->getNumBins());
+        for (int i = 0; i < thisLookUp->getNumBins(); i++) { co_matrix[i].resize((thisLookUp->size()), 0); }
+        vector<int> columntotal; columntotal.resize(thisLookUp->size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
-        for (int i = 0; i < thisLookUp.size(); i++) { //nrows in the shared file
-            for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) { //cols of original shared file
+        
+        vector<RAbundVector*> temp;
+        for (int i = 0; i < thisLookUp->size(); i++) { //nrows in the shared file
+            for (int j = 0; j < temp[i]->getNumBins(); j++) { //cols of original shared file
                 if (m->control_pressed) { return 0; }
-                int abund = thisLookUp[i]->getAbundance(j);
+                int abund = temp[i]->get(j);
                 
                 if(abund > 0) {
                     co_matrix[j][i] = 1;
@@ -313,11 +313,12 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 }
             }
         }
+        for (int i = 0; i < temp.size(); i++) { delete temp[i]; }
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
         //comatrix and initmatrix are still vectors of vectors of ints as in the original script. The abundancevector is only what was read in ie not a co-occurrence matrix!
         int nrows = numOTUS;//rows of inital matrix
-        int ncols = thisLookUp.size();//groups
+        int ncols = thisLookUp->size();//groups
         double initscore = 0.0;
        
         vector<double> stats;
@@ -568,7 +569,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         m->mothurOut("zscore: " + toString(zscore)); m->mothurOutEndLine();
         m->mothurOut("standard deviation: " + toString(sd)); m->mothurOutEndLine();
         m->mothurOut("non-parametric p-value: " + toString(pvalue)); m->mothurOutEndLine();
-        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore << '\t' << sd << '\t' << pvalue << endl;
+        out << metric << '\t' << thisLookUp->getLabel() << '\t' << nullMean << '\t' << zscore << '\t' << sd << '\t' << pvalue << endl;
         
         return 0;
     }

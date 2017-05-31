@@ -601,33 +601,34 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		map<string, string>::iterator it3;
 					
 		input = new InputData(filename, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
+		SharedRAbundVectors* shared = input->getSharedRAbundVectors();
 		
 		string sharedFileRoot = m->getRootName(filename);
+        vector<string> groups = shared->getNamesGroups();
 		
 		//clears file before we start to write to it below
-		for (int i=0; i<lookup.size(); i++) {
+		for (int i=0; i<groups.size(); i++) {
             ofstream temp;
-            string group = lookup[i]->getGroup();
+            string group = groups[i];
 			m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
 			filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
             groups.push_back(group);
 		}
 		
-		while(lookup[0] != NULL) {
-		
+		while(shared != NULL) {
+            
+            vector<RAbundVector*> lookup = shared->getSharedRAbundVectors();
 			for (int i = 0; i < lookup.size(); i++) {
-				RAbundVector rav = lookup[i]->getRAbundVector();
                 ofstream temp;
-                string group = lookup[i]->getGroup();
+                string group = groups[i];
 				m->openOutputFileAppend(files[group], temp);
-				rav.print(temp);
+				lookup[i]->print(temp);
 				temp.close();
 			}
 		
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input->getSharedRAbundVectors();
+            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } lookup[i] = NULL; }
+			shared = input->getSharedRAbundVectors();
 		}
 		
 		delete input;

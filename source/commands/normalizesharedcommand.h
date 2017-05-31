@@ -12,7 +12,7 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
+
 
 class NormalizeSharedCommand : public Command {
 
@@ -36,21 +36,14 @@ public:
 	
 	
 private:
-	InputData* input;
-	vector<SharedRAbundVector*> lookup;
-	vector<SharedRAbundFloatVector*> lookupFloat;
-	
 	bool abort, allLines, pickedGroups, makeRelabund;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, method, sharedfile, relabundfile, format, inputfile;
 	int norm;
 	vector<string> Groups, outputNames;
 		
-	int normalize(vector<SharedRAbundVector*>&);
-	int normalize(vector<SharedRAbundFloatVector*>&);
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
-	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
-
+	int normalize(SharedRAbundVectors*);
+	int normalize(SharedRAbundFloatVectors*);
 };
 
 #endif

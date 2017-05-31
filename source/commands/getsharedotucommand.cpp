@@ -613,8 +613,8 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 int GetSharedOTUCommand::runShared() {
 	try {
         InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
         
         if (Groups.size() == 0) {
             Groups = m->getGroups();
@@ -641,48 +641,48 @@ int GetSharedOTUCommand::runShared() {
 		set<string> userLabels = labels;
         
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) {
                 outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-                for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } m->clearGroups(); return 0;
+                delete lookup; m->clearGroups(); return 0;
 			}
             
             
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
-				m->mothurOut(lookup[0]->getLabel()); 
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+				m->mothurOut(lookup->getLabel());
 				process(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup[0]->getLabel()); 
+                m->mothurOut(lookup->getLabel());
                 process(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
+                lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
             
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 			lookup = input.getSharedRAbundVectors();
 		}
 		
 		if (m->control_pressed) {
             outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-            for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } m->clearGroups(); return 0;
+            delete lookup; m->clearGroups(); return 0;
         }
         
 		//output error messages about any remaining user labels
@@ -700,12 +700,12 @@ int GetSharedOTUCommand::runShared() {
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} }
+            delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
-            m->mothurOut(lookup[0]->getLabel()); 
+            m->mothurOut(lookup->getLabel());
             process(lookup);
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+            delete lookup;
 		}
         
 		//reset groups parameter
@@ -720,14 +720,14 @@ int GetSharedOTUCommand::runShared() {
 	}
 }
 /***********************************************************/
-int GetSharedOTUCommand::process(vector<SharedRAbundVector*>& lookup) {
+int GetSharedOTUCommand::process(SharedRAbundVectors* lookup) {
 	try {
 		
 		string outputFileNames;
 		if (outputDir == "") { outputDir += m->hasPath(sharedfile); }
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         variables["[group]"] = userGroups;
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
 		else { outputFileNames = getOutputFileName("accnos", variables); }
@@ -739,7 +739,7 @@ int GetSharedOTUCommand::process(vector<SharedRAbundVector*>& lookup) {
 		int num = 0;
         
 		//go through each bin, find out if shared
-		for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+		for (int i = 0; i < lookup->getNumBins(); i++) {
 			if (m->control_pressed) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
@@ -748,13 +748,15 @@ int GetSharedOTUCommand::process(vector<SharedRAbundVector*>& lookup) {
 			
 			set<string> namesOfGroupsInThisBin;
 			
-			for(int j = 0; j < lookup.size(); j++) {
-				string seqGroup = lookup[j]->getGroup();
+            vector<string> groupNames = lookup->getNamesGroups();
+			for(int j = 0; j < lookup->size(); j++) {
+				string seqGroup = groupNames[j];
                 string name = m->currentSharedBinLabels[i];
+                int abund = lookup->get(i, seqGroup);
 				
-                if (lookup[j]->getAbundance(i) != 0) {
+                if (abund != 0) {
                     if (output != "accnos") {
-                        namesOfGroupsInThisBin.insert(name + "|" + seqGroup + "|" + toString(lookup[j]->getAbundance(i)));
+                        namesOfGroupsInThisBin.insert(name + "|" + seqGroup + "|" + toString(abund));
                     }else {  namesOfGroupsInThisBin.insert(name);	}
                     
                     //is this seq in one of the groups we care about

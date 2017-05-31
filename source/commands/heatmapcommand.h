@@ -42,8 +42,8 @@ public:
 private:
 	InputData* input;
 	RAbundVector* rabund;
-	vector<SharedRAbundVector*> lookup;
-	vector<SharedRAbundFloatVector*> lookupFloat;
+	SharedRAbundVectors* lookup;
+	SharedRAbundFloatVectors* lookupFloat;
 	HeatMap* heatmap;
 
 	bool abort, allLines;

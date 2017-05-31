@@ -11,7 +11,7 @@
 /***********************************************************************/
 //KLD <- function(x,y) sum(x *log(x/y))
 //JSD<- function(x,y) sqrt(0.5 * KLD(x, (x+y)/2) + 0.5 * KLD(y, (x+y)/2))
-EstOutput RJSD::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput RJSD::getValues(vector<RAbundVector*> shared) {
 	try {
         
 		data.resize(1,0);
@@ -19,22 +19,15 @@ EstOutput RJSD::getValues(vector<SharedRAbundVector*> shared) {
         double KLD1 = 0.0;
         double KLD2 = 0.0;
         
-        vector<int> countA = shared[0]->getAbundances();
-        vector<int> countB = shared[1]->getAbundances();
-        double totalA = 0;
-        double totalB = 0;
-        
-		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-            totalA += countA[i];
-            totalB += countB[i];
-        }
+        double totalA = shared[0]->getNumSeqs();
+        double totalB = shared[1]->getNumSeqs();
         
         for (int i = 0; i < shared[0]->getNumBins(); i++) {
-            double tempA = countA[i] / totalA;
-            double tempB = countB[i] / totalB;
+            double tempA = shared[0]->get(i) / totalA;
+            double tempB = shared[1]->get(i) / totalB;
             
-            tempA = countA[i] / totalA;
-            tempB = countB[i] / totalB;
+            tempA = shared[0]->get(i) / totalA;
+            tempB = shared[1]->get(i) / totalB;
             
             if (tempA == 0) { tempA = 0.000001; }
             if (tempB == 0) { tempB = 0.000001; }

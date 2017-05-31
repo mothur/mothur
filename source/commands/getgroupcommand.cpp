@@ -119,13 +119,14 @@ int GetgroupCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 					
 		InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-		
-		for (int i = 0; i < lookup.size(); i++) {
-			m->mothurOut(lookup[i]->getGroup()); m->mothurOutEndLine();
-			delete lookup[i];
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        delete lookup;
+        
+		for (int i = 0; i < namesOfGroups.size(); i++) {
+			m->mothurOut(namesOfGroups[i]); m->mothurOutEndLine();
 		}
-			
+    
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOutEndLine();

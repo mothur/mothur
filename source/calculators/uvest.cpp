@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 //This is used by SharedJAbund and SharedSorAbund
-EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
+EstOutput UVEst::getUVest(vector<RAbundVector*> shared) {
 	try {	
 		EstOutput results;
 		results.resize(2,0);
@@ -31,8 +31,8 @@ EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared[0]->getAbundance(i);
-			tempB = shared[1]->getAbundance(i);
+			tempA = shared[0]->get(i);
+			tempB = shared[1]->get(i);
 
 			Atotal += tempA;
 			Btotal += tempB;

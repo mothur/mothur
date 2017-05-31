@@ -20,7 +20,7 @@ class Hellinger : public Calculator  {
 public:
 	Hellinger() :  Calculator("hellinger", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<SharedRAbundVector*>);
+	EstOutput getValues(vector<RAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Hellinger"; }
 private:
 	

@@ -10,7 +10,7 @@
 #include "mempearson.h"
 
 /***********************************************************************/
-EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput MemPearson::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,8 +20,8 @@ EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 		
 		//for each otu
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			if (shared[0]->getAbundance(i) != 0) { nonZeroA++; }
-			if (shared[1]->getAbundance(i) != 0) { nonZeroB++; }
+			if (shared[0]->get(i) != 0) { nonZeroA++; }
+			if (shared[1]->get(i) != 0) { nonZeroB++; }
 		}
 		
 		double numTerm = 0.0;
@@ -31,8 +31,8 @@ EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 		double averageB = nonZeroB / (float) numOTUS;
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			int Aij =  shared[0]->getAbundance(i);
-			int Bij =  shared[1]->getAbundance(i);
+			int Aij =  shared[0]->get(i);
+			int Bij =  shared[1]->get(i);
 			
 			if (Aij > 0) { Aij = 1; }
 			if (Bij > 0) { Bij = 1; }

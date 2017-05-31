@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "groupmap.h"
-#include "sharedrabundvector.h"
+
 
 class CountSeqsCommand : public Command {
 	

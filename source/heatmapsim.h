@@ -10,7 +10,7 @@
  */
 
 
-#include "sharedrabundvector.h"
+
 #include "datavector.hpp"
 #include "calculator.h"
 
@@ -22,7 +22,7 @@ class HeatMapSim {
 		HeatMapSim(string, string, int);
 		~HeatMapSim(){};
 	
-		vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+		vector<string> getPic(vector<RAbundVector*>, vector<Calculator*>, vector<string>);
 		string getPic(vector< vector<double> >, vector<string>);
 
 	private:

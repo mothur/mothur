@@ -289,10 +289,10 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         vector<Display*> rDisplays;
         
         InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
-        if (lookup.size() < 2) { 
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        if (lookup->size() < 2) {
 			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
-            for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+            delete lookup;
             return 0;
         }
         
@@ -305,42 +305,33 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             fileNameRoot += thisSet + ".";
         }
         
-        vector<SharedRAbundVector*> subset;
-        if (thisSet == "") {  subset.clear(); subset = lookup;  }
-        else {//fill subset with this sets groups
-            subset.clear();
-            for (int i = 0; i < lookup.size(); i++) {
-                if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
-                    subset.push_back(lookup[i]);
-                }
-            }
-        }
+        SharedRAbundVectors* subset = new SharedRAbundVectors();
+        vector<string> lookupGroups = lookup->getNamesGroups();
+        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        if (thisSet != "") {//remove unwanted groups
+            for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+            subset->eliminateZeroOTUS();
+        }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+        
 
         /******************************************************/
-        if (subsample) { 
-            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = subset[0]->getNumSeqs();
-                for (int i = 1; i < subset.size(); i++) {
-                    int thisSize = subset[i]->getNumSeqs();
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
-            }else {
+        if (subsample) {
+            //user has not set size, set size = smallest samples size
+            if (subsampleSize == -1) { subsampleSize = subset->getNumSeqsSmallestGroup(); }
+            else {
+                vector<string> lookupGroups = subset->getNamesGroups();
                 newGroups.clear();
-                vector<SharedRAbundVector*> temp;
-                for (int i = 0; i < subset.size(); i++) {
-                    if (subset[i]->getNumSeqs() < subsampleSize) { 
-                        m->mothurOut(subset[i]->getGroup() + " contains " + toString(subset[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-                        delete subset[i];
-                    }else { 
-                        newGroups.push_back(subset[i]->getGroup()); 
-                        temp.push_back(subset[i]);
-                    }
-                } 
-                subset = temp;
+                vector<string> temp;
+                for (int i = 0; i < lookupGroups.size(); i++) {
+                    if (lookup->getNumSeqs(lookupGroups[i]) < subsampleSize) {
+                        m->mothurOut(lookupGroups[i] + " contains " + toString(subset->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
+                        temp.push_back(lookupGroups[i]);
+                    }else { newGroups.push_back(lookupGroups[i]); }
+                }
+                subset->removeGroups(temp);
             }
             
-            if (subset.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+            if (subset->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
         }
         /******************************************************/
         
@@ -361,90 +352,87 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		}
 		
 		//if the users entered no valid calculators don't execute command
-		if (rDisplays.size() == 0) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+        if (rDisplays.size() == 0) { delete lookup;  delete subset; return 0; }
 		
 		if (m->control_pressed) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup; delete subset;
 			return 0;
 		}
         
         
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        string lastLabel = subset[0]->getLabel();
+        string lastLabel = subset->getLabel();
 		set<string> processedLabels;
 		set<string> userLabels = labels;
         
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((subset[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((subset != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+                delete lookup; delete subset;
 				return 0;
 			}
 			
-			if(allLines == 1 || labels.count(subset[0]->getLabel()) == 1){
-				m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-				rCurve = new Rarefact(subset, rDisplays);
+			if(allLines == 1 || labels.count(subset->getLabel()) == 1){
+				m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+                vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+				rCurve = new Rarefact(rabunds, rDisplays);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
+                for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
                 
                 if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                     
-				processedLabels.insert(subset[0]->getLabel());
-				userLabels.erase(subset[0]->getLabel());
+				processedLabels.insert(subset->getLabel());
+				userLabels.erase(subset->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(subset[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = subset[0]->getLabel();
+			if ((m->anyLabelsToProcess(subset->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = subset->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+                delete subset;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                if (thisSet == "") {  subset.clear(); subset = lookup;  }
-                else {//fill subset with this sets groups
-                    subset.clear();
-                    for (int i = 0; i < lookup.size(); i++) {
-                        if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
-                            subset.push_back(lookup[i]);
-                        }
-                    }
-                }
-
-                m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                rCurve = new Rarefact(subset, rDisplays);
+                subset = new SharedRAbundVectors();
+                vector<string> lookupGroups = lookup->getNamesGroups();
+                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                if (thisSet != "") {//remove unwanted groups
+                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    subset->eliminateZeroOTUS();
+                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+                
+                m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+                vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+                rCurve = new Rarefact(rabunds, rDisplays);
                 rCurve->getSharedCurve(freq, nIters);
                 delete rCurve;
+                for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
                 
                 if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                 
-                processedLabels.insert(subset[0]->getLabel());
-                userLabels.erase(subset[0]->getLabel());
+                processedLabels.insert(subset->getLabel());
+                userLabels.erase(subset->getLabel());
                 
                 //restore real lastlabel to save below
-                subset[0]->setLabel(saveLabel);
+                subset->setLabel(saveLabel);
 			}
             
 			
-			lastLabel = subset[0]->getLabel();
+			lastLabel = subset->getLabel();
 			
 			//get next line to process
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+            delete lookup; delete subset;
 			lookup = input.getSharedRAbundVectors();
             
-            if (lookup[0] != NULL) {
-                if (thisSet == "") {  subset.clear(); subset = lookup;  }
-                else {//fill subset with this sets groups
-                    subset.clear();
-                    for (int i = 0; i < lookup.size(); i++) {
-                        if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
-                            subset.push_back(lookup[i]);
-                        }
-                    }
-                }
-            }else {  subset.clear(); subset.push_back(NULL); }
+            if (lookup != NULL) {
+                if (thisSet != "") {//remove unwanted groups
+                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    subset->eliminateZeroOTUS();
+                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+            }else {  subset = NULL; }
 
 		}
 		
@@ -475,27 +463,26 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
-			lookup = input.getSharedRAbundVectors(lastLabel);
+            delete lookup; delete subset;
+            lookup = input.getSharedRAbundVectors();
             
-            if (thisSet == "") {  subset.clear(); subset = lookup;  }
-            else {//fill subset with this sets groups
-                subset.clear();
-                for (int i = 0; i < lookup.size(); i++) {
-                    if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
-                        subset.push_back(lookup[i]);
-                    }
-                }
-            }
+            if (lookup != NULL) {
+                if (thisSet != "") {//remove unwanted groups
+                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    subset->eliminateZeroOTUS();
+                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+            }else {  subset = NULL; }
             
-			m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-			rCurve = new Rarefact(subset, rDisplays);
+			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+            vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+			rCurve = new Rarefact(rabunds, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
+            for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
             
             if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                 
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup; delete subset;
 		}
 		
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
@@ -509,36 +496,18 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 	}
 }
 //**********************************************************************************************************************
-int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLookup, string fileNameRoot) {
+int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors* thisLookup, string fileNameRoot) {
 	try {
         
         map<string, vector<string> > filenames;
         for (int thisIter = 0; thisIter < iters; thisIter++) {
             
-            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             
              //we want the summary results for the whole dataset, then the subsampling
             SubSample sample;
             vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-            //make copy of lookup so we don't get access violations
-            vector<SharedRAbundVector*> newLookup;
-            for (int k = 0; k < thisItersLookup.size(); k++) {
-                SharedRAbundVector* temp = new SharedRAbundVector();
-                temp->setLabel(thisItersLookup[k]->getLabel());
-                temp->setGroup(thisItersLookup[k]->getGroup());
-                newLookup.push_back(temp);
-            }
-                
-            //for each bin
-            for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
-                if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
-                }
-                
-            tempLabels = sample.getSample(newLookup, subsampleSize);
-            thisItersLookup = newLookup;
-            
+            tempLabels = sample.getSample(thisItersLookup, subsampleSize);
             
             Rarefact* rCurve;
             vector<Display*> rDisplays;
@@ -561,13 +530,14 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
                 }
             }
             
-            rCurve = new Rarefact(thisItersLookup, rDisplays);
+            vector<RAbundVector*> rabunds = thisItersLookup->getSharedRAbundVectors();
+            rCurve = new Rarefact(rabunds, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
+            for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
             
             //clean up memory
-            for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
-            thisItersLookup.clear();
+            delete thisItersLookup;
             for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
         }
         
@@ -599,7 +569,7 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
             
             if (!m->control_pressed) {
                 //process results
-                map<string, string> variables; variables["[filename]"] = fileNameRoot + "ave-std." + thisLookup[0]->getLabel() + ".";
+                map<string, string> variables; variables["[filename]"] = fileNameRoot + "ave-std." + thisLookup->getLabel() + ".";
 
                 string outputFile = getOutputFileName(it->first,variables);
                 ofstream out;

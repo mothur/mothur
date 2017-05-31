@@ -70,15 +70,16 @@ int Collect::getCurve(float percentFreq = 0.01){
 /***********************************************************************/
 int Collect::getSharedCurve(float percentFreq = 0.01){
 try {
-                vector<SharedRAbundVector*> lookup; 
-				vector<SharedRAbundVector*> subset;
+                vector<RAbundVector*> lookup;
+                map<string, int> indexLookup;
+				vector<RAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
 				vector<string> mGroups = m->getGroups();
-                for (int i = 0; i < mGroups.size(); i++) { 
-                        SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
+                for (int i = 0; i < mGroups.size(); i++) {
+                        RAbundVector* temp = new RAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
-                        temp->setGroup(mGroups[i]);
+                        indexLookup[mGroups[i]] = i;
 						lookup.push_back(temp);
                 }
 	
@@ -114,16 +115,9 @@ try {
 						
                         //get first sample
                         individual chosen = sharedorder->get(i);
-                        int abundance; 
-					             
-                        //set info for sharedvector in chosens group
-                        for (int j = 0; j < lookup.size(); j++) { 
-							if (chosen.group == lookup[j]->getGroup()) {
-								abundance = lookup[j]->getAbundance(chosen.bin);
-								lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-								break;
-							}
-                        }
+                        int abundance = lookup[indexLookup[chosen.group]]->get(chosen.bin);
+                        lookup[indexLookup[chosen.group]]->set(chosen.bin, (abundance + 1));
+                    
 	
                         //calculate at 0 and the given increment
                         if((i == 0) || (i+1) % increment == 0){

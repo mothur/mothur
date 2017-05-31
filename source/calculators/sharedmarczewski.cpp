@@ -9,20 +9,20 @@
 
 #include "sharedmarczewski.h"
 
-EstOutput SharedMarczewski::getValues(vector<SharedRAbundVector*> vectorShared){
+EstOutput SharedMarczewski::getValues(vector<RAbundVector*> shared){
 	try {
-		SharedRAbundVector* shared1 = vectorShared[0];
-		SharedRAbundVector* shared2 = vectorShared[1];
+		//SharedRAbundVector* shared1 = vectorShared[0];
+		//SharedRAbundVector* shared2 = vectorShared[1];
 		
 		data.resize(1,0);
 		
 		double a = 0;
 		double b = 0;
 		double c = 0;
-		for(int i = 1; i < shared1->size(); i++)
+		for(int i = 1; i < shared[0]->getNumBins(); i++)
 		{
-			int abund1 = shared1->get(i).abundance;
-			int abund2 = shared2->get(i).abundance;
+			int abund1 = shared[0]->get(i);
+			int abund2 = shared[1]->get(i);
 			
 			if(abund1 > 0 && abund2 > 0)
 				a++;

@@ -26,7 +26,7 @@ public:
 		return data;
 	}
 	
-	EstOutput getValues(vector<SharedRAbundVector*> shared) { //return number of sequences in the sharedotus
+	EstOutput getValues(vector<RAbundVector*> shared) { //return number of sequences in the sharedotus
 		
 		int numGroups = shared.size();
 		data.clear(); data.resize(numGroups,0);
@@ -35,11 +35,11 @@ public:
 			//get bin values and set sharedByAll 
 			bool sharedByAll = true;
 			for (int j = 0; j < numGroups; j++) {
-				if (shared[j]->getAbundance(i) == 0) { sharedByAll = false; }
+				if (shared[j]->get(i) == 0) { sharedByAll = false; }
 			}
 			
 			//they are shared
-			if (sharedByAll == true) {  for (int j = 0; j < numGroups; j++) {  data[j] += shared[j]->getAbundance(i);  } }
+			if (sharedByAll == true) {  for (int j = 0; j < numGroups; j++) {  data[j] += shared[j]->get(i);  } }
 		}
 
 		return data;

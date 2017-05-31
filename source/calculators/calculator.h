@@ -3,8 +3,8 @@
 
 
 #include "sabundvector.hpp"
-#include "sharedsabundvector.h"
 #include "rabundvector.hpp"
+#include "sharedrabundvectors.hpp"
 #include "sequence.hpp"
 #include "mothurout.h"
 
@@ -26,9 +26,9 @@ public:
 	virtual ~Calculator(){};
 	
 	virtual EstOutput getValues(SAbundVector*) = 0;	
-	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
+	virtual EstOutput getValues(vector<RAbundVector*>) = 0;
     //optional calc that returns the otus labels of shared otus
-    virtual EstOutput getValues(vector<SharedRAbundVector*> sv , vector<string>&) { data = getValues(sv); return data; }
+    virtual EstOutput getValues(vector<RAbundVector*> sv , vector<string>&) { data = getValues(sv); return data; }
 	virtual void print(ostream& f)	{ f.setf(ios::fixed, ios::floatfield); f.setf(ios::showpoint);
 									  f << data[0]; for(int i=1;i<data.size();i++){	f << '\t' << data[i];	}}
     

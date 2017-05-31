@@ -10,7 +10,7 @@
 #include "structchord.h"
 
 /***********************************************************************/
-EstOutput StructChord::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput StructChord::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -20,8 +20,8 @@ EstOutput StructChord::getValues(vector<SharedRAbundVector*> shared) {
 		//calc the 2 denominators
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			//(Aij) ^ 2
 			sumAj2 += (Aij * Aij);
@@ -35,8 +35,8 @@ EstOutput StructChord::getValues(vector<SharedRAbundVector*> shared) {
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			sum += (((Aij / sumAj2) - (Bij / sumBj2)) * ((Aij / sumAj2) - (Bij / sumBj2)));
 		}

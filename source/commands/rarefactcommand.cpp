@@ -404,20 +404,20 @@ int RareFactCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (rDisplays.size() == 0) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  return 0; }
 			
-			input = new InputData(inputFileNames[p], format);			
-			order = input->getOrderVector();
+			InputData input(inputFileNames[p], format);
+			OrderVector* order = input.getOrderVector();
 			string lastLabel = order->getLabel();
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  delete input;  delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  delete input;  delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+				if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
@@ -438,7 +438,7 @@ int RareFactCommand::execute(){
 					string saveLabel = order->getLabel();
 					
 					delete order;
-					order = (input->getOrderVector(lastLabel));
+					order = (input.getOrderVector(lastLabel));
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
@@ -459,10 +459,10 @@ int RareFactCommand::execute(){
 				lastLabel = order->getLabel();		
 				
 				delete order;
-				order = (input->getOrderVector());
+				order = (input.getOrderVector());
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  delete input;   for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -477,12 +477,12 @@ int RareFactCommand::execute(){
 				}
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  delete input;   for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//run last label if you need to
 			if (needToRun == true)  {
 				if (order != NULL) {	delete order;	}
-				order = (input->getOrderVector(lastLabel));
+				order = (input.getOrderVector(lastLabel));
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
@@ -499,7 +499,6 @@ int RareFactCommand::execute(){
 			
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 			rDisplays.clear();
-			delete input;  
 		}
 		
 		
@@ -688,38 +687,36 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
         map<string, string> files;
         map<string, string>::iterator it3;
         
-        input = new InputData(filename, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
+        InputData input(filename, "sharedfile");
+        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        vector<string> lookupGroups = lookup->getNamesGroups();
         
         string sharedFileRoot = m->getRootName(filename);
         
         //clears file before we start to write to it below
-        for (int i=0; i<lookup.size(); i++) {
+        for (int i=0; i<lookupGroups.size(); i++) {
             ofstream temp;
-            string group = lookup[i]->getGroup();
+            string group = lookupGroups[i];
             m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
             filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
             groups.push_back(group);
         }
         
-        while(lookup[0] != NULL) {
-            
-            for (int i = 0; i < lookup.size(); i++) {
-                RAbundVector rav = lookup[i]->getRAbundVector();
+        while(lookup != NULL) {
+            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
-                string group = lookup[i]->getGroup();
+                string group = lookupGroups[i];
                 m->openOutputFileAppend(files[group], temp);
-                rav.print(temp);
+                data[i]->print(temp);
                 temp.close();
-                label2Ends[lookup[i]->getLabel()].insert(rav.getNumSeqs());
+                label2Ends[lookup->getLabel()].insert(data[i]->getNumSeqs());
             }
-            
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-            lookup = input->getSharedRAbundVectors();
+            for (int i = 0; i < data.size(); i++) { delete data[i]; }
+            delete lookup;
+            lookup = input.getSharedRAbundVectors();
         }
-        
-        delete input;
         m->clearGroups();
         
         return filenames;

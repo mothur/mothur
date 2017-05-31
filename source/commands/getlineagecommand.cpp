@@ -768,35 +768,23 @@ int GetLineageCommand::getListVector(){
 int GetLineageCommand::readShared(){
 	try {
         
-        getShared();
+        SharedRAbundVectors* lookup = getShared();
         
-        if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0; }
+        if (m->control_pressed) { delete lookup; }
         
         vector<string> newLabels;
         
-        //create new "filtered" lookup
-        vector<SharedRAbundVector*> newLookup;
-        for (int i = 0; i < lookup.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
-			newLookup.push_back(temp);
-        }
-        
         bool wroteSomething = false;
         int numSelected = 0;
-        for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+        for (int i = 0; i < lookup->getNumBins(); i++) {
             
-            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
+            if (m->control_pressed) {  delete lookup; return 0; }
             
             //is this otu on the list
             if (names.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) != 0) {
                 numSelected++; wroteSomething = true;
                 newLabels.push_back(m->currentSharedBinLabels[i]);
-                for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
-                    newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
-                }
-            }
+            }else { lookup->removeOTU(i);  }
         }
         
         string thisOutputDir = outputDir;
@@ -804,25 +792,18 @@ int GetLineageCommand::readShared(){
         map<string, string> variables;
 		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
-        
         m->currentSharedBinLabels = newLabels;
-        
-		newLookup[0]->printHeaders(out);
-		
-		for (int i = 0; i < newLookup.size(); i++) {
-			out << newLookup[i]->getLabel() << '\t' << newLookup[i]->getGroup() << '\t';
-			newLookup[i]->print(out);
-		}
+		lookup->printHeaders(out);
+        lookup->print(out);
 		out.close();
         
-        for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; }
+        delete lookup;
         
         if (wroteSomething == false) { m->mothurOut("Your file does not contain OTUs from " + taxons + "."); m->mothurOutEndLine();  }
         
@@ -836,11 +817,11 @@ int GetLineageCommand::readShared(){
 	}
 }
 //**********************************************************************************************************************
-int GetLineageCommand::getShared(){
+SharedRAbundVectors* GetLineageCommand::getShared(){
 	try {
 		InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		if (label == "") { label = lastLabel;  return 0; }
 		
@@ -850,34 +831,34 @@ int GetLineageCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
+		while((lookup != NULL) && (userLabels.size() != 0)) {
 			if (m->control_pressed) {   return 0;  }
 			
-			if(labels.count(lookup[0]->getLabel()) == 1){
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+			if(labels.count(lookup->getLabel()) == 1){
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 				break;
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
 			lookup = input.getSharedRAbundVectors();
 		}
 		
@@ -899,11 +880,11 @@ int GetLineageCommand::getShared(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} }
+            delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}
 		
-		return 0;
+		return lookup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetLineageCommand", "getShared");

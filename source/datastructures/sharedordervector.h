@@ -40,8 +40,7 @@ struct individualFloat {
 
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
-#include "sharedrabundvector.h"
-#include "sharedsabundvector.h"
+#include "sharedrabundvectors.hpp"
 #include "groupmap.h"
 
 class SharedOrderVector : public DataVector {
@@ -74,9 +73,8 @@ public:
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector getSharedOrderVector();
-	SharedRAbundVector getSharedRAbundVector(string);  //get the sharedRabundvector for a sepecific group
-	SharedSAbundVector getSharedSAbundVector(string);	//get the sharedSabundvector for a sepecific group
-	vector<SharedRAbundVector*> getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
+	SharedRAbundVector* getSharedRAbundVector(string);  //get the sharedRabundvector for a sepecific group
+	SharedRAbundVector* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
 	GroupMap* groupmap;

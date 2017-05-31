@@ -10,7 +10,7 @@
 #include "sharedchao1.h"
 
 /***********************************************************************/
-EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
+EstOutput SharedChao1::getValues(vector<RAbundVector*> shared){
 	try {
 		data.resize(1,0);		
 		vector<int> temp; 
@@ -34,7 +34,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			bool sharedByAll = true;
 			temp.clear();
 			for (int j = 0; j < numGroups; j++) {
-				temp.push_back(shared[j]->getAbundance(i));
+				temp.push_back(shared[j]->get(i));
 				if (temp[j] == 0) { sharedByAll = false; }
 			}
 			

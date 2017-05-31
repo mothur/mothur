@@ -31,7 +31,7 @@ struct logger {
 /***********************************************/
 class OrderVector;
 class SharedOrderVector;
-class SharedRAbundVector;
+class RAbundVector;
 
 class MothurOut {
 	
@@ -216,7 +216,7 @@ class MothurOut {
         int mothurRandomShuffle(vector<PDistCellMin>&);
         int mothurRandomShuffle(OrderVector&);
         int mothurRandomShuffle(SharedOrderVector&);
-        int mothurRandomShuffle(vector<SharedRAbundVector*>&);
+        int mothurRandomShuffle(vector<RAbundVector*>&);
         void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); srand(s); }
     
 		
@@ -235,6 +235,8 @@ class MothurOut {
         int average(vector<int>);
         int sum(vector<int>);
         double sum(vector<double>);
+        int max(vector<int>);
+        float max(vector<float>);
 		int getRandomIndex(int); //highest
         int getRandomNumber();
         double getRandomDouble0to1();

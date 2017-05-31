@@ -10,8 +10,7 @@
  */
 
 #include "rabundvector.hpp"
-#include "sharedrabundvector.h"
-#include "sharedrabundfloatvector.h"
+#include "rabundfloatvector.hpp"
 #include "datavector.hpp"
 
 
@@ -47,12 +46,12 @@ class HeatMap {
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
-		string getPic(vector<SharedRAbundVector*>);
-		string getPic(vector<SharedRAbundFloatVector*>);
+		string getPic(vector<RAbundVector*>, vector<string>);
+		string getPic(vector<RAbundFloatVector*>, vector<string>);
 
 	private:
-		vector<string> sortSharedVectors(vector<SharedRAbundVector*>& );
-		vector<string> sortSharedVectors(vector<SharedRAbundFloatVector*>& );
+		vector<string> sortSharedVectors(vector<RAbundVector*>& );
+		vector<string> sortSharedVectors(vector<RAbundFloatVector*>& );
 		int sortRabund(RAbundVector*&);
 		void printLegend(int, float);
 
@@ -61,12 +60,12 @@ class HeatMap {
 		MothurOut* m;
 		int numOTU, fontSize;
 		
-		map<int, int> orderTopGroup(vector<SharedRAbundVector*>&);
-		map<int, int> orderTopOtu(vector<SharedRAbundVector*>&);
-		map<int, int> orderShared(vector<SharedRAbundVector*>&);
-		map<int, int> orderTopGroup(vector<SharedRAbundFloatVector*>&);
-		map<int, int> orderTopOtu(vector<SharedRAbundFloatVector*>&);
-		map<int, int> orderShared(vector<SharedRAbundFloatVector*>&);
+		map<int, int> orderTopGroup(vector<RAbundVector*>&);
+		map<int, int> orderTopOtu(vector<RAbundVector*>&);
+		map<int, int> orderShared(vector<RAbundVector*>&);
+		map<int, int> orderTopGroup(vector<RAbundFloatVector*>&);
+		map<int, int> orderTopOtu(vector<RAbundFloatVector*>&);
+		map<int, int> orderShared(vector<RAbundFloatVector*>&);
 
 			
 };

@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
+EstOutput Whittaker::getValues(vector<RAbundVector*> shared){
 	try{
 		data.resize(1);
 
@@ -19,8 +19,8 @@ EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
 		int countB = 0;
 		int sTotal = shared[0]->getNumBins();
 		for(int i=0;i<sTotal;i++){
-			if(shared[0]->getAbundance(i) != 0){	countA++;	}
-			if(shared[1]->getAbundance(i) != 0){	countB++;	}		
+			if(shared[0]->get(i) != 0){	countA++;	}
+			if(shared[1]->get(i) != 0){	countB++;	}		
 		}
 		
 		data[0] = 2-2*sTotal/(float)(countA+countB);

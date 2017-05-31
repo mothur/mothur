@@ -28,25 +28,20 @@ public:
 	DataVector(ifstream&) {m = MothurOut::getInstance();}
 	DataVector(ifstream&, GroupMap*){m = MothurOut::getInstance();}
 	virtual ~DataVector(){};
-	
-//	virtual int getNumBins()	{	return numBins;		}
-//	virtual int getNumSeqs()	{	return numSeqs;		}
-//	virtual int getMaxRank()	{	return maxRank;		}
-	
-	virtual void resize(int) = 0;
-	virtual int size()	= 0;
-	virtual void print(ostream&) = 0;
-    virtual void print(ostream&, map<string, int>&) {}
-    virtual void print(ostream&, bool) { m->mothurOut("[ERROR]: no print function\n"); }
-	virtual void printHeaders(ostream&) {};
-	virtual void clear() = 0;
-	
-	void setLabel(string l)		{	label = l;			}
-	string getLabel()			{	return label;		}
 
-	virtual RAbundVector getRAbundVector() = 0;
+	virtual int size()	= 0;
+    virtual void clear() = 0;
+	virtual void print(ostream&) = 0;
+    virtual RAbundVector getRAbundVector() = 0;
 	virtual SAbundVector getSAbundVector() = 0;
 	virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
+    
+    virtual void print(ostream&, map<string, int>&) {}
+    virtual void print(ostream&, bool) { m->mothurOut("[ERROR]: no print function\n"); }
+    virtual void printHeaders(ostream&) {};
+    void setLabel(string l)		{	label = l;			}
+    string getLabel()			{	return label;		}
+    virtual void resize(int);
 	
 protected:
 	string label;

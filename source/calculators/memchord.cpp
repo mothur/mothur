@@ -10,7 +10,7 @@
 #include "memchord.h"
 
 /***********************************************************************/
-EstOutput MemChord::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput MemChord::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -19,8 +19,8 @@ EstOutput MemChord::getValues(vector<SharedRAbundVector*> shared) {
 		
 		//for each otu
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			if (shared[0]->getAbundance(i) != 0) { nonZeroA++; }
-			if (shared[1]->getAbundance(i) != 0) { nonZeroB++; }
+			if (shared[0]->get(i) != 0) { nonZeroA++; }
+			if (shared[1]->get(i) != 0) { nonZeroB++; }
 		}
 		
 		nonZeroA = sqrt(nonZeroA);
@@ -28,8 +28,8 @@ EstOutput MemChord::getValues(vector<SharedRAbundVector*> shared) {
 		
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			int A = shared[0]->getAbundance(i);
-			int B = shared[1]->getAbundance(i);
+			int A = shared[0]->get(i);
+			int B = shared[1]->get(i);
 			
 			if (A > 0) { A = 1; }
 			if (B > 0) { B = 1; }

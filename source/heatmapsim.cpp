@@ -24,7 +24,7 @@ HeatMapSim::HeatMapSim(string dir, string i, int f) : outputDir(dir), inputfile(
 		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
-vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs) {
+vector<string> HeatMapSim::getPic(vector<RAbundVector*> lookup, vector<Calculator*> calcs, vector<string> groups) {
 	try {
 		EstOutput data;
 		vector<double> sims;
@@ -49,8 +49,8 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		
 			//column labels
 			for (int h = 0; h < lookup.size(); h++) {
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" y=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" x=\"50\">" + lookup[h]->getGroup() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" y=\"50\">" + groups[h] + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" y=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" x=\"50\">" + groups[h] + "</text>\n";
 			}
 			
 			sims.clear();
@@ -64,7 +64,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 						
 						if (m->control_pressed) { outsvg.close(); return outputNames; }
 						
-						vector<SharedRAbundVector*> subset;
+						vector<RAbundVector*> subset;
 						subset.push_back(lookup[i]);  subset.push_back(lookup[j]); 
 					
 						//get similairity between groups

@@ -10,7 +10,7 @@
 #include "hellinger.h"
 
 /***********************************************************************/
-EstOutput Hellinger::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Hellinger::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -19,8 +19,8 @@ EstOutput Hellinger::getValues(vector<SharedRAbundVector*> shared) {
 		
 		//calc the 2 denominators
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			sumA += shared[0]->getAbundance(i);
-			sumB += shared[1]->getAbundance(i);
+			sumA += shared[0]->get(i);
+			sumB += shared[1]->get(i);
 		}
 		
 		
@@ -28,8 +28,8 @@ EstOutput Hellinger::getValues(vector<SharedRAbundVector*> shared) {
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			double term1 = sqrt((Aij / sumA));
 			double term2 = sqrt((Bij / sumB));

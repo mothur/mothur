@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Spearman::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput Spearman::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -47,8 +47,8 @@ EstOutput Spearman::getValues(vector<SharedRAbundVector*> shared) {
 		
 
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			int Aij = shared[0]->getAbundance(i);
-			int Bij = shared[1]->getAbundance(i);
+			int Aij = shared[0]->get(i);
+			int Bij = shared[1]->get(i);
 			
 			float rankA = rankVectorA[Aij];
 			float rankB = rankVectorB[Bij];

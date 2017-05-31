@@ -575,36 +575,31 @@ int GetGroupsCommand::readShared(){
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
 		
 		InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
 		
 		bool wroteSomething = false;
 		
-		while(lookup[0] != NULL) {
+		while(lookup != NULL) {
 			
-            variables["[tag]"] = lookup[0]->getLabel();
+            variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
 			
 			ofstream out;
 			m->openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 			
-			if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } return 0; }
+            if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
 			
-			lookup[0]->printHeaders(out); 
-			
-			for (int i = 0; i < lookup.size(); i++) {
-				out << lookup[i]->getLabel() << '\t' << lookup[i]->getGroup() << '\t';
-				lookup[i]->print(out);
-				wroteSomething = true;
-				
-			}			
+			lookup->printHeaders(out);
+            lookup->print(out);
+            wroteSomething = true;
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup;
 			lookup = input.getSharedRAbundVectors();
 			
 			out.close();

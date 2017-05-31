@@ -9,7 +9,7 @@
 
 #include "metastatscommand.h"
 #include "sharedutilities.h"
-#include "sharedrabundfloatvector.h"
+
 
 
 //**********************************************************************************************************************
@@ -226,9 +226,9 @@ int MetaStatsCommand::execute(){
 		
 		designMap = new DesignMap(designfile);
 
-		input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		InputData input(sharedfile, "sharedfile");
+		lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -268,46 +268,46 @@ int MetaStatsCommand::execute(){
         }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->control_pressed) {  outputTypes.clear(); delete lookup; m->clearGroups(); delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 			
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				delete lookup;
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				process(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			delete lookup;
 			
-			if (m->control_pressed) {  outputTypes.clear(); m->clearGroups(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();				
+			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->clearGroups(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -324,19 +324,18 @@ int MetaStatsCommand::execute(){
 	
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			delete lookup;
+			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			
 			process(lookup);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
 	
 		//reset groups parameter
-		m->clearGroups();  
-		delete input; 
+		m->clearGroups();
 		delete designMap;
 		
         if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
@@ -355,7 +354,7 @@ int MetaStatsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
+int MetaStatsCommand::process(SharedRAbundVectors* thisLookUp){
 	try {
 		
 		
@@ -509,9 +508,12 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
 	}
 }
 //**********************************************************************************************************************
-int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, vector<SharedRAbundVector*>& thisLookUp) {
+int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, SharedRAbundVectors* thisLookUp) {
 	try {
 	
+        vector<string> thisLookupNames = thisLookUp->getNamesGroups();
+        vector<RAbundVector*> thisLookupRabunds = thisLookUp->getSharedRAbundVectors();
+        
 		//for each combo
 		for (int c = start; c < (start+num); c++) {
 			
@@ -522,33 +524,29 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 			//get filename
             map<string, string> variables; 
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-            variables["[distance]"] = thisLookUp[0]->getLabel();
+            variables["[distance]"] = thisLookUp->getLabel();
             variables["[group]"] = setA + "-" + setB;
 			string outputFileName = getOutputFileName("metastats",variables);
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
-			//int nameLength = outputFileName.length();
-			//char * output = new char[nameLength];
-			//strcpy(output, outputFileName.c_str());
-	
-			//build matrix from shared rabunds
-			//double** data;
-			//data = new double*[thisLookUp[0]->getNumBins()];
 			
-			vector< vector<double> > data2; data2.resize(thisLookUp[0]->getNumBins());
+			vector< vector<double> > data2; data2.resize(thisLookUp->getNumBins());
 			
-			vector<SharedRAbundVector*> subset;
+			vector<RAbundVector*> subset;
+            vector<string> subsetGroups;
 			int setACount = 0;
 			int setBCount = 0;
-			for (int i = 0; i < thisLookUp.size(); i++) {
-				string thisGroup = thisLookUp[i]->getGroup();
+			for (int i = 0; i < thisLookUp->size(); i++) {
+				string thisGroup = thisLookupNames[i];
 				
 				//is this group for a set we want to compare??
 				//sorting the sets by putting setB at the back and setA in the front
 				if ((designMap->get(thisGroup) == setB)) {
-					subset.push_back(thisLookUp[i]);
+					subset.push_back(thisLookupRabunds[i]);
+                    subsetGroups.push_back(thisGroup);
 					setBCount++;
 				}else if ((designMap->get(thisGroup) == setA)) {
-					subset.insert(subset.begin()+setACount, thisLookUp[i]);
+					subset.insert(subset.begin()+setACount, thisLookupRabunds[i]);
+                    subsetGroups.insert(subsetGroups.begin()+setACount, thisGroup);
 					setACount++;
 				}
 			}
@@ -558,18 +556,17 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 			}else {
                 
 				//fill data
-				for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
-					//data[j] = new double[subset.size()];
+				for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 					data2[j].resize(subset.size(), 0.0);
                    
 					for (int i = 0; i < subset.size(); i++) {
-						data2[j][i] = (subset[i]->getAbundance(j));
+						data2[j][i] = (subset[i]->get(j));
 					}
 				}
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
 				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
-                if (convertSharedToInput) { convertToInput(subset, outputFileName);  }
+                if (convertSharedToInput) { convertToInput(subset, subsetGroups, outputFileName);  }
 				
 				m->mothurOutEndLine();
 				MothurMetastats mothurMeta(threshold, iters);
@@ -577,13 +574,10 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, v
 				m->mothurOutEndLine();
 				m->mothurOutEndLine(); 
 			}
-			
-			//free memory
-			//delete output;
-			//for(int i = 0; i < thisLookUp[0]->getNumBins(); i++)  {  delete[] data[i];  }
-			//delete[] data; 
 		}
 		
+        for(int i = 0; i < thisLookupRabunds.size(); i++)  {  delete thisLookupRabunds[i];  }
+        
 		return 0;
 
 	}
@@ -618,13 +612,12 @@ int MetaStatsCommand::convertToShared(string filename) {
         string header = m->getline(in); m->gobble(in);
         
         vector<string> groups = m->splitWhiteSpace(header);
-        vector<SharedRAbundFloatVector*> newLookup;
+        vector<RAbundFloatVector*> newLookup;
         cout << groups.size() << endl;
         for (int i = 0; i < groups.size(); i++) {
             cout << "creating group " << groups[i] << endl;
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
+            RAbundFloatVector* temp = new RAbundFloatVector();
             temp->setLabel("0.03");
-            temp->setGroup(groups[i]);
             newLookup.push_back(temp);
         }
         
@@ -639,7 +632,7 @@ int MetaStatsCommand::convertToShared(string filename) {
             for (int i = 0; i < groups.size(); i++) {
                 double temp;
                 in >> temp; m->gobble(in);
-                newLookup[i]->push_back(temp, groups[i]);
+                newLookup[i]->push_back(temp);
             }
             m->gobble(in);
         }
@@ -680,20 +673,20 @@ int MetaStatsCommand::convertToShared(string filename) {
 }
 //**********************************************************************************************************************
 
-int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string thisfilename) {
+int MetaStatsCommand::convertToInput(vector<RAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
 	try {
         ofstream out;
         m->openOutputFile(thisfilename+".matrix", out);
         
         for (int i = 0; i < subset.size(); i++) {
-            out << '\t' << subset[i]->getGroup();
+            out << '\t' << subsetGroups[i];
         }
         out << endl;
         
         for (int i = 0; i < subset[0]->getNumBins(); i++) {
             out << m->currentSharedBinLabels[i];
             for (int j = 0; j < subset.size(); j++) {
-                out  << '\t' << subset[j]->getAbundance(i);
+                out  << '\t' << subset[j]->get(i);
             }
             out << endl;
         }

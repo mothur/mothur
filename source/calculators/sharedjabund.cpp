@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 
-EstOutput JAbund::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput JAbund::getValues(vector<RAbundVector*> shared) {
 	try {
 		EstOutput UVest;
 		UVest.resize(2,0);

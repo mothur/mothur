@@ -10,6 +10,7 @@
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
+#include "rabundfloatvector.hpp"
 
 
 /***********************************************************************/
@@ -59,21 +60,40 @@ RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
 
 RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+    try {
+        int hold;
+        f >> label >> hold;
+        
+        data.assign(hold, 0);
+        int inputData;
+        
+        for(int i=0;i<hold;i++){
+            f >> inputData;
+            set(i, inputData);
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RAbundVector", "RAbundVector");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+RAbundVector::RAbundVector(ifstream& f, string l) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
 		int hold;
-		f >> label >> hold;
+        label = l;
+		f >> numBins;
 	
-		data.assign(hold, 0);
 		int inputData;
-	
 		for(int i=0;i<hold;i++){
 			f >> inputData;
-			set(i, inputData);
+			push_back(inputData);
 		}
         
 	}
@@ -141,7 +161,27 @@ void RAbundVector::push_back(int binSize){
 		exit(1);
 	}
 }
+/***********************************************************************/
 
+int RAbundVector::remove(int bin){
+    try {
+        int abund = data[bin];
+        data.erase(data.begin()+bin);
+        numBins--;
+        
+        if(abund == maxRank){
+            maxRank = m->max(data);
+        }
+        
+        numSeqs -= abund;
+        
+        return abund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RAbundVector", "remove");
+        exit(1);
+    }
+}
 /***********************************************************************/
 
 void RAbundVector::pop_back(){
@@ -189,7 +229,13 @@ int RAbundVector::numNZ(){
     for(int i = 0; i < data.size(); i++) { if(data[i] != 0) { numNZ++; } }
 	return numNZ;
 }
+/***********************************************************************/
 
+vector<int> RAbundVector::getSortedD(){
+    vector<int> temp; temp = data;
+    sort(temp.begin()+1, temp.end());
+    return temp;
+}
 /***********************************************************************/
 
 vector<int>::reverse_iterator RAbundVector::rbegin(){
@@ -249,6 +295,22 @@ void RAbundVector::print(ostream& output){
 		exit(1);
 	}
 }
+/***********************************************************************/
+//non-sorting print for use with SharedRAbundVectors
+int RAbundVector::print(ostream& output, string noLabel){
+    try {
+        output << numBins;
+        
+        vector<int> hold = data;
+        
+        for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
+        output << endl;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RAbundVector", "print");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 int RAbundVector::getNumBins(){
@@ -271,6 +333,13 @@ int RAbundVector::getMaxRank(){
 
 RAbundVector RAbundVector::getRAbundVector(){
 	return *this;			
+}
+/***********************************************************************/
+
+RAbundFloatVector RAbundVector::getRAbundFloatVector(){
+    RAbundFloatVector rav; rav.setLabel(label);
+    for(int i=0;i<data.size();i++){ rav.push_back(0.0 + data[i]);  }
+    return rav;
 }
 
 /***********************************************************************/

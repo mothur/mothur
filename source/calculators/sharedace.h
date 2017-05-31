@@ -21,7 +21,7 @@ class SharedAce : public Calculator  {
 public:
 	SharedAce(int n=10) : abund(n),  Calculator("sharedace", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<SharedRAbundVector*>);
+	EstOutput getValues(vector<RAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/SharedAce"; }
 private:
 	int abund;

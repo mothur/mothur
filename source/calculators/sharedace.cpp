@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 
-EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput SharedAce::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		string label;
@@ -34,8 +34,8 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared[0]->getAbundance(i);
-			tempB = shared[1]->getAbundance(i);
+			tempA = shared[0]->get(i);
+			tempB = shared[1]->get(i);
 			if ((tempA != 0) && (tempB != 0)) {//they are shared
 				S12++;
 				//do both A and B have one

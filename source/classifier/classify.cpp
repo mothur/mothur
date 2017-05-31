@@ -133,7 +133,7 @@ int Classify::readTaxonomy(string file) {
             phyloTree->addSeqToTree(itTax->first, itTax->second);
             if (m->control_pressed) { break; }
         }
-
+       
 		phyloTree->assignHeirarchyIDs(0);
         
         maxLevel = phyloTree->getMaxLevel();

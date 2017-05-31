@@ -582,8 +582,8 @@ int RemoveGroupsCommand::readShared(){
 		
 		//get group names from sharedfile so we can set Groups to the groupNames we want to keep
 		//that way we can take advantage of the reads in inputdata and sharedRabundVector
-		InputData* tempInput = new InputData(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = tempInput->getSharedRAbundVectors();
+		InputData input(sharedfile, "sharedfile");
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -600,11 +600,10 @@ int RemoveGroupsCommand::readShared(){
 			}
 		}
 		
-		if (allGroupsNames.size() == groupsToKeep.size()) { m->mothurOut("Your file does not contain any groups you wish to remove."); m->mothurOutEndLine(); m->setGroups(mothurOutGroups); delete tempInput; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+        if (allGroupsNames.size() == groupsToKeep.size()) { m->mothurOut("Your file does not contain any groups you wish to remove."); m->mothurOutEndLine(); m->setGroups(mothurOutGroups); delete lookup;  return 0; }
 		
 		//reset read 
-		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-		delete tempInput;
+		delete lookup;
 		m->setGroups(groupsToKeep);
 		m->clearAllGroups();
 		m->saveNextLabel = "";
@@ -612,33 +611,28 @@ int RemoveGroupsCommand::readShared(){
 		m->currentSharedBinLabels.clear();
 		m->sharedBinLabelsInFile.clear();
 		
-		InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
+		InputData input2(sharedfile, "sharedfile");
+		lookup = input2.getSharedRAbundVectors();
 
 		bool wroteSomething = false;
 		
-		while(lookup[0] != NULL) {
+		while(lookup != NULL) {
 			
-			variables["[tag]"] = lookup[0]->getLabel();
+			variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
 			ofstream out;
 			m->openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 			
-			if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } return 0; }
+            if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
 			
-			lookup[0]->printHeaders(out); 
-			
-			for (int i = 0; i < lookup.size(); i++) {
-				out << lookup[i]->getLabel() << '\t' << lookup[i]->getGroup() << '\t';
-				lookup[i]->print(out);
-				wroteSomething = true;
-				
-			}			
+            if (lookup->size() != 0) { wroteSomething = true; }
+			lookup->printHeaders(out);
+            lookup->print(out);
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+            delete lookup;
 			lookup = input.getSharedRAbundVectors();
 			
 			out.close();

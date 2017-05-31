@@ -288,9 +288,6 @@
 		481FB6411AC1B7EA0076CFF3 /* sequenceparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */; };
 		481FB6421AC1B7EA0076CFF3 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80412D37EC400DA6239 /* sharedlistvector.cpp */; };
 		481FB6431AC1B7EA0076CFF3 /* sharedordervector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */; };
-		481FB6441AC1B7EA0076CFF3 /* sharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80F12D37EC400DA6239 /* sharedrabundfloatvector.cpp */; };
-		481FB6451AC1B7EA0076CFF3 /* sharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81112D37EC400DA6239 /* sharedrabundvector.cpp */; };
-		481FB6461AC1B7EA0076CFF3 /* sharedsabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81312D37EC400DA6239 /* sharedsabundvector.cpp */; };
 		481FB6471AC1B7EA0076CFF3 /* sparsematrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */; };
 		481FB6481AC1B7EA0076CFF3 /* sparsedistancematrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */; };
 		481FB6491AC1B7F40076CFF3 /* suffixdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B85112D37EC400DA6239 /* suffixdb.cpp */; };
@@ -391,6 +388,12 @@
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
+		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
+		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
+		48BDDA751ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */; };
+		48BDDA761ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */; };
+		48BDDA791ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */; };
+		48BDDA7A1ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */; };
 		48C1DDC61D25C1BC00B5BA9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48C1DDC71D25C1BC00B5BA9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C51DEF1A76B888004ECDF1 /* fastqread.cpp */; };
@@ -720,9 +723,6 @@
 		A7E9B95412D37EC400DA6239 /* sharedmorisitahorn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80812D37EC400DA6239 /* sharedmorisitahorn.cpp */; };
 		A7E9B95512D37EC400DA6239 /* sharedochiai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80B12D37EC400DA6239 /* sharedochiai.cpp */; };
 		A7E9B95612D37EC400DA6239 /* sharedordervector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */; };
-		A7E9B95712D37EC400DA6239 /* sharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B80F12D37EC400DA6239 /* sharedrabundfloatvector.cpp */; };
-		A7E9B95812D37EC400DA6239 /* sharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81112D37EC400DA6239 /* sharedrabundvector.cpp */; };
-		A7E9B95912D37EC400DA6239 /* sharedsabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81312D37EC400DA6239 /* sharedsabundvector.cpp */; };
 		A7E9B95A12D37EC400DA6239 /* sharedsobs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81512D37EC400DA6239 /* sharedsobs.cpp */; };
 		A7E9B95B12D37EC400DA6239 /* sharedsobscollectsummary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81712D37EC400DA6239 /* sharedsobscollectsummary.cpp */; };
 		A7E9B95C12D37EC400DA6239 /* sharedsorabund.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81912D37EC400DA6239 /* sharedsorabund.cpp */; };
@@ -896,6 +896,12 @@
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = TestMothur/testcommands/testrenameseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
+		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
+		48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvectors.hpp; path = source/datastructures/sharedrabundvectors.hpp; sourceTree = "<group>"; };
+		48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvectors.cpp; path = source/datastructures/sharedrabundfloatvectors.cpp; sourceTree = "<group>"; };
+		48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvectors.hpp; path = source/datastructures/sharedrabundfloatvectors.hpp; sourceTree = "<group>"; };
+		48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rabundfloatvector.cpp; path = source/datastructures/rabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
+		48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rabundfloatvector.hpp; path = source/datastructures/rabundfloatvector.hpp; sourceTree = "<group>"; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = SOURCE_ROOT; };
 		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastqread.cpp; path = source/datastructures/fastqread.cpp; sourceTree = SOURCE_ROOT; };
 		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kmeralign.cpp; path = source/datastructures/kmeralign.cpp; sourceTree = SOURCE_ROOT; };
@@ -1549,12 +1555,6 @@
 		A7E9B80C12D37EC400DA6239 /* sharedochiai.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedochiai.h; path = source/calculators/sharedochiai.h; sourceTree = SOURCE_ROOT; };
 		A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedordervector.cpp; path = source/datastructures/sharedordervector.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B80E12D37EC400DA6239 /* sharedordervector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedordervector.h; path = source/datastructures/sharedordervector.h; sourceTree = SOURCE_ROOT; };
-		A7E9B80F12D37EC400DA6239 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B81012D37EC400DA6239 /* sharedrabundfloatvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrabundfloatvector.h; path = source/datastructures/sharedrabundfloatvector.h; sourceTree = SOURCE_ROOT; };
-		A7E9B81112D37EC400DA6239 /* sharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvector.cpp; path = source/datastructures/sharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B81212D37EC400DA6239 /* sharedrabundvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrabundvector.h; path = source/datastructures/sharedrabundvector.h; sourceTree = SOURCE_ROOT; };
-		A7E9B81312D37EC400DA6239 /* sharedsabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedsabundvector.cpp; path = source/datastructures/sharedsabundvector.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B81412D37EC400DA6239 /* sharedsabundvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedsabundvector.h; path = source/datastructures/sharedsabundvector.h; sourceTree = SOURCE_ROOT; };
 		A7E9B81512D37EC400DA6239 /* sharedsobs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedsobs.cpp; path = source/calculators/sharedsobs.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B81612D37EC400DA6239 /* sharedsobs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedsobs.h; path = source/calculators/sharedsobs.h; sourceTree = SOURCE_ROOT; };
 		A7E9B81712D37EC400DA6239 /* sharedsobscollectsummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedsobscollectsummary.cpp; path = source/calculators/sharedsobscollectsummary.cpp; sourceTree = SOURCE_ROOT; };
@@ -1995,17 +1995,18 @@
 				A7E9B7E812D37EC400DA6239 /* shannoneven.h */,
 				A7A09B0E18773BF700FAA081 /* shannonrange.h */,
 				A7A09B0F18773C0E00FAA081 /* shannonrange.cpp */,
-				A7E9B7E912D37EC400DA6239 /* sharedace.cpp */,
-				A7E9B7F412D37EC400DA6239 /* sharedjabund.cpp */,
 				A7E9B7EA12D37EC400DA6239 /* sharedace.h */,
+				A7E9B7E912D37EC400DA6239 /* sharedace.cpp */,
 				A7E9B7EC12D37EC400DA6239 /* sharedanderbergs.cpp */,
 				A7E9B7ED12D37EC400DA6239 /* sharedanderbergs.h */,
 				A7E9B7EE12D37EC400DA6239 /* sharedbraycurtis.cpp */,
 				A7E9B7EF12D37EC400DA6239 /* sharedbraycurtis.h */,
 				A7E9B7F012D37EC400DA6239 /* sharedchao1.cpp */,
 				A7E9B7F112D37EC400DA6239 /* sharedchao1.h */,
+				A7E9B7F412D37EC400DA6239 /* sharedjabund.cpp */,
 				A7E9B7F512D37EC400DA6239 /* sharedjabund.h */,
 				A7E9B7F612D37EC400DA6239 /* sharedjackknife.cpp */,
+				A7E9B7F712D37EC400DA6239 /* sharedjackknife.h */,
 				A7E9B64F12D37EC300DA6239 /* ace.cpp */,
 				A7E9B65012D37EC300DA6239 /* ace.h */,
 				A7E9B65E12D37EC300DA6239 /* bergerparker.cpp */,
@@ -2057,7 +2058,6 @@
 				A7E9B76F12D37EC400DA6239 /* nseqs.h */,
 				A7E9B77112D37EC400DA6239 /* odum.cpp */,
 				A7E9B77212D37EC400DA6239 /* odum.h */,
-				A7E9B7F712D37EC400DA6239 /* sharedjackknife.h */,
 				A7E9B7F812D37EC400DA6239 /* sharedjclass.cpp */,
 				A7E9B7F912D37EC400DA6239 /* sharedjclass.h */,
 				A7E9B7FA12D37EC400DA6239 /* sharedjest.cpp */,
@@ -2586,6 +2586,8 @@
 				A7E9B77812D37EC400DA6239 /* ordervector.hpp */,
 				A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */,
 				A7E9B7A012D37EC400DA6239 /* qualityscores.h */,
+				48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */,
+				48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */,
 				A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */,
 				A7E9B7A412D37EC400DA6239 /* rabundvector.hpp */,
 				A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */,
@@ -2604,12 +2606,10 @@
 				A7E9B80512D37EC400DA6239 /* sharedlistvector.h */,
 				A7E9B80E12D37EC400DA6239 /* sharedordervector.h */,
 				A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */,
-				A7E9B81012D37EC400DA6239 /* sharedrabundfloatvector.h */,
-				A7E9B80F12D37EC400DA6239 /* sharedrabundfloatvector.cpp */,
-				A7E9B81112D37EC400DA6239 /* sharedrabundvector.cpp */,
-				A7E9B81212D37EC400DA6239 /* sharedrabundvector.h */,
-				A7E9B81312D37EC400DA6239 /* sharedsabundvector.cpp */,
-				A7E9B81412D37EC400DA6239 /* sharedsabundvector.h */,
+				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
+				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
+				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
+				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
 				A7E9B83A12D37EC400DA6239 /* sparsematrix.hpp */,
 				A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */,
@@ -2844,6 +2844,7 @@
 				481FB6351AC1B7EA0076CFF3 /* kmerdb.cpp in Sources */,
 				481FB5721AC1B6D40076CFF3 /* simpson.cpp in Sources */,
 				481FB55D1AC1B6690076CFF3 /* sharedchao1.cpp in Sources */,
+				48BDDA7A1ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */,
 				481FB5FE1AC1B7970076CFF3 /* removerarecommand.cpp in Sources */,
 				481FB53C1AC1B5F10076CFF3 /* bootstrap.cpp in Sources */,
 				481FB5E21AC1B77E0076CFF3 /* metastatscommand.cpp in Sources */,
@@ -3002,6 +3003,7 @@
 				48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
+				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */,
 				481FB63E1AC1B7EA0076CFF3 /* sabundvector.cpp in Sources */,
@@ -3106,7 +3108,6 @@
 				48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				481FB6181AC1B7AC0076CFF3 /* summarytaxcommand.cpp in Sources */,
 				481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */,
-				481FB6451AC1B7EA0076CFF3 /* sharedrabundvector.cpp in Sources */,
 				481FB6701AC1B8820076CFF3 /* raredisplay.cpp in Sources */,
 				481FB5F91AC1B77E0076CFF3 /* removedistscommand.cpp in Sources */,
 				481FB6581AC1B8100076CFF3 /* libshuff.cpp in Sources */,
@@ -3204,17 +3205,16 @@
 				481FB6151AC1B7AC0076CFF3 /* summarycommand.cpp in Sources */,
 				481FB5EE1AC1B77E0076CFF3 /* pcacommand.cpp in Sources */,
 				481FB5B71AC1B74F0076CFF3 /* getcommandinfocommand.cpp in Sources */,
+				48BDDA761ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */,
 				481FB5711AC1B6D40076CFF3 /* shen.cpp in Sources */,
 				481FB6501AC1B8100076CFF3 /* dlibshuff.cpp in Sources */,
 				481FB64D1AC1B7F40076CFF3 /* treemap.cpp in Sources */,
 				481FB67F1AC1B8960076CFF3 /* singlelinkage.cpp in Sources */,
 				481FB5641AC1B6A40076CFF3 /* sharedkulczynskicody.cpp in Sources */,
-				481FB6461AC1B7EA0076CFF3 /* sharedsabundvector.cpp in Sources */,
 				481FB60D1AC1B7AC0076CFF3 /* shhhercommand.cpp in Sources */,
 				481FB5FA1AC1B77E0076CFF3 /* removegroupscommand.cpp in Sources */,
 				481FB5371AC1B5E00076CFF3 /* cluster.cpp in Sources */,
 				481FB53B1AC1B5EF0076CFF3 /* boneh.cpp in Sources */,
-				481FB6441AC1B7EA0076CFF3 /* sharedrabundfloatvector.cpp in Sources */,
 				481FB6071AC1B7970076CFF3 /* setcurrentcommand.cpp in Sources */,
 				481FB5321AC1B5D00076CFF3 /* cmdargs.cpp in Sources */,
 				481FB6711AC1B8820076CFF3 /* rarefact.cpp in Sources */,
@@ -3310,6 +3310,7 @@
 				A7E9B8C212D37EC400DA6239 /* engine.cpp in Sources */,
 				A7E9B8C312D37EC400DA6239 /* fasta.cpp in Sources */,
 				A7E9B8C412D37EC400DA6239 /* fastamap.cpp in Sources */,
+				48BDDA751ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */,
 				A7E9B8C512D37EC400DA6239 /* fileoutput.cpp in Sources */,
 				A7E9B8C612D37EC400DA6239 /* filterseqscommand.cpp in Sources */,
 				A7E9B8C812D37EC400DA6239 /* flowdata.cpp in Sources */,
@@ -3440,6 +3441,7 @@
 				48910D4B1D58CBA300F60EDB /* optimatrix.cpp in Sources */,
 				A7E9B94412D37EC400DA6239 /* shannoneven.cpp in Sources */,
 				A7E9B94512D37EC400DA6239 /* sharedace.cpp in Sources */,
+				48BDDA791ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */,
 				A7E9B94612D37EC400DA6239 /* sharedanderbergs.cpp in Sources */,
 				A7E9B94712D37EC400DA6239 /* sharedbraycurtis.cpp in Sources */,
 				A7E9B94812D37EC400DA6239 /* sharedchao1.cpp in Sources */,
@@ -3460,9 +3462,6 @@
 				A7E9B95412D37EC400DA6239 /* sharedmorisitahorn.cpp in Sources */,
 				A7E9B95512D37EC400DA6239 /* sharedochiai.cpp in Sources */,
 				A7E9B95612D37EC400DA6239 /* sharedordervector.cpp in Sources */,
-				A7E9B95712D37EC400DA6239 /* sharedrabundfloatvector.cpp in Sources */,
-				A7E9B95812D37EC400DA6239 /* sharedrabundvector.cpp in Sources */,
-				A7E9B95912D37EC400DA6239 /* sharedsabundvector.cpp in Sources */,
 				A7E9B95A12D37EC400DA6239 /* sharedsobs.cpp in Sources */,
 				A7E9B95B12D37EC400DA6239 /* sharedsobscollectsummary.cpp in Sources */,
 				A7E9B95C12D37EC400DA6239 /* sharedsorabund.cpp in Sources */,
@@ -3493,6 +3492,7 @@
 				A7E9B97312D37EC400DA6239 /* structchord.cpp in Sources */,
 				A7E9B97412D37EC400DA6239 /* structeuclidean.cpp in Sources */,
 				A7E9B97512D37EC400DA6239 /* structkulczynski.cpp in Sources */,
+				48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
 				A7E9B97612D37EC400DA6239 /* structpearson.cpp in Sources */,
 				48E544411E9C292900FF6AB8 /* mcc.cpp in Sources */,
 				A7E9B97712D37EC400DA6239 /* subsamplecommand.cpp in Sources */,

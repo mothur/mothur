@@ -211,28 +211,26 @@ int NormalizeSharedCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		input = new InputData(inputfile, format);
-		
+		InputData input(inputfile, format);
+        
 		//you are reading a sharedfile and you do not want to make relabund
 		if ((format == "sharedfile") && (!makeRelabund)) {
-			lookup = input->getSharedRAbundVectors();
-			string lastLabel = lookup[0]->getLabel();
+			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+			string lastLabel = lookup->getLabel();
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { 
 				m->clearGroups();
 				vector<string> mGroups;
-				vector<SharedRAbundVector*> temp;
-				for (int i = 0; i < lookup.size(); i++) {
-					if (lookup[i]->getNumSeqs() < norm) { 
-						m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-						delete lookup[i];
-					}else { 
-						mGroups.push_back(lookup[i]->getGroup()); 
-						temp.push_back(lookup[i]);
-					}
-				} 
-				lookup = temp;
+                vector<string> temp;
+                vector<string> lookupGroups = lookup->getNamesGroups();
+                for (int i = 0; i < lookupGroups.size(); i++) {
+                    if (lookup->getNumSeqs(lookupGroups[i]) < norm) {
+                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookup->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
+                        temp.push_back(lookupGroups[i]);
+                    }else { Groups.push_back(lookupGroups[i]); }
+                }
+                lookup->removeGroups(temp);
 				m->setGroups(mGroups);
 			}
 			
@@ -242,10 +240,11 @@ int NormalizeSharedCommand::execute(){
 			
 			if (method == "totalgroup") {
 				//set norm to smallest group number
-				if (norm == 0) { 
-					norm = lookup[0]->getNumSeqs();
-					for (int i = 1; i < lookup.size(); i++) {
-						if (lookup[i]->getNumSeqs() < norm) { norm = lookup[i]->getNumSeqs();  }
+				if (norm == 0) {
+                    vector<string> lookupGroups = lookup->getNamesGroups();
+                    norm = lookup->getNumSeqs(lookupGroups[0]);
+					for (int i = 1; i < lookupGroups.size(); i++) {
+						if (lookup->getNumSeqs(lookupGroups[i]) < norm) { norm = lookup->getNumSeqs(lookupGroups[i]);  }
 					}  
 				}
 				
@@ -254,43 +253,43 @@ int NormalizeSharedCommand::execute(){
 			
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups();   return 0; }
+                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup; m->clearGroups();   return 0; }
 				
-				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 					normalize(lookup);
 					
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup[0]->getLabel();
+				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup->getLabel();
 					
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
-					lookup = input->getSharedRAbundVectors(lastLabel);
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					delete lookup;
+					lookup = input.getSharedRAbundVectors(lastLabel);
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 					
 					normalize(lookup);
 					
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
-					lookup[0]->setLabel(saveLabel);
+					lookup->setLabel(saveLabel);
 				}
 				
-				lastLabel = lookup[0]->getLabel();
+				lastLabel = lookup->getLabel();
 				//prevent memory leak
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+				delete lookup;
 				
 				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();  return 0; }
 				
 				//get next line to process
-				lookup = input->getSharedRAbundVectors();				
+				lookup = input.getSharedRAbundVectors();
 			}
 			
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
@@ -310,19 +309,16 @@ int NormalizeSharedCommand::execute(){
 			
 			//run last label if you need to
 			if (needToRun == true)  {
-				for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				
+				delete lookup;
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				normalize(lookup);
-				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				delete lookup;
 			}
 			
 		}else{ //relabund values
-			lookupFloat = input->getSharedRAbundFloatVectors();
-			string lastLabel = lookupFloat[0]->getLabel();
+			SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
+			string lastLabel = lookupFloat->getLabel();
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
@@ -330,74 +326,73 @@ int NormalizeSharedCommand::execute(){
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { 
-				m->clearGroups();
-				vector<string> mGroups;
-				vector<SharedRAbundFloatVector*> temp;
-				for (int i = 0; i < lookupFloat.size(); i++) {
-					if (lookupFloat[i]->getNumSeqs() < norm) { 
-						m->mothurOut(lookupFloat[i]->getGroup() + " contains " + toString(lookupFloat[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-						delete lookupFloat[i];
-					}else { 
-						mGroups.push_back(lookupFloat[i]->getGroup()); 
-						temp.push_back(lookupFloat[i]);
-					}
-				} 
-				lookupFloat = temp;
-				m->setGroups(mGroups);
+                m->clearGroups();
+                vector<string> mGroups;
+                vector<string> temp;
+                vector<string> lookupGroups = lookupFloat->getNamesGroups();
+                for (int i = 0; i < lookupGroups.size(); i++) {
+                    if (lookupFloat->getNumSeqs(lookupGroups[i]) < norm) {
+                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookupFloat->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
+                        temp.push_back(lookupGroups[i]);
+                    }else { Groups.push_back(lookupGroups[i]); }
+                }
+                lookupFloat->removeGroups(temp);
+                m->setGroups(mGroups);
 			}
 			
 			//set norm to smallest group number
 			if (method == "totalgroup") {
-				if (norm == 0) { 
-					norm = lookupFloat[0]->getNumSeqs();
-					for (int i = 1; i < lookupFloat.size(); i++) {
-						if (lookupFloat[i]->getNumSeqs() < norm) { norm = lookupFloat[i]->getNumSeqs();  }
-					}  
-				}
+                if (norm == 0) {
+                    vector<string> lookupGroups = lookupFloat->getNamesGroups();
+                    norm = lookupFloat->getNumSeqs(lookupGroups[0]);
+                    for (int i = 1; i < lookupGroups.size(); i++) {
+                        if (lookupFloat->getNumSeqs(lookupGroups[i]) < norm) { norm = lookupFloat->getNumSeqs(lookupGroups[i]);  }
+                    }  
+                }
 				
 				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } m->clearGroups();  return 0; }
+                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat; m->clearGroups();  return 0; }
 				
-				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
 					
-					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 					
 					normalize(lookupFloat);
 					
-					processedLabels.insert(lookupFloat[0]->getLabel());
-					userLabels.erase(lookupFloat[0]->getLabel());
+					processedLabels.insert(lookupFloat->getLabel());
+					userLabels.erase(lookupFloat->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookupFloat[0]->getLabel();
+				if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookupFloat->getLabel();
 					
-					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  
-					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+					delete lookupFloat;
+					lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 					
-					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 		
 					normalize(lookupFloat);
 					
-					processedLabels.insert(lookupFloat[0]->getLabel());
-					userLabels.erase(lookupFloat[0]->getLabel());
+					processedLabels.insert(lookupFloat->getLabel());
+					userLabels.erase(lookupFloat->getLabel());
 					
 					//restore real lastlabel to save below
-					lookupFloat[0]->setLabel(saveLabel);
+					lookupFloat->setLabel(saveLabel);
 				}
 				
-				lastLabel = lookupFloat[0]->getLabel();
+				lastLabel = lookupFloat->getLabel();
 				//prevent memory leak
-				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i]; lookupFloat[i] = NULL; }
+				delete lookupFloat;
 				
 				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
 				
 				//get next line to process
-				lookupFloat = input->getSharedRAbundFloatVectors();				
+				lookupFloat = input.getSharedRAbundFloatVectors();
 			}
 			
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
@@ -417,20 +412,19 @@ int NormalizeSharedCommand::execute(){
 			
 			//run last label if you need to
 			if (needToRun == true)  {
-				for (int i = 0; i < lookupFloat.size(); i++) { if (lookupFloat[i] != NULL) { delete lookupFloat[i]; } }  
-				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+				delete lookupFloat;
+				lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 				
-				m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 				
 				normalize(lookupFloat);
 				
-				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+				delete lookupFloat;
 			}
 			
 		}
 		//reset groups parameter
-		m->clearGroups();  
-		delete input;
+		m->clearGroups();
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
@@ -456,16 +450,15 @@ int NormalizeSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundVectors* thisLookUp){
 	try {
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
-		
-		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
+        vector<string> lookupGroups = thisLookUp->getNamesGroups();
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
-        variables["[distance]"] = thisLookUp[0]->getLabel();
+        variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
         
 		ofstream out;
@@ -476,69 +469,61 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
 			
 			//save numSeqs since they will change as the data is normalized
 			vector<int> sizes;
-			for (int i = 0; i < thisLookUp.size(); i++) {  sizes.push_back(thisLookUp[i]->getNumSeqs()); }
+			for (int i = 0; i < lookupGroups.size(); i++) {  sizes.push_back(thisLookUp->getNumSeqs(lookupGroups[i])); }
 					
-			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
-						
-					for (int i = 0; i < thisLookUp.size(); i++) {
-							
-						if (m->control_pressed) { out.close(); return 0; }
-							
-						int abund = thisLookUp[i]->getAbundance(j);
-							
-						float relabund = abund / (float) sizes[i];
-						float newNorm = relabund * norm;
-						
-						//round to nearest int
-						int finalNorm = (int) floor((newNorm + 0.5));
-						
-						thisLookUp[i]->set(j, finalNorm, thisLookUp[i]->getGroup());
-					}
-				}
+            for (int j = 0; j < thisLookUp->getNumBins(); j++) {
+                
+                for (int i = 0; i < lookupGroups.size(); i++) {
+                    
+                    if (m->control_pressed) { out.close(); return 0; }
+                    
+                    int abund = thisLookUp->get(j, lookupGroups[i]);
+                    
+                    float relabund = abund / (float) sizes[i];
+                    float newNorm = relabund * norm;
+                    
+                    //round to nearest int
+                    int finalNorm = (int) floor((newNorm + 0.5));
+                    
+                    thisLookUp->set(j, finalNorm, lookupGroups[i]);
+                }
+            }
 					
 		}else if (method == "zscore") {
 			
-			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				//calc mean
 				float mean = 0.0;
-				for (int i = 0; i < thisLookUp.size(); i++) {  mean += thisLookUp[i]->getAbundance(j); }
-				mean /= (float) thisLookUp.size();
+				for (int i = 0; i < lookupGroups.size(); i++) {  mean += thisLookUp->get(j, lookupGroups[i]); }
+				mean /= (float) lookupGroups.size();
 					
 				//calc standard deviation
 				float sumSquared = 0.0;
-				for (int i = 0; i < thisLookUp.size(); i++) { sumSquared += (((float)thisLookUp[i]->getAbundance(j) - mean) * ((float)thisLookUp[i]->getAbundance(j) - mean)); }
-				sumSquared /= (float) thisLookUp.size();
+				for (int i = 0; i < lookupGroups.size(); i++) { sumSquared += (((float)thisLookUp->get(j, lookupGroups[i]) - mean) * ((float)thisLookUp->get(j, lookupGroups[i]) - mean)); }
+				sumSquared /= (float) lookupGroups.size();
 				
 				float standardDev = sqrt(sumSquared);
 					
-				for (int i = 0; i < thisLookUp.size(); i++) {
+				for (int i = 0; i < lookupGroups.size(); i++) {
 					int finalNorm = 0;
 					if (standardDev != 0) { // stop divide by zero
-						float newNorm = ((float)thisLookUp[i]->getAbundance(j) - mean) / standardDev;
+						float newNorm = ((float)thisLookUp->get(j, lookupGroups[i]) - mean) / standardDev;
 						//round to nearest int
 						finalNorm = (int) floor((newNorm + 0.5));
 					}
 					
-					thisLookUp[i]->set(j, finalNorm, thisLookUp[i]->getGroup());
+					thisLookUp->set(j, finalNorm, lookupGroups[i]);
 				}
 			}
 						
 		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
 				
-				
-						
-		eliminateZeroOTUS(thisLookUp);
-		
-		thisLookUp[0]->printHeaders(out); 
-		 
-		for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t';
-			thisLookUp[i]->print(out);
-		}
-		
+		thisLookUp->eliminateZeroOTUS();
+		thisLookUp->printHeaders(out);
+        thisLookUp->print(out);
 		out.close();
 		
 		m->currentSharedBinLabels = saveBinLabels;
@@ -552,83 +537,75 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors* thisLookUp){
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
+        vector<string> lookupGroups = thisLookUp->getNamesGroups();
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
-        variables["[distance]"] = thisLookUp[0]->getLabel();
+        variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
 		
-		
-		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
-		
 		if (method == "totalgroup") { 
 			
 			//save numSeqs since they will change as the data is normalized
 			vector<float> sizes;
-			for (int i = 0; i < thisLookUp.size(); i++) {  sizes.push_back(thisLookUp[i]->getNumSeqs()); }
+			for (int i = 0; i < lookupGroups.size(); i++) {  sizes.push_back(thisLookUp->getNumSeqs(lookupGroups[i])); }
 			
-			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 				
-				for (int i = 0; i < thisLookUp.size(); i++) {
+				for (int i = 0; i < lookupGroups.size(); i++) {
 					
 					if (m->control_pressed) { out.close(); return 0; }
 					
-					float abund = thisLookUp[i]->getAbundance(j);
+					float abund = thisLookUp->get(j, lookupGroups[i]);
 					
 					float relabund = abund / (float) sizes[i];
 					float newNorm = relabund * norm;
 					
-					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());
+					thisLookUp->set(j, newNorm, lookupGroups[i]);
 				}
 			}
 			
 		}else if (method == "zscore") {
-			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				//calc mean
 				float mean = 0.0;
-				for (int i = 0; i < thisLookUp.size(); i++) {  mean += thisLookUp[i]->getAbundance(j); }
-				mean /= (float) thisLookUp.size();
+				for (int i = 0; i < lookupGroups.size(); i++) {  mean += thisLookUp->get(j, lookupGroups[i]); }
+				mean /= (float) lookupGroups.size();
 				
 				//calc standard deviation
 				float sumSquared = 0.0;
-				for (int i = 0; i < thisLookUp.size(); i++) { sumSquared += ((thisLookUp[i]->getAbundance(j) - mean) * (thisLookUp[i]->getAbundance(j) - mean)); }
-				sumSquared /= (float) thisLookUp.size();
+				for (int i = 0; i < lookupGroups.size(); i++) { sumSquared += ((thisLookUp->get(j, lookupGroups[i]) - mean) * (thisLookUp->get(j, lookupGroups[i]) - mean)); }
+				sumSquared /= (float) lookupGroups.size();
 				
 				float standardDev = sqrt(sumSquared);
 				
-				for (int i = 0; i < thisLookUp.size(); i++) {
+				for (int i = 0; i < lookupGroups.size(); i++) {
 					float newNorm = 0.0;
-					if (standardDev != 0) { // stop divide by zero
-						newNorm = (thisLookUp[i]->getAbundance(j) - mean) / standardDev;
-					}
-					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());
-				}
+                    if (standardDev != 0) { // stop divide by zero
+                        newNorm = ((float)thisLookUp->get(j, lookupGroups[i]) - mean) / standardDev;
+                    }
+                    thisLookUp->set(j, newNorm, lookupGroups[i]);
+                }
 			}			
 			
 		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
 		
 		
-		eliminateZeroOTUS(thisLookUp);
-		
-		thisLookUp[0]->printHeaders(out); 
-		
-		for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t';
-			thisLookUp[i]->print(out);
-		}
-		
-		out.close();
+        thisLookUp->eliminateZeroOTUS();
+        thisLookUp->printHeaders(out);
+        thisLookUp->print(out);
+        out.close();
 		
 		m->currentSharedBinLabels = saveBinLabels;
 		
@@ -639,117 +616,4 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		vector<string> newBinLabels;
-		string snumBins = toString(thislookup[0]->getNumBins());
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-		
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu";
-				string sbinNumber = toString(i+1);
-				if (sbinNumber.length() < snumBins.length()) { 
-					int diff = snumBins.length() - sbinNumber.length();
-					for (int h = 0; h < diff; h++) { binLabel += "0"; }
-				}
-				binLabel += sbinNumber; 
-				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-				
-				newBinLabels.push_back(binLabel);
-			}
-		}
-
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-
-		thislookup = newLookup;
-		m->currentSharedBinLabels = newBinLabels;
-		
-		return 0;
- 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "eliminateZeroOTUS");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundFloatVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		vector<string> newBinLabels;
-		string snumBins = toString(thislookup[0]->getNumBins());
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-			
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu";
-				string sbinNumber = toString(i+1);
-				if (sbinNumber.length() < snumBins.length()) { 
-					int diff = snumBins.length() - sbinNumber.length();
-					for (int h = 0; h < diff; h++) { binLabel += "0"; }
-				}
-				binLabel += sbinNumber; 
-				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-				
-				newBinLabels.push_back(binLabel);
-			}
-		}
-		
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-		
-		thislookup = newLookup;
-		m->currentSharedBinLabels = newBinLabels;
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "eliminateZeroOTUS");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************

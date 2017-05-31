@@ -10,7 +10,7 @@
 #include "speciesprofile.h"
 
 /***********************************************************************/
-EstOutput SpeciesProfile::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput SpeciesProfile::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -18,14 +18,14 @@ EstOutput SpeciesProfile::getValues(vector<SharedRAbundVector*> shared) {
 		double sumB = 0.0;
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			sumA += shared[0]->getAbundance(i);
-			sumB += shared[1]->getAbundance(i);
+			sumA += shared[0]->get(i);
+			sumB += shared[1]->get(i);
 		}
 		
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
-			int A = shared[0]->getAbundance(i);
-			int B = shared[1]->getAbundance(i);
+			int A = shared[0]->get(i);
+			int B = shared[1]->get(i);
 			
 			sum += (((A / sumA) - (B / sumB)) * ((A / sumA) - (B / sumB)));
 		}

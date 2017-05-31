@@ -249,20 +249,16 @@ try {
 				displays[i]->init(label);		  
 			}
 			
-			if (m->jumble == true)  {
-				//randomize the groups
-				m->mothurRandomShuffle(lookup);
-			}
+            //randomize the groups
+			if (m->jumble == true)  { m->mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
-			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->size());
+			RAbundVector* merge = new RAbundVector(lookup[0]->getNumBins());
 			
 			//make copy of lookup zero
-			for(int i = 0; i<lookup[0]->size(); i++) {
-				merge->set(i, lookup[0]->getAbundance(i), "merge");
-			}
+			for(int i = 0; i<lookup[0]->getNumBins(); i++) {  merge->set(i, lookup[0]->get(i)); }
 			
-			vector<SharedRAbundVector*> subset;
+			vector<RAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
 				if (m->control_pressed) {  delete merge; delete rcd; return 0;  }
@@ -297,11 +293,11 @@ try {
 }
 
 /**************************************************************************************/
-void Rarefact::mergeVectors(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+void Rarefact::mergeVectors(RAbundVector* shared1, RAbundVector* shared2) {
 	try{
-		for (int k = 0; k < shared1->size(); k++) {
+		for (int k = 0; k < shared1->getNumBins(); k++) {
 			//merge new species into shared1
-			shared1->set(k, (shared1->getAbundance(k) + shared2->getAbundance(k)), "combo");  //set to 'combo' since this vector now contains multiple groups
+			shared1->set(k, (shared1->get(k) + shared2->get(k)));  //set to 'combo' since this vector now contains multiple groups
 		}
 	}
 	catch(exception& e) {

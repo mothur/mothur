@@ -88,13 +88,11 @@ public:
 private:
 	vector<linePair> lines;
 	
-	void printSims(ostream&, vector< vector<double> >&);
-	int process(vector<SharedRAbundVector*>);
+	void printSims(ostream&, vector< vector<double> >&, vector<string>);
+	int process(SharedRAbundVectors*);
 	
 	vector<Calculator*> matrixCalculators;
-	//vector< vector<float> > simMatrix;
-	InputData* input;
-	vector<SharedRAbundVector*> lookup;
+	SharedRAbundVectors* lookup;
 	string exportFileName, output, sharedfile;
 	int numGroups, processors, iters, subsampleSize;
 	ofstream out;
@@ -103,8 +101,8 @@ private:
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
-	int process(vector<SharedRAbundVector*>, string, string);
-	int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);
+	int process(SharedRAbundVectors*, string, string);
+	int driver(vector<RAbundVector*>, int, int, vector< vector<seqDist> >&);
 
 };
 	
@@ -113,7 +111,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distSharedData {
-    vector<SharedRAbundVector*> thisLookup;
+    vector<RAbundVector*> thisLookup;
     vector< vector<seqDist> > calcDists;
     vector<string>  Estimators;
 	unsigned long long start;
@@ -122,7 +120,7 @@ struct distSharedData {
     int count;
 	
 	distSharedData(){}
-	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
+	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<RAbundVector*> lu) {
 		m = mout;
 		start = st;
 		end = en;
@@ -233,7 +231,7 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
         
         pDataArray->calcDists.resize(matrixCalculators.size());
         		
-		vector<SharedRAbundVector*> subset;
+		vector<RAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
 			pDataArray->count++;
 			for (int l = 0; l < k; l++) {
@@ -265,6 +263,7 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
 		}
         
         for(int i=0;i<matrixCalculators.size();i++){  delete matrixCalculators[i]; }
+        for(int i=0;i<pDataArray->thisLookup->size();i++){  delete pDataArray->thisLookup[i]; }
 		
 		return 0;
 		

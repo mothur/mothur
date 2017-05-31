@@ -14,7 +14,7 @@ It is used by sharedJAbund and SharedSorensonAbund. */
  
 
 #include "mothurout.h"
-#include "sharedrabundvector.h"
+
 
 typedef vector<double> EstOutput;
 
@@ -24,7 +24,7 @@ class UVEst {
 		UVEst() { m = MothurOut::getInstance(); }
         ~UVEst() {}
     
-		EstOutput getUVest(vector<SharedRAbundVector*>);
+		EstOutput getUVest(vector<RAbundVector*>);
     
 	private:
 		MothurOut* m;

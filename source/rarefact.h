@@ -12,7 +12,7 @@ class Rarefact {
 public:
 	Rarefact(OrderVector& o, vector<Display*> disp, int p, set<int> en) :
 			numSeqs(o.getNumSeqs()), order(o), displays(disp), label(o.getLabel()), processors(p), ends(en)  { m = MothurOut::getInstance(); }
-	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp) :
+	Rarefact(vector<RAbundVector*> shared, vector<Display*> disp) :
 					 lookup(shared), displays(disp) {  m = MothurOut::getInstance(); }
 
 	~Rarefact(){};
@@ -26,8 +26,8 @@ private:
 	int numSeqs, numGroupComb, processors;
 	string label;
     set<int> ends;
-	void mergeVectors(SharedRAbundVector*, SharedRAbundVector*);
-	vector<SharedRAbundVector*> lookup; 
+	void mergeVectors(RAbundVector*, RAbundVector*);
+	vector<RAbundVector*> lookup;
 	MothurOut* m;
 	
 	int createProcesses(vector<int>&, RarefactionCurveData*, int, int);

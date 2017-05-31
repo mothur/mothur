@@ -38,8 +38,6 @@ public:
 private:
 	
 	vector<Display*> rDisplays;
-	OrderVector* order;
-	InputData* input;
 	Rarefact* rCurve;
 	int nIters, abund, processors, alpha;
 	float freq;

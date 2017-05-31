@@ -15,7 +15,7 @@
 #include "sequence.hpp"
 #include "groupmap.h"
 #include "counttable.h"
-#include "sharedrabundvector.h"
+
 #include "inputdata.h"
 
 //**********************************************************************************************************************
@@ -57,7 +57,7 @@ class GetSharedOTUCommand : public Command {
 		vector<string> outputNames;
 		
 		int process(ListVector*);
-        int process(vector<SharedRAbundVector*>&);
+        int process(SharedRAbundVectors*);
         int runShared();
 		
 };

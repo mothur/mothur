@@ -11,6 +11,7 @@
 #include "ordervector.hpp"
 #include "listvector.hpp"
 #include "rabundvector.hpp"
+#include "sharedrabundvectors.hpp"
 
 /***********************************************************************/
 
@@ -416,39 +417,36 @@ OrderVector* InputData::getOrderVector(string label){
 		exit(1);
 	}
 }
+/***********************************************************************/
+SharedRAbundVectors* InputData::getSharedRAbundVectors(){
+    try {
+        if(fileHandle){
+            if (format == "sharedfile")  {
+                SharedRAbundVectors* shared = new SharedRAbundVectors(fileHandle);
+                return shared;
+            }else if (format == "shared") {
+                SharedList = new SharedListVector(fileHandle);
+                
+                if (SharedList != NULL) {
+                    return SharedList->getSharedRAbundVector();
+                }
+            }
+            m->gobble(fileHandle);
+        }
+        
+        //this is created to signal to calling function that the input file is at eof
+        SharedRAbundVectors* null; null = NULL;
+        return null;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "InputData", "getSharedRAbundVectors");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
-//this is used when you don't need the order vector
-vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
-	try {
-		if(fileHandle){
-			if (format == "sharedfile")  {
-				SharedRAbundVector* SharedRAbund = new SharedRAbundVector(fileHandle);
-				if (SharedRAbund != NULL) {
-					return SharedRAbund->getSharedRAbundVectors();
-				}
-			}else if (format == "shared") {
-				SharedList = new SharedListVector(fileHandle);
-				
-				if (SharedList != NULL) {
-					return SharedList->getSharedRAbundVector();
-				}
-			}
-			m->gobble(fileHandle);
-		}
-				
-		//this is created to signal to calling function that the input file is at eof
-		vector<SharedRAbundVector*> null;  null.push_back(NULL);
-		return null;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "InputData", "getSharedRAbundVectors");
-		exit(1);
-	}
-}
-/***********************************************************************/
-vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
+SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
@@ -460,16 +458,13 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 			if (format == "sharedfile")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundVector* SharedRAbund = new SharedRAbundVector(in);
+					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in);
 					if (SharedRAbund != NULL) {
 						thisLabel = SharedRAbund->getLabel();
 					
 						//if you are at the last label
-						if (thisLabel == label) {  in.close(); return SharedRAbund->getSharedRAbundVectors();  }
+						if (thisLabel == label) {  in.close(); return SharedRAbund;  }
 						else {
-							//so you don't loose this memory
-							vector<SharedRAbundVector*> lookup = SharedRAbund->getSharedRAbundVectors(); 
-							for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 							delete SharedRAbund;
 						}
 					}else{  break;  }
@@ -498,7 +493,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 		}
 				
 		//this is created to signal to calling function that the input file is at eof
-		vector<SharedRAbundVector*> null;  null.push_back(NULL);
+		SharedRAbundVectors* null;  null = (NULL);
 		in.close();
 		return null;
 	
@@ -511,21 +506,21 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 
 /***********************************************************************/
 //this is used when you don't need the order vector
-vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(){
+SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 	try {
 		if(fileHandle){
 			if (format == "relabund")  {
-				SharedRAbundFloatVector* SharedRelAbund = new SharedRAbundFloatVector(fileHandle);
-				if (SharedRelAbund != NULL) {
-					return SharedRelAbund->getSharedRAbundFloatVectors();
-				}
+				SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(fileHandle);
+                return SharedRelAbund;
 			}else if (format == "sharedfile")  {
-				SharedRAbundVector* SharedRAbund = new SharedRAbundVector(fileHandle);
+				SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(fileHandle);
 				if (SharedRAbund != NULL) {
-					vector<SharedRAbundVector*> lookup = SharedRAbund->getSharedRAbundVectors(); 
-					vector<SharedRAbundFloatVector*> lookupFloat = SharedRAbund->getSharedRAbundFloatVectors(lookup); 
-					for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } lookup.clear();
-					return lookupFloat;  
+					vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
+                    vector<string> groups = SharedRAbund->getNamesGroups();
+                    SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
+                    for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i], groups[i]); }
+					delete SharedRAbund;
+                    return SharedRelAbund;
 				}
 						
 			}
@@ -533,9 +528,8 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(){
 		}
 				
 		//this is created to signal to calling function that the input file is at eof
-		vector<SharedRAbundFloatVector*> null;  null.push_back(NULL);
+		SharedRAbundFloatVectors* null;  null = (NULL);
 		return null;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedRAbundFloatVectors");
@@ -543,7 +537,7 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(){
 	}
 }
 /***********************************************************************/
-vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string label){
+SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
@@ -555,40 +549,32 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string l
 			if (format == "relabund")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundFloatVector* SharedRelAbund = new SharedRAbundFloatVector(in);
+					SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(in);
 					if (SharedRelAbund != NULL) {
 						thisLabel = SharedRelAbund->getLabel();
 						//if you are at the last label
-						if (thisLabel == label) {  in.close(); return SharedRelAbund->getSharedRAbundFloatVectors();  }
-						else {
-							//so you don't loose this memory
-							vector<SharedRAbundFloatVector*> lookup = SharedRelAbund->getSharedRAbundFloatVectors(); 
-							for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-							delete SharedRelAbund;
-						}
+						if (thisLabel == label) {  in.close(); return SharedRelAbund;  }
+						else { delete SharedRelAbund; }
 					}else{  break;  }
 					m->gobble(in);
 				}
 			}else if (format == "sharedfile")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundVector* SharedRAbund = new SharedRAbundVector(in);
+					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in);
 					if (SharedRAbund != NULL) {
 						thisLabel = SharedRAbund->getLabel();
 						
 						//if you are at the last label
 						if (thisLabel == label) {  
 							in.close(); 
-							vector<SharedRAbundVector*> lookup = SharedRAbund->getSharedRAbundVectors(); 
-							vector<SharedRAbundFloatVector*> lookupFloat = SharedRAbund->getSharedRAbundFloatVectors(lookup); 
-							for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } lookup.clear();
-							return lookupFloat;  
-						}else {
-							//so you don't loose this memory
-							vector<SharedRAbundVector*> lookup = SharedRAbund->getSharedRAbundVectors(); 
-							for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } lookup.clear();
-							delete SharedRAbund;
-						}
+                            vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
+                            vector<string> groups = SharedRAbund->getNamesGroups();
+                            SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
+                            for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i], groups[i]); }
+                            delete SharedRAbund;
+                            return SharedRelAbund;
+						}else { delete SharedRAbund; }
 					}else{  break;  }
 					m->gobble(in);
 				}
@@ -597,7 +583,7 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string l
 		
 				
 		//this is created to signal to calling function that the input file is at eof
-		vector<SharedRAbundFloatVector*> null;  null.push_back(NULL);
+		SharedRAbundFloatVectors* null;  null = (NULL);
 		in.close();
 		return null;
 	

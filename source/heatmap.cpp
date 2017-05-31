@@ -109,10 +109,10 @@ string HeatMap::getPic(RAbundVector* rabund) {
 
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
+string HeatMap::getPic(vector<RAbundVector*> lookup, vector<string> groups) {
 	try {
 	
-		int numBinsToDisplay = lookup[0]->size();
+		int numBinsToDisplay = lookup[0]->getNumBins();
 		
 		if (numOTU != 0) { //user want to display a portion of the otus
 			if (numOTU < numBinsToDisplay) {  numBinsToDisplay = numOTU; }
@@ -129,7 +129,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		for(int i = 0; i < lookup.size(); i++){
 			for(int j=0; j<lookup[i]->size(); j++){
 				
-				float relAbund = lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs();
+				float relAbund = lookup[i]->get(j) / (float)lookup[i]->getNumSeqs();
 				if(relAbund > maxRelAbund[i]){	maxRelAbund[i] = relAbund;	}
 			}
 			if(maxRelAbund[i] > superMaxRelAbund){	superMaxRelAbund = maxRelAbund[i];	}
@@ -140,9 +140,9 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
 				if (m->control_pressed) {  return "control"; }
-				float relAbund = lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs();
+				float relAbund = lookup[i]->get(j) / (float)lookup[i]->getNumSeqs();
 				
-				if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
+				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
                         if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
                         if (relAbund == 1) { relAbund -= 0.001; }
@@ -182,7 +182,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
                 string tempLabel = "OTU";
                 outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(labelBump-labelBump/2+1) + "\" y=\"50\">" + tempLabel + "</text>\n";
             }else {
-                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)lookup[h-1]->getGroup().length() / 2)+labelBump/2) + "\" y=\"50\">" + lookup[h-1]->getGroup() + "</text>\n";
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)groups[h-1].length() / 2)+labelBump/2) + "\" y=\"50\">" + groups[h-1] + "</text>\n";
             }
 		}
 
@@ -219,10 +219,10 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 }
 
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<RAbundVector*>& lookup){
 	try {
 				
-		vector<SharedRAbundVector*> looktemp;
+		vector<RAbundVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
@@ -241,31 +241,26 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 		/******************* create copy of lookup *********************/
 		//create and initialize looktemp as a copy of lookup
 		for (int i = 0; i < lookup.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(lookup[i]->getNumBins());
+			RAbundVector* temp = new RAbundVector(*lookup[i]);
 			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
-			//copy lookup i's info
-			for (int j = 0; j < lookup[i]->size(); j++) {
-				temp->set(j, lookup[i]->getAbundance(j), lookup[i]->getGroup());
-			}
 			looktemp.push_back(temp);
 		}
 	
 		/************************ fill lookup in order given by place *********************/
 		//for each bin
-		for (int i = 0; i < looktemp[0]->size(); i++) {														//place
+		for (int i = 0; i < looktemp[0]->getNumBins(); i++) {														//place
 			//fill lookup																					// 2 -> 1
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
-				int newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
-				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
+				int newAbund = looktemp[j]->get(i);												// 1 -> 3
+				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
 			}
             sortedLabels[place[i]] = m->currentSharedBinLabels[i];
 		}
 		
 		//delete looktemp -- Sarah look at - this is causing segmentation faults
 		for (int j = 0; j < looktemp.size(); j++) {
-//			delete looktemp[j];
-		}
+            //delete looktemp[j];
+        }
 		
 		return sortedLabels;
 		
@@ -276,7 +271,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderShared(vector<SharedRAbundVector*>& lookup){
+map<int, int> HeatMap::orderShared(vector<RAbundVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -286,11 +281,11 @@ map<int, int> HeatMap::orderShared(vector<SharedRAbundVector*>& lookup){
 		vector<int> uniqueBins;
 		
 		//for each bin
-		for (int i = 0; i < lookup[0]->size(); i++) {	
+		for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 			int count = 0;												
 			
 			//is this bin shared
-			for (int j = 0; j < lookup.size(); j++) {		if (lookup[j]->getAbundance(i) != 0) { count++; }	}
+			for (int j = 0; j < lookup.size(); j++) {		if (lookup[j]->get(i) != 0) { count++; }	}
 			
 			if (count < 2)	{  uniqueBins.push_back(i); }
 			else			{  sharedBins.push_back(i); }
@@ -309,7 +304,7 @@ map<int, int> HeatMap::orderShared(vector<SharedRAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundVector*>& lookup){
+map<int, int> HeatMap::orderTopOtu(vector<RAbundVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -318,10 +313,10 @@ map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundVector*>& lookup){
 		vector<binCount> totals;
 		
 		//for each bin
-		for (int i = 0; i < lookup[0]->size(); i++) {	
+		for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 			int total = 0;												
 			
-			for (int j = 0; j < lookup.size(); j++) {	total += lookup[j]->getAbundance(i); 	}
+			for (int j = 0; j < lookup.size(); j++) {	total += lookup[j]->get(i); 	}
 			
 			binCount temp(i, total);
 			
@@ -342,7 +337,7 @@ map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundVector*>& lookup){
+map<int, int> HeatMap::orderTopGroup(vector<RAbundVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -352,9 +347,9 @@ map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundVector*>& lookup){
 		totals.resize(lookup.size());
 		
 		//for each bin
-		for (int i = 0; i < lookup[0]->size(); i++) {	
+		for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 			for (int j = 0; j < lookup.size(); j++) {
-				binCount temp(i, (lookup[j]->getAbundance(i)));
+				binCount temp(i, (lookup[j]->get(i)));
 				totals[j].push_back(temp);
 			}
 		}
@@ -425,10 +420,10 @@ void HeatMap::printLegend(int y, float maxbin) {
 }
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
+string HeatMap::getPic(vector<RAbundFloatVector*> lookup, vector<string> groups) {
 	try {
 	
-		int numBinsToDisplay = lookup[0]->size();
+		int numBinsToDisplay = lookup[0]->getNumBins();
 		
 		if (numOTU != 0) { //user want to display a portion of the otus
 			if (numOTU < numBinsToDisplay) {  numBinsToDisplay = numOTU; }
@@ -443,9 +438,9 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 		float superMaxRelAbund = 0;
 		
 		for(int i = 0; i < lookup.size(); i++){
-			for(int j=0; j<lookup[i]->size(); j++){
+			for(int j=0; j<numBinsToDisplay; j++){
 				
-				float relAbund = lookup[i]->getAbundance(j);
+				float relAbund = lookup[i]->get(j);
 				if(relAbund > maxRelAbund[i]){	maxRelAbund[i] = relAbund;	}
 			}
 			if(maxRelAbund[i] > superMaxRelAbund){	superMaxRelAbund = maxRelAbund[i];	}
@@ -456,9 +451,9 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
 				if (m->control_pressed) {  return "control"; }
-				float relAbund = lookup[i]->getAbundance(j);
+				float relAbund = lookup[i]->get(j);
 				
-				if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
+				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
                         if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
                         if (relAbund == 1) { relAbund -= 0.001; }
@@ -498,7 +493,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
                 string tempLabel = "OTU";
                 outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(labelBump-labelBump/2+1) + "\" y=\"50\">" + tempLabel + "</text>\n";
             }else {
-                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)lookup[h-1]->getGroup().length() / 2)+labelBump/2) + "\" y=\"50\">" + lookup[h-1]->getGroup() + "</text>\n";
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)groups[h-1].length() / 2)+labelBump/2) + "\" y=\"50\">" + groups[h-1] + "</text>\n";
             }
 		}
         
@@ -534,10 +529,10 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 	}
 }
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<RAbundFloatVector*>& lookup){
 	try {
 				
-		vector<SharedRAbundFloatVector*> looktemp;
+		vector<RAbundFloatVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
@@ -556,14 +551,9 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& look
 		/******************* create copy of lookup *********************/
 		//create and initialize looktemp as a copy of lookup
 		for (int i = 0; i < lookup.size(); i++) { 
-			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(lookup[i]->getNumBins());
+			RAbundFloatVector* temp = new RAbundFloatVector(*lookup[i]);
 			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
-			//copy lookup i's info
-			for (int j = 0; j < lookup[i]->size(); j++) {
-				temp->set(j, lookup[i]->getAbundance(j), lookup[i]->getGroup());
-			}
-			looktemp.push_back(temp);
+            looktemp.push_back(temp);
 		}
 	
 		/************************ fill lookup in order given by place *********************/
@@ -571,8 +561,8 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& look
 		for (int i = 0; i < looktemp[0]->size(); i++) {														//place
 			//fill lookup																					// 2 -> 1
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
-				float newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
-				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
+				float newAbund = looktemp[j]->get(i);												// 1 -> 3
+				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
                 sortedLabels[place[i]] = m->currentSharedBinLabels[i];
 			}
 		}
@@ -636,7 +626,7 @@ int HeatMap::sortRabund(RAbundVector*& r){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderShared(vector<SharedRAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderShared(vector<RAbundFloatVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -646,11 +636,11 @@ map<int, int> HeatMap::orderShared(vector<SharedRAbundFloatVector*>& lookup){
 		vector<int> uniqueBins;
 		
 		//for each bin
-		for (int i = 0; i < lookup[0]->size(); i++) {	
+		for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 			int count = 0;												
 			
 			//is this bin shared
-			for (int j = 0; j < lookup.size(); j++) {		if (lookup[j]->getAbundance(i) != 0) { count++; }	}
+			for (int j = 0; j < lookup.size(); j++) {		if (lookup[j]->get(i) != 0) { count++; }	}
 			
 			if (count < 2)	{  uniqueBins.push_back(i); }
 			else			{  sharedBins.push_back(i); }
@@ -669,7 +659,7 @@ map<int, int> HeatMap::orderShared(vector<SharedRAbundFloatVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderTopOtu(vector<RAbundFloatVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -681,7 +671,7 @@ map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundFloatVector*>& lookup){
 		for (int i = 0; i < lookup[0]->size(); i++) {	
 			int total = 0;												
 			
-			for (int j = 0; j < lookup.size(); j++) {	total += lookup[j]->getAbundance(i); 	}
+			for (int j = 0; j < lookup.size(); j++) {	total += lookup[j]->get(i); 	}
 			
 			binCountFloat temp(i, total);
 			
@@ -702,7 +692,7 @@ map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundFloatVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderTopGroup(vector<RAbundFloatVector*>& lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -714,7 +704,7 @@ map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundFloatVector*>& lookup){
 		//for each bin
 		for (int i = 0; i < lookup[0]->size(); i++) {	
 			for (int j = 0; j < lookup.size(); j++) {
-				binCountFloat temp(i, (lookup[j]->getAbundance(i)));
+				binCountFloat temp(i, (lookup[j]->get(i)));
 				totals[j].push_back(temp);
 			}
 		}

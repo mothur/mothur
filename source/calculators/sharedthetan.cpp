@@ -10,7 +10,7 @@
 #include "sharedthetan.h"
 
 /***********************************************************************/
-EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput ThetaN::getValues(vector<RAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
@@ -22,15 +22,15 @@ EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
 		//get the total values we need to calculate the theta denominator sums
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			Atotal += shared[0]->getAbundance(i);
-			Btotal += shared[1]->getAbundance(i);
+			Atotal += shared[0]->get(i);
+			Btotal += shared[1]->get(i);
 		}
 		
 		//calculate the theta denominator sums
 		for (int j = 0; j < shared[0]->getNumBins(); j++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared[0]->getAbundance(j);
-			tempB = shared[1]->getAbundance(j);
+			tempA = shared[0]->get(j);
+			tempB = shared[1]->get(j);
 			
 			//they are shared
 			if ((tempA != 0) && (tempB != 0)) {

@@ -21,7 +21,7 @@ class GoodsCoverage : public Calculator  {
 public:
 	GoodsCoverage() : Calculator("goodscoverage", 1, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	EstOutput getValues(vector<RAbundVector*>) {return data;};
 	string getCitation() { return "http://www.mothur.org/wiki/GoodsCoverage"; }
 
 private:

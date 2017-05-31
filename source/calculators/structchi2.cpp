@@ -10,7 +10,7 @@
 #include "structchi2.h"
 
 /***********************************************************************/
-EstOutput StructChi2::getValues(vector<SharedRAbundVector*> shared) {
+EstOutput StructChi2::getValues(vector<RAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -25,14 +25,14 @@ EstOutput StructChi2::getValues(vector<SharedRAbundVector*> shared) {
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//for each group
 			for (int j = 0; j < shared.size(); j++) { 
-				sumOtus[i] += shared[j]->getAbundance(i);
+				sumOtus[i] += shared[j]->get(i);
 			}
 		}
 		
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			int A = shared[0]->getAbundance(i);
-			int B = shared[1]->getAbundance(i);
+			int A = shared[0]->get(i);
+			int B = shared[1]->get(i);
 			
 			double totalTerm = 1 / (float) sumOtus[i];
 			double Aterm = A / sumA;

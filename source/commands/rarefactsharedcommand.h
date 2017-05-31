@@ -37,8 +37,6 @@ public:
 	
 	
 private:
-	
-	vector<SharedRAbundVector*> lookup;
 	int nIters, subsampleSize, iters;
 	string format;
 	float freq;
@@ -51,7 +49,7 @@ private:
     
     int process(DesignMap&, string);
     vector<string> createGroupFile(vector<string>&);
-    int subsampleLookup(vector<SharedRAbundVector*>&, string);
+    int subsampleLookup(SharedRAbundVectors*, string);
 
 };
 
