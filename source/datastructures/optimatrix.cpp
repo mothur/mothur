@@ -175,11 +175,10 @@ string OptiMatrix::getName(int index) {
 /***********************************************************************/
 string OptiMatrix::getOverlapName(int index) {
     try {
-        bool found = false;
-        if (toFind < i) { mothurSwap(i, toFind); }
-        if (closeness[i].count(toFind) != 0) { found = true; }
-        return found;
-        
+        //return toString(index);
+        if (index > blastOverlap.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->control_pressed = true; return ""; }
+        string name = overlapNameMap[index];
+        return name;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "getOverlapName");
