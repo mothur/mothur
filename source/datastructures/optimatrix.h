@@ -40,6 +40,11 @@ public:
     ListVector* getListSingle();
     long int print(ostream&);
     
+    //for mgcluster - reading blast files
+    vector< set<int> > getBlastOverlap() { return blastOverlap; }
+    void setBlastVariables(int l, float p, bool m) {  length = l; penalty = p; minWanted = m; }//length, penalty, minWanted
+    string getOverlapName(int); //name from nameMap index
+    
 protected:
     
     MothurOut* m;

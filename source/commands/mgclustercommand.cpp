@@ -341,7 +341,23 @@ int MGClusterCommand::runOptiCluster(){
         matrix.setBlastVariables(length, penalty, minWanted);
         matrix.readFile(distfile, thisNamefile, nameOrCount, "blast", cutoff, false);
         
-        OptiCluster cluster(&matrix, metric, 0);
+        ClusterMetric* metricCalc = NULL;
+        if (metric == "mcc")             { metricCalc = new MCC();              }
+        else if (metric == "sens")       { metricCalc = new Sensitivity();      }
+        else if (metric == "spec")       { metricCalc = new Specificity();      }
+        else if (metric == "tptn")       { metricCalc = new TPTN();             }
+        else if (metric == "tp")         { metricCalc = new TP();               }
+        else if (metric == "tn")         { metricCalc = new TN();               }
+        else if (metric == "fp")         { metricCalc = new FP();               }
+        else if (metric == "fn")         { metricCalc = new FN();               }
+        else if (metric == "f1score")    { metricCalc = new F1Score();          }
+        else if (metric == "accuracy")   { metricCalc = new Accuracy();         }
+        else if (metric == "ppv")        { metricCalc = new PPV();              }
+        else if (metric == "npv")        { metricCalc = new NPV();              }
+        else if (metric == "fdr")        { metricCalc = new FDR();              }
+        else if (metric == "fpfn")       { metricCalc = new FPFN();             }
+        
+        OptiCluster cluster(&matrix, metricCalc, 0);
         string tag = cluster.getTag();
         
         map<string, string> variables;
