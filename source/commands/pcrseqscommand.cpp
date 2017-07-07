@@ -856,10 +856,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                             else {
                                 if (keepdots)   { currSeq.filterFromPos(end); }
                                 else {
-                                    
                                     string seqString = currSeq.getAligned().substr(0, end);
                                     currSeq.setAligned(seqString);
-                                    
                                 }
                             }
                         }
@@ -868,7 +866,6 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                             else {
                                 string seqString = currSeq.getAligned().substr(start);
                                 currSeq.setAligned(seqString);
-                                
                             }
                         }
                     }
