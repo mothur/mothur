@@ -262,6 +262,11 @@ ClusterCommand::ClusterCommand(string option)  {
                         }	
                     }
                 }
+                if ((method != "agc") || (method != "dgc")) {
+                    if ((columnfile == "") && (phylipfile == "")) {
+                        m->mothurOut("[ERROR]: You must provide a distance file unless you are using the agc, dgc or unique clustering methods, aborting\n."); abort = true;
+                    }
+                }
             }else {
                 if ((countfile == "") && (namefile == "")) {
                     countfile = m->getCountTableFile();
