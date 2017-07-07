@@ -33,6 +33,8 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     
     phylipFile = outputFilenames["phylip"][0];
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+    
+    blastFile = m->getTestFilePath() + "bap.100.blast";
 }
 /**************************************************************************************************/
 TestOptiMatrix::~TestOptiMatrix() {
@@ -81,4 +83,25 @@ TEST_CASE("Testing OptiMatrix Class") {
         CHECK(matrix.isClose(1, 36) == true);
     }
 }*/
+/**************************************************************************************************/
+TEST_F(TestOptiMatrix, readColumn) {
+    TestOptiMatrix testOMatrix;
+    OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", 0.03, false);
+    
+    EXPECT_EQ(112,(matrix.print(cout)));
+}
+
+TEST_F(TestOptiMatrix, readPhylip) {
+    TestOptiMatrix testOMatrix;
+    OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", 0.03, false);
+
+    EXPECT_EQ(112,(pmatrix.print(cout)));
+}
+
+TEST_F(TestOptiMatrix, readBlast) {
+    TestOptiMatrix testOMatrix;
+    OptiMatrix bmatrix(testOMatrix.blastFile, "", "", 0.03, false);
+
+    EXPECT_EQ(46032,(bmatrix.print(cout)));
+}
 /**************************************************************************************************/

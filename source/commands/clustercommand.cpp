@@ -41,7 +41,7 @@ vector<string> ClusterCommand::setParameters(){
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted-agc-dgc-opti-unique", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
@@ -78,7 +78,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
-        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=opti.  The agc and dgc methods require a fasta file.";
+        helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc, unique and opti. Default=opti.  The agc and dgc methods require a fasta file.";
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
        helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
@@ -234,41 +234,72 @@ ClusterCommand::ClusterCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { m->setCountTableFile(countfile); }
 			
-			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) {
-				//is there are current file available for either of these?
-				//give priority to column, then phylip
-				columnfile = m->getColumnFile(); 
-				if (columnfile != "") {  distfile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
-				else { 
-					phylipfile = m->getPhylipFile(); 
-					if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-					else {
-                        fastafile = m->getFastaFile();
-                        if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+            method = validParameter.validFile(parameters, "method", false);
+            if (method == "not found") {
+                method = "opti";
+                //m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
+            }
+            
+            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti") || (method == "unique")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc, unique and opti."); m->mothurOutEndLine(); abort = true; }
+            
+            if (method != "unique") {
+                if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) {
+                    //is there are current file available for either of these?
+                    //give priority to column, then phylip
+                    columnfile = m->getColumnFile();
+                    if (columnfile != "") {  distfile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+                    else {
+                        phylipfile = m->getPhylipFile();
+                        if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
                         else {
-                            m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command."); m->mothurOutEndLine();
+                            fastafile = m->getFastaFile();
+                            if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                            else {
+                                m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command, unless using the unique method."); m->mothurOutEndLine();
+                                abort = true;
+                            }
+                        }
+                    }
+                }
+                else if (((phylipfile != "") && (columnfile != "")) || ((phylipfile != "") && (fastafile != "")) || ((fastafile != "") && (columnfile != "")))  { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip, column or fasta."); m->mothurOutEndLine(); abort = true; }
+                
+                if (columnfile != "") {
+                    if ((namefile == "") && (countfile == "")){
+                        namefile = m->getNameFile();
+                        if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                        else {
+                            countfile = m->getCountTableFile();
+                            if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                            else { 
+                                m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                                abort = true; 
+                            }	
+                        }	
+                    }
+                }
+                if ((method != "agc") || (method != "dgc")) {
+                    if ((columnfile == "") && (phylipfile == "")) {
+                        m->mothurOut("[ERROR]: You must provide a distance file unless you are using the agc, dgc or unique clustering methods, aborting\n."); abort = true;
+                    }
+                }
+            }else {
+                if ((countfile == "") && (namefile == "")) {
+                    countfile = m->getCountTableFile();
+                    if (countfile != "") { distfile = countfile;  format = "count"; m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                    else {
+                        namefile = m->getNameFile();
+                        if (namefile != "") {  distfile = namefile; format = "name"; m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("No valid current files. You must provide a count or name file before you can use the cluster command with the unique method."); m->mothurOutEndLine();
                             abort = true;
                         }
-					}
-				}
-			}
-			else if (((phylipfile != "") && (columnfile != "")) || ((phylipfile != "") && (fastafile != "")) || ((fastafile != "") && (columnfile != "")))  { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip, column or fasta."); m->mothurOutEndLine(); abort = true; }
-			
-			if (columnfile != "") {
-				if ((namefile == "") && (countfile == "")){ 
-					namefile = m->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-					else { 
-						countfile = m->getCountTableFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
-                        else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
-                            abort = true; 
-                        }	
-					}	
-				}
-			}
-			
+                    }
+
+                }
+                else if(countfile != "")    { format = "count"; }
+                else if(namefile != "")     { format = "name";  }
+            }
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
 			//check for optional parameter and set defaults
@@ -300,26 +331,12 @@ ClusterCommand::ClusterCommand(string option)  {
             temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
             m->mothurConvert(temp, maxIters);
             
-            //temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { temp = "F"; }
-            //if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
-            //else if (m->isTrue(temp))   { adjust = 1.0;                     }
-            //else                        { adjust = -1.0;                    }
             adjust=-1.0;
 			
             bool setProcessors = true;
             temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ setProcessors=false;	temp = m->getProcessors();	}
             m->setProcessors(temp);
             m->mothurConvert(temp, processors);
-            
-			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") {
-                method = "opti";
-                //m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
-            }
-			
-            if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
-            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
-        
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -383,9 +400,10 @@ int ClusterCommand::execute(){
 		
         time_t estart = time(NULL);
         
-        if (format == "fasta")      {   runVsearchCluster();    }
-        else if (method == "opti")  {   runOptiCluster();       }
-        else                        {   runMothurCluster();     }
+        if (format == "fasta")          {   runVsearchCluster();    }
+        else if (method == "opti")      {   runOptiCluster();       }
+        else if (method == "unique")    {   runUniqueCluster();     }
+        else                            {   runMothurCluster();     }
         
 		if (m->control_pressed) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
         
@@ -996,6 +1014,79 @@ int ClusterCommand::runOptiCluster(){
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterCommand", "runOptiCluster");
+        exit(1);
+    }
+    
+}
+//**********************************************************************************************************************
+
+int ClusterCommand::runUniqueCluster(){
+    try {
+        if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
+        
+        if (countfile != "") {  distfile = countfile;   }
+        else if (namefile != "") {  distfile = namefile;  }
+        
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
+        
+        ListVector list; list.setLabel(toString(cutoff));
+        
+        map<string, int> counts;
+        if (countfile != "") {
+            CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap();
+            for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) {
+                if (m->control_pressed) { return 0; }
+                list.push_back(it->first);
+            }
+        }else {
+            map<string, string> nameMap;
+            m->readNames(namefile, nameMap);
+            for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
+                if (m->control_pressed) { return 0; }
+                list.push_back(it->second);
+            }
+        }
+        
+        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        
+        tag = "unique";
+        string listFileName = fileroot+ tag + ".list";
+        
+        ofstream listFile;
+        m->openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+
+        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list.printHeaders(listFile); }
+        if(countfile != "") { list.print(listFile, counts); }
+        else { list.print(listFile); }
+        listFile.close();
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+            SAbundVector sabund = list.getSAbundVector();
+            sabund.print(sabundFile);
+            sabundFile.close();
+            
+            RAbundVector rabund = list.getRAbundVector();
+            rabund.print(rabundFile);
+            rabundFile.close();
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "runUniqueCluster");
         exit(1);
     }
     

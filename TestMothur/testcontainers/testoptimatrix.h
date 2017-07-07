@@ -10,6 +10,7 @@
 #define __Mothur__testoptimatrix__
 
 #include "optimatrix.h"
+#include "../../googletest/include/gtest/gtest.h"
 
 class TestOptiMatrix : public OptiMatrix {
     
@@ -19,11 +20,12 @@ public:
     ~TestOptiMatrix();
     
     using OptiMatrix::getCloseSeqs;
-    using OptiMatrix::findDistFormat;
+    using OptiMatrix::readBlast;
+    using OptiMatrix::readBlastNames;
     using OptiMatrix::readPhylip;
     using OptiMatrix::readColumn;
     
-    string columnFile, phylipFile;
+    string columnFile, phylipFile, blastFile;
     vector<string> filenames;
     
 };
