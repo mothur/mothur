@@ -3449,7 +3449,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.39.1\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
 					"RELEASE_DATE=\"\\\"2/2/2017\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -3500,7 +3500,7 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.39.3\\\"\"",
+					"VERSION=\"\\\"1.39.5\\\"\"",
 					"RELEASE_DATE=\"\\\"2/23/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);

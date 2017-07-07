@@ -17,6 +17,8 @@
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "counttable.h"
+#include "opticluster.h"
+#include "optimatrix.h"
 
 /**********************************************************************/
 
@@ -45,25 +47,25 @@ private:
 	NameAssignment* nameMap;
 	Cluster* cluster;
 	ListVector* list;
+    ListVector oldList;
     CountTable* ct;
-	ListVector oldList;
     RAbundVector rav;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
-	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir;
+	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir, sabundFileName, rabundFileName, listFileName, metric, initialize, tag, fileroot;
 	ofstream sabundFile, rabundFile, listFile;
 	double cutoff;
-	float penalty, adjust;
-	int precision, length, precisionLength;
+	float penalty, adjust, stableMetric;
+	int precision, length, precisionLength, maxIters;
 	bool abort, minWanted, hclusterWanted, merge, cutoffSet;
 	
 	void printData(ListVector*, map<string, int>&);
 	ListVector* mergeOPFs(map<string, int>, float);
-	void sortHclusterFiles(string, string);
-	vector<seqDist> getSeqs(ifstream&);
+    vector<seqDist> getSeqs(ifstream&);
     void createRabund(CountTable*&, ListVector*&, RAbundVector*&);
-
+    int runOptiCluster();
+    int runMothurCluster();
 };
 
 /**********************************************************************/
