@@ -54,6 +54,7 @@ class CountTable {
     
         int printTable(string);
         int printHeaders(ofstream&);
+        vector<string> getHardCodedHeaders(); //Representative_Sequence, total
         int printSeq(ofstream&, string);
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.

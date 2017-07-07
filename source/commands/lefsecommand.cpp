@@ -272,7 +272,7 @@ LefseCommand::LefseCommand(string option)  {
 
 int LefseCommand::execute(){
 	try {
-        srand(1982);
+        m->setRandomSeed(1982);
         //for reading lefse formatted file and running in mothur for testing - pass number of rows used for design file
         if (false) {  makeShared(1); exit(1); }
 		
@@ -376,7 +376,7 @@ int LefseCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
-        srand((unsigned)time(NULL));
+        m->setRandomSeed((unsigned)time(NULL));
         return 0;
 		
     }

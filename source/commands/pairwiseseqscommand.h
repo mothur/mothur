@@ -15,7 +15,7 @@
 #include "database.hpp"
 #include "alignment.hpp"
 #include "validcalculator.h"
-#include "dist.h"
+#include "calculator.h"
 #include "sequencedb.h"
 #include "sequence.hpp"
 

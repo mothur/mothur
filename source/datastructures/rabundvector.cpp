@@ -10,7 +10,6 @@
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
-#include "calculator.h"
 
 
 /***********************************************************************/
@@ -172,22 +171,23 @@ void RAbundVector::quicksort(){
 /***********************************************************************/
 
 int RAbundVector::sum(){
-	VecCalc vecCalc;
-	return vecCalc.sumElements(data);
+	return m->sum(data);
 }
 
 /***********************************************************************/
 
 int RAbundVector::sum(int index){
-	VecCalc vecCalc;
-	return vecCalc.sumElements(data, index);
+    int sum = 0;
+    for(int i = index; i < data.size(); i++) {  sum += data[i];  }
+	return sum;
 }
 
 /***********************************************************************/
 
 int RAbundVector::numNZ(){
-	VecCalc vecCalc;
-	return vecCalc.numNZ(data);
+    int numNZ = 0;
+    for(int i = 0; i < data.size(); i++) { if(data[i] != 0) { numNZ++; } }
+	return numNZ;
 }
 
 /***********************************************************************/

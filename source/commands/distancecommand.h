@@ -13,7 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "validcalculator.h"
-#include "dist.h"
+#include "calculator.h"
 #include "sequencedb.h"
 #include "ignoregaps.h"
 #include "eachgapdist.h"

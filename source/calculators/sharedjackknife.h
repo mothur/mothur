@@ -31,6 +31,7 @@ private:
 	vector<SharedRAbundVector*> groups;
 	double simpson(vector<int>, double, int);
 	double* jackknife();
+    double getConfLimit(int row, int col);
 };
 
 /***********************************************************************/

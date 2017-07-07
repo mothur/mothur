@@ -8,6 +8,7 @@
  */
 
 #include "sharedsorabund.h"
+#include "uvest.h"
 
 /***********************************************************************/
 
@@ -17,7 +18,8 @@ EstOutput SorAbund::getValues(vector<SharedRAbundVector*> shared) {
 		UVest.resize(2,0);
 		data.resize(1,0);
 		
-		UVest = uv->getUVest(shared);
+        UVEst uv;
+        uv.getUVest(shared);
 		
 		//UVest[0] is Uest, UVest[1] is Vest
 		data[0] = (2 * UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1]));

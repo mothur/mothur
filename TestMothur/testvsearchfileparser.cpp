@@ -13,13 +13,12 @@
 TestVsearchFileParser::TestVsearchFileParser() {  //setup
     m = MothurOut::getInstance();
     TestDataSet data;
-    filenames = data.getSubsetFNGFiles(100);
+    filenames = data.getSubsetFNGFiles();
     ct = data.getCountTable();
 }
 /**************************************************************************************************/
 TestVsearchFileParser::~TestVsearchFileParser() {
     delete ct;
-    for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); } //teardown
 }
 /**************************************************************************************************
 

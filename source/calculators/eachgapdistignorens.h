@@ -11,11 +11,11 @@
  */
 
 
-#include "dist.h"
+#include "calculator.h"
 
 /**************************************************************************************************/
 
-class eachGapDistIgnoreNs : public Dist {
+class eachGapDistIgnoreNs : public DistCalc {
 	
 public:
 	void calcDist(Sequence A, Sequence B){		

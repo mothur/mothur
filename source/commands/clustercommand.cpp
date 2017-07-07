@@ -14,6 +14,22 @@
 #include "sequence.hpp"
 #include "systemcommand.h"
 #include "sensspeccommand.h"
+#include "mcc.hpp"
+#include "sensitivity.hpp"
+#include "specificity.hpp"
+#include "fdr.hpp"
+#include "npv.hpp"
+#include "ppv.hpp"
+#include "f1score.hpp"
+#include "tp.hpp"
+#include "fp.hpp"
+#include "fpfn.hpp"
+#include "tptn.hpp"
+#include "tn.hpp"
+#include "fn.hpp"
+#include "accuracy.hpp"
+
+
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -297,9 +313,9 @@ ClusterCommand::ClusterCommand(string option)  {
             temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
             m->mothurConvert(temp, stableMetric);
             
-            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            metricName = validParameter.validFile(parameters, "metric", false);		if (metricName == "not found") { metricName = "mcc"; }
             
-            if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
+            if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
             
             initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
@@ -861,11 +877,25 @@ int ClusterCommand::runOptiCluster(){
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
-        //int rstart = time(NULL);
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+    
+        ClusterMetric* metric = NULL;
+        if (metricName == "mcc")             { metric = new MCC();              }
+        else if (metricName == "sens")       { metric = new Sensitivity();      }
+        else if (metricName == "spec")       { metric = new Specificity();      }
+        else if (metricName == "tptn")       { metric = new TPTN();             }
+        else if (metricName == "tp")         { metric = new TP();               }
+        else if (metricName == "tn")         { metric = new TN();               }
+        else if (metricName == "fp")         { metric = new FP();               }
+        else if (metricName == "fn")         { metric = new FN();               }
+        else if (metricName == "f1score")    { metric = new F1Score();          }
+        else if (metricName == "accuracy")   { metric = new Accuracy();         }
+        else if (metricName == "ppv")        { metric = new PPV();              }
+        else if (metricName == "npv")        { metric = new NPV();              }
+        else if (metricName == "fdr")        { metric = new FDR();              }
+        else if (metricName == "fpfn")       { metric = new FPFN();             }
         
-        //m->mothurOut("It took " + toString(time(NULL) - rstart) + " seconds to read and process matrix"); m->mothurOutEndLine();
         
         OptiCluster cluster(&matrix, metric, 0);
         tag = cluster.getTag();
@@ -928,6 +958,8 @@ int ClusterCommand::runOptiCluster(){
             outStep << endl;
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        if (m->control_pressed) { delete metric; metric = NULL; return 0; }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));

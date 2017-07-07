@@ -25,7 +25,8 @@ public:
     GroupMap* getGroupMap()                     { fillGroup(); return gMap;             }
     CountTable* getCountTable()                 { createCountTable(); return ct;        }
     vector<SharedRAbundVector*> getLookup()     { fillLookup(); return lookup;          }
-    vector<string> getSubsetFNGFiles(int);  //number of uniques, Fasta, name, group returned
+    vector<string> getSubsetFNGFiles();  //Fasta, name, group returned - containing 100 seqs
+    string getSubsetFNGDistFile();
     
 private:
     MothurOut* m;

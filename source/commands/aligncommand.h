@@ -49,8 +49,8 @@ private:
 	
 	AlignmentDB* templateDB;
 	
-	int driver(linePair*, string, string, string, string);
-	int createProcesses(string, string, string, string);
+	long long driver(linePair*, string, string, string, string, vector<long long>&);
+	long long createProcesses(string, string, string, string, vector<long long>&);
 	void appendReportFiles(string, string);
 		
 	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
@@ -79,7 +79,7 @@ struct alignData {
 	unsigned long long start;
 	unsigned long long end;
 	MothurOut* m;
-	//AlignmentDB* templateDB;
+    vector<long long> numFlipped;
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int count, kmerSize, threadID;
 	
@@ -151,6 +151,8 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 		}
 		
 		pDataArray->count = 0;
+        pDataArray->numFlipped[0] = 0;
+        pDataArray->numFlipped[1] = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) {  break; }
@@ -184,7 +186,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 				
 				//if there is a possibility that this sequence should be reversed
 				if (candidateSeq->getNumBases() < numBasesNeeded) {
-					
+					pDataArray->numFlipped[1]++;
 					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (pDataArray->flip) {
@@ -210,6 +212,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 							nast = nast2;
 							needToDeleteCopy = true;
 							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
+                            pDataArray->numFlipped[0]++;
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;

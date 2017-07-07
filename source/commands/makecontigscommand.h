@@ -31,7 +31,7 @@ struct pairFastqRead {
     FastqRead reverse;
     FastqRead findex;
     FastqRead rindex;
-	
+
 	pairFastqRead() {};
 	pairFastqRead(FastqRead f, FastqRead r) : forward(f), reverse(r){};
     pairFastqRead(FastqRead f, FastqRead r, FastqRead fi, FastqRead ri) : forward(f), reverse(r), findex(fi), rindex(ri) {};
@@ -44,22 +44,22 @@ public:
     MakeContigsCommand(string);
     MakeContigsCommand();
     ~MakeContigsCommand(){}
-    
+
     vector<string> setParameters();
     string getCommandName()			{ return "make.contigs";			}
-    string getCommandCategory()		{ return "Sequence Processing";		} 
+    string getCommandCategory()		{ return "Sequence Processing";		}
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    
-	string getHelpString();	
-    string getOutputPattern(string);	
+
+	string getHelpString();
+    string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Make.contigs"; }
     string getDescription()		{ return "description"; }
-    
-    int execute(); 
-    void help() { m->mothurOut(getHelpString()); }	
-    
+
+    int execute();
+    void help() { m->mothurOut(getHelpString()); }
+
 private:
-    
+
 #define perfectMatch 2
 #define poundMatch  1
 #define offByOne  3
@@ -69,15 +69,15 @@ private:
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
     string outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, outputGroupFileName, group;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers, nameType, offByOneTrimLength;
+	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, qwindowsize, qwindowaverage, kmerSize, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers, nameType, offByOneTrimLength;
     vector<string> outputNames;
     Oligos* oligos;
-    
-	map<string, int> groupCounts; 
+
+	map<string, int> groupCounts;
     map<string, string> groupMap;
     map<int, string> file2Group;
     vector<double> qual_score;
-    
+
     int setNameType(string, string);
     int setNameType(string, string, char);
     bool checkName(FastqRead& forward, FastqRead& reverse);
@@ -93,9 +93,9 @@ private:
     #endif
     bool read(Sequence&, Sequence&, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence&, Sequence&, char, ifstream&, ifstream&, ifstream&, ifstream&, string, string);
     vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*&, QualityScores*&, QualityScores*& savedFQual, QualityScores*& savedRQual, bool, Alignment*& alignment, string& contig, string&, int&, int&, int&);
-    
+
     //main processing functions
-    unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<linePair>, vector<linePair>, string);
+    unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, string);
     unsigned long long createProcessesGroups(vector< vector<string> >, string compositeGroupFile, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<string, int>& totalGroupCounts, map<string, string>&);
     unsigned long long driverGroups(vector<vector<string> >, int, int, string, string, string, string, string, string, map<string, int>&, map<string, string>&);
     unsigned long long driver(vector<string> files, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual,  string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, linePair, linePair, linePair, linePair, string);
@@ -124,7 +124,7 @@ struct contigsData {
 	float match, misMatch, gapOpen, gapExtend;
 	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq, kmerSize, nameType, offByOneTrimLength;
     bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap, reorient, gz, renameSeqs;
-    map<string, int> groupCounts; 
+    map<string, int> groupCounts;
     map<string, string> groupMap;
     map<string, string> theseAllFileNames;
     vector< vector<string> > fileInputs;
@@ -132,51 +132,55 @@ struct contigsData {
     string compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile;
     map<string, int> totalGroupCounts;
     map<int, string> file2Group;
-    
-	
+		int qwindowaverage;
+		int qwindowsize;
+
+
 	contigsData(){}
-	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int nt, int tid) {
-        inputFiles = f;
-        qualOrIndexFiles = qif;
-		outputFasta = of;
-        outputMisMatches = om;
-        outputQual = oq;
-        outputScrapQual = osq;
-        m = mout;
-		match = ma; 
-		misMatch = misMa;
-		gapOpen = gapO; 
-		gapExtend = gapE; 
-        insert = thr;
-        kmerSize = km;
-		align = al;
-        group = g;
-		count = 0;
-        outputScrapFasta = osf;
-        fastaFileNames = ffn;
-        qualFileNames = qfn;
-        oligosfile = olig;
-        pdiffs = pdf;
-        bdiffs = bdf;
-        tdiffs = tdf;
-        allFiles = all;
-        trimOverlap = to;
-        createOligosGroup = cg;
-        createFileGroup = cfg;
-		threadID = tid;
-        deltaq = delt;
-        reorient = ro;
-        linesInput_start = lff; linesInput_end = lff2;
-        linesInputReverse_start = lrf; linesInputReverse_end = lrf2;
-        qlinesInput_start = qff; qlinesInput_end = qff2;
-        qlinesInputReverse_start = qrf; qlinesInputReverse_end = qrf2;
-        delim = d;
-        format = form;
-        done=false;
-        renameSeqs = false;
-        nameType = nt;
+	contigsData(string form, char d, string g, vector<string> f, vector<string> qif, string of, string osf, string oq, string osq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, int qwinsize, int qwinave, vector<vector<string> > ffn, vector<vector<string> > qfn,string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, unsigned long long lff, unsigned long long lff2, unsigned long long lrf, unsigned long long lrf2, unsigned long long qff, unsigned long long qff2, unsigned long long qrf, unsigned long long qrf2, int nt, int tid) {
+			inputFiles = f;
+			qualOrIndexFiles = qif;
+			outputFasta = of;
+			outputMisMatches = om;
+			outputQual = oq;
+			outputScrapQual = osq;
+			m = mout;
+			match = ma;
+			misMatch = misMa;
+			gapOpen = gapO;
+			gapExtend = gapE;
+			insert = thr;
+			kmerSize = km;
+			align = al;
+			group = g;
+			count = 0;
+			outputScrapFasta = osf;
+			fastaFileNames = ffn;
+			qualFileNames = qfn;
+			oligosfile = olig;
+			pdiffs = pdf;
+			bdiffs = bdf;
+			tdiffs = tdf;
+			allFiles = all;
+			trimOverlap = to;
+			createOligosGroup = cg;
+			createFileGroup = cfg;
+			threadID = tid;
+			deltaq = delt;
+			qwindowsize = qwinsize;
+			qwindowaverage = qwinave;
+			reorient = ro;
+			linesInput_start = lff; linesInput_end = lff2;
+			linesInputReverse_start = lrf; linesInputReverse_end = lrf2;
+			qlinesInput_start = qff; qlinesInput_end = qff2;
+			qlinesInputReverse_start = qrf; qlinesInputReverse_end = qrf2;
+			delim = d;
+			format = form;
+			done=false;
+			renameSeqs = false;
+			nameType = nt;
 	}
-    contigsData(string form, char d, string g, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb, int nt, bool ren) {
+    contigsData(string form, char d, string g, string al, string opd, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, int qwinsize, int qwinave, string olig, bool ro, int pdf, int bdf, int tdf, int km, bool cg, bool cfg, bool all, bool to, int tid, vector< vector<string> > fileI, int st, int ed, string compGroupFile, string compFastaFile, string compScrapFastaFile, string compQualFile, string compScrapQualFile, string compMisMatchFile, map<string, int> tGroupCounts, map<int, string> fGroup, bool gzb, int nt, bool ren) {
         m = mout;
         match = ma;
         misMatch = misMa;
@@ -197,7 +201,9 @@ struct contigsData {
         createOligosGroup = cg;
         createFileGroup = cfg;
         threadID = tid;
-        deltaq = delt;
+				deltaq = delt;
+				qwindowsize = qwinsize;
+				qwindowaverage = qwinave;
         reorient = ro;
         delim = d;
         format = form;
@@ -229,61 +235,61 @@ struct contigsData {
 static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
     contigsData* pDataArray;
     pDataArray = (contigsData*)lpParam;
-    
+
     try {
         unsigned long long numReads = 0;
         pDataArray->delim = '@';
         string format = pDataArray->format;
-        
+
         for (int l = pDataArray->start; l < pDataArray->end; l++) {
             int startTime = time(NULL);
-            
+
             if (pDataArray->m->control_pressed) { break; }
-            
+
             pDataArray->m->mothurOut("\n>>>>>\tProcessing file pair " + pDataArray->fileInputs[l][0] + " - " + pDataArray->fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(pDataArray->fileInputs.size()) + ")\t<<<<<\n");
-            
+
             string ffastqfile = pDataArray->fileInputs[l][0];
             string rfastqfile = pDataArray->fileInputs[l][1];
             string findexfile = pDataArray->fileInputs[l][2];
             string rindexfile = pDataArray->fileInputs[l][3];
             pDataArray->group = pDataArray->file2Group[l];
-            
+
             //find read name type to speed read matching later
             //nameType = setNameType(ffastqfile, rfastqfile, delim);
             ////////////////////////////////////////////////////////
             int type = false; bool error = false;
             string forward = ""; string reverse = "";
-            
+
             ifstream inForward, inReverse;
 
             pDataArray->m->openInputFile(ffastqfile, inForward);
             pDataArray->m->openInputFile(rfastqfile, inReverse);
-            
+
             FastqRead fread(inForward, error, pDataArray->format);
             forward = fread.getName();
-            
+
             FastqRead rread(inReverse, error, pDataArray->format);
             reverse = rread.getName();
-            
-            
-            
+
+
+
             if (forward == reverse) {  type = perfectMatch;  }
             else {
                 int pos = forward.find_last_of('#');
                 string tempForward = forward;
                 if (pos != string::npos) {  tempForward = forward.substr(0, pos);   }
-                
+
                 int pos2 = reverse.find_last_of('#');
                 string tempReverse = reverse;
                 if (pos2 != string::npos) {  tempReverse = reverse.substr(0, pos2);   }
-                
+
                 if (tempForward == tempReverse) { type = poundMatch;    }
                 else {
                     char delim = ':';
                     if (pDataArray->m->changedSeqNames) { delim = '_'; }
-                    
+
                     vector<char> delims; delims.push_back(delim); delims.push_back('/');
-                    
+
                     for (int j = 0; j < delims.size(); j++) {
                         delim = delims[j];
 
@@ -293,14 +299,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         if (pos != string::npos) {
                             tempForwardEnd = forward.substr(pos+1);
                         }
-                        
+
                         int pos2 = reverse.find_last_of(delim);
                         string tempReverse = reverse;
                         string tempReverseEnd = reverse;
                         if (pos2 != string::npos) {
                             tempReverseEnd = reverse.substr(pos2+1);
                         }
-                        
+
                         if (tempForwardEnd != tempReverseEnd) {
                             if ((pDataArray->m->isAllAlphaNumerics(tempForwardEnd)) && (pDataArray->m->isAllAlphaNumerics(tempReverseEnd))) {
                                 //check for off by one on rest of name
@@ -325,20 +331,20 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     }
                 }
             }
-            
+
             pDataArray->nameType = type;
             ////////////////////////////////////////////////////////
-            
-            
+
+
             pDataArray->groupCounts.clear();
             pDataArray->groupMap.clear();
-            
+
             pDataArray->inputFiles.clear();
             pDataArray->qualOrIndexFiles.clear();
             vector<linePair> thisLines;
             vector<linePair> thisQLines;
             string thisOutputDir = pDataArray->outputDir;
-            
+
             string inputFile = ffastqfile;
             if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
             pDataArray->outputQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
@@ -353,11 +359,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             pDataArray->outputScrapFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
             pDataArray->outputMisMatches= thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
             pDataArray->linesInput_start = 0; pDataArray->linesInput_end = 1000; pDataArray->linesInputReverse_start = 1; pDataArray->qlinesInput_start = 0; pDataArray->qlinesInputReverse_start =0; pDataArray->linesInputReverse_end =1000; pDataArray->qlinesInput_end =1000; pDataArray->qlinesInputReverse_end=1000;
-            
+
             map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
             pDataArray->createOligosGroup = false;
-            
-            
+
+
             if(pDataArray->oligosfile != "") {
                 Oligos oligos;
                 //createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);
@@ -367,52 +373,52 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 int numFPrimers, numBarcodes, numLinkers, numSpacers, numRPrimers;
                 numRPrimers = 0; numSpacers = 0; numLinkers = 0; numBarcodes = 0; numFPrimers = 0;
                 oligos.read(pDataArray->oligosfile, false);
-                
+
                 if (pDataArray->m->control_pressed) { break; } //error in reading oligos
-                
+
                 if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
                     numFPrimers = oligos.getPairedPrimers().size();
                     numBarcodes = oligos.getPairedBarcodes().size();
                 }else {
                     pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->control_pressed = true;
                 }
-                
+
                 if (pDataArray->m->control_pressed) { break; }
-                
+
                 numLinkers = oligos.getLinkers().size();
                 numSpacers = oligos.getSpacers().size();
                 numRPrimers = oligos.getReversePrimers().size();
                 if (numLinkers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n"); }
                 if (numSpacers != 0) { pDataArray->m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n"); }
-                
+
                 vector<string> groupNames = oligos.getGroupNames();
                 if (groupNames.size() == 0) { pDataArray->allFiles = 0; allBlank = true;  }
-                
+
                 pDataArray->fastaFileNames.clear();
                 pDataArray->fastaFileNames.resize(oligos.getBarcodeNames().size());
                 for(int i=0;i<pDataArray->fastaFileNames.size();i++){
                     for(int j=0;j<oligos.getPrimerNames().size();j++){  pDataArray->fastaFileNames[i].push_back(""); }
                 }
-                
+
                 pDataArray->qualFileNames = pDataArray->fastaFileNames;
-                
+
                 if (pDataArray->allFiles) {
                     set<string> uniqueNames; //used to cleanup outputFileNames
                     map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
                     map<int, oligosPair> primers = oligos.getPairedPrimers();
                     for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
                         for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                            
+
                             string primerName = oligos.getPrimerName(itPrimer->first);
                             string barcodeName = oligos.getBarcodeName(itBar->first);
-                            
+
                             if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
                             else if ((primerName == "") && (barcodeName == "")) { } //do nothing
                             else {
                                 string comboGroupName = "";
                                 string fastaFileName = "";
                                 string qualFileName = "";
-                                
+
                                 if(primerName == ""){
                                     comboGroupName = barcodeName;
                                 }else{
@@ -423,7 +429,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         comboGroupName = barcodeName + "." + primerName;
                                     }
                                 }
-                                
+
                                 ofstream temp, temp2;
                                 fastaFileName = rootname + "." + comboGroupName + ".contigs.fasta";
                                 qualFileName = rootname + "." + comboGroupName + ".contigs.qual";
@@ -431,55 +437,55 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->outputNames.push_back(fastaFileName);
                                     uniqueNames.insert(fastaFileName);
                                     uniqueFastaNames[fastaFileName] = comboGroupName;
-                                    
+
                                     pDataArray->outputNames.push_back(qualFileName);
                                     uniqueNames.insert(qualFileName);
                                 }
-                                
+
                                 pDataArray->fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                                 pDataArray->m->openOutputFile(fastaFileName, temp);		temp.close();
                                 //cout << fastaFileName << endl;
-                                
+
                                 pDataArray->qualFileNames[itBar->first][itPrimer->first] = qualFileName;
                                 pDataArray->m->openOutputFile(qualFileName, temp2);		temp2.close();
                             }
                         }
                     }
                 }
-                
+
                 if (allBlank) {
                     pDataArray->m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); pDataArray->m->mothurOutEndLine();
                     pDataArray->allFiles = false;
                     pDataArray->createOligosGroup = false;
                 }
-                
+
                 pDataArray->createOligosGroup = true;
-                
+
                 ///////////////////////////////////////////////////////////////////////////////////////
             }
-            
+
             string outputGroupFileName = "";
             if (pDataArray->createOligosGroup || pDataArray->createFileGroup)   {       outputGroupFileName += thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile))   + ".contigs.group";                                 }
-            
+
             //give group in file file precedence
             if (pDataArray->createFileGroup) {  pDataArray->createOligosGroup = false; }
-            
+
             ofstream temp, temp1, temp2, temp3;
             pDataArray->m->openOutputFile(pDataArray->outputFasta, temp); temp.close();
             pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, temp1); temp1.close();
             pDataArray->m->openOutputFile(pDataArray->outputQual, temp2); temp2.close();
             pDataArray->m->openOutputFile(pDataArray->outputScrapQual, temp3); temp3.close();
-            
+
             pDataArray->m->mothurOut("Making contigs...\n");
             unsigned long long thisNumReads = 0;
             if (true) { //resolve local variable issues
             //unsigned long long thisNumReads = driver(thisFileInputs, thisQualOrIndexInputs, outFastaFile, outScrapFastaFile,  outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1], group);
             ///////////////////////////////////////////////////////////////////////////////////////
-            
+
             vector< vector<double> > qual_match_simple_bayesian;
             qual_match_simple_bayesian.resize(47);
             for (int i = 0; i < qual_match_simple_bayesian.size(); i++) { qual_match_simple_bayesian[i].resize(47);  }
-            
+
             qual_match_simple_bayesian[0][0] = -1.09861; qual_match_simple_bayesian[0][1] = -1.32887; qual_match_simple_bayesian[0][2] = -1.55913; qual_match_simple_bayesian[0][3] = -1.78939; qual_match_simple_bayesian[0][4] = -2.01965; qual_match_simple_bayesian[0][5] = -2.2499; qual_match_simple_bayesian[0][6] = -2.48016; qual_match_simple_bayesian[0][7] = -2.71042; qual_match_simple_bayesian[0][8] = -2.94068; qual_match_simple_bayesian[0][9] = -3.17094; qual_match_simple_bayesian[0][10] = -3.4012; qual_match_simple_bayesian[0][11] = -3.63146; qual_match_simple_bayesian[0][12] = -3.86171; qual_match_simple_bayesian[0][13] = -4.09197; qual_match_simple_bayesian[0][14] = -4.32223; qual_match_simple_bayesian[0][15] = -4.55249; qual_match_simple_bayesian[0][16] = -4.78275; qual_match_simple_bayesian[0][17] = -5.01301; qual_match_simple_bayesian[0][18] = -5.24327; qual_match_simple_bayesian[0][19] = -5.47352; qual_match_simple_bayesian[0][20] = -5.70378; qual_match_simple_bayesian[0][21] = -5.93404; qual_match_simple_bayesian[0][22] = -6.1643; qual_match_simple_bayesian[0][23] = -6.39456; qual_match_simple_bayesian[0][24] = -6.62482; qual_match_simple_bayesian[0][25] = -6.85508; qual_match_simple_bayesian[0][26] = -7.08533; qual_match_simple_bayesian[0][27] = -7.31559; qual_match_simple_bayesian[0][28] = -7.54585; qual_match_simple_bayesian[0][29] = -7.77611; qual_match_simple_bayesian[0][30] = -8.00637; qual_match_simple_bayesian[0][31] = -8.23663; qual_match_simple_bayesian[0][32] = -8.46688; qual_match_simple_bayesian[0][33] = -8.69714; qual_match_simple_bayesian[0][34] = -8.9274; qual_match_simple_bayesian[0][35] = -9.15766; qual_match_simple_bayesian[0][36] = -9.38792; qual_match_simple_bayesian[0][37] = -9.61818; qual_match_simple_bayesian[0][38] = -9.84844; qual_match_simple_bayesian[0][39] = -10.0787; qual_match_simple_bayesian[0][40] = -10.309; qual_match_simple_bayesian[0][41] = -10.5392; qual_match_simple_bayesian[0][42] = -10.7695; qual_match_simple_bayesian[0][43] = -10.9997; qual_match_simple_bayesian[0][44] = -11.23; qual_match_simple_bayesian[0][45] = -11.4602; qual_match_simple_bayesian[0][46] = -11.6905;
             qual_match_simple_bayesian[1][0] = -1.32887; qual_match_simple_bayesian[1][1] = -1.37587; qual_match_simple_bayesian[1][2] = -1.41484; qual_match_simple_bayesian[1][3] = -1.44692; qual_match_simple_bayesian[1][4] = -1.47315; qual_match_simple_bayesian[1][5] = -1.49449; qual_match_simple_bayesian[1][6] = -1.51178; qual_match_simple_bayesian[1][7] = -1.52572; qual_match_simple_bayesian[1][8] = -1.53694; qual_match_simple_bayesian[1][9] = -1.54593; qual_match_simple_bayesian[1][10] = -1.55314; qual_match_simple_bayesian[1][11] = -1.5589; qual_match_simple_bayesian[1][12] = -1.5635; qual_match_simple_bayesian[1][13] = -1.56717; qual_match_simple_bayesian[1][14] = -1.5701; qual_match_simple_bayesian[1][15] = -1.57243; qual_match_simple_bayesian[1][16] = -1.57428; qual_match_simple_bayesian[1][17] = -1.57576; qual_match_simple_bayesian[1][18] = -1.57693; qual_match_simple_bayesian[1][19] = -1.57786; qual_match_simple_bayesian[1][20] = -1.5786; qual_match_simple_bayesian[1][21] = -1.57919; qual_match_simple_bayesian[1][22] = -1.57966; qual_match_simple_bayesian[1][23] = -1.58003; qual_match_simple_bayesian[1][24] = -1.58033; qual_match_simple_bayesian[1][25] = -1.58057; qual_match_simple_bayesian[1][26] = -1.58075; qual_match_simple_bayesian[1][27] = -1.5809; qual_match_simple_bayesian[1][28] = -1.58102; qual_match_simple_bayesian[1][29] = -1.58111; qual_match_simple_bayesian[1][30] = -1.58119; qual_match_simple_bayesian[1][31] = -1.58125; qual_match_simple_bayesian[1][32] = -1.58129; qual_match_simple_bayesian[1][33] = -1.58133; qual_match_simple_bayesian[1][34] = -1.58136; qual_match_simple_bayesian[1][35] = -1.58138; qual_match_simple_bayesian[1][36] = -1.5814; qual_match_simple_bayesian[1][37] = -1.58142; qual_match_simple_bayesian[1][38] = -1.58143; qual_match_simple_bayesian[1][39] = -1.58144; qual_match_simple_bayesian[1][40] = -1.58145; qual_match_simple_bayesian[1][41] = -1.58145; qual_match_simple_bayesian[1][42] = -1.58146; qual_match_simple_bayesian[1][43] = -1.58146; qual_match_simple_bayesian[1][44] = -1.58146; qual_match_simple_bayesian[1][45] = -1.58146; qual_match_simple_bayesian[1][46] = -1.58147;
             qual_match_simple_bayesian[2][0] = -1.55913; qual_match_simple_bayesian[2][1] = -1.41484; qual_match_simple_bayesian[2][2] = -1.31343; qual_match_simple_bayesian[2][3] = -1.23963; qual_match_simple_bayesian[2][4] = -1.18465; qual_match_simple_bayesian[2][5] = -1.14303; qual_match_simple_bayesian[2][6] = -1.11117; qual_match_simple_bayesian[2][7] = -1.08657; qual_match_simple_bayesian[2][8] = -1.06744; qual_match_simple_bayesian[2][9] = -1.05251; qual_match_simple_bayesian[2][10] = -1.0408; qual_match_simple_bayesian[2][11] = -1.0316; qual_match_simple_bayesian[2][12] = -1.02436; qual_match_simple_bayesian[2][13] = -1.01863; qual_match_simple_bayesian[2][14] = -1.01411; qual_match_simple_bayesian[2][15] = -1.01054; qual_match_simple_bayesian[2][16] = -1.00771; qual_match_simple_bayesian[2][17] = -1.00546; qual_match_simple_bayesian[2][18] = -1.00368; qual_match_simple_bayesian[2][19] = -1.00227; qual_match_simple_bayesian[2][20] = -1.00115; qual_match_simple_bayesian[2][21] = -1.00027; qual_match_simple_bayesian[2][22] = -0.99956; qual_match_simple_bayesian[2][23] = -0.999001; qual_match_simple_bayesian[2][24] = -0.998557; qual_match_simple_bayesian[2][25] = -0.998204; qual_match_simple_bayesian[2][26] = -0.997924; qual_match_simple_bayesian[2][27] = -0.997702; qual_match_simple_bayesian[2][28] = -0.997525; qual_match_simple_bayesian[2][29] = -0.997385; qual_match_simple_bayesian[2][30] = -0.997273; qual_match_simple_bayesian[2][31] = -0.997185; qual_match_simple_bayesian[2][32] = -0.997114; qual_match_simple_bayesian[2][33] = -0.997059; qual_match_simple_bayesian[2][34] = -0.997014; qual_match_simple_bayesian[2][35] = -0.996979; qual_match_simple_bayesian[2][36] = -0.996951; qual_match_simple_bayesian[2][37] = -0.996929; qual_match_simple_bayesian[2][38] = -0.996911; qual_match_simple_bayesian[2][39] = -0.996897; qual_match_simple_bayesian[2][40] = -0.996886; qual_match_simple_bayesian[2][41] = -0.996877; qual_match_simple_bayesian[2][42] = -0.99687; qual_match_simple_bayesian[2][43] = -0.996865; qual_match_simple_bayesian[2][44] = -0.99686; qual_match_simple_bayesian[2][45] = -0.996857; qual_match_simple_bayesian[2][46] = -0.996854;
@@ -527,11 +533,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             qual_match_simple_bayesian[44][0] = -11.23; qual_match_simple_bayesian[44][1] = -1.58146; qual_match_simple_bayesian[44][2] = -0.99686; qual_match_simple_bayesian[44][3] = -0.695551; qual_match_simple_bayesian[44][4] = -0.507707; qual_match_simple_bayesian[44][5] = -0.380164; qual_match_simple_bayesian[44][6] = -0.289304; qual_match_simple_bayesian[44][7] = -0.222588; qual_match_simple_bayesian[44][8] = -0.172594; qual_match_simple_bayesian[44][9] = -0.13459; qual_match_simple_bayesian[44][10] = -0.105399; qual_match_simple_bayesian[44][11] = -0.082804; qual_match_simple_bayesian[44][12] = -0.0652131; qual_match_simple_bayesian[44][13] = -0.0514574; qual_match_simple_bayesian[44][14] = -0.0406641; qual_match_simple_bayesian[44][15] = -0.032173; qual_match_simple_bayesian[44][16] = -0.0254792; qual_match_simple_bayesian[44][17] = -0.0201939; qual_match_simple_bayesian[44][18] = -0.0160155; qual_match_simple_bayesian[44][19] = -0.0127088; qual_match_simple_bayesian[44][20] = -0.01009; qual_match_simple_bayesian[44][21] = -0.0080147; qual_match_simple_bayesian[44][22] = -0.00636929; qual_match_simple_bayesian[44][23] = -0.00506422; qual_match_simple_bayesian[44][24] = -0.00402878; qual_match_simple_bayesian[44][25] = -0.00320706; qual_match_simple_bayesian[44][26] = -0.00255482; qual_match_simple_bayesian[44][27] = -0.00203704; qual_match_simple_bayesian[44][28] = -0.00162594; qual_match_simple_bayesian[44][29] = -0.00129951; qual_match_simple_bayesian[44][30] = -0.0010403; qual_match_simple_bayesian[44][31] = -0.000834445; qual_match_simple_bayesian[44][32] = -0.00067096; qual_match_simple_bayesian[44][33] = -0.000541118; qual_match_simple_bayesian[44][34] = -0.000437993; qual_match_simple_bayesian[44][35] = -0.000356085; qual_match_simple_bayesian[44][36] = -0.000291028; qual_match_simple_bayesian[44][37] = -0.000239355; qual_match_simple_bayesian[44][38] = -0.000198311; qual_match_simple_bayesian[44][39] = -0.00016571; qual_match_simple_bayesian[44][40] = -0.000139815; qual_match_simple_bayesian[44][41] = -0.000119246; qual_match_simple_bayesian[44][42] = -0.000102908; qual_match_simple_bayesian[44][43] = -8.99308e-05; qual_match_simple_bayesian[44][44] = -7.96225e-05; qual_match_simple_bayesian[44][45] = -7.14344e-05; qual_match_simple_bayesian[44][46] = -6.49304e-05;
             qual_match_simple_bayesian[45][0] = -11.4602; qual_match_simple_bayesian[45][1] = -1.58146; qual_match_simple_bayesian[45][2] = -0.996857; qual_match_simple_bayesian[45][3] = -0.695546; qual_match_simple_bayesian[45][4] = -0.507701; qual_match_simple_bayesian[45][5] = -0.380157; qual_match_simple_bayesian[45][6] = -0.289296; qual_match_simple_bayesian[45][7] = -0.222581; qual_match_simple_bayesian[45][8] = -0.172586; qual_match_simple_bayesian[45][9] = -0.134582; qual_match_simple_bayesian[45][10] = -0.105391; qual_match_simple_bayesian[45][11] = -0.082796; qual_match_simple_bayesian[45][12] = -0.0652051; qual_match_simple_bayesian[45][13] = -0.0514493; qual_match_simple_bayesian[45][14] = -0.040656; qual_match_simple_bayesian[45][15] = -0.0321649; qual_match_simple_bayesian[45][16] = -0.0254711; qual_match_simple_bayesian[45][17] = -0.0201858; qual_match_simple_bayesian[45][18] = -0.0160073; qual_match_simple_bayesian[45][19] = -0.0127007; qual_match_simple_bayesian[45][20] = -0.0100819; qual_match_simple_bayesian[45][21] = -0.00800654; qual_match_simple_bayesian[45][22] = -0.00636112; qual_match_simple_bayesian[45][23] = -0.00505604; qual_match_simple_bayesian[45][24] = -0.0040206; qual_match_simple_bayesian[45][25] = -0.00319888; qual_match_simple_bayesian[45][26] = -0.00254664; qual_match_simple_bayesian[45][27] = -0.00202886; qual_match_simple_bayesian[45][28] = -0.00161776; qual_match_simple_bayesian[45][29] = -0.00129133; qual_match_simple_bayesian[45][30] = -0.00103211; qual_match_simple_bayesian[45][31] = -0.000826259; qual_match_simple_bayesian[45][32] = -0.000662773; qual_match_simple_bayesian[45][33] = -0.000532931; qual_match_simple_bayesian[45][34] = -0.000429806; qual_match_simple_bayesian[45][35] = -0.000347898; qual_match_simple_bayesian[45][36] = -0.000282841; qual_match_simple_bayesian[45][37] = -0.000231167; qual_match_simple_bayesian[45][38] = -0.000190123; qual_match_simple_bayesian[45][39] = -0.000157522; qual_match_simple_bayesian[45][40] = -0.000131627; qual_match_simple_bayesian[45][41] = -0.000111058; qual_match_simple_bayesian[45][42] = -9.47203e-05; qual_match_simple_bayesian[45][43] = -8.17427e-05; qual_match_simple_bayesian[45][44] = -7.14344e-05; qual_match_simple_bayesian[45][45] = -6.32462e-05; qual_match_simple_bayesian[45][46] = -5.67422e-05;
             qual_match_simple_bayesian[46][0] = -11.6905; qual_match_simple_bayesian[46][1] = -1.58147; qual_match_simple_bayesian[46][2] = -0.996854; qual_match_simple_bayesian[46][3] = -0.695541; qual_match_simple_bayesian[46][4] = -0.507695; qual_match_simple_bayesian[46][5] = -0.380152; qual_match_simple_bayesian[46][6] = -0.28929; qual_match_simple_bayesian[46][7] = -0.222575; qual_match_simple_bayesian[46][8] = -0.17258; qual_match_simple_bayesian[46][9] = -0.134576; qual_match_simple_bayesian[46][10] = -0.105385; qual_match_simple_bayesian[46][11] = -0.0827897; qual_match_simple_bayesian[46][12] = -0.0651987; qual_match_simple_bayesian[46][13] = -0.051443; qual_match_simple_bayesian[46][14] = -0.0406496; qual_match_simple_bayesian[46][15] = -0.0321584; qual_match_simple_bayesian[46][16] = -0.0254646; qual_match_simple_bayesian[46][17] = -0.0201793; qual_match_simple_bayesian[46][18] = -0.0160009; qual_match_simple_bayesian[46][19] = -0.0126942; qual_match_simple_bayesian[46][20] = -0.0100754; qual_match_simple_bayesian[46][21] = -0.00800005; qual_match_simple_bayesian[46][22] = -0.00635463; qual_match_simple_bayesian[46][23] = -0.00504955; qual_match_simple_bayesian[46][24] = -0.0040141; qual_match_simple_bayesian[46][25] = -0.00319238; qual_match_simple_bayesian[46][26] = -0.00254014; qual_match_simple_bayesian[46][27] = -0.00202236; qual_match_simple_bayesian[46][28] = -0.00161126; qual_match_simple_bayesian[46][29] = -0.00128483; qual_match_simple_bayesian[46][30] = -0.00102561; qual_match_simple_bayesian[46][31] = -0.000819756; qual_match_simple_bayesian[46][32] = -0.00065627; qual_match_simple_bayesian[46][33] = -0.000526428; qual_match_simple_bayesian[46][34] = -0.000423302; qual_match_simple_bayesian[46][35] = -0.000341394; qual_match_simple_bayesian[46][36] = -0.000276337; qual_match_simple_bayesian[46][37] = -0.000224664; qual_match_simple_bayesian[46][38] = -0.00018362; qual_match_simple_bayesian[46][39] = -0.000151019; qual_match_simple_bayesian[46][40] = -0.000125123; qual_match_simple_bayesian[46][41] = -0.000104554; qual_match_simple_bayesian[46][42] = -8.82164e-05; qual_match_simple_bayesian[46][43] = -7.52387e-05; qual_match_simple_bayesian[46][44] = -6.49304e-05; qual_match_simple_bayesian[46][45] = -5.67422e-05; qual_match_simple_bayesian[46][46] = -5.02381e-05;
-            
+
             vector< vector<double> > qual_mismatch_simple_bayesian;
             qual_mismatch_simple_bayesian.resize(47);
             for (int i = 0; i < qual_mismatch_simple_bayesian.size(); i++) { qual_mismatch_simple_bayesian[i].resize(47);  }
-            
+
             qual_mismatch_simple_bayesian[0][0] = -1.50408; qual_mismatch_simple_bayesian[0][1] = -1.40619; qual_mismatch_simple_bayesian[0][2] = -1.33474; qual_mismatch_simple_bayesian[0][3] = -1.28141; qual_mismatch_simple_bayesian[0][4] = -1.24099; qual_mismatch_simple_bayesian[0][5] = -1.21; qual_mismatch_simple_bayesian[0][6] = -1.18606; qual_mismatch_simple_bayesian[0][7] = -1.16744; qual_mismatch_simple_bayesian[0][8] = -1.15289; qual_mismatch_simple_bayesian[0][9] = -1.14148; qual_mismatch_simple_bayesian[0][10] = -1.13251; qual_mismatch_simple_bayesian[0][11] = -1.12545; qual_mismatch_simple_bayesian[0][12] = -1.11987; qual_mismatch_simple_bayesian[0][13] = -1.11546; qual_mismatch_simple_bayesian[0][14] = -1.11197; qual_mismatch_simple_bayesian[0][15] = -1.10921; qual_mismatch_simple_bayesian[0][16] = -1.10702; qual_mismatch_simple_bayesian[0][17] = -1.10529; qual_mismatch_simple_bayesian[0][18] = -1.10391; qual_mismatch_simple_bayesian[0][19] = -1.10282; qual_mismatch_simple_bayesian[0][20] = -1.10195; qual_mismatch_simple_bayesian[0][21] = -1.10126; qual_mismatch_simple_bayesian[0][22] = -1.10072; qual_mismatch_simple_bayesian[0][23] = -1.10028; qual_mismatch_simple_bayesian[0][24] = -1.09994; qual_mismatch_simple_bayesian[0][25] = -1.09967; qual_mismatch_simple_bayesian[0][26] = -1.09945; qual_mismatch_simple_bayesian[0][27] = -1.09928; qual_mismatch_simple_bayesian[0][28] = -1.09914; qual_mismatch_simple_bayesian[0][29] = -1.09903; qual_mismatch_simple_bayesian[0][30] = -1.09895; qual_mismatch_simple_bayesian[0][31] = -1.09888; qual_mismatch_simple_bayesian[0][32] = -1.09882; qual_mismatch_simple_bayesian[0][33] = -1.09878; qual_mismatch_simple_bayesian[0][34] = -1.09874; qual_mismatch_simple_bayesian[0][35] = -1.09872; qual_mismatch_simple_bayesian[0][36] = -1.0987; qual_mismatch_simple_bayesian[0][37] = -1.09868; qual_mismatch_simple_bayesian[0][38] = -1.09867; qual_mismatch_simple_bayesian[0][39] = -1.09865; qual_mismatch_simple_bayesian[0][40] = -1.09865; qual_mismatch_simple_bayesian[0][41] = -1.09864; qual_mismatch_simple_bayesian[0][42] = -1.09863; qual_mismatch_simple_bayesian[0][43] = -1.09863; qual_mismatch_simple_bayesian[0][44] = -1.09863; qual_mismatch_simple_bayesian[0][45] = -1.09862; qual_mismatch_simple_bayesian[0][46] = -1.09862;
             qual_mismatch_simple_bayesian[1][0] = -1.40619; qual_mismatch_simple_bayesian[1][1] = -1.38979; qual_mismatch_simple_bayesian[1][2] = -1.37696; qual_mismatch_simple_bayesian[1][3] = -1.36688; qual_mismatch_simple_bayesian[1][4] = -1.35894; qual_mismatch_simple_bayesian[1][5] = -1.35268; qual_mismatch_simple_bayesian[1][6] = -1.34774; qual_mismatch_simple_bayesian[1][7] = -1.34383; qual_mismatch_simple_bayesian[1][8] = -1.34073; qual_mismatch_simple_bayesian[1][9] = -1.33828; qual_mismatch_simple_bayesian[1][10] = -1.33634; qual_mismatch_simple_bayesian[1][11] = -1.3348; qual_mismatch_simple_bayesian[1][12] = -1.33358; qual_mismatch_simple_bayesian[1][13] = -1.33261; qual_mismatch_simple_bayesian[1][14] = -1.33184; qual_mismatch_simple_bayesian[1][15] = -1.33123; qual_mismatch_simple_bayesian[1][16] = -1.33074; qual_mismatch_simple_bayesian[1][17] = -1.33036; qual_mismatch_simple_bayesian[1][18] = -1.33005; qual_mismatch_simple_bayesian[1][19] = -1.32981; qual_mismatch_simple_bayesian[1][20] = -1.32962; qual_mismatch_simple_bayesian[1][21] = -1.32946; qual_mismatch_simple_bayesian[1][22] = -1.32934; qual_mismatch_simple_bayesian[1][23] = -1.32924; qual_mismatch_simple_bayesian[1][24] = -1.32917; qual_mismatch_simple_bayesian[1][25] = -1.32911; qual_mismatch_simple_bayesian[1][26] = -1.32906; qual_mismatch_simple_bayesian[1][27] = -1.32902; qual_mismatch_simple_bayesian[1][28] = -1.32899; qual_mismatch_simple_bayesian[1][29] = -1.32896; qual_mismatch_simple_bayesian[1][30] = -1.32895; qual_mismatch_simple_bayesian[1][31] = -1.32893; qual_mismatch_simple_bayesian[1][32] = -1.32892; qual_mismatch_simple_bayesian[1][33] = -1.32891; qual_mismatch_simple_bayesian[1][34] = -1.3289; qual_mismatch_simple_bayesian[1][35] = -1.32889; qual_mismatch_simple_bayesian[1][36] = -1.32889; qual_mismatch_simple_bayesian[1][37] = -1.32889; qual_mismatch_simple_bayesian[1][38] = -1.32888; qual_mismatch_simple_bayesian[1][39] = -1.32888; qual_mismatch_simple_bayesian[1][40] = -1.32888; qual_mismatch_simple_bayesian[1][41] = -1.32888; qual_mismatch_simple_bayesian[1][42] = -1.32888; qual_mismatch_simple_bayesian[1][43] = -1.32887; qual_mismatch_simple_bayesian[1][44] = -1.32887; qual_mismatch_simple_bayesian[1][45] = -1.32887; qual_mismatch_simple_bayesian[1][46] = -1.32887;
             qual_mismatch_simple_bayesian[2][0] = -1.33474; qual_mismatch_simple_bayesian[2][1] = -1.37696; qual_mismatch_simple_bayesian[2][2] = -1.41181; qual_mismatch_simple_bayesian[2][3] = -1.44039; qual_mismatch_simple_bayesian[2][4] = -1.46368; qual_mismatch_simple_bayesian[2][5] = -1.48258; qual_mismatch_simple_bayesian[2][6] = -1.49786; qual_mismatch_simple_bayesian[2][7] = -1.51016; qual_mismatch_simple_bayesian[2][8] = -1.52003; qual_mismatch_simple_bayesian[2][9] = -1.52795; qual_mismatch_simple_bayesian[2][10] = -1.53428; qual_mismatch_simple_bayesian[2][11] = -1.53934; qual_mismatch_simple_bayesian[2][12] = -1.54338; qual_mismatch_simple_bayesian[2][13] = -1.5466; qual_mismatch_simple_bayesian[2][14] = -1.54916; qual_mismatch_simple_bayesian[2][15] = -1.55121; qual_mismatch_simple_bayesian[2][16] = -1.55283; qual_mismatch_simple_bayesian[2][17] = -1.55412; qual_mismatch_simple_bayesian[2][18] = -1.55515; qual_mismatch_simple_bayesian[2][19] = -1.55597; qual_mismatch_simple_bayesian[2][20] = -1.55662; qual_mismatch_simple_bayesian[2][21] = -1.55713; qual_mismatch_simple_bayesian[2][22] = -1.55754; qual_mismatch_simple_bayesian[2][23] = -1.55787; qual_mismatch_simple_bayesian[2][24] = -1.55813; qual_mismatch_simple_bayesian[2][25] = -1.55833; qual_mismatch_simple_bayesian[2][26] = -1.5585; qual_mismatch_simple_bayesian[2][27] = -1.55863; qual_mismatch_simple_bayesian[2][28] = -1.55873; qual_mismatch_simple_bayesian[2][29] = -1.55881; qual_mismatch_simple_bayesian[2][30] = -1.55888; qual_mismatch_simple_bayesian[2][31] = -1.55893; qual_mismatch_simple_bayesian[2][32] = -1.55897; qual_mismatch_simple_bayesian[2][33] = -1.559; qual_mismatch_simple_bayesian[2][34] = -1.55903; qual_mismatch_simple_bayesian[2][35] = -1.55905; qual_mismatch_simple_bayesian[2][36] = -1.55907; qual_mismatch_simple_bayesian[2][37] = -1.55908; qual_mismatch_simple_bayesian[2][38] = -1.55909; qual_mismatch_simple_bayesian[2][39] = -1.5591; qual_mismatch_simple_bayesian[2][40] = -1.5591; qual_mismatch_simple_bayesian[2][41] = -1.55911; qual_mismatch_simple_bayesian[2][42] = -1.55911; qual_mismatch_simple_bayesian[2][43] = -1.55912; qual_mismatch_simple_bayesian[2][44] = -1.55912; qual_mismatch_simple_bayesian[2][45] = -1.55912; qual_mismatch_simple_bayesian[2][46] = -1.55912;
@@ -579,19 +585,19 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             qual_mismatch_simple_bayesian[44][0] = -1.09863; qual_mismatch_simple_bayesian[44][1] = -1.32887; qual_mismatch_simple_bayesian[44][2] = -1.55912; qual_mismatch_simple_bayesian[44][3] = -1.78936; qual_mismatch_simple_bayesian[44][4] = -2.0196; qual_mismatch_simple_bayesian[44][5] = -2.24983; qual_mismatch_simple_bayesian[44][6] = -2.48006; qual_mismatch_simple_bayesian[44][7] = -2.71028; qual_mismatch_simple_bayesian[44][8] = -2.94048; qual_mismatch_simple_bayesian[44][9] = -3.17068; qual_mismatch_simple_bayesian[44][10] = -3.40085; qual_mismatch_simple_bayesian[44][11] = -3.63101; qual_mismatch_simple_bayesian[44][12] = -3.86114; qual_mismatch_simple_bayesian[44][13] = -4.09123; qual_mismatch_simple_bayesian[44][14] = -4.32128; qual_mismatch_simple_bayesian[44][15] = -4.55128; qual_mismatch_simple_bayesian[44][16] = -4.78122; qual_mismatch_simple_bayesian[44][17] = -5.01107; qual_mismatch_simple_bayesian[44][18] = -5.24081; qual_mismatch_simple_bayesian[44][19] = -5.47042; qual_mismatch_simple_bayesian[44][20] = -5.69986; qual_mismatch_simple_bayesian[44][21] = -5.92909; qual_mismatch_simple_bayesian[44][22] = -6.15806; qual_mismatch_simple_bayesian[44][23] = -6.3867; qual_mismatch_simple_bayesian[44][24] = -6.61492; qual_mismatch_simple_bayesian[44][25] = -6.84262; qual_mismatch_simple_bayesian[44][26] = -7.06966; qual_mismatch_simple_bayesian[44][27] = -7.29589; qual_mismatch_simple_bayesian[44][28] = -7.52109; qual_mismatch_simple_bayesian[44][29] = -7.74503; qual_mismatch_simple_bayesian[44][30] = -7.96738; qual_mismatch_simple_bayesian[44][31] = -8.18777; qual_mismatch_simple_bayesian[44][32] = -8.40575; qual_mismatch_simple_bayesian[44][33] = -8.62076; qual_mismatch_simple_bayesian[44][34] = -8.83214; qual_mismatch_simple_bayesian[44][35] = -9.03913; qual_mismatch_simple_bayesian[44][36] = -9.24085; qual_mismatch_simple_bayesian[44][37] = -9.43629; qual_mismatch_simple_bayesian[44][38] = -9.62438; qual_mismatch_simple_bayesian[44][39] = -9.80396; qual_mismatch_simple_bayesian[44][40] = -9.97387; qual_mismatch_simple_bayesian[44][41] = -10.133; qual_mismatch_simple_bayesian[44][42] = -10.2803; qual_mismatch_simple_bayesian[44][43] = -10.4151; qual_mismatch_simple_bayesian[44][44] = -10.5369; qual_mismatch_simple_bayesian[44][45] = -10.6454; qual_mismatch_simple_bayesian[44][46] = -10.7408;
             qual_mismatch_simple_bayesian[45][0] = -1.09862; qual_mismatch_simple_bayesian[45][1] = -1.32887; qual_mismatch_simple_bayesian[45][2] = -1.55912; qual_mismatch_simple_bayesian[45][3] = -1.78937; qual_mismatch_simple_bayesian[45][4] = -2.01961; qual_mismatch_simple_bayesian[45][5] = -2.24985; qual_mismatch_simple_bayesian[45][6] = -2.48008; qual_mismatch_simple_bayesian[45][7] = -2.71031; qual_mismatch_simple_bayesian[45][8] = -2.94052; qual_mismatch_simple_bayesian[45][9] = -3.17073; qual_mismatch_simple_bayesian[45][10] = -3.40092; qual_mismatch_simple_bayesian[45][11] = -3.6311; qual_mismatch_simple_bayesian[45][12] = -3.86126; qual_mismatch_simple_bayesian[45][13] = -4.09138; qual_mismatch_simple_bayesian[45][14] = -4.32148; qual_mismatch_simple_bayesian[45][15] = -4.55153; qual_mismatch_simple_bayesian[45][16] = -4.78153; qual_mismatch_simple_bayesian[45][17] = -5.01147; qual_mismatch_simple_bayesian[45][18] = -5.24131; qual_mismatch_simple_bayesian[45][19] = -5.47106; qual_mismatch_simple_bayesian[45][20] = -5.70067; qual_mismatch_simple_bayesian[45][21] = -5.93011; qual_mismatch_simple_bayesian[45][22] = -6.15934; qual_mismatch_simple_bayesian[45][23] = -6.38831; qual_mismatch_simple_bayesian[45][24] = -6.61695; qual_mismatch_simple_bayesian[45][25] = -6.84517; qual_mismatch_simple_bayesian[45][26] = -7.07286; qual_mismatch_simple_bayesian[45][27] = -7.29991; qual_mismatch_simple_bayesian[45][28] = -7.52614; qual_mismatch_simple_bayesian[45][29] = -7.75134; qual_mismatch_simple_bayesian[45][30] = -7.97528; qual_mismatch_simple_bayesian[45][31] = -8.19763; qual_mismatch_simple_bayesian[45][32] = -8.41802; qual_mismatch_simple_bayesian[45][33] = -8.636; qual_mismatch_simple_bayesian[45][34] = -8.851; qual_mismatch_simple_bayesian[45][35] = -9.06239; qual_mismatch_simple_bayesian[45][36] = -9.26938; qual_mismatch_simple_bayesian[45][37] = -9.4711; qual_mismatch_simple_bayesian[45][38] = -9.66654; qual_mismatch_simple_bayesian[45][39] = -9.85463; qual_mismatch_simple_bayesian[45][40] = -10.0342; qual_mismatch_simple_bayesian[45][41] = -10.2041; qual_mismatch_simple_bayesian[45][42] = -10.3632; qual_mismatch_simple_bayesian[45][43] = -10.5106; qual_mismatch_simple_bayesian[45][44] = -10.6454; qual_mismatch_simple_bayesian[45][45] = -10.7671; qual_mismatch_simple_bayesian[45][46] = -10.8756;
             qual_mismatch_simple_bayesian[46][0] = -1.09862; qual_mismatch_simple_bayesian[46][1] = -1.32887; qual_mismatch_simple_bayesian[46][2] = -1.55912; qual_mismatch_simple_bayesian[46][3] = -1.78937; qual_mismatch_simple_bayesian[46][4] = -2.01962; qual_mismatch_simple_bayesian[46][5] = -2.24986; qual_mismatch_simple_bayesian[46][6] = -2.4801; qual_mismatch_simple_bayesian[46][7] = -2.71033; qual_mismatch_simple_bayesian[46][8] = -2.94056; qual_mismatch_simple_bayesian[46][9] = -3.17077; qual_mismatch_simple_bayesian[46][10] = -3.40098; qual_mismatch_simple_bayesian[46][11] = -3.63117; qual_mismatch_simple_bayesian[46][12] = -3.86135; qual_mismatch_simple_bayesian[46][13] = -4.09151; qual_mismatch_simple_bayesian[46][14] = -4.32163; qual_mismatch_simple_bayesian[46][15] = -4.55173; qual_mismatch_simple_bayesian[46][16] = -4.78178; qual_mismatch_simple_bayesian[46][17] = -5.01178; qual_mismatch_simple_bayesian[46][18] = -5.24172; qual_mismatch_simple_bayesian[46][19] = -5.47156; qual_mismatch_simple_bayesian[46][20] = -5.70131; qual_mismatch_simple_bayesian[46][21] = -5.93092; qual_mismatch_simple_bayesian[46][22] = -6.16036; qual_mismatch_simple_bayesian[46][23] = -6.38959; qual_mismatch_simple_bayesian[46][24] = -6.61856; qual_mismatch_simple_bayesian[46][25] = -6.8472; qual_mismatch_simple_bayesian[46][26] = -7.07542; qual_mismatch_simple_bayesian[46][27] = -7.30311; qual_mismatch_simple_bayesian[46][28] = -7.53016; qual_mismatch_simple_bayesian[46][29] = -7.75639; qual_mismatch_simple_bayesian[46][30] = -7.98159; qual_mismatch_simple_bayesian[46][31] = -8.20553; qual_mismatch_simple_bayesian[46][32] = -8.42788; qual_mismatch_simple_bayesian[46][33] = -8.64827; qual_mismatch_simple_bayesian[46][34] = -8.86625; qual_mismatch_simple_bayesian[46][35] = -9.08126; qual_mismatch_simple_bayesian[46][36] = -9.29264; qual_mismatch_simple_bayesian[46][37] = -9.49963; qual_mismatch_simple_bayesian[46][38] = -9.70135; qual_mismatch_simple_bayesian[46][39] = -9.8968; qual_mismatch_simple_bayesian[46][40] = -10.0849; qual_mismatch_simple_bayesian[46][41] = -10.2645; qual_mismatch_simple_bayesian[46][42] = -10.4344; qual_mismatch_simple_bayesian[46][43] = -10.5935; qual_mismatch_simple_bayesian[46][44] = -10.7408; qual_mismatch_simple_bayesian[46][45] = -10.8756; qual_mismatch_simple_bayesian[46][46] = -10.9974;
-            
+
             vector<double> qual_score;
             qual_score.resize(47);
-            
+
             qual_score[0] = -2; qual_score[1] = -1.58147; qual_score[2] = -0.996843; qual_score[3] = -0.695524; qual_score[4] = -0.507676; qual_score[5] = -0.38013; qual_score[6] = -0.289268; qual_score[7] = -0.222552; qual_score[8] = -0.172557; qual_score[9] = -0.134552; qual_score[10] = -0.105361; qual_score[11] = -0.0827653; qual_score[12] = -0.0651742; qual_score[13] = -0.0514183; qual_score[14] = -0.0406248; qual_score[15] = -0.0321336; qual_score[16] = -0.0254397; qual_score[17] = -0.0201544; qual_score[18] = -0.0159759; qual_score[19] = -0.0126692; qual_score[20] = -0.0100503; qual_score[21] = -0.007975; qual_score[22] = -0.00632956; qual_score[23] = -0.00502447; qual_score[24] = -0.00398902; qual_score[25] = -0.00316729; qual_score[26] = -0.00251505; qual_score[27] = -0.00199726; qual_score[28] = -0.00158615; qual_score[29] = -0.00125972; qual_score[30] = -0.0010005; qual_score[31] = -0.000794644; qual_score[32] = -0.000631156; qual_score[33] = -0.000501313; qual_score[34] = -0.000398186; qual_score[35] = -0.000316278; qual_score[36] = -0.00025122; qual_score[37] = -0.000199546; qual_score[38] = -0.000158502; qual_score[39] = -0.0001259; qual_score[40] = -0.000100005; qual_score[41] = -7.9436e-05; qual_score[42] = -6.30977e-05; qual_score[43] = -5.012e-05; qual_score[44] = -3.98115e-05; qual_score[45] = -3.16233e-05; qual_score[46] = -2.51192e-05;
-            
+
             int longestBase = 1000;
-            
+
             Alignment* alignment;
             if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
             else if(pDataArray->align == "needleman")	{	alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, longestBase);				}
             else if(pDataArray->align == "kmer")                    {	alignment = new KmerAlign(pDataArray->kmerSize);                                                    }
-            
+
             string thisfqualindexfile, thisrqualindexfile, thisffastafile, thisrfastafile;
             thisfqualindexfile = ""; thisrqualindexfile = "";
             thisffastafile = pDataArray->inputFiles[0]; thisrfastafile = pDataArray->inputFiles[1];
@@ -599,9 +605,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 thisfqualindexfile = pDataArray->qualOrIndexFiles[0];
                 thisrqualindexfile = pDataArray->qualOrIndexFiles[1];
             }
-            
+
             if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
-            
+
             ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
 #ifdef USE_BOOST
             boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
@@ -615,7 +621,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 pDataArray->m->openInputFileBinary(thisrfastafile, inRFasta, inRF);
 #endif
             }
-            
+
             ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
             if (thisfqualindexfile != "") {
                 if (thisfqualindexfile != "NONE") {
@@ -660,7 +666,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
                 hasQuality = true;
             }
-            
+
             if(pDataArray->allFiles){
                 for (int i = 0; i < pDataArray->fastaFileNames.size(); i++) { //clears old file
                     for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
@@ -672,30 +678,30 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     }
                 }
             }
-            
+
             Oligos oligos;
             if (pDataArray->oligosfile != "") { oligos.read(pDataArray->oligosfile, false);  }
             int numFPrimers = oligos.getPairedPrimers().size();
             int numBarcodes = oligos.getPairedBarcodes().size();
-            
-            
+
+
             TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), hasIndex);
             TrimOligos* rtrimOligos = NULL;
             if (pDataArray->reorient) {
                 rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
             }
-            
+
             //for(int i = 0; i < pDataArray->linesInput_end; i++){ //end is the number of sequences to process
             bool good = true;
             while (good) {
-                
+
                 if (pDataArray->m->control_pressed) { break; }
-                
+
                 int success = 1;
                 string trashCode = "";
                 string commentString = "";
                 int currentSeqsDiffs = 0;
-                
+
                 bool ignore; ignore = false;
                 Sequence fSeq, rSeq;
                 QualityScores* fQual = NULL; QualityScores* rQual = NULL;
@@ -706,10 +712,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         bool tignore;
                         FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
                         FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = rread.getName();
-                        
+
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
@@ -718,25 +724,25 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
-                            
+
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 rread.setName(reverseName);
@@ -758,24 +764,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 //we know the location of the # matches in the forward and reverse
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         f2read.setName(forwardName);
                                         rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     f2read.setName(forwardName);
                                     rread.setName(reverseName);
@@ -785,7 +791,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
-                                
+
                                 string forwardName = fread.getName();
                                 string reverseName = r2read.getName();
                                 ///bool fixed = checkName(fread, r2read);
@@ -796,24 +802,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     //we know the location of the # matches in the forward and reverse
                                                                             int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2read.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                   
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2read.setName(reverseName);
@@ -823,12 +829,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                                 if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                                 else { rread = r2read; }
-                                
+
                             }else { fread = f2read; }
                             /////////////////////////////////////////////////////////////
-                            
+
                         }
-                        
+
                         if (tignore) { ignore=true; }
                         fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
                         rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
@@ -840,7 +846,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                             if (tignore) { ignore=true; }
                             findexBarcode.setAligned(firead.getSeq());
-                            
+
                             string forwardName = fread.getName();
                             string reverseName = firead.getName();
 
@@ -852,24 +858,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 //we know the location of the # matches in the forward and reverse
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         firead.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     firead.setName(reverseName);
@@ -877,13 +883,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = false;
                                 }
                             }
-                            
+
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
                                 string forwardName = fread.getName();
                                 string reverseName = f2iread.getName();
-                                
+
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
@@ -891,24 +897,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             f2iread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         f2iread.setName(reverseName);
@@ -924,7 +930,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         if (thisrqualindexfile != "") { //reverse index file
                             FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
-                            
+
                             string forwardName = fread.getName();
                             string reverseName = riread.getName();
 
@@ -936,27 +942,27 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
                                 //we know the location of the # matches in the forward and reverse
-                                
+
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         riread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     riread.setName(reverseName);
@@ -967,33 +973,33 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
-                                
+
                                 string forwardName = fread.getName();
                                 string reverseName = r2iread.getName();
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-             
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2iread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2iread.setName(reverseName);
@@ -1007,7 +1013,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                             }
                         }
-                        
+
                     }else { //reading fasta and maybe qual
                         Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
                         Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
@@ -1018,27 +1024,27 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 rread.setName(reverseName);
@@ -1056,27 +1062,27 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                    
+
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         f2read.setName(forwardName);
                                         rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     f2read.setName(forwardName);
                                     rread.setName(reverseName);
@@ -1096,24 +1102,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2read.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                   
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2read.setName(reverseName);
@@ -1123,49 +1129,49 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                                 if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                                 else { rread = r2read; }
-                                
+
                             }else { fread = f2read; }
                             /////////////////////////////////////////////////////////////
-                            
+
                         }
-                        
-                        
+
+
                         fSeq.setName(fread.getName()); fSeq.setAligned(fread.getAligned());
                         rSeq.setName(rread.getName()); rSeq.setAligned(rread.getAligned());
                         if (thisfqualindexfile != "") {
                             fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                             rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
-                            
+
                             string forwardName = fread.getName();
                             string reverseName = rread.getName();
-                            
+
                             if (fQual->getName() != rQual->getName()) {
                                 ///bool fixed = checkName(fread, rread);
                                 //////////////////////////////////////////////////////////////
                                 bool fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             rread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         rread.setName(reverseName);
@@ -1177,7 +1183,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 if (!fixed) {
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse qfile file. Ignoring, " + fQual->getName() + ".\n"); ignore = true; }
                             }
-                            
+
                             savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                             savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                             if (fQual->getName() != fread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
@@ -1191,36 +1197,36 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         bool tignore;
                         FastqRead fread(inFF, tignore, pDataArray->format);
                         FastqRead rread(inRF, ignore, pDataArray->format);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = rread.getName();
-                        
+
                         ///bool fixed = checkName(fread, rread);
                         //////////////////////////////////////////////////////////////
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 rread.setName(reverseName);
@@ -1240,24 +1246,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 fixed = poundMatch;
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         f2read.setName(forwardName);
                                         rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     f2read.setName(forwardName);
                                     rread.setName(reverseName);
@@ -1267,10 +1273,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             if (!fixed) {
                                 FastqRead r2read(inRF, ignore, pDataArray->format);
-                                
+
                                 string forwardName = fread.getName();
                                 string reverseName = r2read.getName();
-                                
+
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 fixed = false;
@@ -1278,24 +1284,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = poundMatch;
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2read.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2read.setName(reverseName);
@@ -1305,12 +1311,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                                 if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                                 else { rread = r2read; }
-                                
+
                             }else { fread = f2read; }
                             /////////////////////////////////////////////////////////////
-                            
+
                         }
-                        
+
                         if (tignore) { ignore=true; }
                         fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
                         rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
@@ -1324,33 +1330,33 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             findexBarcode.setAligned(firead.getSeq());
                             string forwardName = fread.getName();
                             string reverseName = firead.getName();
-                            
+
                             ///bool fixed = checkName(fread, firead);
                             //////////////////////////////////////////////////////////////
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                
+
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         firead.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     firead.setName(reverseName);
@@ -1368,24 +1374,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     fixed = poundMatch;
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             f2iread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         f2iread.setName(reverseName);
@@ -1410,28 +1416,28 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             bool fixed = false;
                             if (pDataArray->nameType == poundMatch) {
                                 fixed = poundMatch;
-                                
+
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         riread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
-                                
+
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     riread.setName(reverseName);
@@ -1442,34 +1448,34 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
                                 FastqRead r2iread(inRQ, tignore, pDataArray->format);
-                                
+
                                 string forwardName = fread.getName();
                                 string reverseName = r2iread.getName();
                                 fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                        
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2iread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
-                                    
+
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2iread.setName(reverseName);
@@ -1483,7 +1489,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }else { riread = r2iread; rindexBarcode.setAligned(riread.getSeq()); }
                             }
                         }
-                        
+
                     }else { //reading fasta and maybe qual
                         Sequence tfSeq(inFF);
                         Sequence trSeq(inRF);
@@ -1495,28 +1501,28 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         bool fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
-                            
+
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 rread.setName(reverseName);
@@ -1537,24 +1543,24 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 
                                     int pos = forwardName.find_last_of('#');
                                     if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                    
+
                                     int pos2 = reverseName.find_last_of('#');
                                     if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                    
+
                                     if (forwardName == reverseName) {
                                         f2read.setName(forwardName);
                                         rread.setName(reverseName);
                                     }else{
                                         fixed = false;
                                     }
-                                
+
                             }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                             else if (pDataArray->nameType == offByOne) {
-                                
+
                                 fixed = true;
                                 reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                 forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                
+
                                 if (forwardName == reverseName) {
                                     f2read.setName(forwardName);
                                     rread.setName(reverseName);
@@ -1566,34 +1572,34 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 Sequence tr2Seq(inRF);
                                 string forwardName = fread.getName();
                                 string reverseName = r2read.getName();
-                                
+
 
                                 ///bool fixed = checkName(fread, r2read);
                                 //////////////////////////////////////////////////////////////
                                 bool fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             r2read.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         r2read.setName(reverseName);
@@ -1603,19 +1609,19 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                                 if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
                                 else { trSeq = tr2Seq; }
-                                
+
                             }else { tfSeq = tf2Seq; }
                             /////////////////////////////////////////////////////////////
-                            
+
                         }
-                        
-                        
+
+
                         fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
                         rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
                         if (thisfqualindexfile != "") {
                             fQual = new QualityScores(inFQ);
                             rQual = new QualityScores(inRQ);
-                            
+
                             string forwardName = fread.getName();
                             string reverseName = rread.getName();
                             if (fQual->getName() != rQual->getName()) {
@@ -1624,29 +1630,29 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 bool fixed = false;
                                 if (pDataArray->nameType == poundMatch) {
                                     fixed = poundMatch;
-                                    
-                                        
+
+
                                         int pos = forwardName.find_last_of('#');
                                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                        
+
                                         int pos2 = reverseName.find_last_of('#');
                                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                        
+
                                         if (forwardName == reverseName) {
                                             fread.setName(forwardName);
                                             rread.setName(reverseName);
                                         }else{
                                             fixed = false;
                                         }
-                                    
+
                                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                                 else if (pDataArray->nameType == offByOne) {
-                                    
+
                                     fixed = true;
-                                    
+
                                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                                    
+
                                     if (forwardName == reverseName) {
                                         fread.setName(forwardName);
                                         rread.setName(reverseName);
@@ -1658,7 +1664,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 if (!fixed) {
                                     pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse qfile file. Ignoring, " + fQual->getName() + ".\n"); ignore = true; }
                             }
-                            
+
                             savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                             savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                             if (fQual->getName() != tfSeq.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
@@ -1671,12 +1677,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 }
                 int barcodeIndex = 0;
                 int primerIndex = 0;
-                
+
                 if (!ignore) {
-                    
+
                     Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
                     Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
-                    
+
                     if(numBarcodes != 0){
                         vector<int> results;
                         if (hasQuality) {
@@ -1693,7 +1699,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
                         else{ currentSeqsDiffs += success;  }
                     }
-                    
+
                     if(numFPrimers != 0){
                         vector<int> results;
                         if (hasQuality) {
@@ -1706,18 +1712,18 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
                         else{ currentSeqsDiffs += success;  }
                     }
-                    
+
                     if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
-                    
+
                     if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
                         int thisSuccess = 0;
                         string thisTrashCode = "";
                         string thiscommentString = "";
                         int thisCurrentSeqsDiffs = 0;
-                        
+
                         int thisBarcodeIndex = 0;
                         int thisPrimerIndex = 0;
-                        
+
                         if(numBarcodes != 0){
                             vector<int> results;
                             if (hasQuality) {
@@ -1734,7 +1740,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
                             else{ thisCurrentSeqsDiffs += thisSuccess;  }
                         }
-                        
+
                         if(numFPrimers != 0){
                             vector<int> results;
                             if (hasQuality) {
@@ -1747,9 +1753,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
                             else{ thisCurrentSeqsDiffs += thisSuccess;  }
                         }
-                        
+
                         if (thisCurrentSeqsDiffs > pDataArray->tdiffs)	{	thisTrashCode += 't';   }
-                        
+
                         if (thisTrashCode == "") {
                             trashCode = thisTrashCode;
                             success = thisSuccess;
@@ -1767,12 +1773,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                         }else { trashCode += "(" + thisTrashCode + ")";  }
                     }
-                    
-                    
+
+
                     //flip the reverse reads
                     rSeq.reverseComplement();
                     if (hasQuality) { rQual->flipQScores(); }
-                    
+
                     //pairwise align
                     alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
                     map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
@@ -1780,7 +1786,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     fSeq.setAligned(alignment->getSeqAAln());
                     rSeq.setAligned(alignment->getSeqBAln());
                     int length = fSeq.getAligned().length();
-                    
+
                     //traverse alignments merging into one contiguous seq
                     string contig = "";
                     int numMismatches = 0;
@@ -1792,11 +1798,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         scores2 = rQual->getQualityScores();
                         delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
                     }
-                    
+
                     // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
                     int overlapStart = fSeq.getStartPos()-1;
                     int seq2Start = rSeq.getStartPos()-1;
-                    
+
                     //bigger of the 2 starting positions is the location of the overlapping start
                     if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
                         overlapStart = seq2Start;
@@ -1804,12 +1810,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     }else { //seq1 starts later so take from 0 to overlapStart from seq2
                         for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; if (hasQuality) { if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); }  } }
                     }
-                    
+
                     int seq1End = fSeq.getEndPos();
                     int seq2End = rSeq.getEndPos();
                     int overlapEnd = seq1End;
                     if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
-                    
+
                     int firstForward = 0; int seq2FirstForward = 0; int lastReverse = seq1.length(); int seq2lastReverse = seq2.length(); bool firstChooseSeq1 = false; bool lastChooseSeq1 = false;
                     if (hasQuality) {
                         for (int i = 0; i < seq1.length(); i++) { if ((seq1[i] != '.') && (seq1[i] != '-')) { if (scores1[ABaseMap[i]] == 2) { firstForward++; }else { break; } } }
@@ -1819,7 +1825,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         for (int i = seq2.length()-1; i >= 0; i--) { if ((seq2[i] != '.') && (seq2[i] != '-')) { if (scores2[BBaseMap[i]] == 2) { seq2lastReverse--; }else { break; } } }
                         if (lastReverse > seq2lastReverse) { lastReverse = seq2lastReverse; lastChooseSeq1 = true; }
                     }
-                    
+
                     int oStart = contig.length();
                     //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
                     for (int i = overlapStart; i < overlapEnd; i++) {
@@ -1831,10 +1837,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 /////////////////////////////////////////////////////////////
                                 int qualScore = 1;
                                 double qProb = qual_match_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])];
-                                
+
                                 int lower = 0;
                                 int upper = 46;
-                                
+
                                 if (qProb < qual_score[0])  { qualScore = 1; }
                                 else {
                                     while (lower < upper) {
@@ -1852,7 +1858,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     }
                                 }
                                 qualScore = lower;
-                                
+
                                 contigScores.push_back(qualScore);
                                 ////////////////////////////////////////////////////////////
                             }
@@ -1877,10 +1883,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                         /////////////////////////////////////////////////////////////
                                         int qualScore = 1;
                                         double qProb = qual_mismatch_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])];
-                                        
+
                                         int lower = 0;
                                         int upper = 46;
-                                        
+
                                         if (qProb < qual_score[0])  { qualScore = 1; }
                                         else {
                                             while (lower < upper) {
@@ -1898,10 +1904,10 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                             }
                                         }
                                         qualScore = lower;
-                                        
+
                                         contigScores.push_back(qualScore);
                                         ////////////////////////////////////////////////////////////
-                                        
+
                                     }else if (i < firstForward) {
                                         if (firstChooseSeq1) { contigScores.push_back(scores1[ABaseMap[i]]); }
                                         else { contigScores.push_back(scores2[BBaseMap[i]]); }
@@ -1926,7 +1932,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         for (int i = overlapEnd; i < length; i++) {  contig += seq1[i];  if (hasQuality) { if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
                         }
                     }
-                    
+
                     //cout << contig << endl;
                     //exit(1);
                     if (pDataArray->trimOverlap) {
@@ -1938,22 +1944,22 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             contigScores = newContigScores;
                         }
                     }
-                    
+
                     if (contig == "") { trashCode += "l"; contig = "NNNN"; contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); }
-                    
+
                     if(trashCode.length() == 0){
                         bool ignore = false;
-                        
+
                         if (pDataArray->m->debug) { pDataArray->m->mothurOut(fSeq.getName()); }
-                        
+
                         if (pDataArray->createOligosGroup) {
                             string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
                             if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
-                            
+
                             int pos = thisGroup.find("ignore");
                             if (pos == string::npos) {
                                 pDataArray->groupMap[fSeq.getName()] = thisGroup;
-                                
+
                                 map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
                                 if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
                                 else { pDataArray->groupCounts[it->first] ++; }
@@ -1962,14 +1968,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             int pos = pDataArray->group.find("ignore");
                             if (pos == string::npos) {
                                 pDataArray->groupMap[fSeq.getName()] = pDataArray->group;
-                                
+
                                 map<string, int>::iterator it = pDataArray->groupCounts.find(pDataArray->group);
                                 if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[pDataArray->group] = 1; }
                                 else { pDataArray->groupCounts[it->first] ++; }
                             }else { ignore = true; }
                         }
                         if (pDataArray->m->debug) { pDataArray->m->mothurOut("\n"); }
-                        
+
                         if(!ignore){
                             //output
                             outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
@@ -1977,17 +1983,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 outQual << ">" << fSeq.getName() << '\t' << commentString << endl;
                                 for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << " "; }  outQual << endl;
                             }
-                            
+
                             int numNs = 0;
                             for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
                             outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
-                            
+
                             if (pDataArray->allFiles) {
                                 ofstream output;
                                 pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                                 output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                                 output.close();
-                                
+
                                 if (hasQuality) {
                                     ofstream output2;
                                     pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
@@ -1995,7 +2001,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
                                     output2.close();
                                 }
-                                
+
                             }
                         }
                     }else {
@@ -2007,7 +2013,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                     }
                 }
-                
+
                 if (!pDataArray->gz) {
                     if ((inFFasta.eof()) || (inRFasta.eof())) { good = false; break; }
                 }else {
@@ -2015,16 +2021,16 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     if (inFF.eof() || inRF.eof()) { good = false; break; }
                     #endif
                 }
-                
+
                 thisNumReads++;
-                
+
                 //report progress
                 if((thisNumReads) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(thisNumReads)+"\n"); 	}
             }
-            
+
             //report progress
             if((thisNumReads) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(thisNumReads)+"\n"); 	}
-            
+
             inFFasta.close();
             inRFasta.close();
             if (pDataArray->gz) {
@@ -2070,22 +2076,22 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             }
             delete alignment;
             if (pDataArray->reorient) { delete rtrimOligos; }
-            
+
             pDataArray->done = true;
             if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
                 if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
             }
             }
-            
+
             ///////////////////////////////////////////////////////////////////////////////////////
-            
+
             numReads += thisNumReads;
-            
+
             pDataArray->m->mothurOut("Done.\n");
-            
+
             if (pDataArray->m->control_pressed) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }   return 0; }
-            
-            
+
+
             if(pDataArray->allFiles){
                 // so we don't add the same groupfile multiple times
                 map<string, string>::iterator it;
@@ -2098,7 +2104,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                     pDataArray->m->mothurRemove(pDataArray->fastaFileNames[i][j]);
                                     namesToRemove.insert(pDataArray->fastaFileNames[i][j]);
                                     uniqueFastaNames.erase(pDataArray->fastaFileNames[i][j]); //remove from list for group file print
-                                    
+
                                     pDataArray->m->mothurRemove(pDataArray->qualFileNames[i][j]);
                                     namesToRemove.insert(pDataArray->qualFileNames[i][j]);
                                 }
@@ -2106,27 +2112,27 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                     }
                 }
-                
+
                 //remove names for outputFileNames, just cleans up the output
                 vector<string> outputNames2;
                 for(int i = 0; i < pDataArray->outputNames.size(); i++) { if (namesToRemove.count(pDataArray->outputNames[i]) == 0) { outputNames2.push_back(pDataArray->outputNames[i]); } }
                 pDataArray->outputNames = outputNames2;
-                
+
                 for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
-                    
+
                     if (pDataArray->renameSeqs) { pDataArray->theseAllFileNames[it->first] = it->second; }
-                    
+
                     ifstream in;
                     pDataArray->m->openInputFile(it->first, in);
-                    
+
                     ofstream out;
                     string thisroot = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(it->first));
                     string thisGroupName = thisroot + ".group"; pDataArray->outputNames.push_back(thisGroupName);
                     pDataArray->m->openOutputFile(thisGroupName, out);
-                    
+
                     while (!in.eof()){
                         if (pDataArray->m->control_pressed) { break; }
-                        
+
                         Sequence currSeq(in); pDataArray->m->gobble(in);
                         out << currSeq.getName() << '\t' << it->second << endl;
                     }
@@ -2134,19 +2140,19 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     in.close();
                 }
             }
-            
+
             //append to combo files
             if (pDataArray->createFileGroup || pDataArray->createOligosGroup) {
                 ofstream outCGroup;
                 if (l == 0) {   pDataArray->m->openOutputFile(pDataArray->compositeGroupFile, outCGroup);  pDataArray->outputNames.push_back(pDataArray->compositeGroupFile);          }
                 else {          pDataArray->m->openOutputFileAppend(pDataArray->compositeGroupFile, outCGroup);     }
-                
+
                 if (!pDataArray->allFiles) {
                     pDataArray->m->mothurRemove(outputGroupFileName);
                 }else {
                     ofstream outGroup;
                     pDataArray->m->openOutputFile(outputGroupFileName, outGroup);
-                    
+
                     for (map<string, string>::iterator itGroup = pDataArray->groupMap.begin(); itGroup != pDataArray->groupMap.end(); itGroup++) {
                         outCGroup << itGroup->first << '\t' << itGroup->second << endl;
                         outGroup << itGroup->first << '\t' << itGroup->second << endl;
@@ -2154,7 +2160,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     outGroup.close();
                 }
                 outCGroup.close();
-                
+
                 for (map<string, int>::iterator itGroups = pDataArray->groupCounts.begin(); itGroups != pDataArray->groupCounts.end(); itGroups++) {
                     map<string, int>::iterator itTemp = pDataArray->totalGroupCounts.find(itGroups->first);
                     if (itTemp == pDataArray->totalGroupCounts.end()) { pDataArray->totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
@@ -2180,14 +2186,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 pDataArray->outputNames.push_back(pDataArray->outputScrapQual);
                 pDataArray->outputNames.push_back(pDataArray->outputMisMatches);
             }
-            
+
             pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n");	pDataArray->m->mothurOutEndLine();
         }
-        
+
         pDataArray->count = numReads;
-        
+
         return numReads;
-        
+
     }
     catch(exception& e) {
         pDataArray->m->errorOut(e, "MakeContigsCommand", "driverGroups");
@@ -2200,13 +2206,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
     contigsData* pDataArray;
     pDataArray = (contigsData*)lpParam;
-    
+
     try {
-        
+
         vector< vector<double> > qual_match_simple_bayesian;
         qual_match_simple_bayesian.resize(47);
         for (int i = 0; i < qual_match_simple_bayesian.size(); i++) { qual_match_simple_bayesian[i].resize(47);  }
-        
+
         qual_match_simple_bayesian[0][0] = -1.09861; qual_match_simple_bayesian[0][1] = -1.32887; qual_match_simple_bayesian[0][2] = -1.55913; qual_match_simple_bayesian[0][3] = -1.78939; qual_match_simple_bayesian[0][4] = -2.01965; qual_match_simple_bayesian[0][5] = -2.2499; qual_match_simple_bayesian[0][6] = -2.48016; qual_match_simple_bayesian[0][7] = -2.71042; qual_match_simple_bayesian[0][8] = -2.94068; qual_match_simple_bayesian[0][9] = -3.17094; qual_match_simple_bayesian[0][10] = -3.4012; qual_match_simple_bayesian[0][11] = -3.63146; qual_match_simple_bayesian[0][12] = -3.86171; qual_match_simple_bayesian[0][13] = -4.09197; qual_match_simple_bayesian[0][14] = -4.32223; qual_match_simple_bayesian[0][15] = -4.55249; qual_match_simple_bayesian[0][16] = -4.78275; qual_match_simple_bayesian[0][17] = -5.01301; qual_match_simple_bayesian[0][18] = -5.24327; qual_match_simple_bayesian[0][19] = -5.47352; qual_match_simple_bayesian[0][20] = -5.70378; qual_match_simple_bayesian[0][21] = -5.93404; qual_match_simple_bayesian[0][22] = -6.1643; qual_match_simple_bayesian[0][23] = -6.39456; qual_match_simple_bayesian[0][24] = -6.62482; qual_match_simple_bayesian[0][25] = -6.85508; qual_match_simple_bayesian[0][26] = -7.08533; qual_match_simple_bayesian[0][27] = -7.31559; qual_match_simple_bayesian[0][28] = -7.54585; qual_match_simple_bayesian[0][29] = -7.77611; qual_match_simple_bayesian[0][30] = -8.00637; qual_match_simple_bayesian[0][31] = -8.23663; qual_match_simple_bayesian[0][32] = -8.46688; qual_match_simple_bayesian[0][33] = -8.69714; qual_match_simple_bayesian[0][34] = -8.9274; qual_match_simple_bayesian[0][35] = -9.15766; qual_match_simple_bayesian[0][36] = -9.38792; qual_match_simple_bayesian[0][37] = -9.61818; qual_match_simple_bayesian[0][38] = -9.84844; qual_match_simple_bayesian[0][39] = -10.0787; qual_match_simple_bayesian[0][40] = -10.309; qual_match_simple_bayesian[0][41] = -10.5392; qual_match_simple_bayesian[0][42] = -10.7695; qual_match_simple_bayesian[0][43] = -10.9997; qual_match_simple_bayesian[0][44] = -11.23; qual_match_simple_bayesian[0][45] = -11.4602; qual_match_simple_bayesian[0][46] = -11.6905;
         qual_match_simple_bayesian[1][0] = -1.32887; qual_match_simple_bayesian[1][1] = -1.37587; qual_match_simple_bayesian[1][2] = -1.41484; qual_match_simple_bayesian[1][3] = -1.44692; qual_match_simple_bayesian[1][4] = -1.47315; qual_match_simple_bayesian[1][5] = -1.49449; qual_match_simple_bayesian[1][6] = -1.51178; qual_match_simple_bayesian[1][7] = -1.52572; qual_match_simple_bayesian[1][8] = -1.53694; qual_match_simple_bayesian[1][9] = -1.54593; qual_match_simple_bayesian[1][10] = -1.55314; qual_match_simple_bayesian[1][11] = -1.5589; qual_match_simple_bayesian[1][12] = -1.5635; qual_match_simple_bayesian[1][13] = -1.56717; qual_match_simple_bayesian[1][14] = -1.5701; qual_match_simple_bayesian[1][15] = -1.57243; qual_match_simple_bayesian[1][16] = -1.57428; qual_match_simple_bayesian[1][17] = -1.57576; qual_match_simple_bayesian[1][18] = -1.57693; qual_match_simple_bayesian[1][19] = -1.57786; qual_match_simple_bayesian[1][20] = -1.5786; qual_match_simple_bayesian[1][21] = -1.57919; qual_match_simple_bayesian[1][22] = -1.57966; qual_match_simple_bayesian[1][23] = -1.58003; qual_match_simple_bayesian[1][24] = -1.58033; qual_match_simple_bayesian[1][25] = -1.58057; qual_match_simple_bayesian[1][26] = -1.58075; qual_match_simple_bayesian[1][27] = -1.5809; qual_match_simple_bayesian[1][28] = -1.58102; qual_match_simple_bayesian[1][29] = -1.58111; qual_match_simple_bayesian[1][30] = -1.58119; qual_match_simple_bayesian[1][31] = -1.58125; qual_match_simple_bayesian[1][32] = -1.58129; qual_match_simple_bayesian[1][33] = -1.58133; qual_match_simple_bayesian[1][34] = -1.58136; qual_match_simple_bayesian[1][35] = -1.58138; qual_match_simple_bayesian[1][36] = -1.5814; qual_match_simple_bayesian[1][37] = -1.58142; qual_match_simple_bayesian[1][38] = -1.58143; qual_match_simple_bayesian[1][39] = -1.58144; qual_match_simple_bayesian[1][40] = -1.58145; qual_match_simple_bayesian[1][41] = -1.58145; qual_match_simple_bayesian[1][42] = -1.58146; qual_match_simple_bayesian[1][43] = -1.58146; qual_match_simple_bayesian[1][44] = -1.58146; qual_match_simple_bayesian[1][45] = -1.58146; qual_match_simple_bayesian[1][46] = -1.58147;
         qual_match_simple_bayesian[2][0] = -1.55913; qual_match_simple_bayesian[2][1] = -1.41484; qual_match_simple_bayesian[2][2] = -1.31343; qual_match_simple_bayesian[2][3] = -1.23963; qual_match_simple_bayesian[2][4] = -1.18465; qual_match_simple_bayesian[2][5] = -1.14303; qual_match_simple_bayesian[2][6] = -1.11117; qual_match_simple_bayesian[2][7] = -1.08657; qual_match_simple_bayesian[2][8] = -1.06744; qual_match_simple_bayesian[2][9] = -1.05251; qual_match_simple_bayesian[2][10] = -1.0408; qual_match_simple_bayesian[2][11] = -1.0316; qual_match_simple_bayesian[2][12] = -1.02436; qual_match_simple_bayesian[2][13] = -1.01863; qual_match_simple_bayesian[2][14] = -1.01411; qual_match_simple_bayesian[2][15] = -1.01054; qual_match_simple_bayesian[2][16] = -1.00771; qual_match_simple_bayesian[2][17] = -1.00546; qual_match_simple_bayesian[2][18] = -1.00368; qual_match_simple_bayesian[2][19] = -1.00227; qual_match_simple_bayesian[2][20] = -1.00115; qual_match_simple_bayesian[2][21] = -1.00027; qual_match_simple_bayesian[2][22] = -0.99956; qual_match_simple_bayesian[2][23] = -0.999001; qual_match_simple_bayesian[2][24] = -0.998557; qual_match_simple_bayesian[2][25] = -0.998204; qual_match_simple_bayesian[2][26] = -0.997924; qual_match_simple_bayesian[2][27] = -0.997702; qual_match_simple_bayesian[2][28] = -0.997525; qual_match_simple_bayesian[2][29] = -0.997385; qual_match_simple_bayesian[2][30] = -0.997273; qual_match_simple_bayesian[2][31] = -0.997185; qual_match_simple_bayesian[2][32] = -0.997114; qual_match_simple_bayesian[2][33] = -0.997059; qual_match_simple_bayesian[2][34] = -0.997014; qual_match_simple_bayesian[2][35] = -0.996979; qual_match_simple_bayesian[2][36] = -0.996951; qual_match_simple_bayesian[2][37] = -0.996929; qual_match_simple_bayesian[2][38] = -0.996911; qual_match_simple_bayesian[2][39] = -0.996897; qual_match_simple_bayesian[2][40] = -0.996886; qual_match_simple_bayesian[2][41] = -0.996877; qual_match_simple_bayesian[2][42] = -0.99687; qual_match_simple_bayesian[2][43] = -0.996865; qual_match_simple_bayesian[2][44] = -0.99686; qual_match_simple_bayesian[2][45] = -0.996857; qual_match_simple_bayesian[2][46] = -0.996854;
@@ -2254,11 +2260,11 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         qual_match_simple_bayesian[44][0] = -11.23; qual_match_simple_bayesian[44][1] = -1.58146; qual_match_simple_bayesian[44][2] = -0.99686; qual_match_simple_bayesian[44][3] = -0.695551; qual_match_simple_bayesian[44][4] = -0.507707; qual_match_simple_bayesian[44][5] = -0.380164; qual_match_simple_bayesian[44][6] = -0.289304; qual_match_simple_bayesian[44][7] = -0.222588; qual_match_simple_bayesian[44][8] = -0.172594; qual_match_simple_bayesian[44][9] = -0.13459; qual_match_simple_bayesian[44][10] = -0.105399; qual_match_simple_bayesian[44][11] = -0.082804; qual_match_simple_bayesian[44][12] = -0.0652131; qual_match_simple_bayesian[44][13] = -0.0514574; qual_match_simple_bayesian[44][14] = -0.0406641; qual_match_simple_bayesian[44][15] = -0.032173; qual_match_simple_bayesian[44][16] = -0.0254792; qual_match_simple_bayesian[44][17] = -0.0201939; qual_match_simple_bayesian[44][18] = -0.0160155; qual_match_simple_bayesian[44][19] = -0.0127088; qual_match_simple_bayesian[44][20] = -0.01009; qual_match_simple_bayesian[44][21] = -0.0080147; qual_match_simple_bayesian[44][22] = -0.00636929; qual_match_simple_bayesian[44][23] = -0.00506422; qual_match_simple_bayesian[44][24] = -0.00402878; qual_match_simple_bayesian[44][25] = -0.00320706; qual_match_simple_bayesian[44][26] = -0.00255482; qual_match_simple_bayesian[44][27] = -0.00203704; qual_match_simple_bayesian[44][28] = -0.00162594; qual_match_simple_bayesian[44][29] = -0.00129951; qual_match_simple_bayesian[44][30] = -0.0010403; qual_match_simple_bayesian[44][31] = -0.000834445; qual_match_simple_bayesian[44][32] = -0.00067096; qual_match_simple_bayesian[44][33] = -0.000541118; qual_match_simple_bayesian[44][34] = -0.000437993; qual_match_simple_bayesian[44][35] = -0.000356085; qual_match_simple_bayesian[44][36] = -0.000291028; qual_match_simple_bayesian[44][37] = -0.000239355; qual_match_simple_bayesian[44][38] = -0.000198311; qual_match_simple_bayesian[44][39] = -0.00016571; qual_match_simple_bayesian[44][40] = -0.000139815; qual_match_simple_bayesian[44][41] = -0.000119246; qual_match_simple_bayesian[44][42] = -0.000102908; qual_match_simple_bayesian[44][43] = -8.99308e-05; qual_match_simple_bayesian[44][44] = -7.96225e-05; qual_match_simple_bayesian[44][45] = -7.14344e-05; qual_match_simple_bayesian[44][46] = -6.49304e-05;
         qual_match_simple_bayesian[45][0] = -11.4602; qual_match_simple_bayesian[45][1] = -1.58146; qual_match_simple_bayesian[45][2] = -0.996857; qual_match_simple_bayesian[45][3] = -0.695546; qual_match_simple_bayesian[45][4] = -0.507701; qual_match_simple_bayesian[45][5] = -0.380157; qual_match_simple_bayesian[45][6] = -0.289296; qual_match_simple_bayesian[45][7] = -0.222581; qual_match_simple_bayesian[45][8] = -0.172586; qual_match_simple_bayesian[45][9] = -0.134582; qual_match_simple_bayesian[45][10] = -0.105391; qual_match_simple_bayesian[45][11] = -0.082796; qual_match_simple_bayesian[45][12] = -0.0652051; qual_match_simple_bayesian[45][13] = -0.0514493; qual_match_simple_bayesian[45][14] = -0.040656; qual_match_simple_bayesian[45][15] = -0.0321649; qual_match_simple_bayesian[45][16] = -0.0254711; qual_match_simple_bayesian[45][17] = -0.0201858; qual_match_simple_bayesian[45][18] = -0.0160073; qual_match_simple_bayesian[45][19] = -0.0127007; qual_match_simple_bayesian[45][20] = -0.0100819; qual_match_simple_bayesian[45][21] = -0.00800654; qual_match_simple_bayesian[45][22] = -0.00636112; qual_match_simple_bayesian[45][23] = -0.00505604; qual_match_simple_bayesian[45][24] = -0.0040206; qual_match_simple_bayesian[45][25] = -0.00319888; qual_match_simple_bayesian[45][26] = -0.00254664; qual_match_simple_bayesian[45][27] = -0.00202886; qual_match_simple_bayesian[45][28] = -0.00161776; qual_match_simple_bayesian[45][29] = -0.00129133; qual_match_simple_bayesian[45][30] = -0.00103211; qual_match_simple_bayesian[45][31] = -0.000826259; qual_match_simple_bayesian[45][32] = -0.000662773; qual_match_simple_bayesian[45][33] = -0.000532931; qual_match_simple_bayesian[45][34] = -0.000429806; qual_match_simple_bayesian[45][35] = -0.000347898; qual_match_simple_bayesian[45][36] = -0.000282841; qual_match_simple_bayesian[45][37] = -0.000231167; qual_match_simple_bayesian[45][38] = -0.000190123; qual_match_simple_bayesian[45][39] = -0.000157522; qual_match_simple_bayesian[45][40] = -0.000131627; qual_match_simple_bayesian[45][41] = -0.000111058; qual_match_simple_bayesian[45][42] = -9.47203e-05; qual_match_simple_bayesian[45][43] = -8.17427e-05; qual_match_simple_bayesian[45][44] = -7.14344e-05; qual_match_simple_bayesian[45][45] = -6.32462e-05; qual_match_simple_bayesian[45][46] = -5.67422e-05;
         qual_match_simple_bayesian[46][0] = -11.6905; qual_match_simple_bayesian[46][1] = -1.58147; qual_match_simple_bayesian[46][2] = -0.996854; qual_match_simple_bayesian[46][3] = -0.695541; qual_match_simple_bayesian[46][4] = -0.507695; qual_match_simple_bayesian[46][5] = -0.380152; qual_match_simple_bayesian[46][6] = -0.28929; qual_match_simple_bayesian[46][7] = -0.222575; qual_match_simple_bayesian[46][8] = -0.17258; qual_match_simple_bayesian[46][9] = -0.134576; qual_match_simple_bayesian[46][10] = -0.105385; qual_match_simple_bayesian[46][11] = -0.0827897; qual_match_simple_bayesian[46][12] = -0.0651987; qual_match_simple_bayesian[46][13] = -0.051443; qual_match_simple_bayesian[46][14] = -0.0406496; qual_match_simple_bayesian[46][15] = -0.0321584; qual_match_simple_bayesian[46][16] = -0.0254646; qual_match_simple_bayesian[46][17] = -0.0201793; qual_match_simple_bayesian[46][18] = -0.0160009; qual_match_simple_bayesian[46][19] = -0.0126942; qual_match_simple_bayesian[46][20] = -0.0100754; qual_match_simple_bayesian[46][21] = -0.00800005; qual_match_simple_bayesian[46][22] = -0.00635463; qual_match_simple_bayesian[46][23] = -0.00504955; qual_match_simple_bayesian[46][24] = -0.0040141; qual_match_simple_bayesian[46][25] = -0.00319238; qual_match_simple_bayesian[46][26] = -0.00254014; qual_match_simple_bayesian[46][27] = -0.00202236; qual_match_simple_bayesian[46][28] = -0.00161126; qual_match_simple_bayesian[46][29] = -0.00128483; qual_match_simple_bayesian[46][30] = -0.00102561; qual_match_simple_bayesian[46][31] = -0.000819756; qual_match_simple_bayesian[46][32] = -0.00065627; qual_match_simple_bayesian[46][33] = -0.000526428; qual_match_simple_bayesian[46][34] = -0.000423302; qual_match_simple_bayesian[46][35] = -0.000341394; qual_match_simple_bayesian[46][36] = -0.000276337; qual_match_simple_bayesian[46][37] = -0.000224664; qual_match_simple_bayesian[46][38] = -0.00018362; qual_match_simple_bayesian[46][39] = -0.000151019; qual_match_simple_bayesian[46][40] = -0.000125123; qual_match_simple_bayesian[46][41] = -0.000104554; qual_match_simple_bayesian[46][42] = -8.82164e-05; qual_match_simple_bayesian[46][43] = -7.52387e-05; qual_match_simple_bayesian[46][44] = -6.49304e-05; qual_match_simple_bayesian[46][45] = -5.67422e-05; qual_match_simple_bayesian[46][46] = -5.02381e-05;
-        
+
         vector< vector<double> > qual_mismatch_simple_bayesian;
         qual_mismatch_simple_bayesian.resize(47);
         for (int i = 0; i < qual_mismatch_simple_bayesian.size(); i++) { qual_mismatch_simple_bayesian[i].resize(47);  }
-        
+
         qual_mismatch_simple_bayesian[0][0] = -1.50408; qual_mismatch_simple_bayesian[0][1] = -1.40619; qual_mismatch_simple_bayesian[0][2] = -1.33474; qual_mismatch_simple_bayesian[0][3] = -1.28141; qual_mismatch_simple_bayesian[0][4] = -1.24099; qual_mismatch_simple_bayesian[0][5] = -1.21; qual_mismatch_simple_bayesian[0][6] = -1.18606; qual_mismatch_simple_bayesian[0][7] = -1.16744; qual_mismatch_simple_bayesian[0][8] = -1.15289; qual_mismatch_simple_bayesian[0][9] = -1.14148; qual_mismatch_simple_bayesian[0][10] = -1.13251; qual_mismatch_simple_bayesian[0][11] = -1.12545; qual_mismatch_simple_bayesian[0][12] = -1.11987; qual_mismatch_simple_bayesian[0][13] = -1.11546; qual_mismatch_simple_bayesian[0][14] = -1.11197; qual_mismatch_simple_bayesian[0][15] = -1.10921; qual_mismatch_simple_bayesian[0][16] = -1.10702; qual_mismatch_simple_bayesian[0][17] = -1.10529; qual_mismatch_simple_bayesian[0][18] = -1.10391; qual_mismatch_simple_bayesian[0][19] = -1.10282; qual_mismatch_simple_bayesian[0][20] = -1.10195; qual_mismatch_simple_bayesian[0][21] = -1.10126; qual_mismatch_simple_bayesian[0][22] = -1.10072; qual_mismatch_simple_bayesian[0][23] = -1.10028; qual_mismatch_simple_bayesian[0][24] = -1.09994; qual_mismatch_simple_bayesian[0][25] = -1.09967; qual_mismatch_simple_bayesian[0][26] = -1.09945; qual_mismatch_simple_bayesian[0][27] = -1.09928; qual_mismatch_simple_bayesian[0][28] = -1.09914; qual_mismatch_simple_bayesian[0][29] = -1.09903; qual_mismatch_simple_bayesian[0][30] = -1.09895; qual_mismatch_simple_bayesian[0][31] = -1.09888; qual_mismatch_simple_bayesian[0][32] = -1.09882; qual_mismatch_simple_bayesian[0][33] = -1.09878; qual_mismatch_simple_bayesian[0][34] = -1.09874; qual_mismatch_simple_bayesian[0][35] = -1.09872; qual_mismatch_simple_bayesian[0][36] = -1.0987; qual_mismatch_simple_bayesian[0][37] = -1.09868; qual_mismatch_simple_bayesian[0][38] = -1.09867; qual_mismatch_simple_bayesian[0][39] = -1.09865; qual_mismatch_simple_bayesian[0][40] = -1.09865; qual_mismatch_simple_bayesian[0][41] = -1.09864; qual_mismatch_simple_bayesian[0][42] = -1.09863; qual_mismatch_simple_bayesian[0][43] = -1.09863; qual_mismatch_simple_bayesian[0][44] = -1.09863; qual_mismatch_simple_bayesian[0][45] = -1.09862; qual_mismatch_simple_bayesian[0][46] = -1.09862;
         qual_mismatch_simple_bayesian[1][0] = -1.40619; qual_mismatch_simple_bayesian[1][1] = -1.38979; qual_mismatch_simple_bayesian[1][2] = -1.37696; qual_mismatch_simple_bayesian[1][3] = -1.36688; qual_mismatch_simple_bayesian[1][4] = -1.35894; qual_mismatch_simple_bayesian[1][5] = -1.35268; qual_mismatch_simple_bayesian[1][6] = -1.34774; qual_mismatch_simple_bayesian[1][7] = -1.34383; qual_mismatch_simple_bayesian[1][8] = -1.34073; qual_mismatch_simple_bayesian[1][9] = -1.33828; qual_mismatch_simple_bayesian[1][10] = -1.33634; qual_mismatch_simple_bayesian[1][11] = -1.3348; qual_mismatch_simple_bayesian[1][12] = -1.33358; qual_mismatch_simple_bayesian[1][13] = -1.33261; qual_mismatch_simple_bayesian[1][14] = -1.33184; qual_mismatch_simple_bayesian[1][15] = -1.33123; qual_mismatch_simple_bayesian[1][16] = -1.33074; qual_mismatch_simple_bayesian[1][17] = -1.33036; qual_mismatch_simple_bayesian[1][18] = -1.33005; qual_mismatch_simple_bayesian[1][19] = -1.32981; qual_mismatch_simple_bayesian[1][20] = -1.32962; qual_mismatch_simple_bayesian[1][21] = -1.32946; qual_mismatch_simple_bayesian[1][22] = -1.32934; qual_mismatch_simple_bayesian[1][23] = -1.32924; qual_mismatch_simple_bayesian[1][24] = -1.32917; qual_mismatch_simple_bayesian[1][25] = -1.32911; qual_mismatch_simple_bayesian[1][26] = -1.32906; qual_mismatch_simple_bayesian[1][27] = -1.32902; qual_mismatch_simple_bayesian[1][28] = -1.32899; qual_mismatch_simple_bayesian[1][29] = -1.32896; qual_mismatch_simple_bayesian[1][30] = -1.32895; qual_mismatch_simple_bayesian[1][31] = -1.32893; qual_mismatch_simple_bayesian[1][32] = -1.32892; qual_mismatch_simple_bayesian[1][33] = -1.32891; qual_mismatch_simple_bayesian[1][34] = -1.3289; qual_mismatch_simple_bayesian[1][35] = -1.32889; qual_mismatch_simple_bayesian[1][36] = -1.32889; qual_mismatch_simple_bayesian[1][37] = -1.32889; qual_mismatch_simple_bayesian[1][38] = -1.32888; qual_mismatch_simple_bayesian[1][39] = -1.32888; qual_mismatch_simple_bayesian[1][40] = -1.32888; qual_mismatch_simple_bayesian[1][41] = -1.32888; qual_mismatch_simple_bayesian[1][42] = -1.32888; qual_mismatch_simple_bayesian[1][43] = -1.32887; qual_mismatch_simple_bayesian[1][44] = -1.32887; qual_mismatch_simple_bayesian[1][45] = -1.32887; qual_mismatch_simple_bayesian[1][46] = -1.32887;
         qual_mismatch_simple_bayesian[2][0] = -1.33474; qual_mismatch_simple_bayesian[2][1] = -1.37696; qual_mismatch_simple_bayesian[2][2] = -1.41181; qual_mismatch_simple_bayesian[2][3] = -1.44039; qual_mismatch_simple_bayesian[2][4] = -1.46368; qual_mismatch_simple_bayesian[2][5] = -1.48258; qual_mismatch_simple_bayesian[2][6] = -1.49786; qual_mismatch_simple_bayesian[2][7] = -1.51016; qual_mismatch_simple_bayesian[2][8] = -1.52003; qual_mismatch_simple_bayesian[2][9] = -1.52795; qual_mismatch_simple_bayesian[2][10] = -1.53428; qual_mismatch_simple_bayesian[2][11] = -1.53934; qual_mismatch_simple_bayesian[2][12] = -1.54338; qual_mismatch_simple_bayesian[2][13] = -1.5466; qual_mismatch_simple_bayesian[2][14] = -1.54916; qual_mismatch_simple_bayesian[2][15] = -1.55121; qual_mismatch_simple_bayesian[2][16] = -1.55283; qual_mismatch_simple_bayesian[2][17] = -1.55412; qual_mismatch_simple_bayesian[2][18] = -1.55515; qual_mismatch_simple_bayesian[2][19] = -1.55597; qual_mismatch_simple_bayesian[2][20] = -1.55662; qual_mismatch_simple_bayesian[2][21] = -1.55713; qual_mismatch_simple_bayesian[2][22] = -1.55754; qual_mismatch_simple_bayesian[2][23] = -1.55787; qual_mismatch_simple_bayesian[2][24] = -1.55813; qual_mismatch_simple_bayesian[2][25] = -1.55833; qual_mismatch_simple_bayesian[2][26] = -1.5585; qual_mismatch_simple_bayesian[2][27] = -1.55863; qual_mismatch_simple_bayesian[2][28] = -1.55873; qual_mismatch_simple_bayesian[2][29] = -1.55881; qual_mismatch_simple_bayesian[2][30] = -1.55888; qual_mismatch_simple_bayesian[2][31] = -1.55893; qual_mismatch_simple_bayesian[2][32] = -1.55897; qual_mismatch_simple_bayesian[2][33] = -1.559; qual_mismatch_simple_bayesian[2][34] = -1.55903; qual_mismatch_simple_bayesian[2][35] = -1.55905; qual_mismatch_simple_bayesian[2][36] = -1.55907; qual_mismatch_simple_bayesian[2][37] = -1.55908; qual_mismatch_simple_bayesian[2][38] = -1.55909; qual_mismatch_simple_bayesian[2][39] = -1.5591; qual_mismatch_simple_bayesian[2][40] = -1.5591; qual_mismatch_simple_bayesian[2][41] = -1.55911; qual_mismatch_simple_bayesian[2][42] = -1.55911; qual_mismatch_simple_bayesian[2][43] = -1.55912; qual_mismatch_simple_bayesian[2][44] = -1.55912; qual_mismatch_simple_bayesian[2][45] = -1.55912; qual_mismatch_simple_bayesian[2][46] = -1.55912;
@@ -2306,10 +2312,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         qual_mismatch_simple_bayesian[44][0] = -1.09863; qual_mismatch_simple_bayesian[44][1] = -1.32887; qual_mismatch_simple_bayesian[44][2] = -1.55912; qual_mismatch_simple_bayesian[44][3] = -1.78936; qual_mismatch_simple_bayesian[44][4] = -2.0196; qual_mismatch_simple_bayesian[44][5] = -2.24983; qual_mismatch_simple_bayesian[44][6] = -2.48006; qual_mismatch_simple_bayesian[44][7] = -2.71028; qual_mismatch_simple_bayesian[44][8] = -2.94048; qual_mismatch_simple_bayesian[44][9] = -3.17068; qual_mismatch_simple_bayesian[44][10] = -3.40085; qual_mismatch_simple_bayesian[44][11] = -3.63101; qual_mismatch_simple_bayesian[44][12] = -3.86114; qual_mismatch_simple_bayesian[44][13] = -4.09123; qual_mismatch_simple_bayesian[44][14] = -4.32128; qual_mismatch_simple_bayesian[44][15] = -4.55128; qual_mismatch_simple_bayesian[44][16] = -4.78122; qual_mismatch_simple_bayesian[44][17] = -5.01107; qual_mismatch_simple_bayesian[44][18] = -5.24081; qual_mismatch_simple_bayesian[44][19] = -5.47042; qual_mismatch_simple_bayesian[44][20] = -5.69986; qual_mismatch_simple_bayesian[44][21] = -5.92909; qual_mismatch_simple_bayesian[44][22] = -6.15806; qual_mismatch_simple_bayesian[44][23] = -6.3867; qual_mismatch_simple_bayesian[44][24] = -6.61492; qual_mismatch_simple_bayesian[44][25] = -6.84262; qual_mismatch_simple_bayesian[44][26] = -7.06966; qual_mismatch_simple_bayesian[44][27] = -7.29589; qual_mismatch_simple_bayesian[44][28] = -7.52109; qual_mismatch_simple_bayesian[44][29] = -7.74503; qual_mismatch_simple_bayesian[44][30] = -7.96738; qual_mismatch_simple_bayesian[44][31] = -8.18777; qual_mismatch_simple_bayesian[44][32] = -8.40575; qual_mismatch_simple_bayesian[44][33] = -8.62076; qual_mismatch_simple_bayesian[44][34] = -8.83214; qual_mismatch_simple_bayesian[44][35] = -9.03913; qual_mismatch_simple_bayesian[44][36] = -9.24085; qual_mismatch_simple_bayesian[44][37] = -9.43629; qual_mismatch_simple_bayesian[44][38] = -9.62438; qual_mismatch_simple_bayesian[44][39] = -9.80396; qual_mismatch_simple_bayesian[44][40] = -9.97387; qual_mismatch_simple_bayesian[44][41] = -10.133; qual_mismatch_simple_bayesian[44][42] = -10.2803; qual_mismatch_simple_bayesian[44][43] = -10.4151; qual_mismatch_simple_bayesian[44][44] = -10.5369; qual_mismatch_simple_bayesian[44][45] = -10.6454; qual_mismatch_simple_bayesian[44][46] = -10.7408;
         qual_mismatch_simple_bayesian[45][0] = -1.09862; qual_mismatch_simple_bayesian[45][1] = -1.32887; qual_mismatch_simple_bayesian[45][2] = -1.55912; qual_mismatch_simple_bayesian[45][3] = -1.78937; qual_mismatch_simple_bayesian[45][4] = -2.01961; qual_mismatch_simple_bayesian[45][5] = -2.24985; qual_mismatch_simple_bayesian[45][6] = -2.48008; qual_mismatch_simple_bayesian[45][7] = -2.71031; qual_mismatch_simple_bayesian[45][8] = -2.94052; qual_mismatch_simple_bayesian[45][9] = -3.17073; qual_mismatch_simple_bayesian[45][10] = -3.40092; qual_mismatch_simple_bayesian[45][11] = -3.6311; qual_mismatch_simple_bayesian[45][12] = -3.86126; qual_mismatch_simple_bayesian[45][13] = -4.09138; qual_mismatch_simple_bayesian[45][14] = -4.32148; qual_mismatch_simple_bayesian[45][15] = -4.55153; qual_mismatch_simple_bayesian[45][16] = -4.78153; qual_mismatch_simple_bayesian[45][17] = -5.01147; qual_mismatch_simple_bayesian[45][18] = -5.24131; qual_mismatch_simple_bayesian[45][19] = -5.47106; qual_mismatch_simple_bayesian[45][20] = -5.70067; qual_mismatch_simple_bayesian[45][21] = -5.93011; qual_mismatch_simple_bayesian[45][22] = -6.15934; qual_mismatch_simple_bayesian[45][23] = -6.38831; qual_mismatch_simple_bayesian[45][24] = -6.61695; qual_mismatch_simple_bayesian[45][25] = -6.84517; qual_mismatch_simple_bayesian[45][26] = -7.07286; qual_mismatch_simple_bayesian[45][27] = -7.29991; qual_mismatch_simple_bayesian[45][28] = -7.52614; qual_mismatch_simple_bayesian[45][29] = -7.75134; qual_mismatch_simple_bayesian[45][30] = -7.97528; qual_mismatch_simple_bayesian[45][31] = -8.19763; qual_mismatch_simple_bayesian[45][32] = -8.41802; qual_mismatch_simple_bayesian[45][33] = -8.636; qual_mismatch_simple_bayesian[45][34] = -8.851; qual_mismatch_simple_bayesian[45][35] = -9.06239; qual_mismatch_simple_bayesian[45][36] = -9.26938; qual_mismatch_simple_bayesian[45][37] = -9.4711; qual_mismatch_simple_bayesian[45][38] = -9.66654; qual_mismatch_simple_bayesian[45][39] = -9.85463; qual_mismatch_simple_bayesian[45][40] = -10.0342; qual_mismatch_simple_bayesian[45][41] = -10.2041; qual_mismatch_simple_bayesian[45][42] = -10.3632; qual_mismatch_simple_bayesian[45][43] = -10.5106; qual_mismatch_simple_bayesian[45][44] = -10.6454; qual_mismatch_simple_bayesian[45][45] = -10.7671; qual_mismatch_simple_bayesian[45][46] = -10.8756;
         qual_mismatch_simple_bayesian[46][0] = -1.09862; qual_mismatch_simple_bayesian[46][1] = -1.32887; qual_mismatch_simple_bayesian[46][2] = -1.55912; qual_mismatch_simple_bayesian[46][3] = -1.78937; qual_mismatch_simple_bayesian[46][4] = -2.01962; qual_mismatch_simple_bayesian[46][5] = -2.24986; qual_mismatch_simple_bayesian[46][6] = -2.4801; qual_mismatch_simple_bayesian[46][7] = -2.71033; qual_mismatch_simple_bayesian[46][8] = -2.94056; qual_mismatch_simple_bayesian[46][9] = -3.17077; qual_mismatch_simple_bayesian[46][10] = -3.40098; qual_mismatch_simple_bayesian[46][11] = -3.63117; qual_mismatch_simple_bayesian[46][12] = -3.86135; qual_mismatch_simple_bayesian[46][13] = -4.09151; qual_mismatch_simple_bayesian[46][14] = -4.32163; qual_mismatch_simple_bayesian[46][15] = -4.55173; qual_mismatch_simple_bayesian[46][16] = -4.78178; qual_mismatch_simple_bayesian[46][17] = -5.01178; qual_mismatch_simple_bayesian[46][18] = -5.24172; qual_mismatch_simple_bayesian[46][19] = -5.47156; qual_mismatch_simple_bayesian[46][20] = -5.70131; qual_mismatch_simple_bayesian[46][21] = -5.93092; qual_mismatch_simple_bayesian[46][22] = -6.16036; qual_mismatch_simple_bayesian[46][23] = -6.38959; qual_mismatch_simple_bayesian[46][24] = -6.61856; qual_mismatch_simple_bayesian[46][25] = -6.8472; qual_mismatch_simple_bayesian[46][26] = -7.07542; qual_mismatch_simple_bayesian[46][27] = -7.30311; qual_mismatch_simple_bayesian[46][28] = -7.53016; qual_mismatch_simple_bayesian[46][29] = -7.75639; qual_mismatch_simple_bayesian[46][30] = -7.98159; qual_mismatch_simple_bayesian[46][31] = -8.20553; qual_mismatch_simple_bayesian[46][32] = -8.42788; qual_mismatch_simple_bayesian[46][33] = -8.64827; qual_mismatch_simple_bayesian[46][34] = -8.86625; qual_mismatch_simple_bayesian[46][35] = -9.08126; qual_mismatch_simple_bayesian[46][36] = -9.29264; qual_mismatch_simple_bayesian[46][37] = -9.49963; qual_mismatch_simple_bayesian[46][38] = -9.70135; qual_mismatch_simple_bayesian[46][39] = -9.8968; qual_mismatch_simple_bayesian[46][40] = -10.0849; qual_mismatch_simple_bayesian[46][41] = -10.2645; qual_mismatch_simple_bayesian[46][42] = -10.4344; qual_mismatch_simple_bayesian[46][43] = -10.5935; qual_mismatch_simple_bayesian[46][44] = -10.7408; qual_mismatch_simple_bayesian[46][45] = -10.8756; qual_mismatch_simple_bayesian[46][46] = -10.9974;
-        
+
         vector<double> qual_score;
         qual_score.resize(47);
-        
+
         qual_score[0] = -2; qual_score[1] = -1.58147; qual_score[2] = -0.996843; qual_score[3] = -0.695524; qual_score[4] = -0.507676; qual_score[5] = -0.38013; qual_score[6] = -0.289268; qual_score[7] = -0.222552; qual_score[8] = -0.172557; qual_score[9] = -0.134552; qual_score[10] = -0.105361; qual_score[11] = -0.0827653; qual_score[12] = -0.0651742; qual_score[13] = -0.0514183; qual_score[14] = -0.0406248; qual_score[15] = -0.0321336; qual_score[16] = -0.0254397; qual_score[17] = -0.0201544; qual_score[18] = -0.0159759; qual_score[19] = -0.0126692; qual_score[20] = -0.0100503; qual_score[21] = -0.007975; qual_score[22] = -0.00632956; qual_score[23] = -0.00502447; qual_score[24] = -0.00398902; qual_score[25] = -0.00316729; qual_score[26] = -0.00251505; qual_score[27] = -0.00199726; qual_score[28] = -0.00158615; qual_score[29] = -0.00125972; qual_score[30] = -0.0010005; qual_score[31] = -0.000794644; qual_score[32] = -0.000631156; qual_score[33] = -0.000501313; qual_score[34] = -0.000398186; qual_score[35] = -0.000316278; qual_score[36] = -0.00025122; qual_score[37] = -0.000199546; qual_score[38] = -0.000158502; qual_score[39] = -0.0001259; qual_score[40] = -0.000100005; qual_score[41] = -7.9436e-05; qual_score[42] = -6.30977e-05; qual_score[43] = -5.012e-05; qual_score[44] = -3.98115e-05; qual_score[45] = -3.16233e-05; qual_score[46] = -2.51192e-05;
         /*const double qual_match_simple_bayesian[][47] = {
          { -1.09861, -1.32887, -1.55913, -1.78939, -2.01965, -2.2499, -2.48016, -2.71042, -2.94068, -3.17094, -3.4012, -3.63146, -3.86171, -4.09197, -4.32223, -4.55249, -4.78275, -5.01301, -5.24327, -5.47352, -5.70378, -5.93404, -6.1643, -6.39456, -6.62482, -6.85508, -7.08533, -7.31559, -7.54585, -7.77611, -8.00637, -8.23663, -8.46688, -8.69714, -8.9274, -9.15766, -9.38792, -9.61818, -9.84844, -10.0787, -10.309, -10.5392, -10.7695, -10.9997, -11.23, -11.4602, -11.6905},
@@ -2407,18 +2413,18 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
          { -1.09863, -1.32887, -1.55912, -1.78936, -2.0196, -2.24983, -2.48006, -2.71028, -2.94048, -3.17068, -3.40085, -3.63101, -3.86114, -4.09123, -4.32128, -4.55128, -4.78122, -5.01107, -5.24081, -5.47042, -5.69986, -5.92909, -6.15806, -6.3867, -6.61492, -6.84262, -7.06966, -7.29589, -7.52109, -7.74503, -7.96738, -8.18777, -8.40575, -8.62076, -8.83214, -9.03913, -9.24085, -9.43629, -9.62438, -9.80396, -9.97387, -10.133, -10.2803, -10.4151, -10.5369, -10.6454, -10.7408},
          { -1.09862, -1.32887, -1.55912, -1.78937, -2.01961, -2.24985, -2.48008, -2.71031, -2.94052, -3.17073, -3.40092, -3.6311, -3.86126, -4.09138, -4.32148, -4.55153, -4.78153, -5.01147, -5.24131, -5.47106, -5.70067, -5.93011, -6.15934, -6.38831, -6.61695, -6.84517, -7.07286, -7.29991, -7.52614, -7.75134, -7.97528, -8.19763, -8.41802, -8.636, -8.851, -9.06239, -9.26938, -9.4711, -9.66654, -9.85463, -10.0342, -10.2041, -10.3632, -10.5106, -10.6454, -10.7671, -10.8756},
          { -1.09862, -1.32887, -1.55912, -1.78937, -2.01962, -2.24986, -2.4801, -2.71033, -2.94056, -3.17077, -3.40098, -3.63117, -3.86135, -4.09151, -4.32163, -4.55173, -4.78178, -5.01178, -5.24172, -5.47156, -5.70131, -5.93092, -6.16036, -6.38959, -6.61856, -6.8472, -7.07542, -7.30311, -7.53016, -7.75639, -7.98159, -8.20553, -8.42788, -8.64827, -8.86625, -9.08126, -9.29264, -9.49963, -9.70135, -9.8968, -10.0849, -10.2645, -10.4344, -10.5935, -10.7408, -10.8756, -10.9974}};
-         
+
          const double qual_score[47] = {
          -2, -1.58147, -0.996843, -0.695524, -0.507676, -0.38013, -0.289268, -0.222552, -0.172557, -0.134552, -0.105361, -0.0827653, -0.0651742, -0.0514183, -0.0406248, -0.0321336, -0.0254397, -0.0201544, -0.0159759, -0.0126692, -0.0100503, -0.007975, -0.00632956, -0.00502447, -0.00398902, -0.00316729, -0.00251505, -0.00199726, -0.00158615, -0.00125972, -0.0010005, -0.000794644, -0.000631156, -0.000501313, -0.000398186, -0.000316278, -0.00025122, -0.000199546, -0.000158502, -0.0001259, -0.000100005, -7.9436e-05, -6.30977e-05, -5.012e-05, -3.98115e-05, -3.16233e-05, -2.51192e-05};
          */
-        
+
         int longestBase = 1000;
-        
+
         Alignment* alignment;
         if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
         else if(pDataArray->align == "needleman")	{	alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, longestBase);				}
         else if(pDataArray->align == "kmer")                    {	alignment = new KmerAlign(pDataArray->kmerSize);                                                    }
-        
+
         pDataArray->count = 0;
         int num = 0;
         string thisfqualindexfile, thisrqualindexfile, thisffastafile, thisrfastafile;
@@ -2428,14 +2434,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             thisfqualindexfile = pDataArray->qualOrIndexFiles[0];
             thisrqualindexfile = pDataArray->qualOrIndexFiles[1];
         }
-        
+
         if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
-        
+
         ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
         pDataArray->m->openInputFile(thisffastafile, inFFasta);
         pDataArray->m->openInputFile(thisrfastafile, inRFasta);
-        
+
         bool begin = false;
         //print header if you are process 0
         if ((pDataArray->linesInput_start == 0) || (pDataArray->linesInput_start == 1)) {
@@ -2446,7 +2452,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             inFFasta.seekg(pDataArray->linesInput_start-1); pDataArray->m->gobble(inFFasta);
             inRFasta.seekg(pDataArray->linesInputReverse_start-1); pDataArray->m->gobble(inRFasta);
         }
-        
+
         bool hasIndex = false;
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {
@@ -2462,7 +2468,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 hasIndex = true;
             }else { thisrqualindexfile = ""; }
         }
-        
+
         pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
         pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
         pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
@@ -2477,7 +2483,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
             hasQuality = true;
         }
-        
+
         if(pDataArray->allFiles){
             for (int i = 0; i < pDataArray->fastaFileNames.size(); i++) { //clears old file
                 for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
@@ -2489,29 +2495,29 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
             }
         }
-        
+
         Oligos oligos;
         if (pDataArray->oligosfile != "") { oligos.read(pDataArray->oligosfile, false);  }
         int numFPrimers = oligos.getPairedPrimers().size();
         int numBarcodes = oligos.getPairedBarcodes().size();
-        
-        
+
+
         TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), hasIndex);
         TrimOligos* rtrimOligos = NULL;
         if (pDataArray->reorient) {
             rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
         }
-        
+
         for(int i = 0; i < pDataArray->linesInput_end; i++){ //end is the number of sequences to process
-            
+
             if (pDataArray->m->control_pressed) { break; }
-            
+
             int success = 1;
             string trashCode = "";
             string commentString = "";
             int currentSeqsDiffs = 0;
             bool hasIndex = false;
-            
+
             bool ignore; ignore = false;
             Sequence fSeq, rSeq;
             QualityScores* fQual = NULL; QualityScores* rQual = NULL;
@@ -2521,7 +2527,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 bool tignore;
                 FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
                 FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
-                
+
                 string forwardName = fread.getName();
                 string reverseName = rread.getName();
                 ///bool fixed = checkName(fread, rread);
@@ -2532,24 +2538,24 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 
                         int pos = forwardName.find_last_of('#');
                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                        
+
                         int pos2 = reverseName.find_last_of('#');
                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                        
+
                         if (forwardName == reverseName) {
                             fread.setName(forwardName);
                             rread.setName(reverseName);
                         }else{
                             fixed = false;
                         }
-                   
+
                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                 else if (pDataArray->nameType == offByOne) {
-                    
+
                     fixed = true;
                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                    
+
                     if (forwardName == reverseName) {
                         fread.setName(forwardName);
                         rread.setName(reverseName);
@@ -2560,7 +2566,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
                     FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
-                    
+
                     string forwardName = f2read.getName();
                     string reverseName = rread.getName();
                        ///bool fixed = checkName(f2read, rread);
@@ -2570,25 +2576,25 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         fixed = poundMatch;
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                            
+
                             int pos2 = reverseName.find_last_of('#');
                             if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                            
+
                             if (forwardName == reverseName) {
                                 f2read.setName(forwardName);
                                 rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
-                        
+
                     }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
-                        
+
                         fixed = true;
-                        
+
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                        
+
                         if (forwardName == reverseName) {
                             f2read.setName(forwardName);
                             rread.setName(reverseName);
@@ -2598,7 +2604,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     if (!fixed) {
                         FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = r2read.getName();
                         ///bool fixed = checkName(fread, r2read);
@@ -2606,27 +2612,27 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     r2read.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 r2read.setName(reverseName);
@@ -2636,12 +2642,12 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         }
                         if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                         else { rread = r2read; }
-                        
+
                     }else { fread = f2read; }
                     /////////////////////////////////////////////////////////////
-                    
+
                 }
-                
+
                 if (tignore) { ignore=true; }
                 fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
@@ -2662,28 +2668,28 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
-                        
+
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                            
+
                             int pos2 = reverseName.find_last_of('#');
                             if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 firead.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
-                        
+
                     }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
-                        
+
                         fixed = true;
-                        
+
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                        
+
                         if (forwardName == reverseName) {
                             fread.setName(forwardName);
                             firead.setName(reverseName);
@@ -2694,7 +2700,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = f2iread.getName();
 
@@ -2703,28 +2709,28 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         /////////////////////////////////////////////////////////////
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     f2iread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
-                            
+
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 f2iread.setName(reverseName);
@@ -2743,7 +2749,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     rindexBarcode.setAligned(riread.getSeq());
-                    
+
                     string forwardName = fread.getName();
                     string reverseName = riread.getName();
 
@@ -2752,27 +2758,27 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
-                        
+
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                            
+
                             int pos2 = reverseName.find_last_of('#');
                             if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 riread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
-                        
+
                     }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
-                        
+
                         fixed = true;
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                        
+
                         if (forwardName == reverseName) {
                             fread.setName(forwardName);
                             riread.setName(reverseName);
@@ -2783,7 +2789,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
                         FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = r2iread.getName();
 
@@ -2792,28 +2798,28 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     r2iread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
-                            
+
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 r2iread.setName(reverseName);
@@ -2828,40 +2834,40 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     hasIndex = true;
                 }
-                
+
             }else { //reading fasta and maybe qual
                 Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
                 Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
                 string forwardName = fread.getName();
                 string reverseName = rread.getName();
-                
+
 
                 ///bool fixed = checkName(fread, rread);
                 //////////////////////////////////////////////////////////////
                 bool fixed = false;
                 if (pDataArray->nameType == poundMatch) {
                     fixed = poundMatch;
-                    
+
                         int pos = forwardName.find_last_of('#');
                         if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                        
+
                         int pos2 = reverseName.find_last_of('#');
                         if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                        
+
                         if (forwardName == reverseName) {
                             fread.setName(forwardName);
                             rread.setName(reverseName);
                         }else{
                             fixed = false;
                         }
-                    
+
                 }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                 else if (pDataArray->nameType == offByOne) {
-                    
+
                     fixed = true;
                     reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                     forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                    
+
                     if (forwardName == reverseName) {
                         fread.setName(forwardName);
                         rread.setName(reverseName);
@@ -2872,7 +2878,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
                     Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
-                    
+
                     string forwardName = f2read.getName();
                     string reverseName = rread.getName();
 
@@ -2881,28 +2887,28 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     fixed = false;
                     if (pDataArray->nameType == poundMatch) {
                         fixed = poundMatch;
-                        
+
                             int pos = forwardName.find_last_of('#');
                             if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                            
+
                             int pos2 = reverseName.find_last_of('#');
                             if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                            
+
                             if (forwardName == reverseName) {
                                 f2read.setName(forwardName);
                                 rread.setName(reverseName);
                             }else{
                                 fixed = false;
                             }
-                        
+
                     }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                     else if (pDataArray->nameType == offByOne) {
-                        
+
                         fixed = true;
-                        
+
                         reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                         forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                        
+
                         if (forwardName == reverseName) {
                             f2read.setName(forwardName);
                             rread.setName(reverseName);
@@ -2912,7 +2918,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     if (!fixed) {
                         Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
-                        
+
                         string forwardName = fread.getName();
                         string reverseName = r2read.getName();
                         ///bool fixed = checkName(fread, r2read);
@@ -2920,28 +2926,28 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     r2read.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
-                            
+
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 r2read.setName(reverseName);
@@ -2951,10 +2957,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         }
                         if (!fixed) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
                         else { rread = r2read; }
-                        
+
                     }else { fread = f2read; }
                     /////////////////////////////////////////////////////////////
-                    
+
                 }
 
 
@@ -2963,7 +2969,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 if (thisfqualindexfile != "") {
                     fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
                     rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
-                    
+
                     string forwardName = fread.getName();
                     string reverseName = rread.getName();
                     if (fQual->getName() != rQual->getName()) {
@@ -2972,27 +2978,27 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         fixed = false;
                         if (pDataArray->nameType == poundMatch) {
                             fixed = poundMatch;
-                            
+
                                 int pos = forwardName.find_last_of('#');
                                 if (pos != string::npos) {  forwardName = forwardName.substr(0, pos);   }
-                                
+
                                 int pos2 = reverseName.find_last_of('#');
                                 if (pos2 != string::npos) {  reverseName = reverseName.substr(0, pos2);   }
-                                
+
                                 if (forwardName == reverseName) {
                                     fread.setName(forwardName);
                                     rread.setName(reverseName);
                                 }else{
                                     fixed = false;
                                 }
-                            
+
                         }else if (pDataArray->nameType == perfectMatch) { if (forwardName == reverseName) { fixed = true; } }
                         else if (pDataArray->nameType == offByOne) {
-                            
+
                             fixed = true;
                             reverseName = reverseName.substr(0, (reverseName.length()-pDataArray->offByOneTrimLength));
                             forwardName = forwardName.substr(0, (forwardName.length()-pDataArray->offByOneTrimLength));
-                            
+
                             if (forwardName == reverseName) {
                                 fread.setName(forwardName);
                                 rread.setName(reverseName);
@@ -3012,15 +3018,15 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
                 if (fread.getName() != rread.getName()) { pDataArray->m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + fread.getName() + ".\n"); ignore = true; }
             }
-            
+
             int barcodeIndex = 0;
             int primerIndex = 0;
-            
+
             if (!ignore) {
-                
+
                 Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
                 Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
-                
+
                 if(numBarcodes != 0){
                     vector<int> results;
                     if (hasQuality) {
@@ -3037,7 +3043,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
                     else{ currentSeqsDiffs += success;  }
                 }
-                
+
                 if(numFPrimers != 0){
                     vector<int> results;
                     if (hasQuality) {
@@ -3050,18 +3056,18 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
                     else{ currentSeqsDiffs += success;  }
                 }
-                
+
                 if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
-                
+
                 if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
                     int thisSuccess = 0;
                     string thisTrashCode = "";
                     string thiscommentString = "";
                     int thisCurrentSeqsDiffs = 0;
-                    
+
                     int thisBarcodeIndex = 0;
                     int thisPrimerIndex = 0;
-                    
+
                     if(numBarcodes != 0){
                         vector<int> results;
                         if (hasQuality) {
@@ -3078,7 +3084,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
-                    
+
                     if(numFPrimers != 0){
                         vector<int> results;
                         if (hasQuality) {
@@ -3091,9 +3097,9 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
-                    
+
                     if (thisCurrentSeqsDiffs > pDataArray->tdiffs)	{	thisTrashCode += 't';   }
-                    
+
                     if (thisTrashCode == "") {
                         trashCode = thisTrashCode;
                         success = thisSuccess;
@@ -3111,12 +3117,12 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         }
                     }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
-                
-                
+
+
                 //flip the reverse reads
                 rSeq.reverseComplement();
                 if (hasQuality) { rQual->flipQScores(); }
-                
+
                 //pairwise align
                 alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
                 map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
@@ -3124,7 +3130,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 fSeq.setAligned(alignment->getSeqAAln());
                 rSeq.setAligned(alignment->getSeqBAln());
                 int length = fSeq.getAligned().length();
-                
+
                 //traverse alignments merging into one contiguous seq
                 string contig = "";
                 int numMismatches = 0;
@@ -3136,11 +3142,11 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     scores2 = rQual->getQualityScores();
                     delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
                 }
-                
+
                 // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
                 int overlapStart = fSeq.getStartPos()-1;
                 int seq2Start = rSeq.getStartPos()-1;
-                
+
                 //bigger of the 2 starting positions is the location of the overlapping start
                 if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
                     overlapStart = seq2Start;
@@ -3148,12 +3154,12 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }else { //seq1 starts later so take from 0 to overlapStart from seq2
                     for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; if (hasQuality) { if (((seq2[i] != '-') && (seq2[i] != '.'))) {  contigScores.push_back(scores2[BBaseMap[i]]); }  } }
                 }
-                
+
                 int seq1End = fSeq.getEndPos();
                 int seq2End = rSeq.getEndPos();
                 int overlapEnd = seq1End;
                 if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
-                
+
                 int firstForward = 0; int seq2FirstForward = 0; int lastReverse = seq1.length(); int seq2lastReverse = seq2.length(); bool firstChooseSeq1 = false; bool lastChooseSeq1 = false;
                 if (hasQuality) {
                     for (int i = 0; i < seq1.length(); i++) { if ((seq1[i] != '.') && (seq1[i] != '-')) { if (scores1[ABaseMap[i]] == 2) { firstForward++; }else { break; } } }
@@ -3163,7 +3169,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     for (int i = seq2.length()-1; i >= 0; i--) { if ((seq2[i] != '.') && (seq2[i] != '-')) { if (scores2[BBaseMap[i]] == 2) { seq2lastReverse--; }else { break; } } }
                     if (lastReverse > seq2lastReverse) { lastReverse = seq2lastReverse; lastChooseSeq1 = true; }
                 }
-                
+
                 int oStart = contig.length();
                 //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
                 for (int i = overlapStart; i < overlapEnd; i++) {
@@ -3175,10 +3181,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             /////////////////////////////////////////////////////////////
                             int qualScore = 1;
                             double qProb = qual_match_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])];
-                            
+
                             int lower = 0;
                             int upper = 46;
-                            
+
                             if (qProb < qual_score[0])  { qualScore = 1; }
                             else {
                                 while (lower < upper) {
@@ -3196,7 +3202,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 }
                             }
                             qualScore = lower;
-                            
+
                             contigScores.push_back(qualScore);
                             ////////////////////////////////////////////////////////////
                         }
@@ -3221,10 +3227,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                     /////////////////////////////////////////////////////////////
                                     int qualScore = 1;
                                     double qProb = qual_mismatch_simple_bayesian[PHREDCLAMP(scores1[ABaseMap[i]])][PHREDCLAMP(scores2[BBaseMap[i]])];
-                                    
+
                                     int lower = 0;
                                     int upper = 46;
-                                    
+
                                     if (qProb < qual_score[0])  { qualScore = 1; }
                                     else {
                                         while (lower < upper) {
@@ -3242,10 +3248,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                         }
                                     }
                                     qualScore = lower;
-                                    
+
                                     contigScores.push_back(qualScore);
                                     ////////////////////////////////////////////////////////////
-                                    
+
                                 }else if (i < firstForward) {
                                     if (firstChooseSeq1) { contigScores.push_back(scores1[ABaseMap[i]]); }
                                     else { contigScores.push_back(scores2[BBaseMap[i]]); }
@@ -3270,7 +3276,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     for (int i = overlapEnd; i < length; i++) {  contig += seq1[i];  if (hasQuality) { if (((seq1[i] != '-') && (seq1[i] != '.'))) { contigScores.push_back(scores1[ABaseMap[i]]); } }
                     }
                 }
-                
+
                 //cout << contig << endl;
                 //exit(1);
                 if (pDataArray->trimOverlap) {
@@ -3282,22 +3288,22 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         contigScores = newContigScores;
                     }
                 }
-                
+
                 if (contig == "") { trashCode += "l"; contig = "NNNN"; contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); contigScores.push_back(0); }
-                
+
                 if(trashCode.length() == 0){
                     bool ignore = false;
-                    
+
                     if (pDataArray->m->debug) { pDataArray->m->mothurOut(fSeq.getName()); }
-                    
+
                     if (pDataArray->createOligosGroup) {
                         string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
                         if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
-                        
+
                         int pos = thisGroup.find("ignore");
                         if (pos == string::npos) {
                             pDataArray->groupMap[fSeq.getName()] = thisGroup;
-                            
+
                             map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
                             if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
                             else { pDataArray->groupCounts[it->first] ++; }
@@ -3306,14 +3312,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         int pos = pDataArray->group.find("ignore");
                         if (pos == string::npos) {
                             pDataArray->groupMap[fSeq.getName()] = pDataArray->group;
-                            
+
                             map<string, int>::iterator it = pDataArray->groupCounts.find(pDataArray->group);
                             if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[pDataArray->group] = 1; }
                             else { pDataArray->groupCounts[it->first] ++; }
                         }else { ignore = true; }
                     }
                     if (pDataArray->m->debug) { pDataArray->m->mothurOut("\n"); }
-                    
+
                     if(!ignore){
                         //output
                         outFasta << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
@@ -3321,17 +3327,17 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             outQual << ">" << fSeq.getName() << '\t' << commentString << endl;
                             for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << " "; }  outQual << endl;
                         }
-                        
+
                         int numNs = 0;
                         for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
                         outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
-                        
+
                         if (pDataArray->allFiles) {
                             ofstream output;
                             pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                             output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                             output.close();
-                            
+
                             if (hasQuality) {
                                 ofstream output2;
                                 pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
@@ -3339,7 +3345,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                                 for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
                                 output2.close();
                             }
-                            
+
                         }
                     }
                 }else {
@@ -3352,14 +3358,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
             }
             pDataArray->count++;
-            
+
             //report progress
             if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 	}
         }
-        
+
         //report progress
         if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
-        
+
         inFFasta.close();
         inRFasta.close();
         outFasta.close();
@@ -3380,14 +3386,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         }
         delete alignment;
         if (pDataArray->reorient) { delete rtrimOligos; }
-        
+
         pDataArray->done = true;
         if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
             if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
         }
-        
+
         return 0;
-        
+
     }
     catch(exception& e) {
         pDataArray->m->errorOut(e, "MakeContigsCommand", "MyContigsThreadFunction");

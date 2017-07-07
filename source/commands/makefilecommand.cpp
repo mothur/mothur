@@ -335,13 +335,13 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             }
             
         }else { //separate by the user selected deliminator. default='_'
-            
             for (int i = 0; i < paired.size(); i++) {
                 
                 string groupName = "Group_" + toString(i);
+                string filename = m->getSimpleName(paired[i][0]);
+                int pos = filename.find(delim);
                 
-                int pos = paired[i][0].find_first_of(delim);
-                if (pos != string::npos) { groupName = m->getSimpleName(paired[i][0].substr(0, pos)); }
+                if (pos != string::npos) { groupName = filename.substr(0, pos); }
                 
                 results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
             }

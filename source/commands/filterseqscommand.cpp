@@ -743,8 +743,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 					
 			Sequence seq(in); m->gobble(in);
 			if (seq.getName() != "") {
-                    if (m->debug) { m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();}
-                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); error = true; if (!m->debug) { m->control_pressed = true; }else{ m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();} }
+                    if (m->debug) { m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
+                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!m->debug) { m->control_pressed = true; }else{ m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
 					
 					if(trump != '*')			{	F.doTrump(seq);		}
 					if(m->isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}

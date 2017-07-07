@@ -10,11 +10,11 @@
  */
 
 
-#include "dist.h"
+#include "calculator.h"
 
 /**************************************************************************************************/
 
-class oneGapIgnoreTermGapDist : public Dist {
+class oneGapIgnoreTermGapDist : public DistCalc {
 	
 public:
 	

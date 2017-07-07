@@ -180,46 +180,50 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
         
         ignore = false;
         format = f;
-        //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
-        for (int i = -64; i < 65; i++) {
-            char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
-            convertTable.push_back(temp);
+        
+        if (in.eof()) { ignore = true; }
+        else {
+            //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+            for (int i = -64; i < 65; i++) {
+                char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+                convertTable.push_back(temp);
+            }
+            
+            //read sequence name
+            string line = ""; std::getline(in, line); m->gobble(in);
+            vector<string> pieces = m->splitWhiteSpace(line);
+            name = "";  if (pieces.size() != 0) { name = pieces[0];  }
+            if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
+            else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
+            else { name = name.substr(1); }
+            if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = m->getStringFromVector(pieces, " "); }
+            
+            //read sequence
+            std::getline(in, sequence); m->gobble(in);
+            if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
+            
+            //read sequence name
+            line = ""; std::getline(in, line); m->gobble(in);
+            pieces = m->splitWhiteSpace(line);
+            string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
+            if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
+            else if (name2[0] != '+') { m->mothurOut("[WARNING]: reading " + name2 + " expected a name with + as a leading character, ignoring."); ignore=true; }
+            else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
+            
+            //read quality scores
+            string quality = ""; std::getline(in, quality); m->gobble(in);
+            if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
+            
+            //sanity check sequence length and number of quality scores match
+            if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
+            if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
+            
+            scoreString = quality;
+            scores = convertQual(quality);
+            m->checkName(name);
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
         }
-        
-        //read sequence name
-        string line = ""; std::getline(in, line); m->gobble(in);
-        vector<string> pieces = m->splitWhiteSpace(line);
-        name = "";  if (pieces.size() != 0) { name = pieces[0]; }
-        if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
-        else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
-        else { name = name.substr(1); }
-        if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = m->getStringFromVector(pieces, " "); }
-        
-        //read sequence
-        std::getline(in, sequence); m->gobble(in);
-        if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
-        
-        //read sequence name
-        line = ""; std::getline(in, line); m->gobble(in);
-        pieces = m->splitWhiteSpace(line);
-        string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
-        if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
-        else if (name2[0] != '+') { m->mothurOut("[WARNING]: reading " + name2 + " expected a name with + as a leading character, ignoring."); ignore=true; }
-        else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
-        
-        //read quality scores
-        string quality = ""; std::getline(in, quality); m->gobble(in);
-        if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
-        
-        //sanity check sequence length and number of quality scores match
-        if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
-        if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
-        
-        scoreString = quality;
-        scores = convertQual(quality);
-        m->checkName(name);
-        
-        if (m->debug) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
         
     }
     catch(exception& e) {

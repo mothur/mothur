@@ -16,6 +16,7 @@ class OptiMatrix {
     
 #ifdef UNIT_TEST
     friend class TestOptiMatrix;
+    friend class FakeOptiMatrix;
 #endif
 
     
@@ -37,7 +38,7 @@ public:
     long int print(ostream&);
     int readFile(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
     
-private:
+protected:
     
     vector< set<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector<string> singletons;
