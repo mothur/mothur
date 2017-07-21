@@ -419,6 +419,9 @@ int SRACommand::execute(){
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
             
+            string thisGroup = Groups[i];
+            thisGroup = m->splitWhiteSpace(thisGroup).front();  //removes leading and trailing spaces if any
+            
             if ((!includeScrap) && (Groups[i] == "scrap")) {} //ignore scrap
             else {
                 if (m->control_pressed) { break; }
@@ -428,7 +431,7 @@ int SRACommand::execute(){
                 out << "\t\t\t\t<XmlContent>\n";
                 out << "\t\t\t\t\t<BioSample schema_version=\"2.0\">\n";
                 out << "\t\t\t\t\t\t<SampleId>\n";
-                out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID> \n";
+                out << "\t\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + thisGroup + "</SPUID> \n";
                 out << "\t\t\t\t\t\t</SampleId>\n";
                 out << "\t\t\t\t\t\t<Descriptor>\n";
                 out << "\t\t\t\t\t\t\t<Title>" + mimarks[Groups[i]]["sample_title"] + "</Title> \n";
@@ -456,7 +459,7 @@ int SRACommand::execute(){
                 out << "\t\t\t\t</XmlContent>\n";
                 out << "\t\t\t</Data>\n";
                 out << "\t\t\t<Identifier>\n";
-                out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
+                out << "\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + thisGroup + "</SPUID>\n";
                 out << "\t\t\t</Identifier>\n";
                 out << "\t\t</AddData>\n";
                 out << "\t</Action>\n";
@@ -467,6 +470,9 @@ int SRACommand::execute(){
         //File objects
         ////////////////////////////////////////////////////////
         for (int i = 0; i < Groups.size(); i++) {
+            
+            string thisGroup = Groups[i];
+            thisGroup = m->splitWhiteSpace(thisGroup).front();  //removes leading and trailing spaces if any
             
             if ((!includeScrap) && (Groups[i] == "scrap")) {} //ignore scrap
             else {
@@ -487,14 +493,14 @@ int SRACommand::execute(){
                 //cout << Groups[i] << '\t' << thisGroupsFiles.size() << endl;
                 
                 for (int j = 0; j < thisGroupsFiles.size(); j++) {
-                    string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + Groups[i];
+                    string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + thisGroup;
                     
                     if (m->control_pressed) { break; }
                     out << "\t<Action>\n";
                     out << "\t\t<AddFiles target_db=\"SRA\">\n";
                     if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
                         vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                        libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
+                        libId = m->getSimpleName(pieces[0]) + "." + thisGroup;
                         out << "\t\t\t<File file_path=\"" + m->getSimpleName(pieces[0]) + "\">\n";
                         out << "\t\t\t\t<DataType>generic-data</DataType> \n";
                         out << "\t\t\t</File>\n";
@@ -599,14 +605,14 @@ int SRACommand::execute(){
                     //////////////////bioSample info
                     out << "\t\t\t<AttributeRefId name=\"BioSample\">\n";
                     out << "\t\t\t\t<RefId>\n";
-                    out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + Groups[i] + "</SPUID>\n";
+                    out << "\t\t\t\t\t<SPUID spuid_namespace=\"" + centerName + "\">" + thisGroup + "</SPUID>\n";
                     out << "\t\t\t\t</RefId>\n";
                     out << "\t\t\t</AttributeRefId>\n";
                     //libID
                     out << "\t\t\t<Identifier>\n";
                     if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
                         vector<string> pieces = m->splitWhiteSpace(thisGroupsFiles[j]);
-                        libId = m->getSimpleName(pieces[0]) + "." + Groups[i];
+                        libId = m->getSimpleName(pieces[0]) + "." + thisGroup;
                     }
                     out << "\t\t\t\t<LocalId>" + libId + "</LocalId>\n";
                     out << "\t\t\t</Identifier>\n";

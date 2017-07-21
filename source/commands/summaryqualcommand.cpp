@@ -306,7 +306,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 				for (int i = 0; i < thisScores.size(); i++) { 
 					position[i] += num; 
 					averageQ[i] += (thisScores[i] * num); //weighting for namesfile
-					if (thisScores[i] > 40) { m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (thisScores[i] > 41) { m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { scores[i][thisScores[i]] += num; }  
 				}
 				
