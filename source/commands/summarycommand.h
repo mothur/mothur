@@ -37,7 +37,6 @@ public:
 	
 private:
 	vector<Calculator*> sumCalculators;	
-	InputData* input;
 	SAbundVector* sabund;
 	int abund, size, iters, subsampleSize, alpha;
 

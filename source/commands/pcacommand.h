@@ -12,6 +12,7 @@
 
 #include "command.hpp"
 #include "linearalgebra.h"
+#include "sharedrabundfloatvectors.hpp"
 
 
 /*****************************************************************/
@@ -44,7 +45,7 @@ private:
 	LinearAlgebra linearCalc;
 	
 	//vector< vector<double> > createMatrix(vector<SharedRAbundFloatVector*>);
-	int process(vector<SharedRAbundFloatVector*>&);
+	int process(SharedRAbundFloatVectors*);
 	void output(string, string, vector<string>, vector<vector<double> >&, vector<double>);
 	
 };

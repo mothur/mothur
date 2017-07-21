@@ -37,14 +37,14 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    void printSharedData(vector<SharedRAbundVector*>, ofstream&);
+    void printSharedData(SharedRAbundVectors*, ofstream&);
     int createFilesFromBiom();
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);
     vector< vector<string> > readRows(string, int&, bool&);
     int getDims(string, int&, int&);
-    vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
+    SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);
     
     vector<string> outputNames;

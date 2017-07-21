@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "listvector.hpp"
+#include "sharedrabundvectors.hpp"
 
 
 class RemoveRareCommand : public Command {
@@ -47,7 +48,7 @@ private:
 	int processRabund();
 	int processList();
 	int processShared();
-	int processLookup(vector<SharedRAbundVector*>&);
+	int processLookup(SharedRAbundVectors*);
 	
 };
 

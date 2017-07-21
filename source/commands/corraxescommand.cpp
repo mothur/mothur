@@ -885,19 +885,21 @@ int CorrAxesCommand::getMetadata(){
 				
 			RAbundFloatVector* tempLookup = new RAbundFloatVector();
 			tempLookup->setLabel("1");
+            tempLookup->setGroup(group);
         
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
 				in >> temp; 
 				tempLookup->push_back(temp);
 			}
-            lookupFloat->push_back(tempLookup, group);
+            lookupFloat->push_back(tempLookup);
 			
 			m->gobble(in);
 		}
 		in.close();
 		
         lookupFloat->eliminateZeroOTUS();
+        lookupFloat->setLabel("1");
         
 		return 0;
 	}

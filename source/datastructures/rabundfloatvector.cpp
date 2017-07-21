@@ -14,11 +14,11 @@
 
 /***********************************************************************/
 
-RAbundFloatVector::RAbundFloatVector() : DataVector(), maxRank(0.0), numBins(0), numSeqs(0.0) {}
+RAbundFloatVector::RAbundFloatVector() : DataVector(), maxRank(0.0), numBins(0), numSeqs(0.0), group("") {}
 
 /***********************************************************************/
 
-RAbundFloatVector::RAbundFloatVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0) {}
+RAbundFloatVector::RAbundFloatVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0), group("") {}
 
 /***********************************************************************/
 
@@ -27,7 +27,7 @@ RAbundFloatVector::RAbundFloatVector(int n) : DataVector(), data(n,0) , maxRank(
 
 /***********************************************************************/
 
-RAbundFloatVector::RAbundFloatVector(string id, vector<float> rav) : DataVector(id), data(rav) {
+RAbundFloatVector::RAbundFloatVector(string id, vector<float> rav) : DataVector(id), data(rav), group("") {
     try {
         numBins = 0;
         maxRank = 0;
@@ -47,7 +47,7 @@ RAbundFloatVector::RAbundFloatVector(string id, vector<float> rav) : DataVector(
 
 /***********************************************************************/
 
-RAbundFloatVector::RAbundFloatVector(vector<float> rav, float mr, int nb, float ns) {
+RAbundFloatVector::RAbundFloatVector(vector<float> rav, float mr, int nb, float ns) : group(""){
     try {
         numBins = nb;
         maxRank = mr;
@@ -62,7 +62,7 @@ RAbundFloatVector::RAbundFloatVector(vector<float> rav, float mr, int nb, float 
 /***********************************************************************/
 
 
-RAbundFloatVector::RAbundFloatVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+RAbundFloatVector::RAbundFloatVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {
     try {
         int hold;
         f >> label >> hold;
@@ -83,7 +83,7 @@ RAbundFloatVector::RAbundFloatVector(ifstream& f) : DataVector(), maxRank(0), nu
 }
 
 /***********************************************************************/
-RAbundFloatVector::RAbundFloatVector(ifstream& f, string l) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+RAbundFloatVector::RAbundFloatVector(ifstream& f, string l, string g) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group(g) {
     try {
         int hold;
         label = l;
@@ -104,9 +104,7 @@ RAbundFloatVector::RAbundFloatVector(ifstream& f, string l) : DataVector(), maxR
 
 /***********************************************************************/
 
-RAbundFloatVector::~RAbundFloatVector() {
-    
-}
+RAbundFloatVector::~RAbundFloatVector() {}
 
 /***********************************************************************/
 
@@ -245,7 +243,10 @@ vector<float>::reverse_iterator RAbundFloatVector::rend(){
 /***********************************************************************/
 void RAbundFloatVector::nonSortedPrint(ostream& output){
     try {
-        output << label << '\t' << numBins;
+        output << label;
+        if (group != "") { output << '\t' << group; }
+        output << '\t' << numBins;
+
         
         for(int i=0;i<numBins;i++){		output  << '\t' << data[i];		}
         output << endl;
@@ -255,7 +256,7 @@ void RAbundFloatVector::nonSortedPrint(ostream& output){
         exit(1);
     }
 }
-/***********************************************************************/
+/***********************************************************************
 void RAbundFloatVector::print(string prefix, ostream& output){
     try {
         output << prefix << '\t' << numBins;
@@ -276,7 +277,9 @@ void RAbundFloatVector::print(string prefix, ostream& output){
 /***********************************************************************/
 void RAbundFloatVector::print(ostream& output){
     try {
-        output << label << '\t' << numBins;
+        output << label;
+        if (group != "") { output << '\t' << group; }
+        output << '\t' << numBins;
         
         vector<float> hold = data;
         sort(hold.rbegin(), hold.rend());
@@ -289,20 +292,6 @@ void RAbundFloatVector::print(ostream& output){
         exit(1);
     }
 }
-/***********************************************************************/
-//non-sorting print for use with SharedRAbundVectors
-int RAbundFloatVector::print(ostream& output, string noLabel){
-    try {
-        output << numBins;
-        for(int i=0;i<numBins;i++){		output  << '\t' << data[i];		}
-        output << endl;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "data", "print");
-        exit(1);
-    }
-}
-
 /***********************************************************************/
 int RAbundFloatVector::getNumBins(){
     return numBins;

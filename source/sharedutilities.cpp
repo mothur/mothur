@@ -8,29 +8,22 @@
  */
 
 #include "sharedutilities.h"
-
 #include "sharedordervector.h"
 
 /**************************************************************************************************/
 
-void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVector*>& lookup, SharedOrderVector* order) {
+SharedRAbundVectors* SharedUtil::getSharedVectors(vector<string> Groups, SharedOrderVector* order) {
 	try {
 	
-		//delete each sharedrabundvector in lookup
-		for (int j = 0; j < lookup.size(); j++) {
-			delete lookup[j];
-		}
-		
-		lookup.clear();
-        
+        SharedRAbundVectors* lookup = new SharedRAbundVectors();
 		sort(Groups.begin(), Groups.end());
         
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
+			RAbundVector* temp = new RAbundVector(order->getNumBins());
 			temp->setLabel(order->getLabel());
 			temp->setGroup(Groups[i]);
-			lookup.push_back(temp);
+			lookup->push_back(temp);
 		}
 	
 		int numSeqs = order->size();
@@ -38,16 +31,8 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 		for(int i=0;i<numSeqs;i++){
 			//get first sample
 			individual chosen = order->get(i);
-			int abundance; 
-					
-			//set info for sharedvector in chosens group
-			for (int j = 0; j < lookup.size(); j++) { 
-				if (chosen.group == lookup[j]->getGroup()) {
-					 abundance = lookup[j]->getAbundance(chosen.bin);
-					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-					 break;
-				}
-			}
+			int abundance = lookup->get(chosen.bin, chosen.group);
+            lookup->set(chosen.bin, (abundance + 1), chosen.group);
 		}
 	}
 	catch(exception& e) {
@@ -55,51 +40,6 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<SharedRAbundVector*>& lookup, SharedOrderVector* order) {
-	try {
-	
-		//delete each sharedrabundvector in lookup
-		for (int j = 0; j < lookup.size(); j++) {
-			delete lookup[j];
-		}
-		lookup.clear();
-		
-		//create and initialize vector of sharedvectors, one for each group
-		for (int i = 0; i < Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
-			temp->setLabel(order->getLabel());
-			temp->setGroup(Groups[i]);
-			lookup.push_back(temp);
-		}
-	
-		int numSeqs = order->size();
-		
-		//sample all the members
-		for(int i=0;i<numSeqs;i++){
-			//get random number
-            int random = m->getRandomIndex(i);
-			individual chosen = order->get(random);
-
-			int abundance; 
-			//set info for sharedvector in chosens group
-			for (int j = 0; j < lookup.size(); j++) { 
-				if (chosen.group == lookup[j]->getGroup()) {
-					 abundance = lookup[j]->getAbundance(chosen.bin);
-					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-					 break;
-				}
-			}
-		}
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedUtil", "getSharedVectorswithReplacement");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 //need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups) {

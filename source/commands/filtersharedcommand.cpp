@@ -227,48 +227,47 @@ int FilterSharedCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {   for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  
-                for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;  }
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            if (m->control_pressed) {   delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;  }
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				processShared(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				delete lookup;
 				
 				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				processShared(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			delete lookup;
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();				
@@ -292,14 +291,14 @@ int FilterSharedCommand::execute(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			
 			processShared(lookup);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
         
 		//set shared file as new current sharedfile
@@ -322,7 +321,7 @@ int FilterSharedCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
+int FilterSharedCommand::processShared(SharedRAbundVectors* sharedLookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
@@ -331,7 +330,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
-        variables["[distance]"] = thislookup[0]->getLabel();
+        variables["[distance]"] = sharedLookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         
         if (m->control_pressed) {  return 0; }
@@ -340,24 +339,17 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
         vector<string> filteredLabels;
         vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
         
-        //create new "filtered" lookup
-        vector<SharedRAbundVector*> filteredLookup;
-        for (int i = 0; i < thislookup.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			filteredLookup.push_back(temp);
-        }
+        vector<RAbundVector*> data = sharedLookup->getSharedRAbundVectors();
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;
         if (rarePercent != -0.01) {
             vector<spearmanRank> otus;
             //rank otus by abundance
-            for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < sharedLookup->getNumBins(); i++) {
                 float otuTotal = 0.0;
-                for (int j = 0; j < thislookup.size(); j++) {
-                    otuTotal += thislookup[j]->getAbundance(i);
+                for (int j = 0; j < data.size(); j++) {
+                    otuTotal += data[j]->get(i);
                 }
                 spearmanRank temp(saveBinLabels[i], otuTotal);
                 otus.push_back(temp);
@@ -367,7 +359,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
             sort(otus.begin(), otus.end(), compareSpearman);
             
             //find index of cutoff
-            int indexFirstNotRare = ceil(rarePercent * (float)thislookup[0]->getNumBins());
+            int indexFirstNotRare = ceil(rarePercent * (float)data[0]->getNumBins());
             
             //handle ties
             if (keepties) { //adjust indexFirstNotRare if needed
@@ -379,7 +371,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                                 indexFirstNotRare = i+1; tie = false; break;
                             }
                         }
-                        if (tie) { if (m->debug) { m->mothurOut("For distance " + thislookup[0]->getLabel() + " all rare OTUs abundance tie with first 'non rare' OTU, not removing any for rarepercent parameter.\n"); }indexFirstNotRare = 0; }
+                        if (tie) { if (m->debug) { m->mothurOut("For distance " + sharedLookup->getLabel() + " all rare OTUs abundance tie with first 'non rare' OTU, not removing any for rarepercent parameter.\n"); }indexFirstNotRare = 0; }
                     }
                 }
             }
@@ -390,21 +382,22 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
         
         bool filteredSomething = false;
         int numRemoved = 0;
-        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+        vector<int> otusToRemove;
+        for (int i = 0; i < sharedLookup->getNumBins(); i++) {
             
-            if (m->control_pressed) { for (int j = 0; j < filteredLookup.size(); j++) { delete filteredLookup[j]; } return 0; }
+            if (m->control_pressed) { for (int j = 0; j < data.size(); j++) { delete data[j]; } return 0; }
             
             bool okay = true; //innocent until proven guilty
             if (minAbund != -1) {
-                for (int j = 0; j < thislookup.size(); j++) { 
-                    if (thislookup[j]->getAbundance(i) < minAbund) { okay = false; break; }
+                for (int j = 0; j < data.size(); j++) {
+                    if (data[j]->get(i) < minAbund) { okay = false; break; }
                 }
             }
             
             if (okay && (minTotal != -1)) {
                 int otuTotal = 0;
-                for (int j = 0; j < thislookup.size(); j++) { 
-                    otuTotal += thislookup[j]->getAbundance(i);
+                for (int j = 0; j < data.size(); j++) {
+                    otuTotal += data[j]->get(i);
                 }
                 if (otuTotal < minTotal) { okay = false; }
             }
@@ -412,9 +405,9 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
             if (okay && (minPercent != -0.01)) {
                 double otuTotal = 0;
                 double total = 0;
-                for (int j = 0; j < thislookup.size(); j++) { 
-                    otuTotal += thislookup[j]->getAbundance(i);
-                    total += thislookup[j]->getNumSeqs();
+                for (int j = 0; j < data.size(); j++) {
+                    otuTotal += data[j]->get(i);
+                    total += data[j]->getNumSeqs();
                 }
                 double percent = otuTotal / total; 
                 if (percent < minPercent) { okay = false; }
@@ -423,17 +416,17 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
             
             if (okay && (minSamples != -1)) {
                 int samples = 0;
-                for (int j = 0; j < thislookup.size(); j++) { 
-                    if (thislookup[j]->getAbundance(i) != 0) { samples++; }
+                for (int j = 0; j < data.size(); j++) {
+                    if (data[j]->get(i) != 0) { samples++; }
                 }
                 if (samples < minSamples) { okay = false; }
             }
             
             if (okay && (minPercentSamples != -0.01)) {
                 double samples = 0;
-                double total = thislookup.size();
-                for (int j = 0; j < thislookup.size(); j++) { 
-                    if (thislookup[j]->getAbundance(i) != 0) { samples++; }
+                double total = data.size();
+                for (int j = 0; j < data.size(); j++) {
+                    if (data[j]->get(i) != 0) { samples++; }
                 }
                 double percent = samples / total; 
                 if (percent < minPercentSamples) { okay = false; }
@@ -449,25 +442,22 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
             if (okay) {
                 filteredLabels.push_back(saveBinLabels[i]);
                 labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
-                for (int j = 0; j < filteredLookup.size(); j++) { //add this OTU to the filtered lookup
-                    filteredLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-                }
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
                 if (makeRare) {
-                    for (int j = 0; j < rareCounts.size(); j++) {  rareCounts[j] += thislookup[j]->getAbundance(i); }
+                    for (int j = 0; j < rareCounts.size(); j++) {  rareCounts[j] += data[j]->get(i); }
                 }
+                otusToRemove.push_back(i);
                 numRemoved++;
             }
             
         }
         
+        sharedLookup->removeOTUs(otusToRemove);
+        
         //if we are saving the counts add a "rare" OTU if anything was filtered
         if (makeRare) {
             if (filteredSomething) {
-                for (int j = 0; j < rareCounts.size(); j++) { //add "rare" OTU to the filtered lookup
-                    filteredLookup[j]->push_back(rareCounts[j], thislookup[j]->getGroup());
-                }
                 //create label for rare OTUs
                 map<string, int>::iterator it;
                 int otuNum = 0; bool notDone = true;
@@ -493,6 +483,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                     }
                     otuNum++;
                 }
+                sharedLookup->push_back(rareCounts, "rareOTUs" + toString(otuNum));
                 filteredLabels.push_back("rareOTUs" + toString(otuNum));
             }
         }
@@ -503,20 +494,14 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
 		
         m->currentSharedBinLabels = filteredLabels;
         
-		filteredLookup[0]->printHeaders(out);
-		
-		for (int i = 0; i < filteredLookup.size(); i++) {
-			out << filteredLookup[i]->getLabel() << '\t' << filteredLookup[i]->getGroup() << '\t';
-			filteredLookup[i]->print(out);
-		}
+		sharedLookup->printHeaders(out);
+        sharedLookup->print(out);
 		out.close();
         
         
         //save mothurOut's binLabels to restore for next label
 		m->currentSharedBinLabels = saveBinLabels;
         
-        for (int j = 0; j < filteredLookup.size(); j++) { delete filteredLookup[j]; }
-		
         m->mothurOut("\nRemoved " + toString(numRemoved) + " OTUs.\n");
         
 		return 0;

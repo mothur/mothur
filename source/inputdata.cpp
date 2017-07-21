@@ -518,7 +518,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 					vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
                     vector<string> groups = SharedRAbund->getNamesGroups();
                     SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
-                    for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i], groups[i]); }
+                    for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i]); }
 					delete SharedRAbund;
                     return SharedRelAbund;
 				}
@@ -571,7 +571,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
                             vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
                             vector<string> groups = SharedRAbund->getNamesGroups();
                             SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
-                            for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i], groups[i]); }
+                            for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i]); }
                             delete SharedRAbund;
                             return SharedRelAbund;
 						}else { delete SharedRAbund; }

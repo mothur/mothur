@@ -12,7 +12,7 @@
 #include "mothur.h"
 #include "mothurout.h"
 
-class SharedRAbundVector;
+class SharedRAbundVectors;
 class SharedOrderVector;
 
 /**************************************************************************************************/
@@ -22,8 +22,7 @@ class SharedUtil {
 		SharedUtil() { m = MothurOut::getInstance(); }
 		~SharedUtil() {};
 		
-		void getSharedVectors(vector<string>, vector<SharedRAbundVector*>&, SharedOrderVector*);
-		void getSharedVectorswithReplacement(vector<string>, vector<SharedRAbundVector*>&, SharedOrderVector*);
+		SharedRAbundVectors* getSharedVectors(vector<string>, SharedOrderVector*);
 		void setGroups(vector<string>&, vector<string>&);  //globaldata->Groups, your tree or group map
 		void setGroups(vector<string>&, vector<string>&, string);  //globaldata->Groups, your tree or group map, mode
 		void setGroups(vector<string>&, vector<string>&, string&, int&, string);  //globaldata->Groups, your tree or group map, allgroups, numGroups, mode

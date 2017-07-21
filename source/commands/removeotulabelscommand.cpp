@@ -448,61 +448,46 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
 int RemoveOtuLabelsCommand::readShared(){
 	try {
         
-        getShared();
+        SharedRAbundVectors* lookup = getShared();
         
-        if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0; }
+        if (m->control_pressed) { delete lookup; return 0; }
         
         vector<string> newLabels;
-        
-        //create new "filtered" lookup
-        vector<SharedRAbundVector*> newLookup;
-        for (int i = 0; i < lookup.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
-			newLookup.push_back(temp);
-        }
-        
+
         bool wroteSomething = false;
         int numRemoved = 0;
-        for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+        vector<int> otusToRemove;
+        for (int i = 0; i < lookup->getNumBins(); i++) {
             
-            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
+            if (m->control_pressed) { delete lookup; return 0; }
             
             //is this otu on the list
             if (otulabels.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
                 wroteSomething = true;
                 newLabels.push_back(m->currentSharedBinLabels[i]);
-                for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
-                    newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
-                }
-            }else { numRemoved++; }
+            }else { numRemoved++; otusToRemove.push_back(i);  }
         }
+        
+        lookup->removeOTUs(otusToRemove);
         
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables); 
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
-        
         m->currentSharedBinLabels = newLabels;
         
-		newLookup[0]->printHeaders(out);
-		
-		for (int i = 0; i < newLookup.size(); i++) {
-			out << newLookup[i]->getLabel() << '\t' << newLookup[i]->getGroup() << '\t';
-			newLookup[i]->print(out);
-		}
-		out.close();
+        lookup->printHeaders(out);
+        lookup->print(out);
+        out.close();
         
-        for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; }
+        delete lookup;
         
         if (wroteSomething == false) { m->mothurOut("Your file contains only OTUs from the .accnos file."); m->mothurOutEndLine();  }
         
@@ -647,74 +632,76 @@ int RemoveOtuLabelsCommand::getListVector(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::getShared(){
+SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
 	try {
 		InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		if (label == "") { label = lastLabel;  return 0; }
 		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> labels; labels.insert(label);
-		set<string> processedLabels;
-		set<string> userLabels = labels;
+        if (label == "") { label = lastLabel;  return 0; }
+        
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> labels; labels.insert(label);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((lookup != NULL) && (userLabels.size() != 0)) {
+            if (m->control_pressed) {   delete lookup; return NULL;  }
+            
+            if(labels.count(lookup->getLabel()) == 1){
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
+                break;
+            }
+            
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
+                
+                delete lookup;
+                lookup = input.getSharedRAbundVectors(lastLabel);
+                
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
+                
+                //restore real lastlabel to save below
+                lookup->setLabel(saveLabel);
+                break;
+            }
+            
+            lastLabel = lookup->getLabel();
+            
+            //get next line to process
+            //prevent memory leak
+            delete lookup;
+            lookup = input.getSharedRAbundVectors();
+        }
+        
+        
+        if (m->control_pressed) {  return 0;  }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) {
+                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                needToRun = true;
+            }else {
+                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+            }
+        }
+        
+        //run last label if you need to
+        if (needToRun == true)  {
+            delete lookup;
+            lookup = input.getSharedRAbundVectors(lastLabel);
+        }	
 		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {   return 0;  }
-			
-			if(labels.count(lookup[0]->getLabel()) == 1){
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
-				break;
-			}
-			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
-				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
-				break;
-			}
-			
-			lastLabel = lookup[0]->getLabel();			
-			
-			//get next line to process
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		
-		if (m->control_pressed) {  return 0;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
-			lookup = input.getSharedRAbundVectors(lastLabel);
-		}	
-		
-		return 0;
+		return lookup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveOtuLabelsCommand", "getShared");	

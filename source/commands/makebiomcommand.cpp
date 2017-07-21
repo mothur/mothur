@@ -344,18 +344,18 @@ int MakeBiomCommand::execute(){
         
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        vector<SharedRAbundVector*> lookup;
-        vector<SharedRAbundFloatVector*> lookupRel;
+        SharedRAbundVectors* lookup = NULL;
+        SharedRAbundFloatVectors* lookupRel = NULL;
         string lastLabel;
         
 		InputData input(inputFileName, fileFormat);
         if (fileFormat == "sharedfile") {
             lookup = input.getSharedRAbundVectors();
-            lastLabel = lookup[0]->getLabel();
+            lastLabel = lookup->getLabel();
             getSampleMetaData(lookup);
         }else                        {
             lookupRel = input.getSharedRAbundFloatVectors();
-            lastLabel = lookupRel[0]->getLabel();
+            lastLabel = lookupRel->getLabel();
             getSampleMetaData(lookupRel);
         }
         
@@ -372,77 +372,77 @@ int MakeBiomCommand::execute(){
         if (fileFormat == "sharedfile") {
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete lookup;  return 0; }
                 
-                if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     getBiom(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup[0]->getLabel();
+                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookup->getLabel();
                     
-                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                    delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     getBiom(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup[0]->setLabel(saveLabel);
+                    lookup->setLabel(saveLabel);
                 }
                 
-                lastLabel = lookup[0]->getLabel();
+                lastLabel = lookup->getLabel();
                 
                 //prevent memory leak and get next set
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors();				
             }
         }else {
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((lookupRel[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((lookupRel != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } for (int i = 0; i < lookupRel.size(); i++) {  delete lookupRel[i];  }  return 0; }
+                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete lookupRel; return 0; }
                 
-                if(allLines == 1 || labels.count(lookupRel[0]->getLabel()) == 1){
+                if(allLines == 1 || labels.count(lookupRel->getLabel()) == 1){
                     
-                    m->mothurOut(lookupRel[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
                     getBiom(lookupRel);
                     
-                    processedLabels.insert(lookupRel[0]->getLabel());
-                    userLabels.erase(lookupRel[0]->getLabel());
+                    processedLabels.insert(lookupRel->getLabel());
+                    userLabels.erase(lookupRel->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookupRel[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookupRel[0]->getLabel();
+                if ((m->anyLabelsToProcess(lookupRel->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookupRel->getLabel();
                     
-                    for (int i = 0; i < lookupRel.size(); i++) {  delete lookupRel[i];  }
+                    delete lookupRel;
                     lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookupRel[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
                     
                     getBiom(lookupRel);
                     
-                    processedLabels.insert(lookupRel[0]->getLabel());
-                    userLabels.erase(lookupRel[0]->getLabel());
+                    processedLabels.insert(lookupRel->getLabel());
+                    userLabels.erase(lookupRel->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookupRel[0]->setLabel(saveLabel);
+                    lookupRel->setLabel(saveLabel);
                 }
                 
-                lastLabel = lookupRel[0]->getLabel();
+                lastLabel = lookupRel->getLabel();
                 
                 //prevent memory leak and get next set
-                for (int i = 0; i < lookupRel.size(); i++) {  delete lookupRel[i]; lookupRel[i] = NULL; }
+                delete lookupRel;
                 lookupRel = input.getSharedRAbundFloatVectors();
             }
         }
@@ -465,21 +465,21 @@ int MakeBiomCommand::execute(){
 		//run last label if you need to
 		if (needToRun == true)  {
             if (fileFormat == "sharedfile") {
-                for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 getBiom(lookup);
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
             }else {
-                for (int i = 0; i < lookupRel.size(); i++) { if (lookupRel[i] != NULL) { delete lookupRel[i]; } }
+                delete lookupRel;
                 lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
                 
-                m->mothurOut(lookupRel[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
                 getBiom(lookupRel);
                 
-                for (int i = 0; i < lookupRel.size(); i++) {  delete lookupRel[i];  }
+                delete lookupRel;
             }
 		}
 		
@@ -506,11 +506,11 @@ int MakeBiomCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
+int MakeBiomCommand::getBiom(SharedRAbundVectors* lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -527,12 +527,12 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         string spaces = "      ";
         
         //standard 
-        out << "{\n" + spaces + "\"id\":\"" + m->getSimpleName(sharedfile) + "-" + lookup[0]->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
+        out << "{\n" + spaces + "\"id\":\"" + m->getSimpleName(sharedfile) + "-" + lookup->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
         out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
         
         vector<string> metadata = getMetaData(lookup);
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         
         if (m->control_pressed) {  out.close(); return 0; }
         
@@ -565,14 +565,15 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         
         string colBack = "\", \"metadata\":";
         out << spaces + "\"columns\":[\n";
-        for (int i = 0; i < lookup.size()-1; i++) {
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int i = 0; i < namesOfGroups.size()-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
-            out << rowFront << lookup[i]->getGroup() << colBack << sampleMetadata[i] << "},\n";
+            out << rowFront << namesOfGroups[i] << colBack << sampleMetadata[i] << "},\n";
         }
-        out << rowFront << lookup[(lookup.size()-1)]->getGroup() << colBack << sampleMetadata[lookup.size()-1] << "}\n" + spaces + "],\n";
+        out << rowFront << namesOfGroups[(namesOfGroups.size()-1)] << colBack << sampleMetadata[lookup->size()-1] << "}\n" + spaces + "],\n";
         
         out << spaces + "\"matrix_type\": \"" << format << "\",\n" + spaces + "\"matrix_element_type\": \"int\",\n";
-        out <<  spaces + "\"shape\": [" << numBins << "," << lookup.size() << "],\n";
+        out <<  spaces + "\"shape\": [" << numBins << "," << lookup->size() << "],\n";
         out << spaces + "\"data\":  [";
         
         vector<string> dataRows;
@@ -594,14 +595,15 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
              [4,2,1]
              ]*/
             string output = "";
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { out.close(); return 0; }
                 
-                for (int j = 0; j < lookup.size(); j++) {
-                    string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(lookup[j]->getAbundance(i)) + "]";
+                for (int j = 0; j < namesOfGroups.size(); j++) {
+                    int abund = lookup->get(i, namesOfGroups[i]);
+                    string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                     //only print non zero values
-                    if (lookup[j]->getAbundance(i) != 0) { dataRows.push_back(binInfo); }
+                    if (abund != 0) { dataRows.push_back(binInfo); }
                 }
             }
         }else {
@@ -615,15 +617,14 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
              [2,1,1,0,0,1],
              [0,1,1,0,0,0]]*/
             
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { out.close(); return 0; }
                 
                 string binInfo = "[";
-                for (int j = 0; j < lookup.size()-1; j++) {
-                    binInfo += toString(lookup[j]->getAbundance(i)) + ",";
-                }
-                binInfo += toString(lookup[lookup.size()-1]->getAbundance(i)) + "]";
+                vector<int> binAbund = lookup->getOTU(i);
+                for (int j = 0; j < binAbund.size()-1; j++) {  binInfo += toString(binAbund[j]) + ","; }
+                binInfo += toString(binAbund[binAbund.size()-1]) + "]";
                 dataRows.push_back(binInfo);
             }
         }
@@ -644,11 +645,11 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
+int MakeBiomCommand::getBiom(SharedRAbundFloatVectors* lookup){
     try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
         ofstream out;
         m->openOutputFile(outputFileName, out);
@@ -665,12 +666,12 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
         string spaces = "      ";
         
         //standard
-        out << "{\n" + spaces + "\"id\":\"" + sharedfile + "-" + lookup[0]->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
+        out << "{\n" + spaces + "\"id\":\"" + sharedfile + "-" + lookup->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
         out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
         
         vector<string> metadata = getMetaData(lookup);
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         
         if (m->control_pressed) {  out.close(); return 0; }
         
@@ -703,14 +704,15 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
         
         string colBack = "\", \"metadata\":";
         out << spaces + "\"columns\":[\n";
-        for (int i = 0; i < lookup.size()-1; i++) {
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int i = 0; i < namesOfGroups.size()-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
-            out << rowFront << lookup[i]->getGroup() << colBack << sampleMetadata[i] << "},\n";
+            out << rowFront << namesOfGroups[i] << colBack << sampleMetadata[i] << "},\n";
         }
-        out << rowFront << lookup[(lookup.size()-1)]->getGroup() << colBack << sampleMetadata[lookup.size()-1] << "}\n" + spaces + "],\n";
+        out << rowFront << namesOfGroups[(namesOfGroups.size()-1)] << colBack << sampleMetadata[lookup->size()-1] << "}\n" + spaces + "],\n";
         
         out << spaces + "\"matrix_type\": \"" << format << "\",\n" + spaces + "\"matrix_element_type\": \"float\",\n";
-        out <<  spaces + "\"shape\": [" << numBins << "," << lookup.size() << "],\n";
+        out <<  spaces + "\"shape\": [" << numBins << "," << lookup->size() << "],\n";
         out << spaces + "\"data\":  [";
         
         vector<string> dataRows;
@@ -732,14 +734,15 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
              [4,2,1]
              ]*/
             string output = "";
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { out.close(); return 0; }
                 
-                for (int j = 0; j < lookup.size(); j++) {
-                    string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(lookup[j]->getAbundance(i)) + "]";
+                for (int j = 0; j < namesOfGroups.size(); j++) {
+                    float abund = lookup->get(i, namesOfGroups[i]);
+                    string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                     //only print non zero values
-                    if (lookup[j]->getAbundance(i) != 0) { dataRows.push_back(binInfo); }
+                    if (abund != 0) { dataRows.push_back(binInfo); }
                 }
             }
         }else {
@@ -753,17 +756,17 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
              [2,1,1,0,0,1],
              [0,1,1,0,0,0]]*/
             
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { out.close(); return 0; }
                 
                 string binInfo = "[";
-                for (int j = 0; j < lookup.size()-1; j++) {
-                    binInfo += toString(lookup[j]->getAbundance(i)) + ",";
-                }
-                binInfo += toString(lookup[lookup.size()-1]->getAbundance(i)) + "]";
+                vector<float> binAbund = lookup->getOTU(i);
+                for (int j = 0; j < binAbund.size()-1; j++) {  binInfo += toString(binAbund[j]) + ","; }
+                binInfo += toString(binAbund[binAbund.size()-1]) + "]";
                 dataRows.push_back(binInfo);
             }
+
         }
         
         for (int i = 0; i < dataRows.size()-1; i++) {
@@ -782,11 +785,11 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundFloatVector*>& lookup){
     }
 }
 //**********************************************************************************************************************
-vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup){
+vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors* lookup){
 	try {
         vector<string> metadata;
         
-        if (contaxonomyfile == "") { for (int i = 0; i < lookup[0]->getNumBins(); i++) {  metadata.push_back("null");  } }
+        if (contaxonomyfile == "") { for (int i = 0; i < lookup->getNumBins(); i++) {  metadata.push_back("null");  } }
         else {
             
             //read constaxonomy file storing in a map, otulabel -> taxonomy
@@ -857,7 +860,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { return metadata; }
                 
@@ -899,11 +902,11 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
 
 }
 //**********************************************************************************************************************
-vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundFloatVector*>& lookup){
+vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors* lookup){
     try {
         vector<string> metadata;
         
-        if (contaxonomyfile == "") { for (int i = 0; i < lookup[0]->getNumBins(); i++) {  metadata.push_back("null");  } }
+        if (contaxonomyfile == "") { for (int i = 0; i < lookup->getNumBins(); i++) {  metadata.push_back("null");  } }
         else {
             
             //read constaxonomy file storing in a map, otulabel -> taxonomy
@@ -967,7 +970,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundFloatVector*>& lo
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { return metadata; }
                 
@@ -1009,7 +1012,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundFloatVector*>& lo
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, map<string, string>& labelTaxMap){
+int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors* lookup, map<string, string>& labelTaxMap){
 	try {
         //read reftaxonomy
         PhyloTree phylo(referenceTax);
@@ -1066,12 +1069,12 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             
         }
         
-       
-        vector<SharedRAbundVector*> newLookup;
-		for (int i = 0; i < lookup.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
+        vector<RAbundVector*> newLookup;
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+		for (int i = 0; i < namesOfGroups.size(); i++) {
+			RAbundVector* temp = new RAbundVector();
+			temp->setLabel(lookup->getLabel());
+			temp->setGroup(namesOfGroups[i]);
 			newLookup.push_back(temp);
 		}
 		
@@ -1084,7 +1087,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
         //ggOTUIDs = 16097 -> <OTU01, OTU10, OTU22>
         
         for (map<string, vector<string> >::iterator itMap = ggOTUIDs.begin(); itMap != ggOTUIDs.end(); itMap++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+            if (m->control_pressed) { delete lookup; return 0; }
             
             //set new gg otu id to taxonomy. OTU01 -> k__Bacteria becomes 16097 -> k__Bacteria
             //find taxonomy of this otu
@@ -1092,8 +1095,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             vector<string> scores;
             vector<string> taxonomies = parseTax(it->second, scores);
             
-            //merge/set OTU abundances
-            vector<int> abunds; abunds.resize(lookup.size(), 0);
+            //merge/set OTU abundances for new merged OTU - abunds[i] = new OTU total for group i
+            vector<int> abunds; abunds.resize(lookup->size(), 0);
             string mergeString = "";
             vector<float> boots; boots.resize(scores.size(), 0);
             bool scoresNULL = false;
@@ -1114,28 +1117,21 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
                 
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
-                for (int i = 0; i < lookup.size(); i++) {
-                    abunds[i] += lookup[i]->getAbundance(labelIndex[m->getSimpleLabel((itMap->second)[j])]);
-                }
+                for (int i = 0; i < lookup->size(); i++) { abunds[i] += lookup->get(labelIndex[m->getSimpleLabel((itMap->second)[j])], namesOfGroups[i]); }
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: merging " + mergeString + " for ggOTUid = " + itMap->first + ".\n");  }
             
             //average scores
             //add merged otu to new lookup
+            //assemble new taxonomy
             string newTaxString = "";
             if (!scoresNULL) {
                 for (int j = 0; j < boots.size(); j++) { boots[j] /= (float) itMap->second.size(); }
             
-                //assemble new taxomoy
-                for (int j = 0; j < boots.size(); j++) {
-                    newTaxString += taxonomies[j] + "(" + toString(boots[j]) + ");";
-                }
+                for (int j = 0; j < boots.size(); j++) { newTaxString += taxonomies[j] + "(" + toString(boots[j]) + ");"; }
             }else {
-                //assemble new taxomoy
-                for (int j = 0; j < taxonomies.size(); j++) {
-                    newTaxString += taxonomies[j] + ";";
-                }
+                for (int j = 0; j < taxonomies.size(); j++) { newTaxString += taxonomies[j] + ";"; }
             }
             
             //set new gg otu id to taxonomy. OTU01 -> k__Bacteria becomes 16097 -> k__Bacteria
@@ -1143,33 +1139,30 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             newLabelTaxMap[itMap->first] = newTaxString;
             
             //add merged otu to new lookup
-            for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j], newLookup[j]->getGroup()); }
+            for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j]); }
             
             //saved otu label
             newBinLabels.push_back(itMap->first);
         }
 		
-		for (int j = 0; j < lookup.size(); j++) {  delete lookup[j];  }
+        lookup->clear();
+        for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
+        lookup->eliminateZeroOTUS();
 		
-		lookup = newLookup;
 		m->currentSharedBinLabels = newBinLabels;
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("shared",variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
         
-        lookup[0]->printHeaders(out);
-		
-		for (int i = 0; i < lookup.size(); i++) {
-			out << lookup[i]->getLabel() << '\t' << lookup[i]->getGroup() << '\t';
-			lookup[i]->print(out);
-		}
-		out.close();
+        lookup->printHeaders(out);
+        lookup->print(out);
+        out.close();
 
         return 0;
     }
@@ -1180,7 +1173,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& lookup, map<string, string>& labelTaxMap){
+int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors* lookup, map<string, string>& labelTaxMap){
     try {
         //read reftaxonomy
         PhyloTree phylo(referenceTax);
@@ -1239,11 +1232,12 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& looku
         }
         
         
-        vector<SharedRAbundFloatVector*> newLookup;
-        for (int i = 0; i < lookup.size(); i++) {
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-            temp->setLabel(lookup[i]->getLabel());
-            temp->setGroup(lookup[i]->getGroup());
+        vector<RAbundFloatVector*> newLookup;
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int i = 0; i < namesOfGroups.size(); i++) {
+            RAbundFloatVector* temp = new RAbundFloatVector();
+            temp->setLabel(lookup->getLabel());
+            temp->setGroup(namesOfGroups[i]);
             newLookup.push_back(temp);
         }
         
@@ -1265,7 +1259,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& looku
             vector<string> taxonomies = parseTax(it->second, scores);
             
             //merge/set OTU abundances
-            vector<float> abunds; abunds.resize(lookup.size(), 0.0);
+            vector<float> abunds; abunds.resize(lookup->size(), 0.0);
             string mergeString = "";
             vector<float> boots; boots.resize(scores.size(), 0.0);
             bool scoresNULL = false;
@@ -1286,9 +1280,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& looku
                 
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
-                for (int i = 0; i < lookup.size(); i++) {
-                    abunds[i] += lookup[i]->getAbundance(labelIndex[m->getSimpleLabel((itMap->second)[j])]);
-                }
+                for (int i = 0; i < lookup->size(); i++) { abunds[i] += lookup->get(labelIndex[m->getSimpleLabel((itMap->second)[j])], namesOfGroups[i]); }
             }
             
             if (m->debug) { m->mothurOut("[DEBUG]: merging " + mergeString + " for ggOTUid = " + itMap->first + ".\n");  }
@@ -1315,21 +1307,22 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& looku
             newLabelTaxMap[itMap->first] = newTaxString;
             
             //add merged otu to new lookup
-            for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j], newLookup[j]->getGroup()); }
+            for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j]); }
             
             //saved otu label
             newBinLabels.push_back(itMap->first);
         }
         
-        for (int j = 0; j < lookup.size(); j++) {  delete lookup[j];  }
+        lookup->clear();
+        for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
+        lookup->eliminateZeroOTUS();
         
-        lookup = newLookup;
         m->currentSharedBinLabels = newBinLabels;
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("relabund",variables);
         ofstream out;
     
@@ -1337,12 +1330,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>& looku
         
         outputNames.push_back(outputFileName); outputTypes["relabund"].push_back(outputFileName);
         
-        lookup[0]->printHeaders(out);
-        
-        for (int i = 0; i < lookup.size(); i++) {
-            out << lookup[i]->getLabel() << '\t' << lookup[i]->getGroup() << '\t';
-            lookup[i]->print(out);
-        }
+        lookup->printHeaders(out);
+        lookup->print(out);
         out.close();
         
         return 0;
@@ -1387,10 +1376,10 @@ map<string, string> MakeBiomCommand::readGGOtuMap(){
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
+int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors* lookup){
 	try {
         sampleMetadata.clear();
-        if (metadatafile == "") {  for (int i = 0; i < lookup.size(); i++) {  sampleMetadata.push_back("null");  } }
+        if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }
         else {
             ifstream in;
             m->openInputFile(metadatafile, in);
@@ -1431,13 +1420,14 @@ int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
             in.close();
             
             map<string, vector<string> >::iterator it;
-            for (int i = 0; i < lookup.size(); i++) {
+            vector<string> namesOfGroups = lookup->getNamesGroups();
+            for (int i = 0; i < namesOfGroups.size(); i++) {
                 
                 if (m->control_pressed) { return 0; }
                 
-                it = lines.find(lookup[i]->getGroup());
+                it = lines.find(namesOfGroups[i]);
                 
-                if (it == lines.end()) { m->mothurOut("[ERROR]: can't find metadata information for " + lookup[i]->getGroup() + ", quitting.\n"); m->control_pressed = true; }
+                if (it == lines.end()) { m->mothurOut("[ERROR]: can't find metadata information for " + namesOfGroups[i] + ", quitting.\n"); m->control_pressed = true; }
                 else {
                     vector<string> values = it->second;
                     
@@ -1463,10 +1453,10 @@ int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundFloatVector*>& lookup){
+int MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors* lookup){
     try {
         sampleMetadata.clear();
-        if (metadatafile == "") {  for (int i = 0; i < lookup.size(); i++) {  sampleMetadata.push_back("null");  } }
+        if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }
         else {
             ifstream in;
             m->openInputFile(metadatafile, in);
@@ -1505,13 +1495,14 @@ int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundFloatVector*>& lookup)
             in.close();
             
             map<string, vector<string> >::iterator it;
-            for (int i = 0; i < lookup.size(); i++) {
+            vector<string> namesOfGroups = lookup->getNamesGroups();
+            for (int i = 0; i < namesOfGroups.size(); i++) {
                 
                 if (m->control_pressed) { return 0; }
                 
-                it = lines.find(lookup[i]->getGroup());
+                it = lines.find(namesOfGroups[i]);
                 
-                if (it == lines.end()) { m->mothurOut("[ERROR]: can't find metadata information for " + lookup[i]->getGroup() + ", quitting.\n"); m->control_pressed = true; }
+                if (it == lines.end()) { m->mothurOut("[ERROR]: can't find metadata information for " + namesOfGroups[i] + ", quitting.\n"); m->control_pressed = true; }
                 else {
                     vector<string> values = it->second;
                     

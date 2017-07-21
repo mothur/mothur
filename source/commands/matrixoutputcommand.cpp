@@ -496,23 +496,14 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
             variables["[distance]"] = thisLookup->getLabel();
             variables["[tag2]"] = "";
             
-            SharedRAbundVectors* thisItersLookup = thisLookup;
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
+            vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
             if (subsample && (thisIter != 0)) {
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
-                vector<RAbundVector*> thisItersRabunds = thisLookup->getSharedRAbundVectors();
-                vector<string> thisItersGroups = thisLookup->getNamesGroups();
-                
-                //make copy of lookup so we don't get access violations
-                SharedRAbundVectors* newLookup = new SharedRAbundVectors();
-                for (int k = 0; k < thisItersRabunds.size(); k++) { newLookup->push_back(thisItersRabunds[k], thisItersGroups[k]); }
-                newLookup->eliminateZeroOTUS();
-                
-                tempLabels = sample.getSample(newLookup, subsampleSize);
-                delete thisLookup;
-                thisItersLookup = newLookup;
+                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
             }
             
             vector<RAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
@@ -744,6 +735,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
                 }
             }
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            delete thisItersLookup;
 		}
 		
         if (iters != 0) {

@@ -196,10 +196,10 @@ int SparccCommand::execute(){
         int start = time(NULL);
         
         InputData input(sharedfile, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-        string lastLabel = lookup[0]->getLabel();
+        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        string lastLabel = lookup->getLabel();
         
-        int numOTUs = lookup[0]->getNumBins();
+        int numOTUs = lookup->getNumBins();
         if (numOTUs >= maxIterations) {  m->mothurOut("[WARNING]: The number of iterations is set higher than the number of OTUs, reducing to " + toString(numOTUs-1) + "\n"); maxIterations = numOTUs-1; }
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -207,39 +207,39 @@ int SparccCommand::execute(){
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }return 0; }
+            if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }return 0; }
             
-            if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 process(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 process(lookup);                
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
+                lookup->setLabel(saveLabel);
             }
             
-            lastLabel = lookup[0]->getLabel();
+            lastLabel = lookup->getLabel();
             //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+            delete lookup;
             
             if (m->control_pressed) { return 0; }
             
@@ -264,14 +264,14 @@ int SparccCommand::execute(){
         
         //run last label if you need to
         if (needToRun == true)  {
-            for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+            delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
-            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             
             process(lookup);           
             
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
         }
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
@@ -315,27 +315,28 @@ vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >
 	}
 }
 //**********************************************************************************************************************
-int SparccCommand::process(vector<SharedRAbundVector*>& lookup){
+int SparccCommand::process(SharedRAbundVectors* shared){
 	try {
         cout.setf(ios::fixed, ios::floatfield);
         cout.setf(ios::showpoint);
         
         vector<vector<float> > sharedVector;
         vector<string> otuNames = m->currentSharedBinLabels;
+        vector<RAbundVector*> data = shared->getSharedRAbundVectors();
         
         //fill sharedVector to pass to CalcSparcc
-        for (int i = 0; i < lookup.size(); i++) {
-            vector<int> abunds = lookup[i]->getAbundances();
+        for (int i = 0; i < data.size(); i++) {
+            vector<int> abunds = data[i]->get();
             vector<float> temp;
             for (int j = 0; j < abunds.size(); j++) { temp.push_back((float) abunds[j]); }
             sharedVector.push_back(temp);
         }
         int numOTUs = (int)sharedVector[0].size();
-        int numGroups = lookup.size();
+        int numGroups = data.size();
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = shared->getLabel();
         
 
         string relAbundFileName = getOutputFileName("sparccrelabund", variables);
@@ -345,11 +346,11 @@ int SparccCommand::process(vector<SharedRAbundVector*>& lookup){
         
         relAbundFile << "OTU\taveRelAbund\n";
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) { relAbundFile.close(); return 0; }
+            if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); relAbundFile.close(); return 0; }
             
             double relAbund = 0.0000;
             for(int j=0;j<numGroups;j++){
-                relAbund += sharedVector[j][i]/(double)lookup[j]->getNumSeqs();
+                relAbund += sharedVector[j][i]/(double)data[j]->getNumSeqs();
             }
             relAbundFile << otuNames[i] <<'\t' << relAbund / (double) numGroups << endl;
         }
@@ -378,7 +379,7 @@ int SparccCommand::process(vector<SharedRAbundVector*>& lookup){
         if(numPermutations != 0){
             vector<vector<float> > pValues = createProcesses(sharedVector, origCorrMatrix);
             
-            if (m->control_pressed) { return 0; }
+            if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 0; }
             
             string pValueFileName = getOutputFileName("pvalue", variables);
             ofstream pValueFile;
@@ -397,7 +398,7 @@ int SparccCommand::process(vector<SharedRAbundVector*>& lookup){
             }
         }
 
-
+        for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
         return 0;
     }
 	catch(exception& e) {

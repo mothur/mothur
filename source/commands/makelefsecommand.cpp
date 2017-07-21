@@ -224,11 +224,11 @@ int MakeLefseCommand::execute(){
         
         if (sharedfile != "") {
             inputFile = sharedfile;
-            vector<SharedRAbundFloatVector*> lookup = getSharedRelabund();
+            SharedRAbundFloatVectors* lookup = getSharedRelabund();
             runRelabund(consTax, lookup);
         }else {
             inputFile = relabundfile;
-            vector<SharedRAbundFloatVector*> lookup = getRelabund();
+            SharedRAbundFloatVectors* lookup = getRelabund();
             runRelabund(consTax, lookup);
         }
         
@@ -248,12 +248,12 @@ int MakeLefseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbundFloatVector*>& lookup){
+int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloatVectors* lookup){
 	try {
         if (outputDir == "") { outputDir = m->hasPath(inputFile); }
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFile));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
 		string outputFile = getOutputFileName("lefse",variables);
 		outputNames.push_back(outputFile); outputTypes["lefse"].push_back(outputFile);
         
@@ -261,6 +261,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
         m->openOutputFile(outputFile, out);
 
         DesignMap* designMap = NULL;
+        vector<string> namesOfGroups = lookup->getNamesGroups();
         if (designfile != "") {
             designMap = new DesignMap(designfile);
             vector<string> categories = designMap->getNamesOfCategories();
@@ -269,26 +270,26 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
             
             for (int j = 0; j < categories.size(); j++) {
                 out << categories[j];
-                for (int i = 0; i < lookup.size()-1; i++) {
+                for (int i = 0; i < namesOfGroups.size()-1; i++) {
                     if (m->control_pressed) { out.close(); delete designMap; return 0; }
-                    string value = designMap->get(lookup[i]->getGroup(), categories[j]);
+                    string value = designMap->get(namesOfGroups[i], categories[j]);
                     if (value == "not found") {
-                        m->mothurOut("[ERROR]: " + lookup[i]->getGroup() + " is not in your design file, please correct.\n"); m->control_pressed = true;
+                        m->mothurOut("[ERROR]: " + namesOfGroups[i] + " is not in your design file, please correct.\n"); m->control_pressed = true;
                     }else { out  << '\t' << value; }
                 }
-                string value = designMap->get(lookup[lookup.size()-1]->getGroup(), categories[j]);
+                string value = designMap->get(namesOfGroups[namesOfGroups.size()-1], categories[j]);
                 if (value == "not found") {
-                    m->mothurOut("[ERROR]: " + lookup[lookup.size()-1]->getGroup() + " is not in your design file, please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: " + namesOfGroups[namesOfGroups.size()-1] + " is not in your design file, please correct.\n"); m->control_pressed = true;
                 }else { out << '\t' << value; }
                 out << endl;
             }
         }
         
         out << "group";
-        for (int i = 0; i < lookup.size(); i++) {  out  << '\t' << lookup[i]->getGroup(); }
+        for (int i = 0; i < namesOfGroups.size(); i++) {  out  << '\t' << namesOfGroups[i]; }
         out << endl;
         
-        for (int i = 0; i < lookup[0]->getNumBins(); i++) { //process each otu
+        for (int i = 0; i < lookup->getNumBins(); i++) { //process each otu
             if (m->control_pressed) { break; }
             string nameOfOtu = m->currentSharedBinLabels[i];
             
@@ -316,7 +317,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
             out << nameOfOtu;
             
             //print out relabunds for each otu
-            for (int j = 0; j < lookup.size(); j++) { out  << '\t' << lookup[j]->getAbundance(i); }
+            for (int j = 0; j < lookup->size(); j++) { out  << '\t' << lookup->get(i, namesOfGroups[j]); }
             out << endl;
         }
         out.close();
@@ -329,13 +330,12 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, vector<SharedRAbu
 	}
 }
 //**********************************************************************************************************************
-vector<SharedRAbundFloatVector*> MakeLefseCommand::getSharedRelabund(){
+SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 	try {
 		InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> templookup = input.getSharedRAbundVectors();
-		string lastLabel = templookup[0]->getLabel();
-        vector<SharedRAbundFloatVector*> lookup;
-		
+		SharedRAbundVectors* templookup = input.getSharedRAbundVectors();
+		string lastLabel = templookup->getLabel();
+        
 		if (label == "") { label = lastLabel;  }
 		else {
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -344,39 +344,39 @@ vector<SharedRAbundFloatVector*> MakeLefseCommand::getSharedRelabund(){
             set<string> userLabels = labels;
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((templookup[0] != NULL) && (userLabels.size() != 0)) {
-                if (m->control_pressed) {  for (int i = 0; i < templookup.size(); i++) {  delete templookup[i];  } return lookup;  }
+            while((templookup != NULL) && (userLabels.size() != 0)) {
+                if (m->control_pressed) {  delete templookup; return NULL;  }
                 
-                if(labels.count(templookup[0]->getLabel()) == 1){
-                    processedLabels.insert(templookup[0]->getLabel());
-                    userLabels.erase(templookup[0]->getLabel());
+                if(labels.count(templookup->getLabel()) == 1){
+                    processedLabels.insert(templookup->getLabel());
+                    userLabels.erase(templookup->getLabel());
                     break;
                 }
                 
-                if ((m->anyLabelsToProcess(templookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = templookup[0]->getLabel();
+                if ((m->anyLabelsToProcess(templookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = templookup->getLabel();
                     
-                    for (int i = 0; i < templookup.size(); i++) {  delete templookup[i];  }
+                    delete templookup;
                     templookup = input.getSharedRAbundVectors(lastLabel);
                     
-                    processedLabels.insert(templookup[0]->getLabel());
-                    userLabels.erase(templookup[0]->getLabel());
+                    processedLabels.insert(templookup->getLabel());
+                    userLabels.erase(templookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    templookup[0]->setLabel(saveLabel);
+                    templookup->setLabel(saveLabel);
                     break;
                 }
                 
-                lastLabel = templookup[0]->getLabel();
+                lastLabel = templookup->getLabel();
                 
                 //get next line to process
                 //prevent memory leak
-                for (int i = 0; i < templookup.size(); i++) {  delete templookup[i];  }
+                delete templookup;
                 templookup = input.getSharedRAbundVectors();
             }
             
             
-            if (m->control_pressed) { for (int i = 0; i < templookup.size(); i++) {  delete templookup[i];  } return lookup;  }
+            if (m->control_pressed) { delete templookup; return NULL;  }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -393,50 +393,52 @@ vector<SharedRAbundFloatVector*> MakeLefseCommand::getSharedRelabund(){
             
             //run last label if you need to
             if (needToRun == true)  {
-                for (int i = 0; i < templookup.size(); i++) {  if (templookup[i] != NULL) {	delete templookup[i];	} }
+                delete templookup;
                 templookup = input.getSharedRAbundVectors(lastLabel);
             }
 		}
         
-        for (int i = 0; i < templookup.size(); i++) {
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-            temp->setLabel(templookup[i]->getLabel());
-            temp->setGroup(templookup[i]->getGroup());
-            lookup.push_back(temp);
-        }
+        vector<RAbundVector*> data = templookup->getSharedRAbundVectors();
+        delete templookup;
+        SharedRAbundFloatVectors* lookup = new SharedRAbundFloatVectors();
         
         //convert to relabund
-        for (int i = 0; i < templookup.size(); i++) {
-			for (int j = 0; j < templookup[i]->getNumBins(); j++) {
+        for (int i = 0; i < data.size(); i++) {
+            RAbundFloatVector* rel = new RAbundFloatVector();
+            rel->setGroup(data[i]->getGroup());
+            rel->setLabel(data[i]->getLabel());
+			for (int j = 0; j < data[i]->getNumBins(); j++) {
                 
-				if (m->control_pressed) { for (int k = 0; k < templookup.size(); k++) {  delete templookup[k];  } return lookup; }
+				if (m->control_pressed) { for (int k = 0; k < data.size(); k++) {  delete data[k];  } return lookup; }
                 
-				int abund = templookup[i]->getAbundance(j);
+				int abund = data[i]->get(j);
 				float relabund = 0.0;
 				
 				if (scale == "totalgroup") {
-					relabund = abund / (float) templookup[i]->getNumSeqs();
+					relabund = abund / (float) data[i]->getNumSeqs();
 				}else if (scale == "totalotu") {
 					//calc the total in this otu
 					int totalOtu = 0;
-					for (int l = 0; l < templookup.size(); l++) {  totalOtu += templookup[l]->getAbundance(j); }
+					for (int l = 0; l < data.size(); l++) {  totalOtu += data[l]->get(j); }
 					relabund = abund / (float) totalOtu;
 				}else if (scale == "averagegroup") {
-					relabund = abund / (float) (templookup[i]->getNumSeqs() / (float) templookup[i]->getNumBins());
+					relabund = abund / (float) (data[i]->getNumSeqs() / (float) data[i]->getNumBins());
 				}else if (scale == "averageotu") {
 					//calc the total in this otu
 					int totalOtu = 0;
-					for (int l = 0; l < templookup.size(); l++) {  totalOtu += templookup[l]->getAbundance(j); }
-					float averageOtu = totalOtu / (float) templookup.size();
+					for (int l = 0; l < data.size(); l++) {  totalOtu += data[l]->get(j); }
+					float averageOtu = totalOtu / (float) data.size();
 					
 					relabund = abund / (float) averageOtu;
 				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true;  }
 				
-				lookup[i]->push_back(relabund, lookup[i]->getGroup());
+				rel->push_back(relabund);
 			}
+            lookup->push_back(rel);
         }
-
-        for (int k = 0; k < templookup.size(); k++) {  delete templookup[k];  }
+        for (int k = 0; k < data.size(); k++) {  delete data[k];  } data.clear();
+        
+        lookup->eliminateZeroOTUS();
         
 		return lookup;
 	}
@@ -446,11 +448,11 @@ vector<SharedRAbundFloatVector*> MakeLefseCommand::getSharedRelabund(){
 	}
 }
 //**********************************************************************************************************************
-vector<SharedRAbundFloatVector*> MakeLefseCommand::getRelabund(){
+SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 	try {
 		InputData input(relabundfile, "relabund");
-		vector<SharedRAbundFloatVector*> lookupFloat = input.getSharedRAbundFloatVectors();
-		string lastLabel = lookupFloat[0]->getLabel();
+		SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
+		string lastLabel = lookupFloat->getLabel();
 		
 		if (label == "") { label = lastLabel; return lookupFloat; }
 		
@@ -460,35 +462,35 @@ vector<SharedRAbundFloatVector*> MakeLefseCommand::getRelabund(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat[0] != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
 			if (m->control_pressed) {  return lookupFloat;  }
 			
-			if(labels.count(lookupFloat[0]->getLabel()) == 1){
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+			if(labels.count(lookupFloat->getLabel()) == 1){
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookupFloat[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookupFloat->getLabel();
 				
-				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+                delete lookupFloat;
 				lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 				
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat[0]->setLabel(saveLabel);
+				lookupFloat->setLabel(saveLabel);
 				break;
 			}
 			
-			lastLabel = lookupFloat[0]->getLabel();
+			lastLabel = lookupFloat->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+			delete lookupFloat;
 			lookupFloat = input.getSharedRAbundFloatVectors();
 		}
 		
@@ -510,7 +512,7 @@ vector<SharedRAbundFloatVector*> MakeLefseCommand::getRelabund(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookupFloat.size(); i++) {  if (lookupFloat[i] != NULL) {	delete lookupFloat[i];	} }
+			delete lookupFloat;
 			lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 		}
 		

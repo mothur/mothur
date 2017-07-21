@@ -237,13 +237,12 @@ int OTUAssociationCommand::execute(){
 int OTUAssociationCommand::processShared(){
 	try {
 		InputData* input = new InputData(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
         
-        if (metadatafile != "") { 
-            getMetadata();  
+        if (metadatafile != "") {
             bool error = false;
-            if (metadata[0].size() != lookup.size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup.size()) + " from the shared file.\n");  m->control_pressed = true; error=true;}
+            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the shared file.\n");  m->control_pressed = true; error=true;}
             if (error) {
                 //maybe add extra info here?? compare groups in each file??
             }
@@ -254,39 +253,39 @@ int OTUAssociationCommand::processShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (m->control_pressed) {  delete input; return 0;  }
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){	
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 			}
 			
-			lastLabel = lookup[0]->getLabel();			
+			lastLabel = lookup->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup;
 			lookup = input->getSharedRAbundVectors();
 		}
 		
@@ -308,10 +307,10 @@ int OTUAssociationCommand::processShared(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
+			delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			process(lookup);
 		}	
 		
@@ -325,11 +324,11 @@ int OTUAssociationCommand::processShared(){
 	}
 }
 //**********************************************************************************************************************
-int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
+int OTUAssociationCommand::process(SharedRAbundVectors* lookup){
 	try {
 		map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
 		string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
@@ -343,8 +342,11 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
         else { out << "OTUA\tMetadata\t" << method << "Coef\tSignificance\n";  }
 
 		
-		vector< vector<double> > xy; xy.resize(lookup[0]->getNumBins());
-		for (int i = 0; i < lookup[0]->getNumBins(); i++) { for (int j = 0; j < lookup.size(); j++) { xy[i].push_back(lookup[j]->getAbundance(i)); } }
+		vector< vector<double> > xy; xy.resize(lookup->getNumBins());
+        vector<string> sampleNames = lookup->getNamesGroups();
+		for (int i = 0; i < lookup->getNumBins(); i++) {
+            for (int j = 0; j < sampleNames.size(); j++) { xy[i].push_back(lookup->get(i, sampleNames[j])); }
+        }
 		
 		LinearAlgebra linear;
         if (metadatafile == "") {//compare otus
@@ -398,58 +400,55 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 int OTUAssociationCommand::processRelabund(){
 	try {
 		InputData* input = new InputData(relabundfile, "relabund");
-		vector<SharedRAbundFloatVector*> lookup = input->getSharedRAbundFloatVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundFloatVectors* lookup = input->getSharedRAbundFloatVectors();
+		string lastLabel = lookup->getLabel();
         
-        if (metadatafile != "") { 
-            getMetadata(); 
+        if (metadatafile != "") {
             bool error = false;
-            if (metadata[0].size() != lookup.size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup.size()) + " from the relabund file.\n");  m->control_pressed = true; error=true;}
+            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the relabund file.\n");  m->control_pressed = true; error=true;}
             if (error) {
                 //maybe add extra info here?? compare groups in each file??
             }
         }
-        
-        
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (m->control_pressed) {  delete input; return 0;  }
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){	
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+				delete lookup;
 				lookup = input->getSharedRAbundFloatVectors(lastLabel);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 			}
 			
-			lastLabel = lookup[0]->getLabel();			
+			lastLabel = lookup->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup;
 			lookup = input->getSharedRAbundFloatVectors();
 		}
 		
@@ -471,11 +470,12 @@ int OTUAssociationCommand::processRelabund(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
+			delete lookup;
 			lookup = input->getSharedRAbundFloatVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			process(lookup);
+            delete lookup;
 		}	
 		
 		delete input;
@@ -488,12 +488,12 @@ int OTUAssociationCommand::processRelabund(){
 	}
 }
 //**********************************************************************************************************************
-int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
+int OTUAssociationCommand::process(SharedRAbundFloatVectors* lookup){
 	try {
 		
 		map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
         string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
@@ -506,8 +506,11 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
 		if (metadatafile == "") { out << "OTUA\tOTUB\t" << method << "Coef\tSignificance\n"; }
         else { out << "OTUA\tMetadata\t" << method << "Coef\tSignificance\n";  }
 		
-		vector< vector<double> > xy; xy.resize(lookup[0]->getNumBins());
-		for (int i = 0; i < lookup[0]->getNumBins(); i++) { for (int j = 0; j < lookup.size(); j++) { xy[i].push_back(lookup[j]->getAbundance(i)); } }
+		vector< vector<double> > xy; xy.resize(lookup->getNumBins());
+        vector<string> sampleNames = lookup->getNamesGroups();
+        for (int i = 0; i < lookup->getNumBins(); i++) {
+            for (int j = 0; j < sampleNames.size(); j++) { xy[i].push_back(lookup->get(i, sampleNames[j])); }
+        }
 		
 		LinearAlgebra linear;
         if (metadatafile == "") {//compare otus
@@ -577,6 +580,10 @@ int OTUAssociationCommand::readMetadata(){
 			metadataLabels.push_back(columnLabel);
 		}
 		int count = metadataLabels.size();
+        SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
+        metadataLookup->setLabel("1");
+        
+        vector<string> mGroups = m->getGroups();
         
 		//read rest of file
 		while (!in.eof()) {
@@ -587,22 +594,34 @@ int OTUAssociationCommand::readMetadata(){
 			in >> group; m->gobble(in);
             if (m->debug) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
-			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
-			tempLookup->setGroup(group);
-			tempLookup->setLabel("1");
+            RAbundFloatVector* tempLookup = new RAbundFloatVector();
+            tempLookup->setLabel("1");
+            tempLookup->setGroup(group);
 			
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
 				in >> temp;
                 if (m->debug) { m->mothurOut("[DEBUG]: metadata value = " + toString(temp) + "\n"); }
-				tempLookup->push_back(temp, group);
+				tempLookup->push_back(temp);
 			}
 			
-			metadataLookup.push_back(tempLookup);
+            if (m->inUsersGroups(group, mGroups)) {  metadataLookup->push_back(tempLookup);  }
 			
 			m->gobble(in);
 		}
 		in.close();
+        
+        //elimnatezeros remove zero otus, we want to remove the extra labels from metaLabels
+        vector<int> binsToKeep = metadataLookup->eliminateZeroOTUS();
+        vector<string> newMetaLabels;
+        for (int i = 0; i < binsToKeep.size(); i++) {  newMetaLabels.push_back(metadataLabels[binsToKeep[i]]); }
+        metadataLabels = newMetaLabels;
+        
+        metadata.resize(metadataLookup->getNumBins());
+        vector<string> sampleNames = metadataLookup->getNamesGroups();
+        for (int i = 0; i < metadataLookup->getNumBins(); i++) {
+            for (int j = 0; j < sampleNames.size(); j++) { metadata[i].push_back(metadataLookup->get(i, sampleNames[j])); }
+        }
 		
 		return 0;
 	}
@@ -611,7 +630,7 @@ int OTUAssociationCommand::readMetadata(){
 		exit(1);
 	}
 }
-/*****************************************************************/
+/*****************************************************************
 //eliminate groups user did not pick, remove zeroed out otus, fill metadata vector.
 int OTUAssociationCommand::getMetadata(){
 	try {
@@ -675,6 +694,7 @@ int OTUAssociationCommand::getMetadata(){
 	}
 }
 /*****************************************************************/
+
 
 
 

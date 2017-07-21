@@ -40,17 +40,16 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void printSharedData(vector<SharedRAbundVector*>, ofstream&);
+	void printSharedData(SharedRAbundVectors*, ofstream&);
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
     int createSharedFromListGroup();
     int createSharedFromBiom();
     string getTag(string&);
     vector<string> readRows(string, int&);
     int getDims(string, int&, int&);
-    vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
+    SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
 	
 	vector<string> Groups, outputNames, order;
 	set<string> labels;

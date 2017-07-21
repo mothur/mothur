@@ -830,79 +830,62 @@ int SubSampleCommand::readNames() {
 int SubSampleCommand::getSubSampleShared() {
 	try {
 		
-		InputData* input = new InputData(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		InputData input(sharedfile, "sharedfile");
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		if (size == 0) { //user has not set size, set size = smallest samples size
-			size = lookup[0]->getNumSeqs();
-			for (int i = 1; i < lookup.size(); i++) {
-				int thisSize = lookup[i]->getNumSeqs();
-				
-				if (thisSize < size) {	size = thisSize;	}
-			}
-		}else {
-			m->clearGroups();
-			Groups.clear();
-			vector<SharedRAbundVector*> temp;
-			for (int i = 0; i < lookup.size(); i++) {
-				if (lookup[i]->getNumSeqs() < size) { 
-					m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-					delete lookup[i];
-				}else { 
-					Groups.push_back(lookup[i]->getGroup()); 
-					temp.push_back(lookup[i]);
-				}
-			} 
-			lookup = temp;
-			m->setGroups(Groups);
+			size = lookup->getNumSeqsSmallestGroup();
+        }else {
+            lookup->removeGroups(size);
+			Groups = m->getGroups();
 		}
 		
-		if (lookup.size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine(); delete input; return 0; }
+		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine();  return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  return 0;  }
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) {  delete lookup;  return 0;  }
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				processShared(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				delete lookup;
 				
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				processShared(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			delete lookup;
 			
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();				
+			lookup = input.getSharedRAbundVectors();
 		}
 		
 		
@@ -923,17 +906,15 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			delete lookup;
+			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			
 			processShared(lookup);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
-		
-		delete input;
 		
 		return 0;
 		
@@ -944,7 +925,7 @@ int SubSampleCommand::getSubSampleShared() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
+int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
@@ -955,7 +936,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
-        variables["[distance]"] = thislookup[0]->getLabel();
+        variables["[distance]"] = thislookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         SubSample sample;
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
@@ -968,14 +949,9 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		
         m->currentSharedBinLabels = subsampledLabels;
         
-		thislookup[0]->printHeaders(out);
-		
-		for (int i = 0; i < thislookup.size(); i++) {
-			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
-			thislookup[i]->print(out);
-		}
+		thislookup->printHeaders(out);
+		thislookup->print(out);
 		out.close();
-        
         
         //save mothurOut's binLabels to restore for next label
 		m->currentSharedBinLabels = saveBinLabels;

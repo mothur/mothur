@@ -24,29 +24,21 @@ public:
   ~ClassifySvmSharedCommand() {};
   
   vector<string> setParameters();
-  string getCommandName()			{ return "classifysvm.shared";     }
+  string getCommandName()			{ return "classify.svm";     }
   string getCommandCategory()		{ return "OTU-Based Approaches";		}  
   string getHelpString();	
   string getOutputPattern(string);
-  string getCitation()              { return "http://www.mothur.org/wiki/ClassifySvm.shared\n"; }
+  string getCitation()              { return "http://www.mothur.org/wiki/Classify.svm\n"; }
   string getDescription()		    { return "implements the support vector machine machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
   int execute();
   
   void help() { m->mothurOut(getHelpString()); }
 
   void readSharedAndDesignFiles(const string&, const string&, LabeledObservationVector&, FeatureVector&);
-  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, DesignMap&, LabeledObservationVector&, FeatureVector&);
-
-  //bool interruptTraining() { return m->control_pressed; }
+  void readSharedRAbundVectors(vector<RAbundVector*>&, DesignMap&, LabeledObservationVector&, FeatureVector&);
 
   vector<double>& getSmocList() { return smocList; }
   const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
-
-  //bool interruptTraining() { return m->control_pressed; }
-
-  //std::vector<double>& getSmocList() { return smocList; }
-  //const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
-
 
 private:
     bool abort;
@@ -62,9 +54,6 @@ private:
 
     DesignMap designMap;
     
-    //void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
-    //void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
-
     // mode is either "rfe" or "classify"
     string mode;
 
@@ -79,13 +68,9 @@ private:
 
     double stdthreshold;
 
-    //int numDecisionTrees;
-    //string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
-    //bool doPruning, discardHighErrorTrees;
-    //double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
 
-    void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
-    void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup);
+    void processSharedAndDesignData(vector<RAbundVector*> lookup);
+    void trainSharedAndDesignData(vector<RAbundVector*> lookup);
 
     void getParameterValue(int& target, string pstring, int defaultvalue) {
         if (pstring == "not found" or pstring == "") {

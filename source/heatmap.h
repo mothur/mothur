@@ -11,8 +11,6 @@
 
 #include "rabundvector.hpp"
 #include "rabundfloatvector.hpp"
-#include "datavector.hpp"
-
 
 /***********************************************************************/
 struct binCount {

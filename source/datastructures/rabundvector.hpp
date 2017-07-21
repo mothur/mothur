@@ -14,7 +14,7 @@
 			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5 */
 
 class RAbundFloatVector;
-//class OrderVector;
+class OrderVector;
 
 class RAbundVector : public DataVector {
 	
@@ -23,9 +23,9 @@ public:
 	RAbundVector(int);
 	RAbundVector(vector<int>, int, int, int);
 	RAbundVector(string, vector<int>);
-	RAbundVector(const RAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs){};
+	RAbundVector(const RAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) {};
 	RAbundVector(ifstream&);
-    RAbundVector(ifstream& f, string l); //label given
+    RAbundVector(ifstream& f, string l, string g); //filehandle, label, group
 	~RAbundVector();
 
 	int getNumBins();		
@@ -35,6 +35,7 @@ public:
     int remove(int);
 	void set(int, int);	
 	int get(int);
+    vector<int> get() { return data; }
 	void push_back(int);
 	void pop_back();
 	void resize(int);
@@ -48,21 +49,25 @@ public:
 	vector<int>::reverse_iterator rbegin();
 	vector<int>::reverse_iterator rend();
 	
-	void print(ostream&); //sorted, no group
-    int print(ostream&, string); //notsorted, group
-	void print(string, ostream&); //label, sorted
-	void nonSortedPrint(ostream&); //nonsorted , no group
+	void print(ostream&); //sorted
+    //void print(string, ostream&); //label, sorted
+	void nonSortedPrint(ostream&); //nonsorted
 	
 	RAbundVector getRAbundVector();
     RAbundFloatVector getRAbundFloatVector();
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
-	
+    
+    string getGroup() { return group; } //group = "" for rabunds without groupInfo
+    void setGroup(string g) { group = g;  }
+    
 private:
 	vector<int> data;
 	int maxRank;
 	int numBins;
-	int numSeqs;	
+	int numSeqs;
+    
+    string group;
 };
 
 

@@ -35,11 +35,9 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	InputData* input;
 	SharedListVector* SharedList;
 	Venn* venn;
-	vector<Calculator*> vennCalculators;	
-	vector<SharedRAbundVector*> lookup;
+	vector<Calculator*> vennCalculators;
 	set< set<int> > combos;
 	SAbundVector* sabund;
 	int abund, fontsize, perm;

@@ -306,12 +306,11 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         }
         
         SharedRAbundVectors* subset = new SharedRAbundVectors();
-        vector<string> lookupGroups = lookup->getNamesGroups();
         vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
         if (thisSet != "") {//remove unwanted groups
-            for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+            for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
             subset->eliminateZeroOTUS();
-        }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+        }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
         
 
         /******************************************************/
@@ -397,12 +396,11 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
                 subset = new SharedRAbundVectors();
-                vector<string> lookupGroups = lookup->getNamesGroups();
                 vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
                 
                 m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
                 vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
@@ -429,9 +427,9 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             
             if (lookup != NULL) {
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
             }else {  subset = NULL; }
 
 		}
@@ -468,9 +466,9 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             
             if (lookup != NULL) {
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < lookupGroups.size(); i++) { if (m->inUsersGroups(lookupGroups[i], newGroups)) { subset->push_back(data[i], lookupGroups[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < lookupGroups.size(); i++) {  subset->push_back(data[i], lookupGroups[i]); } }
+                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
             }else {  subset = NULL; }
             
 			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
@@ -539,6 +537,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors* thisLookup, stri
             //clean up memory
             delete thisItersLookup;
             for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+            delete thisItersLookup;
         }
         
         //create std and ave outputs

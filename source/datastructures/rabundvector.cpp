@@ -15,11 +15,11 @@
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {}
+RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {}
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0) {}
+RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0), group("") {}
 
 /***********************************************************************/
 
@@ -28,7 +28,7 @@ RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBin
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(rav) {
+RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(rav), group("") {
 	try {
 		numBins = 0;
 		maxRank = 0;
@@ -48,7 +48,7 @@ RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(ra
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
+RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) :  group("") {
 	try {
 		numBins = nb;
 		maxRank = mr;
@@ -63,7 +63,7 @@ RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
 /***********************************************************************/
 
 
-RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {
     try {
         int hold;
         f >> label >> hold;
@@ -84,7 +84,7 @@ RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), 
 }
 
 /***********************************************************************/
-RAbundVector::RAbundVector(ifstream& f, string l) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+RAbundVector::RAbundVector(ifstream& f, string l, string g) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group(g) {
 	try {
 		int hold;
         label = l;
@@ -251,7 +251,9 @@ vector<int>::reverse_iterator RAbundVector::rend(){
 /***********************************************************************/
 void RAbundVector::nonSortedPrint(ostream& output){
 	try {	
-		output << label << '\t' << numBins;
+        output << label;
+        if (group != "") { output << '\t' << group; }
+        output << '\t' << numBins;
 	
 		for(int i=0;i<numBins;i++){		output  << '\t' << data[i];		}
 		output << endl;
@@ -261,7 +263,7 @@ void RAbundVector::nonSortedPrint(ostream& output){
 		exit(1);
 	}
 }
-/***********************************************************************/
+/***********************************************************************
 void RAbundVector::print(string prefix, ostream& output){
 	try {	
 		output << prefix << '\t' << numBins;
@@ -282,7 +284,9 @@ void RAbundVector::print(string prefix, ostream& output){
 /***********************************************************************/
 void RAbundVector::print(ostream& output){
 	try {
-		output << label << '\t' << numBins;
+        output << label;
+        if (group != "") { output << '\t' << group; }
+        output << '\t' << numBins;
 	
 		vector<int> hold = data;
 		sort(hold.rbegin(), hold.rend());
@@ -295,23 +299,6 @@ void RAbundVector::print(ostream& output){
 		exit(1);
 	}
 }
-/***********************************************************************/
-//non-sorting print for use with SharedRAbundVectors
-int RAbundVector::print(ostream& output, string noLabel){
-    try {
-        output << numBins;
-        
-        vector<int> hold = data;
-        
-        for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
-        output << endl;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "RAbundVector", "print");
-        exit(1);
-    }
-}
-
 /***********************************************************************/
 int RAbundVector::getNumBins(){
 	return numBins;

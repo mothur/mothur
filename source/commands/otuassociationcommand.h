@@ -12,7 +12,6 @@
 
 
 #include "command.hpp"
-
 #include "inputdata.h"
 
 
@@ -39,16 +38,15 @@ private:
 	bool abort, pickedGroups, allLines;
     double cutoff;
 	set<string> labels;
-    vector<SharedRAbundFloatVector*> metadataLookup;
     vector< vector< double> > metadata;
 	
 	vector<string> outputNames, Groups, metadataLabels;
 	int processShared();
-	int process(vector<SharedRAbundVector*>&);
+	int process(SharedRAbundVectors*);
 	int processRelabund();
-	int process(vector<SharedRAbundFloatVector*>&);
+	int process(SharedRAbundFloatVectors*);
     int readMetadata();
-    int getMetadata();
+    //int getMetadata();
 	
 };
 

@@ -11,7 +11,6 @@
 
 
 #include "command.hpp"
-
 #include "inputdata.h"
 
 
@@ -42,16 +41,16 @@ private:
     
 	bool abort, allLines, picrust;
     
-    int getBiom(vector<SharedRAbundVector*>&);
-    int getBiom(vector<SharedRAbundFloatVector*>& lookup);
-    vector<string> getMetaData(vector<SharedRAbundVector*>&);
-    vector<string> getMetaData(vector<SharedRAbundFloatVector*>&);
+    int getBiom(SharedRAbundVectors*);
+    int getBiom(SharedRAbundFloatVectors*);
+    vector<string> getMetaData(SharedRAbundVectors*);
+    vector<string> getMetaData(SharedRAbundFloatVectors*);
     vector<string> parseTax(string tax, vector<string>& scores);
-    int getSampleMetaData(vector<SharedRAbundVector*>&);
-    int getSampleMetaData(vector<SharedRAbundFloatVector*>&);
+    int getSampleMetaData(SharedRAbundVectors*);
+    int getSampleMetaData(SharedRAbundFloatVectors*);
     //for picrust
-    int getGreenGenesOTUIDs(vector<SharedRAbundVector*>&, map<string, string>&);
-    int getGreenGenesOTUIDs(vector<SharedRAbundFloatVector*>&, map<string, string>&);
+    int getGreenGenesOTUIDs(SharedRAbundVectors*, map<string, string>&);
+    int getGreenGenesOTUIDs(SharedRAbundFloatVectors*, map<string, string>&);
     map<string, string> readGGOtuMap();
 };
 

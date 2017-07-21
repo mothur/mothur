@@ -221,47 +221,50 @@ int CountSeqsCommand::execute(){
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
             
             InputData input(sharedfile, "sharedfile");
-            vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-            string lastLabel = lookup[0]->getLabel();
+            SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            string lastLabel = lookup->getLabel();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
             set<string> userLabels = labels;
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->control_pressed) { delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
                 
-                if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    processShared(data, variables);
+                    for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
-                    processShared(lookup, variables);
-                    
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup[0]->getLabel();
+                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookup->getLabel();
                     
-                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                    delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
-                    processShared(lookup, variables);
+                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    processShared(data, variables);
+                    for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup[0]->setLabel(saveLabel);
+                    lookup->setLabel(saveLabel);
                 }
                 
-                lastLabel = lookup[0]->getLabel();
+                lastLabel = lookup->getLabel();
                 //prevent memory leak
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+                delete lookup;
                 
                 if (m->control_pressed) { return 0; }
                 
@@ -286,14 +289,16 @@ int CountSeqsCommand::execute(){
             
             //run last label if you need to
             if (needToRun == true)  {
-                for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
-                processShared(lookup, variables);
+                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                processShared(data, variables);
+                for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+               delete lookup;
             }
             
         }
@@ -319,7 +324,7 @@ int CountSeqsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
+unsigned long long CountSeqsCommand::processShared(vector<RAbundVector*>& lookup, map<string, string> variables){
     try {
         variables["[distance]"] = lookup[0]->getLabel();
         string outputFileName = getOutputFileName("count", variables);
@@ -337,8 +342,8 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
             int total = 0;
             string output = "";
             for (int i = 0; i < lookup.size(); i++) {
-                total += lookup[i]->getAbundance(j);
-                output += '\t' + toString(lookup[i]->getAbundance(j));
+                total += lookup[i]->get(j);
+                output += '\t' + toString(lookup[i]->get(j));
             }
             out << m->currentSharedBinLabels[j] << '\t' << total << output << endl;
         }

@@ -286,7 +286,7 @@ int CountGroupsCommand::execute(){
 		
 		if (sharedfile != "")		{		
 			InputData input(sharedfile, "sharedfile");
-			vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 			
             map<string, string> variables; 
             string thisOutputDir = outputDir;
@@ -298,12 +298,12 @@ int CountGroupsCommand::execute(){
             m->openOutputFile(outputFileName, out);
             
             int total = 0;
-			for (int i = 0; i < lookup.size(); i++) {
-                int num = lookup[i]->getNumSeqs();
+            vector<string> groups = lookup->getNamesGroups();
+			for (int i = 0; i < groups.size(); i++) {
+                int num = lookup->getNumSeqs(groups[i]);
                 total += num;
-				m->mothurOut(lookup[i]->getGroup() + " contains " + toString(num) + "."); m->mothurOutEndLine();
-                out << lookup[i]->getGroup() << '\t' << num << endl;
-                delete lookup[i];
+				m->mothurOut(groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
+                out << groups[i] << '\t' << num << endl;
 			}
             out.close();
 			

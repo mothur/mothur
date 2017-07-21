@@ -87,10 +87,10 @@ private:
     vector<string> Groups, Estimators;
     set<string> labels;
     
-    vector<vector<double> > generateDistanceMatrix(vector<SharedRAbundVector*>& lookup);
-    int driver(vector<SharedRAbundVector*> thisLookup, vector< vector<seqDist> >& calcDists, Calculator*);
-    int processDriver(vector<SharedRAbundVector*>&, vector<int>&, string, vector<string>, vector<string>, vector<string>, int);
-    int createProcesses(vector<SharedRAbundVector*>&);
+    vector<vector<double> > generateDistanceMatrix(SharedRAbundVectors* lookup);
+    int driver(SharedRAbundVectors* thisLookup, vector< vector<seqDist> >& calcDists, Calculator*);
+    int processDriver(SharedRAbundVectors*, vector<int>&, string, vector<string>, vector<string>, vector<string>, int);
+    int createProcesses(SharedRAbundVectors*);
     vector<double> generateDesignFile(int, map<string,string>);
     int generateSummaryFile(int, map<string,string>, vector<double>);
 

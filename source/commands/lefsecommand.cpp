@@ -296,47 +296,47 @@ int LefseCommand::execute(){
         }
         
         InputData input(sharedfile, "sharedfile");
-        vector<SharedRAbundFloatVector*> lookup = input.getSharedRAbundFloatVectors();
-        string lastLabel = lookup[0]->getLabel();
+        SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
+        string lastLabel = lookup->getLabel();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+            if (m->control_pressed) { delete lookup;  return 0; }
             
-            if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 process(lookup, designMap);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 process(lookup, designMap);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
+                lookup->setLabel(saveLabel);
             }
             
-            lastLabel = lookup[0]->getLabel();
+            lastLabel = lookup->getLabel();
             //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+            delete lookup;
             
             if (m->control_pressed) { return 0; }
             
@@ -361,13 +361,13 @@ int LefseCommand::execute(){
         
         //run last label if you need to
         if (needToRun == true)  {
-            for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+            delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             
-            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             process(lookup, designMap);
             
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
         }
                 
 		
@@ -387,7 +387,7 @@ int LefseCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& designMap) {
+int LefseCommand::process(SharedRAbundFloatVectors* lookup, DesignMap& designMap) {
 	try {
         vector<string> classes;
         vector<string> subclasses;
@@ -396,8 +396,9 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
         map<string, vector<int> > subClass2GroupIndex; //maps subclass name to vector of indexes in lookup from that subclass. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
         map<string, vector<int> > class2GroupIndex; //maps subclass name to vector of indexes in lookup from that class. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
         if (normMillion) {  normalize(lookup);  }
-        for (int j = 0; j < lookup.size(); j++) {
-            string group = lookup[j]->getGroup();
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int j = 0; j < namesOfGroups.size(); j++) {
+            string group = namesOfGroups[j];
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             string thisSub = designMap.get(group, subclass);
             map<string, string>::iterator it = subclass2Class.find(thisSub);
@@ -459,7 +460,7 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
         
         if (m->debug) { m->mothurOut("[DEBUG]: completed lda\n"); } 
         
-        printResults(means, significantOtuLabels, sigOTUSLDA, lookup[0]->getLabel(), classes);
+        printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes);
         
         return 0;
     }
@@ -469,18 +470,18 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
 	}
 }
 //**********************************************************************************************************************
-int LefseCommand::normalize(vector<SharedRAbundFloatVector*>& lookup) {
+int LefseCommand::normalize(SharedRAbundFloatVectors* lookup) {
 	try {
         vector<double> mul;
-        for (int i = 0; i < lookup.size(); i++) {
-            double sum = 0.0;
-            for (int j = 0; j < lookup[i]->getNumBins(); j++) { sum += lookup[i]->getAbundance(j); }
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int i = 0; i < lookup->size(); i++) {
+            double sum = lookup->getNumSeqs(namesOfGroups[i]);
             mul.push_back(1000000.0/sum);
         }
         
-        for (int i = 0; i < lookup.size(); i++) {
-            for (int j = 0; j < lookup[i]->getNumBins(); j++) {
-                lookup[i]->set(j, lookup[i]->getAbundance(j)*mul[i], lookup[i]->getGroup());
+        for (int i = 0; i < lookup->size(); i++) {
+            for (int j = 0; j < lookup->getNumBins(); j++) {
+                lookup->set(j, lookup->get(j, namesOfGroups[i])*mul[i], namesOfGroups[i]);
             }
         }
         
@@ -492,14 +493,15 @@ int LefseCommand::normalize(vector<SharedRAbundFloatVector*>& lookup) {
 	}
 }
 //**********************************************************************************************************************
-map<int, double> LefseCommand::runKruskalWallis(vector<SharedRAbundFloatVector*>& lookup, DesignMap& designMap) {
+map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors* lookup, DesignMap& designMap) {
 	try {        
         map<int, double> significantOtuLabels;
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         //sanity check to make sure each treatment has a group in the shared file
         set<string> treatments;
-        for (int j = 0; j < lookup.size(); j++) {
-            string group = lookup[j]->getGroup();
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int j = 0; j < namesOfGroups.size(); j++) {
+            string group = namesOfGroups[j];
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             treatments.insert(treatment);
         }
@@ -510,10 +512,11 @@ map<int, double> LefseCommand::runKruskalWallis(vector<SharedRAbundFloatVector*>
             if (m->control_pressed) { break; }
             
             vector<spearmanRank> values;
-            for (int j = 0; j < lookup.size(); j++) {
-                string group = lookup[j]->getGroup();
+            vector<float> abunds = lookup->getOTU(i);
+            for (int j = 0; j < namesOfGroups.size(); j++) {
+                string group = namesOfGroups[j];
                 string treatment = designMap.get(group, mclass); //get value for this group in this category
-                spearmanRank temp(treatment, lookup[j]->getAbundance(i));
+                spearmanRank temp(treatment, abunds[j]);
                 values.push_back(temp);
             }
             
@@ -532,7 +535,7 @@ map<int, double> LefseCommand::runKruskalWallis(vector<SharedRAbundFloatVector*>
 }
 //**********************************************************************************************************************
 //assumes not neccessarily paired
-map<int, double> LefseCommand::runWilcoxon(vector<SharedRAbundFloatVector*>& lookup, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
+map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors* lookup, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
     try {
         map<int, double> significantOtuLabels;
         map<int, double>::iterator it;
@@ -542,14 +545,14 @@ map<int, double> LefseCommand::runWilcoxon(vector<SharedRAbundFloatVector*>& loo
          anything else
         */
         
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         for (int i = 0; i < numBins; i++) {
             if (m->control_pressed) { break; }
             
             it = bins.find(i);
             if (it != bins.end()) { //flagged in Kruskal Wallis
                 
-                vector<float> abunds;  for (int j = 0; j < lookup.size(); j++) { abunds.push_back(lookup[j]->getAbundance(i)); }
+                vector<float> abunds = lookup->getOTU(i);
                 
                 bool sig = testOTUWilcoxon(class2SubClasses, abunds, subClass2GroupIndex, subclass2Class);
                 if (sig) { significantOtuLabels[i] = it->second;  }
@@ -721,13 +724,13 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
 }
 //**********************************************************************************************************************
 //modelled after lefse.py test_lda_r function
-map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
+map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors* lookup, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
     try {
         map<int, double> sigOTUS;
         map<int, double>::iterator it;
         LinearAlgebra linear;
     
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         vector< vector<double> > adjustedLookup;
         
         for (int i = 0; i < numBins; i++) {
@@ -741,8 +744,8 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
                 if (m->debug) { m->mothurOut("[DEBUG]:flagged bin = " + toString(i) + "\n."); }
                 
                 //fill x with this OTUs abundances
-                vector<double> x;
-                for (int j = 0; j < lookup.size(); j++) {  x.push_back(lookup[j]->getAbundance(i));  } 
+                vector<float> tempx = lookup->getOTU(i);
+                vector<double> x; for (int h = 0; h < tempx.size(); h++) { x.push_back((double)tempx[h]); }
                 
                 //go through classes
                 for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {
@@ -782,7 +785,7 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
             classes.push_back(it->first);
         }
         
-        int numGroups = lookup.size(); //lfk
+        int numGroups = lookup->size(); //lfk
         int fractionNumGroups = numGroups * fBoots; //rfk
         minCl = (int)((float)(minCl*fBoots*fBoots*0.05));
         minCl = max(minCl, 1);
@@ -812,8 +815,8 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
             
             //print data in R input format for testing
             if (false) {
-                vector<string> groups; for (int h = 0; h < rand_s.size(); h++) {  groups.push_back(lookup[rand_s[h]]->getGroup()); }
-                for (int h = 0; h < groups.size(); h++) { cout << groups[h]<< endl; }
+                //vector<string> groups; for (int h = 0; h < rand_s.size(); h++) {  groups.push_back(lookup[rand_s[h]]->getGroup()); }
+                //for (int h = 0; h < groups.size(); h++) { cout << groups[h]<< endl; }
                 //printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, bins, subClass2GroupIndex, groups);
             }
             if (save < 1000) { m->mothurOut("[WARNING]: Skipping iter " + toString(j+1) + " in LDA test. This can be caused by too few groups per class or not enough contrast within the classes. \n"); }
@@ -856,9 +859,9 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
     }
 }
 //**********************************************************************************************************************
-vector< vector<double> > LefseCommand::getMeans(vector<SharedRAbundFloatVector*>& lookup, map<string, vector<int> >& class2GroupIndex) {
+vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors* lookup, map<string, vector<int> >& class2GroupIndex) {
     try {
-        int numBins = lookup[0]->getNumBins();
+        int numBins = lookup->getNumBins();
         int numClasses = class2GroupIndex.size();
         vector< vector<double> > means; //[numOTUS][classes]
         means.resize(numBins);
@@ -876,9 +879,10 @@ vector< vector<double> > LefseCommand::getMeans(vector<SharedRAbundFloatVector*>
         }
         
         for (int i = 0; i < numBins; i++) {
-            for (int j = 0; j < lookup.size(); j++) {
+            vector<float> abunds = lookup->getOTU(i);
+            for (int j = 0; j < abunds.size(); j++) {
                 if (m->control_pressed) { return means; }
-                means[i][quickIndex[indexToClass[j]]] += lookup[j]->getAbundance(i);
+                means[i][quickIndex[indexToClass[j]]] += abunds[j];
             }
         }
         
@@ -1167,7 +1171,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         exit(1);
     }
 }
-//**********************************************************************************************************************
+/**********************************************************************************************************************
 int LefseCommand::makeShared(int numDesignLines) {
     try {
         ifstream in;
@@ -1195,7 +1199,7 @@ int LefseCommand::makeShared(int numDesignLines) {
         out.close();
         DesignMap design(sharedfile+".design");
         
-        vector<SharedRAbundFloatVector*> lookup;
+        SharedRAbundFloatVectors* lookup;
         for (int k = 0; k < lines[0].size()-1; k++) {
             SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
             temp->setLabel("0.03");
@@ -1247,6 +1251,7 @@ int LefseCommand::makeShared(int numDesignLines) {
     }
 }
 
-//**********************************************************************************************************************
+//**********************************************************************************************************************/
+
 
 

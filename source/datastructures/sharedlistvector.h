@@ -54,7 +54,6 @@ public:
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector* getSharedOrderVector();
-	SharedRAbundVector getSharedRAbundVector(string);  //get sharedrabundvector for a certain group
 	SharedRAbundVectors* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
     SharedRAbundFloatVectors* getSharedRAbundFloatVector(); //returns sharedRabundVectors for all the users groups
 	

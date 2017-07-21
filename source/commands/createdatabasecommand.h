@@ -42,7 +42,7 @@ private:
 	vector<int> readFasta(vector<Sequence>&);
     vector<int> readTax(vector<string>&, vector<string>&);
 	ListVector* getList();
-    vector<SharedRAbundVector*> getShared();
+    SharedRAbundVectors* getShared();
     int findIndex(vector<string>&, string);
 	
 };

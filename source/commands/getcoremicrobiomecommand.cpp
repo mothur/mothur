@@ -220,11 +220,11 @@ int GetCoreMicroBiomeCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         InputData input(inputFileName, format);
-        vector<SharedRAbundFloatVector*> lookup = input.getSharedRAbundFloatVectors();
-        string lastLabel = lookup[0]->getLabel();
+        SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
+        string lastLabel = lookup->getLabel();
         
         if (samples != -1) { 
-            if ((samples < 1) || (samples > lookup.size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup.size()) + " samples, so I will use that.\n"); samples = lookup.size(); }
+            if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
         }
 
         
@@ -233,39 +233,39 @@ int GetCoreMicroBiomeCommand::execute(){
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
             
-            if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createTable(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+                delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createTable(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
+                lookup->setLabel(saveLabel);
             }
             
-            lastLabel = lookup[0]->getLabel();
+            lastLabel = lookup->getLabel();
             //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+            delete lookup;
             
             if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
             
@@ -290,14 +290,16 @@ int GetCoreMicroBiomeCommand::execute(){
         
         //run last label if you need to
         if (needToRun == true)  {
-            for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+            delete lookup;
+ 
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             
-            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             
             createTable(lookup);
             
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
+
         }
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
@@ -317,18 +319,18 @@ int GetCoreMicroBiomeCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& lookup){
+int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors* lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[tag]"] = lookup[0]->getLabel();
+        variables["[tag]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("coremicrobiome", variables);
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        int numSamples = lookup.size();
-        int numOtus = lookup[0]->getNumBins();
+        int numSamples = lookup->size();
+        int numOtus = lookup->getNumBins();
         
         //table is 100 by numsamples
         //question we are answering is: what fraction of OTUs in a study have a relative abundance at or above %X
@@ -353,6 +355,7 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
             otuNames[thisAbund] = temp;
         }
         
+        vector<string> sampleNames = lookup->getNamesGroups();
         for (int i = 0; i < numOtus; i++) {
             
             if (m->control_pressed) { break; }
@@ -360,8 +363,8 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
             //count number of samples in this otu with a relabund >= spot in count
             vector<int> counts; counts.resize(factor+1, 0);
             
-            for (int j = 0; j < lookup.size(); j++) {
-                double relabund = lookup[j]->getAbundance(i);
+            for (int j = 0; j < sampleNames.size(); j++) {
+                double relabund = lookup->get(i, sampleNames[j]);
                 int wholeRelabund = (int) (floor(relabund*factor));
                 for (int k = 0; k < wholeRelabund+1; k++) { counts[k]++; }
             }
@@ -409,7 +412,7 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         if (m->control_pressed) { return 0; }
         
         if ((samples != -1) || (abund != -1))  {
-            string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiomelist";
+            string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
             outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;
             m->openOutputFile(outputFileName2, out2);

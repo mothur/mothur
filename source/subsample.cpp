@@ -105,42 +105,69 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
 	}
 }
 //**********************************************************************************************************************
+vector<string> SubSample::getSample(vector<RAbundVector*> rabunds, int size) {
+    try {
+        
+        //save mothurOut's binLabels to restore for next label
+        vector<string> saveBinLabels = m->currentSharedBinLabels;
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors();
+        
+        int numBins = rabunds[0]->getNumBins();
+        for (int i = 0; i < rabunds.size(); i++) {
+            int thisSize = rabunds[i]->getNumSeqs();
+            
+            if (thisSize != size) {
+                
+                OrderVector order = rabunds[i]->getOrderVector(NULL);
+                
+                m->mothurRandomShuffle(order);
+                
+                RAbundVector* temp = new RAbundVector(numBins);
+                temp->setLabel(rabunds[i]->getLabel());
+                temp->setGroup(rabunds[i]->getGroup());
+                
+                for (int j = 0; j < size; j++) {
+                    
+                    if (m->control_pressed) {  return m->currentSharedBinLabels; }
+                    
+                    int bin = order.get(j);
+                    
+                    int abund = temp->get(bin);
+                    temp->set(bin, (abund+1));
+                }
+                newLookup->push_back(temp);
+            }
+        }
+        newLookup->eliminateZeroOTUS();
+        for (int i = 0; i < rabunds.size(); i++) { delete rabunds[i]; } rabunds.clear();
+        rabunds = newLookup->getSharedRAbundVectors();
+        delete newLookup;
+        
+        if (m->control_pressed) { return m->currentSharedBinLabels; }
+        
+        //save mothurOut's binLabels to restore for next label
+        vector<string> subsampleBinLabels = m->currentSharedBinLabels;
+        m->currentSharedBinLabels = saveBinLabels;
+        
+        return subsampleBinLabels;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getSample-shared");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 vector<string> SubSample::getSample(SharedRAbundVectors* thislookup, int size) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
-        vector<string> groups = thislookup->getNamesGroups();
         vector<RAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
+        getSample(rabunds, size);
         SharedRAbundVectors* newLookup = new SharedRAbundVectors();
 		
-		int numBins = thislookup->getNumBins();
-		for (int i = 0; i < rabunds.size(); i++) {
-			int thisSize = rabunds[i]->getNumSeqs();
-			
-			if (thisSize != size) {
-				
-				OrderVector order = rabunds[i]->getOrderVector(NULL);
-                
-                m->mothurRandomShuffle(order);
-				
-				RAbundVector* temp = new RAbundVector(numBins);
-				temp->setLabel(rabunds[i]->getLabel());
-				
-				for (int j = 0; j < size; j++) {
-					
-					if (m->control_pressed) {  return m->currentSharedBinLabels; }
-					
-					int bin = order.get(j);
-					
-					int abund = temp->get(bin);
-					temp->set(bin, (abund+1));
-				}
-                newLookup->push_back(temp, groups[i]);
-			}
-		}
-        newLookup->eliminateZeroOTUS();
-        delete thislookup;
+		for (int i = 0; i < rabunds.size(); i++) { newLookup->push_back(rabunds[i]);  }
         thislookup = newLookup;
         
 		if (m->control_pressed) { return m->currentSharedBinLabels; }

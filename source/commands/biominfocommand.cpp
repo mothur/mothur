@@ -442,15 +442,15 @@ int BiomInfoCommand::createFilesFromBiom() {
             m->currentSharedBinLabels = otuNames;
             
             //read data
-            vector<SharedRAbundVector*> lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
+            SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
             
-            m->mothurOutEndLine(); m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-            lookup[0]->printHeaders(out);
-            printSharedData(lookup, out);
+            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            lookup->printHeaders(out);
+            lookup->print(out);
             
             if (conTaxonomy.size() != 0) {
                 //sanity check
-                if ((lookup[0]->getNumBins() == conTaxonomy.size()) && (lookup[0]->getNumBins() == otuNames.size())) {
+                if ((lookup->getNumBins() == conTaxonomy.size()) && (lookup->getNumBins() == otuNames.size())) {
                     //write taxonomy file
                     map<string, string> variables;
                     variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
@@ -464,14 +464,15 @@ int BiomInfoCommand::createFilesFromBiom() {
                     CountTable* ct = NULL;
                     if (basis == "otu") {
                         ct = new CountTable();
-                        for (int j = 0; j < lookup.size(); j++) {  ct->addGroup(lookup[j]->getGroup()); }
+                        vector<string> groupNames = lookup->getNamesGroups();
+                        for (int j = 0; j < groupNames.size(); j++) {  ct->addGroup(groupNames[j]); }
                         
-                        int numBins = lookup[0]->getNumBins();
+                        int numBins = lookup->getNumBins();
                         for (int i = 0; i < numBins; i++) {
                             vector<int> abunds;
-                            for (int j = 0; j < lookup.size(); j++) {
+                            for (int j = 0; j < lookup->size(); j++) {
                                 if (m->control_pressed) { break; }
-                                abunds.push_back(lookup[j]->getAbundance(i));
+                                abunds.push_back(lookup->get(i, groupNames[j]));
                             }
                             ct->push_back(otuNames[i], abunds);
                         }
@@ -479,14 +480,15 @@ int BiomInfoCommand::createFilesFromBiom() {
                     
                     PhyloSummary taxaSum(ct, relabund, printlevel);
                     
-                    for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+                    for (int i = 0; i < lookup->getNumBins(); i++) {
                         if (m->control_pressed) { break; }
                         
                         int total = 0;
                         map<string, bool> containsGroup;
-                        for (int j = 0; j < lookup.size(); j++) {
-                            total += lookup[j]->getAbundance(i);
-                            containsGroup[lookup[j]->getGroup()] = lookup[j]->getAbundance(i);
+                        for (int j = 0; j < lookup->size(); j++) {
+                            int abund = lookup->get(i, groupNames[j]);
+                            total += abund;
+                            containsGroup[groupNames[j]] = abund;
                         }
                         
                         string newTax = m->addUnclassifieds(conTaxonomy[i], maxLevel, false);
@@ -516,7 +518,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 }
             }
             
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
         }
         
         return 0;
@@ -527,17 +529,16 @@ int BiomInfoCommand::createFilesFromBiom() {
     }
 }
 //**********************************************************************************************************************
-vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, string line, string matrixElementType, vector<string>& groupNames, int numOTUs) {
+SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line, string matrixElementType, vector<string>& groupNames, int numOTUs) {
     try {
-        
-        vector<SharedRAbundVector*> lookup;
+        SharedRAbundVectors* lookup = new SharedRAbundVectors();
         
         //creates new sharedRAbunds
         for (int i = 0; i < groupNames.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
+            RAbundVector* temp = new RAbundVector(numOTUs); //sets all abunds to 0
             temp->setLabel(label);
             temp->setGroup(groupNames[i]);
-            lookup.push_back(temp);
+            lookup->push_back(temp);
         }
         
         bool dataStart = false;
@@ -568,11 +569,11 @@ vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, strin
                     if (matrixFormat == "dense") {
                         
                         //sanity check
-                        if (nums.size() != lookup.size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
+                        if (nums.size() != lookup->size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
                         
                         //set abundances for this otu
                         //nums contains [abundSample0, abundSample1, abundSample2, ...] for current OTU
-                        for (int j = 0; j < lookup.size(); j++) { lookup[j]->set(otuCount, nums[j], groupNames[j]); }
+                        for (int j = 0; j < groupNames.size(); j++) { lookup->set(otuCount, nums[j], groupNames[j]); }
                         
                         otuCount++;
                     }else {
@@ -580,7 +581,7 @@ vector<SharedRAbundVector*> BiomInfoCommand::readData(string matrixFormat, strin
                         if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->control_pressed = true; }
                         
                         //nums contains [otuNum, sampleNum, abundance]
-                        lookup[nums[1]]->set(nums[0], nums[2], groupNames[nums[1]]);
+                        lookup->set(nums[0], nums[2], groupNames[nums[1]]);
                     }
                     nums.clear();
                 }
@@ -851,8 +852,8 @@ string BiomInfoCommand::getTag(string& line) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-void BiomInfoCommand::printSharedData(vector<SharedRAbundVector*> thislookup, ofstream& out) {
+/**********************************************************************************************************************
+void BiomInfoCommand::printSharedData(SharedRAbundVectors* thislookup, ofstream& out) {
     try {
         
         //sorts alphabetically
@@ -877,4 +878,6 @@ void BiomInfoCommand::printSharedData(vector<SharedRAbundVector*> thislookup, of
     }
 }
 
-//**********************************************************************************************************************
+//**********************************************************************************************************************/
+
+

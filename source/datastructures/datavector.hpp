@@ -8,28 +8,27 @@
 /* This class is parent to listvector, ordervector, rabundvector, sabundvector, sharedordervector, sharedrabundvector, sharedsabundvector. 
 	The child classes all contain OTU information in different forms. */
 	
-
+class SharedSAbundVector;
+class SharedRAbundVectors;
 class RAbundVector;
+class RAbundFloatVector;
 class SAbundVector;
 class OrderVector;
 class SharedListVector;
 class SharedOrderVector;
-class SharedSAbundVector;
-class SharedRAbundVector;
-class SharedRAbundFloatVector;
 class GroupMap;
 
 class DataVector {
 	
 public:
-	DataVector(){ m = MothurOut::getInstance(); }// : maxRank(0), numBins(0), numSeqs(0){};
+	DataVector(){ m = MothurOut::getInstance(); }
 	DataVector(string l) : label(l) { m = MothurOut::getInstance();};
-	DataVector(const DataVector& dv) : label(dv.label){ m = MothurOut::getInstance();};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
+    DataVector(const DataVector& dv) : label(dv.label){ m = MothurOut::getInstance();};
 	DataVector(ifstream&) {m = MothurOut::getInstance();}
 	DataVector(ifstream&, GroupMap*){m = MothurOut::getInstance();}
 	virtual ~DataVector(){};
 
-	virtual int size()	= 0;
+	virtual int size() = 0;
     virtual void clear() = 0;
 	virtual void print(ostream&) = 0;
     virtual RAbundVector getRAbundVector() = 0;
@@ -46,9 +45,7 @@ public:
 protected:
 	string label;
 	MothurOut* m;
-//	int maxRank;
-//	int numBins;
-//	int numSeqs;	
+
 };
 
 /***********************************************************************/

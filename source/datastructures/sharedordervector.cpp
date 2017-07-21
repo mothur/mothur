@@ -292,19 +292,22 @@ SAbundVector SharedOrderVector::getSAbundVector(){
 
 }
 /***********************************************************************/
-SharedRAbundVector SharedOrderVector::getSharedRAbundVector(string group) {
+SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector(string group) {
 	try {
-		SharedRAbundVector sharedRav(data.size());
+		RAbundVector* sharedRav = new RAbundVector(data.size());
 		
-		sharedRav.setLabel(label);
-		sharedRav.setGroup(group);
+		sharedRav->setLabel(label);
+		sharedRav->setGroup(group);
 		
 		for (int i = 0; i < data.size(); i++) {
 			if (data[i].group == group) {
-				sharedRav.set(data[i].abundance, sharedRav.getAbundance(data[i].abundance) + 1, data[i].group);
+				sharedRav->set(data[i].abundance, sharedRav->get(data[i].abundance) + 1);
 			}
 		}
-		return sharedRav;
+        
+        SharedRAbundVectors* lookup = new SharedRAbundVectors();
+        lookup->push_back(sharedRav);
+		return lookup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedOrderVector", "getSharedRAbundVector");
@@ -312,16 +315,15 @@ SharedRAbundVector SharedOrderVector::getSharedRAbundVector(string group) {
 	}
 }
 /***********************************************************************/
-vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
+SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector() {
 	try {
 		SharedUtil* util;
 		util = new SharedUtil();
-		vector<SharedRAbundVector*> lookup;
 		
 		vector<string> Groups = m->getGroups();
 		vector<string> allGroups = m->getAllGroups();
 		util->setGroups(Groups, allGroups);
-		util->getSharedVectors(Groups, lookup, this);
+		SharedRAbundVectors* lookup = util->getSharedVectors(Groups, this);
 		m->setGroups(Groups);
 		m->setAllGroups(allGroups);
 		
@@ -332,20 +334,6 @@ vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
 		exit(1);
 	}
 }
-/***********************************************************************/
-SharedSAbundVector SharedOrderVector::getSharedSAbundVector(string group) {
-	try {
-		
-		SharedRAbundVector sharedRav(this->getSharedRAbundVector(group));
-		return sharedRav.getSharedSAbundVector();
-				
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedOrderVector", "getSharedSAbundVector");
-		exit(1);
-	}
-}
-
 /***********************************************************************/
 
 SharedOrderVector SharedOrderVector::getSharedOrderVector(){

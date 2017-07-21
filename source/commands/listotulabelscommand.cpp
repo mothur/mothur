@@ -207,47 +207,47 @@ int ListOtuLabelsCommand::execute(){
         InputData input(inputFileName, format);
         
         if (format == "relabund") {
-            vector<SharedRAbundFloatVector*> lookup = input.getSharedRAbundFloatVectors();
-            string lastLabel = lookup[0]->getLabel();
+            SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
+            string lastLabel = lookup->getLabel();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
             set<string> userLabels = labels;
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->control_pressed) { delete lookup; for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
                 
-                if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     createList(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup[0]->getLabel();
+                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookup->getLabel();
                     
-                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+                    delete lookup;
                     lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     createList(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup[0]->setLabel(saveLabel);
+                    lookup->setLabel(saveLabel);
                 }
                 
-                lastLabel = lookup[0]->getLabel();
+                lastLabel = lookup->getLabel();
                 //prevent memory leak
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+                delete lookup;
                 
                 if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
                 
@@ -272,58 +272,58 @@ int ListOtuLabelsCommand::execute(){
             
             //run last label if you need to
             if (needToRun == true)  {
-                for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+                delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createList(lookup);
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
             }
         }else if (format == "sharedfile") {
             
-            vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-            string lastLabel = lookup[0]->getLabel();
+            SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            string lastLabel = lookup->getLabel();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
             set<string> userLabels = labels;
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
                 
-                if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     createList(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup[0]->getLabel();
+                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookup->getLabel();
                     
-                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+                    delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     createList(lookup);
                     
-                    processedLabels.insert(lookup[0]->getLabel());
-                    userLabels.erase(lookup[0]->getLabel());
+                    processedLabels.insert(lookup->getLabel());
+                    userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup[0]->setLabel(saveLabel);
+                    lookup->setLabel(saveLabel);
                 }
                 
-                lastLabel = lookup[0]->getLabel();
+                lastLabel = lookup->getLabel();
                 //prevent memory leak
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+                delete lookup;
                 
                 if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
                 
@@ -348,14 +348,14 @@ int ListOtuLabelsCommand::execute(){
             
             //run last label if you need to
             if (needToRun == true)  {
-                for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createList(lookup);
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
             }
         }else {
             ListVector* list = input.getListVector();
@@ -451,12 +451,12 @@ int ListOtuLabelsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
+int ListOtuLabelsCommand::createList(SharedRAbundVectors* lookup){
 	try {
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("otulabels",variables);
         outputNames.push_back(outputFileName);  outputTypes["otulabels"].push_back(outputFileName);
 		ofstream out;
@@ -476,11 +476,11 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
 
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(vector<SharedRAbundFloatVector*>& lookup){
+int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors* lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
-        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("otulabels",variables);
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
 		ofstream out;

@@ -74,10 +74,10 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 	}
 }
 //**********************************************************************************************************************
-vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
+vector<string> Venn::getPic(vector<RAbundVector*> lookup, vector<Calculator*> vCalcs) {
 	try {
 
-		vector<SharedRAbundVector*> subset;
+		vector<RAbundVector*> subset;
 		vector<string> outputNames;
 		
 		int width = 1500;
@@ -277,7 +277,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					NSeqs* nseqsCalc = new NSeqs();
 					vector<double> sharedData = nseqsCalc->getValues(lookup);
 						
-					vector<SharedRAbundVector*> mysubset; mysubset.push_back(lookup[0]); mysubset.push_back(lookup[1]);
+					vector<RAbundVector*> mysubset; mysubset.push_back(lookup[0]); mysubset.push_back(lookup[1]);
 					vector<double> sharedAB = nseqsCalc->getValues(mysubset);
 						
 					mysubset.clear(); mysubset.push_back(lookup[0]); mysubset.push_back(lookup[2]);
@@ -337,10 +337,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 
 					if (vCalcs[i]->getMultiple() == false) {
 						//merge BC and estimate with shared with A
-						SharedRAbundVector* merge = new SharedRAbundVector();
-						for (int j = 0; j < lookup[1]->size(); j++) {
-							merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), "");
-						}
+						RAbundVector* merge = new RAbundVector();
+						for (int j = 0; j < lookup[1]->size(); j++) {  merge->push_back((lookup[1]->get(j) + lookup[2]->get(j)));  }
 					
 						subset.clear();
 						subset.push_back(lookup[0]); subset.push_back(merge);
@@ -348,10 +346,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				
 						delete merge;
 						//merge AC and estimate with shared with B
-						merge = new SharedRAbundVector();
-						for (int j = 0; j < lookup[0]->size(); j++) {
-							merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), "");
-						}
+						merge = new RAbundVector();
+						for (int j = 0; j < lookup[0]->size(); j++) { merge->push_back((lookup[0]->get(j) + lookup[2]->get(j))); }
 					
 						subset.clear();
 						subset.push_back(merge); subset.push_back(lookup[1]);
@@ -359,10 +355,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				
 						delete merge;
 						//merge AB and estimate with shared with C
-						merge = new SharedRAbundVector();
-						for (int j = 0; j < lookup[0]->size(); j++) {
-							merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), "");
-						}
+						merge = new RAbundVector();
+						for (int j = 0; j < lookup[0]->size(); j++) { merge->push_back((lookup[0]->get(j) + lookup[1]->get(j))); }
 					
 						subset.clear();
 						subset.push_back(lookup[2]); subset.push_back(merge);
@@ -466,7 +460,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         m->openOutputFile(filenameShared, outShared);
                         outShared << "Groups\tNumShared\tOTULabels\n";
                     }
-					vector<SharedRAbundVector*> subset;
+					vector<RAbundVector*> subset;
 
 					//get estimates for numA
 					subset.push_back(lookup[0]);
@@ -827,7 +821,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 						NSeqs* nseqsCalc = new NSeqs();
 						vector<double> sharedData = nseqsCalc->getValues(lookup);
 						
-						vector<SharedRAbundVector*> mysubset; mysubset.push_back(lookup[0]); mysubset.push_back(lookup[1]);
+						vector<RAbundVector*> mysubset; mysubset.push_back(lookup[0]); mysubset.push_back(lookup[1]);
 						vector<double> sharedAB = nseqsCalc->getValues(mysubset);
 						
 						mysubset.clear(); mysubset.push_back(lookup[0]); mysubset.push_back(lookup[2]);

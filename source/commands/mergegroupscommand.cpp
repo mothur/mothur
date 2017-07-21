@@ -328,137 +328,66 @@ int MergeGroupsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
+int MergeGroupsCommand::process(SharedRAbundVectors* thisLookUp, ofstream& out){
 	try {
         vector<string> setNames = designMap->getCategory();
         
-        if (method == "average") {
-            //create sharedRabundFloatVectors
-            vector<SharedRAbundFloatVector*> temp = thisLookUp->getSharedRAbundFloatVectors();
+        //create sharedRabundVectors
+        vector<RAbundVector*> data = thisLookUp->getSharedRAbundVectors();
+        
+        //create SharedRAbundVectors for the merged groups. Fill with blank rabundFloatVectors
+        SharedRAbundVectors* merged; merged = new SharedRAbundVectors();
+        for (int i = 0; i < setNames.size(); i++) {
+            RAbundVector* myLookup = new RAbundVector(thisLookUp->getNumBins());
+            myLookup->setLabel(thisLookUp->getLabel());
+            myLookup->setGroup(setNames[i]);
+            merged->push_back(myLookup);
+        }
+ 
+        //for each OTU
+        for (int j = 0; j < data[0]->getNumBins(); j++) {
+            if (m->control_pressed) { break; }
             
-            //follow code below
-            map<string, SharedRAbundFloatVector> merged;
-            map<string, SharedRAbundFloatVector>::iterator it;
-            for (int i = 0; i < setNames.size(); i++) {
-                SharedRAbundFloatVector myLookup(thisLookUp[0]->getNumBins());
-                myLookup.setLabel(thisLookUp[0]->getLabel());
-                merged[setNames[i]] = myLookup;
-            }
-            
-            map<string, vector<int> > clearGroupAbunds;
+            map<string, vector<int> > otusGroupAbunds;
             map<string, vector<int> >::iterator itAbunds;
             
-            for (int i = 0; i < temp.size(); i++) {
-                if (m->control_pressed) { return 0; }
-                //what grouping does this group belong to
-                string grouping = designMap->get(temp[i]->getGroup());
-                if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+            //for each sample
+            for (int i = 0; i < data.size(); i++) {
+                
+                string grouping = designMap->get(data[i]->getGroup());  //what set to your belong to
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + data[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
                 else {
-                    //do we already have a member of this grouping?
-                    it = merged.find(grouping);
-                    
-                    if (it == merged.end()) { //nope, so create it
-                        merged[grouping] = *temp[i];
-                        merged[grouping].setGroup(grouping);
+                    //Add this OTUs values to sets abunds
+                    itAbunds = otusGroupAbunds.find(grouping);
+                    if (itAbunds == otusGroupAbunds.end()) { //new group
                         vector<int> temp;
-                        clearGroupAbunds[grouping] = temp;
+                        temp.push_back(data[i]->get(j));
+                        otusGroupAbunds[grouping] = temp;
+                    }else {
+                        (itAbunds->second).push_back(data[i]->get(j));
                     }
                 }
             }
             
-            for (int j = 0; j < temp[0]->getNumBins(); j++) {
-                if (m->control_pressed) { return 0; }
-                
-                map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
-                for (int i = 0; i < temp.size(); i++) {
-                    
-                    string grouping = designMap->get(temp[i]->getGroup());
-                    if (grouping == "not found") { m->mothurOut("[ERROR]: " + temp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
-                    else {
-                        otusGroupAbunds[grouping].push_back(temp[i]->getAbundance(j));
-                    }
-                }
-                
-                for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
-                    int abund = mergeAbund(itAbunds->second);
-                    merged[itAbunds->first].set(j, abund, itAbunds->first);
-                }
-            }
-            
-            if (method == "median") {
-                vector<SharedRAbundFloatVector*> temp2;
-                for (it = merged.begin(); it != merged.end(); it++) {  temp2.push_back(&(it->second)); }
-                eliminateZeroOTUS(temp2);
-            }
-            
-            //print new file
-            for (it = merged.begin(); it != merged.end(); it++) {
-                if (!m->printedSharedHeaders) { (it->second).printHeaders(out); }
-                out << (it->second).getLabel() << '\t' << it->first << '\t';
-                (it->second).print(out);
-            }
-        }else {
-            map<string, SharedRAbundVector> merged;
-            map<string, SharedRAbundVector>::iterator it;
-            for (int i = 0; i < setNames.size(); i++) {
-                SharedRAbundVector myLookup(thisLookUp[0]->getNumBins());
-                myLookup.setLabel(thisLookUp[0]->getLabel());
-                merged[setNames[i]] = myLookup;
-            }
-            
-            map<string, vector<int> > clearGroupAbunds;
-            map<string, vector<int> >::iterator itAbunds;
-            
-            for (int i = 0; i < thisLookUp.size(); i++) {
-                if (m->control_pressed) { return 0; }
-                //what grouping does this group belong to
-                string grouping = designMap->get(thisLookUp[i]->getGroup());
-                if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
-                else {
-                    //do we already have a member of this grouping?
-                    it = merged.find(grouping);
-                    
-                    if (it == merged.end()) { //nope, so create it
-                        merged[grouping] = *thisLookUp[i];
-                        merged[grouping].setGroup(grouping);
-                        vector<int> temp;
-                        clearGroupAbunds[grouping] = temp;
-                    }
-                }
-            }
-            
-            for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
-                if (m->control_pressed) { return 0; }
-                
-                map<string, vector<int> > otusGroupAbunds = clearGroupAbunds;
-                for (int i = 0; i < thisLookUp.size(); i++) {
-                    
-                    string grouping = designMap->get(thisLookUp[i]->getGroup());
-                    if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
-                    else {
-                        otusGroupAbunds[grouping].push_back(thisLookUp[i]->getAbundance(j));
-                    }
-                }
-                
-                for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
-                    int abund = mergeAbund(itAbunds->second);
-                    merged[itAbunds->first].set(j, abund, itAbunds->first);
-                }
-            }
-            
-            if (method == "median") {
-                vector<SharedRAbundVector*> temp;
-                for (it = merged.begin(); it != merged.end(); it++) {  temp.push_back(&(it->second)); }
-                eliminateZeroOTUS(temp);
-            }
-            
-            //print new file
-            for (it = merged.begin(); it != merged.end(); it++) {
-                if (!m->printedSharedHeaders) { (it->second).printHeaders(out); }
-                out << (it->second).getLabel() << '\t' << it->first << '\t';
-                (it->second).print(out);
+            //find results for this bin. Set merged value for this bin in the results
+            for (itAbunds = otusGroupAbunds.begin(); itAbunds != otusGroupAbunds.end(); itAbunds++) {
+                int abund = mergeAbund(itAbunds->second);
+                merged->set(j, abund, itAbunds->first);
             }
         }
+        
+        //free memory
+        for (int i = 0; i < data.size(); i++) {	delete data[i]; 	}
+        
+        if (m->control_pressed) { delete merged; return 0; }
+        
+        merged->eliminateZeroOTUS(); // remove any zero OTUs created by median option.
+        
+        //print new file
+        if (!m->printedSharedHeaders) { merged->printHeaders(out); }
+        merged->print(out);
+        delete merged;
+        
 		return 0;
 		
 	}
@@ -484,46 +413,46 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		m->openOutputFile(outputFileName, out);
 		
 		InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  out.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->control_pressed) {  out.close(); delete lookup; m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				
 				process(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+			delete lookup;
 			
 			if (m->control_pressed) {  out.close(); m->clearGroups();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
@@ -548,13 +477,13 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
+			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			process(lookup, out);
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 		}
 		
 		out.close();
@@ -776,119 +705,6 @@ int MergeGroupsCommand::mergeAbund(vector<int> values){
     }
     catch(exception& e) {
         m->errorOut(e, "MergeGroupsCommand", "mergeAbund");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int MergeGroupsCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-    try {
-        
-        vector<SharedRAbundVector*> newLookup;
-        for (int i = 0; i < thislookup.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
-            temp->setLabel(thislookup[i]->getLabel());
-            temp->setGroup(thislookup[i]->getGroup());
-            newLookup.push_back(temp);
-        }
-        
-        //for each bin
-        vector<string> newBinLabels;
-        string snumBins = toString(thislookup[0]->getNumBins());
-        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-            
-            //look at each sharedRabund and make sure they are not all zero
-            bool allZero = true;
-            for (int j = 0; j < thislookup.size(); j++) {
-                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-            }
-            
-            //if they are not all zero add this bin
-            if (!allZero) {
-                for (int j = 0; j < thislookup.size(); j++) {
-                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-                }
-                //if there is a bin label use it otherwise make one
-                string binLabel = "Otu";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-                
-                newBinLabels.push_back(binLabel);
-            }
-        }
-        
-        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-        thislookup.clear();
-        
-        thislookup = newLookup;
-        m->currentSharedBinLabels = newBinLabels;
-        
-        return 0;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MergeGroupsCommand", "eliminateZeroOTUS");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int MergeGroupsCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
-    try {
-        
-        vector<SharedRAbundFloatVector*> newLookup;
-        for (int i = 0; i < thislookup.size(); i++) {
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-            temp->setLabel(thislookup[i]->getLabel());
-            temp->setGroup(thislookup[i]->getGroup());
-            newLookup.push_back(temp);
-        }
-        
-        //for each bin
-        vector<string> newBinLabels;
-        string snumBins = toString(thislookup[0]->getNumBins());
-        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-            
-            //look at each sharedRabund and make sure they are not all zero
-            bool allZero = true;
-            for (int j = 0; j < thislookup.size(); j++) {
-                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-            }
-            
-            //if they are not all zero add this bin
-            if (!allZero) {
-                for (int j = 0; j < thislookup.size(); j++) {
-                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-                }
-                //if there is a bin label use it otherwise make one
-                string binLabel = "Otu";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-                
-                newBinLabels.push_back(binLabel);
-            }
-        }
-        
-        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-        
-        thislookup = newLookup;
-        m->currentSharedBinLabels = newBinLabels;
-        
-        return 0;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MergeGroupsCommand", "eliminateZeroOTUS");
         exit(1);
     }
 }

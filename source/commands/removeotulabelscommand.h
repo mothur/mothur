@@ -41,7 +41,6 @@ private:
     vector<string> outputNames;
     set<string> otulabels;
     ListVector* list;
-    vector<SharedRAbundVector*> lookup;
     
     int readClassifyOtu();
     int readOtuAssociation();
@@ -49,7 +48,7 @@ private:
     int readList();
     int readShared();
     int getListVector();
-    int getShared();
+    SharedRAbundVectors* getShared();
 };
 
 /**************************************************************************************************/

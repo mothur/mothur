@@ -405,8 +405,8 @@ int SummaryCommand::execute(){
                 }
             }
 		
-			input = new InputData(inputFileNames[p], format);
-			sabund = input->getSAbundVector();
+			InputData input(inputFileNames[p], format);
+			sabund = input.getSAbundVector();
 			string lastLabel = sabund->getLabel();
 		
 			for(int i=0;i<sumCalculators.size();i++){
@@ -430,11 +430,11 @@ int SummaryCommand::execute(){
 			
             
             
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+				if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -444,7 +444,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                    if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 					numLines++;
 				}
 				
@@ -452,7 +452,7 @@ int SummaryCommand::execute(){
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
-					sabund = input->getSAbundVector(lastLabel);
+					sabund = input.getSAbundVector(lastLabel);
 					
 					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(sabund->getLabel());
@@ -460,7 +460,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 					numLines++;
 					
 					//restore real lastlabel to save below
@@ -470,10 +470,10 @@ int SummaryCommand::execute(){
 				lastLabel = sabund->getLabel();			
 				
 				delete sabund;
-				sabund = input->getSAbundVector();
+				sabund = input.getSAbundVector();
 			}
 			
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -491,12 +491,12 @@ int SummaryCommand::execute(){
 			//run last label if you need to
 			if (needToRun == true)  {
 				if (sabund != NULL) {	delete sabund;	}
-				sabund = input->getSAbundVector(lastLabel);
+				sabund = input.getSAbundVector(lastLabel);
 				
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
                 process(sabund, outputFileHandle, outAve);
                 
-                if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
 				numLines++;
 				delete sabund;
 			}
@@ -504,10 +504,8 @@ int SummaryCommand::execute(){
 			outputFileHandle.close();
             if (subsample) { outAve.close(); }
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
-
-			
-			delete input;  
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
 		
@@ -641,69 +639,50 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         map<string, string> files;
         map<string, string>::iterator it3;
         
-        input = new InputData(filename, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
+        InputData input(filename, "sharedfile");
+        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         
         string sharedFileRoot = m->getRootName(filename);
 		
         /******************************************************/
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup[0]->getNumSeqs();
-                for (int i = 1; i < lookup.size(); i++) {
-                    int thisSize = lookup[i]->getNumSeqs();
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
-                m->clearGroups();
-                vector<string> Groups;
-                vector<SharedRAbundVector*> temp;
-                for (int i = 0; i < lookup.size(); i++) {
-                    if (lookup[i]->getNumSeqs() < subsampleSize) { 
-                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-                        delete lookup[i];
-                    }else { 
-                        Groups.push_back(lookup[i]->getGroup()); 
-                        temp.push_back(lookup[i]);
-                    }
-                } 
-                lookup = temp;
-                m->setGroups(Groups);
+                lookup->removeGroups(subsampleSize);
+                groups = lookup->getNamesGroups();
             }
             
-            if (lookup.size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; delete input; return filenames; }
+            if (lookup->size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return filenames; }
         }
         
 		
 		/******************************************************/
         
         //clears file before we start to write to it below
-        for (int i=0; i<lookup.size(); i++) {
+        for (int i=0; i<groups.size(); i++) {
             ofstream temp;
-            string group = lookup[i]->getGroup();
+            string group = groups[i];
             m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
             filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
-            groups.push_back(group);
         }
         
-        while(lookup[0] != NULL) {
+        while(lookup != NULL) {
             
-            for (int i = 0; i < lookup.size(); i++) {
-                RAbundVector rav = lookup[i]->getRAbundVector();
+            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
-                string group = lookup[i]->getGroup();
+                string group = data[i]->getGroup();
                 m->openOutputFileAppend(files[group], temp);
-                rav.print(temp);
+                data[i]->print(temp);
                 temp.close();
+                delete data[i];
             }
             
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-            lookup = input->getSharedRAbundVectors();
+            delete lookup;
+            lookup = input.getSharedRAbundVectors();
         }
-        
-        delete input;
         
         return filenames;
 	}

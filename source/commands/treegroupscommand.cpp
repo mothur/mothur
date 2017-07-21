@@ -410,11 +410,11 @@ int TreeGroupCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
 			
-			input = new InputData(sharedfile, "sharedfile");
-			lookup = input->getSharedRAbundVectors();
-			lastLabel = lookup[0]->getLabel();
+			InputData input(sharedfile, "sharedfile");
+			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+			lastLabel = lookup->getLabel();
 			
-			if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0; }
+			if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0; }
 			
 			//used in tree constructor 
 			m->runParse = false;
@@ -434,16 +434,13 @@ int TreeGroupCommand::execute(){
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
 			
-			//fills globaldatas tree names
-			//m->Treenames = m->getGroups();
-            for (int k = 0; k < lookup.size(); k++) {
-                m->Treenames.push_back(lookup[k]->getGroup());
-            }
-		
+			//fills tree names with shared files groups
+			m->Treenames = lookup->getNamesGroups();
+            
 			if (m->control_pressed) { return 0; }
 			
 			//create tree file
-			makeSimsShared();
+			makeSimsShared(lookup);
 			
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		}else{
@@ -636,39 +633,21 @@ vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* ma
 }
 
 /***********************************************************/
-int TreeGroupCommand::makeSimsShared() {
+int TreeGroupCommand::makeSimsShared(SharedRAbundVectors* lookup) {
 	try {
         
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup[0]->getNumSeqs();
-                for (int i = 1; i < lookup.size(); i++) {
-                    int thisSize = lookup[i]->getNumSeqs();
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
-                m->clearGroups();
-                Groups.clear();
-                m->Treenames.clear();
-                vector<SharedRAbundVector*> temp;
-                for (int i = 0; i < lookup.size(); i++) {
-                    if (lookup[i]->getNumSeqs() < subsampleSize) { 
-                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-                        delete lookup[i];
-                    }else { 
-                        Groups.push_back(lookup[i]->getGroup()); 
-                        temp.push_back(lookup[i]);
-                        m->Treenames.push_back(lookup[i]->getGroup());
-                    }
-                } 
-                lookup = temp;
-                m->setGroups(Groups);
+                lookup->removeGroups(subsampleSize);
+                Groups = m->getGroups();
+                m->Treenames = Groups;
             }
             
-            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
         }
-        numGroups = lookup.size();
+        numGroups = lookup->size();
         
         //sanity check to make sure processors < numComparisions
         int numDists = 0;
@@ -690,41 +669,41 @@ int TreeGroupCommand::makeSimsShared() {
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            if (m->control_pressed) { delete lookup; for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
 		
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 			
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 					
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 			}
 
-			lastLabel = lookup[0]->getLabel();			
+			lastLabel = lookup->getLabel();
 			
 			//get next line to process
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			delete lookup;
 			lookup = input->getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+		if (m->control_pressed) { for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -741,12 +720,12 @@ int TreeGroupCommand::makeSimsShared() {
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {		delete lookup[i]; }		} 
+			delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			process(lookup);
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 	
+			delete lookup;
 		}
 		
 		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
@@ -760,36 +739,21 @@ int TreeGroupCommand::makeSimsShared() {
 }
 
 /***********************************************************/
-int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
+int TreeGroupCommand::process(SharedRAbundVectors* thisLookup) {
 	try{
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(treeCalculators.size()); 		
         
         for (int thisIter = 0; thisIter < iters; thisIter++) {
             
-            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
+            vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample) {
+            if (subsample && (thisIter != 0)) {
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
-                //make copy of lookup so we don't get access violations
-                vector<SharedRAbundVector*> newLookup;
-                for (int k = 0; k < thisItersLookup.size(); k++) {
-                    SharedRAbundVector* temp = new SharedRAbundVector();
-                    temp->setLabel(thisItersLookup[k]->getLabel());
-                    temp->setGroup(thisItersLookup[k]->getGroup());
-                    newLookup.push_back(temp);
-                }
-                
-                //for each bin
-                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
-                    if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
-                }
-                
-                tempLabels = sample.getSample(newLookup, subsampleSize);
-                thisItersLookup = newLookup;
+                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
             }
             
             if(processors == 1){
@@ -849,7 +813,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                     /******************************************************/
                     //comparison breakup to be used by different processes later
                     lines.clear();
-                    numGroups = thisLookup.size();
+                    numGroups = thisLookup->size();
                     lines.resize(processors);
                     for (int i = 0; i < processors; i++) {
                         lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -990,14 +954,11 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
             
             calcDistsTotals.push_back(calcDists);
             
-            if (subsample) {  
-                
+            if (subsample) {
                 //clean up memory
-                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
-                thisItersLookup.clear();
-                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
-            }
+                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); } }
             
+            delete thisItersLookup;
             if (m->debug) {  m->mothurOut("[DEBUG]: iter = " + toString(thisIter) + ".\n"); }
 		}
         
@@ -1012,8 +973,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
             //create average tree for each calc
             for (int i = 0; i < calcDists.size(); i++) {
                 vector< vector<double> > matrix; //square matrix to represent the distance
-                matrix.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                matrix.resize(thisLookup->size());
+                for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     int row = calcAverages[i][j].seq1;
@@ -1028,7 +989,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 map<string, string> variables; 
                 variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
                 variables["[calc]"] = treeCalculators[i]->getName();
-                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "ave";
                 string outputFile = getOutputFileName("tree",variables);				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
@@ -1049,7 +1010,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 map<string, string> variables; 
                 variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
                 variables["[calc]"] = treeCalculators[i]->getName();
-                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "all";
                 string outputFile = getOutputFileName("tree",variables);				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
@@ -1064,8 +1025,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                     
                     //initialize matrix
                     vector< vector<double> > matrix; //square matrix to represent the distance
-                    matrix.resize(thisLookup.size());
-                    for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                    matrix.resize(thisLookup->size());
+                    for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
                     
                     for (int j = 0; j < calcDistsTotals[myIter][i].size(); j++) {
                         int row = calcDistsTotals[myIter][i][j].seq1;
@@ -1112,8 +1073,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 
                 //initialize matrix
                 vector< vector<double> > matrix; //square matrix to represent the distance
-                matrix.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                matrix.resize(thisLookup->size());
+                for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
                 
                 for (int j = 0; j < calcDists[i].size(); j++) {
                     int row = calcDists[i][j].seq1;
@@ -1128,7 +1089,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 map<string, string> variables; 
                 variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
                 variables["[calc]"] = treeCalculators[i]->getName();
-                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "";
                 string outputFile = getOutputFileName("tree",variables);					
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
@@ -1147,9 +1108,10 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	}
 }
 /**************************************************************************************************/
-int TreeGroupCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) { 
+int TreeGroupCommand::driver(SharedRAbundVectors* thislookup, int start, int end, vector< vector<seqDist> >& calcDists) {
 	try {
-		vector<SharedRAbundVector*> subset;
+		vector<RAbundVector*> subset;
+        vector<RAbundVector*> thisLookup = thislookup->getSharedRAbundVectors();
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			
 			for (int l = 0; l < k; l++) {
@@ -1171,7 +1133,7 @@ int TreeGroupCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, 
 						
 						vector<double> tempdata = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 						
-						if (m->control_pressed) { return 1; }
+                        if (m->control_pressed) { for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  } return 1; }
 						
 						seqDist temp(l, k, -(tempdata[0]-1.0));
 						calcDists[i].push_back(temp);
@@ -1180,6 +1142,8 @@ int TreeGroupCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, 
 			}
 		}
 		
+        for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  }
+        
 		return 0;
 	}
 	catch(exception& e) {

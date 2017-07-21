@@ -42,7 +42,7 @@ private:
     vector<string> Groups;
     vector<string> outputNames;
     
-    int process(vector<SharedRAbundVector*>&);
+    int process(SharedRAbundVectors*);
     vector<vector<float> > createProcesses(vector<vector<float> >&, vector<vector<float> >&);
     vector<vector<float> > driver(vector<vector<float> >&, vector<vector<float> >&, int);
     vector<vector<float> > shuffleSharedVector(vector<vector<float> >&);

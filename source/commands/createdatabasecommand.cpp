@@ -462,15 +462,16 @@ int CreateDatabaseCommand::execute(){
             if (groupfile != "") { delete groupmap; }
            
         }else {
-            vector<SharedRAbundVector*> lookup = getShared();
+            SharedRAbundVectors* lookup = getShared();
+            vector<string> namesOfGroups = lookup->getNamesGroups();
             
             header = "OTUNumber";
-            for (int i = 0; i < lookup.size(); i++) { header += '\t' + lookup[i]->getGroup(); }
+            for (int i = 0; i < namesOfGroups.size(); i++) { header += '\t' + namesOfGroups[i]; }
             if (repfastafile != "") {  header += "\trepSeqName\trepSeq";  }
             header += "\tOTUConTaxonomy";
             out << header << endl;
             
-            for (int h = 0; h < lookup[0]->getNumBins(); h++) {
+            for (int h = 0; h < lookup->getNumBins(); h++) {
                 
                 if (m->control_pressed) { break; }
                 
@@ -482,8 +483,8 @@ int CreateDatabaseCommand::execute(){
                 out << otuLabels[index];
                 
                 int totalAbund = 0;
-                for (int i = 0; i < lookup.size(); i++) { 
-                    int abund = lookup[i]->getAbundance(h);
+                for (int i = 0; i < lookup->size(); i++) {
+                    int abund = lookup->get(h, namesOfGroups[i]);
                     totalAbund += abund; 
                     out  << '\t' << abund;
                 }
@@ -687,11 +688,11 @@ ListVector* CreateDatabaseCommand::getList(){
 	}
 }
 //**********************************************************************************************************************
-vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
+SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 	try {
 		InputData input(sharedfile, "sharedfile");
-		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 		
 		if (label == "") { label = lastLabel; return lookup; }
 		
@@ -701,34 +702,34 @@ vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
+		while((lookup != NULL) && (userLabels.size() != 0)) {
 			if (m->control_pressed) {  return lookup;  }
 			
-			if(labels.count(lookup[0]->getLabel()) == 1){
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+			if(labels.count(lookup->getLabel()) == 1){
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
 				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				lookup->setLabel(saveLabel);
 				break;
 			}
 			
-			lastLabel = lookup[0]->getLabel();			
+			lastLabel = lookup->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 			lookup = input.getSharedRAbundVectors();
 		}
 		
@@ -750,7 +751,7 @@ vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}	
         

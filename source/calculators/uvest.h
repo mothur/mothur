@@ -14,7 +14,7 @@ It is used by sharedJAbund and SharedSorensonAbund. */
  
 
 #include "mothurout.h"
-
+#include "calculator.h"
 
 typedef vector<double> EstOutput;
 

@@ -4,11 +4,7 @@
 #include "collectorscurvedata.h"
 #include "display.h"
 #include "ordervector.hpp"
-#include "sabundvector.hpp"
-#include "rabundvector.hpp"
 #include "sharedordervector.h"
-#include "datavector.hpp"
-#include "mothurout.h"
 
 /***********************************************************************/
 

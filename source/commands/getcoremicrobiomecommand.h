@@ -46,7 +46,7 @@ private:
     float abund;
     int samples, factor;
     
-    int createTable(vector<SharedRAbundFloatVector*>&);
+    int createTable(SharedRAbundFloatVectors*);
 
 };
 

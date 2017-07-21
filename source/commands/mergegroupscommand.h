@@ -41,20 +41,17 @@ public:
 	
 private:
 	DesignMap* designMap;
-	vector<SharedRAbundVector*> lookup;
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile, method, fastafile;
 	vector<string> Groups, outputNames;
 		
-	int process(vector<SharedRAbundVector*>&, ofstream&);
+	int process(SharedRAbundVectors*, ofstream&);
 	int processSharedFile(DesignMap*&);
 	int processGroupFile(DesignMap*&);
     int processCountFile(DesignMap*&);
     int mergeAbund(vector<int>);
-    int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
-    int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 };
 
 #endif

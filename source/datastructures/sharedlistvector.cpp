@@ -340,12 +340,12 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		exit(1);
 	}
 }
-/***********************************************************************/
-SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
+/***********************************************************************
+SharedRAbundVectors* SharedListVector::getSharedRAbundVector(string groupName) {
 	try {
         m->currentSharedBinLabels = binLabels;
         
-		SharedRAbundVector rav(data.size());
+		vector<RAbundVector*> lookup;
 		
 		for(int i=0;i<numBins;i++){
 			string names = get(i);
@@ -357,19 +357,19 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
                     string group = groupmap->getGroup(binNames[j]);
                     if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
                     if (group == groupName) { //this name is in the group you want the vector for.
-                        rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
+                        rav->set(i, rav->get(i, group) + 1, group);  //i represents what bin you are in
                     }
                 }else {
                     int count = countTable->getGroupCount(binNames[j], groupName);
-                    rav.set(i, rav.getAbundance(i) + count, groupName);
+                    rav->set(i, rav->get(i, groupName) + count, groupName);
                 }
 			}
 		}
-		
-		rav.setLabel(label);
-		rav.setGroup(groupName);
+		SharedRAbundVectors* shared = new SharedRAbundVectors();
+        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
+		shared->setLabel(label);
 
-		return rav;
+		return shared;
 		
 	}
 	catch(exception& e) {
@@ -427,7 +427,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 		}
         
         SharedRAbundVectors* shared = new SharedRAbundVectors();
-        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j], groups[j]);  }
+        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
 
 		return shared;
 	}
@@ -441,10 +441,9 @@ SharedRAbundFloatVectors* SharedListVector::getSharedRAbundFloatVector() {
     try {
         SharedRAbundVectors* shared = getSharedRAbundVector();
         vector<RAbundFloatVector*> thisLookup = shared->getSharedRAbundFloatVectors();
-        vector<string> thisGroups = shared->getNamesGroups();
         SharedRAbundFloatVectors* sharedFloat = new SharedRAbundFloatVectors();
-        for (int j = 0; j < thisLookup.size(); j++) {  sharedFloat->push_back(thisLookup[j], thisGroups[j]);  }
-        
+        for (int j = 0; j < thisLookup.size(); j++) {  sharedFloat->push_back(thisLookup[j]);  }
+        return sharedFloat;
     }
     catch(exception& e) {
         m->errorOut(e, "SharedListVector", "getSharedRAbundVector");

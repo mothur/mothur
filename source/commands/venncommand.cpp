@@ -283,17 +283,18 @@ int VennCommand::execute(){
 		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
 		
 		venn = new Venn(outputDir, nseqs, inputfile, fontsize, sharedOtus); 
-		input = new InputData(inputfile, format);
+		InputData input(inputfile, format);
 		
 		string lastLabel;
 		
+        SharedRAbundVectors* lookup = NULL;
 		if (format == "sharedfile") {
-			lookup = input->getSharedRAbundVectors();
-			lastLabel = lookup[0]->getLabel();
+			lookup = input.getSharedRAbundVectors();
+			lastLabel = lookup->getLabel();
 			
-			if ((lookup.size() > 4)) { combos = findCombinations(lookup.size()); }
+			if ((lookup->size() > 4)) { combos = findCombinations(lookup->size()); }
 		}else if (format == "list") {
-			sabund = input->getSAbundVector();
+			sabund = input.getSAbundVector();
 			lastLabel = sabund->getLabel();
 		}
 		
@@ -304,83 +305,83 @@ int VennCommand::execute(){
 		if (format != "list") {	
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 				if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-					m->clearGroups(); delete venn; delete input;
+                    delete lookup; m->clearGroups(); delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 				}
 
-				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
-					
-					
-
-					if (lookup.size() > 4) {
+				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
+                    
+                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+					if (lookup->size() > 4) {
 						set< set<int> >::iterator it3;
 						set<int>::iterator it2;
 						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
 			
 							set<int> poss = *it3;
-							vector<SharedRAbundVector*> subset;
-							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(lookup[*it2]);   }
+							vector<RAbundVector*> subset;
+							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
 							
 							vector<string> outfilenames = venn->getPic(subset, vennCalculators);
 							for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
 						}		
 					}else {
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
-					}					
-				}
-				
-				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup[0]->getLabel();
-					
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-					lookup = input->getSharedRAbundVectors(lastLabel);
-
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
-
-					if (lookup.size() > 4) {
-						set< set<int> >::iterator it3;
-						set<int>::iterator it2;
-						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
-			
-							set<int> poss = *it3;
-							vector<SharedRAbundVector*> subset;
-							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(lookup[*it2]);   }
-							
-							vector<string> outfilenames = venn->getPic(subset, vennCalculators);
-							for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
-						}		
-					}else {
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
+						vector<string> outfilenames = venn->getPic(data, vennCalculators);
 						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
 					}
-										
-					//restore real lastlabel to save below
-					lookup[0]->setLabel(saveLabel);
+                    for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
+				}
+				
+				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup->getLabel();
+					
+                    delete lookup;
+					lookup = input.getSharedRAbundVectors(lastLabel);
+
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
+
+                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    if (lookup->size() > 4) {
+                        set< set<int> >::iterator it3;
+                        set<int>::iterator it2;
+                        for (it3 = combos.begin(); it3 != combos.end(); it3++) {
+                            
+                            set<int> poss = *it3;
+                            vector<RAbundVector*> subset;
+                            for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
+                            
+                            vector<string> outfilenames = venn->getPic(subset, vennCalculators);
+                            for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
+                        }
+                    }else {
+                        vector<string> outfilenames = venn->getPic(data, vennCalculators);
+                        for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
+                    }
+                    for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
+					
+					lookup->setLabel(saveLabel); //restore real lastlabel to save below
 				}
 				
 				
-				lastLabel = lookup[0]->getLabel();	
+				lastLabel = lookup->getLabel();
 						
 				//get next line to process
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-				lookup = input->getSharedRAbundVectors();
+				delete lookup;
+				lookup = input.getSharedRAbundVectors();
 			}
 			
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					m->clearGroups(); delete venn; delete input; 
+					m->clearGroups(); delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 			}
@@ -401,31 +402,32 @@ int VennCommand::execute(){
 		
 			//run last label if you need to
 			if (needToRun == true)  {
-					for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
-					lookup = input->getSharedRAbundVectors(lastLabel);
+					delete lookup;
+					lookup = input.getSharedRAbundVectors(lastLabel);
 
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
 
-					if (lookup.size() > 4) {
-						set< set<int> >::iterator it3;
-						set<int>::iterator it2;
-						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
-			
-							set<int> poss = *it3;
-							vector<SharedRAbundVector*> subset;
-							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(lookup[*it2]);   }
-							
-							vector<string> outfilenames = venn->getPic(subset, vennCalculators);
-							for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
-						}		
-					}else {
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
-					}
-					
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                if (lookup->size() > 4) {
+                    set< set<int> >::iterator it3;
+                    set<int>::iterator it2;
+                    for (it3 = combos.begin(); it3 != combos.end(); it3++) {
+                        
+                        set<int> poss = *it3;
+                        vector<RAbundVector*> subset;
+                        for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
+                        
+                        vector<string> outfilenames = venn->getPic(subset, vennCalculators);
+                        for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
+                    }
+                }else {
+                    vector<string> outfilenames = venn->getPic(data, vennCalculators);
+                    for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
+                }
+                for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
+                delete lookup;
 			}
 		
 
@@ -433,7 +435,7 @@ int VennCommand::execute(){
 			m->clearGroups();  
 			
 			if (m->control_pressed) {
-					m->clearGroups(); delete venn; delete input;
+					m->clearGroups(); delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
@@ -446,7 +448,7 @@ int VennCommand::execute(){
 			
 				if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					delete sabund; delete venn; delete input;
+					delete sabund; delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 				}
@@ -466,7 +468,7 @@ int VennCommand::execute(){
 					string saveLabel = sabund->getLabel();
 				
 					delete sabund;
-					sabund = input->getSAbundVector(lastLabel);
+					sabund = input.getSAbundVector(lastLabel);
 					
 					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
@@ -483,14 +485,13 @@ int VennCommand::execute(){
 				lastLabel = sabund->getLabel();		
 				
 				delete sabund;
-				sabund = input->getSAbundVector();
+				sabund = input.getSAbundVector();
 			}
 			
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
-					delete venn; delete input;
-					return 0;
+					delete venn;  return 0;
 			}
 			
 			//output error messages about any remaining user labels
@@ -509,7 +510,7 @@ int VennCommand::execute(){
 			//run last label if you need to
 			if (needToRun == true)  {
 				if (sabund != NULL) {	delete sabund;	}
-				sabund = input->getSAbundVector(lastLabel);
+				sabund = input.getSAbundVector(lastLabel);
 					
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 				vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
@@ -520,7 +521,7 @@ int VennCommand::execute(){
 			}
 			
 			if (m->control_pressed) {
-					delete venn; delete input;
+					delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
@@ -528,7 +529,7 @@ int VennCommand::execute(){
 		}
 		
 		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-		delete venn; delete input;
+		delete venn; 
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

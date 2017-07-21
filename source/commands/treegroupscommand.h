@@ -95,10 +95,10 @@ private:
     
 	Tree* createTree(vector< vector<double> >&);
 	void printSims(ostream&, vector< vector<double> >&);
-	int makeSimsShared();
+	int makeSimsShared(SharedRAbundVectors*);
 	vector< vector<double> > makeSimsDist(SparseDistanceMatrix*);
     int writeTree(string, Tree*);
-    int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);
+    int driver(SharedRAbundVectors*, int, int, vector< vector<seqDist> >&);
 	
 	NameAssignment* nameMap;
 	ListVector* list;
@@ -106,7 +106,6 @@ private:
 	Tree* t;
     InputData* input;
 	vector<Calculator*> treeCalculators;
-	vector<SharedRAbundVector*> lookup;
 	string lastLabel;
 	string format, groupNames, filename, sharedfile, countfile, inputfile;
 	int numGroups, subsampleSize, iters, processors;
@@ -119,7 +118,7 @@ private:
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-	int process(vector<SharedRAbundVector*>);
+	int process(SharedRAbundVectors*);
 	
 	
 
@@ -130,7 +129,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct treeSharedData {
-    vector<SharedRAbundVector*> thisLookup;
+    vector<RAbundVector*> thisLookup;
     vector< vector<seqDist> > calcDists;
     vector<string>  Estimators;
 	unsigned long long start;
@@ -139,7 +138,7 @@ struct treeSharedData {
     int count;
 	
 	treeSharedData(){}
-	treeSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
+	treeSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<RAbundVector*> lu) {
 		m = mout;
 		start = st;
 		end = en;
@@ -250,7 +249,7 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
     
         pDataArray->calcDists.resize(treeCalculators.size());
         
-		vector<SharedRAbundVector*> subset;
+		vector<RAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
 			
             pDataArray->count++;

@@ -11,8 +11,9 @@
 
 
 #include "command.hpp"
-
 #include "listvector.hpp"
+#include "sharedrabundvectors.hpp"
+#include "sharedrabundfloatvectors.hpp"
 
 /**************************************************************************************************/
 
@@ -42,8 +43,8 @@ private:
     vector<string> Groups;
     set<string> labels;
     
-    int createList(vector<SharedRAbundFloatVector*>&);
-    int createList(vector<SharedRAbundVector*>&);
+    int createList(SharedRAbundFloatVectors*);
+    int createList(SharedRAbundVectors*);
     int createList(ListVector*&);
 
 };

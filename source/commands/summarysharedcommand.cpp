@@ -335,9 +335,9 @@ int SummarySharedCommand::execute(){
 			}
 		}
 			
-		input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		InputData input(sharedfile, "sharedfile");
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup->getLabel();
 	
 		/******************************************************/
 		//output headings for files
@@ -369,16 +369,16 @@ int SummarySharedCommand::execute(){
 			outAll.close();
 		}
 		
-		if (lookup.size() < 2) { 
+		if (lookup->size() < 2) {
 			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
-			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+			delete lookup;
 			
 			//close files and clean up
 			m->mothurRemove(outputFileName);
 			if (mult == true) { m->mothurRemove(outAllFileName);  }
 			return 0;
 		//if you only have 2 groups you don't need a .sharedmultiple file
-		}else if ((lookup.size() == 2) && (mult == true)) { 
+		}else if ((lookup->size() == 2) && (mult == true)) {
 			mult = false;
 			m->mothurRemove(outAllFileName);
 			outputNames.pop_back();
@@ -386,9 +386,8 @@ int SummarySharedCommand::execute(){
 		
 		if (m->control_pressed) {
 			if (mult) {  m->mothurRemove(outAllFileName);  }
-			m->mothurRemove(outputFileName); 
-			delete input;
-			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+			m->mothurRemove(outputFileName);
+			delete lookup;
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 			m->clearGroups(); 
 			return 0;
@@ -396,36 +395,19 @@ int SummarySharedCommand::execute(){
 		/******************************************************/
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup[0]->getNumSeqs();
-                for (int i = 1; i < lookup.size(); i++) {
-                    int thisSize = lookup[i]->getNumSeqs();
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
-                m->clearGroups();
-                Groups.clear();
-                vector<SharedRAbundVector*> temp;
-                for (int i = 0; i < lookup.size(); i++) {
-                    if (lookup[i]->getNumSeqs() < subsampleSize) { 
-                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-                        delete lookup[i];
-                    }else { 
-                        Groups.push_back(lookup[i]->getGroup()); 
-                        temp.push_back(lookup[i]);
-                    }
-                } 
-                lookup = temp;
-                m->setGroups(Groups);
+                lookup->removeGroups(subsampleSize);
+                Groups = lookup->getNamesGroups();
             }
             
-            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; delete input; return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
         }
 
 		
 		/******************************************************/
 		//comparison breakup to be used by different processes later
-		numGroups = lookup.size();
+		numGroups = lookup->size();
 		lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -438,54 +420,56 @@ int SummarySharedCommand::execute(){
 		set<string> userLabels = labels;
 			
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) {
 				if (mult) {  m->mothurRemove(outAllFileName);  }
 				m->mothurRemove(outputFileName); 
-				delete input; 
-				for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+                delete lookup;
 				for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 				m->clearGroups(); 
 				return 0;
 			}
 
 		
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				process(lookup, outputFileName, outAllFileName);
+			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
+				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                process(data, outputFileName, outAllFileName);
+                for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				processedLabels.insert(lookup->getLabel());
+				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup->getLabel();
 					
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-					lookup = input->getSharedRAbundVectors(lastLabel);
+					delete lookup;
+					lookup = input.getSharedRAbundVectors(lastLabel);
 
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					process(lookup, outputFileName, outAllFileName);
+					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    process(data, outputFileName, outAllFileName);
+                    for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 					
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
+					processedLabels.insert(lookup->getLabel());
+					userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
-					lookup[0]->setLabel(saveLabel);
+					lookup->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookup[0]->getLabel();			
+			lastLabel = lookup->getLabel();
 				
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input->getSharedRAbundVectors();
+			delete lookup;
+			lookup = input.getSharedRAbundVectors();
 		}
 		
 		if (m->control_pressed) {
 			if (mult) { m->mothurRemove(outAllFileName);  }
-			m->mothurRemove(outputFileName); 
-			delete input; 
+			m->mothurRemove(outputFileName);
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 			m->clearGroups(); 
 			return 0;
@@ -506,12 +490,14 @@ int SummarySharedCommand::execute(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-				for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
-				lookup = input->getSharedRAbundVectors(lastLabel);
+            delete lookup;
+            lookup = input.getSharedRAbundVectors(lastLabel);
 
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				process(lookup, outputFileName, outAllFileName);
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            process(data, outputFileName, outAllFileName);
+            for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
+            delete lookup;
 		}
 		
 				
@@ -519,7 +505,6 @@ int SummarySharedCommand::execute(){
 		m->clearGroups();  
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-		delete input;  
 		
 		if (m->control_pressed) {
 			m->mothurRemove(outAllFileName);  
@@ -542,7 +527,7 @@ int SummarySharedCommand::execute(){
 	}
 }
 /***********************************************************/
-int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simMatrix) {
+int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> theseGroups) {
 	try {
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -552,7 +537,7 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 		
 		if (output == "lt") {
 			for (int b = 0; b < simMatrix.size(); b++)	{
-				out << lookup[b]->getGroup();
+				out << theseGroups[b];
 				for (int n = 0; n < b; n++)	{
                     if (m->control_pressed) { return 0; }
 					out << '\t' << simMatrix[b][n];
@@ -561,7 +546,7 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 			}
 		}else{
 			for (int b = 0; b < simMatrix.size(); m++)	{
-				out << lookup[b]->getGroup();
+				out << theseGroups[b];
 				for (int n = 0; n < simMatrix[b].size(); n++)	{
                     if (m->control_pressed) { return 0; }
 					out << '\t' << simMatrix[b][n];
@@ -578,32 +563,26 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 	}
 }
 /***********************************************************/
-int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string sumFileName, string sumAllFileName) {
+int SummarySharedCommand::process(vector<RAbundVector*> thisLookup, string sumFileName, string sumAllFileName) {
 	try {
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(sumCalculators.size()); 		
         
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
             
-            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            vector<RAbundVector*> thisItersLookup = thisLookup;
             
             if (subsample && (thisIter != 0)) { //we want the summary results for the whole dataset, then the subsampling
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
                 //make copy of lookup so we don't get access violations
-                vector<SharedRAbundVector*> newLookup;
+                vector<RAbundVector*> newLookup;
                 for (int k = 0; k < thisItersLookup.size(); k++) {
-                    SharedRAbundVector* temp = new SharedRAbundVector();
+                    RAbundVector* temp = new RAbundVector(*thisItersLookup[k]); //deep copy
                     temp->setLabel(thisItersLookup[k]->getLabel());
                     temp->setGroup(thisItersLookup[k]->getGroup());
                     newLookup.push_back(temp);
-                }
-                
-                //for each bin
-                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
-                    if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
                 }
                 
                 tempLabels = sample.getSample(newLookup, subsampleSize);
@@ -853,7 +832,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         //initialize matrix
                         vector< vector<double> > matrix; //square matrix to represent the distance
                         matrix.resize(thisLookup.size());
-                        for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                        vector<string> GroupNames;
+                        for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); GroupNames.push_back(thisLookup[k]->getGroup()); }
                         
                         for (int j = 0; j < calcDists[i].size(); j++) {
                             int row = calcDists[i][j].seq1;
@@ -876,7 +856,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         m->openOutputFile(distFileName, outDist);
                         outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
                         
-                        printSims(outDist, matrix);
+                        printSims(outDist, matrix, GroupNames);
                         
                         outDist.close();
                     }
@@ -900,7 +880,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                 vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
                 stdmatrix.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); }
+                vector<string> GroupNames;
+                for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); GroupNames.push_back(thisLookup[k]->getGroup()); }
                 
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
@@ -927,7 +908,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 m->openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
-                printSims(outAve, matrix);
+                printSims(outAve, matrix, GroupNames);
                 
                 outAve.close();
                 
@@ -938,7 +919,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 m->openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
-                printSims(outSTD, stdmatrix);
+                printSims(outSTD, stdmatrix, GroupNames);
                 
                 outSTD.close();
                 
@@ -953,7 +934,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 	}
 }
 /**************************************************************************************************/
-int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, string sumFile, string sumAllFile, vector< vector<seqDist> >& calcDists) { 
+int SummarySharedCommand::driver(vector<RAbundVector*> thisLookup, int start, int end, string sumFile, string sumAllFile, vector< vector<seqDist> >& calcDists) {
 	try {
 		
 		//loop through calculators and add to file all for all calcs that can do mutiple groups
@@ -989,7 +970,7 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 		ofstream outputFileHandle;
 		m->openOutputFile(sumFile, outputFileHandle);
 		
-		vector<SharedRAbundVector*> subset;
+		vector<RAbundVector*> subset;
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 
 			for (int l = 0; l < k; l++) {

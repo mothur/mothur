@@ -205,8 +205,8 @@ int PCACommand::execute(){
 			input = new InputData(inputFile, "relabund");
 		}else {  m->mothurOut("[ERROR]: filetype not recognized."); m->mothurOutEndLine();  return 0; }
 		
-		vector<SharedRAbundFloatVector*> lookupFloat = input->getSharedRAbundFloatVectors();
-		string lastLabel = lookupFloat[0]->getLabel();
+		SharedRAbundFloatVectors* lookupFloat = input->getSharedRAbundFloatVectors();
+		string lastLabel = lookupFloat->getLabel();
 			
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -219,42 +219,42 @@ int PCACommand::execute(){
 		}
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat[0] != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  lookupFloat.clear(); return 0;  }
+            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
 			
-			if(labels.count(lookupFloat[0]->getLabel()) == 1){
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+			if(labels.count(lookupFloat->getLabel()) == 1){
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				
 				process(lookupFloat);
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookupFloat[0]->getLabel();
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookupFloat->getLabel();
 				
-				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  lookupFloat.clear();
+				delete lookupFloat;
 				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 				
 				process(lookupFloat);
 				
-				processedLabels.insert(lookupFloat[0]->getLabel());
-				userLabels.erase(lookupFloat[0]->getLabel());
+				processedLabels.insert(lookupFloat->getLabel());
+				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat[0]->setLabel(saveLabel);
+				lookupFloat->setLabel(saveLabel);
 			}
 			
-			lastLabel = lookupFloat[0]->getLabel();			
+			lastLabel = lookupFloat->getLabel();
 			
 			//get next line to process
 			//prevent memory leak
-			for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } lookupFloat.clear();
+			delete lookupFloat;
 			lookupFloat = input->getSharedRAbundFloatVectors();
 		}
 		
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } lookupFloat.clear(); return 0;  }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat;  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -271,15 +271,15 @@ int PCACommand::execute(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookupFloat.size(); i++) {  if (lookupFloat[i] != NULL) {	delete lookupFloat[i];	} }  lookupFloat.clear();
+			delete lookupFloat;
 			lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 			
 			process(lookupFloat);
 			
-			for (int i = 0; i < lookupFloat.size(); i++) {  if (lookupFloat[i] != NULL) {	delete lookupFloat[i];	} } lookupFloat.clear();
+			delete lookupFloat;
 		}	
 		
-		for (int i = 0; i < lookupFloat.size(); i++) {  if (lookupFloat[i] != NULL) {	delete lookupFloat[i];	} } lookupFloat.clear();
+		delete lookupFloat;
 		delete input;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
@@ -327,26 +327,28 @@ vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector
 }*/
 //**********************************************************************************************************************
 
-int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
+int PCACommand::process(SharedRAbundFloatVectors* lookupFloat){
 	try {
-		m->mothurOut("\nProcessing " + lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+		m->mothurOut("\nProcessing " + lookupFloat->getLabel()); m->mothurOutEndLine();
 	
-		int numOTUs = lookupFloat[0]->getNumBins();
-		int numSamples = lookupFloat.size();
+		int numOTUs = lookupFloat->getNumBins();
+		int numSamples = lookupFloat->getNumGroups();
 		
 		vector< vector<double> > matrix(numSamples);
 		vector<double> colMeans(numOTUs);
 		
 		//fill matrix with shared relative abundances, re-center
-		for (int i = 0; i < lookupFloat.size(); i++) {
+        vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+		for (int i = 0; i < numSamples; i++) {
 			matrix[i].resize(numOTUs, 0);
 			
 			for (int j = 0; j < numOTUs; j++) {
-				matrix[i][j] = lookupFloat[i]->getAbundance(j);
+				matrix[i][j] = data[i]->get(j);
 				colMeans[j] += matrix[i][j];
 			}
+            delete data[i];
 		}
-		
+        data.clear();
 
 		for(int j=0;j<numOTUs;j++){
 			colMeans[j] = colMeans[j] / (double)numSamples;
@@ -383,7 +385,7 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		//string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(fbase, lookupFloat[0]->getLabel(), m->getGroups(), X, d);
+		output(fbase, lookupFloat->getLabel(), m->getGroups(), X, d);
 		
 		if (metric) {   
 			

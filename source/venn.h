@@ -9,11 +9,8 @@
  *
  */
 
-#include "sabundvector.hpp"
 
-#include "datavector.hpp"
 #include "calculator.h"
-
 
 /***********************************************************************/
 
@@ -23,7 +20,7 @@ public:
 	~Venn(){};
 
 	vector<string> getPic(SAbundVector*, vector<Calculator*>);
-	vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+	vector<string> getPic(vector<RAbundVector*>, vector<Calculator*>);
 
 private:
 	Calculator* singleCalc;

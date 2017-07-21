@@ -4,7 +4,6 @@
 
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
-#include "sharedrabundvectors.hpp"
 #include "sequence.hpp"
 #include "mothurout.h"
 

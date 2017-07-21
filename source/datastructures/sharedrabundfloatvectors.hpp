@@ -15,6 +15,10 @@
 #include "sharedordervector.h"
 
 /*  DataStructure for a relabund file. */
+//********************************************************************************************************************
+inline bool compareRAbundFloats(RAbundFloatVector* left, RAbundFloatVector* right){ return (left->getGroup() < right->getGroup()); }
+//********************************************************************************************************************
+
 
 class SharedRAbundFloatVectors : public DataVector {
     
@@ -23,28 +27,29 @@ public:
     SharedRAbundFloatVectors(ifstream&);
     SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins) {
         vector<RAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
-        vector<string> temp = bv.getNamesGroups();
-        for (int i = 0; i < temp.size(); i++) {
-            push_back(data[i],temp[i]);
-        }
+        for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
         setLabel(bv.getLabel());
     }
-    ~SharedRAbundFloatVectors() { for (it = lookup.begin(); it != lookup.end(); it++) {  if (it->second != NULL) { delete it->second;  it->second = NULL; } }  lookup.clear(); }
+    ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
     
     float getOTUTotal(int bin);
+    vector<float> getOTU(int bin);
+    void setLabel(string l);
     float removeOTUs(vector<int> bins);
     float removeOTU(int bin);
-    void setLabel(string l);
     float get(int bin, string group);
     void set(int bin, float binSize, string group);
-    int push_back(RAbundFloatVector*, string n);
+    
+    int push_back(RAbundFloatVector*);
     void print(ostream&);
     void printHeaders(ostream&);
     void removeGroups(vector<string> g);
-    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); }
-    void clear() { for (it = lookup.begin(); it != lookup.end(); it++) {  if (it->second != NULL) { delete it->second;  it->second = NULL; } }  lookup.clear(); }
+    int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
+    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundFloatVectors.\n"); }
+    void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
     int size() { return lookup.size();  }
+    int getNumGroups() { return lookup.size(); }
     int getNumBins() { return numBins; }
     float getNumSeqs(string); //group
     float getNumSeqsSmallestGroup();
@@ -54,12 +59,14 @@ public:
     RAbundVector getRAbundVector();
     SAbundVector getSAbundVector();
     OrderVector getOrderVector(map<string,int>*);
+    
     vector<string> getNamesGroups();
-    int eliminateZeroOTUS(); //run after push_backs if groups are chosen
+    vector<int> eliminateZeroOTUS(); //run after push_backs if groups are chosen
     
 private:
-    map<string, RAbundFloatVector*> lookup;
-    map<string, RAbundFloatVector*>::iterator it;
+    vector<RAbundFloatVector*> lookup;
+    map<string, int> groupNames;
+    
     int numBins;
 
 };

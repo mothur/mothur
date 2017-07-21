@@ -13,7 +13,6 @@
 #include "ordervector.hpp"
 #include "inputdata.h"
 #include "collect.h"
-#include "display.h"
 #include "validcalculator.h"
 
 /*The collect() command:

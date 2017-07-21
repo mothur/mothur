@@ -16,6 +16,10 @@
 
 
 #include "datavector.hpp"
+#include "sabundvector.hpp"
+#include "rabundvector.hpp"
+#include "sharedrabundvectors.hpp"
+#include "groupmap.h"
 
 struct individual {
 		string group;
@@ -36,12 +40,6 @@ struct individualFloat {
 		}
 	individualFloat() { group = ""; bin = 0; abundance = 0.0; }
 };
-
-
-#include "sabundvector.hpp"
-#include "rabundvector.hpp"
-#include "sharedrabundvectors.hpp"
-#include "groupmap.h"
 
 class SharedOrderVector : public DataVector {
 	
@@ -73,8 +71,8 @@ public:
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector getSharedOrderVector();
-	SharedRAbundVector* getSharedRAbundVector(string);  //get the sharedRabundvector for a sepecific group
-	SharedRAbundVector* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
+	SharedRAbundVectors* getSharedRAbundVector(string);  //get the sharedRabundvector for a sepecific group
+	SharedRAbundVectors* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
 	GroupMap* groupmap;

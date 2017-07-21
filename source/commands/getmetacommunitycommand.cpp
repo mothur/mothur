@@ -233,8 +233,8 @@ int GetMetaCommunityCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         InputData input(sharedfile, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-        string lastLabel = lookup[0]->getLabel();
+        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        string lastLabel = lookup->getLabel();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
@@ -242,67 +242,50 @@ int GetMetaCommunityCommand::execute(){
         
         if (subsample) {
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup[0]->getNumSeqs();
-                for (int i = 1; i < lookup.size(); i++) {
-                    int thisSize = lookup[i]->getNumSeqs();
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
-                m->clearGroups();
-                Groups.clear();
-                vector<SharedRAbundVector*> temp;
-                for (int i = 0; i < lookup.size(); i++) {
-                    if (lookup[i]->getNumSeqs() < subsampleSize) {
-                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
-                        delete lookup[i];
-                    }else {
-                        Groups.push_back(lookup[i]->getGroup());
-                        temp.push_back(lookup[i]);
-                    }
-                }
-                lookup = temp;
-                m->setGroups(Groups);
+                lookup->removeGroups(subsampleSize);
+                Groups = m->getGroups();
             }
             
-            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
         }
 
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+            if (m->control_pressed) { delete lookup;  return 0; }
             
-            if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createProcesses(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup->getLabel();
                 
-                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
-                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 createProcesses(lookup);
                 
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
+                processedLabels.insert(lookup->getLabel());
+                userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
+                lookup->setLabel(saveLabel);
             }
             
-            lastLabel = lookup[0]->getLabel();
+            lastLabel = lookup->getLabel();
             //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+            delete lookup;
             
             if (m->control_pressed) { return 0; }
             
@@ -327,14 +310,13 @@ int GetMetaCommunityCommand::execute(){
         
         //run last label if you need to
         if (needToRun == true)  {
-            for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+            delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
-            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             
             createProcesses(lookup);
-            
-            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete lookup;
         }
 		
         //output files created by command
@@ -351,7 +333,7 @@ int GetMetaCommunityCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislookup){
+int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors* thislookup){
 	try {
         
         //#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -370,7 +352,7 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[distance]"] = thislookup[0]->getLabel();
+        variables["[distance]"] = thislookup->getLabel();
         variables["[method]"] = method;
 		string outputFileName = getOutputFileName("fit", variables);
         outputNames.push_back(outputFileName); outputTypes["fit"].push_back(outputFileName);
@@ -443,7 +425,8 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
         if (method == "dmm") {  m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");  }
         else {
             m->mothurOut("K\tCH");
-            for (int i = 0; i < thislookup.size(); i++) {  m->mothurOut('\t' + thislookup[i]->getGroup()); }
+            vector<string> namesOfGroups = thislookup->getNamesGroups();
+            for (int i = 0; i < namesOfGroups.size(); i++) {  m->mothurOut('\t' + namesOfGroups[i]); }
             m->mothurOut("\n");
         }
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
@@ -545,12 +528,13 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
 	}
 }
 //**********************************************************************************************************************
-int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislookup, vector<int>& parts, string outputFileName, vector<string> relabunds, vector<string> matrix, vector<string> doneFlags, int processID){
+int GetMetaCommunityCommand::processDriver(SharedRAbundVectors* thislookup, vector<int>& parts, string outputFileName, vector<string> relabunds, vector<string> matrix, vector<string> doneFlags, int processID){
 	try {
         
         double minLaplace = 1e10;
         int minPartition = 1;
-        vector<double> minSilhouettes; minSilhouettes.resize(thislookup.size(), 0);
+        vector<double> minSilhouettes; minSilhouettes.resize(thislookup->size(), 0);
+        vector<string> namesOfGroups = thislookup->getNamesGroups();
         
 		ofstream fitData, silData;
         if (method == "dmm") {
@@ -564,7 +548,8 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
             silData.setf(ios::fixed, ios::floatfield);
             silData.setf(ios::showpoint);
             silData << "K\tCH";
-            for (int i = 0; i < thislookup.size(); i++) { silData  << '\t' << thislookup[i]->getGroup();  }
+            
+            for (int i = 0; i < namesOfGroups.size(); i++) { silData  << '\t' << namesOfGroups[i];  }
             silData << endl;
         } 
         
@@ -572,8 +557,11 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
         cout.setf(ios::showpoint);
 
         vector< vector<int> > sharedMatrix;
-        vector<string> thisGroups;
-        for (int i = 0; i < thislookup.size(); i++) { sharedMatrix.push_back(thislookup[i]->getAbundances()); thisGroups.push_back(thislookup[i]->getGroup()); }
+        vector<string> thisGroups = namesOfGroups;
+        for (int i = 0; i < thisGroups.size(); i++) {
+            RAbundVector rav = thislookup->getRAbundVector(thisGroups[i]);
+            sharedMatrix.push_back(rav.get());
+        }
         
         vector< vector<double> > dists; //do we want to output this matrix??
         if ((method == "pam") || (method == "kmeans")) {  dists = generateDistanceMatrix(thislookup);  }
@@ -880,7 +868,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
     
 }
 //**********************************************************************************************************************
-vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<SharedRAbundVector*>& thisLookup){
+vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRAbundVectors* thisLookup){
     try {
         vector<vector<double> > results;
         
@@ -982,52 +970,35 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<S
         
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
  
-            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
+            vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
             if (subsample && (thisIter != 0)) {
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
-                //make copy of lookup so we don't get access violations
-                vector<SharedRAbundVector*> newLookup;
-                for (int k = 0; k < thisItersLookup.size(); k++) {
-                    SharedRAbundVector* temp = new SharedRAbundVector();
-                    temp->setLabel(thisItersLookup[k]->getLabel());
-                    temp->setGroup(thisItersLookup[k]->getGroup());
-                    newLookup.push_back(temp);
-                }
-                
-                //for each bin
-                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
-                    if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return results; }
-                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
-                }
-                
-                tempLabels = sample.getSample(newLookup, subsampleSize);
-                thisItersLookup = newLookup;
+                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
             }
             
-           
             driver(thisItersLookup, calcDists, matrixCalculator);
-                     
+            
             if (subsample && (thisIter != 0)) {
                 if((thisIter) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter)+"\n"); 		}
                 calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {
-                        if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisLookup[calcDists[i][j].seq1]->getGroup() + " - " + thisLookup[calcDists[i][j].seq2]->getGroup() + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                        if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + namesOfGroups[calcDists[i][j].seq1] + " - " + namesOfGroups[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     }
                 }
                 //clean up memory
-                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
-                thisItersLookup.clear();
+                thisItersLookup->clear();
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
                     if (m->control_pressed) { break; }
                     
                     //initialize matrix
-                    results.resize(thisLookup.size());
-                    for (int k = 0; k < thisLookup.size(); k++) {  results[k].resize(thisLookup.size(), 0.0); }
+                    results.resize(thisLookup->size());
+                    for (int k = 0; k < thisLookup->size(); k++) {  results[k].resize(thisLookup->size(), 0.0); }
                     
                     for (int j = 0; j < calcDists[i].size(); j++) {
                         int row = calcDists[i][j].seq1;
@@ -1040,6 +1011,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<S
                 }
             }
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            delete thisItersLookup;
 		}
 		
         if (iters != 0) {
@@ -1048,8 +1020,8 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<S
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {
-                results.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  results[k].resize(thisLookup.size(), 0.0); }
+                results.resize(thisLookup->size());
+                for (int k = 0; k < thisLookup->size(); k++) {  results[k].resize(thisLookup->size(), 0.0); }
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     int row = calcAverages[i][j].seq1;
@@ -1071,32 +1043,33 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<S
     }
 }
 /**************************************************************************************************/
-int GetMetaCommunityCommand::driver(vector<SharedRAbundVector*> thisLookup, vector< vector<seqDist> >& calcDists, Calculator* matrixCalculator) {
+int GetMetaCommunityCommand::driver(SharedRAbundVectors* thisLookup, vector< vector<seqDist> >& calcDists, Calculator* matrixCalculator) {
 	try {
-		vector<SharedRAbundVector*> subset;
+        vector<RAbundVector*> data = thisLookup->getSharedRAbundVectors();
+		vector<RAbundVector*> subset;
         
-		for (int k = 0; k < thisLookup.size(); k++) { // pass cdd each set of groups to compare
+		for (int k = 0; k < data.size(); k++) { // pass cdd each set of groups to compare
 			
 			for (int l = 0; l < k; l++) {
 				
 				if (k != l) { //we dont need to similiarity of a groups to itself
 					subset.clear(); //clear out old pair of sharedrabunds
 					//add new pair of sharedrabunds
-					subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]);
+					subset.push_back(data[k]); subset.push_back(data[l]);
 					
 					
                     
                     //if this calc needs all groups to calculate the pair load all groups
                     if (matrixCalculator->getNeedsAll()) {
                         //load subset with rest of lookup for those calcs that need everyone to calc for a pair
-                        for (int w = 0; w < thisLookup.size(); w++) {
-                            if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+                        for (int w = 0; w < data.size(); w++) {
+                            if ((w != k) && (w != l)) { subset.push_back(data[w]); }
                         }
                     }
                     
                     vector<double> tempdata = matrixCalculator->getValues(subset); //saves the calculator outputs
                     
-                    if (m->control_pressed) { return 1; }
+                    if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 1; }
                     
                     seqDist temp(l, k, tempdata[0]);
                     //cout << l << '\t' << k << '\t' <<  tempdata[0] << endl;
@@ -1105,6 +1078,8 @@ int GetMetaCommunityCommand::driver(vector<SharedRAbundVector*> thisLookup, vect
 				
 			}
 		}
+        
+        for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 		
 		return 0;
 	}
