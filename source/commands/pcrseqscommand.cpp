@@ -837,9 +837,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     else if (currSeq.getAligned().length() != length) {
                         m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->control_pressed = true; break; 
                     }else {
-                        if (keepdots)   { 
-                            currSeq.filterToPos(start); 
+                        if (keepdots)   {
                             currSeq.filterFromPos(end);
+                            currSeq.filterToPos(start-1);
                         }else {
                             string seqString = currSeq.getAligned().substr(0, end);
                             seqString = seqString.substr(start);
@@ -850,7 +850,6 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     //make sure the seqs are aligned
                     if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else {
-                        
                         if (end != -1) {
                             if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
                             else {
@@ -861,8 +860,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                                 }
                             }
                         }
+                        
                         if (start != -1) { 
-                            if (keepdots)   {  currSeq.filterToPos(start);  }
+                            if (keepdots)   {  currSeq.filterToPos(start-1);  }
                             else {
                                 string seqString = currSeq.getAligned().substr(start);
                                 currSeq.setAligned(seqString);
