@@ -11,16 +11,18 @@
 
 /***********************************************************************/
 
-EstOutput KSTest::getValues(vector<RAbundVector*> shared){
+EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(3,0);
 
 		//Must return shared1 and shared2 to original order at conclusion of kstest
-		vector<int> sortedA = shared[0]->getSortedD();
-		vector<int> sortedB = shared[1]->getSortedD();
+		vector<int> sortedA = shared[0]->get();  sort(sortedA.begin()+1, sortedA.end());
+		vector<int> sortedB = shared[1]->get();  sort(sortedB.begin()+1, sortedB.end());
 
-        int numNZ1 = shared[0]->numNZ();
-        int numNZ2 = shared[1]->numNZ();
+        int numNZ1 = 0;
+        for(int i = 0; i < shared[0]->getNumBins(); i++) { if(shared[0]->get(i) != 0) { numNZ1++; } } //shared[0]->numNZ();
+        int numNZ2 = 0;
+        for(int i = 0; i < shared[1]->getNumBins(); i++) { if(shared[1]->get(i) != 0) { numNZ2++; } } //shared[1]->numNZ();
 		double numInd1 = (double)shared[0]->getNumSeqs();
 		double numInd2 = (double)shared[1]->getNumSeqs();
 		

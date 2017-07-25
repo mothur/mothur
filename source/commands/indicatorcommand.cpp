@@ -430,13 +430,13 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 		if (sharedfile != "") {
-			vector< vector<RAbundVector*> > groupings;
+			vector< vector<SharedRAbundVector*> > groupings;
             vector< vector<string> > groupingNames;
 			set<string> groupsAlreadyAdded;
-			vector<RAbundVector*> subset;
+			vector<SharedRAbundVector*> subset;
             vector<string> subsetNames;
             
-            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             vector<string> dataGroupNames = lookup->getNamesGroups();
 			
 			//for each grouping
@@ -460,13 +460,13 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			
 			pValues = getPValues(groupings, groupingNames, lookup->size(), indicatorValues);
 		}else {
-			vector< vector<RAbundFloatVector*> > groupings;
+			vector< vector<SharedRAbundFloatVector*> > groupings;
             vector< vector<string> > groupingNames;
 			set<string> groupsAlreadyAdded;
-			vector<RAbundFloatVector*> subset;
+			vector<SharedRAbundFloatVector*> subset;
             vector<string> subsetNames;
             
-            vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+            vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
             vector<string> dataGroupNames = lookupFloat->getNamesGroups();
 			
 			//for each grouping
@@ -586,7 +586,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 			if (sharedfile != "") {
-				vector< vector<RAbundVector*> > groupings;
+				vector< vector<SharedRAbundVector*> > groupings;
                 vector< vector<string> > groupingNames;
 				
 				//get nodes that will be a valid grouping
@@ -596,11 +596,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				set<string> groupsAlreadyAdded;
 				//create a grouping with my grouping
-				vector<RAbundVector*> subset;
+				vector<SharedRAbundVector*> subset;
                 vector<string> subsetNames;
 				int count = 0;
 				int doneCount = nodeToDescendants[i].size();
-                vector<RAbundVector*> data = lookupFloat->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookupFloat->getSharedRAbundVectors();
                 vector<string> dataGroupNames = lookupFloat->getNamesGroups();
 
 				for (int k = 0; k < data.size(); k++) {
@@ -618,7 +618,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
 	
 					if ((descendantNodes[i].count(j) == 0) && (distToRoot[j] >= distToRoot[i])) { 
-						vector<RAbundVector*> subset;
+						vector<SharedRAbundVector*> subset;
                         vector<string> subsetNames;
 						int count = 0;
 						int doneCount = nodeToDescendants[j].size();
@@ -644,7 +644,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				pValues = getPValues(groupings, groupingNames, data.size(), indicatorValues);
 			}else {
-				vector< vector<RAbundFloatVector*> > groupings;
+				vector< vector<SharedRAbundFloatVector*> > groupings;
                 vector< vector<string> > groupingNames;
 				
 				//get nodes that will be a valid grouping
@@ -654,12 +654,12 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				set<string> groupsAlreadyAdded;
 				//create a grouping with my grouping
-				vector<RAbundFloatVector*> subset;
+				vector<SharedRAbundFloatVector*> subset;
                 vector<string> subsetNames;
 				int count = 0;
 				int doneCount = nodeToDescendants[i].size();
                 
-                vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+                vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
                 vector<string> dataGroupNames = lookupFloat->getNamesGroups();
                 
 				for (int k = 0; k < data.size(); k++) {
@@ -676,7 +676,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
 					if ((descendantNodes[i].count(j) == 0) && (distToRoot[j] >= distToRoot[i])) {
-						vector<RAbundFloatVector*> subset;
+						vector<SharedRAbundFloatVector*> subset;
                         vector<string> subsetNames;
 						int count = 0;
 						int doneCount = nodeToDescendants[j].size();
@@ -750,7 +750,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	}
 }
 //**********************************************************************************************************************
-vector<float> IndicatorCommand::getValues(vector< vector<RAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
 		map< vector<int>, vector<int> >::iterator it;
@@ -830,7 +830,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<RAbundFloatVector*> >& 
 }
 //**********************************************************************************************************************
 //same as above, just data type difference
-vector<float> IndicatorCommand::getValues(vector< vector<RAbundVector*> >& groupings, vector< vector<string> >& groupingNames,vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames,vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
 		map< vector<int>, vector<int> >::iterator it;
@@ -1046,7 +1046,7 @@ int IndicatorCommand::getShared(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 				break;
 			}
 			
@@ -1122,7 +1122,7 @@ int IndicatorCommand::getSharedFloat(){
 				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat->setLabel(saveLabel);
+				lookupFloat->setLabels(saveLabel);
 				break;
 			}
 			
@@ -1164,7 +1164,7 @@ int IndicatorCommand::getSharedFloat(){
 	}
 }
 //**********************************************************************************************************************
-vector<float> IndicatorCommand::driver(vector< vector<RAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues, int numIters){
+vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues, int numIters){
 	try {
 		vector<float> pvalues;
 		pvalues.resize(indicatorValues.size(), 0);
@@ -1188,7 +1188,7 @@ vector<float> IndicatorCommand::driver(vector< vector<RAbundFloatVector*> >& gro
 	}
 }
 //**********************************************************************************************************************
-vector<float> IndicatorCommand::getPValues(vector< vector<RAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
+vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
         bool recalc = false;
@@ -1394,7 +1394,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<RAbundFloatVector*> >&
 
 //**********************************************************************************************************************
 //same as above, just data type difference
-vector<float> IndicatorCommand::driver(vector< vector<RAbundVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues, int numIters){
+vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues, int numIters){
 	try {
 		vector<float> pvalues;
 		pvalues.resize(indicatorValues.size(), 0);
@@ -1419,7 +1419,7 @@ vector<float> IndicatorCommand::driver(vector< vector<RAbundVector*> >& grouping
 }
 //**********************************************************************************************************************
 //same as above, just data type difference
-vector<float> IndicatorCommand::getPValues(vector< vector<RAbundVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
+vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
         bool recalc = false;
@@ -1627,7 +1627,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<RAbundVector*> >& grou
 }
 //**********************************************************************************************************************
 //swap groups between groupings, in essence randomizing the second column of the design file
-map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<RAbundVector*> >& groupings, int numLookupGroups){
+map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<SharedRAbundVector*> >& groupings, int numLookupGroups){
 	try {
 		
 		map< vector<int>, vector<int> > randomGroupings; 
@@ -1662,7 +1662,7 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 }	
 //**********************************************************************************************************************
 //swap groups between groupings, in essence randomizing the second column of the design file
-map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<RAbundFloatVector*> >& groupings, int numLookupGroups){
+map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >& groupings, int numLookupGroups){
 	try {
 		
 		map< vector<int>, vector<int> > randomGroupings; 

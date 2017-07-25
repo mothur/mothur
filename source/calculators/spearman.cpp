@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Spearman::getValues(vector<RAbundVector*> shared) {
+EstOutput Spearman::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

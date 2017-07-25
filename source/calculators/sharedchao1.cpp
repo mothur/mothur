@@ -10,7 +10,7 @@
 #include "sharedchao1.h"
 
 /***********************************************************************/
-EstOutput SharedChao1::getValues(vector<RAbundVector*> shared){
+EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);		
 		vector<int> temp; 

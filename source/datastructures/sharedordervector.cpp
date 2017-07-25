@@ -294,7 +294,7 @@ SAbundVector SharedOrderVector::getSAbundVector(){
 /***********************************************************************/
 SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector(string group) {
 	try {
-		RAbundVector* sharedRav = new RAbundVector(data.size());
+		SharedRAbundVector* sharedRav = new SharedRAbundVector(data.size());
 		
 		sharedRav->setLabel(label);
 		sharedRav->setGroup(group);

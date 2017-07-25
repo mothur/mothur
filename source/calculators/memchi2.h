@@ -21,7 +21,7 @@ class MemChi2 : public Calculator  {
 public:
 	MemChi2() :  Calculator("memchi2", 1, false, true) {};  //the true means this calculator needs all groups to calculate the pair value
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<RAbundVector*>);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Memchi2"; }
 private:
 	

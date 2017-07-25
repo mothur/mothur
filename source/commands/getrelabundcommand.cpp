@@ -213,7 +213,7 @@ int GetRelAbundCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookup->getLabel();

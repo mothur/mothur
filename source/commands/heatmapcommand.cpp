@@ -311,7 +311,7 @@ int HeatMapCommand::execute(){
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
 					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
@@ -327,7 +327,7 @@ int HeatMapCommand::execute(){
 					lookup = input->getSharedRAbundVectors(lastLabel);
 					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 					
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
@@ -336,7 +336,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
-					lookup->setLabel(saveLabel);
+					lookup->setLabels(saveLabel);
 				}
 				
 				lastLabel = lookup->getLabel();
@@ -373,7 +373,7 @@ int HeatMapCommand::execute(){
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 
@@ -470,7 +470,7 @@ int HeatMapCommand::execute(){
 				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
 	
 					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-                    vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+                    vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
                     string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
@@ -486,7 +486,7 @@ int HeatMapCommand::execute(){
 					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 					
-                    vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+                    vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
                     string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
@@ -495,7 +495,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(lookupFloat->getLabel());
 					
 					//restore real lastlabel to save below
-					lookupFloat->setLabel(saveLabel);
+					lookupFloat->setLabels(saveLabel);
 				}
 				
 				lastLabel = lookupFloat->getLabel();
@@ -532,7 +532,7 @@ int HeatMapCommand::execute(){
                 lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
                 m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
                 
-                vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+                vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
                 string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 

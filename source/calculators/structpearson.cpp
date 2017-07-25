@@ -10,7 +10,7 @@
 #include "structpearson.h"
 
 /***********************************************************************/
-EstOutput StructPearson::getValues(vector<RAbundVector*> shared) {
+EstOutput StructPearson::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

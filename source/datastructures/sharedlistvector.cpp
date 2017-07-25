@@ -390,18 +390,20 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 		util.setGroups(Groups, allGroups);
 		m->setGroups(Groups);
 
-        vector<RAbundVector*> lookup;  //contains just the groups the user selected
+        vector<SharedRAbundVector*> lookup;  //contains just the groups the user selected
         vector<string> groups;
-        map<string, RAbundVector*> finder;  //contains all groups in groupmap
-        map<string, RAbundVector*>::iterator it;
+        map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
+        map<string, SharedRAbundVector*>::iterator it;
         
 		for (int i = 0; i < allGroups.size(); i++) {
 			if (m->inUsersGroups(allGroups[i], m->getGroups())) {  //if this group is in user groups
-                RAbundVector* temp = new RAbundVector(data.size());
+                SharedRAbundVector* temp = new SharedRAbundVector(numBins);
                 finder[allGroups[i]] = temp;
                 finder[allGroups[i]]->setLabel(label);
+                finder[allGroups[i]]->setGroup(allGroups[i]);
 				lookup.push_back(finder[allGroups[i]]);
                 groups.push_back(allGroups[i]);
+                cout << temp->getGroup() << '\t' << temp->getNumBins() << endl;
 			}
         }
 	
@@ -427,7 +429,8 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 		}
         
         SharedRAbundVectors* shared = new SharedRAbundVectors();
-        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
+        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  cout << lookup[j]->getGroup() << '\t' << lookup[j]->getNumBins() << endl;}
+        shared->eliminateZeroOTUS();
 
 		return shared;
 	}
@@ -440,7 +443,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 SharedRAbundFloatVectors* SharedListVector::getSharedRAbundFloatVector() {
     try {
         SharedRAbundVectors* shared = getSharedRAbundVector();
-        vector<RAbundFloatVector*> thisLookup = shared->getSharedRAbundFloatVectors();
+        vector<SharedRAbundFloatVector*> thisLookup = shared->getSharedRAbundFloatVectors();
         SharedRAbundFloatVectors* sharedFloat = new SharedRAbundFloatVectors();
         for (int j = 0; j < thisLookup.size(); j++) {  sharedFloat->push_back(thisLookup[j]);  }
         return sharedFloat;

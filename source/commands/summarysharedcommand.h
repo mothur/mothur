@@ -80,18 +80,17 @@ public:
 	
 private:
 	vector<linePair> lines;
-	vector<Calculator*> sumCalculators;	
-	//InputData* input;
+	vector<Calculator*> sumCalculators;
 	
 	bool abort, allLines, mult, all, createPhylip, subsample;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, sharedfile, output;
 	vector<string>  Estimators, Groups, outputNames;
-	//vector<SharedRAbundVector*> lookup;
+	
 	string format, outputDir;
 	int numGroups, processors, subsampleSize, iters;
-	int process(vector<RAbundVector*>, string, string);
-	int driver(vector<RAbundVector*>, int, int, string, string, vector< vector<seqDist> >&);
+	int process(vector<SharedRAbundVector*>, string, string);
+	int driver(vector<SharedRAbundVector*>, int, int, string, string, vector< vector<seqDist> >&);
     int printSims(ostream&, vector< vector<double> >&, vector<string>);
 
 };

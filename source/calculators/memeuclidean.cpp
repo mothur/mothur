@@ -10,7 +10,7 @@
 #include "memeuclidean.h"
 
 /***********************************************************************/
-EstOutput MemEuclidean::getValues(vector<RAbundVector*> shared) {
+EstOutput MemEuclidean::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

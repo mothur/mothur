@@ -10,7 +10,7 @@
 #include "sharedmorisitahorn.h"
 
 /***********************************************************************/
-EstOutput MorHorn::getValues(vector<RAbundVector*> shared) {
+EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		

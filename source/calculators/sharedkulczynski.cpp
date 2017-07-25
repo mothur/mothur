@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Kulczynski::getValues(vector<RAbundVector*> shared) {
+EstOutput Kulczynski::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		double S1, S2, S12, tempA, tempB;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; 

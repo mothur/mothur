@@ -10,7 +10,7 @@
 #include "hamming.h"
 
 /***********************************************************************/
-EstOutput Hamming::getValues(vector<RAbundVector*> shared) {
+EstOutput Hamming::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

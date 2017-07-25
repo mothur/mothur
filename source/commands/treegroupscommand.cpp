@@ -693,7 +693,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors* lookup) {
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 
 			lastLabel = lookup->getLabel();
@@ -1110,8 +1110,8 @@ int TreeGroupCommand::process(SharedRAbundVectors* thisLookup) {
 /**************************************************************************************************/
 int TreeGroupCommand::driver(SharedRAbundVectors* thislookup, int start, int end, vector< vector<seqDist> >& calcDists) {
 	try {
-		vector<RAbundVector*> subset;
-        vector<RAbundVector*> thisLookup = thislookup->getSharedRAbundVectors();
+		vector<SharedRAbundVector*> subset;
+        vector<SharedRAbundVector*> thisLookup = thislookup->getSharedRAbundVectors();
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			
 			for (int l = 0; l < k; l++) {

@@ -32,6 +32,7 @@ struct logger {
 class OrderVector;
 class SharedOrderVector;
 class RAbundVector;
+class SharedRAbundVector;
 
 class MothurOut {
 	
@@ -216,7 +217,7 @@ class MothurOut {
         int mothurRandomShuffle(vector<PDistCellMin>&);
         int mothurRandomShuffle(OrderVector&);
         int mothurRandomShuffle(SharedOrderVector&);
-        int mothurRandomShuffle(vector<RAbundVector*>&);
+        int mothurRandomShuffle(vector<SharedRAbundVector*>&);
         void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); srand(s); }
     
 		
@@ -225,6 +226,10 @@ class MothurOut {
         int min(int, int);
         double max(vector<double>&); //returns largest value in vector
         double min(vector<double>&); //returns smallest value in vector
+        int max(vector<int>);
+        float max(vector<float>);
+        int min(vector<int>);
+        float min(vector<float>);
 		int factorial(int num);
 		vector<vector<double> > binomial(int);
 		float ceilDist(float, int);
@@ -235,8 +240,7 @@ class MothurOut {
         int average(vector<int>);
         int sum(vector<int>);
         double sum(vector<double>);
-        int max(vector<int>);
-        float max(vector<float>);
+    
 		int getRandomIndex(int); //highest
         int getRandomNumber();
         double getRandomDouble0to1();
@@ -249,7 +253,6 @@ class MothurOut {
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&, vector< vector<seqDist> >&);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&);
-
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
 		

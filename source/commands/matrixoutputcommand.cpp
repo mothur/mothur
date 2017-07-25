@@ -385,7 +385,7 @@ int MatrixOutputCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 
 			lastLabel = lookup->getLabel();
@@ -506,7 +506,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
                 tempLabels = sample.getSample(thisItersLookup, subsampleSize);
             }
             
-            vector<RAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = thisLookup->getNamesGroups();
             
             if(processors == 1){
@@ -808,9 +808,9 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
 	}
 }
 /**************************************************************************************************/
-int MatrixOutputCommand::driver(vector<RAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) {
+int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) {
 	try {
-		vector<RAbundVector*> subset;
+		vector<SharedRAbundVector*> subset;
         
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			

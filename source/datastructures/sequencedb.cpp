@@ -40,7 +40,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 			
 			if (newSequence.getName() != "") {   
 				if (length == 0) { length = newSequence.getAligned().length(); }
-				if (length != newSequence.getAligned().length()) { samelength = false; }
+                if (length != newSequence.getAligned().length()) { samelength = false;  }
 				data.push_back(newSequence);  
 			}
 			

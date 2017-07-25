@@ -754,7 +754,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat->setLabel(saveLabel);
+				lookupFloat->setLabels(saveLabel);
 				break;
 			}
 			
@@ -883,7 +883,7 @@ int CorrAxesCommand::getMetadata(){
 			in >> group; m->gobble(in);
 			groupNames.push_back(group);
 				
-			RAbundFloatVector* tempLookup = new RAbundFloatVector();
+			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
 			tempLookup->setLabel("1");
             tempLookup->setGroup(group);
         
@@ -899,7 +899,7 @@ int CorrAxesCommand::getMetadata(){
 		in.close();
 		
         lookupFloat->eliminateZeroOTUS();
-        lookupFloat->setLabel("1");
+        lookupFloat->setLabels("1");
         
 		return 0;
 	}

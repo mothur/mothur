@@ -105,7 +105,7 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
 	}
 }
 //**********************************************************************************************************************
-vector<string> SubSample::getSample(vector<RAbundVector*> rabunds, int size) {
+vector<string> SubSample::getSample(vector<SharedRAbundVector*> rabunds, int size) {
     try {
         
         //save mothurOut's binLabels to restore for next label
@@ -122,7 +122,7 @@ vector<string> SubSample::getSample(vector<RAbundVector*> rabunds, int size) {
                 
                 m->mothurRandomShuffle(order);
                 
-                RAbundVector* temp = new RAbundVector(numBins);
+                SharedRAbundVector* temp = new SharedRAbundVector(numBins);
                 temp->setLabel(rabunds[i]->getLabel());
                 temp->setGroup(rabunds[i]->getGroup());
                 
@@ -136,13 +136,17 @@ vector<string> SubSample::getSample(vector<RAbundVector*> rabunds, int size) {
                     temp->set(bin, (abund+1));
                 }
                 newLookup->push_back(temp);
+                cout << "done sampleing " << temp->getGroup() << '\t' << temp->getNumSeqs() << endl;
             }
         }
+        cout << "about to eliminateZeroOtus" << endl;
         newLookup->eliminateZeroOTUS();
+        cout << "done eliminateZeroOtus" << endl;
         for (int i = 0; i < rabunds.size(); i++) { delete rabunds[i]; } rabunds.clear();
         rabunds = newLookup->getSharedRAbundVectors();
-        delete newLookup;
         
+        cout << "done subsample " << newLookup->getNumSeqs(rabunds[0]->getGroup()) << "\n";
+        delete newLookup;
         if (m->control_pressed) { return m->currentSharedBinLabels; }
         
         //save mothurOut's binLabels to restore for next label
@@ -163,7 +167,8 @@ vector<string> SubSample::getSample(SharedRAbundVectors* thislookup, int size) {
 		
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
-        vector<RAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
+        cout << "got rabunds" << endl;
         getSample(rabunds, size);
         SharedRAbundVectors* newLookup = new SharedRAbundVectors();
 		

@@ -26,7 +26,7 @@ public:
 		return data;
 	}
 	
-	EstOutput getValues(vector<RAbundVector*> shared) { //return number of sequences in the sharedotus
+	EstOutput getValues(vector<SharedRAbundVector*> shared) { //return number of sequences in the sharedotus
 		
 		int numGroups = shared.size();
 		data.clear(); data.resize(numGroups,0);

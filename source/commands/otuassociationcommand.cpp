@@ -275,7 +275,7 @@ int OTUAssociationCommand::processShared(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 				
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
@@ -438,7 +438,7 @@ int OTUAssociationCommand::processRelabund(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 				
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 				process(lookup);
@@ -581,7 +581,7 @@ int OTUAssociationCommand::readMetadata(){
 		}
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
-        metadataLookup->setLabel("1");
+        metadataLookup->setLabels("1");
         
         vector<string> mGroups = m->getGroups();
         
@@ -594,7 +594,7 @@ int OTUAssociationCommand::readMetadata(){
 			in >> group; m->gobble(in);
             if (m->debug) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
-            RAbundFloatVector* tempLookup = new RAbundFloatVector();
+            SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
             tempLookup->setLabel("1");
             tempLookup->setGroup(group);
 			

@@ -18,7 +18,7 @@ class SharedNSeqs : public Calculator {
 public:
 	SharedNSeqs() : Calculator("sharednseqs", 1, false) {};
 	EstOutput getValues(SAbundVector* rank){ return data; };
-	EstOutput getValues(vector<RAbundVector*> shared) {
+	EstOutput getValues(vector<SharedRAbundVector*> shared) {
 		data.resize(1,0);
 		data[0] = (double)shared[0]->getNumSeqs() + (double)shared[1]->getNumSeqs();
 		return data;

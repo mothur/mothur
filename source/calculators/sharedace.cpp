@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 
-EstOutput SharedAce::getValues(vector<RAbundVector*> shared) {
+EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		string label;

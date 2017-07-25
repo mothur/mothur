@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 //This is used by SharedJAbund and SharedSorAbund
-EstOutput UVEst::getUVest(vector<RAbundVector*> shared) {
+EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
 	try {	
 		EstOutput results;
 		results.resize(2,0);

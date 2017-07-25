@@ -21,7 +21,7 @@ public:
 		output->output(nSeqs, data);	
 	};
 	
-    void update(vector<RAbundVector*> shared, int numSeqs, int numGroups){
+    void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups){
         timesCalled++;
         data = estimate->getValues(shared);  //passes estimators a shared vector from each group to be compared
         

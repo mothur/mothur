@@ -22,13 +22,13 @@ class SharedJackknife : public Calculator  {
 public:
 	SharedJackknife() : numGroups(-1), callCount(0), count(0), currentCallDone(true), Calculator("sharedjackknife", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<RAbundVector*>);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Sharedjackknife"; }
 	
 private:
 	int numGroups, callCount, count;
 	bool currentCallDone;
-	vector<RAbundVector*> groups;
+	vector<SharedRAbundVector*> groups;
 	double simpson(vector<int>, double, int);
 	double* jackknife();
     double getConfLimit(int row, int col);

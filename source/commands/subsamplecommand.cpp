@@ -833,7 +833,7 @@ int SubSampleCommand::getSubSampleShared() {
 		InputData input(sharedfile, "sharedfile");
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
-		
+        cout << "done reading" << endl;
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -844,7 +844,6 @@ int SubSampleCommand::getSubSampleShared() {
             lookup->removeGroups(size);
 			Groups = m->getGroups();
 		}
-		
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine();  return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
@@ -877,7 +876,7 @@ int SubSampleCommand::getSubSampleShared() {
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookup->getLabel();
@@ -948,9 +947,11 @@ int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
         m->currentSharedBinLabels = subsampledLabels;
-        
+        cout << "here\n";
 		thislookup->printHeaders(out);
+        cout << "printed headers\n";
 		thislookup->print(out);
+        cout << "printed otus\n";
 		out.close();
         
         //save mothurOut's binLabels to restore for next label

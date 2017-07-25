@@ -550,6 +550,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		
 		if((output == "lt") && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
 		
+        long long distsBelowCutoff = 0;
 		for(int i=startLine;i<endLine;i++){
 			if(output == "lt")	{	
 				string name = alignDB.get(i).getName();
@@ -571,6 +572,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 				
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
+                    distsBelowCutoff++;
 				}
                 if (output == "lt") {  outFile  << '\t' << dist; }
 			}
@@ -578,11 +580,11 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			if (output == "lt") { outFile << endl; }
             
             if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
+				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(distsBelowCutoff) +"\n");
 			}
 			
 		}
-		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
+		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
 		
 		outFile.close();
 		delete distCalculator;
@@ -627,6 +629,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 		
 		if(startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
 		
+        long long distsBelowCutoff = 0;
 		for(int i=startLine;i<endLine;i++){
 				
 			string name = alignDB.get(i).getName();
@@ -641,18 +644,20 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
-				
+                
+                if(dist <= cutoff){ distsBelowCutoff++; }
+
 				outFile << dist << '\t'; 
 			}
 			
 			outFile << endl; 
 			
-			if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n");
-			}
-			
-		}
-		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
+            if(i % 100 == 0){
+                m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(distsBelowCutoff) +"\n");
+            }
+        }
+        m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
+        
 		
 		outFile.close();
 		delete distCalculator;

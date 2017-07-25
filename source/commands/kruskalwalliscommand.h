@@ -46,7 +46,7 @@ private:
     vector<string> outputNames;
     set<string> labels;
     
-    int process(vector<RAbundVector*>&, DesignMap&);    
+    int process(vector<SharedRAbundVector*>&, DesignMap&);    
 };
 
 #endif	/* KRUSKALWALLISCOMMAND_H */

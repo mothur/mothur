@@ -10,7 +10,7 @@
 #include "structeuclidean.h"
 
 /***********************************************************************/
-EstOutput StructEuclidean::getValues(vector<RAbundVector*> shared) {
+EstOutput StructEuclidean::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

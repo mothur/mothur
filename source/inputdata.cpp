@@ -515,7 +515,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 			}else if (format == "sharedfile")  {
 				SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(fileHandle);
 				if (SharedRAbund != NULL) {
-					vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
+					vector<SharedRAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
                     vector<string> groups = SharedRAbund->getNamesGroups();
                     SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
                     for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i]); }
@@ -568,7 +568,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 						//if you are at the last label
 						if (thisLabel == label) {  
 							in.close(); 
-                            vector<RAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
+                            vector<SharedRAbundFloatVector*> lookup = SharedRAbund->getSharedRAbundFloatVectors();
                             vector<string> groups = SharedRAbund->getNamesGroups();
                             SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors();
                             for (int i = 0; i < lookup.size(); i++) { SharedRelAbund->push_back(lookup[i]); }

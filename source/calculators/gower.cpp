@@ -10,7 +10,7 @@
 #include "gower.h"
 
 /***********************************************************************/
-EstOutput Gower::getValues(vector<RAbundVector*> shared) {
+EstOutput Gower::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		
@@ -26,7 +26,7 @@ EstOutput Gower::getValues(vector<RAbundVector*> shared) {
 			//for each group
 			for (int j = 1; j < shared.size(); j++) { 
 				maxOtus[i] = max(shared[j]->get(i), maxOtus[i]);
-				minOtus[i] = min(shared[j]->get(i), minOtus[i]);
+				minOtus[i] = min(int(shared[j]->get(i)), minOtus[i]);
 			}
 		}
 		

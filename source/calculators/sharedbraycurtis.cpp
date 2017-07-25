@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 //This is used by SharedJAbund and SharedSorAbund
-EstOutput BrayCurtis::getValues(vector<RAbundVector*> shared) {
+EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		

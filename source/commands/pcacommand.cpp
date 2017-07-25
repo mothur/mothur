@@ -242,7 +242,7 @@ int PCACommand::execute(){
 				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat->setLabel(saveLabel);
+				lookupFloat->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookupFloat->getLabel();
@@ -338,7 +338,7 @@ int PCACommand::process(SharedRAbundFloatVectors* lookupFloat){
 		vector<double> colMeans(numOTUs);
 		
 		//fill matrix with shared relative abundances, re-center
-        vector<RAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
+        vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
 		for (int i = 0; i < numSamples; i++) {
 			matrix[i].resize(numOTUs, 0);
 			

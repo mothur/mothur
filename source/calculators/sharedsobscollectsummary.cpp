@@ -13,7 +13,7 @@
 //This returns the number of shared species observed in several groups.  
 //The shared vector is each groups sharedrabundvector.
 
-EstOutput SharedSobsCS::getValues(vector<RAbundVector*> shared){
+EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);
 		double observed = 0;
@@ -42,7 +42,7 @@ EstOutput SharedSobsCS::getValues(vector<RAbundVector*> shared){
 //This returns the number of shared species observed in several groups.  
 //The shared vector is each groups sharedrabundvector.
 
-EstOutput SharedSobsCS::getValues(vector<RAbundVector*> shared, vector<string>& labels){
+EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared, vector<string>& labels){
 	try {
 		data.resize(1,0);
 		double observed = 0;

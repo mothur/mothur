@@ -52,7 +52,7 @@ private:
 	int process(SharedRAbundVectors*);
 	int driver(unsigned long long, unsigned long long, SharedRAbundVectors*);
     int convertToShared(string filename);
-    int convertToInput(vector<RAbundVector*>&, vector<string>, string);
+    int convertToInput(vector<SharedRAbundVector*>&, vector<string>, string);
     bool convertSharedToInput;
 };
 
@@ -97,7 +97,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 	try {
 		
         vector<string> thisLookupNames = pDataArray->thisLookUp->getNamesGroups();
-        vector<RAbundVector*> thisLookupRabunds = pDataArray->thisLookUp->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> thisLookupRabunds = pDataArray->thisLookUp->getSharedRAbundVectors();
         
         //for each combo
 		for (int c = pDataArray->start; c < (pDataArray->start+pDataArray->num); c++) {
@@ -112,7 +112,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			
 			vector< vector<double> > data2; data2.resize(pDataArray->thisLookUp[0]->getNumBins());
 			
-			vector<RAbundVector*> subset;
+			vector<SharedRAbundVector*> subset;
 			int setACount = 0;
 			int setBCount = 0;
 			for (int i = 0; i < pDataArray->thisLookUp.size(); i++) {

@@ -52,18 +52,18 @@ private:
 	int GetIndicatorSpecies(Tree*&);
 	int GetIndicatorSpecies();
 	set<string> getDescendantList(Tree*&, int, map<int, set<string> >, map<int, set<int> >&);
-	vector<float> getValues(vector< vector<RAbundVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
-	vector<float> getValues(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<SharedRAbundVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >&, vector< vector<string> >&, vector<string>&, map< vector<int>, vector<int> >);
     
 	map<int, float> getDistToRoot(Tree*&);
-	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<RAbundVector*> >&, int);
-	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<RAbundFloatVector*> >&, int);
+	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundVector*> >&, int);
+	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >&, int);
     
-	vector<float> driver(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>, int);
-	vector<float> driver(vector< vector<RAbundVector*> >&, vector< vector<string> >&, int, vector<float>, int);
+	vector<float> driver(vector< vector<SharedRAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>, int);
+	vector<float> driver(vector< vector<SharedRAbundVector*> >&, vector< vector<string> >&, int, vector<float>, int);
     
-	vector<float> getPValues(vector< vector<RAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>);
-	vector<float> getPValues(vector< vector<RAbundVector*> >&, vector< vector<string> >&, int, vector<float>);
+	vector<float> getPValues(vector< vector<SharedRAbundFloatVector*> >&, vector< vector<string> >&, int, vector<float>);
+	vector<float> getPValues(vector< vector<SharedRAbundVector*> >&, vector< vector<string> >&, int, vector<float>);
 
 	
 };
@@ -71,14 +71,14 @@ private:
 /**************************************************************************************************/
 
 struct indicatorData {
-    vector< vector<RAbundFloatVector*> > groupings;
+    vector< vector<SharedRAbundFloatVector*> > groupings;
    	MothurOut* m;
     int iters, num;
     vector<float> indicatorValues;
     vector<float> pvalues;
 	
 	indicatorData(){}
-	indicatorData(MothurOut* mout, int it, vector< vector<RAbundFloatVector*> > ng, int n, vector<float> iv) {
+	indicatorData(MothurOut* mout, int it, vector< vector<SharedRAbundFloatVector*> > ng, int n, vector<float> iv) {
 		m = mout;
         iters = it;
         groupings = ng;

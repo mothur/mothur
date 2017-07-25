@@ -22,7 +22,7 @@ class Boneh : public Calculator  {
 public: 
 	Boneh(int size) : f(size), Calculator("boneh", 1, false) {};
 	EstOutput getValues(SAbundVector*);	
-	EstOutput getValues(vector<RAbundVector*>) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 	string getCitation() { return "http://www.mothur.org/wiki/Boneh"; }
 private:
 	double getV(double, double, double);

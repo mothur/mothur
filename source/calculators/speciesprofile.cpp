@@ -10,7 +10,7 @@
 #include "speciesprofile.h"
 
 /***********************************************************************/
-EstOutput SpeciesProfile::getValues(vector<RAbundVector*> shared) {
+EstOutput SpeciesProfile::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

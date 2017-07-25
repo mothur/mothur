@@ -102,7 +102,7 @@ private:
 	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	int process(SharedRAbundVectors*, string, string);
-	int driver(vector<RAbundVector*>, int, int, vector< vector<seqDist> >&);
+	int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);
 
 };
 	
@@ -111,7 +111,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distSharedData {
-    vector<RAbundVector*> thisLookup;
+    vector<SharedRAbundVector*> thisLookup;
     vector< vector<seqDist> > calcDists;
     vector<string>  Estimators;
 	unsigned long long start;
@@ -120,7 +120,7 @@ struct distSharedData {
     int count;
 	
 	distSharedData(){}
-	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<RAbundVector*> lu) {
+	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
 		m = mout;
 		start = st;
 		end = en;
@@ -231,7 +231,7 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
         
         pDataArray->calcDists.resize(matrixCalculators.size());
         		
-		vector<RAbundVector*> subset;
+		vector<SharedRAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
 			pDataArray->count++;
 			for (int l = 0; l < k; l++) {

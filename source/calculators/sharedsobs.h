@@ -21,7 +21,7 @@ class SharedSobs : public Calculator {
 public:
 	SharedSobs() : Calculator("sharedsobs", 1, false) {};
 	EstOutput getValues(SAbundVector* rank){ return data; };
-	EstOutput getValues(vector<RAbundVector*>);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/sharedsobs"; }
 };
 

@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Whittaker::getValues(vector<RAbundVector*> shared){
+EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
 	try{
 		data.resize(1);
 

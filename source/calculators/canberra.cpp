@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Canberra::getValues(vector<RAbundVector*> shared) {
+EstOutput Canberra::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

@@ -196,7 +196,7 @@ int KruskalWallisCommand::execute(){
                 
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 process(data, designMap);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
                 
@@ -211,7 +211,7 @@ int KruskalWallisCommand::execute(){
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 process(data, designMap);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
                 
@@ -219,7 +219,7 @@ int KruskalWallisCommand::execute(){
                 userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup->setLabel(saveLabel);
+                lookup->setLabels(saveLabel);
             }
             
             lastLabel = lookup->getLabel();
@@ -253,7 +253,7 @@ int KruskalWallisCommand::execute(){
             lookup = input.getSharedRAbundVectors(lastLabel);
             
             m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             process(data, designMap);
             for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
             
@@ -276,7 +276,7 @@ int KruskalWallisCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int KruskalWallisCommand::process(vector<RAbundVector*>& lookup, DesignMap& designMap) {
+int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
 	try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));

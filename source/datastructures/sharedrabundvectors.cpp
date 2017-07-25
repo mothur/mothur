@@ -83,7 +83,7 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
         numBins = num;
         
         //add new vector to lookup
-        RAbundVector* temp = new RAbundVector(f, label, groupN); m->gobble(f);
+        SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN); m->gobble(f);
         push_back(temp);
         
         if (!(f.eof())) { f >> nextLabel; }
@@ -91,7 +91,7 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
         //read the rest of the groups info in
         while ((nextLabel == holdLabel) && (f.eof() != true)) {
             f >> groupN;
-            RAbundVector* temp = new RAbundVector(f, label, groupN); m->gobble(f);
+            SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN); m->gobble(f);
             push_back(temp);
             allGroups.push_back(groupN);
             
@@ -111,7 +111,7 @@ void SharedRAbundVectors::print(ostream& output){
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->control_pressed) { break; }
-            lookup[i]->nonSortedPrint(output);
+            lookup[i]->print(output);
         }
     }
     catch(exception& e) {
@@ -124,6 +124,7 @@ void SharedRAbundVectors::printHeaders(ostream& output){
     try {
         string snumBins = toString(numBins);
         output << "label\tGroup\tnumOtus";
+        cout << "numBins" << numBins << endl;
         if (m->sharedHeaderMode == "tax") {
             for (int i = 0; i < numBins; i++) {
                 
@@ -144,13 +145,16 @@ void SharedRAbundVectors::printHeaders(ostream& output){
             for (int i = 0; i < numBins; i++) {
                 //if there is a bin label use it otherwise make one
                 string binLabel = "Otu";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
+                
                 if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
+                else {
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                }
                 
                 output  << '\t' << binLabel;
             }
@@ -165,7 +169,7 @@ void SharedRAbundVectors::printHeaders(ostream& output){
     }
 }
 /***********************************************************************/
-int SharedRAbundVectors::push_back(RAbundVector* thisLookup){
+int SharedRAbundVectors::push_back(SharedRAbundVector* thisLookup){
     try {
         if (numBins == 0) { numBins = thisLookup->getNumBins();  }
         lookup.push_back(thisLookup);
@@ -252,13 +256,13 @@ vector<int> SharedRAbundVectors::getOTU(int bin){
     }
 }
 /***********************************************************************/
-void SharedRAbundVectors::setLabel(string l){
+void SharedRAbundVectors::setLabels(string l){
     try {
         label = l;
         for (int i = 0; i < lookup.size(); i++) { lookup[i]->setLabel(l); }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedRAbundVectors", "push_back");
+        m->errorOut(e, "SharedRAbundVectors", "setLabels");
         exit(1);
     }
 }
@@ -342,8 +346,8 @@ vector<string> SharedRAbundVectors::getNamesGroups(){
         exit(1);
     }
 }
-/***********************************************************************/
-vector<RAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVectors(){
+/***********************************************************************
+vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVectors(){
     try {
         SharedUtil util;
         vector<string> Groups = m->getGroups();
@@ -388,7 +392,7 @@ SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
         m->setGroups(Groups);
         
         bool remove = false;
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
                 remove = true;
@@ -426,7 +430,7 @@ void SharedRAbundVectors::removeGroups(vector<string> g){
         m->setGroups(Groups);
         
         bool remove = false;
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.isValidGroup((*it)->getGroup(), g) == false) {
                 remove = true;
@@ -450,7 +454,7 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
     try {
         vector<string> Groups;
         bool remove = false;
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
                 if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine(); }
                 delete (*it); (*it) = NULL;
@@ -479,6 +483,7 @@ int SharedRAbundVectors::getNumSeqsSmallestGroup(){
     try {
         int smallest = 1e6;
         for (int i = 0; i < lookup.size(); i++) {
+            if (m->debug) { m->mothurOut("[DEBUG]: " + lookup[i]->getGroup() + " numSeqs = " + toString(lookup[i]->getNumSeqs()) + "\n"); }
             if (lookup[i]->getNumSeqs() < smallest) { smallest = lookup[i]->getNumSeqs(); }
         }
         return smallest;
@@ -490,7 +495,7 @@ int SharedRAbundVectors::getNumSeqsSmallestGroup(){
 }
 
 /***********************************************************************/
-vector<RAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
+vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
     try {
         SharedUtil util;
         
@@ -499,8 +504,10 @@ vector<RAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
         util.setGroups(Groups, allGroups);
         m->setGroups(Groups);
         
+        vector<SharedRAbundVector*> newLookup;
         bool remove = false;
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+            if (m->control_pressed) { return newLookup; }
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
                 remove = true;
@@ -511,9 +518,52 @@ vector<RAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
 
         if (remove) { eliminateZeroOTUS(); }
         
-        vector<RAbundVector*> newLookup;
         for (int i = 0; i < lookup.size(); i++) {
-            RAbundVector* temp = new RAbundVector(lookup[i]->getRAbundVector());
+            if (m->control_pressed) { return newLookup; }
+            SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
+            newLookup.push_back(temp);
+        }
+        
+        return newLookup;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVectors(){
+    try {
+        SharedUtil util;
+        
+        vector<string> Groups = m->getGroups();
+        vector<string> allGroups = m->getAllGroups();
+        util.setGroups(Groups, allGroups);
+        m->setGroups(Groups);
+        
+        vector<SharedRAbundFloatVector*> newLookup;
+        bool remove = false;
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+            if (m->control_pressed) { return newLookup; }
+            //if this sharedrabund is not from a group the user wants then delete it.
+            if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
+                remove = true;
+                delete (*it); (*it) = NULL;
+                it = lookup.erase(it);
+            }else { ++it; }
+        }
+        
+        if (remove) { eliminateZeroOTUS(); }
+        
+        for (int i = 0; i < lookup.size(); i++) {
+            if (m->control_pressed) { return newLookup; }
+            vector<float> abunds;
+            vector<int> data = lookup[i]->get();
+            string group = lookup[i]->getGroup();
+            for (int j = 0; j < data.size(); j++) { abunds.push_back((float)data[j]); }
+            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(abunds);
+            temp->setLabel(label);
+            temp->setGroup(group);
             newLookup.push_back(temp);
         }
         
@@ -535,7 +585,7 @@ RAbundVector SharedRAbundVectors::getRAbundVector(){
         m->setGroups(Groups);
         
         bool remove = false;
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
                 remove = true;
@@ -564,9 +614,8 @@ RAbundVector SharedRAbundVectors::getRAbundVector(string group){
     try {
         RAbundVector rav;
         rav.setLabel(label);
-        rav.setGroup(group);
         
-        for (vector<RAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
             if ((*it)->getGroup() == group) {
                 for (int i = 0; i < (*it)->getNumBins(); i++) { rav.push_back((*it)->get(i)); }

@@ -124,7 +124,7 @@ double SharedJackknife::getConfLimit(int row, int col) //Rows are the degrees of
 
 /************************************************************************************************/
 
-EstOutput SharedJackknife::getValues(vector<RAbundVector*> vectorShared){ //Fix this for collect, mistake was that it was made with summary in mind.
+EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ //Fix this for collect, mistake was that it was made with summary in mind.
 	try {
 		if(numGroups == -1) {
 			numGroups = m->getNumGroups();

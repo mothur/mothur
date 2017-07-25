@@ -9,7 +9,7 @@
 
 #include "sharedmarczewski.h"
 
-EstOutput SharedMarczewski::getValues(vector<RAbundVector*> shared){
+EstOutput SharedMarczewski::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		//SharedRAbundVector* shared1 = vectorShared[0];
 		//SharedRAbundVector* shared2 = vectorShared[1];

@@ -280,7 +280,7 @@ int GetMetaCommunityCommand::execute(){
                 userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup->setLabel(saveLabel);
+                lookup->setLabels(saveLabel);
             }
             
             lastLabel = lookup->getLabel();
@@ -1045,8 +1045,8 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
 /**************************************************************************************************/
 int GetMetaCommunityCommand::driver(SharedRAbundVectors* thisLookup, vector< vector<seqDist> >& calcDists, Calculator* matrixCalculator) {
 	try {
-        vector<RAbundVector*> data = thisLookup->getSharedRAbundVectors();
-		vector<RAbundVector*> subset;
+        vector<SharedRAbundVector*> data = thisLookup->getSharedRAbundVectors();
+		vector<SharedRAbundVector*> subset;
         
 		for (int k = 0; k < data.size(); k++) { // pass cdd each set of groups to compare
 			

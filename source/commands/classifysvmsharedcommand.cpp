@@ -459,7 +459,7 @@ int ClassifySvmSharedCommand::execute() {
       if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-          vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         processSharedAndDesignData(data);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
@@ -473,7 +473,7 @@ int ClassifySvmSharedCommand::execute() {
         delete lookup;
         lookup = input.getSharedRAbundVectors(lastLabel);
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-          vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
           processSharedAndDesignData(data);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
@@ -481,7 +481,7 @@ int ClassifySvmSharedCommand::execute() {
         userLabels.erase(lookup->getLabel());
 
           //restore real lastlabel to save below
-        lookup->setLabel(saveLabel);
+        lookup->setLabels(saveLabel);
       }
 
       lastLabel = lookup->getLabel();
@@ -516,7 +516,7 @@ int ClassifySvmSharedCommand::execute() {
 
       m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 
-        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         processSharedAndDesignData(data);
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
@@ -552,7 +552,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     designMap.read(designFilePath);
 
     while ( lookup != NULL ) {
-        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         readSharedRAbundVectors(data, designMap, labeledObservationVector, featureVector);
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
         delete lookup;
@@ -560,7 +560,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     }
 }
 
-void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<RAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
+void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
     for ( int j = 0; j < lookup.size(); j++ ) {
         //i++;
         //vector<individual> data = lookup[j]->getData();
@@ -610,7 +610,7 @@ void printPerformanceSummary(MultiClassSVM* s, ostream& output) {
 }
 //**********************************************************************************************************************
 
-void ClassifySvmSharedCommand::processSharedAndDesignData(vector<RAbundVector*> lookup) {
+void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
     try {
         OutputFilter outputFilter(verbosity);
 
@@ -728,7 +728,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<RAbundVector*> 
 }
 //**********************************************************************************************************************
 
-void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<RAbundVector*> lookup) {
+void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
     try {
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;

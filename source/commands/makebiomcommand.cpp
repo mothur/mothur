@@ -398,7 +398,7 @@ int MakeBiomCommand::execute(){
                     userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup->setLabel(saveLabel);
+                    lookup->setLabels(saveLabel);
                 }
                 
                 lastLabel = lookup->getLabel();
@@ -436,7 +436,7 @@ int MakeBiomCommand::execute(){
                     userLabels.erase(lookupRel->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookupRel->setLabel(saveLabel);
+                    lookupRel->setLabels(saveLabel);
                 }
                 
                 lastLabel = lookupRel->getLabel();
@@ -1069,10 +1069,10 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors* lookup, map<string
             
         }
         
-        vector<RAbundVector*> newLookup;
+        vector<SharedRAbundVector*> newLookup;
         vector<string> namesOfGroups = lookup->getNamesGroups();
 		for (int i = 0; i < namesOfGroups.size(); i++) {
-			RAbundVector* temp = new RAbundVector();
+			SharedRAbundVector* temp = new SharedRAbundVector();
 			temp->setLabel(lookup->getLabel());
 			temp->setGroup(namesOfGroups[i]);
 			newLookup.push_back(temp);
@@ -1232,10 +1232,10 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors* lookup, map<s
         }
         
         
-        vector<RAbundFloatVector*> newLookup;
+        vector<SharedRAbundFloatVector*> newLookup;
         vector<string> namesOfGroups = lookup->getNamesGroups();
         for (int i = 0; i < namesOfGroups.size(); i++) {
-            RAbundFloatVector* temp = new RAbundFloatVector();
+            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
             temp->setLabel(lookup->getLabel());
             temp->setGroup(namesOfGroups[i]);
             newLookup.push_back(temp);

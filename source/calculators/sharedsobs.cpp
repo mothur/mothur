@@ -13,7 +13,7 @@
 //This returns the number of unique species observed in several groups.  
 //The shared vector is each groups sharedrabundvector.
 
-EstOutput SharedSobs::getValues(vector<RAbundVector*> shared){
+EstOutput SharedSobs::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);
 		double observed = 0;

@@ -70,14 +70,14 @@ int Collect::getCurve(float percentFreq = 0.01){
 /***********************************************************************/
 int Collect::getSharedCurve(float percentFreq = 0.01){
 try {
-                vector<RAbundVector*> lookup;
+                vector<SharedRAbundVector*> lookup;
                 map<string, int> indexLookup;
-				vector<RAbundVector*> subset;
+				vector<SharedRAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
 				vector<string> mGroups = m->getGroups();
                 for (int i = 0; i < mGroups.size(); i++) {
-                        RAbundVector* temp = new RAbundVector(sharedorder->getNumBins());
+                        SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
                         indexLookup[mGroups[i]] = i;
 						lookup.push_back(temp);

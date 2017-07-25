@@ -774,7 +774,7 @@ int RemoveRareCommand::processShared(){
 				processLookup(lookup);			
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}		
 			
 			lastLabel = lookup->getLabel();
@@ -832,7 +832,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors* lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-		vector<RAbundVector> newRabunds;  newRabunds.resize(lookup->size());
+		vector<SharedRAbundVector> newRabunds;  newRabunds.resize(lookup->size());
         vector<string> headers;
         vector<string> namesOfGroups = lookup->getNamesGroups();
 		for (int i = 0; i < namesOfGroups.size(); i++) {
@@ -840,7 +840,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors* lookup){
 			newRabunds[i].setLabel(lookup->getLabel());
 		}
 		
-        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 		if (byGroup) {
 			
 			//for each otu
@@ -850,18 +850,20 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors* lookup){
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				//for each group
-				for (int j = 0; j < data.size(); j++) {
+                vector<int> abunds = lookup->getOTU(i);
+				for (int j = 0; j < abunds.size(); j++) {
 					
 					//are you rare?
-					if (data[j]->get(i) > nseqs) {
-						newRabunds[j].push_back(data[j]->get(i));
-						allZero = false;
-					}else { newRabunds[j].push_back(0); }
+                    if (abunds[j] > nseqs) { allZero = false; }
+                    else { abunds[j] = 0; }
 				}
 				
 				//eliminates zero otus
-				if (allZero) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
-                else { headers.push_back(m->currentSharedBinLabels[i]); }
+				if (allZero) { }
+                else {
+                    for (int j = 0; j < abunds.size(); j++) {  newRabunds[j].push_back(abunds[j]); }
+                    headers.push_back(m->currentSharedBinLabels[i]);
+                }
 			}
 		}else {
 			//for each otu

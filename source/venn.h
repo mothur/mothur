@@ -20,7 +20,7 @@ public:
 	~Venn(){};
 
 	vector<string> getPic(SAbundVector*, vector<Calculator*>);
-	vector<string> getPic(vector<RAbundVector*>, vector<Calculator*>);
+	vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
 
 private:
 	Calculator* singleCalc;

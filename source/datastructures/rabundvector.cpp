@@ -15,11 +15,11 @@
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {}
+RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0), group("") {}
+RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 
@@ -28,7 +28,7 @@ RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBin
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(rav), group("") {
+RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(rav) {
 	try {
 		numBins = 0;
 		maxRank = 0;
@@ -45,10 +45,21 @@ RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(ra
 		exit(1);
 	}
 }
+/***********************************************************************/
+
+RAbundVector::RAbundVector(vector<int> rav) :  DataVector(), maxRank(0), numBins(0), numSeqs(0)  {
+    try {
+        for(int i=0;i<rav.size();i++){ set(i, rav[i]); }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RAbundVector", "RAbundVector");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) :  group("") {
+RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
 	try {
 		numBins = nb;
 		maxRank = mr;
@@ -63,7 +74,7 @@ RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) :  group("")
 /***********************************************************************/
 
 
-RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {
+RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
     try {
         int hold;
         f >> label >> hold;
@@ -84,16 +95,16 @@ RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), 
 }
 
 /***********************************************************************/
-RAbundVector::RAbundVector(ifstream& f, string l, string g) : DataVector(), maxRank(0), numBins(0), numSeqs(0), group(g) {
+RAbundVector::RAbundVector(ifstream& f, string l) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
-		int hold;
         label = l;
 		f >> numBins;
+        data.assign(numBins, 0);
 	
 		int inputData;
-		for(int i=0;i<hold;i++){
+		for(int i=0;i<numBins;i++){
 			f >> inputData;
-			push_back(inputData);
+			set(i, inputData);
 		}
         
 	}
@@ -252,7 +263,6 @@ vector<int>::reverse_iterator RAbundVector::rend(){
 void RAbundVector::nonSortedPrint(ostream& output){
 	try {	
         output << label;
-        if (group != "") { output << '\t' << group; }
         output << '\t' << numBins;
 	
 		for(int i=0;i<numBins;i++){		output  << '\t' << data[i];		}
@@ -285,7 +295,6 @@ void RAbundVector::print(string prefix, ostream& output){
 void RAbundVector::print(ostream& output){
 	try {
         output << label;
-        if (group != "") { output << '\t' << group; }
         output << '\t' << numBins;
 	
 		vector<int> hold = data;

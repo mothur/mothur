@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Odum::getValues(vector<RAbundVector*> shared) {
+EstOutput Odum::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

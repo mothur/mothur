@@ -11,7 +11,7 @@
 /***********************************************************************/
 //KLD <- function(x,y) sum(x *log(x/y))
 //JSD<- function(x,y) sqrt(0.5 * KLD(x, (x+y)/2) + 0.5 * KLD(y, (x+y)/2))
-EstOutput JSD::getValues(vector<RAbundVector*> shared) {
+EstOutput JSD::getValues(vector<SharedRAbundVector*> shared) {
 	try {
         
 		data.resize(1,0);

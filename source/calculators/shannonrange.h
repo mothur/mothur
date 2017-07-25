@@ -25,7 +25,7 @@ class RangeShannon : public Calculator  {
 public:
 	RangeShannon(int a) : alpha(a), Calculator("rangeshannon", 3, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(vector<RAbundVector*>) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 	string getCitation() { return "Haegeman, B., Hamelin, J., Moriarty, J., Neal, P., Dushoff, J., & Weitz, J. S. (2013). Robust estimation of microbial diversity in theory and in practice. The ISME journal, 7(6), 1092–1101., http://www.mothur.org/wiki/rangeshannon"; }
 private:
     int alpha;

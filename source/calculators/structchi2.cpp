@@ -10,7 +10,7 @@
 #include "structchi2.h"
 
 /***********************************************************************/
-EstOutput StructChi2::getValues(vector<RAbundVector*> shared) {
+EstOutput StructChi2::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

@@ -34,13 +34,15 @@ public:
     virtual RAbundVector getRAbundVector() = 0;
 	virtual SAbundVector getSAbundVector() = 0;
 	virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
+    virtual void resize(int) = 0;
     
     virtual void print(ostream&, map<string, int>&) {}
     virtual void print(ostream&, bool) { m->mothurOut("[ERROR]: no print function\n"); }
     virtual void printHeaders(ostream&) {};
+    
     void setLabel(string l)		{	label = l;			}
     string getLabel()			{	return label;		}
-    virtual void resize(int);
+    
 	
 protected:
 	string label;

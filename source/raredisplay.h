@@ -16,7 +16,7 @@ public:
 	void init(string);
 	void reset();
 	void update(SAbundVector*);
-	void update(vector<RAbundVector*> shared, int numSeqs, int numGroupComb);
+	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb);
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	

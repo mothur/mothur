@@ -535,7 +535,7 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
         
         //creates new sharedRAbunds
         for (int i = 0; i < groupNames.size(); i++) {
-            RAbundVector* temp = new RAbundVector(numOTUs); //sets all abunds to 0
+            SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
             temp->setLabel(label);
             temp->setGroup(groupNames[i]);
             lookup->push_back(temp);

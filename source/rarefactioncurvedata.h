@@ -41,7 +41,7 @@ public:
 	void registerDisplay(Display* o)	{	displays.insert(o);				};
 	void removeDisplay(Display* o)		{	displays.erase(o);	delete o;	};
 	void SharedDataChanged()			{	notifyDisplays();				};
-	void updateSharedData(vector<RAbundVector*> r, int numSeqs, int numGroupComb)	{	shared = r; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged(); };
+	void updateSharedData(vector<SharedRAbundVector*> r, int numSeqs, int numGroupComb)	{	shared = r; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged(); };
 
 	void notifyDisplays(){	
 		for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
@@ -51,7 +51,7 @@ public:
 	
 private:
 	set<Display*> displays;
-	vector<RAbundVector*> shared;
+	vector<SharedRAbundVector*> shared;
 	int NumSeqs, NumGroupComb;
 	
 };

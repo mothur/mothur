@@ -285,7 +285,7 @@ int ClassifyRFSharedCommand::execute() {
         
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
         
-          vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
           processSharedAndDesignData(data);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
           
@@ -299,7 +299,7 @@ int ClassifyRFSharedCommand::execute() {
           delete lookup;
         lookup = input.getSharedRAbundVectors(lastLabel);
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-          vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
           processSharedAndDesignData(data);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
         
@@ -307,7 +307,7 @@ int ClassifyRFSharedCommand::execute() {
         userLabels.erase(lookup->getLabel());
         
           //restore real lastlabel to save below
-        lookup->setLabel(saveLabel);
+        lookup->setLabels(saveLabel);
       }
       
       lastLabel = lookup->getLabel();
@@ -342,7 +342,7 @@ int ClassifyRFSharedCommand::execute() {
       
       m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
       
-        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         processSharedAndDesignData(data);
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
         
@@ -365,7 +365,7 @@ int ClassifyRFSharedCommand::execute() {
 }
 //**********************************************************************************************************************
 
-void ClassifyRFSharedCommand::processSharedAndDesignData(vector<RAbundVector*> lookup){
+void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup){
     try {
 //    for (int i = 0; i < designMap->getNamesOfGroups().size(); i++) {
 //      string groupName = designMap->getNamesOfGroups()[i];

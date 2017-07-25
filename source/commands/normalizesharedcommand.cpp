@@ -279,7 +279,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
-					lookup->setLabel(saveLabel);
+					lookup->setLabels(saveLabel);
 				}
 				
 				lastLabel = lookup->getLabel();
@@ -382,7 +382,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookupFloat->getLabel());
 					
 					//restore real lastlabel to save below
-					lookupFloat->setLabel(saveLabel);
+					lookupFloat->setLabels(saveLabel);
 				}
 				
 				lastLabel = lookupFloat->getLabel();

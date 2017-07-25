@@ -236,7 +236,7 @@ int CountSeqsCommand::execute(){
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
                     m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     processShared(data, variables);
                     for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
@@ -251,7 +251,7 @@ int CountSeqsCommand::execute(){
                     lookup = input.getSharedRAbundVectors(lastLabel);
                     m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     processShared(data, variables);
                     for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
@@ -259,7 +259,7 @@ int CountSeqsCommand::execute(){
                     userLabels.erase(lookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    lookup->setLabel(saveLabel);
+                    lookup->setLabels(saveLabel);
                 }
                 
                 lastLabel = lookup->getLabel();
@@ -294,7 +294,7 @@ int CountSeqsCommand::execute(){
                 
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 processShared(data, variables);
                 for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                 
@@ -324,7 +324,7 @@ int CountSeqsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-unsigned long long CountSeqsCommand::processShared(vector<RAbundVector*>& lookup, map<string, string> variables){
+unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
     try {
         variables["[distance]"] = lookup[0]->getLabel();
         string outputFileName = getOutputFileName("count", variables);

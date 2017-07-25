@@ -375,7 +375,7 @@ int HeatMapSimCommand::runCommandShared() {
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 				vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
@@ -391,7 +391,7 @@ int HeatMapSimCommand::runCommandShared() {
 				lookup = input->getSharedRAbundVectors(lastLabel);				
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
@@ -400,7 +400,7 @@ int HeatMapSimCommand::runCommandShared() {
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 				
 			//prevent memory leak
@@ -437,7 +437,7 @@ int HeatMapSimCommand::runCommandShared() {
             lookup = input->getSharedRAbundVectors(lastLabel);
             
             m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
             for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }

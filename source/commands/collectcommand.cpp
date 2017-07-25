@@ -618,7 +618,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		
 		while(shared != NULL) {
             
-            vector<RAbundVector*> lookup = shared->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> lookup = shared->getSharedRAbundVectors();
 			for (int i = 0; i < lookup.size(); i++) {
                 ofstream temp;
                 string group = groups[i];

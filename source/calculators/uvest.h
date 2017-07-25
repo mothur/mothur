@@ -24,7 +24,7 @@ class UVEst {
 		UVEst() { m = MothurOut::getInstance(); }
         ~UVEst() {}
     
-		EstOutput getUVest(vector<RAbundVector*>);
+		EstOutput getUVest(vector<SharedRAbundVector*>);
     
 	private:
 		MothurOut* m;

@@ -109,7 +109,7 @@ string HeatMap::getPic(RAbundVector* rabund) {
 
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<RAbundVector*> lookup, vector<string> groups) {
+string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups) {
 	try {
 	
 		int numBinsToDisplay = lookup[0]->getNumBins();
@@ -219,10 +219,10 @@ string HeatMap::getPic(vector<RAbundVector*> lookup, vector<string> groups) {
 }
 
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<RAbundVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 	try {
 				
-		vector<RAbundVector*> looktemp;
+		vector<SharedRAbundVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
@@ -241,7 +241,7 @@ vector<string> HeatMap::sortSharedVectors(vector<RAbundVector*>& lookup){
 		/******************* create copy of lookup *********************/
 		//create and initialize looktemp as a copy of lookup
 		for (int i = 0; i < lookup.size(); i++) { 
-			RAbundVector* temp = new RAbundVector(*lookup[i]);
+			SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
 			temp->setLabel(lookup[i]->getLabel());
 			looktemp.push_back(temp);
 		}
@@ -271,7 +271,7 @@ vector<string> HeatMap::sortSharedVectors(vector<RAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderShared(vector<RAbundVector*>& lookup){
+map<int, int> HeatMap::orderShared(vector<SharedRAbundVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -304,7 +304,7 @@ map<int, int> HeatMap::orderShared(vector<RAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopOtu(vector<RAbundVector*>& lookup){
+map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -337,7 +337,7 @@ map<int, int> HeatMap::orderTopOtu(vector<RAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopGroup(vector<RAbundVector*>& lookup){
+map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -420,7 +420,7 @@ void HeatMap::printLegend(int y, float maxbin) {
 }
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<RAbundFloatVector*> lookup, vector<string> groups) {
+string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> groups) {
 	try {
 	
 		int numBinsToDisplay = lookup[0]->getNumBins();
@@ -529,10 +529,10 @@ string HeatMap::getPic(vector<RAbundFloatVector*> lookup, vector<string> groups)
 	}
 }
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<RAbundFloatVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> lookup){
 	try {
 				
-		vector<RAbundFloatVector*> looktemp;
+		vector<SharedRAbundFloatVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
@@ -551,7 +551,7 @@ vector<string> HeatMap::sortSharedVectors(vector<RAbundFloatVector*>& lookup){
 		/******************* create copy of lookup *********************/
 		//create and initialize looktemp as a copy of lookup
 		for (int i = 0; i < lookup.size(); i++) { 
-			RAbundFloatVector* temp = new RAbundFloatVector(*lookup[i]);
+			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(*lookup[i]);
 			temp->setLabel(lookup[i]->getLabel());
             looktemp.push_back(temp);
 		}
@@ -581,7 +581,7 @@ vector<string> HeatMap::sortSharedVectors(vector<RAbundFloatVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-int HeatMap::sortRabund(RAbundVector*& r){
+int HeatMap::sortRabund(RAbundVector* r){
 	try {
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
@@ -626,7 +626,7 @@ int HeatMap::sortRabund(RAbundVector*& r){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderShared(vector<RAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderShared(vector<SharedRAbundFloatVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -659,7 +659,7 @@ map<int, int> HeatMap::orderShared(vector<RAbundFloatVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopOtu(vector<RAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderTopOtu(vector<SharedRAbundFloatVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
@@ -692,7 +692,7 @@ map<int, int> HeatMap::orderTopOtu(vector<RAbundFloatVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-map<int, int> HeatMap::orderTopGroup(vector<RAbundFloatVector*>& lookup){
+map<int, int> HeatMap::orderTopGroup(vector<SharedRAbundFloatVector*> lookup){
 	try {
 				
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.

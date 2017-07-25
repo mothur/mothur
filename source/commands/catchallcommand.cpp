@@ -727,7 +727,7 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 		}
     
 		while(shared != NULL) {
-            vector<RAbundVector*> lookup = shared->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> lookup = shared->getSharedRAbundVectors();
 			for (int i = 0; i < lookup.size(); i++) {
 				SAbundVector sav = lookup[i]->getSAbundVector();
 				ofstream out;

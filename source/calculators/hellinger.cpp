@@ -10,7 +10,7 @@
 #include "hellinger.h"
 
 /***********************************************************************/
-EstOutput Hellinger::getValues(vector<RAbundVector*> shared) {
+EstOutput Hellinger::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

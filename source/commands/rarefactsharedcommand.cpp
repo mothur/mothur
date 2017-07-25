@@ -306,7 +306,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         }
         
         SharedRAbundVectors* subset = new SharedRAbundVectors();
-        vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         if (thisSet != "") {//remove unwanted groups
             for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
             subset->eliminateZeroOTUS();
@@ -377,7 +377,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			
 			if(allLines == 1 || labels.count(subset->getLabel()) == 1){
 				m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
 				rCurve = new Rarefact(rabunds, rDisplays);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
@@ -396,14 +396,14 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
                 subset = new SharedRAbundVectors();
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
                     for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
                 
                 m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
                 rCurve = new Rarefact(rabunds, rDisplays);
                 rCurve->getSharedCurve(freq, nIters);
                 delete rCurve;
@@ -415,7 +415,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 userLabels.erase(subset->getLabel());
                 
                 //restore real lastlabel to save below
-                subset->setLabel(saveLabel);
+                subset->setLabels(saveLabel);
 			}
             
 			
@@ -472,7 +472,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             }else {  subset = NULL; }
             
 			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-            vector<RAbundVector*> rabunds = subset->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
 			rCurve = new Rarefact(rabunds, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
@@ -528,7 +528,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors* thisLookup, stri
                 }
             }
             
-            vector<RAbundVector*> rabunds = thisItersLookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> rabunds = thisItersLookup->getSharedRAbundVectors();
             rCurve = new Rarefact(rabunds, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;

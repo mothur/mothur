@@ -87,7 +87,8 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
 		pDataArray->count = 0;
-		
+		long long distsBelowCutoff = 0;
+        
 		if (pDataArray->output != "square") { 
 			if((pDataArray->output == "lt") && (pDataArray->startLine == 0)){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 			
@@ -112,6 +113,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 					
 					if(dist <= pDataArray->cutoff){
 						if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }
+                        distsBelowCutoff++;
 					}
 					if (pDataArray->output == "lt") {  outFile  << '\t' << dist; }
 				}
@@ -119,10 +121,10 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				if (pDataArray->output == "lt") { outFile << endl; }
 				
 				if(i % 100 == 0){
-					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 				}
+					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n"); 				}
 				pDataArray->count++;
 			}
-			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n");
+			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
 		}else{
 			if(pDataArray->startLine == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 			
@@ -140,6 +142,8 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 					
 					distCalculator->calcDist(pDataArray->alignDB.get(i), pDataArray->alignDB.get(j));
 					double dist = distCalculator->getDist();
+                    
+                    if(dist <= pDataArray->cutoff){ distsBelowCutoff++; }
 					
 					outFile  << '\t' << dist;
 				}
@@ -147,11 +151,11 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				outFile << endl; 
 				
 				if(i % 100 == 0){
-					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
+					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n"v);
 				}
 				pDataArray->count++;
 			}
-			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n"); 
+			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
 		}
 		
 		outFile.close();

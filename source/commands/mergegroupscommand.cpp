@@ -333,12 +333,12 @@ int MergeGroupsCommand::process(SharedRAbundVectors* thisLookUp, ofstream& out){
         vector<string> setNames = designMap->getCategory();
         
         //create sharedRabundVectors
-        vector<RAbundVector*> data = thisLookUp->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = thisLookUp->getSharedRAbundVectors();
         
         //create SharedRAbundVectors for the merged groups. Fill with blank rabundFloatVectors
         SharedRAbundVectors* merged; merged = new SharedRAbundVectors();
         for (int i = 0; i < setNames.size(); i++) {
-            RAbundVector* myLookup = new RAbundVector(thisLookUp->getNumBins());
+            SharedRAbundVector* myLookup = new SharedRAbundVector(thisLookUp->getNumBins());
             myLookup->setLabel(thisLookUp->getLabel());
             myLookup->setGroup(setNames[i]);
             merged->push_back(myLookup);
@@ -447,7 +447,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookup->getLabel();

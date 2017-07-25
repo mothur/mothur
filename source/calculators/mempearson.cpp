@@ -10,7 +10,7 @@
 #include "mempearson.h"
 
 /***********************************************************************/
-EstOutput MemPearson::getValues(vector<RAbundVector*> shared) {
+EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

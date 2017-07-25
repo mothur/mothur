@@ -363,7 +363,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
                     userLabels.erase(templookup->getLabel());
                     
                     //restore real lastlabel to save below
-                    templookup->setLabel(saveLabel);
+                    templookup->setLabels(saveLabel);
                     break;
                 }
                 
@@ -398,13 +398,13 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             }
 		}
         
-        vector<RAbundVector*> data = templookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = templookup->getSharedRAbundVectors();
         delete templookup;
         SharedRAbundFloatVectors* lookup = new SharedRAbundFloatVectors();
         
         //convert to relabund
         for (int i = 0; i < data.size(); i++) {
-            RAbundFloatVector* rel = new RAbundFloatVector();
+            SharedRAbundFloatVector* rel = new SharedRAbundFloatVector();
             rel->setGroup(data[i]->getGroup());
             rel->setLabel(data[i]->getLabel());
 			for (int j = 0; j < data[i]->getNumBins(); j++) {
@@ -482,7 +482,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 				userLabels.erase(lookupFloat->getLabel());
 				
 				//restore real lastlabel to save below
-				lookupFloat->setLabel(saveLabel);
+				lookupFloat->setLabels(saveLabel);
 				break;
 			}
 			

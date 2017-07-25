@@ -49,7 +49,7 @@ private:
     bool doPruning, discardHighErrorTrees;
     double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
     
-    void processSharedAndDesignData(vector<RAbundVector*> lookup);
+    void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 };
 
 #endif /* defined(__Mothur__classifyrfsharedcommand__) */

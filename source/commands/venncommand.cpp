@@ -319,14 +319,14 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup->getLabel());
 					userLabels.erase(lookup->getLabel());
                     
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 					if (lookup->size() > 4) {
 						set< set<int> >::iterator it3;
 						set<int>::iterator it2;
 						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
 			
 							set<int> poss = *it3;
-							vector<RAbundVector*> subset;
+							vector<SharedRAbundVector*> subset;
 							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
 							
 							vector<string> outfilenames = venn->getPic(subset, vennCalculators);
@@ -349,14 +349,14 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup->getLabel());
 					userLabels.erase(lookup->getLabel());
 
-                    vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     if (lookup->size() > 4) {
                         set< set<int> >::iterator it3;
                         set<int>::iterator it2;
                         for (it3 = combos.begin(); it3 != combos.end(); it3++) {
                             
                             set<int> poss = *it3;
-                            vector<RAbundVector*> subset;
+                            vector<SharedRAbundVector*> subset;
                             for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
                             
                             vector<string> outfilenames = venn->getPic(subset, vennCalculators);
@@ -368,7 +368,7 @@ int VennCommand::execute(){
                     }
                     for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
 					
-					lookup->setLabel(saveLabel); //restore real lastlabel to save below
+					lookup->setLabels(saveLabel); //restore real lastlabel to save below
 				}
 				
 				
@@ -409,14 +409,14 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup->getLabel());
 					userLabels.erase(lookup->getLabel());
 
-                vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 if (lookup->size() > 4) {
                     set< set<int> >::iterator it3;
                     set<int>::iterator it2;
                     for (it3 = combos.begin(); it3 != combos.end(); it3++) {
                         
                         set<int> poss = *it3;
-                        vector<RAbundVector*> subset;
+                        vector<SharedRAbundVector*> subset;
                         for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
                         
                         vector<string> outfilenames = venn->getPic(subset, vennCalculators);

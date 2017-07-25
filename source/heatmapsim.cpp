@@ -24,7 +24,7 @@ HeatMapSim::HeatMapSim(string dir, string i, int f) : outputDir(dir), inputfile(
 		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
-vector<string> HeatMapSim::getPic(vector<RAbundVector*> lookup, vector<Calculator*> calcs, vector<string> groups) {
+vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs, vector<string> groups) {
 	try {
 		EstOutput data;
 		vector<double> sims;
@@ -64,7 +64,7 @@ vector<string> HeatMapSim::getPic(vector<RAbundVector*> lookup, vector<Calculato
 						
 						if (m->control_pressed) { outsvg.close(); return outputNames; }
 						
-						vector<RAbundVector*> subset;
+						vector<SharedRAbundVector*> subset;
 						subset.push_back(lookup[i]);  subset.push_back(lookup[j]); 
 					
 						//get similairity between groups

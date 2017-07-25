@@ -10,7 +10,7 @@
 #include "memchi2.h"
 
 /***********************************************************************/
-EstOutput MemChi2::getValues(vector<RAbundVector*> shared) {
+EstOutput MemChi2::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

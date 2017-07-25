@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Lennon::getValues(vector<RAbundVector*> shared) {
+EstOutput Lennon::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		double S1, S2, S12, tempA, tempB, min;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; min = 0;

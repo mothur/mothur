@@ -670,7 +670,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         
         while(lookup != NULL) {
             
-            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
                 string group = data[i]->getGroup();

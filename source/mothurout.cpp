@@ -885,7 +885,7 @@ int MothurOut::mothurRandomShuffle(OrderVector& randomize){
     
 }
 /***********************************************************************/
-int MothurOut::mothurRandomShuffle(vector<RAbundVector*>& randomize){
+int MothurOut::mothurRandomShuffle(vector<SharedRAbundVector*>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
         
@@ -4159,6 +4159,40 @@ float  MothurOut::max(vector<float> x) {
     }
     catch(exception& e) {
         errorOut(e, "MothurOut", "max - float");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int  MothurOut::min(vector<int> x) {
+    try {
+        int value = 1e6;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            if (value > x[i]) { value = x[i];  }
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "min - int");
+        exit(1);
+    }
+}
+/***********************************************************************/
+float  MothurOut::min(vector<float> x) {
+    try {
+        int value = 1e6;
+        
+        for (int i = 0; i < x.size(); i++) {
+            if (control_pressed) { break; }
+            if (value > x[i]) { value = x[i];  }
+        }
+        
+        return value;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "min - float");
         exit(1);
     }
 }

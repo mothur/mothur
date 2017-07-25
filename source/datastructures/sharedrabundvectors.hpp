@@ -13,11 +13,13 @@
 #include "rabundvector.hpp"
 #include "rabundfloatvector.hpp"
 #include "sharedordervector.h"
+#include "sharedrabundvector.hpp"
+#include "sharedrabundfloatvector.hpp"
 
 /*  DataStructure for a shared file. */
 
 //********************************************************************************************************************
-inline bool compareRAbunds(RAbundVector* left, RAbundVector* right){ return (left->getGroup() < right->getGroup()); }
+inline bool compareRAbunds(SharedRAbundVector* left, SharedRAbundVector* right){ return (left->getGroup() < right->getGroup()); }
 //********************************************************************************************************************
 
 class SharedRAbundVectors : public DataVector {
@@ -26,20 +28,20 @@ public:
     SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; }
     SharedRAbundVectors(ifstream&);
     SharedRAbundVectors(SharedRAbundVectors& bv) : DataVector(bv), numBins(bv.numBins) {
-        vector<RAbundVector*> data = bv.getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = bv.getSharedRAbundVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
-        setLabel(bv.getLabel());
+        setLabels(bv.getLabel());
     }
     ~SharedRAbundVectors() { clear(); }
     
-    void setLabel(string l);
+    void setLabels(string l);
     int getOTUTotal(int bin);
     vector<int> getOTU(int bin);
     int push_back(vector<int>, string binLabel=""); //add otu. mothur assumes abunds are in same order as groups.
     int get(int bin, string group);
     void set(int bin, int binSize, string group);
-    int push_back(RAbundVector*);
+    int push_back(SharedRAbundVector*);
     
     vector<int> eliminateZeroOTUS(); //run after push_backs if groups are chosen
     int removeOTU(int bin);
@@ -51,23 +53,23 @@ public:
     int getNumSeqsSmallestGroup();
     vector<string> getNamesGroups(); //same order as Rabunds
     int getNumGroups() { return lookup.size(); }
+    int getNumSeqs(string); //group
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->control_pressed = true; }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
     
     void print(ostream&);
     void printHeaders(ostream&);
-    int getNumSeqs(string); //group
     
     RAbundVector getRAbundVector();
     RAbundVector getRAbundVector(string); //group you want the rabund for
     SAbundVector getSAbundVector();
     OrderVector getOrderVector(map<string,int>*);
     SharedOrderVector getSharedOrderVector();
-    vector<RAbundVector*> getSharedRAbundVectors();
-    vector<RAbundFloatVector*> getSharedRAbundFloatVectors();
+    vector<SharedRAbundVector*> getSharedRAbundVectors();
+    vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
     
 private:
-    vector<RAbundVector*> lookup;
+    vector<SharedRAbundVector*> lookup;
     map<string, int> groupNames;
     int numBins;
     

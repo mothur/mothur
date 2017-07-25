@@ -10,7 +10,7 @@
 #include "manhattan.h"
 
 /***********************************************************************/
-EstOutput Manhattan::getValues(vector<RAbundVector*> shared) {
+EstOutput Manhattan::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

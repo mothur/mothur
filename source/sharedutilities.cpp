@@ -20,7 +20,7 @@ SharedRAbundVectors* SharedUtil::getSharedVectors(vector<string> Groups, SharedO
         
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < Groups.size(); i++) { 
-			RAbundVector* temp = new RAbundVector(order->getNumBins());
+			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
 			temp->setLabel(order->getLabel());
 			temp->setGroup(Groups[i]);
 			lookup->push_back(temp);
@@ -34,6 +34,7 @@ SharedRAbundVectors* SharedUtil::getSharedVectors(vector<string> Groups, SharedO
 			int abundance = lookup->get(chosen.bin, chosen.group);
             lookup->set(chosen.bin, (abundance + 1), chosen.group);
 		}
+        return lookup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedUtil", "getSharedVectors");

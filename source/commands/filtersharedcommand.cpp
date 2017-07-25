@@ -262,7 +262,7 @@ int FilterSharedCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookup->getLabel();
@@ -339,7 +339,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors* sharedLookup) {
         vector<string> filteredLabels;
         vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
         
-        vector<RAbundVector*> data = sharedLookup->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;

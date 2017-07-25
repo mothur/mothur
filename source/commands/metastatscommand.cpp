@@ -294,7 +294,7 @@ int MetaStatsCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
-				lookup->setLabel(saveLabel);
+				lookup->setLabels(saveLabel);
 			}
 			
 			lastLabel = lookup->getLabel();
@@ -451,21 +451,8 @@ int MetaStatsCommand::process(SharedRAbundVectors* thisLookUp){
                     for( int i=1; i<processors; i++ ){
                         
                         //make copy of lookup so we don't get access violations
-                        vector<SharedRAbundVector*> newLookup;
-                        vector<string> designMapGroups;
-                        for (int k = 0; k < thisLookUp.size(); k++) {
-                            SharedRAbundVector* temp = new SharedRAbundVector();
-                            temp->setLabel(thisLookUp[k]->getLabel());
-                            temp->setGroup(thisLookUp[k]->getGroup());
-                            newLookup.push_back(temp);
-                            designMapGroups.push_back(designMap->get(thisLookUp[k]->getGroup()));
-                        }
-                        
-                        //for each bin
-                        for (int k = 0; k < thisLookUp[0]->getNumBins(); k++) {
-                            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                            for (int j = 0; j < thisLookUp.size(); j++) { newLookup[j]->push_back(thisLookUp[j]->getAbundance(k), thisLookUp[j]->getGroup()); }
-                        }
+                        SharedRAbundVectors* newLookup = new SharedRAbundVectors(lookup);
+                        vector<string> designMapGroups = lookup->getNamesOfGroups();
                         
                         // Allocate memory for thread data.
                         metastatsData* tempSum = new metastatsData(sharedfile, outputDir, m, lines[i].start, lines[i].end, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
@@ -486,7 +473,7 @@ int MetaStatsCommand::process(SharedRAbundVectors* thisLookUp){
                         if (pDataArray[i]->count != (pDataArray[i]->num)) {
                             m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->num) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
                         }
-                        for (int j = 0; j < pDataArray[i]->thisLookUp.size(); j++) {  delete pDataArray[i]->thisLookUp[j];  } 
+                        delete pDataArray[i]->thisLookUp;
                         for (int j = 0; j < pDataArray[i]->outputNames.size(); j++) {  
                             outputNames.push_back(pDataArray[i]->outputNames[j]);
                             outputTypes["metastats"].push_back(pDataArray[i]->outputNames[j]);
@@ -512,7 +499,7 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
 	try {
 	
         vector<string> thisLookupNames = thisLookUp->getNamesGroups();
-        vector<RAbundVector*> thisLookupRabunds = thisLookUp->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> thisLookupRabunds = thisLookUp->getSharedRAbundVectors();
         
 		//for each combo
 		for (int c = start; c < (start+num); c++) {
@@ -531,7 +518,7 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
 			
 			vector< vector<double> > data2; data2.resize(thisLookUp->getNumBins());
 			
-			vector<RAbundVector*> subset;
+			vector<SharedRAbundVector*> subset;
             vector<string> subsetGroups;
 			int setACount = 0;
 			int setBCount = 0;
@@ -673,7 +660,7 @@ int MetaStatsCommand::convertToShared(string filename) {
 }
 //**********************************************************************************************************************
 
-int MetaStatsCommand::convertToInput(vector<RAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
+int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
 	try {
         ofstream out;
         m->openOutputFile(thisfilename+".matrix", out);

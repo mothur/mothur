@@ -10,7 +10,7 @@
 #include "memchord.h"
 
 /***********************************************************************/
-EstOutput MemChord::getValues(vector<RAbundVector*> shared) {
+EstOutput MemChord::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

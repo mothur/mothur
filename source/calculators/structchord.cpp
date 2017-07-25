@@ -10,7 +10,7 @@
 #include "structchord.h"
 
 /***********************************************************************/
-EstOutput StructChord::getValues(vector<RAbundVector*> shared) {
+EstOutput StructChord::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

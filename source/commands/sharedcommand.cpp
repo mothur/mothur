@@ -13,7 +13,7 @@
 
 //********************************************************************************************************************
 //sorts lowest to highest
-inline bool compareSharedRabunds(RAbundVector* left, RAbundVector* right){
+inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* right){
     return (left->getGroup() < right->getGroup());
 }
 //**********************************************************************************************************************
@@ -500,11 +500,11 @@ SharedRAbundVectors* SharedCommand::readData(string matrixFormat, string line, s
         
         //creates new sharedRAbunds
         for (int i = 0; i < groupNames.size(); i++) {
-            RAbundVector* temp = new RAbundVector(numOTUs); //sets all abunds to 0
+            SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
             temp->setGroup(groupNames[i]);
             lookup->push_back(temp);
         }
-        lookup->setLabel("userLabel");
+        lookup->setLabels("userLabel");
 
         bool dataStart = false;
         bool inBrackets = false;
@@ -999,9 +999,9 @@ void SharedCommand::printSharedData(SharedRAbundVectors* thislookup, ofstream& o
             m->setGroups(Groups);
 		}else{
 			//create a map from groupName to each sharedrabund
-			map<string, RAbundVector*> myMap;
-			map<string, RAbundVector*>::iterator myIt;
-            vector<RAbundVector*> data = thislookup->getSharedRAbundVectors();
+			map<string, SharedRAbundVector*> myMap;
+			map<string, SharedRAbundVector*>::iterator myIt;
+            vector<SharedRAbundVector*> data = thislookup->getSharedRAbundVectors();
 
 			for (int i = 0; i < data.size(); i++) { myMap[data[i]->getGroup()] = data[i]; }
 

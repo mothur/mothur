@@ -20,7 +20,7 @@ class KulczynskiCody : public Calculator  {
 public:
 	KulczynskiCody() :  Calculator("kulczynskicody", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(vector<RAbundVector*>);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 	string getCitation() { return "http://www.mothur.org/wiki/Kulczynskicody"; }
 private:
 	

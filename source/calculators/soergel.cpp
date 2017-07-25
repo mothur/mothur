@@ -10,7 +10,7 @@
 #include "soergel.h"
 
 /***********************************************************************/
-EstOutput Soergel::getValues(vector<RAbundVector*> shared) {
+EstOutput Soergel::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

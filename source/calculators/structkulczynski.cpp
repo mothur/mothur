@@ -10,7 +10,7 @@
 #include "structkulczynski.h"
 
 /***********************************************************************/
-EstOutput StructKulczynski::getValues(vector<RAbundVector*> shared) {
+EstOutput StructKulczynski::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		

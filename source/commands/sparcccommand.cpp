@@ -234,7 +234,7 @@ int SparccCommand::execute(){
                 userLabels.erase(lookup->getLabel());
                 
                 //restore real lastlabel to save below
-                lookup->setLabel(saveLabel);
+                lookup->setLabels(saveLabel);
             }
             
             lastLabel = lookup->getLabel();
@@ -322,7 +322,7 @@ int SparccCommand::process(SharedRAbundVectors* shared){
         
         vector<vector<float> > sharedVector;
         vector<string> otuNames = m->currentSharedBinLabels;
-        vector<RAbundVector*> data = shared->getSharedRAbundVectors();
+        vector<SharedRAbundVector*> data = shared->getSharedRAbundVectors();
         
         //fill sharedVector to pass to CalcSparcc
         for (int i = 0; i < data.size(); i++) {

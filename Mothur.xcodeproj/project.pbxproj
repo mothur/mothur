@@ -367,6 +367,8 @@
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
 		48576EA81D05F59300BBC9C0 /* distpdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA61D05F59300BBC9C0 /* distpdataset.cpp */; };
+		485B0E081F264F2E00CA5F57 /* sharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */; };
+		485B0E0E1F27C40500CA5F57 /* sharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */; };
 		48705AC419BE32C50075E977 /* getmimarkspackagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */; };
 		48705AC519BE32C50075E977 /* oligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABD19BE32C50075E977 /* oligos.cpp */; };
 		48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */; };
@@ -865,6 +867,10 @@
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = testcontainers/testoptimatrix.h; sourceTree = "<group>"; };
 		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distpdataset.cpp; sourceTree = "<group>"; };
 		48576EA71D05F59300BBC9C0 /* distpdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distpdataset.h; sourceTree = "<group>"; };
+		485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvector.cpp; path = source/datastructures/sharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
+		485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvector.hpp; path = source/datastructures/sharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
+		485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
+		485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvector.hpp; path = source/datastructures/sharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
 		48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getmimarkspackagecommand.cpp; path = source/commands/getmimarkspackagecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48705ABC19BE32C50075E977 /* getmimarkspackagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getmimarkspackagecommand.h; path = source/commands/getmimarkspackagecommand.h; sourceTree = SOURCE_ROOT; };
 		48705ABD19BE32C50075E977 /* oligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = oligos.cpp; path = source/datastructures/oligos.cpp; sourceTree = SOURCE_ROOT; };
@@ -2608,6 +2614,10 @@
 				A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */,
 				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
 				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
+				485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */,
+				485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */,
+				485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */,
+				485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */,
 				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
 				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
@@ -3398,6 +3408,7 @@
 				A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */,
 				A7E9B91712D37EC400DA6239 /* phylodiversitycommand.cpp in Sources */,
 				488841611CC515A000C5E972 /* (null) in Sources */,
+				485B0E081F264F2E00CA5F57 /* sharedrabundvector.cpp in Sources */,
 				A7E9B91812D37EC400DA6239 /* phylosummary.cpp in Sources */,
 				A7E9B91912D37EC400DA6239 /* phylotree.cpp in Sources */,
 				A7E9B91A12D37EC400DA6239 /* phylotypecommand.cpp in Sources */,
@@ -3605,6 +3616,7 @@
 				A7548FB0171440ED00B1F05A /* qFinderDMM.cpp in Sources */,
 				A77B7185173D2240002163C2 /* sparcccommand.cpp in Sources */,
 				A77B7188173D4042002163C2 /* randomnumber.cpp in Sources */,
+				485B0E0E1F27C40500CA5F57 /* sharedrabundfloatvector.cpp in Sources */,
 				A77B718B173D40E5002163C2 /* calcsparcc.cpp in Sources */,
 				A7E6F69E17427D06006775E2 /* makelookupcommand.cpp in Sources */,
 				A7CFA4311755401800D9ED4D /* renameseqscommand.cpp in Sources */,

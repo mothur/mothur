@@ -43,7 +43,7 @@ public:
 	void registerDisplay(Display* o)		{	displays.insert(o);			};
 	void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
 	void SharedDataChanged()				{	notifyDisplays();				};
-	void updateSharedData(vector<RAbundVector*> s, int numSeqs, int numGroupComb, bool p)	{	pairs = p; shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged();	};
+	void updateSharedData(vector<SharedRAbundVector*> s, int numSeqs, int numGroupComb, bool p)	{	pairs = p; shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged();	};
 	
 	void notifyDisplays(){	
 		for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
@@ -55,7 +55,7 @@ public:
 				if ( ((*pos)->isCalcMultiple() == true) && ((*pos)->getAll() == true) && (!pairs) ) {
 					(*pos)->update(shared, NumSeqs, NumGroupComb);
 				}else {
-					vector<RAbundVector*> temp; temp.push_back(shared[0]); temp.push_back(shared[1]);
+					vector<SharedRAbundVector*> temp; temp.push_back(shared[0]); temp.push_back(shared[1]);
 					shared = temp; 
 					
 					(*pos)->update(shared, NumSeqs, NumGroupComb);
@@ -67,7 +67,7 @@ public:
 private:
 	set<Display*> displays;
 	vector<Display*> multiDisplays;
-	vector<RAbundVector*> shared;
+	vector<SharedRAbundVector*> shared;
 	int NumSeqs, NumGroupComb;
 	bool pairs;
 };

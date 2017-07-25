@@ -10,7 +10,7 @@
 #include "sharedthetayc.h"
 
 /***********************************************************************/
-EstOutput ThetaYC::getValues(vector<RAbundVector*> shared) {
+EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(3,0.0000);
 		

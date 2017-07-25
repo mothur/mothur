@@ -704,7 +704,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
         }
         
         while(lookup != NULL) {
-            vector<RAbundVector*> data = lookup->getSharedRAbundVectors();
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
                 string group = lookupGroups[i];

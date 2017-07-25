@@ -10,7 +10,7 @@
 #include "sharedthetan.h"
 
 /***********************************************************************/
-EstOutput ThetaN::getValues(vector<RAbundVector*> shared) {
+EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		

@@ -22,13 +22,14 @@ public:
 	RAbundVector();
 	RAbundVector(int);
 	RAbundVector(vector<int>, int, int, int);
+    RAbundVector(vector<int>);
 	RAbundVector(string, vector<int>);
-	RAbundVector(const RAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) {};
+	RAbundVector(const RAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs) {};
 	RAbundVector(ifstream&);
-    RAbundVector(ifstream& f, string l, string g); //filehandle, label, group
-	~RAbundVector();
+    RAbundVector(ifstream& f, string l); //filehandle, label
+    ~RAbundVector();
 
-	int getNumBins();		
+	int getNumBins();
 	int getNumSeqs();							
 	int getMaxRank();							
 
@@ -50,7 +51,6 @@ public:
 	vector<int>::reverse_iterator rend();
 	
 	void print(ostream&); //sorted
-    //void print(string, ostream&); //label, sorted
 	void nonSortedPrint(ostream&); //nonsorted
 	
 	RAbundVector getRAbundVector();
@@ -58,16 +58,11 @@ public:
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
     
-    string getGroup() { return group; } //group = "" for rabunds without groupInfo
-    void setGroup(string g) { group = g;  }
-    
 private:
 	vector<int> data;
 	int maxRank;
 	int numBins;
 	int numSeqs;
-    
-    string group;
 };
 
 
