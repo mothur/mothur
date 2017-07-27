@@ -65,11 +65,10 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 }
 
 /***********************************************************************/
-SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f, string l, string g) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f, string l, string g, int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
     try {
         label = l;
         group = g;
-        f >> numBins;
         data.assign(numBins, 0);
         
         float inputData;

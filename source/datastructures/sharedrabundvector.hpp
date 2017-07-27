@@ -45,9 +45,9 @@ public:
     SharedRAbundVector(int);
     SharedRAbundVector(vector<int>, int, int, int);
     SharedRAbundVector(vector<int>);
-    SharedRAbundVector(const SharedRAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) {};
+    SharedRAbundVector(const SharedRAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) { };
     SharedRAbundVector(ifstream&);
-    SharedRAbundVector(ifstream& f, string l, string g); //filehandle, label
+    SharedRAbundVector(ifstream& f, string l, string g, int); //filehandle, label, numBins
     ~SharedRAbundVector();
     
     int getNumBins();

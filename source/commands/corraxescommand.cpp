@@ -898,8 +898,9 @@ int CorrAxesCommand::getMetadata(){
 		}
 		in.close();
 		
-        lookupFloat->eliminateZeroOTUS();
         lookupFloat->setLabels("1");
+        lookupFloat->eliminateZeroOTUS();
+        
         
 		return 0;
 	}

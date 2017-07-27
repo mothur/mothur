@@ -273,24 +273,6 @@ void RAbundVector::nonSortedPrint(ostream& output){
 		exit(1);
 	}
 }
-/***********************************************************************
-void RAbundVector::print(string prefix, ostream& output){
-	try {	
-		output << prefix << '\t' << numBins;
-	
-		vector<int> hold = data;
-		sort(hold.rbegin(), hold.rend());
-	
-		for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
-		output << endl;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RAbundVector", "print");
-		exit(1);
-	}
-}
-
-
 /***********************************************************************/
 void RAbundVector::print(ostream& output){
 	try {

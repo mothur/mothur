@@ -579,6 +579,7 @@ int OTUAssociationCommand::readMetadata(){
             if (m->debug) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
 			metadataLabels.push_back(columnLabel);
 		}
+        vector<string> savedLabels = m->currentSharedBinLabels;
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
         metadataLookup->setLabels("1");
@@ -612,10 +613,10 @@ int OTUAssociationCommand::readMetadata(){
 		in.close();
         
         //elimnatezeros remove zero otus, we want to remove the extra labels from metaLabels
-        vector<int> binsToKeep = metadataLookup->eliminateZeroOTUS();
-        vector<string> newMetaLabels;
-        for (int i = 0; i < binsToKeep.size(); i++) {  newMetaLabels.push_back(metadataLabels[binsToKeep[i]]); }
-        metadataLabels = newMetaLabels;
+        m->currentSharedBinLabels  = metadataLabels;
+        metadataLookup->eliminateZeroOTUS();
+        metadataLabels = m->currentSharedBinLabels;
+        m->currentSharedBinLabels = savedLabels;
         
         metadata.resize(metadataLookup->getNumBins());
         vector<string> sampleNames = metadataLookup->getNamesGroups();
@@ -627,69 +628,6 @@ int OTUAssociationCommand::readMetadata(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "OTUAssociationCommand", "readMetadata");	
-		exit(1);
-	}
-}
-/*****************************************************************
-//eliminate groups user did not pick, remove zeroed out otus, fill metadata vector.
-int OTUAssociationCommand::getMetadata(){
-	try {
-        
-		vector<string> mGroups = m->getGroups();
-        
-		bool remove = false;
-		for (int i = 0; i < metadataLookup.size(); i++) {
-			//if this sharedrabund is not from a group the user wants then delete it.
-			if (!(m->inUsersGroups(metadataLookup[i]->getGroup(), mGroups))) { 
-				delete metadataLookup[i]; metadataLookup[i] = NULL;
-				metadataLookup.erase(metadataLookup.begin()+i); 
-				i--; 
-				remove = true;
-			}
-		}
-        
-        vector<SharedRAbundFloatVector*> newLookup;
-		for (int i = 0; i < metadataLookup.size(); i++) {
-			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-			temp->setLabel(metadataLookup[i]->getLabel());
-			temp->setGroup(metadataLookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-        vector<string> newBinLabels;
-		for (int i = 0; i < metadataLookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-			
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < metadataLookup.size(); j++) {
-				if (metadataLookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < metadataLookup.size(); j++) {
-					newLookup[j]->push_back(metadataLookup[j]->getAbundance(i), metadataLookup[j]->getGroup());
-				}
-                newBinLabels.push_back(metadataLabels[i]);
-			}
-		}
-		
-        metadataLabels = newBinLabels;
-        
-		for (int j = 0; j < metadataLookup.size(); j++) {  delete metadataLookup[j];  } 
-        metadataLookup.clear();
-		
-        metadata.resize(newLookup[0]->getNumBins());
-		for (int i = 0; i < newLookup[0]->getNumBins(); i++) { for (int j = 0; j < newLookup.size(); j++) { metadata[i].push_back(newLookup[j]->getAbundance(i)); } }
-        
-        for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  }
-	        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "OTUAssociationCommand", "getMetadata");	
 		exit(1);
 	}
 }

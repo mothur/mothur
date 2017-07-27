@@ -256,24 +256,6 @@ void RAbundFloatVector::nonSortedPrint(ostream& output){
         exit(1);
     }
 }
-/***********************************************************************
-void RAbundFloatVector::print(string prefix, ostream& output){
-    try {
-        output << prefix << '\t' << numBins;
-        
-        vector<float> hold = data;
-        sort(hold.rbegin(), hold.rend());
-        
-        for(int i=0;i<numBins;i++){		output  << '\t' << hold[i];		}
-        output << endl;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "RAbundFloatVector", "print");
-        exit(1);
-    }
-}
-
-
 /***********************************************************************/
 void RAbundFloatVector::print(ostream& output){
     try {

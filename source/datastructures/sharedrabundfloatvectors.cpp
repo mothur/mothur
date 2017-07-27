@@ -47,10 +47,10 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f) : DataVector() {
                     m->sharedBinLabelsInFile.push_back(temp);
                 }
                 
-                f >> label >> groupN;
+                f >> label >> groupN >> num;
             }else {
                 //read in first row since you know there is at least 1 group.
-                f >> groupN;
+                f >> groupN >> num;
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(num);
@@ -71,7 +71,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f) : DataVector() {
             label = m->saveNextLabel;
             
             //read in first row since you know there is at least 1 group.
-            f >> groupN;
+            f >> groupN >> num;
         }
         
         //reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
@@ -82,15 +82,15 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f) : DataVector() {
         numBins = num;
         
         //add new vector to lookup
-        SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN); m->gobble(f);
+        SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins); m->gobble(f);
         push_back(temp);
         
         if (!(f.eof())) { f >> nextLabel; }
         
         //read the rest of the groups info in
         while ((nextLabel == holdLabel) && (f.eof() != true)) {
-            f >> groupN;
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN); m->gobble(f);
+            f >> groupN >> num;
+            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins); m->gobble(f);
             push_back(temp);
             allGroups.push_back(groupN);
             
@@ -258,22 +258,14 @@ void SharedRAbundFloatVectors::set(int bin, float binSize, string group){
     }
 }
 /***********************************************************************/
-float SharedRAbundFloatVectors::removeOTUs(vector<int> bins){
-    try {
-        float totalOTUAbund = 0;
-        for (int i = 0; i < bins.size(); i++) { totalOTUAbund += removeOTU(bins[i]); }
-        return totalOTUAbund;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "SharedRAbundVectors", "removeOTU");
-        exit(1);
-    }
-}
-/***********************************************************************/
 float SharedRAbundFloatVectors::removeOTU(int bin){
     try {
         float totalOTUAbund = 0;
-        for (int i = 0; i < lookup.size(); i ++) { totalOTUAbund += lookup[i]->remove(bin); }
+        for (int i = 0; i < lookup.size(); i ++) {
+            totalOTUAbund += lookup[i]->remove(bin);
+        }
+        
+        m->currentSharedBinLabels.erase(m->currentSharedBinLabels.begin()+bin);
         numBins--;
         
         return totalOTUAbund;
@@ -497,39 +489,17 @@ int SharedRAbundFloatVectors::removeGroups(int minSize, bool silent){
     }
 }
 /**********************************************************************************************************************/
-vector<int> SharedRAbundFloatVectors::eliminateZeroOTUS() {
+void SharedRAbundFloatVectors::eliminateZeroOTUS() {
     try {
-        //for each bin
-        vector<string> newBinLabels;
-        string snumBins = toString(numBins);
-        vector <int> bins;
-        for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { return bins; }
-            
-            float total = getOTUTotal(i);
+        for (int i = 0; i < lookup[0]->getNumBins();) {
+            if (m->control_pressed) { break; }
+           
+            int total = getOTUTotal(i);
             
             //if they are not all zero add this bin
             if (total == 0) { removeOTU(i); }
-            else {
-                //if there is a bin label use it otherwise make one
-                string binLabel = "Otu";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
-                
-                newBinLabels.push_back(binLabel);
-                bins.push_back(i);
-            }
+            else { ++i;  }
         }
-        
-        m->currentSharedBinLabels = newBinLabels;
-        
-        return bins;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundFloatVectors", "eliminateZeroOTUS");

@@ -43,9 +43,8 @@ public:
     void set(int bin, int binSize, string group);
     int push_back(SharedRAbundVector*);
     
-    vector<int> eliminateZeroOTUS(); //run after push_backs if groups are chosen
+    void eliminateZeroOTUS(); //run after push_backs if groups are chosen
     int removeOTU(int bin);
-    int removeOTUs(vector<int> bins);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
     int size() { return lookup.size(); }

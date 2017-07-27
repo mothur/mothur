@@ -340,43 +340,6 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		exit(1);
 	}
 }
-/***********************************************************************
-SharedRAbundVectors* SharedListVector::getSharedRAbundVector(string groupName) {
-	try {
-        m->currentSharedBinLabels = binLabels;
-        
-		vector<RAbundVector*> lookup;
-		
-		for(int i=0;i<numBins;i++){
-			string names = get(i);
-            vector<string> binNames;
-            m->splitAtComma(names, binNames);
-            for (int j = 0; j < binNames.size(); j++) { 
-				if (m->control_pressed) { return rav; }
-                if (m->groupMode == "group") {
-                    string group = groupmap->getGroup(binNames[j]);
-                    if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-                    if (group == groupName) { //this name is in the group you want the vector for.
-                        rav->set(i, rav->get(i, group) + 1, group);  //i represents what bin you are in
-                    }
-                }else {
-                    int count = countTable->getGroupCount(binNames[j], groupName);
-                    rav->set(i, rav->get(i, groupName) + count, groupName);
-                }
-			}
-		}
-		SharedRAbundVectors* shared = new SharedRAbundVectors();
-        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
-		shared->setLabel(label);
-
-		return shared;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedListVector", "getSharedRAbundVector");
-		exit(1);
-	}
-}
 /***********************************************************************/
 SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 	try {
@@ -403,7 +366,6 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
                 finder[allGroups[i]]->setGroup(allGroups[i]);
 				lookup.push_back(finder[allGroups[i]]);
                 groups.push_back(allGroups[i]);
-                cout << temp->getGroup() << '\t' << temp->getNumBins() << endl;
 			}
         }
 	
@@ -429,7 +391,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 		}
         
         SharedRAbundVectors* shared = new SharedRAbundVectors();
-        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  cout << lookup[j]->getGroup() << '\t' << lookup[j]->getNumBins() << endl;}
+        for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
         shared->eliminateZeroOTUS();
 
 		return shared;

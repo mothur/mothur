@@ -833,7 +833,7 @@ int SubSampleCommand::getSubSampleShared() {
 		InputData input(sharedfile, "sharedfile");
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
-        cout << "done reading" << endl;
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -938,6 +938,7 @@ int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
         variables["[distance]"] = thislookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         SubSample sample;
+        cout << thislookup->size() << endl;
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
         
         if (m->control_pressed) {  return 0; }
@@ -947,12 +948,10 @@ int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
         m->currentSharedBinLabels = subsampledLabels;
-        cout << "here\n";
+        
 		thislookup->printHeaders(out);
-        cout << "printed headers\n";
 		thislookup->print(out);
-        cout << "printed otus\n";
-		out.close();
+        out.close();
         
         //save mothurOut's binLabels to restore for next label
 		m->currentSharedBinLabels = saveBinLabels;

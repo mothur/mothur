@@ -584,7 +584,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     temp->setGroup(thisItersLookup[k]->getGroup());
                     newLookup.push_back(temp);
                 }
-                
+        
                 tempLabels = sample.getSample(newLookup, subsampleSize);
                 thisItersLookup = newLookup;
             }

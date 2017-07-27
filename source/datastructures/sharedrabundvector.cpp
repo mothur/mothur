@@ -66,11 +66,10 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 }
 
 /***********************************************************************/
-SharedRAbundVector::SharedRAbundVector(ifstream& f, string l, string g) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+SharedRAbundVector::SharedRAbundVector(ifstream& f, string l, string g, int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
     try {
         label = l;
         group = g;
-        f >> numBins;
         data.assign(numBins, 0);
         
         int inputData;
@@ -139,7 +138,7 @@ void SharedRAbundVector::push_back(int binSize){
 
 int SharedRAbundVector::remove(int bin){
     try {
-        float abund = data[bin];
+        int abund = data[bin];
         data.erase(data.begin()+bin);
         numBins--;
         

@@ -47,7 +47,7 @@ public:
     SharedRAbundFloatVector(vector<float>);
     SharedRAbundFloatVector(const SharedRAbundFloatVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) {};
     SharedRAbundFloatVector(ifstream&);
-    SharedRAbundFloatVector(ifstream& f, string l, string g); //filehandle, label
+    SharedRAbundFloatVector(ifstream& f, string l, string g, int); //filehandle, label
     ~SharedRAbundFloatVector();
     
     int getNumBins();

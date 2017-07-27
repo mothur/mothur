@@ -456,8 +456,7 @@ int RemoveOtuLabelsCommand::readShared(){
 
         bool wroteSomething = false;
         int numRemoved = 0;
-        vector<int> otusToRemove;
-        for (int i = 0; i < lookup->getNumBins(); i++) {
+        for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->control_pressed) { delete lookup; return 0; }
             
@@ -465,11 +464,10 @@ int RemoveOtuLabelsCommand::readShared(){
             if (otulabels.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
                 wroteSomething = true;
                 newLabels.push_back(m->currentSharedBinLabels[i]);
-            }else { numRemoved++; otusToRemove.push_back(i);  }
+                ++i;
+            }else { numRemoved++; lookup->removeOTU(i); }
         }
-        
-        lookup->removeOTUs(otusToRemove);
-        
+
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
         map<string, string> variables; 
@@ -637,10 +635,10 @@ SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
 		InputData input(sharedfile, "sharedfile");
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
+        
+		if (label == "") { label = lastLabel;  return lookup; }
 		
-		if (label == "") { label = lastLabel;  return 0; }
-		
-        if (label == "") { label = lastLabel;  return 0; }
+        if (label == "") { label = lastLabel;  return lookup; }
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> labels; labels.insert(label);

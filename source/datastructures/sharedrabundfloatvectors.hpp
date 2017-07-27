@@ -36,7 +36,6 @@ public:
     float getOTUTotal(int bin);
     vector<float> getOTU(int bin);
     void setLabels(string l);
-    float removeOTUs(vector<int> bins);
     float removeOTU(int bin);
     float get(int bin, string group);
     void set(int bin, float binSize, string group);
@@ -62,7 +61,7 @@ public:
     OrderVector getOrderVector(map<string,int>*);
     
     vector<string> getNamesGroups();
-    vector<int> eliminateZeroOTUS(); //run after push_backs if groups are chosen
+    void eliminateZeroOTUS(); //run after push_backs if groups are chosen
     
 private:
     vector<SharedRAbundFloatVector*> lookup;

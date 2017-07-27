@@ -382,8 +382,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors* sharedLookup) {
         
         bool filteredSomething = false;
         int numRemoved = 0;
-        vector<int> otusToRemove;
-        for (int i = 0; i < sharedLookup->getNumBins(); i++) {
+        for (int i = 0; i < sharedLookup->getNumBins();) {
             
             if (m->control_pressed) { for (int j = 0; j < data.size(); j++) { delete data[j]; } return 0; }
             
@@ -442,18 +441,17 @@ int FilterSharedCommand::processShared(SharedRAbundVectors* sharedLookup) {
             if (okay) {
                 filteredLabels.push_back(saveBinLabels[i]);
                 labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
+                ++i;
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
                 if (makeRare) {
                     for (int j = 0; j < rareCounts.size(); j++) {  rareCounts[j] += data[j]->get(i); }
                 }
-                otusToRemove.push_back(i);
+                sharedLookup->removeOTU(i);
                 numRemoved++;
             }
             
         }
-        
-        sharedLookup->removeOTUs(otusToRemove);
         
         //if we are saving the counts add a "rare" OTU if anything was filtered
         if (makeRare) {

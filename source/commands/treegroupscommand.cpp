@@ -410,11 +410,11 @@ int TreeGroupCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
 			
-			InputData input(sharedfile, "sharedfile");
-			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+			input = new InputData(sharedfile, "sharedfile");
+			SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
 			
-			if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine();  return 0; }
 			
 			//used in tree constructor 
 			m->runParse = false;
@@ -442,7 +442,7 @@ int TreeGroupCommand::execute(){
 			//create tree file
 			makeSimsShared(lookup);
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
 		}else{
 			//read in dist file
 			filename = inputfile;
