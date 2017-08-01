@@ -57,7 +57,7 @@ class GetSharedOTUCommand : public Command {
 		vector<string> outputNames;
 		
 		int process(ListVector*);
-        int process(SharedRAbundVectors*);
+        int process(SharedRAbundVectors*&);
         int runShared();
 		
 };

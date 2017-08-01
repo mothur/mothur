@@ -328,7 +328,7 @@ int MergeGroupsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::process(SharedRAbundVectors* thisLookUp, ofstream& out){
+int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out){
 	try {
         vector<string> setNames = designMap->getCategory();
         

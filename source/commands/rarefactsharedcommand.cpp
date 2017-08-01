@@ -494,7 +494,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 	}
 }
 //**********************************************************************************************************************
-int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors* thisLookup, string fileNameRoot) {
+int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, string fileNameRoot) {
 	try {
         
         map<string, vector<string> > filenames;
@@ -535,7 +535,6 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors* thisLookup, stri
             for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
             
             //clean up memory
-            delete thisItersLookup;
             for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
             delete thisItersLookup;
         }

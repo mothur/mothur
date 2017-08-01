@@ -248,7 +248,7 @@ int MakeLefseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloatVectors* lookup){
+int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloatVectors*& lookup){
 	try {
         if (outputDir == "") { outputDir = m->hasPath(inputFile); }
         map<string, string> variables;

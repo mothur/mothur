@@ -451,7 +451,7 @@ int ListOtuLabelsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(SharedRAbundVectors* lookup){
+int ListOtuLabelsCommand::createList(SharedRAbundVectors*& lookup){
 	try {
         
         map<string, string> variables; 
@@ -476,7 +476,7 @@ int ListOtuLabelsCommand::createList(SharedRAbundVectors* lookup){
 
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors* lookup){
+int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors*& lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));

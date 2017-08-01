@@ -324,7 +324,7 @@ int OTUAssociationCommand::processShared(){
 	}
 }
 //**********************************************************************************************************************
-int OTUAssociationCommand::process(SharedRAbundVectors* lookup){
+int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 	try {
 		map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
@@ -488,7 +488,7 @@ int OTUAssociationCommand::processRelabund(){
 	}
 }
 //**********************************************************************************************************************
-int OTUAssociationCommand::process(SharedRAbundFloatVectors* lookup){
+int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 	try {
 		
 		map<string, string> variables; 

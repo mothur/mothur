@@ -333,7 +333,7 @@ int GetMetaCommunityCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors* thislookup){
+int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 	try {
         
         //#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -528,7 +528,7 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors* thislookup){
 	}
 }
 //**********************************************************************************************************************
-int GetMetaCommunityCommand::processDriver(SharedRAbundVectors* thislookup, vector<int>& parts, string outputFileName, vector<string> relabunds, vector<string> matrix, vector<string> doneFlags, int processID){
+int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vector<int>& parts, string outputFileName, vector<string> relabunds, vector<string> matrix, vector<string> doneFlags, int processID){
 	try {
         
         double minLaplace = 1e10;
@@ -868,7 +868,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
     
 }
 //**********************************************************************************************************************
-vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRAbundVectors* thisLookup){
+vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRAbundVectors*& thisLookup){
     try {
         vector<vector<double> > results;
         
@@ -990,8 +990,6 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
                         if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + namesOfGroups[calcDists[i][j].seq1] + " - " + namesOfGroups[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     }
                 }
-                //clean up memory
-                thisItersLookup->clear();
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
                     if (m->control_pressed) { break; }
@@ -1043,7 +1041,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
     }
 }
 /**************************************************************************************************/
-int GetMetaCommunityCommand::driver(SharedRAbundVectors* thisLookup, vector< vector<seqDist> >& calcDists, Calculator* matrixCalculator) {
+int GetMetaCommunityCommand::driver(SharedRAbundVectors*& thisLookup, vector< vector<seqDist> >& calcDists, Calculator* matrixCalculator) {
 	try {
         vector<SharedRAbundVector*> data = thisLookup->getSharedRAbundVectors();
 		vector<SharedRAbundVector*> subset;

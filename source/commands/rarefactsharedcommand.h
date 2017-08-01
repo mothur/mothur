@@ -49,7 +49,7 @@ private:
     
     int process(DesignMap&, string);
     vector<string> createGroupFile(vector<string>&);
-    int subsampleLookup(SharedRAbundVectors*, string);
+    int subsampleLookup(SharedRAbundVectors*&, string);
 
 };
 

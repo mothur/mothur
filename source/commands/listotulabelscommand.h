@@ -43,8 +43,8 @@ private:
     vector<string> Groups;
     set<string> labels;
     
-    int createList(SharedRAbundFloatVectors*);
-    int createList(SharedRAbundVectors*);
+    int createList(SharedRAbundFloatVectors*&);
+    int createList(SharedRAbundVectors*&);
     int createList(ListVector*&);
 
 };

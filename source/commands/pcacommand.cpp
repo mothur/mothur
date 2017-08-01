@@ -327,7 +327,7 @@ vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector
 }*/
 //**********************************************************************************************************************
 
-int PCACommand::process(SharedRAbundFloatVectors* lookupFloat){
+int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 	try {
 		m->mothurOut("\nProcessing " + lookupFloat->getLabel()); m->mothurOutEndLine();
 	

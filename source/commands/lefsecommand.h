@@ -55,15 +55,15 @@ private:
     double anovaAlpha, wilcoxonAlpha, fBoots, ldaThreshold;
     int nlogs, iters, strict, minC;
     
-    int process(SharedRAbundFloatVectors*, DesignMap&);
-    int normalize(SharedRAbundFloatVectors*);
-    map<int, double> runKruskalWallis(SharedRAbundFloatVectors*, DesignMap&);
-    map<int, double> runWilcoxon(SharedRAbundFloatVectors*, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
+    int process(SharedRAbundFloatVectors*&, DesignMap&);
+    int normalize(SharedRAbundFloatVectors*&);
+    map<int, double> runKruskalWallis(SharedRAbundFloatVectors*&, DesignMap&);
+    map<int, double> runWilcoxon(SharedRAbundFloatVectors*&, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
     bool testOTUWilcoxon(map<string, set<string> >& class2SubClasses, vector<float> abunds, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
-    map<int, double> testLDA(SharedRAbundFloatVectors*, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
+    map<int, double> testLDA(SharedRAbundFloatVectors*&, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
     bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);
     vector< vector<double> > lda(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<int, string>& indexToClass, vector<string>);
-    vector< vector<double> > getMeans(SharedRAbundFloatVectors* lookup, map<string, vector<int> >& class2GroupIndex);
+    vector< vector<double> > getMeans(SharedRAbundFloatVectors*& lookup, map<string, vector<int> >& class2GroupIndex);
     int printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>);
     
     //for testing

@@ -41,16 +41,16 @@ private:
     
 	bool abort, allLines, picrust;
     
-    int getBiom(SharedRAbundVectors*);
-    int getBiom(SharedRAbundFloatVectors*);
-    vector<string> getMetaData(SharedRAbundVectors*);
-    vector<string> getMetaData(SharedRAbundFloatVectors*);
+    int getBiom(SharedRAbundVectors*&);
+    int getBiom(SharedRAbundFloatVectors*&);
+    vector<string> getMetaData(SharedRAbundVectors*&);
+    vector<string> getMetaData(SharedRAbundFloatVectors*&);
     vector<string> parseTax(string tax, vector<string>& scores);
-    int getSampleMetaData(SharedRAbundVectors*);
-    int getSampleMetaData(SharedRAbundFloatVectors*);
+    int getSampleMetaData(SharedRAbundVectors*&);
+    int getSampleMetaData(SharedRAbundFloatVectors*&);
     //for picrust
-    int getGreenGenesOTUIDs(SharedRAbundVectors*, map<string, string>&);
-    int getGreenGenesOTUIDs(SharedRAbundFloatVectors*, map<string, string>&);
+    int getGreenGenesOTUIDs(SharedRAbundVectors*&, map<string, string>&);
+    int getGreenGenesOTUIDs(SharedRAbundFloatVectors*&, map<string, string>&);
     map<string, string> readGGOtuMap();
 };
 

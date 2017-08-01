@@ -315,7 +315,7 @@ int MatrixOutputCommand::execute(){
 		if (matrixCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine();  return 0; }
 			
 		InputData input(sharedfile, "sharedfile");
-		lookup = input.getSharedRAbundVectors();
+		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         vector<string> lookupGroups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
@@ -327,23 +327,12 @@ int MatrixOutputCommand::execute(){
         
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup->getNumSeqs(lookupGroups[0]);
-                for (int i = 1; i < lookupGroups.size(); i++) {
-                    int thisSize = lookup->getNumSeqs(lookupGroups[i]);
-                    
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
                 m->clearGroups();
                 Groups.clear();
-                vector<string> temp;
-                for (int i = 0; i < lookupGroups.size(); i++) {
-                    if (lookup->getNumSeqs(lookupGroups[i]) < subsampleSize) {
-                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookup->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
-                        temp.push_back(lookupGroups[i]);
-                    }else { Groups.push_back(lookupGroups[i]); }
-                }
-                lookup->removeGroups(temp);
+                lookup->removeGroups(subsampleSize);
+                Groups = lookup->getNamesGroups();
                 m->setGroups(Groups);
             }
             
@@ -485,7 +474,7 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 	}
 }
 /***********************************************************/
-int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
+int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
 	try {
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
@@ -700,8 +689,6 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
                         if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     } 
                 }
-                //clean up memory
-                delete thisItersLookup;
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
                     if (m->control_pressed) { break; }
@@ -808,7 +795,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors* thisLookup){
 	}
 }
 /**************************************************************************************************/
-int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) {
+int MatrixOutputCommand::driver(vector<SharedRAbundVector*>& thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) {
 	try {
 		vector<SharedRAbundVector*> subset;
         

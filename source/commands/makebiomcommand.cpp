@@ -506,7 +506,7 @@ int MakeBiomCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getBiom(SharedRAbundVectors* lookup){
+int MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -645,7 +645,7 @@ int MakeBiomCommand::getBiom(SharedRAbundVectors* lookup){
 	}
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getBiom(SharedRAbundFloatVectors* lookup){
+int MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup){
     try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
@@ -785,7 +785,7 @@ int MakeBiomCommand::getBiom(SharedRAbundFloatVectors* lookup){
     }
 }
 //**********************************************************************************************************************
-vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors* lookup){
+vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors*& lookup){
 	try {
         vector<string> metadata;
         
@@ -902,7 +902,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors* lookup){
 
 }
 //**********************************************************************************************************************
-vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors* lookup){
+vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors*& lookup){
     try {
         vector<string> metadata;
         
@@ -1012,7 +1012,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors* lookup){
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors* lookup, map<string, string>& labelTaxMap){
+int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<string, string>& labelTaxMap){
 	try {
         //read reftaxonomy
         PhyloTree phylo(referenceTax);
@@ -1173,7 +1173,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors* lookup, map<string
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors* lookup, map<string, string>& labelTaxMap){
+int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<string, string>& labelTaxMap){
     try {
         //read reftaxonomy
         PhyloTree phylo(referenceTax);
@@ -1376,7 +1376,7 @@ map<string, string> MakeBiomCommand::readGGOtuMap(){
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors* lookup){
+int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
 	try {
         sampleMetadata.clear();
         if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }
@@ -1453,7 +1453,7 @@ int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors* lookup){
     
 }
 //**********************************************************************************************************************
-int MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors* lookup){
+int MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& lookup){
     try {
         sampleMetadata.clear();
         if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }

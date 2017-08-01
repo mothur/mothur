@@ -41,7 +41,7 @@ private:
 	int minAbund, minTotal, minSamples;
     float minPercent, minPercentSamples, rarePercent;
     
-    int processShared(SharedRAbundVectors*);
+    int processShared(SharedRAbundVectors*&);
 	
 };
 

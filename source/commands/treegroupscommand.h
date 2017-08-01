@@ -95,10 +95,10 @@ private:
     
 	Tree* createTree(vector< vector<double> >&);
 	void printSims(ostream&, vector< vector<double> >&);
-	int makeSimsShared(SharedRAbundVectors*);
+	int makeSimsShared(SharedRAbundVectors*&);
 	vector< vector<double> > makeSimsDist(SparseDistanceMatrix*);
     int writeTree(string, Tree*);
-    int driver(SharedRAbundVectors*, int, int, vector< vector<seqDist> >&);
+    int driver(SharedRAbundVectors*&, int, int, vector< vector<seqDist> >&);
 	
 	NameAssignment* nameMap;
 	ListVector* list;
@@ -118,7 +118,7 @@ private:
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-	int process(SharedRAbundVectors*);
+	int process(SharedRAbundVectors*&);
 	
 	
 

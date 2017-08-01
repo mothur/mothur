@@ -720,7 +720,7 @@ int GetSharedOTUCommand::runShared() {
 	}
 }
 /***********************************************************/
-int GetSharedOTUCommand::process(SharedRAbundVectors* lookup) {
+int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 	try {
 		
 		string outputFileNames;

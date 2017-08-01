@@ -633,7 +633,7 @@ vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* ma
 }
 
 /***********************************************************/
-int TreeGroupCommand::makeSimsShared(SharedRAbundVectors* lookup) {
+int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 	try {
         
         if (subsample) { 
@@ -739,7 +739,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors* lookup) {
 }
 
 /***********************************************************/
-int TreeGroupCommand::process(SharedRAbundVectors* thisLookup) {
+int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
 	try{
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(treeCalculators.size()); 		
@@ -1108,7 +1108,7 @@ int TreeGroupCommand::process(SharedRAbundVectors* thisLookup) {
 	}
 }
 /**************************************************************************************************/
-int TreeGroupCommand::driver(SharedRAbundVectors* thislookup, int start, int end, vector< vector<seqDist> >& calcDists) {
+int TreeGroupCommand::driver(SharedRAbundVectors*& thislookup, int start, int end, vector< vector<seqDist> >& calcDists) {
 	try {
 		vector<SharedRAbundVector*> subset;
         vector<SharedRAbundVector*> thisLookup = thislookup->getSharedRAbundVectors();

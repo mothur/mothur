@@ -42,7 +42,7 @@ private:
 	string groups, label, outputDir, scale, sharedfile;
 	vector<string> Groups, outputNames;
 	
-	int getRelAbundance(SharedRAbundVectors*, ofstream&);
+	int getRelAbundance(SharedRAbundVectors*&, ofstream&);
 
 };
 

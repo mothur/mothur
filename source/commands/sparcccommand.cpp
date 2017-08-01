@@ -315,7 +315,7 @@ vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >
 	}
 }
 //**********************************************************************************************************************
-int SparccCommand::process(SharedRAbundVectors* shared){
+int SparccCommand::process(SharedRAbundVectors*& shared){
 	try {
         cout.setf(ios::fixed, ios::floatfield);
         cout.setf(ios::showpoint);

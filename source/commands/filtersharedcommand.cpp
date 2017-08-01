@@ -321,7 +321,7 @@ int FilterSharedCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int FilterSharedCommand::processShared(SharedRAbundVectors* sharedLookup) {
+int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label

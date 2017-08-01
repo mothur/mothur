@@ -387,7 +387,7 @@ int LefseCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int LefseCommand::process(SharedRAbundFloatVectors* lookup, DesignMap& designMap) {
+int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMap) {
 	try {
         vector<string> classes;
         vector<string> subclasses;
@@ -470,7 +470,7 @@ int LefseCommand::process(SharedRAbundFloatVectors* lookup, DesignMap& designMap
 	}
 }
 //**********************************************************************************************************************
-int LefseCommand::normalize(SharedRAbundFloatVectors* lookup) {
+int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup) {
 	try {
         vector<double> mul;
         vector<string> namesOfGroups = lookup->getNamesGroups();
@@ -493,7 +493,7 @@ int LefseCommand::normalize(SharedRAbundFloatVectors* lookup) {
 	}
 }
 //**********************************************************************************************************************
-map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors* lookup, DesignMap& designMap) {
+map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& lookup, DesignMap& designMap) {
 	try {        
         map<int, double> significantOtuLabels;
         int numBins = lookup->getNumBins();
@@ -535,7 +535,7 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors* lookup
 }
 //**********************************************************************************************************************
 //assumes not neccessarily paired
-map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors* lookup, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
+map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
     try {
         map<int, double> significantOtuLabels;
         map<int, double>::iterator it;
@@ -724,7 +724,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
 }
 //**********************************************************************************************************************
 //modelled after lefse.py test_lda_r function
-map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors* lookup, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
+map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
     try {
         map<int, double> sigOTUS;
         map<int, double>::iterator it;
@@ -859,7 +859,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors* lookup, map<int
     }
 }
 //**********************************************************************************************************************
-vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors* lookup, map<string, vector<int> >& class2GroupIndex) {
+vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors*& lookup, map<string, vector<int> >& class2GroupIndex) {
     try {
         int numBins = lookup->getNumBins();
         int numClasses = class2GroupIndex.size();

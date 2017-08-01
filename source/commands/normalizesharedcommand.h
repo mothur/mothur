@@ -42,8 +42,8 @@ private:
 	int norm;
 	vector<string> Groups, outputNames;
 		
-	int normalize(SharedRAbundVectors*);
-	int normalize(SharedRAbundFloatVectors*);
+	int normalize(SharedRAbundVectors*&);
+	int normalize(SharedRAbundFloatVectors*&);
 };
 
 #endif

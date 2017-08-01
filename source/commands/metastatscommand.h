@@ -49,8 +49,8 @@ private:
 	int iters, processors;
 	float threshold;
 	
-	int process(SharedRAbundVectors*);
-	int driver(unsigned long long, unsigned long long, SharedRAbundVectors*);
+	int process(SharedRAbundVectors*&);
+	int driver(unsigned long long, unsigned long long, SharedRAbundVectors*&);
     int convertToShared(string filename);
     int convertToInput(vector<SharedRAbundVector*>&, vector<string>, string);
     bool convertSharedToInput;
@@ -73,7 +73,7 @@ struct metastatsData {
     string outputDir;
 	
 	metastatsData(){}
-	metastatsData(string sf, string oDir, MothurOut* mout, int st, int en, vector< vector<string> > ns, SharedRAbundVectors* lu, vector<string> dg, int i, float thr) {
+	metastatsData(string sf, string oDir, MothurOut* mout, int st, int en, vector< vector<string> > ns, SharedRAbundVectors*& lu, vector<string> dg, int i, float thr) {
 		sharedfile = sf;
         outputDir = oDir;
 		m = mout;

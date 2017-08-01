@@ -285,7 +285,7 @@ int CooccurrenceCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors* thisLookUp, ofstream& out){
+int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstream& out){
     try {
         int numOTUS = thisLookUp->getNumBins();
         

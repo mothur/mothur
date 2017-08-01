@@ -319,7 +319,7 @@ int GetCoreMicroBiomeCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors* lookup){
+int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));

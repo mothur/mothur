@@ -47,7 +47,7 @@ private:
 	string groups, label, outputDir, inputDir, designfile, sharedfile, groupfile, countfile, method, fastafile;
 	vector<string> Groups, outputNames;
 		
-	int process(SharedRAbundVectors*, ofstream&);
+	int process(SharedRAbundVectors*&, ofstream&);
 	int processSharedFile(DesignMap*&);
 	int processGroupFile(DesignMap*&);
     int processCountFile(DesignMap*&);

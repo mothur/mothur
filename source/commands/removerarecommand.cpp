@@ -817,7 +817,7 @@ int RemoveRareCommand::processShared(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processLookup(SharedRAbundVectors* lookup){
+int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 	try {
 		
         string thisOutputDir = outputDir;

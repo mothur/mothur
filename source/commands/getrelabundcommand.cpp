@@ -281,7 +281,7 @@ int GetRelAbundCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors* thisLookUp, ofstream& out){
+int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstream& out){
 	try {
         vector<string> groups = thisLookUp->getNamesGroups();
 		 for (int i = 0; i < thisLookUp->size(); i++) {

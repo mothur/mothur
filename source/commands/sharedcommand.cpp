@@ -989,7 +989,7 @@ int SharedCommand::createSharedFromListGroup() {
 	}
 }
 //**********************************************************************************************************************
-void SharedCommand::printSharedData(SharedRAbundVectors* thislookup, ofstream& out) {
+void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& out) {
 	try {
 
 		if (order.size() == 0) { //user has not specified an order so do aplabetically

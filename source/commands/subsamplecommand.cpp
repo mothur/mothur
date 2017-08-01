@@ -850,7 +850,7 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  delete lookup;  return 0;  }
+			if (m->control_pressed) {  if (lookup != NULL) { delete lookup; lookup = NULL; }  return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -865,7 +865,7 @@ int SubSampleCommand::getSubSampleShared() {
 			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
-				delete lookup;
+				if (lookup != NULL) { delete lookup; lookup = NULL; }
 				
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -881,7 +881,7 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			lastLabel = lookup->getLabel();
 			//prevent memory leak
-			delete lookup;
+            if (lookup != NULL) { delete lookup; lookup = NULL; }
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
@@ -905,14 +905,14 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			delete lookup;
+			if (lookup != NULL) { delete lookup; lookup = NULL; }
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 			
 			processShared(lookup);
 			
-			delete lookup;
+			if (lookup != NULL) { delete lookup; lookup = NULL; }
 		}
 		
 		return 0;
@@ -924,7 +924,7 @@ int SubSampleCommand::getSubSampleShared() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
+int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
@@ -938,7 +938,7 @@ int SubSampleCommand::processShared(SharedRAbundVectors* thislookup) {
         variables["[distance]"] = thislookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         SubSample sample;
-        cout << thislookup->size() << endl;
+        
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
         
         if (m->control_pressed) {  return 0; }

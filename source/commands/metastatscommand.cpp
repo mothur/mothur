@@ -354,7 +354,7 @@ int MetaStatsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int MetaStatsCommand::process(SharedRAbundVectors* thisLookUp){
+int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
 	try {
 		
 		
@@ -495,7 +495,7 @@ int MetaStatsCommand::process(SharedRAbundVectors* thisLookUp){
 	}
 }
 //**********************************************************************************************************************
-int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, SharedRAbundVectors* thisLookUp) {
+int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, SharedRAbundVectors*& thisLookUp) {
 	try {
 	
         vector<string> thisLookupNames = thisLookUp->getNamesGroups();

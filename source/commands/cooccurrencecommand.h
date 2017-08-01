@@ -46,7 +46,7 @@ private:
     vector<string> outputNames, Groups;
     int runs;
     
-    int getCooccurrence(SharedRAbundVectors*, ofstream&);
+    int getCooccurrence(SharedRAbundVectors*&, ofstream&);
 	
 };
 

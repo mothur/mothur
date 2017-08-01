@@ -450,7 +450,7 @@ int NormalizeSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(SharedRAbundVectors* thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 	try {
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentSharedBinLabels;
@@ -537,7 +537,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors* thisLookUp){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors* thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 	try {
 		
 		//save mothurOut's binLabels to restore for next label

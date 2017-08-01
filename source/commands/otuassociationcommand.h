@@ -42,9 +42,9 @@ private:
 	
 	vector<string> outputNames, Groups, metadataLabels;
 	int processShared();
-	int process(SharedRAbundVectors*);
+	int process(SharedRAbundVectors*&);
 	int processRelabund();
-	int process(SharedRAbundFloatVectors*);
+	int process(SharedRAbundFloatVectors*&);
     int readMetadata();
     //int getMetadata();
 	
