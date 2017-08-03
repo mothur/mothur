@@ -53,14 +53,14 @@ private:
 	vector<Display*> cDisplays;
 	int abund, size, alpha;
 	float freq;
-	vector<string> outputNames;
+	vector<string> outputNames, groups;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames;
-	vector<string> groups;
+    
 	
 	vector<string> parseSharedFile(string);
 

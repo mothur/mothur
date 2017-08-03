@@ -118,7 +118,11 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
             
             if (thisSize != size) {
                 
-                OrderVector order = rabunds[i]->getOrderVector(NULL);
+                vector<int> order;
+                for (int j = 0; j < rabunds[i]->size(); j++) {
+                    int abund = rabunds[i]->get(j);
+                    for(int k=0;k<abund;k++){ order.push_back(j);  }
+                }
                 
                 m->mothurRandomShuffle(order);
                 
@@ -130,10 +134,8 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                     
                     if (m->control_pressed) {  return m->currentSharedBinLabels; }
                     
-                    int bin = order.get(j);
-                    
-                    int abund = temp->get(bin);
-                    temp->set(bin, (abund+1));
+                    int bin = order[j];
+                    temp->increment(bin);
                 }
                 newLookup->push_back(temp);
             }else { SharedRAbundVector* temp = new SharedRAbundVector(*rabunds[i]); newLookup->push_back(temp); }

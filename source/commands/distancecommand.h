@@ -61,7 +61,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 	
 	try {
 		ValidCalculators validCalculator;
-		Dist* distCalculator;
+		DistCalc* distCalculator;
 		if (pDataArray->m->isTrue(pDataArray->countends) == true) {
 			for (int i=0; i<pDataArray->Estimators.size(); i++) {
 				if (validCalculator.isValidCalculator("distance", pDataArray->Estimators[i]) == true) { 
@@ -151,7 +151,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				outFile << endl; 
 				
 				if(i % 100 == 0){
-					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n"v);
+					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
 				}
 				pDataArray->count++;
 			}

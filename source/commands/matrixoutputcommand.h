@@ -120,7 +120,7 @@ struct distSharedData {
     int count;
 	
 	distSharedData(){}
-	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
+	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*>& lu) {
 		m = mout;
 		start = st;
 		end = en;
@@ -263,7 +263,7 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
 		}
         
         for(int i=0;i<matrixCalculators.size();i++){  delete matrixCalculators[i]; }
-        for(int i=0;i<pDataArray->thisLookup->size();i++){  delete pDataArray->thisLookup[i]; }
+        for(int i=0;i<pDataArray->thisLookup.size();i++){  delete pDataArray->thisLookup[i]; }
 		
 		return 0;
 		

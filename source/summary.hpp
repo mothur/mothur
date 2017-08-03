@@ -237,7 +237,7 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                 pDataArray->count++;
                 
                 string output = "";
-                output += seq.getName() + '\t';
+                output += current.getName() + '\t';
                 output += toString(thisStartPosition) + '\t' + toString(thisEndPosition) + '\t';
                 output += toString(thisSeqLength) + '\t' + toString(thisAmbig) + '\t';
                 output += toString(thisHomoP) + '\t' + toString(num);
@@ -427,7 +427,7 @@ static DWORD WINAPI MySeqAlignSumThreadFunction(LPVOID lpParam){
         }
         
         string name, TemplateName, SearchMethod, AlignmentMethod;
-        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
+        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert, numReps;
         float SearchScore, SimBtwnQueryTemplate;  //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
         //checking for minScore, maxInsert, minSim
         

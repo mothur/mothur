@@ -79,6 +79,7 @@ try {
                 for (int i = 0; i < mGroups.size(); i++) {
                         SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
+                        temp->setGroup(mGroups[i]);
                         indexLookup[mGroups[i]] = i;
 						lookup.push_back(temp);
                 }

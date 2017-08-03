@@ -299,13 +299,13 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
         vector<int> columntotal; columntotal.resize(thisLookUp->size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
-        
-        vector<RAbundVector*> temp;
-        for (int i = 0; i < thisLookUp->size(); i++) { //nrows in the shared file
-            for (int j = 0; j < temp[i]->getNumBins(); j++) { //cols of original shared file
+        for (int j = 0; j < thisLookUp->getNumBins(); j++) { //cols of original shared file
+            vector<int> abunds = thisLookUp->getOTU(j);
+        for (int i = 0; i < abunds.size(); i++) { //nrows in the shared file
+            
                 if (m->control_pressed) { return 0; }
-                int abund = temp[i]->get(j);
-                
+            int abund = abunds[i];
+            
                 if(abund > 0) {
                     co_matrix[j][i] = 1;
                     rowtotal[j]++;
@@ -313,7 +313,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                 }
             }
         }
-        for (int i = 0; i < temp.size(); i++) { delete temp[i]; }
+        
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
         //comatrix and initmatrix are still vectors of vectors of ints as in the original script. The abundancevector is only what was read in ie not a co-occurrence matrix!

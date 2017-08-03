@@ -356,7 +356,7 @@ int HeatMapSimCommand::runCommandShared() {
 		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
 		
 		input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
+		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 			
 		if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}

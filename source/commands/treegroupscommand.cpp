@@ -905,20 +905,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 for( int i=1; i<processors; i++ ){
                     
                     //make copy of lookup so we don't get access violations
-                    vector<SharedRAbundVector*> newLookup;
-                    for (int k = 0; k < thisItersLookup.size(); k++) {
-                        SharedRAbundVector* temp = new SharedRAbundVector();
-                        temp->setLabel(thisItersLookup[k]->getLabel());
-                        temp->setGroup(thisItersLookup[k]->getGroup());
-                        newLookup.push_back(temp);
-                    }
-                    
-                    //for each bin
-                    for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
-                        if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                        for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
-                    }
-                    
+                    vector<SharedRAbundVector*> newLookup = thisItersLookup->getSharedRabundVectors();
                     // Allocate memory for thread data.
                     treeSharedData* tempSum = new treeSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
                     pDataArray.push_back(tempSum);

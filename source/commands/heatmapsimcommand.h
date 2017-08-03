@@ -38,7 +38,6 @@ public:
 	
 private:
 	InputData* input;
-	SharedRAbundVectors* lookup;
 	vector<Calculator*> heatCalculators;
 	HeatMapSim* heatmap;
 	OptionParser* parser;

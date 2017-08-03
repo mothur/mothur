@@ -402,6 +402,7 @@ long long Summary::summarizeFasta(string fastafile, string n, string output) {
 //**********************************************************************************************************************
 long long Summary::summarizeFasta(string fastafile, string output) {
     try {
+        long long num = 0;
         vector<linePair> lines;
         string p = m->getProcessors();
         int processors = 1; m->mothurConvert(p, processors);
@@ -410,20 +411,19 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         positions = m->divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(fastafile, numSeqs);
-        if (numSeqs < processors) { processors = numSeqs; }
+        positions = m->setFilePosFasta(fastafile, num);
+        if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
-        int numSeqsPerProcessor = numSeqs / processors;
+        int numSeqsPerProcessor = num / processors;
         for (int i = 0; i < processors; i++) {
             int startIndex =  i * numSeqsPerProcessor;
-            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
             lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
         }
 #endif
         
         int process = 1;
-        long long num = 0;
         vector<int> processIDS;
         bool recalc = false;
         
@@ -792,7 +792,7 @@ long long Summary::summarizeFastaSummary(string summaryfile, string n) {
 /**********************************************************************************************************************/
 long long Summary::summarizeFastaSummary(string summaryfile) {
     try {
-        
+        long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors();
@@ -801,20 +801,20 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, numSeqs);
-        if (numSeqs < processors) { processors = numSeqs; }
+        positions = m->setFilePosFasta(fastafile, num);
+        if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
-        int numSeqsPerProcessor = numSeqs / processors;
+        int numSeqsPerProcessor = num / processors;
         for (int i = 0; i < processors; i++) {
             int startIndex =  i * numSeqsPerProcessor;
-            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
             lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
         }
 #endif
         
         int process = 1;
-        long long num = 0;
+        
         vector<int> processIDS;
         bool recalc = false;
         
@@ -1008,7 +1008,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         for( int i=0; i<processors-1; i++ ){
             
             // Allocate memory for thread data.
-            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i].start, lines[i].end, hasNameOrCount, nameMap);
             pDataArray.push_back(tempSum);
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -1140,7 +1140,7 @@ long long Summary::summarizeContigsSummary(string summaryfile, string n) {
 /**********************************************************************************************************************/
 long long Summary::summarizeContigsSummary(string summaryfile) {
     try {
-        
+        long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors();
@@ -1149,20 +1149,20 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, numSeqs);
-        if (numSeqs < processors) { processors = numSeqs; }
+        positions = m->setFilePosFasta(fastafile, num);
+        if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
-        int numSeqsPerProcessor = numSeqs / processors;
+        int numSeqsPerProcessor = num / processors;
         for (int i = 0; i < processors; i++) {
             int startIndex =  i * numSeqsPerProcessor;
-            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
             lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
         }
 #endif
         
         int process = 1;
-        long long num = 0;
+        
         vector<int> processIDS;
         bool recalc = false;
         
@@ -1370,7 +1370,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         for( int i=0; i<processors-1; i++ ){
             
             // Allocate memory for thread data.
-            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i].start, lines[i].end, hasNameOrCount, nameMap);
             pDataArray.push_back(tempSum);
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -1509,7 +1509,7 @@ int Summary::driverContigsSummarySummarize(string fastafile, linePair lines) {
 /**********************************************************************************************************************/
 long long Summary::summarizeAlignSummary(string summaryfile) {
     try {
-        
+        long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors();
@@ -1518,20 +1518,20 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, numSeqs);
-        if (numSeqs < processors) { processors = numSeqs; }
+        positions = m->setFilePosFasta(fastafile, num);
+        if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
-        int numSeqsPerProcessor = numSeqs / processors;
+        int numSeqsPerProcessor = num / processors;
         for (int i = 0; i < processors; i++) {
             int startIndex =  i * numSeqsPerProcessor;
-            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
             lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
         }
 #endif
         
         int process = 1;
-        long long num = 0;
+        
         vector<int> processIDS;
         bool recalc = false;
         
@@ -1709,12 +1709,12 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         for( int i=0; i<processors-1; i++ ){
             
             // Allocate memory for thread data.
-            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i]->start, lines[i]->end, hasNameOrCount, nameMap);
+            seqSumData* tempSum = new seqSumData(summaryfile, m, lines[i].start, lines[i].end, hasNameOrCount, nameMap);
             pDataArray.push_back(tempSum);
             
             //MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
             //default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-            hThreadArray[i] = CreateThread(NULL, 0, MySeqAlignThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
+            hThreadArray[i] = CreateThread(NULL, 0, MySeqAlignSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
         }
         
         //do your part
@@ -1732,13 +1732,13 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
                 m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
             }
             for (map<float, long long>::iterator it = pDataArray[i]->sims.begin(); it != pDataArray[i]->sims.end(); it++)		{
-                map<int, long long>::iterator itMain = sims.find(it->first);
+                map<float, long long>::iterator itMain = sims.find(it->first);
                 if (itMain == sims.end()) { //newValue
                     sims[it->first] = it->second;
                 }else { itMain->second += it->second; } //merge counts
             }
             for (map<float, long long>::iterator it = pDataArray[i]->scores.begin(); it != pDataArray[i]->scores.end(); it++)		{
-                map<int, long long>::iterator itMain = scores.find(it->first);
+                map<float, long long>::iterator itMain = scores.find(it->first);
                 if (itMain == scores.end()) { //newValue
                     scores[it->first] = it->second;
                 }else { itMain->second += it->second; } //merge counts

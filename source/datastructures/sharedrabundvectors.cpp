@@ -331,7 +331,7 @@ int SharedRAbundVectors::removeOTU(int bin){
 /***********************************************************************/
 vector<string> SharedRAbundVectors::getNamesGroups(){
     try {
-        vector<string> names;
+        vector<string> names; names.clear();
         for (int i = 0; i < lookup.size(); i ++) { names.push_back(lookup[i]->getGroup()); }
         return names;
     }
@@ -364,9 +364,12 @@ SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
         
         SharedOrderVector order;
         for (int i = 0; i < lookup.size(); i++) {
-            OrderVector thisOrder = lookup[i]->getOrderVector(NULL);
-            for (int i = 0; i < thisOrder.getNumBins(); i++) {
-                order.push_back(i, thisOrder.get(i), lookup[i]->getGroup());
+            for (int j = 0; j < lookup[i]->getNumBins(); j++) {
+                int abund = lookup[i]->get(j);
+                int bin = j+1;
+                if (abund != 0) {
+                    for (int k = 0; k < abund; k++) {  order.push_back(j, j, lookup[i]->getGroup());  }
+                }
             }
         }
         
@@ -599,7 +602,7 @@ SAbundVector SharedRAbundVectors::getSAbundVector(){
         exit(1);
     }
 }
-/***********************************************************************/
+/***********************************************************************
 OrderVector SharedRAbundVectors::getOrderVector(map<string,int>* nameMap = NULL){
     try {
         RAbundVector rav = getRAbundVector();

@@ -412,20 +412,7 @@ unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string
 		positions = m->divideFilePerLine(namefile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
-		if(processors == 1){ lines.push_back(linePair(0, 1000));  }
-        else {
-            unsigned long long numSeqs = 0;
-            positions = m->setFilePosEachLine(namefile, numSeqs);
-            if (positions.size() < processors) { processors = positions.size(); }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-        }
+		lines.push_back(linePair(0, 1000));
 #endif
 
         		
@@ -528,41 +515,9 @@ unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string
             numSeqs += num;
             m->mothurRemove(tempFile);
         }
-#else		
-		vector<countData*> pDataArray;
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1];
-        vector<GroupMap*> copies;
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			string filename = toString(i) + ".temp";
-            
-            GroupMap* copyGroup = new GroupMap();
-            copyGroup->getCopy(groupMap);
-            copies.push_back(copyGroup);
-            vector<string> cGroups = Groups;
-           
-			countData* temp = new countData(filename, copyGroup, m, lines[i].start, lines[i].end, groupfile, namefile, cGroups);
-			pDataArray.push_back(temp);
-			processIDS.push_back(i);
-			
-			hThreadArray[i] = CreateThread(NULL, 0, MyCountThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
-		}
-		
+#else
 		string filename = toString(processors-1) + ".temp";
         numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
-        		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            numSeqs += pDataArray[i]->total;
-            delete copies[i];
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
 #endif
 		
 		//append output files

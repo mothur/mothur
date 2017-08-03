@@ -347,7 +347,7 @@ SAbundVector SharedRAbundFloatVectors::getSAbundVector(){
         exit(1);
     }
 }
-/***********************************************************************/
+/***********************************************************************
 OrderVector SharedRAbundFloatVectors::getOrderVector(map<string,int>* nameMap = NULL){
     try {
         RAbundVector rav = getRAbundVector();

@@ -1348,7 +1348,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                     for (int k = 0; k < groupings[l][0]->getNumBins(); k++) {
                         if (m->control_pressed) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
                         
-                        for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back(groupings[l][j]->getAbundance(k), groupings[l][j]->getGroup()); }
+                        for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back(groupings[l][j]->get(k)); }
                     }
                 }
         
@@ -1362,7 +1362,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
             }
             
             //do my part
-			pvalues = driver(groupings, num, indicatorValues, procIters[0]);
+			pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[0]);
            
             //Wait until all threads have terminated.
             WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -1582,7 +1582,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                     for (int k = 0; k < groupings[l][0]->getNumBins(); k++) {
                         if (m->control_pressed) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
                         
-                        for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back((float)(groupings[l][j]->getAbundance(k)), groupings[l][j]->getGroup()); }
+                        for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back((float)(groupings[l][j]->get(k))); }
                     }
                 }
                 

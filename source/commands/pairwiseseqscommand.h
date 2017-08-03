@@ -139,7 +139,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 		}
 		
         ValidCalculators validCalculator;
-        Dist* distCalculator;
+        DistCalc* distCalculator;
         if (pDataArray->countends) {
             if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
                 if (pDataArray->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
@@ -237,7 +237,7 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 		}
 		
         ValidCalculators validCalculator;
-        Dist* distCalculator;
+        DistCalc* distCalculator;
         if (pDataArray->countends) {
             if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
                 if (pDataArray->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}

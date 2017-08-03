@@ -225,18 +225,8 @@ SAbundVector SharedRAbundFloatVector::getSAbundVector() {
 
 OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = NULL) {
     try {
-        OrderVector ov;
-        
-        for(int i=0;i<data.size();i++){
-            for(int j=0;j<data[i];j++){
-                ov.push_back(i);
-            }
-        }
-        m->mothurRandomShuffle(ov);
-        ov.setLabel(label);
-        ov.getNumBins();
-        
-        return ov;
+ m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->control_pressed = true;
+ OrderVector o; return o; 
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundFloatVector", "getOrderVector");

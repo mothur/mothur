@@ -33,7 +33,7 @@ public:
 	virtual void print(ostream&) = 0;
     virtual RAbundVector getRAbundVector() = 0;
 	virtual SAbundVector getSAbundVector() = 0;
-	virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
+    virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
     virtual void resize(int) = 0;
     
     virtual void print(ostream&, map<string, int>&) {}

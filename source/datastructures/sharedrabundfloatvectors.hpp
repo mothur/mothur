@@ -13,6 +13,7 @@
 #include "rabundvector.hpp"
 #include "sharedrabundfloatvector.hpp"
 #include "sharedordervector.h"
+#include "ordervector.hpp"
 
 /*  DataStructure for a relabund file. */
 //********************************************************************************************************************
@@ -58,7 +59,7 @@ public:
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
     RAbundVector getRAbundVector();
     SAbundVector getSAbundVector();
-    OrderVector getOrderVector(map<string,int>*);
+    OrderVector getOrderVector(map<string,int>*) { m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->control_pressed = true; OrderVector o; return o; }
     
     vector<string> getNamesGroups();
     void eliminateZeroOTUS(); //run after push_backs if groups are chosen

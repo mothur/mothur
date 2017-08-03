@@ -105,6 +105,24 @@ void SharedRAbundVector::set(int binNumber, int newBinSize){
         exit(1);
     }
 }
+/***********************************************************************/
+
+int SharedRAbundVector::increment(int binNumber){
+    try {
+        data[binNumber]++;
+        int newBinSize = data[binNumber];
+        
+        if(newBinSize > maxRank)	{	maxRank = newBinSize;	}
+        
+        numSeqs++;
+        
+        return newBinSize;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RAbundVector", "increment");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 
@@ -191,7 +209,7 @@ int SharedRAbundVector::getMaxRank(){
 
 RAbundVector SharedRAbundVector::getRAbundVector(){
     RAbundVector rav;
-    for(int i = 0; i < data.size(); i++) { rav.push_back(int(data[i])); }
+    for(int i = 0; i < data.size(); i++) { if (data[i] != 0) {  rav.push_back(int(data[i])); } }
     rav.setLabel(label);
     return rav;
 }
@@ -219,18 +237,8 @@ SAbundVector SharedRAbundVector::getSAbundVector() {
 
 OrderVector SharedRAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
     try {
-        OrderVector ov;
-        
-        for(int i=0;i<data.size();i++){
-            for(int j=0;j<data[i];j++){
-                ov.push_back(i);
-            }
-        }
-        m->mothurRandomShuffle(ov);
-        ov.setLabel(label);	
-        ov.getNumBins();
-        
-        return ov;
+    m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->control_pressed = true;
+            OrderVector o; return o;
     }
     catch(exception& e) {
         m->errorOut(e, "RAbundVector", "getOrderVector");

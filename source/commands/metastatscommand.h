@@ -107,10 +107,10 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			string setB = pDataArray->namesOfGroupCombos[c][1];
             
 			//get filename
-			string outputFileName = pDataArray->outputDir +  pDataArray->m->getRootName(pDataArray->m->getSimpleName(pDataArray->sharedfile)) + pDataArray->thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
+			string outputFileName = pDataArray->outputDir +  pDataArray->m->getRootName(pDataArray->m->getSimpleName(pDataArray->sharedfile)) + pDataArray->thisLookUp->getLabel() + "." + setA + "-" + setB + ".metastats";
 			pDataArray->outputNames.push_back(outputFileName); 
 			
-			vector< vector<double> > data2; data2.resize(pDataArray->thisLookUp[0]->getNumBins());
+			vector< vector<double> > data2; data2.resize(pDataArray->thisLookUp->getNumBins());
 			
 			vector<SharedRAbundVector*> subset;
 			int setACount = 0;
@@ -135,7 +135,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 				for (int j = 0; j < pDataArray->thisLookUp[0]->getNumBins(); j++) {
 					data2[j].resize(subset.size(), 0.0);
 					for (int i = 0; i < subset.size(); i++) {
-						data2[j][i] = (subset[i]->getAbundance(j));
+						data2[j][i] = (subset[i]->get(j));
 					}
 				}
 				

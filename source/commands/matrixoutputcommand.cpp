@@ -644,7 +644,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 for( int i=1; i<processors; i++ ){
                     
                     //make copy of lookup so we don't get access violations
-                    vector<RAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
+                    vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
                     
                     // Allocate memory for thread data.
                     distSharedData* tempSum = new distSharedData(m, lines[i].start, lines[i].end, Estimators, thisItersRabunds);
@@ -655,7 +655,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 }
                 
                 //parent do your part
-                driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
+                driver(thisItersRabunds, lines[0].start, lines[0].end, calcDists);   
                            
                 //Wait until all threads have terminated.
                 WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

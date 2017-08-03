@@ -129,7 +129,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct treeSharedData {
-    vector<RAbundVector*> thisLookup;
+    vector<SharedRAbundVector*> thisLookup;
     vector< vector<seqDist> > calcDists;
     vector<string>  Estimators;
 	unsigned long long start;
@@ -138,7 +138,7 @@ struct treeSharedData {
     int count;
 	
 	treeSharedData(){}
-	treeSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<RAbundVector*> lu) {
+	treeSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
 		m = mout;
 		start = st;
 		end = en;
@@ -249,7 +249,7 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
     
         pDataArray->calcDists.resize(treeCalculators.size());
         
-		vector<RAbundVector*> subset;
+		vector<SharedRAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
 			
             pDataArray->count++;

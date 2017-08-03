@@ -604,16 +604,16 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		SharedRAbundVectors* shared = input->getSharedRAbundVectors();
 		
 		string sharedFileRoot = m->getRootName(filename);
-        vector<string> groups = shared->getNamesGroups();
+        groups = shared->getNamesGroups();
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<groups.size(); i++) {
             ofstream temp;
             string group = groups[i];
 			m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
+            temp.close();
 			filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
-            groups.push_back(group);
 		}
 		
 		while(shared != NULL) {
@@ -623,7 +623,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
                 ofstream temp;
                 string group = groups[i];
 				m->openOutputFileAppend(files[group], temp);
-				lookup[i]->print(temp);
+				lookup[i]->getRAbundVector().print(temp);
 				temp.close();
 			}
 		

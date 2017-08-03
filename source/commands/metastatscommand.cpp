@@ -451,8 +451,8 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
                     for( int i=1; i<processors; i++ ){
                         
                         //make copy of lookup so we don't get access violations
-                        SharedRAbundVectors* newLookup = new SharedRAbundVectors(lookup);
-                        vector<string> designMapGroups = lookup->getNamesOfGroups();
+                        SharedRAbundVectors* newLookup = new SharedRAbundVectors(*lookup);
+                        vector<string> designMapGroups = lookup->getNamesGroups();
                         
                         // Allocate memory for thread data.
                         metastatsData* tempSum = new metastatsData(sharedfile, outputDir, m, lines[i].start, lines[i].end, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);

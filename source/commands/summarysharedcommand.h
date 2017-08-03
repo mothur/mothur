@@ -101,7 +101,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct summarySharedData {
-    vector<RAbundVector*> thisLookup;
+    vector<SharedRAbundVector*> thisLookup;
     vector< vector<seqDist> > calcDists;
     vector<string>  Estimators;
 	unsigned long long start;
@@ -111,7 +111,7 @@ struct summarySharedData {
     int count;
 	
 	summarySharedData(){}
-	summarySharedData(string sf, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<RAbundVector*> lu) {
+	summarySharedData(string sf, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
 		sumFile = sf;
 		m = mout;
 		start = st;
@@ -225,7 +225,7 @@ static DWORD WINAPI MySummarySharedThreadFunction(LPVOID lpParam){
 		ofstream outputFileHandle;
 		pDataArray->m->openOutputFile(pDataArray->sumFile, outputFileHandle);
 		
-		vector<RAbundVector*> subset;
+		vector<SharedRAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
             pDataArray->count++;
 			for (int l = 0; l < k; l++) {

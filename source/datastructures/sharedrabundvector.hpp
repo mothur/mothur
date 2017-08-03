@@ -10,9 +10,10 @@
 #define sharedrabundvector_hpp
 
 #include "datavector.hpp"
+#include "ordervector.hpp"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
-#include "ordervector.hpp"
+
 
 /*  Data Structure for a rabund file.
  This class is a child to datavector.  It represents OTU information at a certain distance.
@@ -36,7 +37,7 @@
 
 
 //class RAbundFloatVector;
-//class OrderVector;
+class OrderVector;
 
 class SharedRAbundVector : public DataVector {
     
@@ -58,6 +59,7 @@ public:
     void set(int, int);
     int get(int);
     vector<int> get() { return data; }
+    int increment(int); //add 1 to bin
     void push_back(int);
     void resize(int);
     int size();
@@ -68,7 +70,7 @@ public:
     RAbundVector getRAbundVector();
     RAbundFloatVector getRAbundFloatVector();
     SAbundVector getSAbundVector();
-    OrderVector getOrderVector(map<string,int>*);
+    OrderVector getOrderVector(map<string,int>*); 
     
     string getGroup() { return group; } //group = "" for rabunds without groupInfo
     void setGroup(string g) { group = g;  }

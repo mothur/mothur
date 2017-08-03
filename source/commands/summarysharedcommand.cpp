@@ -762,12 +762,13 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 for( int i=1; i<processors; i++ ){
                     
                     //make copy of lookup so we don't get access violations
-                    SharedRAbundVectors* newLookup = new SharedRAbundVectors();
-                    for (int k = 0; k < thisLookup.size(); k++) {
-                        RAbundVector* temp = new RAbundVector(thisLookup[k]);
+                    vector<SharedRAbundVector*> newLookup;
+                    for (int k = 0; k < thisItersLookup.size(); k++) {
+                        SharedRAbundVector* temp = new SharedRAbundVector(*thisItersLookup[k]); //deep copy
+                        temp->setLabel(thisItersLookup[k]->getLabel());
+                        temp->setGroup(thisItersLookup[k]->getGroup());
                         newLookup.push_back(temp);
                     }
-                    newLookup->eliminateZeroOtus();
                     
                     // Allocate memory for thread data.
                     summarySharedData* tempSum = new summarySharedData((sumFileName+toString(i)+".temp"), m, lines[i].start, lines[i].end, Estimators, newLookup);
