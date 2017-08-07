@@ -341,6 +341,7 @@ int ParseFastaQCommand::execute(){
             }
             
             //remove names for outputFileNames, just cleans up the output
+            outputTypes.clear();
             for(int i = 0; i < outputNames.size(); i++) {
                 if (namesToRemove.count(outputNames[i]) != 0) {
                     outputNames.erase(outputNames.begin()+i);
