@@ -221,16 +221,8 @@ int NormalizeSharedCommand::execute(){
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { 
 				m->clearGroups();
-				vector<string> mGroups;
-                vector<string> temp;
-                vector<string> lookupGroups = lookup->getNamesGroups();
-                for (int i = 0; i < lookupGroups.size(); i++) {
-                    if (lookup->getNumSeqs(lookupGroups[i]) < norm) {
-                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookup->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
-                        temp.push_back(lookupGroups[i]);
-                    }else { Groups.push_back(lookupGroups[i]); }
-                }
-                lookup->removeGroups(temp);
+                lookup->removeGroups(norm);
+                vector<string> mGroups = lookup->getNamesGroups();
 				m->setGroups(mGroups);
 			}
 			
@@ -240,13 +232,7 @@ int NormalizeSharedCommand::execute(){
 			
 			if (method == "totalgroup") {
 				//set norm to smallest group number
-				if (norm == 0) {
-                    vector<string> lookupGroups = lookup->getNamesGroups();
-                    norm = lookup->getNumSeqs(lookupGroups[0]);
-					for (int i = 1; i < lookupGroups.size(); i++) {
-						if (lookup->getNumSeqs(lookupGroups[i]) < norm) { norm = lookup->getNumSeqs(lookupGroups[i]);  }
-					}  
-				}
+				if (norm == 0) { norm = lookup->getNumSeqsSmallestGroup(); }
 				
 				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}

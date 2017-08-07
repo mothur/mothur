@@ -598,9 +598,10 @@ int MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup){
             for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->control_pressed) { out.close(); return 0; }
+                vector<int> binAbunds = lookup->getOTU(i);
                 
-                for (int j = 0; j < namesOfGroups.size(); j++) {
-                    int abund = lookup->get(i, namesOfGroups[i]);
+                for (int j = 0; j < binAbunds.size(); j++) {
+                    int abund = binAbunds[j];
                     string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                     //only print non zero values
                     if (abund != 0) { dataRows.push_back(binInfo); }
@@ -738,8 +739,9 @@ int MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup){
                 
                 if (m->control_pressed) { out.close(); return 0; }
                 
-                for (int j = 0; j < namesOfGroups.size(); j++) {
-                    float abund = lookup->get(i, namesOfGroups[i]);
+                vector<float> binAbund = lookup->getOTU(i);
+                for (int j = 0; j < binAbund.size(); j++) {
+                    float abund = binAbund[j];
                     string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                     //only print non zero values
                     if (abund != 0) { dataRows.push_back(binInfo); }

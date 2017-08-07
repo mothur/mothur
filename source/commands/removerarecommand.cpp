@@ -887,10 +887,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
             out << "label\tGroup\tnumOtus";
             for (int j = 0; j < headers.size(); j++) { out << '\t' << headers[j]; }
             out << endl;
-			for (int j = 0; j < newRabunds.size(); j++) { 
-				out << newRabunds[j].getLabel() << '\t' << newRabunds[j].getGroup() << '\t';
-				newRabunds[j].print(out); 
-			}
+			for (int j = 0; j < newRabunds.size(); j++) { newRabunds[j].print(out);  }
 		}
 		
         out.close();

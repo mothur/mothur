@@ -709,7 +709,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
                 ofstream temp;
                 string group = lookupGroups[i];
                 m->openOutputFileAppend(files[group], temp);
-                data[i]->print(temp);
+                data[i]->getRAbundVector().print(temp);
                 temp.close();
                 label2Ends[lookup->getLabel()].insert(data[i]->getNumSeqs());
             }

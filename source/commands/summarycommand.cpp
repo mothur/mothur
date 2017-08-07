@@ -650,7 +650,6 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
                 lookup->removeGroups(subsampleSize);
-                groups = lookup->getNamesGroups();
             }
             
             if (lookup->size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return filenames; }
@@ -658,7 +657,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         
 		
 		/******************************************************/
-        
+        groups = lookup->getNamesGroups();
         //clears file before we start to write to it below
         for (int i=0; i<groups.size(); i++) {
             ofstream temp;
@@ -675,7 +674,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
                 ofstream temp;
                 string group = data[i]->getGroup();
                 m->openOutputFileAppend(files[group], temp);
-                data[i]->print(temp);
+                data[i]->getRAbundVector().print(temp);
                 temp.close();
                 delete data[i];
             }

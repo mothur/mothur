@@ -345,7 +345,8 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 		vector< vector<double> > xy; xy.resize(lookup->getNumBins());
         vector<string> sampleNames = lookup->getNamesGroups();
 		for (int i = 0; i < lookup->getNumBins(); i++) {
-            for (int j = 0; j < sampleNames.size(); j++) { xy[i].push_back(lookup->get(i, sampleNames[j])); }
+            vector<int> abunds = lookup->getOTU(i);
+            for (int j = 0; j < abunds.size(); j++) { xy[i].push_back(abunds[j]); }
         }
 		
 		LinearAlgebra linear;

@@ -494,7 +494,7 @@ void SharedRAbundFloatVectors::eliminateZeroOTUS() {
         for (int i = 0; i < lookup[0]->getNumBins();) {
             if (m->control_pressed) { break; }
            
-            int total = getOTUTotal(i);
+            float total = getOTUTotal(i);
             
             //if they are not all zero add this bin
             if (total == 0) { removeOTU(i); }

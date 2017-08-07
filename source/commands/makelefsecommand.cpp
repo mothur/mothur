@@ -317,7 +317,8 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
             out << nameOfOtu;
             
             //print out relabunds for each otu
-            for (int j = 0; j < lookup->size(); j++) { out  << '\t' << lookup->get(i, namesOfGroups[j]); }
+            vector<float> abunds = lookup->getOTU(i);
+            for (int j = 0; j < abunds.size(); j++) { out  << '\t' << abunds[j]; }
             out << endl;
         }
         out.close();
@@ -407,6 +408,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             SharedRAbundFloatVector* rel = new SharedRAbundFloatVector();
             rel->setGroup(data[i]->getGroup());
             rel->setLabel(data[i]->getLabel());
+            
 			for (int j = 0; j < data[i]->getNumBins(); j++) {
                 
 				if (m->control_pressed) { for (int k = 0; k < data.size(); k++) {  delete data[k];  } return lookup; }
@@ -434,10 +436,11 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 				
 				rel->push_back(relabund);
 			}
+            
             lookup->push_back(rel);
+            
         }
         for (int k = 0; k < data.size(); k++) {  delete data[k];  } data.clear();
-        
         lookup->eliminateZeroOTUS();
         
 		return lookup;
