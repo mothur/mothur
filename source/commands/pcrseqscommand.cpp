@@ -662,9 +662,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                 int myEnd = thisEnd + myDiff;
                 //cout << name << '\t' << thisStart << '\t' << thisEnd << " diff = " << myDiff << '\t' << myEnd << endl;
                 
-                if (thisEnd != -1) {
-                    if (myEnd > pend) { pend = myEnd; }
-                }
+                if (thisEnd != -1) { if (myEnd > pend) { pend = myEnd; } }
                 
             }
             inLocations.close();
@@ -712,10 +710,12 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
                 primers[(it->second).forward] = it->first;
                 revPrimer.push_back((it->second).reverse);
+                //cout << (it->second).forward << '\t' << (it->second).reverse << endl;
             }
         }else{
             primers = oligos.getPrimers();
             revPrimer = oligos.getReversePrimers();
+            //cout << (primers.begin())->first << '\t' << revPrimer[0] << endl;
         }
         
         TrimOligos trim(pdiffs, rdiffs, 0, primers, barcodes, revPrimer);
@@ -973,8 +973,8 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
             if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
             
             
-            //cout << seq.getName() << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
-            //cout << seq.getName() << '\t' << pstart << '\t' << pend << endl;
+            //cout << "'" << seq.getName() << "'" << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
+            //cout << "'" << name << "'" << '\t' << pstart << '\t' << pend << endl;
             
             if (name != seq.getName()) { m->mothurOut("[ERROR]: name mismatch in pcr.seqs.\n"); }
             else {
@@ -1304,11 +1304,12 @@ int PcrSeqsCommand::readOligos(){
         if (oligos.hasPairedPrimers()) {
             pairedOligos = true;
             numFPrimers = oligos.getPairedPrimers().size();
+            numRPrimers = numFPrimers;
         }else {
             pairedOligos = false;
             numFPrimers = oligos.getPrimers().size();
+            numRPrimers = oligos.getReversePrimers().size();
         }
-        numRPrimers = oligos.getReversePrimers().size();
         
         if (oligos.getLinkers().size() != 0) { m->mothurOut("[WARNING]: pcr.seqs is not setup to remove linkers, ignoring.\n"); }
         if (oligos.getSpacers().size() != 0) { m->mothurOut("[WARNING]: pcr.seqs is not setup to remove spacers, ignoring.\n"); }
