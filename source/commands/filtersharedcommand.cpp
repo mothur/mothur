@@ -337,9 +337,9 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         map<string, int> labelsForRare;
         vector<string> filteredLabels;
-        vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
         
         vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
+        vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;

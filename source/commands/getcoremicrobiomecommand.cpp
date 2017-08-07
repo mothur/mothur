@@ -191,7 +191,6 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                             if (found) { factorString += "0"; }
                         }
                     }
-                    cout << factorString << endl;
                     m->mothurConvert(factorString, factor);
                 }else {
                     factor = 100;

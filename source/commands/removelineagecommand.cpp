@@ -855,7 +855,7 @@ int RemoveLineageCommand::readShared(){
         vector<string> newLabels;
         bool wroteSomething = false;
         int numRemoved = 0;
-        for (int i = 0; i < lookup->getNumBins(); i++) {
+        for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->control_pressed) { delete lookup; return 0; }
             
@@ -863,6 +863,7 @@ int RemoveLineageCommand::readShared(){
             if (names.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
                 wroteSomething = true;
                 newLabels.push_back(m->currentSharedBinLabels[i]);
+                ++i;
             }else { lookup->removeOTU(i); numRemoved++; }
         }
         
@@ -901,7 +902,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		
-		if (label == "") { label = lastLabel;  return 0; }
+		if (label == "") { label = lastLabel;  return lookup; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -962,7 +963,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}
 		
-		return 0;
+		return lookup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "getShared");

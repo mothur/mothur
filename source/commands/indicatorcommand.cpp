@@ -254,7 +254,7 @@ int IndicatorCommand::execute(){
 			vector<string> nameGroups = designMap->getCategory();
 			util.setGroups(Groups, nameGroups);
 			
-			vector<string> namesSeqs = designMap->getNamesGroups(Groups);
+			namesSeqs = designMap->getNamesGroups(Groups);
 			m->setGroups(namesSeqs);
 		}
 	

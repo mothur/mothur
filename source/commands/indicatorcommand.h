@@ -43,7 +43,7 @@ private:
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;
 	int iters, processors;
-	vector<string> outputNames, Groups;
+	vector<string> outputNames, Groups, namesSeqs;
 	SharedRAbundVectors* lookup;
 	SharedRAbundFloatVectors* lookupFloat;
 	

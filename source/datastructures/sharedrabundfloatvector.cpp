@@ -20,6 +20,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(int n) : DataVector(), data(n,0
 
 SharedRAbundFloatVector::SharedRAbundFloatVector(vector<float> rav) :  DataVector(), maxRank(0), numBins(rav.size()), numSeqs(0), group("")  {
     try {
+        data.assign(numBins, 0);
         for(int i=0;i<rav.size();i++){ set(i, rav[i]); }
     }
     catch(exception& e) {

@@ -21,6 +21,7 @@ SharedRAbundVector::SharedRAbundVector(int n) : DataVector(), data(n,0) , maxRan
 
 SharedRAbundVector::SharedRAbundVector(vector<int> rav) :  DataVector(), maxRank(0), numBins(rav.size()), numSeqs(0), group("")  {
     try {
+        data.assign(numBins, 0);
         for(int i=0;i<rav.size();i++){ set(i, rav[i]); }
     }
     catch(exception& e) {
