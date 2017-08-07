@@ -406,6 +406,7 @@ int OptiMatrix::readColumn(){
         ifstream fileHandle;
         m->openInputFile(distFile, fileHandle);
         vector<bool> singleton; singleton.resize(nameAssignment.size(), true);
+        map<int, int> singletonIndexSwap;
         while(fileHandle){  //let's assume it's a triangular matrix...
             
             fileHandle >> firstName; m->gobble(fileHandle);
@@ -430,29 +431,31 @@ int OptiMatrix::readColumn(){
                 int indexB = (itB->second);
                 singleton[indexA] = false;
                 singleton[indexB] = false;
+                singletonIndexSwap[indexA] = indexA;
+                singletonIndexSwap[indexB] = indexB;
             }
         }
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
         
-        map<string, string> names;
-        if (namefile != "") { m->readNames(namefile, names); }
-        
         int nonSingletonCount = 0;
-        vector<string> newNameMap(nameMap.size(), "noname");
         for (int i = 0; i < singleton.size(); i++) {
-            string name = nameMap[i]; string dupName = nameMap[i];
-            if (namefile != "") { dupName = names[name]; }
             if (!singleton[i]) { //if you are a singleton
-                nameAssignment[name] = nonSingletonCount;
-                newNameMap[nonSingletonCount] = dupName;
+                singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
-            }else { singletons.push_back(dupName); }
+            }else { singletons.push_back(nameMap[i]); }
         }
-        singleton.clear(); nameMap.clear();
-        nameMap = newNameMap; newNameMap.clear();
+        singleton.clear();
         
         closeness.resize(nonSingletonCount);
+        
+        map<string, string> names;
+        if (namefile != "") {
+            m->readNames(namefile, names);
+            for (int i = 0; i < singletons.size(); i++) {
+                singletons[i] = names[singletons[i]];
+            }
+        }
         
         ifstream in;
         m->openInputFile(distFile, in);
@@ -480,17 +483,22 @@ int OptiMatrix::readColumn(){
                 int indexA = (itA->second);
                 int indexB = (itB->second);
                 
-                if (indexB < indexA) { mothurSwap(indexA, indexB); }
+                int newB = singletonIndexSwap[indexB];
+                int newA = singletonIndexSwap[indexA];
+                closeness[newA].insert(newB);
+                closeness[newB].insert(newA);
                 
-                closeness[indexA].insert(indexB);
-                closeness[indexB].insert(indexA);
+                if (namefile != "") {
+                    firstName = names[firstName];  //redundant names
+                    secondName = names[secondName]; //redundant names
+                }
+                
+                nameMap[newA] = firstName;
+                nameMap[newB] = secondName;
             }
         }
         in.close();
         nameAssignment.clear();
-        
-        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
-        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
         
         if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
             m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
