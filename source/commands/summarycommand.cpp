@@ -641,24 +641,20 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         
         InputData input(filename, "sharedfile");
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        
-        string sharedFileRoot = m->getRootName(filename);
-		
+
         /******************************************************/
+        //user has not set size, set size = smallest samples size
         if (subsample) { 
-            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup->getNumSeqsSmallestGroup();
-            }else {
-                lookup->removeGroups(subsampleSize);
-            }
+            if (subsampleSize == -1) { subsampleSize = lookup->getNumSeqsSmallestGroup(); }
+            else { lookup->removeGroups(subsampleSize); }
             
             if (lookup->size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return filenames; }
         }
-        
-		
 		/******************************************************/
+        
         groups = lookup->getNamesGroups();
         //clears file before we start to write to it below
+        string sharedFileRoot = m->getRootName(filename);
         for (int i=0; i<groups.size(); i++) {
             ofstream temp;
             string group = groups[i];

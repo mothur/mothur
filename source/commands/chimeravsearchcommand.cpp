@@ -731,7 +731,7 @@ int ChimeraVsearchCommand::execute(){
                 //remove file made for uchime
                 if (templatefile == "self") {  m->mothurRemove(fastaFileNames[s]); }
                 
-                m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.");	m->mothurOutEndLine();
+                m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.");	m->mothurOutEndLine();
             }
             
             outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
