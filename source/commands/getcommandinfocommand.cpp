@@ -84,7 +84,7 @@ int GetCommandInfoCommand::execute(){
 		
 		int numNonHidden = 0;
 		
-		out << "mothurLocation=" << m->getFullPathName(m->mothurProgramPath) << endl;
+		out << "mothurLocation=" << m->getProgramPath() << endl;
 		out << "mothurVersion=" << m->getVersion() << endl;
 		
 		map<string, string> commands = commandFactory->getListCommands();

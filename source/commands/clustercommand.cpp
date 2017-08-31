@@ -235,10 +235,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			else { m->setCountTableFile(countfile); }
 			
             method = validParameter.validFile(parameters, "method", false);
-            if (method == "not found") {
-                method = "opti";
-                //m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine();
-            }
+            if (method == "not found") {  method = "opti";}
             
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti") || (method == "unique")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc, unique and opti."); m->mothurOutEndLine(); abort = true; }
@@ -445,7 +442,7 @@ int ClusterCommand::execute(){
 int ClusterCommand::runVsearchCluster(){
     try {
         //look for vsearch exe
-        string path = m->mothurProgramPath;
+        string path = m->getProgramPath();
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability

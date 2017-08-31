@@ -795,7 +795,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
                     m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
                     
-                    delete pDataArray[i]->thisLookup;
+                    //delete pDataArray[i]->thisLookup;
                     if (createPhylip) {
                         for (int k = 0; k < calcDists.size(); k++) {
                             int size = pDataArray[i]->calcDists[k].size();
@@ -804,7 +804,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     }
                     
                     CloseHandle(hThreadArray[i]);
-                    delete pDataArray[i];
+                    for(int j=0; j < pDataArray[i]->thisLookup.size(); j++){ delete pDataArray[i]->thisLookup[j]; }
                 }
                 
 #endif

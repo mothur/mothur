@@ -293,7 +293,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "lookup", true);
 			if (temp == "not found")	{
-                string path = m->mothurProgramPath;
+                string path = m->getProgramPath();
                 //string tempPath = path;
                 //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
                 //path = path.substr(0, (tempPath.find_last_of('m')));
@@ -311,7 +311,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				lookupFileName = validParameter.validFile(parameters, "lookup", false);
 				
 				//if you can't open it its not inputDir, try mothur excutable location
-				string exepath = m->mothurProgramPath;
+				string exepath = m->getProgramPath();
 				//string tempPath = exepath;
 				//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
 				//exepath = exepath.substr(0, (tempPath.find_last_of('m')));

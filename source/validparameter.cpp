@@ -248,7 +248,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 //if you can't open it, try mothur's location
                 if (ableToOpen == 1) {
                     //look for mothurs exe
-                    string mpath = m->mothurProgramPath;
+                    string mpath = m->getProgramPath();
                     //string tempPath = mpath;
                     //for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
                     //mpath = mpath.substr(0, (tempPath.find_last_of('m')));

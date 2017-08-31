@@ -905,7 +905,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 for( int i=1; i<processors; i++ ){
                     
                     //make copy of lookup so we don't get access violations
-                    vector<SharedRAbundVector*> newLookup = thisItersLookup->getSharedRabundVectors();
+                    vector<SharedRAbundVector*> newLookup = thisItersLookup->getSharedRAbundVectors();
                     // Allocate memory for thread data.
                     treeSharedData* tempSum = new treeSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
                     pDataArray.push_back(tempSum);

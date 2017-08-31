@@ -399,7 +399,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "opti"; m->mothurOut("[NOTE]: Default clustering method has changed to opti. To use average neighbor, set method=average."); m->mothurOutEndLine(); }
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "opti";  }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
@@ -1899,7 +1899,7 @@ bool ClusterSplitCommand::findVsearch(){
         
         //look for vsearch exe
 
-        string path = m->mothurProgramPath;
+        string path = m->getProgramPath();
       
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

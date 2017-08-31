@@ -4244,6 +4244,26 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 	}	
 }
 /***********************************************************************/
+void MothurOut::setProgramPath(string pathname){
+    try {
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            if (lastChar != "/") { pathname += "/"; }
+#else
+            if (lastChar != "\\") { pathname += "\\"; }
+#endif
+        }
+        
+        mothurProgramPath = getFullPathName(pathname);
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setProgramPath");
+        exit(1);
+    }	
+}
+/***********************************************************************/
 bool MothurOut::checkLocations(string& filename, string inputDir){
 	try {
 		filename = getFullPathName(filename);
@@ -5096,13 +5116,16 @@ float MothurOut::removeConfidences(string& tax) {
 		string taxon;
 		string newTax = "";
         string confidenceScore = "0";
+        
+        //remove last ";"
+        if (tax.length() > 1) { tax = tax.substr(0, tax.length()-1); }
+        vector<string> taxons; splitAtChar(tax, taxons, ';');
 		
-		while (tax.find_first_of(';') != -1) {
+        for (int i = 0; i < taxons.size(); i++) {
 			
 			if (control_pressed) { return 0; }
 			
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'));
+			taxon = taxons[i];
 	
 			int pos = taxon.find_last_of('(');
 			if (pos != -1) {
@@ -5118,7 +5141,6 @@ float MothurOut::removeConfidences(string& tax) {
 			}
 			taxon += ";";
 			
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
 			newTax += taxon;
 		}
 		

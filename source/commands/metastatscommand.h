@@ -115,7 +115,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			vector<SharedRAbundVector*> subset;
 			int setACount = 0;
 			int setBCount = 0;
-			for (int i = 0; i < pDataArray->thisLookUp.size(); i++) {
+			for (int i = 0; i < pDataArray->thisLookUp->size(); i++) {
 				//is this group for a set we want to compare??
 				//sorting the sets by putting setB at the back and setA in the front
 				if (pDataArray->designMapGroups[i] == setB) {  
@@ -132,7 +132,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 				pDataArray->outputNames.pop_back();
 			}else {
 				//fill data
-				for (int j = 0; j < pDataArray->thisLookUp[0]->getNumBins(); j++) {
+				for (int j = 0; j < pDataArray->thisLookUp->getNumBins(); j++) {
 					data2[j].resize(subset.size(), 0.0);
 					for (int i = 0; i < subset.size(); i++) {
 						data2[j][i] = (subset[i]->get(j));

@@ -685,9 +685,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
 		HANDLE  hThreadArray[processors-1]; 
 		
 		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			//copy templateDb
-			//AlignmentDB* tempDB = new AlignmentDB(*templateDB);
+        for( int i=0; i<processors-1; i++ ) {
 			
 			// Allocate memory for thread data.
 			string extension = "";
@@ -697,8 +695,6 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
 			pDataArray.push_back(tempalign);
 			processIDS.push_back(i);
 				
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
 			hThreadArray[i] = CreateThread(NULL, 0, MyAlignThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
 		}
 		

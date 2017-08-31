@@ -200,9 +200,7 @@ int CatchAllCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get location of catchall
-		path = m->mothurProgramPath;
-		//path = path.substr(0, (path.find_last_of("othur")-5));
-		path = m->getFullPathName(path);
+		path = m->getProgramPath();
 		
         if (m->debug) { m->mothurOut("[DEBUG]: mothur's path = " + path + "\n"); }
        

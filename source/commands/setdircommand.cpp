@@ -149,7 +149,7 @@ int SetDirectoryCommand::execute(){
             //redirect output
             if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
             else if (output == "default") {
-                string output = m->mothurProgramPath;
+                string output = m->getProgramPath();
                 //output = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
@@ -164,7 +164,7 @@ int SetDirectoryCommand::execute(){
             //redirect input
             if ((input == "clear") || (input == "")) {  input = "";  commandFactory->setInputDirectory(input);  }
             else if (input == "default") {
-                string input = m->mothurProgramPath;
+                string input = m->getProgramPath();
                 //input = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
@@ -189,7 +189,7 @@ int SetDirectoryCommand::execute(){
 #endif
             }else if (tempdefault == "") {  //do nothing
             }else if (tempdefault == "default") {
-                string tempdefault = m->mothurProgramPath;
+                string tempdefault = m->getProgramPath();
                 //tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
@@ -204,7 +204,7 @@ int SetDirectoryCommand::execute(){
             //set default
             if (blastLocation == "") {  //do nothing   }
             }else if ((blastLocation == "default") || (blastLocation == "clear")){
-                string blastLocation = m->mothurProgramPath;
+                string blastLocation = m->getProgramPath();
                                 
                 m->mothurOut("Blast Location=" + blastLocation); m->mothurOutEndLine();
                 m->setBlastPath(blastLocation);

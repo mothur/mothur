@@ -556,7 +556,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 			
 			//look for uchime exe
-			path = m->mothurProgramPath;
+			path = m->getProgramPath();
 			
 			string uchimeCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

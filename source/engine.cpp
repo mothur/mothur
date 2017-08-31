@@ -38,8 +38,8 @@ InteractEngine::InteractEngine(string path){
 	if (temppath == "") { path = mout->findProgramPath("mothur"); }
     else { path = temppath; }
 	
-	mout->mothurProgramPath = mout->getFullPathName(path);
-    mout->setBlastPath(mout->mothurProgramPath);
+	mout->setProgramPath(mout->getFullPathName(path));
+    mout->setBlastPath(mout->getProgramPath());
 
     //if you haven't set your own location
     #ifdef MOTHUR_FILES
@@ -176,8 +176,8 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		if (temppath == "") { path = mout->findProgramPath("mothur"); }
         else { path = temppath; }
 		
-		mout->mothurProgramPath = mout->getFullPathName(path);
-        mout->setBlastPath(mout->mothurProgramPath);
+        mout->setProgramPath(mout->getFullPathName(path));
+        mout->setBlastPath(mout->getProgramPath());
         
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
@@ -312,8 +312,8 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		if (temppath == "") { path = mout->findProgramPath("mothur"); }
         else { path = temppath; }
 		
-		mout->mothurProgramPath = mout->getFullPathName(path);
-        mout->setBlastPath(mout->mothurProgramPath);
+        mout->setProgramPath(mout->getFullPathName(path));
+        mout->setBlastPath(mout->getProgramPath());
     
         //if you haven't set your own location
 #ifdef MOTHUR_FILES

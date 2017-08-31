@@ -1480,11 +1480,11 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
 							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+								tempFASTAFileNames[i][j] += toString(process) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 							}
                             if (tempQUALFileNames[i][j] != "") {
-                                tempQUALFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                tempQUALFileNames[i][j] += toString(process) + ".temp";
                                 m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
                             }
 						}
@@ -1494,16 +1494,16 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                 int spot = process*2;
                 
                 num = driver(fileInputs, qualOrIndexFiles,
-                             outputFasta + m->mothurGetpid(process) + ".temp",
-                             outputScrapFasta + m->mothurGetpid(process) + ".temp",
-                             outputQual + m->mothurGetpid(process) + ".temp",
-                             outputScrapQual + m->mothurGetpid(process) + ".temp",
-                             outputMisMatches + m->mothurGetpid(process) + ".temp",
+                             outputFasta + toString(process) + ".temp",
+                             outputScrapFasta + toString(process) + ".temp",
+                             outputQual + toString(process) + ".temp",
+                             outputScrapQual + toString(process) + ".temp",
+                             outputMisMatches + toString(process) + ".temp",
                              tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
                 
 				//pass groupCounts to parent
                 ofstream out;
-                string tempFile = m->mothurGetpid(process) + ".num.temp";
+                string tempFile = toString(process) + ".num.temp";
                 m->openOutputFile(tempFile, out);
                 out << num << endl;
 				if (createFileGroup || createOligosGroup) {
@@ -1566,7 +1566,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                 pid_t pid = fork();
                 
                 if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                    processIDS.push_back(process);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
                     vector<vector<string> > tempFASTAFileNames = fastaFileNames;
@@ -1601,7 +1601,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                     
                     //pass groupCounts to parent
                     ofstream out;
-                    string tempFile = m->mothurGetpid(process) + ".num.temp";
+                    string tempFile = toString(process) + ".num.temp";
                     m->openOutputFile(tempFile, out);
                     out << num << endl;
                     if (createFileGroup || createOligosGroup) {
@@ -3044,7 +3044,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             //look for mothur exe
-            string mpath = m->mothurProgramPath;
+            string mpath = m->getProgramPath();
             //string tempPath = mpath;
             //for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
             //mpath = mpath.substr(0, (tempPath.find_last_of('m')));

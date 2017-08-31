@@ -1596,7 +1596,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
             }
             
             //do my part
-			pvalues = driver(groupings, num, indicatorValues, procIters[0]);
+			pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[0]);
             
             //Wait until all threads have terminated.
             WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

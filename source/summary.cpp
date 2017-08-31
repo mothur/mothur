@@ -801,7 +801,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(fastafile, num);
+        positions = m->setFilePosFasta(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
@@ -1149,7 +1149,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(fastafile, num);
+        positions = m->setFilePosFasta(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
@@ -1518,7 +1518,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         positions = m->divideFile(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(fastafile, num);
+        positions = m->setFilePosFasta(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process

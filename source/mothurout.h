@@ -77,7 +77,7 @@ class MothurOut {
 		vector<string> sharedBinLabelsInFile;
 		vector<string> currentSharedBinLabels;
         vector<string> listBinLabelsInFile;
-		string saveNextLabel, mothurProgramPath, sharedHeaderMode, groupMode, testDirectory;
+		string saveNextLabel, sharedHeaderMode, groupMode, testDirectory;
 		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
@@ -285,6 +285,7 @@ class MothurOut {
         string getConsTaxonomyFile(){ return constaxonomyfile;  }
         string getContigsReportFile(){ return contigsreportfile;  }
         int getNumErrors()          { return numErrors;         }
+        string getProgramPath()     { return mothurProgramPath;  }
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
@@ -313,6 +314,7 @@ class MothurOut {
         void setContigsReportFile(string f) { contigsreportfile = getFullPathName(f);	}
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
+        void setProgramPath(string);
 		
 		void printCurrentFiles(string); //string="" for just to logfile.
 		bool hasCurrentFiles();
@@ -370,7 +372,7 @@ class MothurOut {
 		}
 		~MothurOut();
 
-		string logFileName;
+		string logFileName, mothurProgramPath;
 		string defaultPath, outputDir, blastPath;
 		string releaseDate, version;
 	
