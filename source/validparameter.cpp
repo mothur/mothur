@@ -213,7 +213,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 
 string ValidParameters::validFile(map<string, string>& container, string parameter, bool isFile) {
 	try {
-		int ableToOpen;
+		bool ableToOpen;
 		
 		map<string, string>::iterator it;
 		
@@ -234,7 +234,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				in.close();
 				
                 //if you can't open it, try default location
-                if (ableToOpen == 1) {
+                if (!ableToOpen) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
                         m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -246,7 +246,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 }
 				
                 //if you can't open it, try mothur's location
-                if (ableToOpen == 1) {
+                if (!ableToOpen) {
                     //look for mothurs exe
                     string mpath = m->mothurProgramPath;
                     //string tempPath = mpath;
@@ -262,7 +262,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 }
                     
 				//if you can't open it, try default location
-				if (ableToOpen == 1) {
+				if (!ableToOpen) {
 					if (m->getOutputDir() != "") { //default path is set
 						string tryPath = m->getOutputDir() + m->getSimpleName(it->second);
 						m->mothurOut("Unable to open " + it->second + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -273,13 +273,13 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					}
 				}
 				
-				if (ableToOpen == 1) { 
+				if (!ableToOpen) { 
 					m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine();
 					return "not open"; 
 				}
 				
 				//check phylip file to make sure its really phylip and not column
-				if ((it->first == "phylip") && (ableToOpen != 1)) {
+				if ((it->first == "phylip") && (ableToOpen)) {
 					ifstream inPhylip;
 					m->openInputFile(it->second, inPhylip);
 										
@@ -291,7 +291,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				}
                 
                 //check for blank file
-                if (ableToOpen != 1) {
+                if (ableToOpen) {
                     if (m->isBlank(container[parameter])) {
                         m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found"; 
                     }

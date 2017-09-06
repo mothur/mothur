@@ -488,10 +488,10 @@ int GetMIMarksPackageCommand::readFile(){
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(thisFileName1, in2, "noerror");
+            bool openForward = m->openInputFile(thisFileName1, in2, "noerror");
             
             //if you can't open it, try default location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -503,7 +503,7 @@ int GetMIMarksPackageCommand::readFile(){
             }
             
             //if you can't open it, try output location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -514,17 +514,17 @@ int GetMIMarksPackageCommand::readFile(){
                 }
             }
             
-            if (openForward == 1) { //can't find it
+            if (!openForward) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
             }else{  in2.close();  }
             
-            int openReverse = 1;
+            bool openReverse;
             
             ifstream in3;
             openReverse = m->openInputFile(thisFileName2, in3, "noerror");
             
             //if you can't open it, try default location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
                     m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -536,7 +536,7 @@ int GetMIMarksPackageCommand::readFile(){
             }
             
             //if you can't open it, try output location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
                     m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -547,18 +547,18 @@ int GetMIMarksPackageCommand::readFile(){
                 }
             }
             
-            if (openReverse == 1) { //can't find it
+            if (!openReverse) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
             }else{  in3.close();  }
             
             
-            if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
+            if ((pieces.size() == 2) && (openForward) && (openReverse)) { //good pair and sff or fastq and oligos
                     oligosfile = thisFileName2;
                     if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
                     oligos.read(oligosfile);
                     createGroupNames(oligos); // adding in groupNames from this file
                 format = 2;
-            }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
+            }else if((pieces.size() == 3) && (openForward) && (openReverse)) { //good pair and paired read
                 Groups.insert(group);
                 format = 3;
             }

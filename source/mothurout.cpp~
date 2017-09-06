@@ -1389,19 +1389,20 @@ string MothurOut::getFullPathName(string fileName){
 }
 /***********************************************************************/
 
-bool MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
+int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
+        
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
 				//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
-				return false;
+				return 1;
 			}else {
 				//check for blank file
                 zapGremlins(fileHandle);
                 gobble(fileHandle);
-				return true;
+				return 0;
 			}
 	}
 	catch(exception& e) {
@@ -1411,7 +1412,7 @@ bool MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 }
 /***********************************************************************/
 
-bool MothurOut::openInputFile(string fileName, ifstream& fileHandle){
+int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 	try {
 
 		//get full path name
@@ -1420,7 +1421,7 @@ bool MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 		fileHandle.open(completeFileName.c_str());
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
-			return false;
+			return 1;
 		}
 		else {
 			//check for blank file
@@ -1428,7 +1429,7 @@ bool MothurOut::openInputFile(string fileName, ifstream& fileHandle){
             gobble(fileHandle);
 			if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
 			
-			return true;
+			return 0;
 		}
 	}
 	catch(exception& e) {
@@ -1623,11 +1624,11 @@ int MothurOut::renameFile(string oldName, string newName){
         if (oldName == newName) { return 0; }
         
 		ifstream inTest;
-		bool exist = openInputFile(newName, inTest, "");
+		int exist = openInputFile(newName, inTest, "");
 		inTest.close();
 		
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		if (exist) { //you could open it so you want to delete it
+		if (exist == 0) { //you could open it so you want to delete it
 			string command = "rm " + newName;
 			system(command.c_str());
 		}
@@ -3310,8 +3311,8 @@ set<string> MothurOut::readAccnos(string accnosfile){
 	try {
  		set<string> names;
 		ifstream in;
-		bool ableToOpen = openInputFile(accnosfile, in, "");
-        if (!ableToOpen) {  mothurOut("[ERROR]: Could not open " + accnosfile); mothurOutEndLine(); return names; }
+		int ableToOpen = openInputFile(accnosfile, in, "");
+        if (ableToOpen == 1) {  mothurOut("[ERROR]: Could not open " + accnosfile); mothurOutEndLine(); return names; }
 		string name;
 		
         string rest = "";
@@ -4145,13 +4146,13 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
 	try {
 		filename = getFullPathName(filename);
         
-        bool ableToOpen;
+        int ableToOpen;
         ifstream in;
         ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
         
         //if you can't open it, try input location
-        if (!ableToOpen) {
+        if (ableToOpen == 1) {
             if (inputDir != "") { //default path is set
                 string tryPath = inputDir + getSimpleName(filename);
                 mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath); mothurOutEndLine();
@@ -4163,7 +4164,7 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
         }
         
         //if you can't open it, try default location
-        if (!ableToOpen) {
+        if (ableToOpen == 1) {
             if (getDefaultPath() != "") { //default path is set
                 string tryPath = getDefaultPath() + getSimpleName(filename);
                 mothurOut("Unable to open " + filename + ". Trying default " + tryPath); mothurOutEndLine();
@@ -4175,7 +4176,7 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
         }
         
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
-        if (!ableToOpen) {
+        if (ableToOpen == 1) {
             string exepath = mothurProgramPath;
             string tempPath = exepath;
             for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
@@ -4189,7 +4190,7 @@ bool MothurOut::checkLocations(string& filename, string inputDir){
             filename = tryPath;
         }
         
-        if (!ableToOpen) { mothurOut("Unable to open " + filename + "."); mothurOutEndLine(); return false;  }
+        if (ableToOpen == 1) { mothurOut("Unable to open " + filename + "."); mothurOutEndLine(); return false;  }
         
         return true;
 	}

@@ -188,13 +188,13 @@ AlignCommand::AlignCommand(string option)  {
 							if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
 						}
 		
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
 						in.close();	
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
 								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -206,7 +206,7 @@ AlignCommand::AlignCommand(string option)  {
 						}
 						
 						//if you can't open it, try output location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
 								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -219,7 +219,7 @@ AlignCommand::AlignCommand(string option)  {
 						
 										
 
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							candidateFileNames.erase(candidateFileNames.begin()+i);

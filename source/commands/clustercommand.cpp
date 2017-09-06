@@ -445,8 +445,8 @@ int ClusterCommand::runVsearchCluster(){
         //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
-        int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
-        if(ableToOpen == 1) {
+        bool ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+        if(!ableToOpen) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
             //check to see if vsearch is in the path??
 
@@ -460,7 +460,7 @@ int ClusterCommand::runVsearchCluster(){
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
-            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }
             else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
         }else {  vsearchLocation = vsearchCommand; }
         

@@ -319,11 +319,11 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 				ifstream in2;
-				int ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				bool ableToOpen = m->openInputFile(tryPath, in2, "noerror");
 				in2.close();
 				lookupFileName = tryPath;
 				
-				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
 			}else						{	lookupFileName = temp;	}
 		}
 	}

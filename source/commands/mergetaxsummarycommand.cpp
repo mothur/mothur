@@ -106,13 +106,13 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
                         if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
                     }
                     
-                    int ableToOpen;
+                    bool ableToOpen;
                     ifstream in;
                     ableToOpen = m->openInputFile(fileNames[i], in, "noerror");
                     in.close();	
                     
                     //if you can't open it, try default location
-                    if (ableToOpen == 1) {
+                    if (!ableToOpen) {
                         if (m->getDefaultPath() != "") { //default path is set
                             string tryPath = m->getDefaultPath() + m->getSimpleName(fileNames[i]);
                             m->mothurOut("Unable to open " + fileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -124,7 +124,7 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
                     }
                     
                     //if you can't open it, try output location
-                    if (ableToOpen == 1) {
+                    if (!ableToOpen) {
                         if (m->getOutputDir() != "") { //default path is set
                             string tryPath = m->getOutputDir() + m->getSimpleName(fileNames[i]);
                             m->mothurOut("Unable to open " + fileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -137,7 +137,7 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
                     
                     
                     
-                    if (ableToOpen == 1) { 
+                    if (!ableToOpen) { 
                         m->mothurOut("Unable to open " + fileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
                         //erase from file list
                         fileNames.erase(fileNames.begin()+i);

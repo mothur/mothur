@@ -210,13 +210,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						
 						ifstream in;
 						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -227,7 +227,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -240,7 +240,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
@@ -282,13 +282,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							//if the user has not given a path then, add inputdir. else leave path alone.
 							if (path == "") {	namefileNames[i] = inputDir + namefileNames[i];		}
 						}
-						int ableToOpen;
+						bool ableToOpen;
 						
 						ifstream in;
 						ableToOpen = m->openInputFile(namefileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(namefileNames[i]);
 								m->mothurOut("Unable to open " + namefileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -299,7 +299,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(namefileNames[i]);
 								m->mothurOut("Unable to open " + namefileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -311,7 +311,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						}
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + namefileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();  abort = true;
 							//erase from file list
 							namefileNames.erase(namefileNames.begin()+i);
@@ -359,13 +359,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
 								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -376,7 +376,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
 								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -389,7 +389,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							countfileNames.erase(countfileNames.begin()+i);
@@ -435,13 +435,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						
 						ifstream in;
 						ableToOpen = m->openInputFile(groupfileNames[i], in, "noerror");
                         
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(groupfileNames[i]);
 								m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -452,7 +452,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(groupfileNames[i]);
 								m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -465,7 +465,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + groupfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							groupfileNames.erase(groupfileNames.begin()+i);
