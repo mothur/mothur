@@ -42,7 +42,7 @@ public:
 	BatchEngine(string, string);
 	~BatchEngine();
 	virtual bool getInput();
-	int openedBatch;
+	bool openedBatch;
 private:
 	ifstream inputBatchFile;
 	string getNextCommand(ifstream&);
@@ -66,7 +66,7 @@ public:
 	ScriptEngine(string, string);
 	~ScriptEngine();
 	virtual bool getInput();
-	int openedBatch;
+	bool openedBatch;
 private:
 	string listOfCommands;
 	string getNextCommand(string&);

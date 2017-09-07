@@ -205,9 +205,9 @@ ShhherCommand::ShhherCommand(string option) {
                     
                     //test if file is valid
                     ifstream in;
-                    int ableToOpen = m->openInputFile(fName, in, "noerror");
+                    bool ableToOpen = m->openInputFile(fName, in, "noerror");
                     in.close();	
-                    if (ableToOpen == 1) {
+                    if (!ableToOpen) {
                         if (inputDir != "") { //default path is set
                             string tryPath = inputDir + fName;
                             m->mothurOut("Unable to open " + fName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
@@ -218,7 +218,7 @@ ShhherCommand::ShhherCommand(string option) {
                         }
                     }
                     
-                    if (ableToOpen == 1) {
+                    if (!ableToOpen) {
                         if (m->getDefaultPath() != "") { //default path is set
                             string tryPath = m->getDefaultPath() + m->getSimpleName(fName);
                             m->mothurOut("Unable to open " + fName + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -230,7 +230,7 @@ ShhherCommand::ShhherCommand(string option) {
                     }
                     
                     //if you can't open it its not in current working directory or inputDir, try mothur excutable location
-                    if (ableToOpen == 1) {
+                    if (!ableToOpen) {
                         string exepath = m->mothurProgramPath;
                         //string tempPath = exepath;
                         //for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
@@ -244,7 +244,7 @@ ShhherCommand::ShhherCommand(string option) {
                         fName = tryPath;
                     }
                     
-                    if (ableToOpen == 1) {  m->mothurOut("Unable to open " + fName + ". Disregarding. "); m->mothurOutEndLine();  }
+                    if (!ableToOpen) {  m->mothurOut("Unable to open " + fName + ". Disregarding. "); m->mothurOutEndLine();  }
                     else { flowFileVector.push_back(fName); }
                     m->gobble(flowFilesFile);
                 }
@@ -273,13 +273,13 @@ ShhherCommand::ShhherCommand(string option) {
 #endif
 				lookupFileName = m->getFullPathName(path) + "LookUp_Titanium.pat";
 				
-				int ableToOpen;
+				bool ableToOpen;
 				ifstream in;
 				ableToOpen = m->openInputFile(lookupFileName, in, "noerror");
 				in.close();	
 				
 				//if you can't open it, try input location
-				if (ableToOpen == 1) {
+				if (!ableToOpen) {
 					if (inputDir != "") { //default path is set
 						string tryPath = inputDir + m->getSimpleName(lookupFileName);
 						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
@@ -291,7 +291,7 @@ ShhherCommand::ShhherCommand(string option) {
 				}
 				
 				//if you can't open it, try default location
-				if (ableToOpen == 1) {
+				if (!ableToOpen) {
 					if (m->getDefaultPath() != "") { //default path is set
 						string tryPath = m->getDefaultPath() + m->getSimpleName(lookupFileName);
 						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -303,7 +303,7 @@ ShhherCommand::ShhherCommand(string option) {
 				}
 				
 				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
-				if (ableToOpen == 1) {
+				if (!ableToOpen) {
 					string exepath = m->mothurProgramPath;
 					//string tempPath = exepath;
 					//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
@@ -317,7 +317,7 @@ ShhherCommand::ShhherCommand(string option) {
 					lookupFileName = tryPath;
 				}
 				
-				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
 			}
 			else if(temp == "not open")	{	
 				
@@ -332,11 +332,11 @@ ShhherCommand::ShhherCommand(string option) {
 				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 				ifstream in2;
-				int ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				bool ableToOpen = m->openInputFile(tryPath, in2, "noerror");
 				in2.close();
 				lookupFileName = tryPath;
 				
-				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
 			}else						{	lookupFileName = temp;	}
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}

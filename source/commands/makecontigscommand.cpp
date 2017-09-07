@@ -3037,11 +3037,11 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(forward, in2, "noerror");
+            bool openForward = m->openInputFile(forward, in2, "noerror");
             
             string tryPath = forward;
             //if you can't open it, try default location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getDefaultPath() != "") { //default path is set
                     tryPath = m->getDefaultPath() + m->getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -3053,7 +3053,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             //if you can't open it, try output location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getOutputDir() != "") { //default path is set
                     tryPath = m->getOutputDir() + m->getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -3065,7 +3065,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             //if you can't open it, try mothur's location
-            if (openForward == 1) {
+            if (!openForward) {
                 tryPath = mpath + m->getSimpleName(forward);
                 m->mothurOut("Unable to open " + forward + ". Trying mothur's executable directory " + tryPath); m->mothurOutEndLine();
                 ifstream in4;
@@ -3074,7 +3074,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 in4.close();
             }
             
-            if (openForward == 1) { //can't find it
+            if (!openForward) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + forward + ", ignoring pair.\n"); 
             }else{
                 if (m->isBlank(tryPath)) { m->mothurOut("[WARNING]: " + forward + " is blank, skipping.\n"); skip=true; }
@@ -3082,11 +3082,11 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             ifstream in3;
-            int openReverse = m->openInputFile(reverse, in3, "noerror");
+            bool openReverse = m->openInputFile(reverse, in3, "noerror");
             tryPath = reverse;
             
             //if you can't open it, try default location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getDefaultPath() != "") { //default path is set
                     tryPath = m->getDefaultPath() + m->getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -3098,7 +3098,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             //if you can't open it, try mothur's location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 tryPath = mpath + m->getSimpleName(reverse);
                 m->mothurOut("Unable to open " + reverse + ". Trying mothur's executable directory " + tryPath); m->mothurOutEndLine();
                 ifstream in4;
@@ -3108,7 +3108,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             
             //if you can't open it, try output location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getOutputDir() != "") { //default path is set
                     tryPath = m->getOutputDir() + m->getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -3119,18 +3119,18 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 }
             }
             
-            if (openReverse == 1) { //can't find it
+            if (!openReverse) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + reverse + ", ignoring pair.\n"); 
             }else{  if (m->isBlank(tryPath)) { m->mothurOut("[WARNING]: " + reverse + " is blank, skipping.\n"); skip=true; } in3.close();  }
             
-            int openFindex = 0;
+            bool openFindex = true;
             if ((findex != "") && (findex != "NONE")){
                 ifstream in4;
                 openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
                 tryPath = findex;
                 
                 //if you can't open it, try default location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         tryPath = m->getDefaultPath() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -3142,7 +3142,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 }
                 
                 //if you can't open it, try mothur's location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     tryPath = mpath + m->getSimpleName(findex);
                     m->mothurOut("Unable to open " + findex + ". Trying mothur's executable directory " + tryPath); m->mothurOutEndLine();
                     ifstream in14;
@@ -3152,7 +3152,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 }
                 
                 //if you can't open it, try output location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         tryPath = m->getOutputDir() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -3163,21 +3163,21 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                     }
                 }
                 
-                if (openFindex == 1) { //can't find it
+                if (!openFindex) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
                 }else{
                     if (m->isBlank(tryPath)) { m->mothurOut("[WARNING]: " + findex + " is blank, skipping.\n"); skip=true; }
                 }
             }
             
-            int openRindex = 0;
+            bool openRindex = true;
             if ((rindex != "") && (rindex != "NONE")) {
                 ifstream in7;
                 openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
                 tryPath = rindex;
                 
                 //if you can't open it, try default location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -3189,17 +3189,17 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 }
                 
                 //if you can't open it, try mothur's location
-                if (openFindex == 1) {
+                if (!openRindex) {
                     tryPath = mpath + m->getSimpleName(rindex);
                     m->mothurOut("Unable to open " + rindex + ". Trying mothur's executable directory " + tryPath); m->mothurOutEndLine();
                     ifstream in14;
-                    openForward = m->openInputFile(tryPath, in14, "noerror");
+                    openRindex = m->openInputFile(tryPath, in14, "noerror");
                     rindex = tryPath;
                     in14.close();
                 }
                 
                 //if you can't open it, try output location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         tryPath = m->getOutputDir() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -3219,7 +3219,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 
            
 
-            if ((openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1) && (!skip)) { //good pair
+            if ((openForward) && (openReverse) && (openFindex) && (openRindex) && (!skip)) { //good pair
                 file2Group[files.size()] = group;
                 vector<string> pair;
 #ifdef USE_BOOST

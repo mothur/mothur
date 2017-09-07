@@ -165,13 +165,13 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
 		
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 
 						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -183,7 +183,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 						}
 						
 						//if you can't open it, try output location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -196,7 +196,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 						
 						in.close();					
 
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
