@@ -1588,9 +1588,9 @@ vector<bool> MothurOut::isGZ(string filename){
         
         int ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         
-        if (debug) { if (ableToOpen == 1) { mothurOut("[DEBUG]: unable to open gz file. \n"); } }
+        if (debug) { if (!ableToOpen) { mothurOut("[DEBUG]: unable to open gz file. \n"); } }
         
-        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
         
         char c;
@@ -1705,7 +1705,7 @@ int MothurOut::appendFiles(string temp, string filename) {
 		//int ableToOpen = openInputFile(temp, input);
 		
 		int numLines = 0;
-		if (ableToOpen == 0) { //you opened it
+		if (ableToOpen) { //you opened it
             
             char buffer[4096];        
             while (!input.eof()) {
@@ -1736,7 +1736,7 @@ int MothurOut::appendBinaryFiles(string temp, string filename) {
 		openOutputFileBinaryAppend(filename, output);
 		int ableToOpen = openInputFileBinary(temp, input, "no error");
 		
-		if (ableToOpen == 0) { //you opened it
+		if (ableToOpen) { //you opened it
             
             char buffer[4096];
             while (!input.eof()) {
@@ -1807,7 +1807,7 @@ int MothurOut::appendFilesWithoutHeaders(string temp, string filename) {
 		//int ableToOpen = openInputFile(temp, input);
 		
 		int numLines = 0;
-		if (ableToOpen == 0) { //you opened it
+		if (ableToOpen) { //you opened it
         
             string headers = getline(input); gobble(input);
             if (debug) { mothurOut("[DEBUG]: skipping headers " + headers +'\n'); }
