@@ -200,13 +200,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
 		
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -217,7 +217,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -230,7 +230,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
@@ -275,13 +275,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
 								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -292,7 +292,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
 								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -305,7 +305,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							nameFileNames.erase(nameFileNames.begin()+i);
@@ -350,13 +350,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
 								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -367,7 +367,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
 								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -380,7 +380,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							countfileNames.erase(countfileNames.begin()+i);
@@ -430,13 +430,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
 						}
 						
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
 								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -447,7 +447,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
 								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -460,7 +460,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							groupFileNames.erase(groupFileNames.begin()+i);
@@ -604,8 +604,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				//test to make sure formatdb exists
 				ifstream in;
 				formatdbCommand = m->getFullPathName(formatdbCommand);
-				int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
-				if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
+				bool ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
 				
 				string blastCommand = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -617,7 +617,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				ifstream in2;
 				blastCommand = m->getFullPathName(blastCommand);
 				ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
-				if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
+				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
 			}
 
 			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }

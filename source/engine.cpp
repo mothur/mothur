@@ -203,7 +203,7 @@ BatchEngine::~BatchEngine(){	}
 bool BatchEngine::getInput(){
 	try {
 		//check if this is a valid batchfile
-		if (openedBatch == 1) {  
+		if (!openedBatch) {  
 			mout->mothurOut("unable to open batchfile\n");
 			return 1; 
 		}

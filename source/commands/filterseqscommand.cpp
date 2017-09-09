@@ -176,10 +176,10 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						}
 
 						ifstream in;
-						int ableToOpen = m->openInputFile(fastafileNames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(fastafileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(fastafileNames[i]);
 								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -191,7 +191,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						}
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(fastafileNames[i]);
 								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -204,7 +204,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + fastafileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							fastafileNames.erase(fastafileNames.begin()+i);
