@@ -163,7 +163,7 @@ long int OptiMatrix::print(ostream& out) {
 string OptiMatrix::getName(int index) {
     try {
         //return toString(index);
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->control_pressed = true; return ""; }
+        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
         string name = nameMap[index];
         return name;
     }
@@ -176,7 +176,7 @@ string OptiMatrix::getName(int index) {
 string OptiMatrix::getOverlapName(int index) {
     try {
         //return toString(index);
-        if (index > blastOverlap.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->control_pressed = true; return ""; }
+        if (index > blastOverlap.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
         string name = overlapNameMap[index];
         return name;
     }
@@ -231,7 +231,7 @@ int OptiMatrix::readPhylip(){
         if(square == 0){
             
             for(int i=1;i<nseqs;i++){
-                if (m->control_pressed) {  fileHandle.close();  return 0; }
+                if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
@@ -249,7 +249,7 @@ int OptiMatrix::readPhylip(){
             }
         }else{
             for(int i=1;i<nseqs;i++){
-                if (m->control_pressed) {  fileHandle.close();   return 0; }
+                if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
@@ -306,7 +306,7 @@ int OptiMatrix::readPhylip(){
             
             for(int i=1;i<nseqs;i++){
                 
-                if (m->control_pressed) {  in.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
                 in >> name; m->gobble(in);
                 
@@ -328,7 +328,7 @@ int OptiMatrix::readPhylip(){
                     index++; reading->update(index);
                 }
                 
-                if (m->debug) {
+                if (m->getDebug()) {
                     if((i % fivepercent) == 0){
                         unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
                         m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
@@ -342,7 +342,7 @@ int OptiMatrix::readPhylip(){
             for(int i=0;i<nseqs;i++){ in >> distance;  } m->gobble(in);
             
             for(int i=1;i<nseqs;i++){
-                if (m->control_pressed) {  in.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
                 in >> name; m->gobble(in);
                 
@@ -363,7 +363,7 @@ int OptiMatrix::readPhylip(){
                     index++; reading->update(index);
                 }
                 
-                if (m->debug) {
+                if (m->getDebug()) {
                     if((i % fivepercent) == 0){
                         unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
                         m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
@@ -375,7 +375,7 @@ int OptiMatrix::readPhylip(){
         reading->finish();
         delete reading;
 
-        if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+        if (m->getDebug()) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
             m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
 
         return 0;
@@ -413,9 +413,9 @@ int OptiMatrix::readColumn(){
             fileHandle >> secondName; m->gobble(fileHandle);
             fileHandle >> distance;	m->gobble(fileHandle); // get the row and column names and distance
             
-            if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
+            if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
-            if (m->control_pressed) {  fileHandle.close();   return 0; }
+            if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
             
             map<string,int>::iterator itA = nameAssignment.find(firstName);
             map<string,int>::iterator itB = nameAssignment.find(secondName);
@@ -466,9 +466,9 @@ int OptiMatrix::readColumn(){
             in >> secondName; m->gobble(in);
             in >> distance;	m->gobble(in); // get the row and column names and distance
             
-            if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
+            if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
-            if (m->control_pressed) {  in.close();   return 0; }
+            if (m->getControl_pressed()) {  in.close();   return 0; }
 
             map<string,int>::iterator itA = nameAssignment.find(firstName);
             map<string,int>::iterator itB = nameAssignment.find(secondName);
@@ -500,7 +500,7 @@ int OptiMatrix::readColumn(){
         in.close();
         nameAssignment.clear();
         
-        if (m->debug) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
+        if (m->getDebug()) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
             m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
         
         return 1;
@@ -581,7 +581,7 @@ int OptiMatrix::readBlast(){
         
         while(fileHandle){  //let's assume it's a triangular matrix...
             
-            if (m->control_pressed) { fileHandle.close(); return 0; }
+            if (m->getControl_pressed()) { fileHandle.close(); return 0; }
             
             //read in line from file
             fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -810,7 +810,7 @@ int OptiMatrix::readBlast(){
         
         while(in){  //let's assume it's a triangular matrix...
             
-            if (m->control_pressed) { fileHandle.close(); return 0; }
+            if (m->getControl_pressed()) { fileHandle.close(); return 0; }
             
             //read in line from file
             in >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -1002,7 +1002,7 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
         
         map<string, int>::iterator it;
         while (!in.eof()) {
-            if (m->control_pressed) { in.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); return 0; }
             
             //read line
             in >> name;
@@ -1015,7 +1015,7 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
                 prevName = name;
                 
                 it = nameAssignment.find(name);
-                if (it != nameAssignment.end()) { m->mothurOut("[ERROR]: trying to exact names from blast file, and I found dups.  Are you sequence names unique? quitting.\n"); m->control_pressed = true; }
+                if (it != nameAssignment.end()) { m->mothurOut("[ERROR]: trying to exact names from blast file, and I found dups.  Are you sequence names unique? quitting.\n"); m->setControl_pressed(true); }
                 else {
                     nameAssignment[name] = num; num++;
                 }
@@ -1024,7 +1024,7 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
         
         in.close();
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();
         

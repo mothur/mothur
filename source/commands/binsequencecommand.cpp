@@ -57,7 +57,7 @@ string BinSeqCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],[distance],fasta"; } //makes file like: amazon.0.03.fasta
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -256,7 +256,7 @@ int BinSeqCommand::execute(){
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
-		if (m->control_pressed) {  delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+		if (m->getControl_pressed()) {  delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -265,7 +265,7 @@ int BinSeqCommand::execute(){
 				
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
+			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
@@ -298,7 +298,7 @@ int BinSeqCommand::execute(){
 			list = input->getListVector();
 		}
 		
-		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
+		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -328,7 +328,7 @@ int BinSeqCommand::execute(){
 		delete fasta; 
 		if (groupfile != "") {  delete groupMap;   } 
 		
-		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		}  return 0; }	
+		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		}  return 0; }	
         
         //set align file as new current fastafile
 		string currentFasta = "";
@@ -402,7 +402,7 @@ int BinSeqCommand::process(ListVector* list) {
         vector<string> binLabels = list->getLabels();
         for (int i = 0; i < list->size(); i++) {
             
-            if (m->control_pressed) {  return 1; }
+            if (m->getControl_pressed()) {  return 1; }
             
             string binnames = list->get(i);
             vector<string> names;

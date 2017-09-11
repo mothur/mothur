@@ -93,7 +93,7 @@ string SetCurrentCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],current_files.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -523,7 +523,7 @@ int SetCurrentCommand::execute(){
 		if (types.size() != 0) {
 			for (int i = 0; i < types.size(); i++) {
 				
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 				
 				//look for file types
 				if (types[i] == "fasta") {
@@ -623,14 +623,14 @@ int SetCurrentCommand::readCurrentFiles(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string line = m->getline(in); m->gobble(in);
             
             vector<string> pieces;
             m->splitAtChar(line, pieces, '=');
             
-            if (pieces.size() != 2) { m->mothurOut("[ERROR]: " + m->getStringFromVector(pieces, ",") + " line is not in the correct format.  Did you edit the file? Mothur expects tag=filename.  Example: fasta=final.fasta\n"); m->control_pressed = true;  }
+            if (pieces.size() != 2) { m->mothurOut("[ERROR]: " + m->getStringFromVector(pieces, ",") + " line is not in the correct format.  Did you edit the file? Mothur expects tag=filename.  Example: fasta=final.fasta\n"); m->setControl_pressed(true);  }
             else{
                    //look for file types
                 if (pieces[0] == "fasta") {

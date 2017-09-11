@@ -67,7 +67,7 @@ string MatrixOutputCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "phylip") {  pattern = "[filename],[calc],[distance],[outputtag],dist-[filename],[calc],[distance],[outputtag],[tag2],dist"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -336,7 +336,7 @@ int MatrixOutputCommand::execute(){
                 m->setGroups(Groups);
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
         }
         
 		numGroups = lookup->size();
@@ -346,12 +346,12 @@ int MatrixOutputCommand::execute(){
 			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
 		}	
         
-        if (m->control_pressed) { delete lookup; m->clearGroups(); return 0;  }
+        if (m->getControl_pressed()) { delete lookup; m->clearGroups(); return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if (m->control_pressed) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -384,7 +384,7 @@ int MatrixOutputCommand::execute(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -399,7 +399,7 @@ int MatrixOutputCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -411,7 +411,7 @@ int MatrixOutputCommand::execute(){
 			delete lookup;
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 		
 		//reset groups parameter
 		m->clearGroups();  
@@ -539,7 +539,8 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                             int temp = processIDS[i];
                             wait(&temp);
                         }
-                        m->control_pressed = false;
+                        m->setControl_pressed(false);
+
                         for (int i=0;i<processIDS.size();i++) {
                             m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist");
                         }
@@ -550,7 +551,8 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 
                 if (recalc) {
                     //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                     
                     
                     lines.clear();
@@ -663,7 +665,7 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
                     if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
                     }
                     for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
                     
@@ -686,12 +688,12 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {
-                        if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     } 
                 }
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     //initialize matrix
                     vector< vector<double> > matrix; //square matrix to represent the distance
@@ -820,7 +822,7 @@ int MatrixOutputCommand::driver(vector<SharedRAbundVector*>& thisLookup, int sta
 						
 						vector<double> tempdata = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
 						
-						if (m->control_pressed) { return 1; }
+						if (m->getControl_pressed()) { return 1; }
         
 						seqDist temp(l, k, tempdata[0]);
 						calcDists[i].push_back(temp);

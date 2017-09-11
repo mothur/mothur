@@ -55,7 +55,7 @@ string MergeSfffilesCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "sff")            {   pattern =  "[filename],";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -233,7 +233,7 @@ int MergeSfffilesCommand::execute(){
         
 		for (int s = 0; s < filenames.size(); s++) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 			
 			int start = time(NULL);
 			
@@ -249,7 +249,7 @@ int MergeSfffilesCommand::execute(){
         //create new common header and add to merged file
         adjustCommonHeader();
 
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 		
 		//set sff file as new current sff file
 		string current = "";
@@ -306,13 +306,13 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 			//report progress
 			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
             
-			if (m->control_pressed) { count = 0; break;   }
+			if (m->getControl_pressed()) { count = 0; break;   }
 			
 			if (count >= header.numReads) { break; }
 		}
         
 		//report progress
-		if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
 		in.close();
 		
@@ -356,7 +356,7 @@ int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
             in.read(buffer4, 4);
             header.numReads =  be_int4(*(unsigned int *)(&buffer4));
             
-            if (m->debug) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
             
             //read header length
             char buffer5 [2];
@@ -449,10 +449,10 @@ int MergeSfffilesCommand::adjustCommonHeader(){
                     }
                 }
             }
-        }else { m->control_pressed = true; return 0; } //should never get here
+        }else { m->setControl_pressed(true); return 0; } //should never get here
         
         bool modify = false;
-        if (!okayMagic || !okayVersion || !okayHeader || !okayKeyLength || !okayNumFlows || !okayformatCode || !okayflowChar) { m->control_pressed = true; return 0; }
+        if (!okayMagic || !okayVersion || !okayHeader || !okayKeyLength || !okayNumFlows || !okayformatCode || !okayflowChar) { m->setControl_pressed(true); return 0; }
         if (!okayKeySequence) {
             bool okayKeySequence2 = true;
             string keySeq = commonHeaders[0].keySequence.substr(0,4);
@@ -770,11 +770,11 @@ int MergeSfffilesCommand::readFile(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             in >> filename; m->gobble(in);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
             
             //check to make sure both are able to be opened
             ifstream in2;

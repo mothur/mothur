@@ -94,7 +94,7 @@ string ClearcutCommand::getOutputPattern(string type) {
         
         if (type == "matrixout") {  pattern = "[filename],"; } 
         else if (type == "tree") {  pattern = "[filename],tre"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }

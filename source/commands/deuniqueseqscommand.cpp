@@ -54,7 +54,7 @@ string DeUniqueSeqsCommand::getOutputPattern(string type) {
         
         if (type == "fasta") {  pattern = "[filename],redundant.fasta"; }
         else if (type == "group") {  pattern = "[filename],redundant.groups"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -218,14 +218,14 @@ int DeUniqueSeqsCommand::execute() {
             }
         }
         
-		if (m->control_pressed) {  out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
+		if (m->getControl_pressed()) {  out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
 		
 		ifstream in;
 		m->openInputFile(fastaFile, in);
 		
 		while (!in.eof()) {
 		
-			if (m->control_pressed) { in.close(); out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
 			
 			Sequence seq(in); m->gobble(in);
 			
@@ -235,7 +235,7 @@ int DeUniqueSeqsCommand::execute() {
                     //look for sequence name in nameMap
                     map<string, string>::iterator it = nameMap.find(seq.getName());
                     
-                    if (it == nameMap.end()) {	m->mothurOut("[ERROR]: Your namefile does not contain " + seq.getName() + ", aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    if (it == nameMap.end()) {	m->mothurOut("[ERROR]: Your namefile does not contain " + seq.getName() + ", aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {
                         vector<string> names;
                         m->splitAtComma(it->second, names);
@@ -274,7 +274,7 @@ int DeUniqueSeqsCommand::execute() {
         if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); } }
 		
 						
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) {  m->mothurRemove(outGroupFile); } }return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) {  m->mothurRemove(outGroupFile); } }return 0; }
 		
         outputNames.push_back(outFastaFile);  outputTypes["fasta"].push_back(outFastaFile);
         if (countfile != "") { if (ct.hasGroupInfo()) { outputNames.push_back(outGroupFile);  outputTypes["group"].push_back(outGroupFile); } }

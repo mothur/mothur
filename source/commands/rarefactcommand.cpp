@@ -98,7 +98,7 @@ string RareFactCommand::getOutputPattern(string type) {
         else if (type == "r_coverage") {  pattern =  "[filename],r_coverage"; }
         else if (type == "r_nseqs") {  pattern =  "[filename],r_nseqs"; }
         else if (type == "r_heip") {  pattern =  "[filename],r_heip"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -325,14 +325,14 @@ int RareFactCommand::execute(){
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile, labelToEnds);  format = "rabund"; }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
 		
 		map<int, string> file2Group; //index in outputNames[i] -> group
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
 						
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -412,12 +412,12 @@ int RareFactCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+				if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
@@ -462,7 +462,7 @@ int RareFactCommand::execute(){
 				order = (input.getOrderVector());
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -477,7 +477,7 @@ int RareFactCommand::execute(){
 				}
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//run last label if you need to
 			if (needToRun == true)  {
@@ -502,12 +502,12 @@ int RareFactCommand::execute(){
 		}
 		
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
 		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, file2Group);  }
 
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -645,7 +645,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				
                 out << (*itNumSampled);
                                
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //each chunk
 				    //grab data for each group

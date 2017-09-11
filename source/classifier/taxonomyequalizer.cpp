@@ -20,7 +20,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 	
 		highestLevel = getHighestLevel(inTax);
 		
-		if (!m->control_pressed) { 
+		if (!m->getControl_pressed()) { 
 			
 			//if the user has specified a cutoff and it's smaller than the highest level
 			if ((cutoff != -1) && (cutoff < highestLevel)) { 
@@ -42,7 +42,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			string name, tax;
 			while (in) {
 			
-				if (m->control_pressed) {  break; }
+				if (m->getControl_pressed()) {  break; }
 				
                 in >> name;   m->gobble(in);
                 tax = m->getline(in); m->gobble(in);
@@ -62,7 +62,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			in.close();
 			out.close();
 			
-			if (m->control_pressed) { m->mothurRemove(equalizedFile);  }
+			if (m->getControl_pressed()) { m->mothurRemove(equalizedFile);  }
 		}else { inTax.close(); }
 		
 	}

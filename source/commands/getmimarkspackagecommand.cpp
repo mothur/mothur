@@ -58,7 +58,7 @@ string GetMIMarksPackageCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "tsv") {  pattern = "[filename],tsv"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -453,7 +453,7 @@ int GetMIMarksPackageCommand::readFile(){
             
             Oligos oligos;
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);
@@ -469,14 +469,14 @@ int GetMIMarksPackageCommand::readFile(){
                 group = pieces[0];
                 m->checkGroupName(group);
             }else if (pieces.size() == 4) {
-                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
                 thisFileName1 = pieces[0];
                 thisFileName2 = pieces[1];
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->setControl_pressed(true);
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
             
             if (inputDir != "") {
                 string path = m->hasPath(thisFileName2);
@@ -554,7 +554,7 @@ int GetMIMarksPackageCommand::readFile(){
             
             if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
                     oligosfile = thisFileName2;
-                    if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
                     oligos.read(oligosfile);
                     createGroupNames(oligos); // adding in groupNames from this file
                 format = 2;
@@ -743,7 +743,7 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
         }
         
         if (Groups.size() == 0) {
-            m->mothurOut("[ERROR]: your oligos file does not contain any group names."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: your oligos file does not contain any group names."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return Groups;
@@ -795,7 +795,7 @@ int GetMIMarksPackageCommand::findFileOption(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);

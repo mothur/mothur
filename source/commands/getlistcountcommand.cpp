@@ -55,7 +55,7 @@ string GetListCountCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "otu") {  pattern = "[filename],[tag],otu"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -165,7 +165,7 @@ int GetListCountCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+		if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -173,7 +173,7 @@ int GetListCountCommand::execute(){
 			
 				process(list);
 				
-				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -187,7 +187,7 @@ int GetListCountCommand::execute(){
 				
 				process(list);
 				
-				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 
 													
 				processedLabels.insert(list->getLabel());
@@ -224,7 +224,7 @@ int GetListCountCommand::execute(){
 				
 			process(list);	
 			
-			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+			if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 			
 			delete list;  
 		}
@@ -263,7 +263,7 @@ void GetListCountCommand::process(ListVector* list) {
 		//for each bin in the list vector
         vector<string> binLabels = list->getLabels();
 		for (int i = 0; i < list->getNumBins(); i++) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			binnames = list->get(i);
 			

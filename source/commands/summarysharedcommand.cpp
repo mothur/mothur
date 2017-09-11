@@ -71,7 +71,7 @@ string SummarySharedCommand::getOutputPattern(string type) {
         
         if (type == "summary") {  pattern = "[filename],summary-[filename],[tag],summary"; } 
         else if (type == "phylip") {  pattern = "[filename],[calc],[distance],[outputtag],[tag2],dist"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -384,7 +384,7 @@ int SummarySharedCommand::execute(){
 			outputNames.pop_back();
 		}
 		
-		if (m->control_pressed) {
+		if (m->getControl_pressed()) {
 			if (mult) {  m->mothurRemove(outAllFileName);  }
 			m->mothurRemove(outputFileName);
 			delete lookup;
@@ -401,7 +401,7 @@ int SummarySharedCommand::execute(){
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
         }
 
 		
@@ -421,7 +421,7 @@ int SummarySharedCommand::execute(){
 			
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 				if (mult) {  m->mothurRemove(outAllFileName);  }
 				m->mothurRemove(outputFileName); 
                 delete lookup;
@@ -467,7 +467,7 @@ int SummarySharedCommand::execute(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) {
+		if (m->getControl_pressed()) {
 			if (mult) { m->mothurRemove(outAllFileName);  }
 			m->mothurRemove(outputFileName);
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
@@ -506,7 +506,7 @@ int SummarySharedCommand::execute(){
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
-		if (m->control_pressed) {
+		if (m->getControl_pressed()) {
 			m->mothurRemove(outAllFileName);  
 			m->mothurRemove(outputFileName); 
 			return 0;
@@ -539,7 +539,7 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 			for (int b = 0; b < simMatrix.size(); b++)	{
 				out << theseGroups[b];
 				for (int n = 0; n < b; n++)	{
-                    if (m->control_pressed) { return 0; }
+                    if (m->getControl_pressed()) { return 0; }
 					out << '\t' << simMatrix[b][n];
 				}
 				out << endl;
@@ -548,7 +548,7 @@ int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simM
 			for (int b = 0; b < simMatrix.size(); m++)	{
 				out << theseGroups[b];
 				for (int n = 0; n < simMatrix[b].size(); n++)	{
-                    if (m->control_pressed) { return 0; }
+                    if (m->getControl_pressed()) { return 0; }
 					out << '\t' << simMatrix[b][n];
 				}
 				out << endl;
@@ -640,7 +640,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                             int temp = processIDS[i];
                             wait(&temp);
                         }
-                        m->control_pressed = false;
+                        m->setControl_pressed(false);
                         for (int i=0;i<processIDS.size();i++) {
                             m->mothurRemove(sumFileName + (toString(processIDS[i]) + ".temp"));
                             m->mothurRemove(sumAllFileName + (toString(processIDS[i]) + ".temp"));
@@ -653,7 +653,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                 if (recalc) {
                     //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(sumFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(sumAllFileName + (toString(processIDS[i]) + ".temp"));if (createPhylip) { m->mothurRemove(m->getRootName(m->getSimpleName(sumFileName)) + (toString(processIDS[i]) + ".dist")); }}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(sumFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(sumAllFileName + (toString(processIDS[i]) + ".temp"));if (createPhylip) { m->mothurRemove(m->getRootName(m->getSimpleName(sumFileName)) + (toString(processIDS[i]) + ".dist")); }}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                     
                     /******************************************************/
                     //comparison breakup to be used by different processes later
@@ -790,7 +791,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
                     if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
                     }
                     m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
                     m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
@@ -819,7 +820,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
             }else {
                 if (createPhylip) {
                     for (int i = 0; i < calcDists.size(); i++) {
-                        if (m->control_pressed) { break; }
+                        if (m->getControl_pressed()) { break; }
                         
                         //initialize matrix
                         vector< vector<double> > matrix; //square matrix to represent the distance
@@ -949,7 +950,7 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 				if (sumCalculators[i]->getMultiple() == true) { 
 					sumCalculators[i]->getValues(thisLookup);
 					
-					if (m->control_pressed) { outAll.close(); return 1; }
+					if (m->getControl_pressed()) { outAll.close(); return 1; }
 					
 					outAll << '\t';
 					sumCalculators[i]->print(outAll);
@@ -992,7 +993,7 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 					
 					vector<double> tempdata = sumCalculators[i]->getValues(subset); //saves the calculator outputs
 					
-					if (m->control_pressed) { outputFileHandle.close(); return 1; }
+					if (m->getControl_pressed()) { outputFileHandle.close(); return 1; }
 					
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);

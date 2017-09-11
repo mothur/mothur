@@ -60,7 +60,7 @@ string CatchAllCommand::getOutputPattern(string type) {
         else if (type == "bubble") {  pattern = "[filename],_BubblePlot.csv"; }
         else if (type == "summary") {  pattern =  "[filename],catchall.summary"; }
         else if (type == "sabund") {  pattern =  "[filename],[distance],csv"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -202,7 +202,7 @@ int CatchAllCommand::execute() {
 		//get location of catchall
 		path = m->getProgramPath();
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: mothur's path = " + path + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: mothur's path = " + path + "\n"); }
        
 		savedOutputDir = outputDir;
 		string catchAllCommandExe = "";
@@ -256,7 +256,7 @@ int CatchAllCommand::execute() {
 		//prepare full output directory
 		outputDir = m->getFullPathName(outputDir);
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: catchall location = " + catchAllCommandExe + "\n[DEBUG]: outputDir = " + outputDir + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: catchall location = " + catchAllCommandExe + "\n[DEBUG]: outputDir = " + outputDir + "\n"); }
         
 		vector<string> inputFileNames;
 		if (sharedfile != "") { inputFileNames = parseSharedFile(sharedfile);   }
@@ -279,14 +279,14 @@ int CatchAllCommand::execute() {
 			string summaryfilename = getOutputFileName("summary", variables);
 			summaryfilename = m->getFullPathName(summaryfilename);
 			
-            if (m->debug) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n[DEBUG]: inputdata address = " + toString(&input) + ".\n[DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n[DEBUG]: inputdata address = " + toString(&input) + ".\n[DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
             
 			ofstream out;
 			m->openOutputFile(summaryfilename, out);	
 			
 			out << "label\tmodel\testimate\tlci\tuci" << endl;
             
-            if (m->debug) { string open = "no"; if (out.is_open()) { open = "yes"; } m->mothurOut("[DEBUG]: output stream is open = " + open + ".\n"); }
+            if (m->getDebug()) { string open = "no"; if (out.is_open()) { open = "yes"; } m->mothurOut("[DEBUG]: output stream is open = " + open + ".\n"); }
 			
 			//for each label the user selected
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -318,14 +318,14 @@ int CatchAllCommand::execute() {
                             catchAllCommand = "\"" + catchAllCommand + "\"";
 						#endif
                         
-                        if (m->debug) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
+                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
                     
 						//run catchall
 						system(catchAllCommand.c_str());
                     
-                        if (m->debug) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
                     
-                        if (!m->debug) { m->mothurRemove(filename); }
+                        if (!m->getDebug()) { m->mothurRemove(filename); }
 
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
@@ -337,13 +337,13 @@ int CatchAllCommand::execute() {
                         outputNames.push_back(getOutputFileName("models", variables)); outputTypes["models"].push_back(getOutputFileName("models", variables));
                         outputNames.push_back(getOutputFileName("bubble", variables)); outputTypes["bubble"].push_back(getOutputFileName("bubble", variables));
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
                     
 						createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
                     
-                        if (m->debug) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
 											
-						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}  delete sabund;  return 0; }
+						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}  delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
@@ -381,14 +381,14 @@ int CatchAllCommand::execute() {
 							catchAllCommand = "\"" + catchAllCommand + "\"";
 						#endif
                         
-                        if (m->debug) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
+                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
                     
 						//run catchall
 						system(catchAllCommand.c_str());
                     
-                        if (m->debug) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
                     
-                        if (!m->debug) { m->mothurRemove(filename); }
+                        if (!m->getDebug()) { m->mothurRemove(filename); }
 
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
@@ -401,13 +401,13 @@ int CatchAllCommand::execute() {
                         outputNames.push_back(getOutputFileName("bubble", variables)); outputTypes["bubble"].push_back(getOutputFileName("bubble", variables));
                         
                     
-                        if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
                     
 						createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
                     
-                        if (m->debug) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
 					
-						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}   delete sabund;  return 0; }
+						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}   delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
@@ -466,14 +466,14 @@ int CatchAllCommand::execute() {
                     catchAllCommand = "\"" + catchAllCommand + "\"";
 				#endif
                 
-                if (m->debug) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
+                if (m->getDebug()) {  m->mothurOut("[DEBUG]: catchall command = " + catchAllCommand + ". About to call system.\n"); }
 				
 				//run catchall
 				system(catchAllCommand.c_str());
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
 				
-				if (!m->debug) { m->mothurRemove(filename); }
+				if (!m->getDebug()) { m->mothurRemove(filename); }
 				
 				filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 				if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
@@ -483,18 +483,18 @@ int CatchAllCommand::execute() {
                 outputNames.push_back(getOutputFileName("bestanalysis", variables)); outputTypes["bestanalysis"].push_back(getOutputFileName("bestanalysis", variables));
                 outputNames.push_back(getOutputFileName("models", variables)); outputTypes["models"].push_back(getOutputFileName("models", variables));
                 outputNames.push_back(getOutputFileName("bubble", variables)); outputTypes["bubble"].push_back(getOutputFileName("bubble", variables));
-                if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
                 
 				createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
 				
 				delete sabund;
 			}
 			
 			out.close();
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	} return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	} return 0; }
 				
 		}
 		
@@ -536,19 +536,19 @@ string CatchAllCommand::process(SAbundVector* sabund, string file1) {
 		ofstream out;
 		m->openOutputFile(filename, out);
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: Creating " + filename + " file for catchall, shown below.\n\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: Creating " + filename + " file for catchall, shown below.\n\n"); }
         
 		for (int i = 1; i <= sabund->getMaxRank(); i++) {
 			int temp = sabund->get(i);
 			
 			if (temp != 0) {
 				out << i << "," << temp << endl;
-                if (m->debug) { m->mothurOut(toString(i) + "," + toString(temp) + "\n"); }
+                if (m->getDebug()) { m->mothurOut(toString(i) + "," + toString(temp) + "\n"); }
 			}
 		}
 		out.close();
         
-        if (m->debug) { m->mothurOut("[DEBUG]: Done creating " + filename + " file for catchall, shown above.\n\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating " + filename + " file for catchall, shown above.\n\n"); }
 		
 		return filename;
 	
@@ -643,7 +643,7 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 		ifstream in;
 		int able = m->openInputFile(file1, in, "noerror");
 		
-		if (able == 1) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->control_pressed = true; return 0; }
+		if (able == 1) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->setControl_pressed(true); return 0; }
 			
 		if (!in.eof()) {
 			

@@ -33,7 +33,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		//make file for each calculator selected
 		for (int k = 0; k < calcs.size(); k++) {
 		
-			if (m->control_pressed) { return outputNames; }
+			if (m->getControl_pressed()) { return outputNames; }
 		
 			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + calcs[k]->getName() + ".heatmap.sim.svg";
 			m->openOutputFile(filenamesvg, outsvg);
@@ -62,7 +62,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 			for(int i = 0; i < (lookup.size()-1); i++){
 				for(int j = (i+1); j < lookup.size(); j++){
 						
-						if (m->control_pressed) { outsvg.close(); return outputNames; }
+						if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 						
 						vector<SharedRAbundVector*> subset;
 						subset.push_back(lookup[i]);  subset.push_back(lookup[j]); 
@@ -142,7 +142,7 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		for(int i = 0; i < (dists.size()-1); i++){
 			for(int j = (i+1); j < dists.size(); j++){
 			
-				if (m->control_pressed) { outsvg.close(); return filenamesvg; }
+				if (m->getControl_pressed()) { outsvg.close(); return filenamesvg; }
 				
 				float sim = 1.0 - dists[i][j];
 				sims.push_back(sim);

@@ -61,7 +61,7 @@ string ShhherCommand::getOutputPattern(string type) {
         else if (type == "group")        {   pattern = "[filename],shhh.groups";   }
         else if (type == "counts")        {   pattern = "[filename],shhh.counts";   }
         else if (type == "qfile")        {   pattern = "[filename],shhh.qual";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -390,8 +390,8 @@ int ShhherCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		getSingleLookUp();	if (m->control_pressed) { return 0; }
-		getJointLookUp();	if (m->control_pressed) { return 0; }
+		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
+		getJointLookUp();	if (m->getControl_pressed()) { return 0; }
 		
         int numFiles = flowFileVector.size();
 		
@@ -517,7 +517,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));
                     m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));
@@ -531,7 +531,8 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             dividedFiles.clear(); //dividedFiles[1] = vector of filenames for process 1...
             dividedFiles.resize(processors);
@@ -677,7 +678,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
         in >> thisNumFLows; m->gobble(in);
         
         while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             ofstream out;
             string outputFileName = filename + toString(count) + ".temp";
@@ -699,7 +700,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
         }
         in.close();
         
-        if (m->control_pressed) { for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }  files.clear(); }
+        if (m->getControl_pressed()) { for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }  files.clear(); }
         
         m->mothurOut("\nDivided " + filename + " into " + toString(files.size()) + " files.\n\n"); 
         
@@ -719,12 +720,12 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
         
         for(int i=0;i<filenames.size();i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
             vector<string> theseFlowFileNames; theseFlowFileNames.push_back(filenames[i]);
             if (large) {  theseFlowFileNames = parseFlowFiles(filenames[i]);  }
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             double begClock = clock();
             unsigned long long begTime;
@@ -749,15 +750,15 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 vector<int> uniqueLengths;
                 int numFlowCells;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: About to read flowgrams.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: About to read flowgrams.\n"); }
                 int numSeqs = getFlowData(flowFileName, seqNameVector, lengths, flowDataIntI, nameMap, numFlowCells);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurOut("Identifying unique flowgrams...\n");
                 int numUniques = getUniques(numSeqs, numFlowCells, uniqueFlowgrams, uniqueCount, uniqueLengths, mapSeqToUnique, mapUniqueToSeq, lengths, flowDataPrI, flowDataIntI);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurOut("Calculating distances between flowgrams...\n");
                 string distFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
@@ -773,13 +774,13 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 string namesFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
                 createNamesFile(numSeqs, numUniques, namesFileName, seqNameVector, mapSeqToUnique, mapUniqueToSeq);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurOut("\nClustering flowgrams...\n");
                 string listFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.list";
                 cluster(listFileName, distFileName, namesFileName);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 vector<int> otuData;
                 vector<int> cumNumSeqs;
@@ -792,7 +793,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 int numOTUs = getOTUData(numSeqs, listFileName, otuData, cumNumSeqs, nSeqsPerOTU, aaP, aaI, seqNumber, seqIndex, nameMap);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurRemove(distFileName);
                 m->mothurRemove(namesFileName);
@@ -806,7 +807,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 vector<int> nSeqsBreaks;
                 vector<int> nOTUsBreaks;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: numSeqs = " + toString(numSeqs) + " numOTUS = " + toString(numOTUs) + " about to alloc a dist vector with size = " + toString((numSeqs * numOTUs)) + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: numSeqs = " + toString(numSeqs) + " numOTUS = " + toString(numOTUs) + " about to alloc a dist vector with size = " + toString((numSeqs * numOTUs)) + ".\n"); }
                 
                 dist.assign(numSeqs * numOTUs, 0);
                 change.assign(numOTUs, 1);
@@ -821,9 +822,9 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 nSeqsBreaks[1] = numSeqs;
                 nOTUsBreaks[1] = numOTUs;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: done allocating memory, about to denoise.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: done allocating memory, about to denoise.\n"); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 double maxDelta = 0;
                 int iter = 0;
@@ -836,33 +837,33 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 while((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     double cycClock = clock();
                     unsigned long long cycTime = time(NULL);
                     fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     maxDelta = getNewWeights(numOTUs, cumNumSeqs, nSeqsPerOTU, singleTau, seqNumber, weight);  
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     double nLL = getLikelihood(numSeqs, numOTUs, nSeqsPerOTU, seqNumber, cumNumSeqs, seqIndex, dist, weight); 
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     checkCentroids(numOTUs, centroids, weight);
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     calcNewDistances(numSeqs, numOTUs, nSeqsPerOTU,  dist, weight, change, centroids, aaP, singleTau, aaI, seqNumber, seqIndex, uniqueFlowgrams, flowDataIntI, numFlowCells, lengths);
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     iter++;
                     
@@ -870,29 +871,29 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                     
                 }	
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurOut("\nFinalizing...\n");
                 fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: done fill().\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: done fill().\n"); }
 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 setOTUs(numOTUs, numSeqs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, otuData, singleTau, dist, aaP, aaI);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: done setOTUs().\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: done setOTUs().\n"); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 vector<int> otuCounts(numOTUs, 0);
                 for(int j=0;j<numSeqs;j++)	{	otuCounts[otuData[j]]++;	}
                 
                 calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: done calcCentroidsDriver().\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: done calcCentroidsDriver().\n"); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 if ((large) && (g == 0)) {  flowFileName = filenames[i]; theseFlowFileNames[0] = filenames[i]; }
                 string thisOutputDir = outputDir;
@@ -910,11 +911,11 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 string groupFileName = getOutputFileName("group",variables);
 
                 
-                writeQualities(numOTUs, numFlowCells, qualityFileName, otuCounts, nSeqsPerOTU, seqNumber, singleTau, flowDataIntI, uniqueFlowgrams, cumNumSeqs, mapUniqueToSeq, seqNameVector, centroids, aaI); if (m->control_pressed) { break; }
-                writeSequences(thisCompositeFASTAFileName, numOTUs, numFlowCells, fastaFileName, otuCounts, uniqueFlowgrams, seqNameVector, aaI, centroids);if (m->control_pressed) { break; }
-                writeNames(thisCompositeNamesFileName, numOTUs, nameFileName, otuCounts, seqNameVector, aaI, nSeqsPerOTU);				if (m->control_pressed) { break; }
-                writeClusters(otuCountsFileName, numOTUs, numFlowCells,otuCounts, centroids, uniqueFlowgrams, seqNameVector, aaI, nSeqsPerOTU, lengths, flowDataIntI);			if (m->control_pressed) { break; }
-                writeGroups(groupFileName, fileGroup, numSeqs, seqNameVector);						if (m->control_pressed) { break; }
+                writeQualities(numOTUs, numFlowCells, qualityFileName, otuCounts, nSeqsPerOTU, seqNumber, singleTau, flowDataIntI, uniqueFlowgrams, cumNumSeqs, mapUniqueToSeq, seqNameVector, centroids, aaI); if (m->getControl_pressed()) { break; }
+                writeSequences(thisCompositeFASTAFileName, numOTUs, numFlowCells, fastaFileName, otuCounts, uniqueFlowgrams, seqNameVector, aaI, centroids);if (m->getControl_pressed()) { break; }
+                writeNames(thisCompositeNamesFileName, numOTUs, nameFileName, otuCounts, seqNameVector, aaI, nSeqsPerOTU);				if (m->getControl_pressed()) { break; }
+                writeClusters(otuCountsFileName, numOTUs, numFlowCells,otuCounts, centroids, uniqueFlowgrams, seqNameVector, aaI, nSeqsPerOTU, lengths, flowDataIntI);			if (m->getControl_pressed()) { break; }
+                writeGroups(groupFileName, fileGroup, numSeqs, seqNameVector);						if (m->getControl_pressed()) { break; }
                 
                 if (large) {
                     if (g > 0) {
@@ -938,7 +939,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
 			m->mothurOut("Total time to process " + fileNameForOutput + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         return numCompleted;
         
@@ -970,11 +971,11 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
         if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
         else { convert(numFlowTest, numFlowCells); }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
 		int index = 0;//pcluster
 		while(!flowFile.eof()){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			flowFile >> seqName >> currentNumFlowCells;
             
@@ -983,7 +984,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 			thisSeqNameVector.push_back(seqName);
 			thisNameMap[seqName] = index++;//pcluster
             
-            if (m->debug) { m->mothurOut("[DEBUG]: seqName = " + seqName + " length = " + toString(currentNumFlowCells) + " index = " + toString(index) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: seqName = " + seqName + " length = " + toString(currentNumFlowCells) + " index = " + toString(index) + "\n"); }
             
 			for(int i=0;i<numFlowCells;i++){
 				flowFile >> intensity;
@@ -999,7 +1000,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		
 		for(int i=0;i<numSeqs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int iNumFlowCells = i * numFlowCells;
 			for(int j=thisLengths[i];j<numFlowCells;j++){
@@ -1031,7 +1032,7 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
         
 		for(int i=0;i<stopSeq;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			for(int j=0;j<i;j++){
 				float flowDistance = calcPairwiseDist(numFlowCells, mapUniqueToSeq[i], mapUniqueToSeq[j], mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);
@@ -1053,7 +1054,7 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 		distFile << outStream.str();		
 		distFile.close();
 		
-		if (m->control_pressed) {}
+		if (m->getControl_pressed()) {}
 		else {
 			m->mothurOutJustToScreen(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
 			m->mothurOutJustToScreen("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC)+"\n");
@@ -1080,7 +1081,7 @@ float ShhherCommand::calcPairwiseDist(int numFlowCells, int seqA, int seqB, vect
 		
 		for(int i=0;i<minLength;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int flowAIntI = flowDataIntI[ANumFlowCells + i];
 			float flowAPrI = flowDataPrI[ANumFlowCells + i];
@@ -1114,7 +1115,7 @@ int ShhherCommand::getUniques(int numSeqs, int numFlowCells, vector<short>& uniq
 		
 		for(int i=0;i<numSeqs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int index = 0;
 			
@@ -1166,7 +1167,7 @@ int ShhherCommand::getUniques(int numSeqs, int numFlowCells, vector<short>& uniq
 		uniqueLengths.resize(numUniques);	
 		
 		flowDataPrI.resize(numSeqs * numFlowCells, 0);
-		for(int i=0;i<flowDataPrI.size();i++)	{	if (m->control_pressed) { break; } flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
+		for(int i=0;i<flowDataPrI.size();i++)	{	if (m->getControl_pressed()) { break; } flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
         
         return numUniques;
 	}
@@ -1189,7 +1190,7 @@ int ShhherCommand::createNamesFile(int numSeqs, int numUniques, string filename,
 		
 		for(int i=0;i<numUniques;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
             //			nameFile << seqNameVector[mapUniqueToSeq[i]] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
 			nameFile << mapUniqueToSeq[i] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
@@ -1231,7 +1232,7 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
 		double clusterCutoff = cutoff;
 		while (matrix->getSmallDist() <= clusterCutoff && matrix->getNNodes() > 0){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			cluster->update(clusterCutoff);
 		}
@@ -1271,7 +1272,7 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		
 		listFile >> label >> numOTUs;
         
-        if (m->debug) { m->mothurOut("[DEBUG]: Getting OTU Data...\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: Getting OTU Data...\n"); }
         
 		otuData.assign(numSeqs, 0);
 		cumNumSeqs.assign(numOTUs, 0);
@@ -1286,8 +1287,8 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
-            if (m->debug) { m->mothurOut("[DEBUG]: processing OTU " + toString(i) + ".\n"); }
+			if (m->getControl_pressed()) { break; }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: processing OTU " + toString(i) + ".\n"); }
             
 			listFile >> singleOTU;
 			
@@ -1378,7 +1379,7 @@ int ShhherCommand::calcCentroidsDriver(int numOTUs,
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			double count = 0;
 			int position = 0;
@@ -1482,7 +1483,7 @@ double ShhherCommand::getNewWeights(int numOTUs, vector<int>& cumNumSeqs, vector
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			double difference = weight[i];
 			weight[i] = 0;
@@ -1522,7 +1523,7 @@ double ShhherCommand::getLikelihood(int numSeqs, int numOTUs, vector<int>& nSeqs
 		string hold;
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
@@ -1563,7 +1564,7 @@ int ShhherCommand::checkCentroids(int numOTUs, vector<int>& centroids, vector<do
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			if(unique[i] == 1){
 				for(int j=i+1;j<numOTUs;j++){
@@ -1606,7 +1607,7 @@ void ShhherCommand::calcNewDistances(int numSeqs, int numOTUs, vector<int>& nSeq
         
 		for(int i=0;i<numSeqs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int indexOffset = i * numOTUs;
             
@@ -1671,7 +1672,7 @@ int ShhherCommand::fill(int numOTUs, vector<int>& seqNumber, vector<int>& seqInd
 		int index = 0;
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			cumNumSeqs[i] = index;
 			for(int j=0;j<nSeqsPerOTU[i];j++){
@@ -1699,7 +1700,7 @@ void ShhherCommand::setOTUs(int numOTUs, int numSeqs, vector<int>& seqNumber, ve
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
@@ -1764,7 +1765,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int index = 0;
             
@@ -1858,7 +1859,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int index = centroids[i];
 			
@@ -1903,7 +1904,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			if(otuCounts[i] > 0){
 				nameFile << seqNameVector[aaI[i][0]] << '\t' << seqNameVector[aaI[i][0]];
@@ -1937,7 +1938,7 @@ void ShhherCommand::writeGroups(string groupFileName, string fileRoot, int numSe
 		m->openOutputFile(groupFileName, groupFile);
 		
 		for(int i=0;i<numSeqs;i++){
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
 		}
 		groupFile.close();
@@ -1961,7 +1962,7 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 				break;
 			}
 			//output the translated version of the centroid sequence for the otu
@@ -2022,7 +2023,7 @@ void ShhherCommand::getSingleLookUp(){
 		
 		for(int i=0;i<HOMOPS;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			float logFracFreq;
 			lookUpFile >> logFracFreq;
@@ -2050,7 +2051,7 @@ void ShhherCommand::getJointLookUp(){
 		
 		for(int i=0;i<NUMBINS;i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			for(int j=0;j<NUMBINS;j++){		
 				
@@ -2081,7 +2082,7 @@ double ShhherCommand::getProbIntensity(int intIntensity){
 		
 		for(int i=0;i<HOMOPS;i++){//loop signal strength
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			float negLogProb = singleLookUp[i * NUMBINS + intIntensity];
 			if(negLogProb < minNegLogProb)	{	minNegLogProb = negLogProb; }

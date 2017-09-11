@@ -115,7 +115,7 @@ string CollectCommand::getOutputPattern(string type) {
         else if (type == "boneh")       {  pattern =  "[filename],boneh";           }
         else if (type == "solow")       {  pattern =  "[filename],solow";           }
         else if (type == "shen")        {  pattern =  "[filename],shen";            }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -358,7 +358,7 @@ int CollectCommand::execute(){
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -467,7 +467,7 @@ int CollectCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->control_pressed) {  
+			if (m->getControl_pressed()) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 				delete input;  
@@ -479,7 +479,7 @@ int CollectCommand::execute(){
 
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
@@ -528,7 +528,7 @@ int CollectCommand::execute(){
 			}
 			
 			
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
@@ -560,7 +560,7 @@ int CollectCommand::execute(){
 				cCurve->getCurve(freq);
 				delete cCurve;
 				
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
@@ -576,7 +576,7 @@ int CollectCommand::execute(){
 			delete input;  
 		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

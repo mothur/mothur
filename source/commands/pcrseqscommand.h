@@ -282,9 +282,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                 }else if (pDataArray->ecolifile != "") {
                     //make sure the seqs are aligned
-                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
+                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->setControl_pressed(true); break; }
                     else if (currSeq.getAligned().length() != pDataArray->length) {
-                        pDataArray->m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); pDataArray->m->control_pressed = true; break; 
+                        pDataArray->m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); pDataArray->m->setControl_pressed(true); break; 
                     }else {
                         if (pDataArray->keepdots)   { 
                             currSeq.filterToPos(pDataArray->start); 
@@ -297,10 +297,10 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
-                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
+                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->setControl_pressed(true); break; }
                     else {
                         if (pDataArray->end != -1) {
-                            if (pDataArray->end > currSeq.getAligned().length()) {  pDataArray->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); pDataArray->m->control_pressed = true; break; }
+                            if (pDataArray->end > currSeq.getAligned().length()) {  pDataArray->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); pDataArray->m->setControl_pressed(true); break; }
                             else {
                                 if (pDataArray->keepdots)   { currSeq.filterFromPos(pDataArray->end); }
                                 else {

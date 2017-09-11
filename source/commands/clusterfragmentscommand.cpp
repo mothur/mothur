@@ -76,7 +76,7 @@ string ClusterFragmentsCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],fragclust.fasta"; } 
         else if (type == "name") {  pattern = "[filename],fragclust.names"; } 
         else if (type == "count") {  pattern = "[filename],fragclust.count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -219,7 +219,7 @@ int ClusterFragmentsCommand::execute(){
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 	
 		if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
 		
@@ -238,7 +238,7 @@ int ClusterFragmentsCommand::execute(){
 				//try to merge it with all smaller seqs
 				for (int j = i+1; j < numSeqs; j++) {
 					
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					
 					if (alignSeqs[j].active) {  //this sequence has not been merged yet
 						
@@ -276,7 +276,7 @@ int ClusterFragmentsCommand::execute(){
 		string newNamesFile = getOutputFileName("name", variables);
         if (countfile != "") { newNamesFile = getOutputFileName("count", variables); }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Total number of sequences before cluster.fragments was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
@@ -286,7 +286,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
 		
-		if (m->control_pressed) { m->mothurRemove(newFastaFile); m->mothurRemove(newNamesFile); return 0; }
+		if (m->getControl_pressed()) { m->mothurRemove(newFastaFile); m->mothurRemove(newNamesFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -386,7 +386,7 @@ int ClusterFragmentsCommand::readFASTA(){
 		
 		while (!inFasta.eof()) {
 			
-			if (m->control_pressed) { inFasta.close(); return 0; }
+			if (m->getControl_pressed()) { inFasta.close(); return 0; }
 			
 			Sequence seq(inFasta);  m->gobble(inFasta);
 			

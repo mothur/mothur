@@ -72,7 +72,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 			for(int i=0;i<rank;i++) {
 				f >> names[i];
 				for(int j=0;j<rank;j++) {
-					if (m->control_pressed) { return names; }
+					if (m->getControl_pressed()) { return names; }
 					
 					f >> matrix[i][j];
 					if (matrix[i][j] == -0.0000)
@@ -90,7 +90,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 				f >> names[i];
 				matrix[i][i]=0.0000;
 				for(int j=0;j<i;j++){
-					if (m->control_pressed) { return names; }
+					if (m->getControl_pressed()) { return names; }
 					f >> matrix[i][j];
 					if (matrix[i][j] == -0.0000)
 						matrix[i][j] = 0.0000;
@@ -153,7 +153,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 			for(int i=0;i<rank;i++) {
 				f >> names[i];
 				for(int j=0;j<rank;j++) {
-					if (m->control_pressed) { return names; }
+					if (m->getControl_pressed()) { return names; }
 					
 					f >> temp;
 					
@@ -169,7 +169,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 			for(int i=1;i<rank;i++){
 				f >> names[i];
 				for(int j=0;j<i;j++){
-					if (m->control_pressed) { return names; }
+					if (m->getControl_pressed()) { return names; }
 					f >> temp;
 					seqDist dist(i, j, temp);
 					matrix.push_back(dist);

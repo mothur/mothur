@@ -52,7 +52,7 @@ double LinearAlgebra::betai(const double a, const double b, const double x) {
         double bt;
         double result = 0.0;
         
-        if (x < 0.0 || x > 1.0) { m->mothurOut("[ERROR]: bad x in betai.\n"); m->control_pressed = true; return 0.0; }
+        if (x < 0.0 || x > 1.0) { m->mothurOut("[ERROR]: bad x in betai.\n"); m->setControl_pressed(true); return 0.0; }
         
         if (x == 0.0 || x == 1.0)  { bt = 0.0; }
         else { bt = exp(gammln(a+b)-gammln(a)-gammln(b)+a*log(x)+b*log(1.0-x));  }
@@ -96,7 +96,7 @@ double LinearAlgebra::gammp(const double a, const double x) {
     try {
         double gamser,gammcf,gln;
         
-        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMP\n"); m->control_pressed = true; return 0.0;}
+        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMP\n"); m->setControl_pressed(true); return 0.0;}
         if (x < (a+1.0)) {
             gser(gamser,a,x,gln);
             return gamser;
@@ -118,7 +118,7 @@ double LinearAlgebra::gammp(const double a, const double x) {
     try {
         double gamser,gammcf,gln;
         
-        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMQ\n"); m->control_pressed = true; return 0.0; }
+        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMQ\n"); m->setControl_pressed(true); return 0.0; }
         if (x < (a+1.0)) {
             gser(gamser,a,x,gln);
             return 1.0-gamser;
@@ -161,7 +161,7 @@ double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double
             h *= del;
             if (fabs(del-1.0) <= EPS) break;
         }
-        if (i > ITMAX)  { m->mothurOut("[ERROR]: " + toString(a) + " too large, ITMAX=100 too small in gcf\n"); m->control_pressed = true; }
+        if (i > ITMAX)  { m->mothurOut("[ERROR]: " + toString(a) + " too large, ITMAX=100 too small in gcf\n"); m->setControl_pressed(true); }
         gammcf=exp(-x+a*log(x)-gln)*h;
         
         return 0.0;
@@ -182,7 +182,7 @@ double LinearAlgebra::gser(double& gamser, const double a, const double x, doubl
         
         gln=gammln(a);
         if (x <= 0.0) { 
-            if (x < 0.0) {  m->mothurOut("[ERROR]: x less than 0 in routine GSER\n"); m->control_pressed = true;  }
+            if (x < 0.0) {  m->mothurOut("[ERROR]: x less than 0 in routine GSER\n"); m->setControl_pressed(true);  }
             gamser=0.0; return 0.0;
         } else {
             ap=a;
@@ -245,7 +245,7 @@ double LinearAlgebra::betacf(const double a, const double b, const double x) {
             if (fabs(del-1.0) < EPS) break;
         }
         
-        if (m1 > MAXIT) { m->mothurOut("[ERROR]: a or b too big or MAXIT too small in betacf."); m->mothurOutEndLine(); m->control_pressed = true; }
+        if (m1 > MAXIT) { m->mothurOut("[ERROR]: a or b too big or MAXIT too small in betacf."); m->mothurOutEndLine(); m->setControl_pressed(true); }
         return h;
         
     }
@@ -272,7 +272,7 @@ vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first
 		for(int i=0;i<first_rows;i++){
 			for(int j=0;j<second_cols;j++){
 				
-				if (m->control_pressed) { return product; }
+				if (m->getControl_pressed()) { return product; }
 					
 				product[i][j] = 0.0;
 				for(int k=0;k<first_cols;k++){
@@ -533,7 +533,7 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 			
 			for (int i = 0; i < dists.size(); i++) {
 				
-				if (m->control_pressed) { return dists; }
+				if (m->getControl_pressed()) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
 					dists[i][j] = abs(axes[i][0] - axes[j][0]);
@@ -545,7 +545,7 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 			
 			for (int i = 0; i < dists.size(); i++) {
 				
-				if (m->control_pressed) { return dists; }
+				if (m->getControl_pressed()) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
 					double sum = 0.0;
@@ -579,7 +579,7 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 			
 			for (int i = 0; i < dists.size(); i++) {
 				
-				if (m->control_pressed) { return dists; }
+				if (m->getControl_pressed()) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
 					dists[i][j] = abs(axes[0][i] - axes[0][j]);
@@ -591,7 +591,7 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 			
 			for (int i = 0; i < dists[0].size(); i++) {
 				
-				if (m->control_pressed) { return dists; }
+				if (m->getControl_pressed()) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
 					double sum = 0.0;
@@ -1377,13 +1377,13 @@ double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double&
         
         vector<spearmanRank> ranks;
         for (int i = 0; i < x.size(); i++) {
-            if (m->control_pressed) { return W; }
+            if (m->getControl_pressed()) { return W; }
             spearmanRank member("x", x[i]);
             ranks.push_back(member);
         }
         
         for (int i = 0; i < y.size(); i++) {
-            if (m->control_pressed) { return W; }
+            if (m->getControl_pressed()) { return W; }
             spearmanRank member("y", y[i]);
             ranks.push_back(member);
         }
@@ -1396,7 +1396,7 @@ double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double&
 		int rankTotal = 0;
         vector<int> TIES;
 		for (int j = 0; j < ranks.size(); j++) {
-            if (m->control_pressed) { return W; }
+            if (m->getControl_pressed()) { return W; }
 			rankTotal += (j+1);
 			ties.push_back(&(ranks[j]));
             
@@ -1423,7 +1423,7 @@ double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double&
         //STATISTIC <- sum(r[seq_along(x)]) - n.x * (n.x + 1)/2
         double sumRanks = 0.0;
         for (int i = 0; i < ranks.size(); i++) {
-            if (m->control_pressed) { return W; }
+            if (m->getControl_pressed()) { return W; }
             if (ranks[i].name == "x") { sumRanks += ranks[i].score; }
         }
         
@@ -1763,7 +1763,7 @@ vector<vector<double> > LinearAlgebra::getObservedEuclideanDistance(vector<vecto
         for(int i=0;i<numSamples;i++){
             for(int j=0;j<numSamples;j++){
                 
-                if (m->control_pressed) { return dMatrix; }
+                if (m->getControl_pressed()) { return dMatrix; }
                 
                 double d = 0;
                 for(int k=0;k<numOTUs;k++){
@@ -1791,7 +1791,7 @@ vector<double> LinearAlgebra::solveEquations(vector<vector<double> > A, vector<d
         for(int i=0;i<length;i++){  index[i] = i;   }
         double d;
         
-        ludcmp(A, index, d);  if (m->control_pressed) { return b; }
+        ludcmp(A, index, d);  if (m->getControl_pressed()) { return b; }
         lubksb(A, index, b);
         
         return b;
@@ -1810,7 +1810,7 @@ vector<float> LinearAlgebra::solveEquations(vector<vector<float> > A, vector<flo
         for(int i=0;i<length;i++){  index[i] = i;   }
         float d;
         
-        ludcmp(A, index, d);  if (m->control_pressed) { return b; }
+        ludcmp(A, index, d);  if (m->getControl_pressed()) { return b; }
         lubksb(A, index, b);
         
         return b;
@@ -1842,7 +1842,7 @@ void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, doubl
         }
         
         for(int j=0;j<n;j++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             for(int i=0;i<j;i++){
                 double sum = A[i][j];
                 for(int k=0;k<i;k++){   sum -= A[i][k] * A[k][j];   }
@@ -1896,7 +1896,7 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
         
         for(int i=0;i<n;i++){
             //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             int ip = index[i];
             total = b[ip];
             b[ip] = b[i];
@@ -1947,7 +1947,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         }
         
         for(int j=0;j<n;j++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
             for(int i=0;i<j;i++){
                 //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
@@ -2003,7 +2003,7 @@ void LinearAlgebra::lubksb(vector<vector<float> >& A, vector<int>& index, vector
         int ii = 0;
         
         for(int i=0;i<n;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             int ip = index[i];
             total = b[ip];
             b[ip] = b[i];
@@ -2044,7 +2044,7 @@ vector<vector<double> > LinearAlgebra::getInverse(vector<vector<double> > matrix
         ludcmp(matrix, index, dummy);
         
         for(int j=0;j<n;j++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             column.assign(n, 0);
             
@@ -2179,7 +2179,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         for (int i = 0; i < d.size(); i++) {  if (d[i] > 0.0000000001) { rank++; goodColumns.insert(i); } } //cout << d[i] << endl;
         
         if (rank == 0) {
-            ignore=true; //m->mothurOut("[ERROR]: rank = 0: variables are numerically const\n"); m->control_pressed = true;
+            ignore=true; //m->mothurOut("[ERROR]: rank = 0: variables are numerically const\n"); m->setControl_pressed(true);
             return scaling; }
         
         //scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank], , rank)
@@ -2303,7 +2303,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         for (int i = 0; i < d.size(); i++) { if (d[i] > (0.0000000001*largeD)) { rank++; goodColumns.insert(i); } }
         
         if (rank == 0) {
-            ignore=true;//m->mothurOut("[ERROR]: rank = 0: class means are numerically identical.\n"); m->control_pressed = true;
+            ignore=true;//m->mothurOut("[ERROR]: rank = 0: class means are numerically identical.\n"); m->setControl_pressed(true);
             return scaling; }
         
         if (transpose) { Xcopy = linear.transpose(v);  }
@@ -2364,7 +2364,7 @@ int LinearAlgebra::svd(vector< vector<double> >& a, vector<double>& w, vector< v
         v.resize(numCols); for (int i = 0; i < numCols; i++) { v[i].resize(numRows, 0.0); }
     
         vector<double> rv1; rv1.resize(numCols, 0.0);
-        if (numRows < numCols){  m->mothurOut("[ERROR]: numRows < numCols\n"); m->control_pressed = true; return 0; }
+        if (numRows < numCols){  m->mothurOut("[ERROR]: numRows < numCols\n"); m->setControl_pressed(true); return 0; }
 
         /* Householder reduction to bidiagonal form */
         for (i = 0; i < numCols; i++)
@@ -2554,7 +2554,7 @@ int LinearAlgebra::svd(vector< vector<double> >& a, vector<double>& w, vector< v
                     break;
                 }
                 if (its >= 30) {
-                    m->mothurOut("No convergence after 30,000! iterations \n"); m->control_pressed = true;
+                    m->mothurOut("No convergence after 30,000! iterations \n"); m->setControl_pressed(true);
                     return(0);
                 }
                 

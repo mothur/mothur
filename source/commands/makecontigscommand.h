@@ -374,7 +374,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     numFPrimers = oligos.getPairedPrimers().size();
                     numBarcodes = oligos.getPairedBarcodes().size();
                 }else {
-                    pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->control_pressed = true;
+                    pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->setControl_pressed(true);
                 }
                 
                 if (pDataArray->m->control_pressed) { break; }

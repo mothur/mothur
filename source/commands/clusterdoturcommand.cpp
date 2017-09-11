@@ -57,7 +57,7 @@ string ClusterDoturCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -232,7 +232,7 @@ int ClusterDoturCommand::execute(){
         }
         tag = cluster->getTag();
         
-		if (m->control_pressed) { delete cluster; return 0; }
+		if (m->getControl_pressed()) { delete cluster; return 0; }
 		
 		list = cluster->getListVector();
 		rabund = cluster->getRAbundVector();
@@ -269,7 +269,7 @@ int ClusterDoturCommand::execute(){
 		int estart = time(NULL);
 	
 		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
-			if (m->control_pressed) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
                 listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear();  return 0;  }
 		
 			cluster->update(cutoff);

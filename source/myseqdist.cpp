@@ -101,7 +101,7 @@ int correctDist::getSequences(string sequenceFileName){
 		string seqName, seqSeq;
 		
 		while(!sequenceFile.eof()){
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			Sequence temp(sequenceFile); m->gobble(sequenceFile);
 			
@@ -171,7 +171,7 @@ int correctDist::createProcess(string distanceFileName){
                     int temp = processIDs[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
 			}
@@ -249,7 +249,7 @@ int correctDist::driver(int start, int end, string distFileName){
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { distFile.close(); return 0; }
+				if (m->getControl_pressed()) { distFile.close(); return 0; }
 				
 				double dist = getDist(sequences[i], sequences[j]);
 				
@@ -298,7 +298,7 @@ double correctDist::getDist(vector<int>& seqA, vector<int>& seqB){
 		for(int i=1;i<=lengthA;i++){
 			for(int j=1;j<=lengthB;j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->getControl_pressed()) {  return 0;  }
 				
 				double nogap;		
 				nogap = alignMatrix[i-1][j-1] + correctMatrix[seqA[i-1]][seqB[j-1]];
@@ -381,7 +381,7 @@ double correctDist::getDist(vector<int>& seqA, vector<int>& seqB){
 		
 		while(i > 0 && j > 0){
 			
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(alignMoves[i][j] == 'd'){
 				//			alignA = bases[seqA[i-1]] + alignA;
@@ -428,7 +428,7 @@ int correctDist::getLastMatch(char direction, vector<vector<char> >& alignMoves,
 		
 		while(i>=1 && j>=1){
 			
-			if (m->control_pressed) { return nullReturn; }
+			if (m->getControl_pressed()) { return nullReturn; }
 			
 			if(direction == 'd'){
 				if(seqA[i-1] == seqB[j-1])	{	return seqA[i-1];	}

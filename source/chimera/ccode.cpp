@@ -165,7 +165,7 @@ int Ccode::getChimeras(Sequence* query) {
 		//find closest matches to query
 		closest = findClosest(query, numWanted);
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//initialize spotMap
 		for (int i = 0; i < query->getAligned().length(); i++) {	spotMap[i] = i;		}
@@ -190,7 +190,7 @@ int Ccode::getChimeras(Sequence* query) {
 			createFilter(temp, 0.5);
 		
 			for (int i = 0; i < temp.size(); i++) { 
-				if (m->control_pressed) {  return 0;  }
+				if (m->getControl_pressed()) {  return 0;  }
 				runFilter(temp[i]);  
 			}
 			
@@ -210,32 +210,32 @@ int Ccode::getChimeras(Sequence* query) {
 
 		//trim sequences - this follows ccodes remove_extra_gaps 
 		trimSequences(query);
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//windows are equivalent to words - ccode paper recommends windows are between 5% and 20% on alignment length().  
 		//Our default will be 10% and we will warn if user tries to use a window above or below these recommendations
 		windows = findWindows();  
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 
 		//remove sequences that are more than 20% different and less than 0.5% different - may want to allow user to specify this later 
 		removeBadReferenceSeqs(closest);
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//find the averages for each querys references
 		getAverageRef(closest);  //fills sumRef, averageRef, sumSquaredRef and refCombo.
 		getAverageQuery(closest, query);  //fills sumQuery, averageQuery, sumSquaredQuery.
-		if (m->control_pressed) {  return 0;  }			
+		if (m->getControl_pressed()) {  return 0;  }			
 		
 		//find the averages for each querys references 
 		findVarianceRef();  //fills varRef and sdRef also sets minimum error rate to 0.001 to avoid divide by 0.
-		if (m->control_pressed) {  return 0;  }	
+		if (m->getControl_pressed()) {  return 0;  }	
 			
 		//find the averages for the query 
 		findVarianceQuery();  //fills varQuery and sdQuery also sets minimum error rate to 0.001 to avoid divide by 0.
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 					
 		determineChimeras();  //fills anova, isChimericConfidence, isChimericTStudent and isChimericANOVA. 
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		return 0;
 	}

@@ -46,7 +46,7 @@ string Maligner::getResults(Sequence q, DeCalculator decalc) {
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
 		
-		if (m->control_pressed) { return chimera;  }
+		if (m->getControl_pressed()) { return chimera;  }
 				
 		//free memory
 		//delete query;
@@ -82,13 +82,13 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query.getAligned().length(), refSeqs.size()); //builds and initializes
 		
-		if (m->control_pressed) { return chimera;  }
+		if (m->getControl_pressed()) { return chimera;  }
 		
 		fillScoreMatrix(matrix, refSeqs, chimeraPenalty);
 		
 		vector<score_struct> path = extractHighestPath(matrix);
 		
-		if (m->control_pressed) { return chimera;  }
+		if (m->getControl_pressed()) { return chimera;  }
 		
 		vector<trace_struct> trace = mapTraceRegionsToAlignment(path);
 				
@@ -125,7 +125,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 		string queryInRange = query->getAligned();
 		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart));*/
 		
-		if (m->control_pressed) { return chimera;  }
+		if (m->getControl_pressed()) { return chimera;  }
 		
 		//save output results
 		for (int i = 0; i < trace.size(); i++) {

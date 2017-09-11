@@ -28,7 +28,7 @@ int ReadCluster::read(NameAssignment*& nameMap){
 		if (format == "phylip") { convertPhylip2Column(nameMap); }
 		else { list = new ListVector(nameMap->getListVector());  }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		if (sortWanted) {  OutPutFile = m->sortFile(distFile, outputDir);  }
 		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
@@ -48,7 +48,7 @@ int ReadCluster::read(CountTable*& ct){
 		if (format == "phylip") { convertPhylip2Column(ct); }
 		else { list = new ListVector(ct->getListVector());  }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		if (sortWanted) {  OutPutFile = m->sortFile(distFile, outputDir);  }
 		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
@@ -129,7 +129,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 					for(int j=0;j<i;j++){
 					
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -146,7 +146,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 					for(int j=0;j<i;j++){
 						
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -168,7 +168,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 				if(nameMap == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 					
@@ -183,7 +183,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<nseqs;j++){
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -221,7 +221,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		float dist;
 		
 		while (in2) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
@@ -233,7 +233,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		m->mothurRemove(tempFile);
 		distFile = outputFile;
 	
-		if (m->control_pressed) {  m->mothurRemove(outputFile);  }
+		if (m->getControl_pressed()) {  m->mothurRemove(outputFile);  }
 
 		return 0;
 	}
@@ -307,7 +307,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 					
 					for(int j=0;j<i;j++){
                         
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -323,7 +323,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 					
 					for(int j=0;j<i;j++){
 						
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -345,7 +345,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				if(ct == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -358,7 +358,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				}
 				else{
 					for(int j=0;j<nseqs;j++){
-						if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -396,7 +396,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		float dist;
 		
 		while (in2) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
@@ -408,7 +408,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		m->mothurRemove(tempFile);
 		distFile = outputFile;
         
-		if (m->control_pressed) {  m->mothurRemove(outputFile);  }
+		if (m->getControl_pressed()) {  m->mothurRemove(outputFile);  }
         
 		return 0;
 	}

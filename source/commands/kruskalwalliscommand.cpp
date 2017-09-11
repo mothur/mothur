@@ -51,7 +51,7 @@ string KruskalWallisCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "kruskall-wallis") {  pattern = "[filename],[distance],kruskall_wallis"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -190,7 +190,7 @@ int KruskalWallisCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { delete lookup;  return 0; }
+            if (m->getControl_pressed()) { delete lookup;  return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -226,13 +226,13 @@ int KruskalWallisCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -296,11 +296,12 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             treatments.insert(treatment);
         }
-        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->control_pressed = true; }
+        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->setControl_pressed(true); }
         
         LinearAlgebra linear;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             vector<spearmanRank> values;
             for (int j = 0; j < lookup.size(); j++) {
@@ -314,7 +315,7 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
             double H = linear.calcKruskalWallis(values, pValue);
             
             //output H and signifigance
-            out << m->currentSharedBinLabels[i] << '\t' << H << '\t' << pValue << endl;
+            out << currentLabels[i] << '\t' << H << '\t' << pValue << endl;
         }
         out.close();
                 

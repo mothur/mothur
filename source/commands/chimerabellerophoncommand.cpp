@@ -61,7 +61,7 @@ string ChimeraBellerophonCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],bellerophon.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],bellerophon.accnos"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -243,7 +243,7 @@ int ChimeraBellerophonCommand::execute(){
 			
 			chimera->getChimeras();
 			
-			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
+			if (m->getControl_pressed()) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
 					
 			ofstream out;
 			m->openOutputFile(outputFileName, out);
@@ -255,7 +255,7 @@ int ChimeraBellerophonCommand::execute(){
 			out.close();
 			out2.close(); 
 						
-			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
+			if (m->getControl_pressed()) { m->mothurRemove(accnosFileName); m->mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 			

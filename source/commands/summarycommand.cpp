@@ -94,7 +94,7 @@ string SummaryCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],summary-[filename],[tag],summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -300,7 +300,7 @@ int SummaryCommand::execute(){
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		int numLines = 0;
 		int numCols = 0;
@@ -430,11 +430,11 @@ int SummaryCommand::execute(){
 			
             
             
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+				if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -444,7 +444,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 					numLines++;
 				}
 				
@@ -460,7 +460,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 					numLines++;
 					
 					//restore real lastlabel to save below
@@ -473,7 +473,7 @@ int SummaryCommand::execute(){
 				sabund = input.getSAbundVector();
 			}
 			
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -496,7 +496,7 @@ int SummaryCommand::execute(){
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
                 process(sabund, outputFileHandle, outAve);
                 
-                if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
+                if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
 				numLines++;
 				delete sabund;
 			}
@@ -504,17 +504,17 @@ int SummaryCommand::execute(){
 			outputFileHandle.close();
             if (subsample) { outAve.close(); }
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 			 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
 		
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
 		if ((sharedfile != "") && (groupMode)) {   vector<string> comboNames = createGroupSummaryFile(numLines, numCols, outputNames, groupIndex);  for (int i = 0; i < comboNames.size(); i++) { outputNames.push_back(comboNames[i]); } }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -556,7 +556,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
             for(int i=0;i<sumCalculators.size();i++){
                 vector<double> data = sumCalculators[i]->getValues(thisIterSabund);
                
-                if (m->control_pressed) {  return 0;  }
+                if (m->getControl_pressed()) {  return 0;  }
                 
                 if (thisIter == 0) {
                     outputFileHandle << '\t';
@@ -566,7 +566,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
                     if (results[i].size() == 0) {  results[i].resize(data.size());  }
                     //save results for ave and std.
                     for (int j = 0; j < data.size(); j++) {
-                        if (m->control_pressed) {  return 0;  }
+                        if (m->getControl_pressed()) {  return 0;  }
                         results[i][j].push_back(data[j]); 
                     }
                 }
@@ -648,7 +648,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
             if (subsampleSize == -1) { subsampleSize = lookup->getNumSeqsSmallestGroup(); }
             else { lookup->removeGroups(subsampleSize); }
             
-            if (lookup->size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return filenames; }
+            if (lookup->size() < 1) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return filenames; }
         }
 		/******************************************************/
         
@@ -762,7 +762,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
         
         for (map<string, map<string, vector<string> > >::iterator itFiles = files.begin(); itFiles != files.end(); itFiles++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string extension = itFiles->first;
             map<string, vector<string> > thisType = itFiles->second;

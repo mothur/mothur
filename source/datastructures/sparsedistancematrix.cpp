@@ -125,7 +125,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
         for (int i = 0; i < seqVec.size(); i++) {
             for (int j = 0; j < seqVec[i].size(); j++) {
                 
-                if (m->control_pressed) { return smallDist; }
+                if (m->getControl_pressed()) { return smallDist; }
                 
                 //already checked everyone else in row
                 if (i < seqVec[i][j].index) {  

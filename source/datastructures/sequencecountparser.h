@@ -26,8 +26,8 @@ class SequenceCountParser {
 	
 public:
 	
-    SequenceCountParser(string, string, vector<string>);			//count, fasta - file mismatches will set m->control_pressed = true
-    SequenceCountParser(string, CountTable&, vector<string>);		//fasta, counttable - file mismatches will set m->control_pressed = true
+    SequenceCountParser(string, string, vector<string>);			//count, fasta - file mismatches will set m->setControl_pressed(true)
+    SequenceCountParser(string, CountTable&, vector<string>);		//fasta, counttable - file mismatches will set m->setControl_pressed(true)
     ~SequenceCountParser();
     
     //general operations

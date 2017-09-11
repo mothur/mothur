@@ -78,7 +78,7 @@ string PreClusterCommand::getOutputPattern(string type) {
         else if (type == "name") {  pattern = "[filename],precluster.names"; } 
         else if (type == "count") {  pattern = "[filename],precluster.count_table"; }
         else if (type == "map") {  pattern =  "[filename],precluster.map"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -310,7 +310,7 @@ int PreClusterCommand::execute(){
                 m->mothurOutEndLine(); 
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
                 m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-                m->mothurCalling = true;
+                m->setMothurCalling(true);
                 
                 Command* uniqueCommand = new DeconvoluteCommand(inputString);
                 uniqueCommand->execute();
@@ -318,13 +318,13 @@ int PreClusterCommand::execute(){
                 map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
                 
                 delete uniqueCommand;
-                m->mothurCalling = false;
+                m->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
                 
                 m->renameFile(filenames["fasta"][0], newFastaFile);
                 m->renameFile(filenames["name"][0], newNamesFile); 
 			}
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}	 delete alignment; return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}	 delete alignment; return 0; }
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
 				
 		}else {
@@ -333,7 +333,7 @@ int PreClusterCommand::execute(){
 			//reads fasta file and return number of seqs
 			int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 		
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
 	
 			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); delete alignment; return 0;  }
 			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); delete alignment; return 0;  }
@@ -341,7 +341,7 @@ int PreClusterCommand::execute(){
 			int count = process(newMapFile);
 			outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
 			
 			m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
@@ -351,7 +351,7 @@ int PreClusterCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
 		}
 				
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} delete alignment; return 0; }
         
         delete alignment;
 		
@@ -444,7 +444,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".outputNames.temp"));
                 }
@@ -455,7 +455,8 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".outputNames.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".outputNames.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             num = 0;
@@ -560,7 +561,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
 			for (int j = 0; j < pDataArray[i]->mapFileNames.size(); j++) {
 				outputNames.push_back(pDataArray[i]->mapFileNames[j]); outputTypes["map"].push_back(pDataArray[i]->mapFileNames[j]); 
@@ -612,7 +613,7 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			
 			start = time(NULL);
 			
-			if (m->control_pressed) { if (countfile != "") { delete cparser; }else { delete parser; } return 0; }
+			if (m->getControl_pressed()) { if (countfile != "") { delete cparser; }else { delete parser; } return 0; }
 			
 			m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[i] + ":"); m->mothurOutEndLine();
 			
@@ -628,14 +629,14 @@ int PreClusterCommand::driverGroups(string newFFile, string newNFile, string new
 			//fill alignSeqs with this groups info.
 			numSeqs = loadSeqs(thisNameMap, thisSeqs, groups[i]);
 			
-			if (m->control_pressed) {   return 0; }
+			if (m->getControl_pressed()) {   return 0; }
 			
-            if (method == "aligned") { if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); m->control_pressed = true; return 0;  } }
+            if (method == "aligned") { if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0;  } }
 			
 			int count= process(newMFile+groups[i]+".map");
 			outputNames.push_back(newMFile+groups[i]+".map"); outputTypes["map"].push_back(newMFile+groups[i]+".map");
 			
-			if (m->control_pressed) {  return 0; }
+			if (m->getControl_pressed()) {  return 0; }
 			
 			m->mothurOut("Total number of sequences before pre.cluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
@@ -677,7 +678,7 @@ int PreClusterCommand::process(string newMapFile){
                     //try to merge it with all smaller seqs
                     for (int j = i+1; j < numSeqs; j++) {
                         
-                        if (m->control_pressed) { out.close(); return 0; }
+                        if (m->getControl_pressed()) { out.close(); return 0; }
                         
                         if (alignSeqs[j].active) {  //this sequence has not been merged yet
                             //are you within "diff" bases
@@ -720,7 +721,7 @@ int PreClusterCommand::process(string newMapFile){
                 //try to merge it into larger seqs
                 for (int j = i+1; j < numSeqs; j++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
                         //are you within "diff" bases
@@ -779,7 +780,7 @@ int PreClusterCommand::readFASTA(){
 		
 		while (!inFasta.eof()) {
 			
-			if (m->control_pressed) { inFasta.close(); return 0; }
+			if (m->getControl_pressed()) { inFasta.close(); return 0; }
 						
 			Sequence seq(inFasta);  m->gobble(inFasta);
 			
@@ -831,7 +832,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
         	
 		for (int i = 0; i < thisSeqs.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 						
 			if (namefile != "") {
 				map<string, string>::iterator it = thisName.find(thisSeqs[i].getName());
@@ -870,7 +871,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
         else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(); }
         
 		//sanity check
-		if (error) { m->control_pressed = true; }
+		if (error) { m->setControl_pressed(true); }
 		
 		thisSeqs.clear();
         
@@ -936,7 +937,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
         string group, first, second;
         set<string> uniqueNames;
         while (!inNames.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             inNames >> group; m->gobble(inNames);
             inNames >> first; m->gobble(inNames);
             inNames >> second; m->gobble(inNames);
@@ -975,7 +976,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
             int count = 0;
             set<string> already;
             while(!in.eof()) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 Sequence seq(in); m->gobble(in);
                 

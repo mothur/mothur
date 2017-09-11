@@ -52,9 +52,9 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
             fileHandle >> secondName; m->gobble(fileHandle);
             fileHandle >> distance;	// get the row and column names and distance
             
-            if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
+            if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
 			
-			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 	
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
@@ -114,7 +114,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
                 fileHandle >> secondName; m->gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
-				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+				if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 		
 				map<string,int>::iterator itA = nameMap->find(firstName);
 				map<string,int>::iterator itB = nameMap->find(secondName);
@@ -135,7 +135,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			}
 		}
 		
-		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 		
 		reading->finish();
 		fileHandle.close();
@@ -177,12 +177,12 @@ int ReadColumnMatrix::read(CountTable* countTable){
             fileHandle >> secondName; m->gobble(fileHandle);
             fileHandle >> distance;	// get the row and column names and distance
             
-			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
             
 			int itA = countTable->get(firstName);
 			int itB = countTable->get(secondName);
             
-            if (m->control_pressed) { exit(1); }
+            if (m->getControl_pressed()) { exit(1); }
             
 			if (distance == -1) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -236,13 +236,13 @@ int ReadColumnMatrix::read(CountTable* countTable){
                 fileHandle >> secondName; m->gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
-				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+				if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
                 
 				int itA = countTable->get(firstName);
                 int itB = countTable->get(secondName);
                 
                 
-                if (m->control_pressed) { exit(1); }
+                if (m->getControl_pressed()) { exit(1); }
 				
 				if (distance == -1) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -257,7 +257,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
 			}
 		}
 		
-		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 		
 		reading->finish();
 		fileHandle.close();

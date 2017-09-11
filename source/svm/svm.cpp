@@ -500,7 +500,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     double lambda = numeric_limits<double>::max();
     while ( true ) {
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         //if ( externalSvmTrainingInterruption.interruptTraining() ) {
             // this should be a specialized exception
             //cout << "***************************** interrupting training **********************************" << endl;
@@ -950,7 +950,7 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
             m->mothurOut( "fold " + toString(kFoldLabeledObservationsDivider.getFoldNumber()) + " training data has " + toString(kthTwoClassTrainingFold.size()) + " labeled observations" ); m->mothurOutEndLine();
             m->mothurOut( "fold " + toString(kFoldLabeledObservationsDivider.getFoldNumber()) + " testing data has " + toString(kthTwoClassTestingFold.size()) + " labeled observations" ); m->mothurOutEndLine();
         }
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
 //        if ( externalSvmTrainingInterruption.interruptTraining() ) {
 //            m->mothurOut( "training interrupted by user" ); m->mothurOutEndLine();
 //            throw multiClassSvmTrainingInterruptedException;

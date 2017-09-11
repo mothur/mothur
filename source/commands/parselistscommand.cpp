@@ -55,7 +55,7 @@ string ParseListCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "list") {  pattern = "[filename],[group],[distance],list"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -214,14 +214,14 @@ int ParseListCommand::execute(){
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			delete list; if (groupfile != "") { delete groupMap; }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 		}
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				delete list; if (groupfile != "") { delete groupMap; }
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
@@ -258,7 +258,7 @@ int ParseListCommand::execute(){
 			list = input.getListVector(); //get new list vector to process
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			if (groupfile != "") { delete groupMap; }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
@@ -278,7 +278,7 @@ int ParseListCommand::execute(){
 
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			if (groupfile != "") { delete groupMap; }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
@@ -297,7 +297,7 @@ int ParseListCommand::execute(){
 		
 		if (groupfile != "") { delete groupMap; }
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
@@ -356,7 +356,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 
 		vector<string> binLabels = thisList->getLabels();
 		for (int i = 0; i < thisList->getNumBins(); i++) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			map<string, string> groupBins;
 			string bin = list->get(i); 

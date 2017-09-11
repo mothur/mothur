@@ -23,7 +23,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
     
         for (int i = 0; i < Groups.size(); i++) {
             if (m->inUsersGroups(Groups[i], m->getGroups())) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
         
                 int thisSize = ct->getGroupCount(Groups[i]);
                 
@@ -45,7 +45,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
                     sampleRandoms.clear(); sampleRandoms.resize(names.size(), 0);
                     for (int j = size; j < thisSize; j++) { sampleRandoms[random[j]]++; }
                     for (int j = 0; j < sampleRandoms.size(); j++) {  doNotIncludeTotals[names[j]] += sampleRandoms[j]; }
-                }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->control_pressed = true; }
+                }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->setControl_pressed(true); }
             }
 
         }
@@ -77,7 +77,7 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
         vector<string> newWanted;
         for (int i = 0; i < wanted.size(); i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string dupName = wanted[i];
             
@@ -93,7 +93,7 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
                     nameMap[repName] = dupName;
                     newWanted.push_back(repName);
                 }
-            }else { m->mothurOut("[ERROR]: "+dupName+" is not in your name file, please correct.\n"); m->control_pressed = true; }
+            }else { m->mothurOut("[ERROR]: "+dupName+" is not in your name file, please correct.\n"); m->setControl_pressed(true); }
         }
         
         wanted = newWanted;
@@ -109,7 +109,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
     try {
         
         //save mothurOut's binLabels to restore for next label
-        vector<string> saveBinLabels = m->currentSharedBinLabels;
+        vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         SharedRAbundVectors* newLookup = new SharedRAbundVectors();
         
         int numBins = rabunds[0]->getNumBins();
@@ -132,7 +132,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                 
                 for (int j = 0; j < size; j++) {
                     
-                    if (m->control_pressed) {  return m->currentSharedBinLabels; }
+                    if (m->getControl_pressed()) {  return m->getCurrentSharedBinLabels(); }
                     
                     int bin = order[j];
                     temp->increment(bin);
@@ -147,11 +147,11 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
         rabunds = newLookup->getSharedRAbundVectors();
         
         delete newLookup;
-        if (m->control_pressed) { return m->currentSharedBinLabels; }
+        if (m->getControl_pressed()) { return m->getCurrentSharedBinLabels(); }
         
         //save mothurOut's binLabels to restore for next label
-        vector<string> subsampleBinLabels = m->currentSharedBinLabels;
-        m->currentSharedBinLabels = saveBinLabels;
+        vector<string> subsampleBinLabels = m->getCurrentSharedBinLabels();
+        m->setCurrentSharedBinLabels(saveBinLabels);
         
         return subsampleBinLabels;
         
@@ -165,7 +165,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
 vector<string> SubSample::getSample(SharedRAbundVectors*& thislookup, int size) {
 	try {
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentSharedBinLabels;
+		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<SharedRAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
         
         vector<string> subsampleBinLabels = getSample(rabunds, size);
@@ -175,10 +175,10 @@ vector<string> SubSample::getSample(SharedRAbundVectors*& thislookup, int size) 
         delete thislookup;
         thislookup = newLookup;
         
-		if (m->control_pressed) { return m->currentSharedBinLabels; }
+		if (m->getControl_pressed()) { return m->getCurrentSharedBinLabels(); }
 		
 		//save mothurOut's binLabels to restore for next label
-		m->currentSharedBinLabels = saveBinLabels;
+		m->setCurrentSharedBinLabels(saveBinLabels);
 		
 		return subsampleBinLabels;
 		
@@ -205,7 +205,7 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
 
 			for (int j = 0; j < size; j++) {
                 
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
                 int abund = rabund.get(order.get(j));
 				rabund.set(order.get(j), (abund+1));
@@ -215,9 +215,9 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
             sabund = new SAbundVector();
             *sabund = rabund.getSAbundVector();
             
-		}else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->control_pressed = true; }
+		}else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->setControl_pressed(true); }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
 		return 0;
 		
@@ -230,7 +230,7 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
 //**********************************************************************************************************************
 CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups) {
 	try {
-        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: Cannot subsample by group because your count table doesn't have group information.\n"); m->control_pressed = true; }
+        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: Cannot subsample by group because your count table doesn't have group information.\n"); m->setControl_pressed(true); }
             
         CountTable sampledCt;
         map<string, vector<int> > tempCount;
@@ -241,7 +241,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
             vector<string> allNames;
             for (int j = 0; j < names.size(); j++) {
                 
-                if (m->control_pressed) { return sampledCt; }
+                if (m->getControl_pressed()) { return sampledCt; }
                 
                 int num = ct. getGroupCount(names[j], Groups[i]);
                 for (int k = 0; k < num; k++) { allNames.push_back(names[j]); }
@@ -249,11 +249,11 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
             
             m->mothurRandomShuffle(allNames);
             
-            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->control_pressed = true; }
+            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->setControl_pressed(true); }
             else{
                 for (int j = 0; j < size; j++) {
                     
-                    if (m->control_pressed) { return sampledCt; }
+                    if (m->getControl_pressed()) { return sampledCt; }
                     
                     map<string, vector<int> >::iterator it = tempCount.find(allNames[j]);
                     
@@ -285,7 +285,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
 CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups, bool pickedGroups) {
 	try {
         CountTable sampledCt;
-        if (!ct.hasGroupInfo() && pickedGroups) { m->mothurOut("[ERROR]: Cannot subsample with groups because your count table doesn't have group information.\n"); m->control_pressed = true; return sampledCt; }
+        if (!ct.hasGroupInfo() && pickedGroups) { m->mothurOut("[ERROR]: Cannot subsample with groups because your count table doesn't have group information.\n"); m->setControl_pressed(true); return sampledCt; }
         
         if (ct.hasGroupInfo()) {
             map<string, vector<int> > tempCount;
@@ -303,7 +303,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 vector<string> names = ct.getNamesOfSeqs(myGroups[i]);
                 for (int j = 0; j < names.size(); j++) {
                     
-                    if (m->control_pressed) { return sampledCt; }
+                    if (m->getControl_pressed()) { return sampledCt; }
                     
                     int num = ct. getGroupCount(names[j], myGroups[i]);
                     for (int k = 0; k < num; k++) { 
@@ -318,11 +318,11 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
             if (allNames.size() < size) { 
                 if (pickedGroups) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); } 
                 else { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences in the groups you chose.\n"); }
-                m->control_pressed = true; return sampledCt; }
+                m->setControl_pressed(true); return sampledCt; }
             else{
                 for (int j = 0; j < size; j++) {
                     
-                    if (m->control_pressed) { return sampledCt; }
+                    if (m->getControl_pressed()) { return sampledCt; }
                     
                     map<string, vector<int> >::iterator it = tempCount.find(allNames[j].name);
                     
@@ -355,12 +355,12 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 for (int j = 0; j < num; j++) { allNames.push_back(names[i]); }
             }
             
-            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->control_pressed = true; return sampledCt; }
+            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); return sampledCt; }
             else {
                 m->mothurRandomShuffle(allNames);
                 
                 for (int j = 0; j < size; j++) {
-                    if (m->control_pressed) { return sampledCt; }
+                    if (m->getControl_pressed()) { return sampledCt; }
                     
                     map<string, int>::iterator it = nameMap.find(allNames[j]);
                     

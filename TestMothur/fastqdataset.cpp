@@ -38,7 +38,7 @@ void TestFastqDataSet::fillForwardFastq() {
     
     int count = 0; bool ignore = false; string format = "illumina1.8+";
     while (!in.eof()) {
-        if (m->control_pressed) { break; }
+        if (m->getControl_pressed()) { break; }
         
         if (count < 2000) {
             FastqRead read(in, ignore, format); m->gobble(in);
@@ -60,7 +60,7 @@ void TestFastqDataSet::fillReverseFastq() {
     
     int count = 0; bool ignore = false; string format = "illumina1.8+";
     while (!in.eof()) {
-        if (m->control_pressed) { break; }
+        if (m->getControl_pressed()) { break; }
         
         if (count < 2000) {
             FastqRead read(in, ignore, format); m->gobble(in);

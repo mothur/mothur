@@ -179,7 +179,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 			
             level++;
             
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
@@ -320,7 +320,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 			
             level++;
             
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
@@ -693,7 +693,7 @@ void PhyloSummary::print(int i, ofstream& out, bool relabund){
                 string nodeName = "";
                 int thisNode = it->second;
                 while (tree[thisNode].rank != "0") { //while you are not at top
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     nodeName = tree[thisNode].name + "|" + nodeName;
                     thisNode = tree[thisNode].parent;
                 }

@@ -57,7 +57,7 @@ string CooccurrenceCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],cooccurence.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -203,7 +203,7 @@ int CooccurrenceCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->control_pressed) { delete lookup; out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) { delete lookup; out.close(); m->mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -233,13 +233,13 @@ int CooccurrenceCommand::execute(){
 			lastLabel = lookup->getLabel();
 			delete lookup;
 			
-			if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { out.close(); m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { out.close(); m->mothurRemove(outputFileName); return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -303,7 +303,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
             vector<int> abunds = thisLookUp->getOTU(j);
         for (int i = 0; i < abunds.size(); i++) { //nrows in the shared file
             
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
             int abund = abunds[i];
             
                 if(abund > 0) {
@@ -413,7 +413,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
         else if (matrix == "sim9" || matrix == "sim2") { }
         else {
             m->mothurOut("[ERROR]: No model selected! \n");
-            m->control_pressed = true;
+            m->setControl_pressed(true);
         }
         
         
@@ -422,7 +422,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
         else if (metric == "checker") { initscore = trial.calc_checker(co_matrix, rowtotal, ncols, nrows); }
         else if (metric == "vratio") { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal); }
         else if (metric == "combo") { initscore = trial.calc_combo(nrows, ncols, co_matrix); }
-        else { m->mothurOut("[ERROR]: No metric selected!\n"); m->control_pressed = true; return 1; }
+        else { m->mothurOut("[ERROR]: No metric selected!\n"); m->setControl_pressed(true); return 1; }
         
         m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
         
@@ -445,7 +445,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
             if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
                 count = 0;
                 while(count < n) {
-                    if (m->control_pressed) { return 0; }
+                    if (m->getControl_pressed()) { return 0; }
                 nextnum2:
                     previous = 0.0;
                     randnum = m->getRandomDouble0to1();
@@ -479,7 +479,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     count = 0;
                     while(count < rowtotal[i]) {
                         previous = 0.0;
-                        if (m->control_pressed) { return 0; }
+                        if (m->getControl_pressed()) { return 0; }
                         randnum = m->getRandomDouble0to1();
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
@@ -500,7 +500,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                 for(int j=0;j<ncols;j++) {
                     count = 0;
                     while(count < columntotal[j]) {
-                        if (m->control_pressed) { return 0; }
+                        if (m->getControl_pressed()) { return 0; }
                         randnum = m->getRandomDouble0to1();
                         for(int i=0;i<nrows;i++) {
                             current = probabilityMatrix[ncols * i + j];
@@ -522,7 +522,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                 nullmatrix = co_matrix;
             }
             else {
-                m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: No null model selected!\n\n"); m->setControl_pressed(true);
                 return 1;
             }
             
@@ -540,7 +540,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                 stats.push_back(trial.calc_combo(nrows, ncols, nullmatrix));
             }
             else {
-                m->mothurOut("[ERROR]: No metric selected!\n\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: No metric selected!\n\n"); m->setControl_pressed(true);
                 return 1;
             }
             

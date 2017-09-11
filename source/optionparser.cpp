@@ -192,7 +192,7 @@ bool OptionParser::getNameFile(vector<string> files) {
 		string namefile = m->getNameFile();
 		bool match = false;
 		
-		if ((namefile != "")&&(!m->mothurCalling)) {
+		if ((namefile != "")&&(!m->getMothurCalling())) {
 			string temp = m->getRootName(m->getSimpleName(namefile));
 			vector<string> rootName;
 			m->splitAtChar(temp, rootName, '.');

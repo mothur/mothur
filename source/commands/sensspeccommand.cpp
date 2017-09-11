@@ -51,7 +51,7 @@ string SensSpecCommand::getOutputPattern(string type) {
         string pattern = "";
 
         if (type == "sensspec") {  pattern = "[filename],sensspec"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
 
         return pattern;
     }
@@ -270,7 +270,7 @@ int SensSpecCommand::execute(){
         //remove temp file if created
         if (newListFile != "") { m->mothurRemove(newListFile); }
 
-		if (m->control_pressed) { m->mothurRemove(sensSpecFileName); return 0; }
+		if (m->getControl_pressed()) { m->mothurRemove(sensSpecFileName); return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec."); m->mothurOutEndLine();
 
@@ -334,7 +334,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 
 			for(int i=0;i<pNumSeqs;i++){
 
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 
                 phylipFile >> name; seqNameVector.push_back(name);
 
@@ -386,7 +386,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 		}
         //cout << distanceMap.size() << endl;;
 		for(int otu=0;otu<numOTUs;otu++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 
 			// get the sequence string from the list vector
 			string seqList = list->get(otu);
@@ -455,7 +455,7 @@ int SensSpecCommand::processListFile(){
 
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
 
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -608,7 +608,7 @@ string SensSpecCommand::preProcessList(){
 
             string seqName;
             for(int i=0;i<pNumSeqs;i++){
-                if (m->control_pressed) { return ""; }
+                if (m->getControl_pressed()) { return ""; }
                 phylipFile >> seqName;  m->getline(phylipFile);  m->gobble(phylipFile);
                 uniqueNames.insert(seqName);
             }
@@ -620,7 +620,7 @@ string SensSpecCommand::preProcessList(){
                 string uniqueSeqName, redundantSeqNames;
                 
                 while(nameFileHandle){
-                    if (m->control_pressed) { return ""; }
+                    if (m->getControl_pressed()) { return ""; }
                     nameFileHandle >> uniqueSeqName >> redundantSeqNames;
                     uniqueNames.insert(uniqueSeqName);
                     m->gobble(nameFileHandle);
@@ -645,7 +645,7 @@ string SensSpecCommand::preProcessList(){
 
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
 
 			//read in list vector
 			ListVector list(in);
@@ -686,7 +686,7 @@ string SensSpecCommand::preProcessList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
                 newList.setLabels(newLabels);
-                if (!m->printedListHeaders) { newList.printHeaders(out); }
+                if (!m->getPrintedListHeaders()) { newList.printHeaders(out); }
 				newList.print(out);
 			}
 

@@ -30,7 +30,7 @@ int RandomForest::calcForrestErrorRate() {
         int numCorrect = 0;
         for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             int indexOfSample = it->first;
             vector<int> predictedOutComes = it->second;
@@ -63,7 +63,7 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
         
         for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             int indexOfSample = it->first; //key
             vector<int> predictedOutComes = it->second; //value, vector of all predicted classes
@@ -86,7 +86,7 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
         for (int i = 0; i < numGroups; i++) {
             cout << "\n" << setw(fw[i]) << intToTreatmentMap[i] << "\t";
             //m->mothurOut("\n" + intToTreatmentMap[i] + "\t");
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             for (int j = 0; j < numGroups; j++) {
                 //m->mothurOut(toString(cm[i][j]) + "\t");
                 cout << setw(fw[i]) << cm[i][j] << "\t";
@@ -113,7 +113,7 @@ int RandomForest::getMissclassifications(string filename, map<int, string> intTo
         out <<"Sample\tRF classification\tActual classification\n";
         for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             int indexOfSample = it->first;
             vector<int> predictedOutComes = it->second;
@@ -144,7 +144,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         //if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?
         //could cause maintenance issues later if other types of Abstract decison trees are created that cannot be cast as a decision tree.
         for (int i = 0; i < decisionTrees.size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
             
@@ -179,8 +179,9 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         ofstream out;
         m->openOutputFile(filename, out);
         out <<"OTU\tMean decrease accuracy\n";
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < globalVariableRanks.size(); i++) {
-            out << m->currentSharedBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
+            out << currentLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
         }
         out.close();
         return 0;
@@ -198,13 +199,13 @@ int RandomForest::populateDecisionTrees() {
         
         for (int i = 0; i < numDecisionTrees; i++) {
           
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if (((i+1) % 100) == 0) {  m->mothurOut("Creating " + toString(i+1) + " (th) Decision tree\n");  }
           
             // TODO: need to first fix if we are going to use pointer based system or anything else
             DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector(optimumFeatureSubsetSelectionCriteria), treeSplitCriterion, featureStandardDeviationThreshold);
           
-            if (m->debug && doPruning) {
+            if (m->getDebug() && doPruning) {
                 m->mothurOut("Before pruning\n");
                 decisionTree->printTree(decisionTree->rootNode, "ROOT");
             }
@@ -215,13 +216,13 @@ int RandomForest::populateDecisionTrees() {
             decisionTree->calcTreeErrorRate(numCorrect, treeErrorRate);
             double prePrunedErrorRate = treeErrorRate;
             
-            if (m->debug) {
+            if (m->getDebug()) {
                 m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
             }
             
             if (doPruning) {
                 decisionTree->pruneTree(pruneAggressiveness);
-                if (m->debug) {
+                if (m->getDebug()) {
                     m->mothurOut("After pruning\n");
                     decisionTree->printTree(decisionTree->rootNode, "ROOT");
                 }
@@ -233,7 +234,7 @@ int RandomForest::populateDecisionTrees() {
             decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
             double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
 
-            if (m->debug) {
+            if (m->getDebug()) {
                 m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
                 if (doPruning) {
                     m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
@@ -269,7 +270,7 @@ int RandomForest::populateDecisionTrees() {
             avgErrorRateImprovement /= errorRateImprovements.size();
         }
         
-        if (m->debug && doPruning) {
+        if (m->getDebug() && doPruning) {
             m->mothurOut("avgErrorRateImprovement:" + toString(avgErrorRateImprovement) + "\n");
         }
         // m->mothurOut("globalOutOfBagEstimates = " + toStringVectorMap(globalOutOfBagEstimates)+ "\n");
@@ -290,7 +291,7 @@ int RandomForest::updateGlobalOutOfBagEstimates(DecisionTree* decisionTree) {
     try {
         for (map<int, int>::iterator it = decisionTree->outOfBagEstimates.begin(); it != decisionTree->outOfBagEstimates.end(); it++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             int indexOfSample = it->first;
             int predictedOutcomeOfSample = it->second;

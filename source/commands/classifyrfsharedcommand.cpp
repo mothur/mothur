@@ -69,7 +69,7 @@ string ClassifyRFSharedCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],[distance],summary"; } //makes file like: amazon.0.03.fasta
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -279,7 +279,7 @@ int ClassifyRFSharedCommand::execute() {
       //as long as you are not at the end of the file or done wih the lines you want
     while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
       
-        if (m->control_pressed) { delete lookup;  return 0; }
+        if (m->getControl_pressed()) { delete lookup;  return 0; }
       
       if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
         
@@ -314,13 +314,13 @@ int ClassifyRFSharedCommand::execute() {
         //prevent memory leak
       delete lookup;
       
-      if (m->control_pressed) { return 0; }
+      if (m->getControl_pressed()) { return 0; }
       
         //get next line to process
       lookup = input.getSharedRAbundVectors();
     }
     
-    if (m->control_pressed) {  return 0; }
+    if (m->getControl_pressed()) {  return 0; }
     
       //output error messages about any remaining user labels
     set<string>::iterator it;

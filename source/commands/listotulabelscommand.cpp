@@ -54,7 +54,7 @@ string ListOtuLabelsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "otulabels") {  pattern = "[filename],[distance],otulabels"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -217,7 +217,7 @@ int ListOtuLabelsCommand::execute(){
             //as long as you are not at the end of the file or done wih the lines you want
             while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { delete lookup; for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete lookup; for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
@@ -249,13 +249,13 @@ int ListOtuLabelsCommand::execute(){
                 //prevent memory leak
                 delete lookup;
                 
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
                 
                 //get next line to process
                 lookup = input.getSharedRAbundFloatVectors();				
             }
             
-            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -293,7 +293,7 @@ int ListOtuLabelsCommand::execute(){
             //as long as you are not at the end of the file or done wih the lines you want
             while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
@@ -325,13 +325,13 @@ int ListOtuLabelsCommand::execute(){
                 //prevent memory leak
                 delete lookup;
                 
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
                 
                 //get next line to process
                 lookup = input.getSharedRAbundVectors();				
             }
             
-            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -368,7 +368,7 @@ int ListOtuLabelsCommand::execute(){
             //as long as you are not at the end of the file or done wih the lines you want
             while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { delete list;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete list;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
                 
                 if(allLines == 1 || labels.count(list->getLabel()) == 1){			
                     
@@ -400,13 +400,13 @@ int ListOtuLabelsCommand::execute(){
                 //prevent memory leak
                 delete list; list = NULL;
                 
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
                 
                 //get next line to process
                 list = input.getListVector();				
             }
             
-            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -434,7 +434,7 @@ int ListOtuLabelsCommand::execute(){
             }
         }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
 		m->mothurOutEndLine();
@@ -462,7 +462,8 @@ int ListOtuLabelsCommand::createList(SharedRAbundVectors*& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        for (int i = 0; i < m->currentSharedBinLabels.size(); i++) {  out << m->currentSharedBinLabels[i] << endl;  }
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
         
         out.close();
         
@@ -486,7 +487,8 @@ int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors*& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        for (int i = 0; i < m->currentSharedBinLabels.size(); i++) {  out << m->currentSharedBinLabels[i] << endl;  }
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
         
         out.close();
         

@@ -146,7 +146,7 @@ string CollectSharedCommand::getOutputPattern(string type) {
         else if (type == "mempearson")          {  pattern =  "[filename],mempearson";      }
         else if (type == "jsd")                 {  pattern =  "[filename],jsd";             }
         else if (type == "rjsd")                 {  pattern =  "[filename],rjsd";             }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -520,7 +520,7 @@ int CollectSharedCommand::execute(){
 		delete util;
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; delete input;
@@ -568,7 +568,7 @@ int CollectSharedCommand::execute(){
 			order = input->getSharedOrderVector();
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					m->clearGroups();
@@ -599,7 +599,7 @@ int CollectSharedCommand::execute(){
 			cCurve->getSharedCurve(freq);
 			delete cCurve;
 			
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 

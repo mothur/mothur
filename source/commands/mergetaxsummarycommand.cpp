@@ -191,7 +191,7 @@ int MergeTaxSummaryCommand::execute(){
             levelToCurrentNode[0] = 0;
             while (!in.eof()) {
                 
-                if (m->control_pressed) {   return 0;  }
+                if (m->getControl_pressed()) {   return 0;  }
                 
                 in >> level >> rankId; m->gobble(in);
                 string rest = m->getline(in); m->gobble(in);
@@ -212,7 +212,7 @@ int MergeTaxSummaryCommand::execute(){
                 m->mothurConvert(pieces[pcount], totalFloat); pcount--;
                 
                 if ((totalFloat < 1) && (totalFloat > 0)) {
-                    m->mothurOut("[ERROR]: cannot merge tax.summary files with relative abundances.\n"); m->control_pressed = true; in.close(); return 0;
+                    m->mothurOut("[ERROR]: cannot merge tax.summary files with relative abundances.\n"); m->setControl_pressed(true); in.close(); return 0;
                 }else {
                     total = int(totalFloat);
                 }
@@ -243,7 +243,7 @@ int MergeTaxSummaryCommand::execute(){
         m->openOutputFile(outputFileName, out);
         print(out, tree, groups);
         		
-		if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
+		if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -303,7 +303,7 @@ int MergeTaxSummaryCommand::assignRank(int index, vector<rawTaxNode>& tree){
 		int counter = 1;
 		
 		for(it=tree[index].children.begin();it!=tree[index].children.end();it++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
 			tree[it->second].rank = tree[index].rank + '.' + toString(counter);
 			counter++;
             

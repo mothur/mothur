@@ -43,16 +43,16 @@ bool FlowData::getNext(ifstream& flowFile){
 	try {
         
         seqName = getSequenceName(flowFile);
-        if (m->debug) {  m->mothurOut("[DEBUG]: flow = " + seqName + " "); }
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: flow = " + seqName + " "); }
 		flowFile >> endFlow;
-        if (m->debug) {  m->mothurOut(toString(endFlow) + " "); }
-        if (!m->control_pressed) {
-            if (m->debug) {  m->mothurOut(" "); }
+        if (m->getDebug()) {  m->mothurOut(toString(endFlow) + " "); }
+        if (!m->getControl_pressed()) {
+            if (m->getDebug()) {  m->mothurOut(" "); }
             for(int i=0;i<numFlows;i++)	{
                 flowFile >> flowData[i];
-                if (m->debug) {  m->mothurOut(toString(flowData[i]) + " "); }
+                if (m->getDebug()) {  m->mothurOut(toString(flowData[i]) + " "); }
             }
-            if (m->debug) {  m->mothurOut("\n"); }
+            if (m->getDebug()) {  m->mothurOut("\n"); }
             updateEndFlow(); 
             translateFlow();
             m->gobble(flowFile);
@@ -76,7 +76,7 @@ string FlowData::getSequenceName(ifstream& flowFile) {
 		
 		if (name.length() != 0) { 
             m->checkName(name);
-        }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
         
 		return name;
 	}

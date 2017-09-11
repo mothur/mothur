@@ -37,7 +37,7 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 			outputNames.push_back(filenamesvg);
 			m->openOutputFile(filenamesvg, outsvg);
 			
-			if (m->control_pressed) { outsvg.close(); return outputNames; }
+			if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 
 			vector<double> data = vCalcs[i]->getValues(sabund);
 			
@@ -95,7 +95,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				outputNames.push_back(filenamesvg);
 				m->openOutputFile(filenamesvg, outsvg);
 				
-				if (m->control_pressed) { outsvg.close(); return outputNames; }
+				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
@@ -152,7 +152,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				outputNames.push_back(filenamesvg);
 				m->openOutputFile(filenamesvg, outsvg);
 				
-				if (m->control_pressed) { outsvg.close(); return outputNames; }
+				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
 				//get estimates for sharedAB
                 vector<string> labels;
@@ -268,7 +268,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				outputNames.push_back(filenamesvg);
 				m->openOutputFile(filenamesvg, outsvg);
 				
-				if (m->control_pressed) { outsvg.close(); return outputNames; }
+				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
 				int sharedVal, sharedABVal, sharedACVal, sharedBCVal, numSeqsA, numSeqsB, numSeqsC, uniqSeqsToA, uniqSeqsToB, uniqSeqsToC;
 				
@@ -628,7 +628,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					outputNames.push_back(filenamesvg);
 					m->openOutputFile(filenamesvg, outsvg);
 
-					if (m->control_pressed) { outsvg.close(); return outputNames; }
+					if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 					
 					//in essence you want to run it like a single 
 					if (vCalcs[i]->getName() == "sharedsobs") {

@@ -107,7 +107,7 @@ double PWilcox::cwilcox(int k, int m, int n, double*** w) {
     try {
         int c, u, i, j, l;
         
-        if (mout->control_pressed) { return 0; }
+        if (mout->getControl_pressed()) { return 0; }
         
         u = m * n;
         if (k < 0 || k > u)
@@ -179,7 +179,7 @@ double PWilcox::pwilcox(double q, double m, double n, bool lower_tail){
         
         int mm = (int) m, nn = (int) n;
         
-        if (mout->control_pressed) { return 0; }
+        if (mout->getControl_pressed()) { return 0; }
         //w_init_maybe(mm, nn);
         /********************************************/
         int thisi;

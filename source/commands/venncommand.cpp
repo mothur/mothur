@@ -74,7 +74,7 @@ string VennCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "svg") {  pattern = "[filename],svg"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -307,7 +307,7 @@ int VennCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-				if (m->control_pressed) {
+				if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
                     delete lookup; m->clearGroups(); delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
@@ -379,7 +379,7 @@ int VennCommand::execute(){
 				lookup = input.getSharedRAbundVectors();
 			}
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					m->clearGroups(); delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
@@ -434,7 +434,7 @@ int VennCommand::execute(){
 			//reset groups parameter
 			m->clearGroups();  
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 					m->clearGroups(); delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
@@ -446,7 +446,7 @@ int VennCommand::execute(){
 		
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-				if (m->control_pressed) {
+				if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					delete sabund; delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
@@ -488,7 +488,7 @@ int VennCommand::execute(){
 				sabund = input.getSAbundVector();
 			}
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					delete venn;  return 0;
@@ -520,7 +520,7 @@ int VennCommand::execute(){
 					
 			}
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 					delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }

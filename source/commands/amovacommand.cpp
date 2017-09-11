@@ -60,7 +60,7 @@ string AmovaCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "amova") {  pattern = "[filename],amova"; } //makes file like: amazon.align
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -196,12 +196,12 @@ int AmovaCommand::execute(){
 
             for(int i=0;i<distanceMatrix.size();i++){
                 
-                if (m->control_pressed) { delete designMap; return 0; }
+                if (m->getControl_pressed()) { delete designMap; return 0; }
                 
                 string group = designMap->get(sampleNames[i]);
                 
                 if (group == "not found") {
-                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
                 }else if (!m->inUsersGroups(group, Sets)){  //not in set we want remove it
                     //remove from all other rows
                     for(int j=0;j<distanceMatrix.size();j++){
@@ -226,13 +226,13 @@ int AmovaCommand::execute(){
 			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
-				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
 			}else { origGroupSampleMap[group].push_back(i); }
 			
 		}
 		int numGroups = origGroupSampleMap.size();
 		
-		if (m->control_pressed) { delete designMap; return 0; }
+		if (m->getControl_pressed()) { delete designMap; return 0; }
 		
 		//create a new filename
 		ofstream AMOVAFile;

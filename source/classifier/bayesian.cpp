@@ -67,7 +67,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
-			if (m->control_pressed) {  m->mothurRemove(phyloTreeName);  m->mothurRemove(probFileName); m->mothurRemove(probFileName2); }
+			if (m->getControl_pressed()) {  m->mothurRemove(phyloTreeName);  m->mothurRemove(probFileName); m->mothurRemove(probFileName2); }
 			else{ 
 				genusNodes = phyloTree->getGenusNodes(); 
 				genusTotals = phyloTree->getGenusTotals();
@@ -110,7 +110,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				for (int i = 0; i < numKmers; i++) {
                     //m->mothurOut("[DEBUG]: kmer = " + toString(i) + "\n");
                     
-					if (m->control_pressed) {  break; }
+					if (m->getControl_pressed()) {  break; }
 
                     if (shortcuts) {  out << i << '\t'; }
 					
@@ -162,9 +162,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			}
 		}
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: about to generateWordPairDiffArr\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to generateWordPairDiffArr\n"); }
 		generateWordPairDiffArr();
-        if (m->debug) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
 			
 		m->mothurOut("DONE."); m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
@@ -225,16 +225,16 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		
 		int index = getMostProbableTaxonomy(queryKmers);
 		
-		if (m->control_pressed) { return tax; }
+		if (m->getControl_pressed()) { return tax; }
 					
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
 	
-        if (m->debug) {  m->mothurOut(seq->getName() + "\t"); }
+        if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
 		tax = bootstrapResults(queryKmers, index, numToSelect);
         
-        if (m->debug) {  m->mothurOut("\n"); }
+        if (m->getDebug()) {  m->mothurOut("\n"); }
 		
 		return tax;	
 	}
@@ -265,7 +265,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		map<int, int>::iterator itConvert;
 			
 		for (int i = 0; i < iters; i++) {
-			if (m->control_pressed) { return "control"; }
+			if (m->getControl_pressed()) { return "control"; }
 			
 			vector<int> temp;
 			for (int j = 0; j < numToSelect; j++) {
@@ -310,7 +310,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 					confidence = itBoot2->second;
 				}
 				
-                if (m->debug) { m->mothurOut(seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");"); }
+                if (m->getDebug()) { m->mothurOut(seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");"); }
             
 				if (((confidence/(float)iters) * 100) >= confidenceThreshold) {
 					confidenceTax = seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");" + confidenceTax;

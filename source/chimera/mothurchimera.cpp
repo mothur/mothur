@@ -28,7 +28,7 @@ string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
-			if (m->control_pressed) { return filterString; }
+			if (m->getControl_pressed()) { return filterString; }
 		
 			string seqAligned = seqs[i]->getAligned();
 			
@@ -48,7 +48,7 @@ string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 		int numColRemoved = 0;
 		for(int i = 0;i < seqs[0]->getAligned().length(); i++){
 		
-			if (m->control_pressed) { return filterString; }
+			if (m->getControl_pressed()) { return filterString; }
 			
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
@@ -110,7 +110,7 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
         //read in seqs and store in vector
         while(!in.eof()){
             
-            if (m->control_pressed) { return container; }
+            if (m->getControl_pressed()) { return container; }
             
             Sequence* current = new Sequence(in);  m->gobble(in);
             

@@ -20,9 +20,9 @@ volatile int ctrlc_pressed = 0;
 void ctrlc_handler ( int sig ) {
 	MothurOut* m = MothurOut::getInstance();
     ctrlc_pressed = 1;
-	m->control_pressed = ctrlc_pressed;
+	m->setControl_pressed(ctrlc_pressed);
 	
-	if (m->executing) { //if mid command quit execution, else quit mothur
+	if (m->getExecuting()) { //if mid command quit execution, else quit mothur
 		m->mothurOutEndLine(); m->mothurOut("quitting command...");  m->mothurOutEndLine();
 	}else{
 		m->mothurOut("quitting mothur");  m->mothurOutEndLine();
@@ -82,10 +82,10 @@ int main(int argc, char *argv[]){
                     string argv1 = argv[1];
                     string argv2 = argv[2];
                     if ((argv1 == "--quiet") || (argv1 == "-q")) {
-                        m->quietMode = true;
+                        m->setQuietMode(true);
                         argv[1] = argv[2];
                     }else if ((argv2 == "--quiet") || (argv2 == "-q")) {
-                         m->quietMode = true;
+                         m->setQuietMode(true);
                     }else {
                         m->mothurOut("[ERROR]: mothur only allows command inputs and the -q command line options.\n");
                         m->mothurOut("[ERROR]: Unrecognized options: " + argv1 + " " + argv2 + "\n");
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]){
 				mothur = new ScriptEngine(argv[0], argv[1]);
 			}else if (input[0] == '+') {
 					mothur = new ScriptEngine(argv[0], argv[1]);
-					m->gui = true;
+					m->setGui(true);
 			}else if ((input == "--version") || (input == "-v")) {
                 createLogFile = false;
                 string OS = "";
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]){
 				ofstream outNewLog;
 				m->openOutputFileAppend(newlogFileName, outNewLog);
 				
-				if (!m->gui) {
+				if (!m->getGui()) {
 					outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
 				}else {
 					outNewLog << endl;

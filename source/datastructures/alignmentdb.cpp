@@ -34,7 +34,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
         while (!fastaFile.eof()) {
             Sequence temp(fastaFile);  m->gobble(fastaFile);
             
-            if (m->control_pressed) {  templateSequences.clear(); break;  }
+            if (m->getControl_pressed()) {  templateSequences.clear(); break;  }
             
             if (temp.getName() != "") {
                 templateSequences.push_back(temp);
@@ -43,7 +43,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
                 if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
                 
                 if (tempLength != 0) {
-                    if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
+                    if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->setControl_pressed(true); }
                 }else { tempLength = temp.getAligned().length(); }
             }
         }
@@ -93,16 +93,16 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			search = new KmerDB(fastaFileName, 8);
 		}
 		
-		if (!(m->control_pressed)) {
+		if (!m->getControl_pressed()) {
 			if (needToGenerate) {
 				//add sequences to search 
 				for (int i = 0; i < templateSequences.size(); i++) {
 					search->addSequence(templateSequences[i]);
 					
-					if (m->control_pressed) {  templateSequences.clear(); break;  }
+					if (m->getControl_pressed()) {  templateSequences.clear(); break;  }
 				}
 				
-				if (m->control_pressed) {  templateSequences.clear();  }
+				if (m->getControl_pressed()) {  templateSequences.clear();  }
 				
                 if ((method != "kmer") || ((method == "kmer") && (writeShortcut))) { search->generateDB(); }
                 
@@ -146,13 +146,13 @@ AlignmentDB::AlignmentDB(string s){
 /**************************************************************************************************/
 AlignmentDB::~AlignmentDB() {  delete search;	}
 /**************************************************************************************************/
-Sequence AlignmentDB::findClosestSequence(Sequence* seq) {
+Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) {
 	try{
-	
+        lock_guard<std::mutex> guard(mutex);
 		vector<int> spot = search->findClosestSequences(seq, 1);
 	
-		if (spot.size() != 0)	{		return templateSequences[spot[0]];	}
-		else					{		return emptySequence;				}
+		if (spot.size() != 0)	{	searchScore	= search->getSearchScore(); return templateSequences[spot[0]];	}
+        else					{	searchScore = 0.0; 	return emptySequence;                                   }
 		
 	}
 	catch(exception& e) {

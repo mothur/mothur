@@ -79,7 +79,7 @@ string GetLineageCommand::getOutputPattern(string type) {
         else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -343,7 +343,7 @@ int GetLineageCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
@@ -368,7 +368,7 @@ int GetLineageCommand::execute(){
         }
 				
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -450,7 +450,7 @@ int GetLineageCommand::readFasta(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -504,12 +504,12 @@ int GetLineageCommand::readCount(){
         string name, rest; int thisTotal; rest = "";
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
             if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) != 0) {
                 out << name << '\t' << thisTotal << '\t' << rest << endl;
@@ -567,7 +567,7 @@ int GetLineageCommand::readList(){
 			m->openOutputFile(outputFileName, out);
 			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
             
-            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             vector<string> binLabels = list.getLabels();
             vector<string> newBinLabels;
@@ -625,7 +625,7 @@ int GetLineageCommand::readConsList(){
 	try {
 		getListVector();
         
-        if (m->control_pressed) { delete list; return 0;}
+        if (m->getControl_pressed()) { delete list; return 0;}
         
         ListVector newList;
         newList.setLabel(list->getLabel());
@@ -637,7 +637,7 @@ int GetLineageCommand::readConsList(){
         vector<string> newBinLabels;
         for (int i = 0; i < list->getNumBins(); i++) {
             
-            if (m->control_pressed) { delete list; return 0;}
+            if (m->getControl_pressed()) { delete list; return 0;}
             
             //create a label for this otu
             string otuLabel = "Otu";
@@ -704,7 +704,7 @@ int GetLineageCommand::getListVector(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -735,7 +735,7 @@ int GetLineageCommand::getListVector(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -770,20 +770,21 @@ int GetLineageCommand::readShared(){
         
         SharedRAbundVectors* lookup = getShared();
         
-        if (m->control_pressed) { delete lookup; }
+        if (m->getControl_pressed()) { delete lookup; }
         
         vector<string> newLabels;
         
         bool wroteSomething = false;
         int numSelected = 0;
+        vector<string> currentSharedBinLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins();) {
             
-            if (m->control_pressed) {  delete lookup; return 0; }
+            if (m->getControl_pressed()) {  delete lookup; return 0; }
             
             //is this otu on the list
-            if (names.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) != 0) {
+            if (names.count(m->getSimpleLabel(currentSharedBinLabels[i])) != 0) {
                 numSelected++; wroteSomething = true;
-                newLabels.push_back(m->currentSharedBinLabels[i]);
+                newLabels.push_back(currentSharedBinLabels[i]);
                 ++i;
             }else { lookup->removeOTU(i);  }
         }
@@ -799,7 +800,7 @@ int GetLineageCommand::readShared(){
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        m->currentSharedBinLabels = newLabels;
+        m->setCurrentSharedBinLabels(newLabels);
 		lookup->printHeaders(out);
         lookup->print(out);
 		out.close();
@@ -833,7 +834,7 @@ SharedRAbundVectors* GetLineageCommand::getShared(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {   return 0;  }
+			if (m->getControl_pressed()) {   return 0;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel());
@@ -864,7 +865,7 @@ SharedRAbundVectors* GetLineageCommand::getShared(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -915,7 +916,7 @@ int GetLineageCommand::readName(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;
@@ -1003,7 +1004,7 @@ int GetLineageCommand::readGroup(){
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -1067,7 +1068,7 @@ int GetLineageCommand::readTax(){
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1221,7 +1222,7 @@ int GetLineageCommand::readConsTax(){
         
 		while(!in.eof()){
             
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
             
 			in >> otuLabel;	 		m->gobble(in);
             in >> numReps;          m->gobble(in);
@@ -1416,7 +1417,7 @@ int GetLineageCommand::readAlign(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column

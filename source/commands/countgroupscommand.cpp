@@ -38,7 +38,7 @@ string CountGroupsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],count.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -249,7 +249,7 @@ int CountGroupsCommand::execute(){
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
             map<string, string> variables; 
@@ -282,7 +282,7 @@ int CountGroupsCommand::execute(){
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		if (sharedfile != "")		{		
 			InputData input(sharedfile, "sharedfile");

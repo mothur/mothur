@@ -93,7 +93,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 				int        index = 0;
 
 				for(int i=1;i<nseqs;i++){
-						if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+						if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 						
 						fileHandle >> name;
 						matrixNames.push_back(name);
@@ -105,7 +105,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 						
 								for(int j=0;j<i;j++){
 								
-										if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+										if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
 										
 										fileHandle >> distance;
 							
@@ -129,7 +129,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<i;j++){
 										fileHandle >> distance;
 										
-										if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+										if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
 				
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -167,7 +167,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
 										
-										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+										if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 										
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -190,7 +190,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
 										
-										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+										if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 										
 									   if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -214,7 +214,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 				}
 		}
 		
-		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 		
 		reading->finish();
 		delete reading;
@@ -293,7 +293,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
             int        index = 0;
             
             for(int i=1;i<nseqs;i++){
-                if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
                 
                 fileHandle >> name;
                 matrixNames.push_back(name);
@@ -305,7 +305,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     
                     for(int j=0;j<i;j++){
                         
-                        if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
                         
                         fileHandle >> distance;
                         
@@ -327,7 +327,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<i;j++){
                         fileHandle >> distance;
                         
-                        if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -361,7 +361,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -381,7 +381,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -402,7 +402,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
             }
 		}
 		
-		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
 		
 		reading->finish();
 		delete reading;
@@ -412,7 +412,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
         rabund->setLabel(list->getLabel());  
         
         for(int i = 0; i < list->getNumBins(); i++) { 
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             vector<string> binNames;
             string bin = list->get(i);
             m->splitAtComma(bin, binNames);

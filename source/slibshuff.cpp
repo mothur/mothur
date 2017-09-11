@@ -57,19 +57,19 @@ double SLibshuff::sCalculate(int x, int y){
 		
 		minX = getMinX(x);
 		
-		if (m->control_pressed) { return sum; }
+		if (m->getControl_pressed()) { return sum; }
 		
 		minXY = getMinXY(x,y);
 		
-		if (m->control_pressed) { return sum; }
+		if (m->getControl_pressed()) { return sum; }
 
 		sort(minX.begin(), minX.end());
 		
-		if (m->control_pressed) { return sum; }
+		if (m->getControl_pressed()) { return sum; }
 		
 		sort(minXY.begin(), minXY.end());
 		
-		if (m->control_pressed) { return sum; }
+		if (m->getControl_pressed()) { return sum; }
 
 		int ix=0,iy=0;
 		while( (ix < groupSizes[x]) && (iy < groupSizes[x]) ) {

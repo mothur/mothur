@@ -72,7 +72,7 @@ string PairwiseSeqsCommand::getOutputPattern(string type) {
         
         if (type == "phylip") {  pattern = "[filename],[outputtag],dist"; } 
         else if (type == "column") { pattern = "[filename],dist"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -273,7 +273,7 @@ int PairwiseSeqsCommand::execute(){
 		cutoff += 0.005;
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
-			if (m->control_pressed) { outputTypes.clear(); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
 			
 			m->mothurOut("Processing sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
@@ -327,7 +327,7 @@ int PairwiseSeqsCommand::execute(){
 				createProcesses(outputFile); 
 			}
 
-			if (m->control_pressed) { outputTypes.clear();   m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear();   m->mothurRemove(outputFile); return 0; }
 			
 			ifstream fileHandle;
 			fileHandle.open(outputFile.c_str());
@@ -345,7 +345,7 @@ int PairwiseSeqsCommand::execute(){
 
             m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 			
-			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFile); return 0; }
 		}
 		
 		//set phylip file as new current phylipfile
@@ -404,7 +404,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
 
@@ -413,7 +413,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+				 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             int numSeqs = alignDB.getNumSeqs();
@@ -497,7 +498,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -570,7 +571,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
+				if (m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -590,7 +591,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 				                
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
@@ -669,7 +670,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
+				if (m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -691,7 +692,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 								
 				outFile << '\t' << dist;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
 			}
 			
 			outFile << endl; 

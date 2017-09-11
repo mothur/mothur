@@ -56,7 +56,7 @@ string CountSeqsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         if (type == "count") {  pattern = "[filename],count_table-[filename],[distance],count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -208,7 +208,7 @@ int CountSeqsCommand::execute(){
             
             total = process(outputFileName);
             
-            if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) { m->mothurRemove(outputFileName); return 0; }
             
             m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.");
             m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -231,7 +231,7 @@ int CountSeqsCommand::execute(){
             //as long as you are not at the end of the file or done wih the lines you want
             while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
@@ -266,13 +266,13 @@ int CountSeqsCommand::execute(){
                 //prevent memory leak
                 delete lookup;
                 
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 
                 //get next line to process
                 lookup = input.getSharedRAbundVectors();
             }
             
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -336,8 +336,9 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
         out << "OTU_Label\ttotal";
         for (int i = 0; i < lookup.size(); i++) { out << '\t' << lookup[i]->getGroup(); } out << endl;
         
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int j = 0; j < lookup[0]->getNumBins(); j++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             int total = 0;
             string output = "";
@@ -345,7 +346,7 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
                 total += lookup[i]->get(j);
                 output += '\t' + toString(lookup[i]->get(j));
             }
-            out << m->currentSharedBinLabels[j] << '\t' << total << output << endl;
+            out << currentLabels[j] << '\t' << total << output << endl;
         }
         out.close();
         
@@ -449,7 +450,7 @@ unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string
                     m->mothurRemove((toString(processIDS[i]) + ".temp"));
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -458,7 +459,7 @@ unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}m->setControl_pressed(false);  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             positions.clear();
             lines.clear();
@@ -534,7 +535,7 @@ unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string
             if (numSeqs != groupMap->getNumSeqs()) {
                 m->mothurOut("[ERROR]: processes reported processing " + toString(numSeqs) + " sequences, but group file indicates you have " + toString(groupMap->getNumSeqs()) + " sequences.");
                 if (processors == 1) { m->mothurOut(" Could you have a file mismatch?\n"); }
-                else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->control_pressed = true; }
+                else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->setControl_pressed(true); }
             }
 		}
 		return numSeqs;
@@ -561,7 +562,7 @@ unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned l
 		bool done = false;
         unsigned long long total = 0;
 		while (!done) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
 			in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
@@ -647,7 +648,7 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
         int count = 0;
         
 		while (!in.eof()) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
             in.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());
@@ -724,7 +725,7 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
         int count = 0;
         
 		while (!in.eof()) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
             in.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());

@@ -65,7 +65,7 @@ string ChimeraCheckCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "chimera") {  pattern = "[filename],chimeracheck.chimeras"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -331,7 +331,7 @@ int ChimeraCheckCommand::execute(){
 			
 			chimera = new ChimeraCheckRDP(fastaFileNames[i], templatefile, thisNameFile, svg, increment, ksize, outputDir);			
 
-			if (m->control_pressed) { delete chimera;	return 0;	}
+			if (m->getControl_pressed()) { delete chimera;	return 0;	}
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it
             map<string, string> variables;
@@ -351,7 +351,7 @@ int ChimeraCheckCommand::execute(){
 				if(processors == 1){
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 					
-					if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int j = 0; j < lines.size(); j++) {  delete lines[j];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
+					if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int j = 0; j < lines.size(); j++) {  delete lines[j];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 									
 				}else{
 					processIDS.resize(0);
@@ -366,7 +366,7 @@ int ChimeraCheckCommand::execute(){
 						m->mothurRemove((outputFileName + toString(processIDS[j]) + ".temp"));
 					}
 					
-					if (m->control_pressed) { 
+					if (m->getControl_pressed()) { 
 						for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();
 						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
 						delete chimera;
@@ -378,7 +378,7 @@ int ChimeraCheckCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 				
-				if (m->control_pressed) { for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); delete chimera; return 0; }
+				if (m->getControl_pressed()) { for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); delete chimera; return 0; }
 			#endif
 	
 			delete chimera;
@@ -421,7 +421,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 	
 		while (!done) {
 
-			if (m->control_pressed) {	return 1;	}
+			if (m->getControl_pressed()) {	return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
@@ -429,7 +429,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 				//find chimeras
 				chimera->getChimeras(candidateSeq);
 				
-				if (m->control_pressed) {	delete candidateSeq; return 1;	}
+				if (m->getControl_pressed()) {	delete candidateSeq; return 1;	}
 	
 				//print results
 				chimera->print(out, out2);
@@ -495,7 +495,7 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -503,7 +503,8 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             vector<unsigned long long> positions = m->divideFile(filename, processors);
             for (int s = 0; s < (positions.size()-1); s++) {

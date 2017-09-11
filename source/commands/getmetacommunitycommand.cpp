@@ -73,7 +73,7 @@ string GetMetaCommunityCommand::getOutputPattern(string type) {
         else if (type == "matrix")      {  pattern = "[filename],[distance],[method],[tag],mix.posterior"; }
         else if (type == "parameters")  {  pattern = "[filename],[distance],[method],mix.parameters"; }
         else if (type == "summary")  {  pattern = "[filename],[distance],[method],mix.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -248,14 +248,14 @@ int GetMetaCommunityCommand::execute(){
                 Groups = m->getGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
         }
 
         
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { delete lookup;  return 0; }
+            if (m->getControl_pressed()) { delete lookup;  return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -287,13 +287,13 @@ int GetMetaCommunityCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -372,7 +372,7 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
             int processToAssign = (i+1) % processors;
             if (processToAssign == 0) { processToAssign = processors; }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: assigning " + toString(i) + " to process " + toString(processToAssign-1) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: assigning " + toString(i) + " to process " + toString(processToAssign-1) + "\n"); }
             dividedPartitions[(processToAssign-1)].push_back(i);
             
             variables["[tag]"] = toString(i);
@@ -471,7 +471,7 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
                     int num;  m->mothurConvert(tempNum, num);
                     //if (num > minPartition) {
                      //   m->mothurRemove(tempOutputNames[i]);
-                    //    keep = false; if (m->debug) { m->mothurOut("[DEBUG]: removing " + tempOutputNames[i] + ".\n"); }
+                    //    keep = false; if (m->getDebug()) { m->mothurOut("[DEBUG]: removing " + tempOutputNames[i] + ".\n"); }
                     //}
                 }
                 if (keep) { outputNames.push_back(tempOutputNames[i]); }
@@ -496,7 +496,7 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
             out << headers << endl;
             for (map<int, string>::iterator it = file.begin(); it != file.end(); it++) {
                 out << it->first << '\t' << it->second << endl;
-                if (m->debug) { m->mothurOut("[DEBUG]: printing: " + toString(it->first) + '\t' + it->second + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: printing: " + toString(it->first) + '\t' + it->second + ".\n"); }
             }
             out.close();
         }
@@ -510,9 +510,9 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
             m->mothurRemove(tempDoneFile);
         }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: minPartition = " + toString(minPartition) + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: minPartition = " + toString(minPartition) + "\n"); }
         
         //run generate Summary function for smallest minPartition
         variables["[tag]"] = toString(minPartition);
@@ -566,10 +566,10 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
         vector< vector<double> > dists; //do we want to output this matrix??
         if ((method == "pam") || (method == "kmeans")) {  dists = generateDistanceMatrix(thislookup);  }
         
-        if (m->debug) {
+        if (m->getDebug()) {
             m->mothurOut("[DEBUG]: dists = \n");
             for (int i = 0; i < dists.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 m->mothurOut("[DEBUG]: i = " + toString(i) + '\t');
                 for (int j = 0; j < i; j++) { m->mothurOut(toString(dists[i][j]) +"\t"); }
                 m->mothurOut("\n");
@@ -580,9 +580,9 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             
             int numPartitions = parts[i];
             
-            if (m->debug) { m->mothurOut("[DEBUG]: running partition " + toString(numPartitions) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: running partition " + toString(numPartitions) + "\n"); }
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             //check to see if anyone else is done
             for (int j = 0; j < doneFlags.size(); j++) {
@@ -631,13 +631,15 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             if (method == "dmm") {
                 finder->printFitData(cout, minLaplace);
                 finder->printFitData(fitData);
-                finder->printRelAbund(relabund, m->currentSharedBinLabels);
+                vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                finder->printRelAbund(relabund, currentLabels);
                 outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
             }else if ((method == "pam") || (method == "kmeans")) { //print silouettes and ch values
                 finder->printSilData(cout, chi, silhouettes);
                 finder->printSilData(silData, chi, silhouettes);
                 if (method == "kmeans") {
-                    finder->printRelAbund(relabund, m->currentSharedBinLabels);
+                    vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                    finder->printRelAbund(relabund, currentLabels);
                     outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
                 }
             }
@@ -654,7 +656,7 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
         }
         if (method == "dmm") { fitData.close(); }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
 
         return minPartition;
     }
@@ -690,7 +692,7 @@ vector<double> GetMetaCommunityCommand::generateDesignFile(int numPartitions, ma
         
         while(postFile){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             double maxPosterior = 0.0000;
             int maxPartition = -1;
@@ -774,7 +776,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         
         while(referenceFile){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             referenceFile >> name >> mean >> lci >> uci;
             
@@ -803,7 +805,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         referenceFile.close();
         partitionFile.close();
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         int numOTUs = (int)summary.size();
         
@@ -821,13 +823,13 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         double totalDifference =  0.0000;
         parameterFile << "Part\tDif2Ref_i\ttheta_i\tpi_i\n";
         for(int i=0;i<numPartitions;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             parameterFile << i+1 << '\t' << setprecision(2) << partitionDiff[i] << '\t' << thetaValues[i] << '\t' << piValues[i] << endl;
             totalDifference += partitionDiff[i];
         }
         parameterFile.close();
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         string summaryFileName = getOutputFileName("summary", variables);
         outputNames.push_back(summaryFileName); outputTypes["summary"].push_back(summaryFileName);
@@ -847,7 +849,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         double cumDiff = 0.0000;
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             summaryFile << summary[i].name << setprecision(2) << '\t' << summary[i].refMean;
             for(int j=0;j<numPartitions;j++){
                 summaryFile  << '\t' << summary[i].partMean[j] << '\t' << summary[i].partLCI[j] << '\t' << summary[i].partUCI[j];
@@ -960,7 +962,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
             }else if (Estimators[i] == "rjsd") {
                 matrixCalculator = new RJSD();
             }else {
-                m->mothurOut("[ERROR]: " + Estimators[i] + " is not a valid calculator, please correct.\n"); m->control_pressed = true; return results;
+                m->mothurOut("[ERROR]: " + Estimators[i] + " is not a valid calculator, please correct.\n"); m->setControl_pressed(true); return results;
             }
         }
         
@@ -987,12 +989,12 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
                 calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {
-                        if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + namesOfGroups[calcDists[i][j].seq1] + " - " + namesOfGroups[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + namesOfGroups[calcDists[i][j].seq1] + " - " + namesOfGroups[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     }
                 }
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     //initialize matrix
                     results.resize(thisLookup->size());
@@ -1067,7 +1069,7 @@ int GetMetaCommunityCommand::driver(SharedRAbundVectors*& thisLookup, vector< ve
                     
                     vector<double> tempdata = matrixCalculator->getValues(subset); //saves the calculator outputs
                     
-                    if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 1; }
+                    if (m->getControl_pressed()) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 1; }
                     
                     seqDist temp(l, k, tempdata[0]);
                     //cout << l << '\t' << k << '\t' <<  tempdata[0] << endl;

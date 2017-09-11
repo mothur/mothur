@@ -61,7 +61,7 @@ string OTUAssociationCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "otucorr") {  pattern = "[filename],[distance],[tag],otu.corr"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -219,7 +219,7 @@ int OTUAssociationCommand::execute(){
 		if (sharedfile != "")			{  processShared();		} 
 		else if (relabundfile != "")	{  processRelabund();	}
 				
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -242,7 +242,7 @@ int OTUAssociationCommand::processShared(){
         
         if (metadatafile != "") {
             bool error = false;
-            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the shared file.\n");  m->control_pressed = true; error=true;}
+            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the shared file.\n");  m->setControl_pressed(true); error=true;}
             if (error) {
                 //maybe add extra info here?? compare groups in each file??
             }
@@ -255,7 +255,7 @@ int OTUAssociationCommand::processShared(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  delete input; return 0;  }
+			if (m->getControl_pressed()) {  delete input; return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel());
@@ -290,7 +290,7 @@ int OTUAssociationCommand::processShared(){
 		}
 		
 		
-		if (m->control_pressed) { delete input; return 0;  }
+		if (m->getControl_pressed()) { delete input; return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -350,21 +350,22 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
                 for (int k = 0; k < i; k++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     double coef = 0.0;
                     double sig = 0.0;
                     if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], xy[k], sig);	}
                     else if (method == "pearson")	{	coef = linear.calcPearson(xy[i], xy[k], sig);	}
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
-                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     
-                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << m->currentSharedBinLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << currentLabels[i] << '\t' << currentLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -372,16 +373,16 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
                 
                 for (int k = 0; k < metadata.size(); k++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     double coef = 0.0;
                     double sig = 0.0;
                     if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], metadata[k], sig);	}
                     else if (method == "pearson")	{	coef = linear.calcPearson(xy[i], metadata[k], sig);	}
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
-                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     
-                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << currentLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 
@@ -406,7 +407,7 @@ int OTUAssociationCommand::processRelabund(){
         
         if (metadatafile != "") {
             bool error = false;
-            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the relabund file.\n");  m->control_pressed = true; error=true;}
+            if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the relabund file.\n");  m->setControl_pressed(true); error=true;}
             if (error) {
                 //maybe add extra info here?? compare groups in each file??
             }
@@ -419,7 +420,7 @@ int OTUAssociationCommand::processRelabund(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  delete input; return 0;  }
+			if (m->getControl_pressed()) {  delete input; return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel());
@@ -454,7 +455,7 @@ int OTUAssociationCommand::processRelabund(){
 		}
 		
 		
-		if (m->control_pressed) { delete input; return 0;  }
+		if (m->getControl_pressed()) { delete input; return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -514,21 +515,22 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
                 for (int k = 0; k < i; k++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     double coef = 0.0;
                     double sig = 0.0;
                     if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], xy[k], sig);	}
                     else if (method == "pearson")	{	coef = linear.calcPearson(xy[i], xy[k], sig);	}
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
-                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     
-                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << m->currentSharedBinLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << currentLabels[i] << '\t' << currentLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -536,16 +538,16 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
                 
                 for (int k = 0; k < metadata.size(); k++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     double coef = 0.0;
                     double sig = 0.0;
                     if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], metadata[k], sig);	}
                     else if (method == "pearson")	{	coef = linear.calcPearson(xy[i], metadata[k], sig);	}
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
-                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     
-                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << currentLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
             
@@ -577,10 +579,10 @@ int OTUAssociationCommand::readMetadata(){
 		//save names of columns you are reading
 		while (!iss.eof()) {
 			iss >> columnLabel; m->gobble(iss);
-            if (m->debug) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
 			metadataLabels.push_back(columnLabel);
 		}
-        vector<string> savedLabels = m->currentSharedBinLabels;
+        vector<string> savedLabels = m->getCurrentSharedBinLabels();
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
         metadataLookup->setLabels("1");
@@ -590,11 +592,11 @@ int OTUAssociationCommand::readMetadata(){
 		//read rest of file
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			string group = "";
 			in >> group; m->gobble(in);
-            if (m->debug) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
             SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
             tempLookup->setLabel("1");
@@ -603,7 +605,7 @@ int OTUAssociationCommand::readMetadata(){
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
 				in >> temp;
-                if (m->debug) { m->mothurOut("[DEBUG]: metadata value = " + toString(temp) + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata value = " + toString(temp) + "\n"); }
 				tempLookup->push_back(temp);
 			}
 			
@@ -614,10 +616,10 @@ int OTUAssociationCommand::readMetadata(){
 		in.close();
         
         //elimnatezeros remove zero otus, we want to remove the extra labels from metaLabels
-        m->currentSharedBinLabels  = metadataLabels;
+        m->setCurrentSharedBinLabels(metadataLabels);
         metadataLookup->eliminateZeroOTUS();
-        metadataLabels = m->currentSharedBinLabels;
-        m->currentSharedBinLabels = savedLabels;
+        metadataLabels = m->getCurrentSharedBinLabels();
+        m->setCurrentSharedBinLabels(savedLabels);
         
         metadata.resize(metadataLookup->getNumBins());
         vector<string> sampleNames = metadataLookup->getNamesGroups();

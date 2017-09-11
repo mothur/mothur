@@ -83,7 +83,7 @@ string SeqErrorCommand::getOutputPattern(string type) {
         else if (type == "errormatrix")            {   pattern = "[filename],error.matrix";   }
         else if (type == "errorchimera")            {   pattern = "[filename],error.chimera";   }
         else if (type == "errorref-query")            {   pattern = "[filename],error.ref-query";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -324,7 +324,7 @@ int SeqErrorCommand::execute(){
 		
 		setLines(queryFileName, qualFileName, reportFileName);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
         getReferences();	//read in reference sequences - make sure there's no ambiguous bases
         
@@ -335,7 +335,7 @@ int SeqErrorCommand::execute(){
             weights = ct.getNameMap();
         }
         
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
         int numSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -356,7 +356,7 @@ int SeqErrorCommand::execute(){
 		
 		printErrorFRFile(errorForward, errorReverse);
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
 		string errorCountFileName = getOutputFileName("errorcount",variables);
 		ofstream errorCountFile;
@@ -372,7 +372,7 @@ int SeqErrorCommand::execute(){
 		}
 		errorCountFile.close();
 		
-//		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+//		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
 		printSubMatrix();
         
@@ -1365,7 +1365,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         m->mothurOut(it->first + " is in your fasta file and not in your quality file, aborting."); m->mothurOutEndLine();
                     }
-                    m->control_pressed = true;
+                    m->setControl_pressed(true);
                     return processors;
                 }
                 
@@ -1428,7 +1428,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                     for (map<string, int>::iterator it = firstSeqNamesReport.begin(); it != firstSeqNamesReport.end(); it++) {
                         m->mothurOut(it->first + " is in your fasta file and not in your report file, aborting."); m->mothurOutEndLine();
                     }
-                    m->control_pressed = true;
+                    m->setControl_pressed(true);
                     return processors;
                 }
                 
@@ -1504,7 +1504,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
         processors = 1;
 #endif
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
             lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));

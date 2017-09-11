@@ -71,7 +71,7 @@ string ChimeraPintailCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],[tag],pintail.chimeras-[filename],pintail.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],[tag],pintail.accnos-[filename],pintail.accnos"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -400,7 +400,7 @@ int ChimeraPintailCommand::execute(){
             accnosFileName = getOutputFileName("accnos", variables);
 			
 			
-			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+			if (m->getControl_pressed()) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			
 			if (chimera->getUnaligned()) { 
 				m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
@@ -422,7 +422,7 @@ int ChimeraPintailCommand::execute(){
 		
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+					if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -444,7 +444,7 @@ int ChimeraPintailCommand::execute(){
 						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
 					}
 										
-					if (m->control_pressed) { 
+					if (m->getControl_pressed()) { 
 						m->mothurRemove(outputFileName); 
 						m->mothurRemove(accnosFileName);
 						for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();
@@ -458,7 +458,7 @@ int ChimeraPintailCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 			#endif
 			
 			delete chimera;
@@ -511,7 +511,7 @@ int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string 
 	
 		while (!done) {
 				
-			if (m->control_pressed) {	return 1;	}
+			if (m->getControl_pressed()) {	return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
@@ -523,7 +523,7 @@ int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string 
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 					
-					if (m->control_pressed) {	delete candidateSeq; return 1;	}
+					if (m->getControl_pressed()) {	delete candidateSeq; return 1;	}
 		
 					//print results
 					chimera->print(out, out2);
@@ -591,7 +591,7 @@ int ChimeraPintailCommand::createProcesses(string outputFileName, string filenam
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
 			}
@@ -599,7 +599,8 @@ int ChimeraPintailCommand::createProcesses(string outputFileName, string filenam
 
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
 
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             

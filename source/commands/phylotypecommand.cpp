@@ -64,7 +64,7 @@ string PhylotypeCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; }
         else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; }
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -212,7 +212,7 @@ int PhylotypeCommand::execute(){
 		//make it as long as the longest taxonomy in the file 
 		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff, outputDir);
 		
-		if (m->control_pressed) { delete taxEqual; return 0; }
+		if (m->getControl_pressed()) { delete taxEqual; return 0; }
 		
 		string equalizedTaxFile = taxEqual->getEqualizedTaxFile();
 		
@@ -228,7 +228,7 @@ int PhylotypeCommand::execute(){
 		bool done = false;
 		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree"); m->mothurOutEndLine();	done = true;	}
 		
-		if (m->control_pressed) { delete tree; return 0; }
+		if (m->getControl_pressed()) { delete tree; return 0; }
 		
 		ofstream outList, outRabund, outSabund;
         map<string, string> variables;
@@ -263,7 +263,7 @@ int PhylotypeCommand::execute(){
 			string level = toString(count); 
 			count++;
 			
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				if (countfile == "") { outRabund.close(); outSabund.close(); } outList.close();
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 				delete tree; return 0; 
@@ -296,13 +296,13 @@ int PhylotypeCommand::execute(){
                                 map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
                                 
                                 if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
-                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
+                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
                                 
                             }else{   name += names[i] + ",";	}
                         }
 					}
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
 					name = name.substr(0, name.length()-1);  //rip off extra ','
 					//add bin to list vector
@@ -310,7 +310,7 @@ int PhylotypeCommand::execute(){
 				}	
 				
 				//print listvector
-                if (!m->printedListHeaders) { list.printHeaders(outList); }
+                if (!m->getPrintedListHeaders()) { list.printHeaders(outList); }
                 if (countfile == "") { list.print(outList);  }
                 else { list.print(outList, counts);  }
                 
@@ -347,7 +347,7 @@ int PhylotypeCommand::execute(){
 		
 		delete tree;
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 			return 0; 
 		}

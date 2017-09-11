@@ -56,7 +56,7 @@ string MantelCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "mantel") {  pattern = "[filename],mantel"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -167,25 +167,25 @@ int MantelCommand::execute(){
 		vector< vector<double> > matrix1;
 		vector<string> names1 = readMatrix.read(matrix1);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read phylip2
 		ReadPhylipVector readMatrix2(phylipfile2);
 		vector< vector<double> > matrix2;
 		vector<string> names2 = readMatrix2.read(matrix2);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//make sure matrix2 and matrix1 are in the same order
 		if (names1 == names2) { //then everything is in same order and same size
 		}else if (names1.size() != names2.size()) { //wrong size no need to order, abort
 			m->mothurOut("[ERROR]: distance matrices are not the same size, aborting."); m->mothurOutEndLine();
-			m->control_pressed = true;
+			m->setControl_pressed(true);
 		}else { //sizes are the same, but either the names are different or they are in different order
 			m->mothurOut("[WARNING]: Names do not match between distance files. Comparing based on order in files."); m->mothurOutEndLine();
 		}	
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		/***************************************************/
 		//    calculating mantel and signifigance		   //
@@ -203,7 +203,7 @@ int MantelCommand::execute(){
 		int count = 0;
 		for (int i = 0; i < iters; i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//randomize matrix2
 			vector< vector<double> > matrix2Copy = matrix2;
@@ -220,7 +220,7 @@ int MantelCommand::execute(){
 		
 		double pValue = count / (float) iters;
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile1));

@@ -100,7 +100,7 @@ string ClusterCommand::getOutputPattern(string type) {
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
         else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
         else if (type == "steps") {  pattern = "[filename],[clustertag],steps"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -402,7 +402,7 @@ int ClusterCommand::execute(){
         else if (method == "unique")    {   runUniqueCluster();     }
         else                            {   runMothurCluster();     }
         
-		if (m->control_pressed) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
+		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
         
@@ -446,7 +446,7 @@ int ClusterCommand::runVsearchCluster(){
         string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
-        if (m->debug) {
+        if (m->getDebug()) {
             m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
             Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
             newCommand->execute();
@@ -478,11 +478,11 @@ int ClusterCommand::runVsearchCluster(){
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
-            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
         }else {  vsearchLocation = vsearchCommand; }
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         vsearchLocation = m->getFullPathName(vsearchLocation);
         
@@ -490,9 +490,9 @@ int ClusterCommand::runVsearchCluster(){
         if ((namefile == "") && (countfile == ""))  { vParse = new VsearchFileParser(fastafile);                        }
         else if (namefile != "")                    { vParse = new VsearchFileParser(fastafile, namefile, "name");      }
         else if (countfile != "")                   { vParse = new VsearchFileParser(fastafile, countfile, "count");    }
-        else                                        { m->mothurOut("[ERROR]: Opps, should never get here. ClusterCommand::runVsearchCluster() \n"); m->control_pressed = true; }
+        else                                        { m->mothurOut("[ERROR]: Opps, should never get here. ClusterCommand::runVsearchCluster() \n"); m->setControl_pressed(true); }
     
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         vsearchFastafile = vParse->getVsearchFile();
         
@@ -503,7 +503,7 @@ int ClusterCommand::runVsearchCluster(){
         string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
         vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
         
-        if (m->control_pressed) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
+        if (m->getControl_pressed()) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
         
         if (outputDir == "") { outputDir += m->hasPath(distfile); }
         fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
@@ -528,7 +528,7 @@ int ClusterCommand::runVsearchCluster(){
         //remove temp files
         m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile);
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         return 0;
     }
@@ -624,7 +624,7 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
             vsearchParameters.push_back(sizeorder);
          }
 
-        if (m->debug) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        if (m->getDebug()) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
         
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
@@ -636,7 +636,7 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
 #else
         commandString = "\"" + commandString + "\"";
 #endif
-        if (m->debug) { m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch cluster command = " + commandString + ".\n"); }
         system(commandString.c_str());
  
         //free memory
@@ -689,7 +689,7 @@ int ClusterCommand::runMothurCluster(){
         }else { rabund = new RAbundVector(list->getRAbundVector()); }
         delete read;
         
-        if (m->control_pressed) { //clean up
+        if (m->getControl_pressed()) { //clean up
             delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
             listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
         }
@@ -736,7 +736,7 @@ int ClusterCommand::runMothurCluster(){
         
         while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
             
-            if (m->control_pressed) { //clean up
+            if (m->getControl_pressed()) { //clean up
                 delete list; delete matrix; delete rabund; delete cluster;
                 if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
                 listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
@@ -848,7 +848,7 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
     try {
         rabund->setLabel(list->getLabel());        
         for(int i = 0; i < list->getNumBins(); i++) { 
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             vector<string> binNames;
             string bin = list->get(i);
             m->splitAtComma(bin, binNames);
@@ -942,7 +942,7 @@ int ClusterCommand::runOptiCluster(){
             
             int start = time(NULL);
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
             
             cluster.update(listVectorMetric);
@@ -961,11 +961,11 @@ int ClusterCommand::runOptiCluster(){
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         
-        if (m->control_pressed) { delete metric; metric = NULL; return 0; }
+        if (m->getControl_pressed()) { delete metric; metric = NULL; return 0; }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
-        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list->printHeaders(listFile); }
+        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
@@ -1032,14 +1032,14 @@ int ClusterCommand::runUniqueCluster(){
         if (countfile != "") {
             CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap();
             for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 list.push_back(it->first);
             }
         }else {
             map<string, string> nameMap;
             m->readNames(namefile, nameMap);
             for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 list.push_back(it->second);
             }
         }
@@ -1054,7 +1054,7 @@ int ClusterCommand::runUniqueCluster(){
         m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
-        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list.printHeaders(listFile); }
+        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list.printHeaders(listFile); }
         if(countfile != "") { list.print(listFile, counts); }
         else { list.print(listFile); }
         listFile.close();

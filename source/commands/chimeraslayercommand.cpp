@@ -107,7 +107,7 @@ string ChimeraSlayerCommand::getOutputPattern(string type) {
         else if (type == "accnos") {  pattern = "[filename],slayer.accnos"; } 
         else if (type == "fasta") {  pattern = "[filename],slayer.fasta"; }
         else if (type == "count") {  pattern = "[filename],slayer.pick.count_table"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -689,7 +689,7 @@ int ChimeraSlayerCommand::execute(){
                 }
             }
 			
-			if (m->control_pressed) {   for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+			if (m->getControl_pressed()) {   for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 
 			if (fileToPriority.size() == 1) { //you running without a groupfile
 				itFile = fileToPriority.begin();
@@ -718,7 +718,7 @@ int ChimeraSlayerCommand::execute(){
 				if(processors == 1){ numSeqs = driver(lines[0], outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority);  }
 				else{ numSeqs = createProcesses(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority); }
 				
-				if (m->control_pressed) {  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
+				if (m->getControl_pressed()) {  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
 
 			}else { //you have provided a groupfile
                 string countFile = "";
@@ -841,14 +841,14 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		set<string>::iterator itChimeras;
 		
 		while (!in2.eof()) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
 			
 			in2 >> name; m->gobble(in2);
 			
 			//find unique name
 			itUnique = uniqueNames.find(name);
 			
-			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 			else {
 				itChimeras = chimerasInFile.find((itUnique->second));
 				
@@ -895,7 +895,7 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
 			
 			in >> name;		m->gobble(in);
 			in >> parent1;	m->gobble(in);
@@ -907,7 +907,7 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 					//find unique name
 					itUnique = uniqueNames.find(name);
 					
-					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else {
 						//is this sequence really not chimeric??
 						itChimeras = chimerasInFile.find(itUnique->second);
@@ -928,7 +928,7 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 					//find unique name
 					itUnique = uniqueNames.find(name);
 					
-					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else {
 						name = itUnique->second;
 						//is this name already in the file
@@ -953,12 +953,12 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 
 						//output parent1's name
 						itUnique = uniqueNames.find(parent1);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else { out << itUnique->second << '\t'; }
 						
 						//output parent2's name
 						itUnique = uniqueNames.find(parent2);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent2 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else { out << itUnique->second << '\t'; }
 						
 						out << DivQLAQRB << '\t' << PerIDQLAQRB << '\t' << BootStrapA << '\t' << DivQLBQRA << '\t' << PerIDQLBQRA << '\t' << BootStrapB << '\t' << flag << '\t' << range1 << '\t' << range2 << endl;
@@ -983,7 +983,7 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 			namesInFile.clear();
 			
 			while (!in3.eof()) {
-				if (m->control_pressed) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); m->mothurRemove((trimFileName+".temp")); return 0; }
+				if (m->getControl_pressed()) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); m->mothurRemove((trimFileName+".temp")); return 0; }
 				
 				Sequence seq(in3); m->gobble(in3);
 				
@@ -991,7 +991,7 @@ int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 					//find unique name
 					itUnique = uniqueNames.find(seq.getName());
 					
-					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ seq.getName() + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ seq.getName() + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else {
 						itNames = namesInFile.find((itUnique->second));
 						
@@ -1074,7 +1074,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceCountParser*& parser, ma
 		string nameFile = "";
 		if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
 			nameFile = nameFileNames[s];
-		}else {  m->control_pressed = true; return 0; }
+		}else {  m->setControl_pressed(true); return 0; }
          
 		CountTable ct;
 		if (!ct.testGroups(nameFile)) {  
@@ -1122,7 +1122,7 @@ string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 		string inputString = "fasta=" + inputFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->mothurCalling = true;
+		m->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -1130,7 +1130,7 @@ string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->mothurCalling = false;
+		m->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		nameFile = filenames["name"][0];
@@ -1154,7 +1154,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 		
 		for (map<string, map<string, int> >::iterator itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) {
 			
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			int start = time(NULL);
 			string thisFastaName = itFile->first;
@@ -1202,12 +1202,12 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
                                     vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
                                     for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                                }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                                }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
                             }
                             out.close();
                             in.close();
                             m->renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
-                        }else { m->mothurOut("[ERROR]: parsing cannot find " + fileGroup[thisFastaName] + ".\n"); m->control_pressed = true; }
+                        }else { m->mothurOut("[ERROR]: parsing cannot find " + fileGroup[thisFastaName] + ".\n"); m->setControl_pressed(true); }
                     }
                     
                 }
@@ -1295,7 +1295,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -1303,7 +1303,8 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+                    processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             groupsPerProcessor = copyFileToPriority.size() / processors;
             remainder = copyFileToPriority.size() % processors;
             breakUp.clear();
@@ -1398,7 +1399,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->fileToPriority.size() != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->end) + " of " + toString(pDataArray[i]->fileToPriority.size()) + " groups assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->end) + " of " + toString(pDataArray[i]->fileToPriority.size()) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
 			num += pDataArray[i]->count;
 			CloseHandle(hThreadArray[i]);
@@ -1467,7 +1468,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string filename, string accnos, string fasta, map<string, int>& priority){
 	try {
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
         
 		MothurChimera* chimera;
 		if (templatefile != "self") { //you want to run slayer with a reference template
@@ -1476,9 +1477,9 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, m->getRandomNumber());	
 		}
 		
-		if (m->control_pressed) { delete chimera; return 0; }
+		if (m->getControl_pressed()) { delete chimera; return 0; }
 		
-		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 		templateSeqsLength = chimera->getLength();
 		
 		ofstream out;
@@ -1502,7 +1503,7 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 	
 		while (!done) {
 		
-			if (m->control_pressed) {	delete chimera; out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
+			if (m->getControl_pressed()) {	delete chimera; out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
@@ -1514,7 +1515,7 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 					
-					if (m->control_pressed) {	delete chimera; delete candidateSeq; return 1;	}
+					if (m->getControl_pressed()) {	delete chimera; delete candidateSeq; return 1;	}
 						
 					//if you are not chimeric, then check each half
 					data_results wholeResults = chimera->getResults();
@@ -1610,7 +1611,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		processIDS.clear();
         bool recalc = false;
         
-        if (m->debug) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
@@ -1638,7 +1639,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -1646,7 +1647,8 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             lines.clear();
             vector<unsigned long long> positions = m->divideFile(filename, processors);
             for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
@@ -1804,7 +1806,7 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return nameAbund; }
+			if (m->getControl_pressed()) { in.close(); return nameAbund; }
 			
 			Sequence seq(in); m->gobble(in);
 			seqs[seq.getName()] = seq.getAligned();
@@ -1830,10 +1832,10 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
             }
         }else { error = m->readNames(nameFile, nameMapCount, seqs); }
 		
-		if (m->control_pressed) { return nameAbund; }
+		if (m->getControl_pressed()) { return nameAbund; }
 		
-		if (error == 1) { m->control_pressed = true; return nameAbund; }
-		if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return nameAbund; }
+		if (error == 1) { m->setControl_pressed(true); return nameAbund; }
+		if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return nameAbund; }
 
 		sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
 		
@@ -1869,12 +1871,12 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs,
 				
 		for (int i = 0; i < thisseqs.size(); i++) {
 			
-			if (m->control_pressed) { return nameAbund; }
+			if (m->getControl_pressed()) { return nameAbund; }
 			
 			map<string, string>::iterator itNameMap = nameMap.find(thisseqs[i].getName());
 			
 			if (itNameMap == nameMap.end()){
-				m->control_pressed = true;
+				m->setControl_pressed(true);
 				m->mothurOut("[ERROR]: " + thisseqs[i].getName() + " is in your fastafile, but is not in your namesfile, please correct."); m->mothurOutEndLine();
 			}else {
 				int num = m->getNumNames(itNameMap->second);
@@ -1887,9 +1889,9 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs,
 		//sort by num represented
 		sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);
 	
-		if (m->control_pressed) { return nameAbund; }
+		if (m->getControl_pressed()) { return nameAbund; }
 		
-		if (thisseqs.size() != nameVector.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return nameAbund; }
+		if (thisseqs.size() != nameVector.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return nameAbund; }
 				
 		ofstream out;
 		m->openOutputFile(newFile, out);
@@ -1919,12 +1921,12 @@ int ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs, map<string, 
         
 		for (int i = 0; i < thisseqs.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			map<string, int>::iterator itCountMap = countMap.find(thisseqs[i].getName());
 			
 			if (itCountMap == countMap.end()){
-				m->control_pressed = true;
+				m->setControl_pressed(true);
 				m->mothurOut("[ERROR]: " + thisseqs[i].getName() + " is in your fastafile, but is not in your count file, please correct."); m->mothurOutEndLine();
 			}else {
                 seqPriorityNode temp(itCountMap->second, thisseqs[i].getAligned(), thisseqs[i].getName());
@@ -1935,9 +1937,9 @@ int ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs, map<string, 
 		//sort by num represented
 		sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);
         
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
-		if (thisseqs.size() != nameVector.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your count file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		if (thisseqs.size() != nameVector.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your count file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
         
 		ofstream out;
 		m->openOutputFile(newFile, out);

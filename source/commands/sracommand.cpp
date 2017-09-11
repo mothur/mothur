@@ -90,7 +90,7 @@ string SRACommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         if (type == "xml") {  pattern = "[filename],xml"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -313,12 +313,12 @@ int SRACommand::execute(){
         uniqueNames.insert("scrap");
         
         readContactFile();
-        if (m->debug) { m->mothurOut("[DEBUG]: read contact file.\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: read contact file.\n"); }
         readMIMarksFile();
-        if (m->debug) { m->mothurOut("[DEBUG]: read mimarks file.\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: read mimarks file.\n"); }
         if (oligosfile != "") { readOligos(); }
-        if (m->debug) { m->mothurOut("[DEBUG]: read oligos file.\n"); }
-        if (m->control_pressed) { return 0; }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: read oligos file.\n"); }
+        if (m->getControl_pressed()) { return 0; }
         
         //parse files
         map<string, vector<string> > filesBySample;
@@ -334,7 +334,7 @@ int SRACommand::execute(){
         
         sanityCheckMiMarksGroups();
         
-        if (m->debug) { m->mothurOut("[DEBUG]: finished sanity check.\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: finished sanity check.\n"); }
         
         //create xml file
         string thisOutputDir = outputDir;
@@ -424,7 +424,7 @@ int SRACommand::execute(){
             
             if ((!includeScrap) && (Groups[i] == "scrap")) {} //ignore scrap
             else {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 out << "\t<Action>\n";
                 out << "\t\t<AddData target_db=\"BioSample\">\n";
                 out << "\t\t\t<Data content_type=\"XML\">\n";
@@ -450,7 +450,7 @@ int SRACommand::execute(){
                 if (it != mimarks.end()) {
                     map<string, string> categories = it->second;
                     for (map<string, string>:: iterator it2 = categories.begin(); it2 != categories.end(); it2++) {
-                        if (m->control_pressed) { break; }
+                        if (m->getControl_pressed()) { break; }
                         out << "\t\t\t\t\t\t\t<Attribute attribute_name=\"" + it2->first + "\">" + it2->second + "</Attribute>\n";
                     }
                 }
@@ -495,7 +495,7 @@ int SRACommand::execute(){
                 for (int j = 0; j < thisGroupsFiles.size(); j++) {
                     string libId = m->getSimpleName(thisGroupsFiles[j]) + "." + thisGroup;
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     out << "\t<Action>\n";
                     out << "\t\t<AddFiles target_db=\"SRA\">\n";
                     if (libLayout == "paired") { //adjust the libID because the thisGroupsFiles[j] contains two filenames
@@ -624,7 +624,7 @@ int SRACommand::execute(){
         out << "</Submission>\n";
         out.close();
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
         //output files created by command
 		m->mothurOutEndLine();
@@ -650,7 +650,7 @@ int SRACommand::readContactFile(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string key, value;
             in >> key; m->gobble(in);
@@ -667,12 +667,12 @@ int SRACommand::readContactFile(){
                 centerType = value;
                 for (int i = 0; i < centerType.length(); i++) { centerType[i] = tolower(centerType[i]); }
                 if ((centerType == "consortium") || (centerType == "center") ||  (centerType == "institute") ||  (centerType == "lab")) {}
-                else { m->mothurOut("[ERROR]: " + centerType + " is not a center type option.  Valid center type options are consortium, center, institute and lab. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->control_pressed = true; }
+                else { m->mothurOut("[ERROR]: " + centerType + " is not a center type option.  Valid center type options are consortium, center, institute and lab. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             }else if (key == "OWNERSHIP")         {
                     ownership = value;
                     for (int i = 0; i < ownership.length(); i++) { ownership[i] = tolower(ownership[i]); }
                     if ((ownership == "owner") || (ownership == "participant")) {}
-                    else { m->mothurOut("[ERROR]: " + ownership + " is not a ownership option.  Valid ownership options are owner or participant. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: " + ownership + " is not a ownership option.  Valid ownership options are owner or participant. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             }else if (key == "DESCRIPTION")     {   description = value;    }
             else if (key == "WEBSITE")          {   website = value;        }
             else if (key == "PROJECTNAME")      {   projectName = value;    }
@@ -705,15 +705,15 @@ int SRACommand::readContactFile(){
         }
         in.close();
         
-        if (lastName == "") { m->mothurOut("[ERROR]: missing last name from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (firstName == "") { m->mothurOut("[ERROR]: missing first name from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (submissionName == "") { m->mothurOut("[ERROR]: missing submission name from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (email == "") { m->mothurOut("[ERROR]: missing email from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (centerName == "") { m->mothurOut("[ERROR]: missing center name from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (centerType == "") { m->mothurOut("[ERROR]: missing center type from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (description == "") { m->mothurOut("[ERROR]: missing description from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (projectTitle == "") { m->mothurOut("[ERROR]: missing project title from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
-        if (projectName == "") { m->mothurOut("[ERROR]: missing project name from project file, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
+        if (lastName == "") { m->mothurOut("[ERROR]: missing last name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (firstName == "") { m->mothurOut("[ERROR]: missing first name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (submissionName == "") { m->mothurOut("[ERROR]: missing submission name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (email == "") { m->mothurOut("[ERROR]: missing email from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (centerName == "") { m->mothurOut("[ERROR]: missing center name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (centerType == "") { m->mothurOut("[ERROR]: missing center type from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (description == "") { m->mothurOut("[ERROR]: missing description from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (projectTitle == "") { m->mothurOut("[ERROR]: missing project title from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (projectName == "") { m->mothurOut("[ERROR]: missing project name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 
         return 0;
     }
@@ -759,10 +759,10 @@ int SRACommand::readMIMarksFile(){
         string temp; packageType = "";
         while(!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             temp = m->getline(in); m->gobble(in);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             if (temp[0] == '#') {
                 int pos = temp.find("MIMARKS.survey");
@@ -780,10 +780,10 @@ int SRACommand::readMIMarksFile(){
         //remove * from required's
         for (int i = 0; i < headers.size(); i++) {
             if (headers[i][0] == '*') { headers[i] = headers[i].substr(1); }
-            if (m->debug) { m->mothurOut("[DEBUG]: " + headers[i] + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + headers[i] + "\n"); }
         }
         
-        if (m->debug) {  m->mothurOut("[DEBUG]: packageType = '" + packageType + "'\n");   }
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: packageType = '" + packageType + "'\n");   }
         
         if (packageType == "MIMARKS.survey.air.4.0") {	requiredFieldsForPackage.push_back("altitude");	}
         if (packageType == "MIMARKS.survey.host-associated.4.0") {		requiredFieldsForPackage.push_back("host");	}
@@ -804,34 +804,34 @@ int SRACommand::readMIMarksFile(){
         if (!m->isSubset(headers, requiredFieldsForPackage)){
             string requiredFields = "";
             for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) { requiredFields += requiredFieldsForPackage[i] + ", "; } requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
-            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".\n"); m->control_pressed = true; in.close(); return 0;
+            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".\n"); m->setControl_pressed(true); in.close(); return 0;
             
             
         }
         
-        //if (m->debug) {  m->mothurOut("[DEBUG]: chooseAtLeastOneForPackage.size() = " + toString(chooseAtLeastOneForPackage.size()) + "\n");   }
+        //if (m->getDebug()) {  m->mothurOut("[DEBUG]: chooseAtLeastOneForPackage.size() = " + toString(chooseAtLeastOneForPackage.size()) + "\n");   }
         
         //if (!m->inUsersGroups(chooseAtLeastOneForPackage, headers)){ //returns true if any of the choose at least ones are in headers
             //string requiredFields = "";
             //for (int i = 0; i < chooseAtLeastOneForPackage.size()-1; i++) { requiredFields += chooseAtLeastOneForPackage[i] + ", "; cout << chooseAtLeastOneForPackage[i] << endl; }
             //if (chooseAtLeastOneForPackage.size() < 1) { requiredFields += chooseAtLeastOneForPackage[chooseAtLeastOneForPackage.size()-1]; }
-            //m->mothurOut("[ERROR]: missing a choose at least one fields for the package, please correct. These are marked with '**'. Required fields are " + requiredFields + ".\n"); m->control_pressed = true; in.close(); return 0;
+            //m->mothurOut("[ERROR]: missing a choose at least one fields for the package, please correct. These are marked with '**'. Required fields are " + requiredFields + ".\n"); m->setControl_pressed(true); in.close(); return 0;
        // }
         
         map<string, bool> allNA;  for (int i = 1; i < headers.size(); i++) {  allNA[headers[i]] = true; }
         while(!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             temp = m->getline(in);  m->gobble(in);
             //cout << temp << endl;
-            if (m->debug) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             string original = temp;
             vector<string> linePieces; m->splitAtChar(temp, linePieces, '\t');
             m->removeBlanks(linePieces);
             
-            if (linePieces.size() != headers.size()) { m->mothurOut("[ERROR]: line: " + original + " contains " + toString(linePieces.size()) + " columns, but you have " + toString(headers.size()) + " column headers, please correct.\n"); m->control_pressed = true; }
+            if (linePieces.size() != headers.size()) { m->mothurOut("[ERROR]: line: " + original + " contains " + toString(linePieces.size()) + " columns, but you have " + toString(headers.size()) + " column headers, please correct.\n"); m->setControl_pressed(true); }
             else {
                 map<string, map<string, string> >:: iterator it = mimarks.find(linePieces[0]);
                 
@@ -856,7 +856,7 @@ int SRACommand::readMIMarksFile(){
                         if (headers[i] == "collection_date") {
                             //will autocorrect if possible
                             bool okay = checkDateFormat(linePieces[i]);
-                            if (!okay) { m->control_pressed = true; }
+                            if (!okay) { m->setControl_pressed(true); }
                         }
                         if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
                         categories[headers[i]] = linePieces[i];
@@ -865,16 +865,16 @@ int SRACommand::readMIMarksFile(){
                     //does this sample already match an existing sample?
                     bool isOkaySample = true;
                     for (map<string, map<string, string> >:: iterator it2 = mimarks.begin(); it2 != mimarks.end(); it2++) {
-                        if (m->control_pressed) { break; }
+                        if (m->getControl_pressed()) { break; }
                         bool allSame = true;
                         for (int i = 1; i < headers.size(); i++) {
                             if ((it2->second)[headers[i]] != categories[headers[i]]) { allSame = false; }
                         }
-                        if (allSame) { m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sample to " + it2->first + ". It has all the same attributes in the MIMarks file. Samples must have distinguishing features to be uploaded to the NCBI library, please correct.\n"); m->control_pressed = true; isOkaySample = false; }
+                        if (allSame) { m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sample to " + it2->first + ". It has all the same attributes in the MIMarks file. Samples must have distinguishing features to be uploaded to the NCBI library, please correct.\n"); m->setControl_pressed(true); isOkaySample = false; }
                     }
                     if (isOkaySample) { mimarks[linePieces[0]] = categories; }
                 }else {
-                    m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sampleName. Sample names must be unique, please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sampleName. Sample names must be unique, please correct.\n"); m->setControl_pressed(true);
                 }
             }
         }
@@ -959,7 +959,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);
@@ -974,11 +974,11 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 thisFileName2 = pieces[2];
                 group = pieces[0];
                 m->checkGroupName(group);
-                if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
-                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->control_pressed = true; } }
+                if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
+                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
                 else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
             }else if (pieces.size() == 4) {
-                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
                 thisFileName1 = pieces[0];
                 thisFileName2 = pieces[1];
                 findex = pieces[2];
@@ -986,10 +986,10 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 if ((findex == "none") || (findex == "NONE")){ findex = ""; }
                 if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->setControl_pressed(true);
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
             
             if (inputDir != "") {
                 string path = m->hasPath(thisFileName1);
@@ -1157,20 +1157,20 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         fileOption = 1;
                         isSFF = true;
                         sfffile = thisFileName1; oligosfile = thisFileName2;
-                        if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
                         readOligos();
-                        if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to parse\n"); }
                         parseSffFile(files);
-                        if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + sfffile + "\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: done parsing " + sfffile + "\n"); }
                     }else{
                         fileOption = 2;
                         isSFF = false;
                         fastqfile = thisFileName1; oligosfile = thisFileName2;
-                        if (m->debug) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
                         readOligos();
-                        if (m->debug) { m->mothurOut("[DEBUG]: about to parse\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to parse\n"); }
                         parseFastqFile(files);
-                        if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
             }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
@@ -1207,7 +1207,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             m->mothurOutEndLine();
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
             fastqinfoCommand->execute();
@@ -1215,10 +1215,10 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             map<string, vector<string> > filenames = fastqinfoCommand->getOutputFiles();
             map<string, vector<string> >::iterator it = filenames.find("fastq");
             if (it != filenames.end()) { theseFiles = it->second; }
-            else { m->control_pressed = true; } // error in sffinfo
+            else { m->setControl_pressed(true); } // error in sffinfo
             
             delete fastqinfoCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
@@ -1260,7 +1260,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: sffinfo(" + commandString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* sffinfoCommand = new SffInfoCommand(commandString);
         sffinfoCommand->execute();
@@ -1268,10 +1268,10 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         map<string, vector<string> > filenames = sffinfoCommand->getOutputFiles();
         map<string, vector<string> >::iterator it = filenames.find("sff");
         if (it != filenames.end()) { theseFiles = it->second; }
-        else { m->control_pressed = true; } // error in sffinfo
+        else { m->setControl_pressed(true); } // error in sffinfo
         
         delete sffinfoCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
@@ -1307,7 +1307,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
         fastqinfoCommand->execute();
@@ -1315,10 +1315,10 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         map<string, vector<string> > filenames = fastqinfoCommand->getOutputFiles();
         map<string, vector<string> >::iterator it = filenames.find("fastq");
         if (it != filenames.end()) { theseFiles = it->second; }
-        else { m->control_pressed = true; } // error in sffinfo
+        else { m->setControl_pressed(true); } // error in sffinfo
         
         delete fastqinfoCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
@@ -1377,9 +1377,9 @@ int SRACommand::fixMap(map<string, vector<string> >& files){
             
             vector<string> theseFiles = it->second;
             
-            if (theseFiles.size() != 2) { m->mothurOut("[ERROR]: unexpected number of files, quitting. \n."); m->control_pressed = true; }
+            if (theseFiles.size() != 2) { m->mothurOut("[ERROR]: unexpected number of files, quitting. \n."); m->setControl_pressed(true); }
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             vector<string> temp; temp.resize(1, "");
             
@@ -1403,7 +1403,7 @@ int SRACommand::fixMap(map<string, vector<string> >& files){
                             temp[0] += " " + theseFiles[j];
                         }
                     }else {
-                        m->mothurOut("[ERROR]: unexpected parsing results, quitting. \n."); m->control_pressed = true;  //shouldn't get here unless the fastq.info changes the format of the output filenames???
+                        m->mothurOut("[ERROR]: unexpected parsing results, quitting. \n."); m->setControl_pressed(true);  //shouldn't get here unless the fastq.info changes the format of the output filenames???
                     }
                 }
             }
@@ -1425,7 +1425,7 @@ int SRACommand::checkGroups(map<string, vector<string> >& files){
 	try {
         vector<string> newGroups;
         for (int i = 0; i < Groups.size(); i++) {
-            if (m->debug) { m->mothurOut("[DEBUG]: group " + toString(i) + " = " + Groups[i] + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group " + toString(i) + " = " + Groups[i] + "\n"); }
             
             map<string, vector<string> >::iterator it = files.find(Groups[i]);
              //no files for this group, remove it
@@ -1449,7 +1449,7 @@ int SRACommand::readOligos(){
         if ((fileOption == 3) || (fileOption == 5)) { oligos.read(oligosfile, false);  } //like make.contigs
         else {  oligos.read(oligosfile);  }
         
-        if (m->control_pressed) { return false; } //error in reading oligos
+        if (m->getControl_pressed()) { return false; } //error in reading oligos
         
         if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes())    {  pairedOligos = true;    libLayout = "paired"; }
         else                                                            {  pairedOligos = false;    libLayout = "single"; }
@@ -1612,7 +1612,7 @@ int SRACommand::readOligos(){
             }
         }
         
-        if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
+        if (m->getDebug()) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
         Groups.clear();
         for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it);  }
@@ -1855,7 +1855,7 @@ bool SRACommand::sanityCheckMiMarksGroups(){
         bool isOkay = true;
         
         for (int i = 0; i < Groups.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             map<string, map<string, string> >::iterator it = mimarks.find(Groups[i]);
             if (it == mimarks.end()) {
@@ -1864,7 +1864,7 @@ bool SRACommand::sanityCheckMiMarksGroups(){
             }
         }
         
-        if (!isOkay) { m->control_pressed = true; }
+        if (!isOkay) { m->setControl_pressed(true); }
         
         return isOkay;
     }
@@ -1882,7 +1882,7 @@ bool SRACommand::checkDateFormat(string& date){
             if (date[i] == '/') { date[i] = '-'; }
         }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: date = " + date + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: date = " + date + "\n"); }
         
         map<string, int> months; months["Jan"] = 31; months["Feb"] = 29; months["Mar"] = 31; months["Apr"] = 30; months["Jun"] = 30; months["May"] = 31; months["Jul"] = 31; months["Aug"] = 31; months["Sep"] = 30;months["Oct"] = 31; months["Nov"] = 30; months["Dec"] = 31;
         map<string, int> monthsN; monthsN["01"] = 31; monthsN["02"] = 29; monthsN["03"] = 31; monthsN["04"] = 30; monthsN["06"] = 30; monthsN["05"] = 31; monthsN["07"] = 31; monthsN["08"] = 31; monthsN["09"] = 30;monthsN["10"] = 31; monthsN["11"] = 30; monthsN["12"] = 31;
@@ -1893,10 +1893,10 @@ bool SRACommand::checkDateFormat(string& date){
             if (date.find_first_of('-') != string::npos) { m->splitAtDash(date, pieces); }
             else { pieces = m->splitWhiteSpace(date);  }
              
-            if (m->debug) { m->mothurOut("[DEBUG]: in alpha\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: in alpha\n"); }
             //check "Mmm-YYYY"
             if (pieces.size() == 2) { //"Mmm-YYYY"
-                if (m->debug) { m->mothurOut("[DEBUG]: pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
                 map<string, int>::iterator it;
                 it = months.find(pieces[0]);  //is this a valid month
                 if (it != months.end()) {
@@ -1915,7 +1915,7 @@ bool SRACommand::checkDateFormat(string& date){
                 }
                 if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
             }else if (pieces.size() == 3) { //DD-Mmm-YYYY"
-                if (m->debug) { m->mothurOut("[DEBUG]: pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                 map<string, int>::iterator it;
                 it = months.find(pieces[1]);  //is this a valid month
                 if (it != months.end()) {
@@ -1945,7 +1945,7 @@ bool SRACommand::checkDateFormat(string& date){
                 if (isOkay) { date = pieces[0] + "-" + pieces[1] + "-" + pieces[2]; }
             }
         }else { // no alpha months "YYYY" or "YYYY-mm-dd" or "YYYY-mm"
-             if (m->debug) { m->mothurOut("[DEBUG]: in nonAlpha\n"); }
+             if (m->getDebug()) { m->mothurOut("[DEBUG]: in nonAlpha\n"); }
             vector<string> pieces;
             if (date.find_first_of('-') != string::npos) { m->splitAtDash(date, pieces); }
             else { pieces = m->splitWhiteSpace(date);  }
@@ -1956,7 +1956,7 @@ bool SRACommand::checkDateFormat(string& date){
             else if (pieces[pieces.size()-1].length() == 4) { format = "yearLast"; }
             
             if (format == "yearFirst" ) {
-                if (m->debug) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                 //just year
                 if (pieces.size() == 1) {
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
@@ -1994,7 +1994,7 @@ bool SRACommand::checkDateFormat(string& date){
             }else { // year last, try to fix format
                 //if year last, then it could be dd-mm-yyyy or mm-dd-yyyy -> yyyy-mm-dd
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: yearLast pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: yearLast pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                 
                 if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                 
@@ -2047,7 +2047,7 @@ bool SRACommand::checkDateFormat(string& date){
         }
         if (!isOkay) { m->mothurOut("[ERROR]: The date must be in one of the following formats: Date of sampling, in ""DD-Mmm-YYYY/"", ""Mmm-YYYY/"" or ""YYYY/"" format (eg., 30-Oct-1990, Oct-1990 or 1990) or ISO 8601 standard ""YYYY-mm-dd/"", ""YYYY-mm/""  (eg., 1990-10-30, 1990-10/"")"); }
         
-        if (m->debug) {  m->mothurOut("[DEBUG]: date = " + date + "\n"); }
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: date = " + date + "\n"); }
             
         return isOkay;
     }
@@ -2099,7 +2099,7 @@ int SRACommand::findFileOption(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);

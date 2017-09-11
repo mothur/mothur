@@ -32,7 +32,7 @@ KmerNode::KmerNode(string s, int l, int n) : TaxonomyNode(s, l), kmerSize(n) {
 void KmerNode::loadSequence(vector<int>& kmerProfile){
 	try {
         for(int i=0;i<numPossibleKmers;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             if(kmerVector[i] == 0 && kmerProfile[i] != 0)	{	numUniqueKmers++;	}
             
             kmerVector[i] += kmerProfile[i];
@@ -71,7 +71,7 @@ string KmerNode::getKmerBases(int kmerNumber){
         }
         else{
             for(int i=0;i<kmerSize;i++){
-                if (m->control_pressed) { return kmer; }
+                if (m->getControl_pressed()) { return kmer; }
                 int nt = (int)(kmerNumber / (float)power4s[i]) % 4;		//	the '%' operator returns the remainder 
                 if(nt == 0)		{	kmer = 'A' + kmer;	}				//	from int-based division ]
                 else if(nt == 1){	kmer = 'C' + kmer;	}
@@ -92,7 +92,7 @@ string KmerNode::getKmerBases(int kmerNumber){
 void KmerNode::addThetas(vector<int> newTheta, int newNumSeqs){
 	try {
         for(int i=0;i<numPossibleKmers;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             kmerVector[i] += newTheta[i];		
         }
         
@@ -125,7 +125,7 @@ int KmerNode::getNumUniqueKmers(){
         if(numUniqueKmers == 0){
             
             for(int i=0;i<numPossibleKmers;i++){
-                if (m->control_pressed) { return numUniqueKmers; }
+                if (m->getControl_pressed()) { return numUniqueKmers; }
                 if(kmerVector[i] != 0){
                     numUniqueKmers++;
                 }
@@ -168,7 +168,7 @@ double KmerNode::getSimToConsensus(vector<int>& queryKmerProfile){
         double present = 0;
         
         for(int i=0;i<numPossibleKmers;i++){
-            if (m->control_pressed) { return present; }
+            if (m->getControl_pressed()) { return present; }
             if(queryKmerProfile[i] != 0 && kmerVector[i] != 0){
                 present++;
             }
@@ -191,7 +191,7 @@ double KmerNode::getPxGivenkj_D_j(vector<int>& queryKmerProfile)	{
         //	double alpha = pow((1.0 / (double)numUniqueKmers), numSeqs)+0.0001;	//non-flat prior
         
         for(int i=0;i<numPossibleKmers;i++){
-            if (m->control_pressed) { return sumLogProb; }
+            if (m->getControl_pressed()) { return sumLogProb; }
             if(queryKmerProfile[i] != 0){		//numUniqueKmers needs to be the value from Root;
                 sumLogProb += log((kmerVector[i] + alpha) / (numSeqs + numUniqueKmers * alpha));
             }

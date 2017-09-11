@@ -87,7 +87,8 @@ int ChimeraCheckRDP::getChimeras(Sequence* query) {
 				
 		querySeq = query;
 			
-		closest = templateDB->findClosestSequence(query);  
+        float searchScore;
+		closest = templateDB->findClosestSequence(query, searchScore);
 	
 		IS = findIS(); 
 					
@@ -128,9 +129,9 @@ vector<sim> ChimeraCheckRDP::findIS() {
 		//for each window
 		for (int f = start; f < (seq.length() - start); f+=increment) {
 		
-            if ((f - kmerSize) < 0)  { m->mothurOut("[ERROR]: Sequence " + querySeq->getName() + " is too short for your kmerSize, quitting."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if ((f - kmerSize) < 0)  { m->mothurOut("[ERROR]: Sequence " + querySeq->getName() + " is too short for your kmerSize, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 			
-            if (m->control_pressed) { return isValues; }
+            if (m->getControl_pressed()) { return isValues; }
             
 			sim temp;
 			
@@ -142,9 +143,10 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			Sequence* right = new Sequence(queryName, fragRight);
 			
 			//find seqs closest to each fragment
-			Sequence closestLeft = templateDB->findClosestSequence(left); 
+            float searchScore;
+			Sequence closestLeft = templateDB->findClosestSequence(left, searchScore);
 	
-			Sequence closestRight = templateDB->findClosestSequence(right); 
+			Sequence closestRight = templateDB->findClosestSequence(right, searchScore);
 		
 			//get kmerinfo for the closest left
 			vector< map<int, int> > closeLeftKmerInfo = kmer->getKmerCounts(closestLeft.getUnaligned());

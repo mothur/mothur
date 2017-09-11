@@ -73,7 +73,7 @@ string ChimeraPerseusCommand::getOutputPattern(string type) {
         if (type == "chimera") {  pattern = "[filename],perseus.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],perseus.accnos"; }
         else if (type == "count") {  pattern = "[filename],perseus.pick.count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -510,7 +510,7 @@ int ChimeraPerseusCommand::execute(){
 				nameFile = nameFileNames[s];
 			}else { nameFile = getNamesFile(fastaFileNames[s]); }
 			
-			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0;	}				
+			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0;	}				
 			
 			int numSeqs = 0;
 			int numChimeras = 0;
@@ -527,7 +527,7 @@ int ChimeraPerseusCommand::execute(){
                     
                     vector<string> groups = cparser->getNamesOfGroups();
                     
-                    if (m->control_pressed) { delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                    if (m->getControl_pressed()) { delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                     
                     //clears files
                     ofstream out, out1, out2;
@@ -555,7 +555,7 @@ int ChimeraPerseusCommand::execute(){
                     }
                     else				{	numSeqs = createProcessesGroups(outputFileName, accnosFileName, newCountFile, groups, groupFile, fastaFileNames[s], nameFile);			}
                     
-                    if (m->control_pressed) {  delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+                    if (m->getControl_pressed()) {  delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = cparser->getAllSeqsMap();
                     if (!dups) { 
                         numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
@@ -584,7 +584,7 @@ int ChimeraPerseusCommand::execute(){
 
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
                     
-                    if (m->control_pressed) {  delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }	
+                    if (m->getControl_pressed()) {  delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }	
                     
                 }else {
                     if (processors != 1) { m->mothurOut("Your count file does not contain group information, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
@@ -592,7 +592,7 @@ int ChimeraPerseusCommand::execute(){
                     //read sequences and store sorted by frequency
                     vector<seqData> sequences = readFiles(fastaFileNames[s], ct);
                     
-                    if (m->control_pressed) { delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+                    if (m->getControl_pressed()) { delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
                     
                     numSeqs = driver(outputFileName, sequences, accnosFileName, numChimeras);   
                 }
@@ -604,7 +604,7 @@ int ChimeraPerseusCommand::execute(){
                     parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
                     vector<string> groups = parser->getNamesOfGroups();
                     
-                    if (m->control_pressed) { delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                    if (m->getControl_pressed()) { delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                     
                     //clears files
                     ofstream out, out1, out2;
@@ -614,7 +614,7 @@ int ChimeraPerseusCommand::execute(){
                     if(processors == 1)	{	numSeqs = driverGroups(outputFileName, accnosFileName, "", 0, groups.size(), groups);	}
                     else				{	numSeqs = createProcessesGroups(outputFileName, accnosFileName, "", groups, groupFile, fastaFileNames[s], nameFile);			}
                     
-                    if (m->control_pressed) {  delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+                    if (m->getControl_pressed()) {  delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = parser->getAllSeqsMap();
                     if (!dups) { 
                         numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
@@ -623,20 +623,20 @@ int ChimeraPerseusCommand::execute(){
                     
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
                     
-                    if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }		
+                    if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }		
                 }else{
                     if (processors != 1) { m->mothurOut("Without a groupfile, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
                     
                     //read sequences and store sorted by frequency
                     vector<seqData> sequences = readFiles(fastaFileNames[s], nameFile);
                     
-                    if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+                    if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
                     
                     numSeqs = driver(outputFileName, sequences, accnosFileName, numChimeras); 
                 }
 			}
             
-			if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+			if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.");	m->mothurOutEndLine();
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
@@ -679,7 +679,7 @@ string ChimeraPerseusCommand::getNamesFile(string& inputFile){
 		string inputString = "fasta=" + inputFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->mothurCalling = true;
+		m->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -687,7 +687,7 @@ string ChimeraPerseusCommand::getNamesFile(string& inputFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->mothurCalling = false;
+		m->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		nameFile = filenames["name"][0];
@@ -714,16 +714,16 @@ int ChimeraPerseusCommand::driverGroups(string outputFName, string accnos, strin
 			
 			m->mothurOutEndLine(); m->mothurOut("Checking sequences from group " + groups[i] + "...");	m->mothurOutEndLine();					
 			
-			int start = time(NULL);	 if (m->control_pressed) {  return 0; }
+			int start = time(NULL);	 if (m->getControl_pressed()) {  return 0; }
 			
 			vector<seqData> sequences = loadSequences(groups[i]);
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			int numSeqs = driver((outputFName + groups[i]), sequences, (accnos+groups[i]), numChimeras);
 			totalSeqs += numSeqs;
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
             
             if (dups) {
                 if (!m->isBlank(accnos+groups[i])) {
@@ -748,7 +748,7 @@ int ChimeraPerseusCommand::driverGroups(string outputFName, string accnos, strin
                                 vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
@@ -788,7 +788,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
             
             for (int i = 0; i < thisGroupsSeqs.size(); i++) {
                 
-                if (m->control_pressed) {  return sequences; }
+                if (m->getControl_pressed()) {  return sequences; }
                 
                 it = counts.find(thisGroupsSeqs[i].getName());
                 if (it == counts.end()) { error = true; m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your count file, please correct."); m->mothurOutEndLine(); }
@@ -805,7 +805,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
            
             for (int i = 0; i < thisGroupsSeqs.size(); i++) {
                 
-                if (m->control_pressed) {  return sequences; }
+                if (m->getControl_pressed()) {  return sequences; }
                 
                 it = nameMap.find(thisGroupsSeqs[i].getName());
                 if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
@@ -819,7 +819,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
             
 		}
 		
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
 		//sort by frequency
 		sort(sequences.rbegin(), sequences.rend());
 		
@@ -846,7 +846,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, string name){
         
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return sequences; }
+			if (m->getControl_pressed()) { in.close(); return sequences; }
 			
 			Sequence temp(in); m->gobble(in);
 			
@@ -860,7 +860,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, string name){
 		}
 		in.close();
 		
-		if (error) { m->control_pressed = true; }
+		if (error) { m->setControl_pressed(true); }
 		
 		//sort by frequency
 		sort(sequences.rbegin(), sequences.rend());
@@ -899,7 +899,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, CountTable* c
             Sequence temp(in); m->gobble(in);
 			
 			int count = ct->getNumSeqs(temp.getName());
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			else {
                 temp.setAligned(removeNs(temp.getUnaligned()));
 				sequences.push_back(seqData(temp.getName(), temp.getUnaligned(), count));
@@ -961,7 +961,7 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 		vector<bool> chimeras(numSeqs, 0);
 		
 		for(int i=0;i<numSeqs;i++){	
-			if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+			if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
     
 			vector<bool> restricted = chimeras;
 			
@@ -977,7 +977,7 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 			vector<pwAlign> alignments(numSeqs);
 			
 			int comparisons = myPerseus.getAlignments(i, sequences, alignments, leftDiffs, leftMaps, rightDiffs, rightMaps, bestSingleIndex, bestSingleDiff, restricted);
-			if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+			if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 			int minMismatchToChimera, leftParentBi, rightParentBi, breakPointBi;
 			
@@ -987,19 +987,19 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
                 chimeraFile << i << '\t' << sequences[i].seqName << "\t0\t0\tNull\t0\t0\t0\tNull\tNull\t0.0\t0.0\t0.0\t0\t0\t0\t0.0\t0.0\tgood" << endl;
             }else if(comparisons >= 2){	
 				minMismatchToChimera = myPerseus.getChimera(sequences, leftDiffs, rightDiffs, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight, restricted);
-				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				int minMismatchToTrimera = numeric_limits<int>::max();
 				int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
 				
 				if(minMismatchToChimera >= 3 && comparisons >= 3){
 					minMismatchToTrimera = myPerseus.getTrimera(sequences, leftDiffs, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight, restricted);
-					if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+					if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 				}
 				
 				double singleDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, sequences[bestSingleIndex].sequence, dummyA, dummyB, correctModel);
 				
-				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				string type;
 				string chimeraRefSeq;
@@ -1013,16 +1013,16 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 					chimeraRefSeq = myPerseus.stitchBimera(alignments, leftParentBi, rightParentBi, breakPointBi, leftMaps, rightMaps);
 				}
 
-                if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+                if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 				
 				double chimeraDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq, dummyA, dummyB, correctModel);
 				
-				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				double cIndex = chimeraDist;//modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq);
 				double loonIndex = myPerseus.calcLoonIndex(sequences[i].sequence, sequences[leftParentBi].sequence, sequences[rightParentBi].sequence, breakPointBi, binMatrix);		
 				
-				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				chimeraFile << i << '\t' << sequences[i].seqName << '\t' << bestSingleDiff << '\t' << bestSingleIndex << '\t' << sequences[bestSingleIndex].seqName << '\t';
 				chimeraFile << minMismatchToChimera << '\t' << leftParentBi << '\t' << rightParentBi << '\t' << sequences[leftParentBi].seqName << '\t' << sequences[rightParentBi].seqName << '\t';
@@ -1120,7 +1120,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -1128,7 +1128,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             lines.clear();
             remainingPairs = groups.size();
             int startIndex = 0;
@@ -1299,14 +1299,14 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		
 		
 		while (!in2.eof()) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
 			
 			in2 >> name; m->gobble(in2);
 			
 			//find unique name
 			itUnique = uniqueNames.find(name);
 			
-			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 			else {
 				itChimeras = chimerasInFile.find((itUnique->second));
 				
@@ -1350,7 +1350,7 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
 			in >> index;	m->gobble(in);
@@ -1370,7 +1370,7 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 				//find unique name
 				itUnique = uniqueNames.find(name);
 				
-				if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+				if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 				else {
 					name = itUnique->second;
 					//is this name already in the file
@@ -1393,7 +1393,7 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 					
 					if (BestMatchName != "Null") {
 						itUnique = uniqueNames.find(BestMatchName);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find BestMatchName "+ BestMatchName + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find BestMatchName "+ BestMatchName + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else {	out << itUnique->second << '\t';	}					
 					}else { out << "Null" << '\t'; }
 					
@@ -1401,13 +1401,13 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 					
 					if (parent1 != "Null") {
 						itUnique = uniqueNames.find(parent1);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parent1 "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parent1 "+ parent1 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else {	out << itUnique->second << '\t';	}
 					}else { out << "Null" << '\t'; }
 					
 					if (parent1 != "Null") {
 						itUnique = uniqueNames.find(parent2);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parent2 "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parent2 "+ parent2 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else {	out << itUnique->second << '\t';	}
 					}else { out << "Null" << '\t'; }
 					

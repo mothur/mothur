@@ -77,7 +77,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
-            
+            vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for(int i = 0; i < row; i++){
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
@@ -90,10 +90,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 				f22 = total2 - fish2[i];
 				
 				MothurFisher fisher;
-				double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
+				double pre = fisher.fexact(f11, f12, f21, f22, currentLabels[i]);
 				if (pre > 0.999999999)	{ pre = 1.0; }
                 
-				if (m->control_pressed) { return 1; }
+				if (m->getControl_pressed()) { return 1; }
 				
 				pvalues[i] = pre;
 			}
@@ -132,7 +132,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                 T_statistics[i] = xbar_diff/denom;  // calculate two sample t-statistic
             }
             
-            if (m->debug) {
+            if (m->getDebug()) {
                 for (int i = 0; i < row; i++) {
                     for (int j = 0; j < 3; j++) {
                         cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
@@ -152,7 +152,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //#*************************************
             pvalues = permuted_pvalues(Pmatrix, T_statistics, data);
             
-            if (m->debug) {  for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + m->currentSharedBinLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
+            if (m->getDebug()) {  vector<string> currentLabels = m->getCurrentSharedBinLabels(); for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + currentLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
             
             //#*************************************
             //#  generate p values for sparse data 
@@ -168,6 +168,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
             
+            vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for(int i = 0; i < row; i++){
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
@@ -182,13 +183,14 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                     f22 = total2 - fish2[i];
 				
                     MothurFisher fisher;
-                    if (m->debug) {   m->mothurOut("[DEBUG]: about to run fisher for Otu " + m->currentSharedBinLabels[i] + " F11, F12, F21, F22 = " + toString(f11) + " " + toString(f12) + " " + toString(f21) + " " + toString(f22) + " " + "\n"); }
-                    double pre = fisher.fexact(f11, f12, f21, f22, m->currentSharedBinLabels[i]);
-                    if (m->debug) {   m->mothurOut("[DEBUG]: about to completed fisher for Otu " + m->currentSharedBinLabels[i] + " pre = " + toString(pre) + "\n"); }
+                    if (m->getDebug()) {    m->mothurOut("[DEBUG]: about to run fisher for Otu " + currentLabels[i] + " F11, F12, F21, F22 = " + toString(f11) + " " + toString(f12) + " " + toString(f21) + " " + toString(f22) + " " + "\n"); }
+                    
+                    double pre = fisher.fexact(f11, f12, f21, f22, currentLabels[i]);
+                    if (m->getDebug()) {  m->mothurOut("[DEBUG]: about to completed fisher for Otu " + currentLabels[i] + " pre = " + toString(pre) + "\n"); }
                     
                     if (pre > 0.999999999)	{ pre = 1.0; }
                 
-                    if (m->control_pressed) { return 1; }
+                    if (m->getControl_pressed()) { return 1; }
 				
                     pvalues[i] = pre;
                 }
@@ -219,12 +221,12 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		//output column headings - not really sure... documentation labels 9 columns, there are 10 in the output file
 		//storage 0 = meanGroup1 - line 529, 1 = varGroup1 - line 532, 2 = err rate1 - line 534, 3 = mean of counts group1?? - line 291, 4 = meanGroup2 - line 536, 5 = varGroup2 - line 539, 6 = err rate2 - line 541, 7 = mean of counts group2?? - line 292, 8 = pvalues - line 293
 		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tp-value\n";
-		
+		vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		for(int i = 0; i < row; i++){
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
 			
             //if there are binlabels use them otherwise count.
-			if (i < m->currentSharedBinLabels.size()) { out << m->currentSharedBinLabels[i] << '\t'; }
+			if (i < currentLabels.size()) { out << currentLabels[i] << '\t'; }
             else { out << (i+1) << '\t'; }
             
             out << C1[i][0] << '\t' << C1[i][1] << '\t' << C1[i][2] << '\t' << C2[i][0] << '\t' << C2[i][1] << '\t' << C2[i][2] << '\t' << pvalues[i] <<  endl;

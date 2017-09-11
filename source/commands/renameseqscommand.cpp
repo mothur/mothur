@@ -73,7 +73,7 @@ string RenameSeqsCommand::getOutputPattern(string type) {
         else if (type == "qfile")               {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "contigsreport")       {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "map")                 {  pattern = "[filename],renamed_map"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -375,14 +375,14 @@ int RenameSeqsCommand::execute() {
             if ((qualfile != "") || (contigsfile != "")) { fillOld2NewNameMap = true; }
             
             while (!in.eof()) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 Sequence seq(in); m->gobble(in);
                 
                 vector<string> dups;
                 if (nameFile != "") {
                     map<string, vector<string> >::iterator it = nameMap.find(seq.getName());
-                    if (it == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name file, please correct.\n"); m->control_pressed = true;  }
+                    if (it == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name file, please correct.\n"); m->setControl_pressed(true);  }
                     else { dups = it->second; }
                 }else { dups.push_back(seq.getName()); }
                 
@@ -400,13 +400,13 @@ int RenameSeqsCommand::execute() {
                         }
                     }
                     
-                    if (group == "not found") {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your file, please correct.\n"); m->control_pressed = true; }
+                    if (group == "not found") {  m->mothurOut("[ERROR]: " + seq.getName() + " is not in your file, please correct.\n"); m->setControl_pressed(true); }
                     else {
                         //get new name
                         string newName = "";
                         if (mapFile != "") {
                             map<string, string>::iterator itMap = renameMap.find(dups[i]);
-                            if (itMap == renameMap.end()) { m->mothurOut("[ERROR]: " + dups[i] + " is not in your map file, please correct.\n"); m->control_pressed = true;}
+                            if (itMap == renameMap.end()) { m->mothurOut("[ERROR]: " + dups[i] + " is not in your map file, please correct.\n"); m->setControl_pressed(true);}
                             else { newName = itMap->second; }
                         }else {
                             newName = toString(counts[group]); counts[group]++;
@@ -437,7 +437,7 @@ int RenameSeqsCommand::execute() {
             if (nameFile != "") { outName.close(); }
             renameMap.clear();
             
-            if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
+            if (m->getControl_pressed()) {  if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
             
             
             if (groupfile != "") {   outGroup.close(); }
@@ -459,7 +459,7 @@ int RenameSeqsCommand::execute() {
             if (contigsfile != "")      { readContigs(old2NewNameMap);  }
         }
         
-        if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
 
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -519,13 +519,13 @@ int RenameSeqsCommand::readQual(map<string, string>& oldMap){
         map<string, string>::iterator it;
         
         while(!in.eof()){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             QualityScores qual(in); m->gobble(in);
             
             it = oldMap.find(qual.getName());
             if (it == oldMap.end()) {
-                m->mothurOut("[ERROR]: " + qual.getName() + " is not in your quality file, please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + qual.getName() + " is not in your quality file, please correct.\n"); m->setControl_pressed(true);
             }else {
                 qual.setName(it->second);
             }
@@ -565,14 +565,14 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
         string name;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in);
             
             it = oldMap.find(name);
             if (it == oldMap.end()) {
-                m->mothurOut("[ERROR]: " + name + " is not in your contigs report file, please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + name + " is not in your contigs report file, please correct.\n"); m->setControl_pressed(true);
             }else {
                 name = it->second;
             }
@@ -609,13 +609,13 @@ int RenameSeqsCommand::readFasta(string thisFastaFile, map<string, string>& oldM
         map<string, string>::iterator it;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             Sequence seq(in); m->gobble(in);
             
             it = oldMap.find(seq.getName());
             if (it == oldMap.end()) {
-                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your fasta file, please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your fasta file, please correct.\n"); m->setControl_pressed(true);
             }else {
                 seq.setName(it->second);
             }
@@ -641,14 +641,14 @@ int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
         string oldname, newname;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> oldname; m->gobble(in);
             in >> newname; m->gobble(in);
             
             it = readMap.find(oldname);
             if (it != readMap.end()) {
-                m->mothurOut("[ERROR]: " + oldname + " is already in your map file. Sequence names must be unique, quitting.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + oldname + " is already in your map file. Sequence names must be unique, quitting.\n"); m->setControl_pressed(true);
             }else {
                 readMap[oldname] = newname;
             }
@@ -670,7 +670,7 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
         vector<map<string, string> > files = readFiles();
         
         for (int i = 0; i < files.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string thisFile = "";
             string thisFileType = "";
@@ -708,7 +708,7 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
             
             int count = 1;
             while (!in.eof()) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 Sequence* seq;  QualityScores* qual;
                 string name = "";
@@ -721,7 +721,7 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                 string newName = "";
                 if (mapFile != "") {
                     map<string, string>::iterator itMap = readMap.find(name);
-                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your map file, please correct.\n"); m->control_pressed = true;}
+                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your map file, please correct.\n"); m->setControl_pressed(true);}
                     else { newName = itMap->second; }
                 }else {
                     newName = toString(count); count++;
@@ -759,7 +759,7 @@ vector<map<string, string> > RenameSeqsCommand::readFiles(){
         m->openInputFile(fileFile, in);
         
         while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);
@@ -773,7 +773,7 @@ vector<map<string, string> > RenameSeqsCommand::readFiles(){
                 group = pieces[2];
                 m->checkGroupName(group);
             }else {
-                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. TThe file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. TThe file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->setControl_pressed(true);
             }
             
             map<string, string> temp; temp[thisFileName] = group;

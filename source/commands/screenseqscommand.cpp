@@ -114,7 +114,7 @@ string ScreenSeqsCommand::getOutputPattern(string type) {
         else if (type == "alignreport")      {   pattern = "[filename],good.align.report";    }
         else if (type == "contigsreport")      {   pattern = "[filename],good.contigs.report";    }
         else if (type == "summary")      {   pattern = "[filename],good.summary";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -464,7 +464,7 @@ int ScreenSeqsCommand::execute(){
         if ((contigsreport == "") && (summaryfile == "") && (alignreport == "")) {   numFastaSeqs = screenFasta(badSeqNames);  }
         else {   numFastaSeqs = screenReports(badSeqNames);   }
 		
-        if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         //use remove.seqs to create new name, group and count file
         if ((countfile != "") || (namefile != "") || (groupfile != "") || (qualfile != "") || (taxonomy != "")) {
@@ -480,7 +480,7 @@ int ScreenSeqsCommand::execute(){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* removeCommand = new RemoveSeqsCommand(inputString);
             removeCommand->execute();
@@ -488,7 +488,7 @@ int ScreenSeqsCommand::execute(){
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             
             delete removeCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             if (groupfile != "") {
@@ -542,7 +542,7 @@ int ScreenSeqsCommand::execute(){
             }
         }
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
 
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -631,7 +631,7 @@ int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
         if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}
         else{ numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); }
         
-        if (m->control_pressed) { m->mothurRemove(goodSeqFile); return numFastaSeqs; }
+        if (m->getControl_pressed()) { m->mothurRemove(goodSeqFile); return numFastaSeqs; }
 		
 		return numFastaSeqs;
 
@@ -722,7 +722,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in);
@@ -759,7 +759,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             
             while (!in2.eof()) {
                 
-                if (m->control_pressed) { in2.close(); out2.close(); return 0; }
+                if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
                 in2 >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in2);
@@ -773,7 +773,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             m->mothurRemove(outSummary+".temp");
         }
         
-        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->control_pressed = true; }
+        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->setControl_pressed(true); }
         
         
         return count;
@@ -811,7 +811,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in);
@@ -850,7 +850,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             
             while (!in2.eof()) {
                 
-                if (m->control_pressed) { in2.close(); out2.close(); return 0; }
+                if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
                 in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in2);
@@ -864,7 +864,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             m->mothurRemove(outSummary+".temp");
         }
         
-        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->control_pressed = true; }
+        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->setControl_pressed(true); }
         
         
         return count;
@@ -898,7 +898,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
         
 		while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
@@ -938,7 +938,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             
             while (!in2.eof()) {
                 
-                if (m->control_pressed) { in2.close(); out2.close(); return 0; }
+                if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
                 in2 >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in2);
@@ -952,7 +952,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             m->mothurRemove(outSummary+".temp");
         }
         
-        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your summary file, quitting.\n"); m->control_pressed = true; }
+        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your summary file, quitting.\n"); m->setControl_pressed(true); }
         
         
         
@@ -968,7 +968,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 	try{
         if (optimize.size() != 0) {   getSummary();  }
     
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         int numFastaSeqs = runFastaScreening(badSeqNames);
         
@@ -993,7 +993,7 @@ int ScreenSeqsCommand::getSummaryReport(){
             else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
             else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
             else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
+            else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->setControl_pressed(true); } }
             else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
         }
         
@@ -1066,7 +1066,7 @@ int ScreenSeqsCommand::getSummary(){
             else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
             else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
             else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->control_pressed = true; } }
+            else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->setControl_pressed(true); } }
             else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
             else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
         }
@@ -1101,7 +1101,7 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
         
 		while (!done) {
 		
-			if (m->control_pressed) {  return 0; }
+			if (m->getControl_pressed()) {  return 0; }
 			
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			if (currSeq.getName() != "") {
@@ -1119,7 +1119,7 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
                     if(minLength > currSeq.getNumBases())                           {	goodSeq = 0;	trashCode += "<length|";}
                     if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
                 }
                 
                 if (contigsreport == "") { //contigs report includes this so no need to check again
@@ -1198,7 +1198,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
                 }
@@ -1209,7 +1209,8 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1318,7 +1319,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
             for (map<string, string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
 			CloseHandle(hThreadArray[i]);

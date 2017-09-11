@@ -39,7 +39,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		
 		//read in first row since you know there is at least 1 group.
 		//are we at the beginning of the file??
-		if (m->saveNextLabel == "") {  
+		if (m->getSaveNextLabel() == "") {
 			f >> label; 
 			
 			//is this a shared file that has headers
@@ -55,21 +55,22 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-				m->sharedBinLabelsInFile.clear();
+                vector<string> currentLabels;
 				while(!iStringStream.eof()){
-					if (m->control_pressed) { break; }
+					if (m->getControl_pressed()) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
 					
-					m->sharedBinLabelsInFile.push_back(temp);
+					currentLabels.push_back(temp);
 				}
 				
+                m->setSharedBinLabelsInFile(currentLabels);
 				f >> label;
 			}
-		}else { label = m->saveNextLabel; }
+		}else { label = m->getSaveNextLabel(); }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->currentSharedBinLabels = m->sharedBinLabelsInFile;
+		m->setCurrentSharedBinLabels(m->getSharedBinLabelsInFile());
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -122,7 +123,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 
 		}
 		
-		m->saveNextLabel = nextLabel;
+		m->setSaveNextLabel(nextLabel);
 			
 		groupmap->setNamesOfGroups(allGroups);
 		m->setAllGroups(allGroups);

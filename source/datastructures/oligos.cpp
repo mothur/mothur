@@ -99,7 +99,7 @@ int Oligos::readOligos(){
             
 			inOligos >> type;
             
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
+		 	if (m->getDebug()) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
             
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
@@ -112,7 +112,7 @@ int Oligos::readOligos(){
 				
 				inOligos >> oligo;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
 				
 				for(int i=0;i<oligo.length();i++){
 					oligo[i] = toupper(oligo[i]);
@@ -134,7 +134,7 @@ int Oligos::readOligos(){
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
                     else {
-                        if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
+                        if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
                     
                         primers[oligo]=indexPrimer; indexPrimer++;
                         primerNameVector.push_back(group);
@@ -168,14 +168,14 @@ int Oligos::readOligos(){
                     
                     oligosPair newPrimer(oligo, roligo);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
                     if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
                     else { uniquePrimers.insert(tempPair);
 					
-                        if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
+                        if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
                     
                         pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
                         primerNameVector.push_back(group);
@@ -219,7 +219,7 @@ int Oligos::readOligos(){
                         }
                         oligosPair newPair(oligo, reverseBarcode);
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
                         
                         //check for repeat barcodes
                         string tempPair = oligo+reverseBarcode;
@@ -249,11 +249,11 @@ int Oligos::readOligos(){
 		}
 		inOligos.close();
 		
-        if ((linker.size() == 0) && (spacer.size() == 0) && (pairedBarcodes.size() == 0) && (barcodes.size() == 0) && (pairedPrimers.size() == 0) && (primers.size() == 0) && (revPrimer.size() == 0)) { m->mothurOut("[ERROR]: invalid oligos file, quitting.\n"); m->control_pressed = true; return 0; }
+        if ((linker.size() == 0) && (spacer.size() == 0) && (pairedBarcodes.size() == 0) && (barcodes.size() == 0) && (pairedPrimers.size() == 0) && (primers.size() == 0) && (revPrimer.size() == 0)) { m->mothurOut("[ERROR]: invalid oligos file, quitting.\n"); m->setControl_pressed(true); return 0; }
         
         if (hasPBarcodes || hasPPrimers) {
             pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
+            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
             
             //check for "NONE" to make sure if none is used then all primers in that position are NONE
             //ex. Can't have: PRIMER NONE reversePrimer and PRIMER fowardPrimer reversePrimer in same file
@@ -266,7 +266,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix forwardBarcode=NONE and forwardBarcode=barcodeString in same file. Mothur assumes all sequences have forward barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardBarcode=NONE and forwardBarcode=barcodeString in same file. Mothur assumes all sequences have forward barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
                 }
             }
             
@@ -279,7 +279,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix reverseBarcode=NONE and reverseBarcode=barcodeString in same file. Mothur assumes all sequences have reverse barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reverseBarcode=NONE and reverseBarcode=barcodeString in same file. Mothur assumes all sequences have reverse barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
                 }
             }
             
@@ -292,7 +292,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix forwardPrimer=NONE and forwardPrimer=primerString in same file. Mothur assumes all sequences have forward primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardPrimer=NONE and forwardPrimer=primerString in same file. Mothur assumes all sequences have forward primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
                 }
             }
             
@@ -305,7 +305,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix reversePrimer=NONE and reversePrimer=primerString in same file. Mothur assumes all sequences have reverse primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reversePrimer=NONE and reversePrimer=primerString in same file. Mothur assumes all sequences have reverse primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
                 }
             }
         }
@@ -340,10 +340,10 @@ int Oligos::readOligos(){
                     string primerName = primerNameVector[itPrimer->first];
                     string barcodeName = barcodeNameVector[itBar->first];
                     
-                    if (m->debug) {  m->mothurOut("[DEBUG]: primerName = " + primerName + " barcodeName = " + barcodeName + "\n");  }
+                    if (m->getDebug()) {  m->mothurOut("[DEBUG]: primerName = " + primerName + " barcodeName = " + barcodeName + "\n");  }
                     
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { if (m->debug) {  m->mothurOut("[DEBUG]: in ignore. \n");  }  } //do nothing
-                    else if ((primerName == "") && (barcodeName == "")) { if (m->debug) {  m->mothurOut("[DEBUG]: in blank. \n");  }  } //do nothing
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { if (m->getDebug()) {  m->mothurOut("[DEBUG]: in ignore. \n");  }  } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { if (m->getDebug()) {  m->mothurOut("[DEBUG]: in blank. \n");  }  } //do nothing
                     else {
                         string comboGroupName = "";
                         string fastqFileName = "";
@@ -360,7 +360,7 @@ int Oligos::readOligos(){
                             }
                         }
                         
-                        if (m->debug) {  m->mothurOut("[DEBUG]: comboGroupName = " + comboGroupName +  "\n");  }
+                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: comboGroupName = " + comboGroupName +  "\n");  }
                         
                         uniqueNames.insert(comboGroupName);
                         
@@ -429,7 +429,7 @@ int Oligos::readOligos(){
         }
         
         
-        if (m->debug) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
+        if (m->getDebug()) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
         
         Groups.clear();
         for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it); }
@@ -448,7 +448,7 @@ vector<string> Oligos::getBarcodes(string groupName){
         
         map<string, vector<string> >::iterator it = Group2Barcode.find(groupName);
         
-        if (it == Group2Barcode.end()) {  m->mothurOut("[ERROR]: no barcodes found for group " + groupName + ".\n"); m->control_pressed=true;
+        if (it == Group2Barcode.end()) {  m->mothurOut("[ERROR]: no barcodes found for group " + groupName + ".\n"); m->setControl_pressed(true);
         }else { thisGroupsBarcodes = it->second; }
         
         return thisGroupsBarcodes;
@@ -465,7 +465,7 @@ vector<string> Oligos::getPrimers(string groupName){
         
         map<string, vector<string> >::iterator it = Group2Primer.find(groupName);
         
-        if (it == Group2Primer.end()) {  m->mothurOut("[ERROR]: no primers found for group " + groupName + ".\n"); m->control_pressed=true;
+        if (it == Group2Primer.end()) {  m->mothurOut("[ERROR]: no primers found for group " + groupName + ".\n"); m->setControl_pressed(true);
         }else { thisGroupsPrimers = it->second; }
         
         return thisGroupsPrimers;

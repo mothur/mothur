@@ -204,11 +204,11 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			string accnos = pDataArray->accnos+pDataArray->groups[i];
             
             if (pDataArray->filename.length() > 257) {
-                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->setControl_pressed(true); return 0;
             }else if ((pDataArray->alns.length() > 257) && (pDataArray->chimealns)) {
-                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->setControl_pressed(true); return 0;
             }else if (pDataArray->outputFName.length() > 257) {
-                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+                pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->setControl_pressed(true); return 0;
             }
 			
 			vector<char*> cPara;
@@ -485,7 +485,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
                             if (itN != thisnamemap.end()) {
                                 vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
-                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->setControl_pressed(true); }
 
                         }else {
                             out << name << endl;
@@ -555,13 +555,13 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		string accnos = pDataArray->accnos;
         
         if (pDataArray->filename.length() > 257) {
-            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->filename + " filename is " + toString(pDataArray->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->setControl_pressed(true); return 0;
         }else if ((pDataArray->alns.length() > 257) && (pDataArray->chimealns)) {
-            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->control_pressed = true; return 0;
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->alns + " filename is " + toString(pDataArray->alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); pDataArray->m->setControl_pressed(true); return 0;
         }else if (pDataArray->outputFName.length() > 257) {
-            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->outputFName + " filename is " + toString(pDataArray->outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->setControl_pressed(true); return 0;
         }else if (pDataArray->templatefile.length() > 257) {
-            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->templatefile + " filename is " + toString(pDataArray->templatefile.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->control_pressed = true; return 0;
+            pDataArray->m->mothurOut("[ERROR]: " + pDataArray->templatefile + " filename is " + toString(pDataArray->templatefile.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); pDataArray->m->setControl_pressed(true); return 0;
         }
 
 		
@@ -862,7 +862,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		in.close();
 		out.close();
 		
-        if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->control_pressed = true; }
+        if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->setControl_pressed(true); }
         
 		if (pDataArray->m->control_pressed) { return 0; }
 		

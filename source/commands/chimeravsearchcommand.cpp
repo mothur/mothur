@@ -84,7 +84,7 @@ string ChimeraVsearchCommand::getOutputPattern(string type) {
         else if (type == "accnos") {  pattern = "[filename],[tag],vsearch.accnos"; }
         else if (type == "alns") {  pattern = "[filename],[tag],vsearch.alns"; }
         else if (type == "count") {  pattern = "[filename],[tag],vsearch.pick.count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -514,7 +514,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             string vsearchCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
-            if (m->debug) {
+            if (m->getDebug()) {
                 m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
                 Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
                 newCommand->execute();
@@ -552,7 +552,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             
             vsearchLocation = m->getFullPathName(vsearchLocation);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
         }
     }
     catch(exception& e) {
@@ -605,7 +605,7 @@ int ChimeraVsearchCommand::execute(){
                 }else { nameFile = getNamesFile(fastaFileNames[s]); }
                 
                 map<string, string> seqs;
-                numSeqs = readFasta(fastaFileNames[s], seqs);  if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                numSeqs = readFasta(fastaFileNames[s], seqs);  if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 
                 //read namefile
                 vector<seqPriorityNode> nameMapCount;
@@ -617,7 +617,7 @@ int ChimeraVsearchCommand::execute(){
                         if (num == 0) { error = 1; }
                         else { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
                     }
-                }else { error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed || (error == 1)) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}return 0; }
+                }else { error = m->readNames(nameFile, nameMapCount, seqs); if (m->getControl_pressed() || (error == 1)) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}return 0; }
                 }
                 if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 
@@ -625,7 +625,7 @@ int ChimeraVsearchCommand::execute(){
                 fastaFileNames[s] = newFasta;
             }
             
-            if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
             
             if (hasGroup) {
                 if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
@@ -646,7 +646,7 @@ int ChimeraVsearchCommand::execute(){
                     uniqueNames = sparser->getAllSeqsMap();
                 }
                 
-                if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 
                 //clears files
                 ofstream out, out1, out2;
@@ -673,7 +673,7 @@ int ChimeraVsearchCommand::execute(){
                     c.printTable(newCountFile);
                 }
                 
-                if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+                if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
                 
                 if (!dups) {
                     int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
@@ -707,10 +707,10 @@ int ChimeraVsearchCommand::execute(){
                 if (hasCount) { delete cparser; }
                 else { delete sparser; }
                 
-                if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+                if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
                 
             }else{
-                if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+                if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
                 
                 int numChimeras = 0;
                 
@@ -726,7 +726,7 @@ int ChimeraVsearchCommand::execute(){
                 m->appendFiles(outputFileName, outputFileName+".temp");
                 m->mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
                 
-                if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+                if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
                 
                 //remove file made for uchime
                 if (templatefile == "self") {  m->mothurRemove(fastaFileNames[s]); }
@@ -785,14 +785,14 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             m->openInputFile(accnosFileName, in2);
             
             while (!in2.eof()) {
-                if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+                if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
                 
                 in2 >> name; m->gobble(in2);
                 
                 //find unique name
                 itUnique = uniqueNames.find(name);
                 
-                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                 else {
                     itChimeras = chimerasInFile.find((itUnique->second));
                     
@@ -834,7 +834,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
             
             bool print = false;
             in >> temp1;	m->gobble(in);
@@ -856,7 +856,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             //find unique name
             itUnique = uniqueNames.find(name);
             
-            if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else {
                 name = itUnique->second;
                 //is this name already in the file
@@ -887,7 +887,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                     }
                     
                     itUnique = uniqueNames.find(parent1);
-                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {	out << itUnique->second << restOfName << '\t';	}
                 }else { out << parent1 << '\t'; }
                 
@@ -901,7 +901,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                     }
                     
                     itUnique = uniqueNames.find(parent2);
-                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {	out << itUnique->second << restOfName << '\t';	}
                 }else { out << parent2 << '\t'; }
                 
@@ -915,7 +915,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                     }
                     
                     itUnique = uniqueNames.find(parent3);
-                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentC "+ parent3 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentC "+ parent3 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {	out << itUnique->second << restOfName << '\t';	}
                 }else { out << parent3 << '\t'; }
                 
@@ -973,7 +973,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             string line = "";
             
             while (!in3.eof()) {
-                if (m->control_pressed) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName)); m->mothurRemove((alnsFileName+".temp")); return 0; }
+                if (m->getControl_pressed()) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName)); m->mothurRemove((alnsFileName+".temp")); return 0; }
                 
                 line = "";
                 line = m->getline(in3);
@@ -992,8 +992,8 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                             else { out3 << line[i]; }
                         }
                         
-                        if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-                        else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                        if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                        else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                         else {
                             out << line[spot] << line[spot+1];
                             
@@ -1010,7 +1010,7 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                             //find unique name
                             itUnique = uniqueNames.find(name);
                             
-                            if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing alns results. Cannot find "+ name + "."); m->mothurOutEndLine();m->control_pressed = true;  }
+                            if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing alns results. Cannot find "+ name + "."); m->mothurOutEndLine();m->setControl_pressed(true);  }
                             else {
                                 //only limit repeats on query names
                                 if (temp == "Query") {
@@ -1055,7 +1055,7 @@ int ChimeraVsearchCommand::readFasta(string filename, map<string, string>& seqs)
         int num = 0;
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); return 0; }
             
             Sequence seq(in); m->gobble(in);
             seqs[seq.getName()] = seq.getUnaligned();
@@ -1082,7 +1082,7 @@ string ChimeraVsearchCommand::getNamesFile(string& inputFile){
         string inputString = "fasta=" + inputFile;
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
@@ -1090,7 +1090,7 @@ string ChimeraVsearchCommand::getNamesFile(string& inputFile){
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         nameFile = filenames["name"][0];
@@ -1115,20 +1115,20 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
         if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }
         
         for (int i = start; i < end; i++) {
-            int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
+            int start = time(NULL);	 if (m->getControl_pressed()) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
             int error;
             long long thisGroupsSeqs = 0;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
             
             totalSeqs += thisGroupsSeqs;
             driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //remove file made for vsearch
-            if (!m->debug) {  m->mothurRemove(filename);  }
+            if (!m->getDebug()) {  m->mothurRemove(filename);  }
             else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
             
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
@@ -1156,7 +1156,7 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
                                 vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
@@ -1357,7 +1357,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         commandString = "\"" + commandString + "\"";
 #endif
         
-        if (m->debug) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
         //cout << "commandString = " << commandString << endl;
         
         system(commandString.c_str());
@@ -1372,7 +1372,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         filename = filename.substr(1, filename.length()-2);
         alns = alns.substr(1, alns.length()-2);
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         //create accnos file from uchime results
         ifstream in;
@@ -1384,7 +1384,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         numChimeras = 0;
         while(!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             Sequence seq(in); m->gobble(in);
             
@@ -1423,7 +1423,7 @@ int ChimeraVsearchCommand::prepFile(string filename, string output) {
         m->openOutputFile(output, out);
         
         while (!in.eof()) {
-            if (m->control_pressed) { break;  }
+            if (m->getControl_pressed()) { break;  }
             
             Sequence seq(in); m->gobble(in);
             

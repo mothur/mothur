@@ -64,7 +64,7 @@ string ConsensusSeqsCommand::getOutputPattern(string type) {
         else if (type == "name") {  pattern = "[filename],cons.names-[filename],[tag],cons.names"; } 
         else if (type == "count") {  pattern = "[filename],cons.count_table-[filename],[tag],cons.count_table"; }
         else if (type == "summary") {  pattern = "[filename],cons.summary-[filename],[tag],cons.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -224,12 +224,12 @@ int ConsensusSeqsCommand::execute(){
         
 		readFasta();
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		if (namefile != "") { readNames(); }
         if (countfile != "") { ct.readTable(countfile, true, false);  }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 				
 		if (listfile == "") {
@@ -257,7 +257,7 @@ int ConsensusSeqsCommand::execute(){
 			//get counts
 			for (int j = 0; j < seqLength; j++) {
 				
-				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+				if (m->getControl_pressed()) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 				vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
 				int numDots = 0;
@@ -272,7 +272,7 @@ int ConsensusSeqsCommand::execute(){
                         map<string, int>::iterator itCount = nameFileMap.find(it->first);
                         if (itCount != nameFileMap.end()) {
                             size = itCount->second;
-                        }else { m->mothurOut("[ERROR]: file mismatch, aborting.\n"); m->control_pressed = true; break; }
+                        }else { m->mothurOut("[ERROR]: file mismatch, aborting.\n"); m->setControl_pressed(true); break; }
                     }
                     
                     for (int k = 0; k < size; k++) {
@@ -309,7 +309,7 @@ int ConsensusSeqsCommand::execute(){
 			
 			outSummary.close(); outFasta.close();
             
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		}else {
 			
@@ -324,7 +324,7 @@ int ConsensusSeqsCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
 				
 				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 					
@@ -362,7 +362,7 @@ int ConsensusSeqsCommand::execute(){
 			}
 			
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -440,7 +440,7 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
         vector<string> binLabels = list->getLabels();
 		for (int i = 0; i < list->getNumBins(); i++) {
 			
-			if (m->control_pressed) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
+			if (m->getControl_pressed()) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
 			
 			string bin = list->get(i);
 			string consSeq = getConsSeq(bin, outSummary, i);
@@ -478,19 +478,19 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, int bi
             //get counts
             for (int j = 0; j < seqLength; j++) {
                 
-                if (m->control_pressed) { return consSeq; }
+                if (m->getControl_pressed()) { return consSeq; }
                 
                 vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
                 int numDots = 0;
                 totalSize = 0;
                  for (int i = 0; i < binNames.size(); i++) {
-                     if (m->control_pressed) { return consSeq; }
+                     if (m->getControl_pressed()) { return consSeq; }
                      
                      string thisSeq = "";
                      map<string, string>::iterator itFasta = fastaMap.find(binNames[i]);
                      if (itFasta != fastaMap.end()) {
                          thisSeq = itFasta->second;
-                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                      
                      int size = ct.getNumSeqs(binNames[i]);
                      if (size != 0) {
@@ -505,7 +505,7 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, int bi
                              else { counts[4]++; }
                              totalSize++;
                          }
-                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your count file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                  }
                 char conBase = '.';
                 if (numDots != totalSize) { conBase = getBase(counts, totalSize); }
@@ -542,12 +542,12 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, int bi
                 }
             }
             
-            if (error) { m->control_pressed = true; return consSeq; }
+            if (error) { m->setControl_pressed(true); return consSeq; }
             totalSize = seqs.size();
             //get counts
             for (int j = 0; j < seqLength; j++) {
                 
-                if (m->control_pressed) { return consSeq; }
+                if (m->getControl_pressed()) { return consSeq; }
                 
                 vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
                 int numDots = 0;
@@ -708,7 +708,7 @@ int ConsensusSeqsCommand::readFasta(){
         
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			Sequence seq(in); m->gobble(in);
 			string name = seq.getName();
@@ -719,7 +719,7 @@ int ConsensusSeqsCommand::readFasta(){
 				nameFileMap[name] = 1;
                 
                 if (seqLength == 0) { seqLength = seq.getAligned().length(); }
-				else if (seqLength != seq.getAligned().length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true; break; }
+				else if (seqLength != seq.getAligned().length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); break; }
 			}
 		}
 		
@@ -760,7 +760,7 @@ int ConsensusSeqsCommand::readNames(){
 			 }else{	m->mothurOut("[ERROR]: " + thisname + " is not in the fasta file, please correct."); m->mothurOutEndLine(); error = true; }
          }
          
-		 if (error) { m->control_pressed = true; }
+		 if (error) { m->setControl_pressed(true); }
  
 		 return 0;
  

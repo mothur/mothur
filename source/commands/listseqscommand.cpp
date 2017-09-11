@@ -61,7 +61,7 @@ string ListSeqsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "accnos") {  pattern = "[filename],accnos"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -263,7 +263,7 @@ int ListSeqsCommand::execute(){
 		else if (taxfile != "")		{	inputFileName = taxfile;	readTax();		}
         else if (countfile != "")	{	inputFileName = countfile;	readCount();	}
 		
-		if (m->control_pressed) { outputTypes.clear();  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  return 0; }
 		
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
@@ -281,13 +281,13 @@ int ListSeqsCommand::execute(){
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
 			
-			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			out << names[i] << endl;
 		}
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0; }
 		
 		m->setAccnosFile(outputFileName);
 		
@@ -322,14 +322,14 @@ int ListSeqsCommand::readFastq(){
 		int count = 1;
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
             bool ignore;
             FastqRead fread(in, ignore, format); m->gobble(in);
             
             if (!ignore) { names.push_back(fread.getName()); }
 			
-			if (m->debug) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"); }
+			if (m->getDebug()) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"); }
 		}
 		in.close();
 		
@@ -358,7 +358,7 @@ int ListSeqsCommand::readFasta(){
 		
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -366,7 +366,7 @@ int ListSeqsCommand::readFasta(){
 			if (name != "") {  names.push_back(name);  }
 			
 			m->gobble(in);
-			if (m->debug) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"; }
+			if (m->getDebug()) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"; }
 		}
 		in.close();	
 		//out.close();
@@ -393,7 +393,7 @@ int ListSeqsCommand::readList(){
 			for (int i = 0; i < list.getNumBins(); i++) {
 				string binnames = list.get(i);
 				
-				if (m->control_pressed) { in.close(); return 0; }
+				if (m->getControl_pressed()) { in.close(); return 0; }
 				
 				m->splitAtComma(binnames, names);
 			}
@@ -419,7 +419,7 @@ int ListSeqsCommand::readName(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 
 			in >> firstCol;	m->gobble(in);
 			in >> secondCol;			
@@ -449,7 +449,7 @@ int ListSeqsCommand::readGroup(){
 		
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			in >> name;	m->gobble(in);			//read from first column
 			in >> group;			//read from second column
@@ -473,7 +473,7 @@ int ListSeqsCommand::readCount(){
 		CountTable ct;
 		ct.readTable(countfile, false, false);
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         names = ct.getNamesOfSeqs();
         
@@ -503,7 +503,7 @@ int ListSeqsCommand::readAlign(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 
 			in >> name;				//read from first column
 			//m->getline(in);
@@ -538,7 +538,7 @@ int ListSeqsCommand::readTax(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 
             in >> firstCol; m->gobble(in);
             secondCol = m->getline(in); m->gobble(in);

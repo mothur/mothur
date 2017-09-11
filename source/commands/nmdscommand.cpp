@@ -63,7 +63,7 @@ string NMDSCommand::getOutputPattern(string type) {
         if (type == "nmds") {  pattern = "[filename],nmds.axes"; } 
         else if (type == "stress") {  pattern = "[filename],nmds.stress"; } 
         else if (type == "iters") {  pattern = "[filename],nmds.iters"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -199,7 +199,7 @@ int NMDSCommand::execute(){
 		//read in phylip file
 		ReadPhylipVector readFile(phylipfile);
 		names = readFile.read(matrix);
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read axes
 		vector< vector<double> > axes;
@@ -238,21 +238,21 @@ int NMDSCommand::execute(){
 				vector< vector<double> > thisConfig;
 				if (axesfile == "") {	thisConfig = generateStartingConfiguration(names.size(), i);		}
 				else				{	thisConfig = getConfiguration(axes, i);								}
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc nmds for this dimension
 				double stress;
 				vector< vector<double> > endConfig = nmdsCalc(matrix, thisConfig, stress);
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc euclid distances for new config
 				vector< vector<double> > newEuclid = linearCalc.calculateEuclidianDistance(endConfig);
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc correlation between original distances and euclidean distances from this config
 				double rsquared = linearCalc.calcPearson(newEuclid, matrix);
 				rsquared *= rsquared;
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//output results
 				out << "Config" << (j+1);
@@ -270,7 +270,7 @@ int NMDSCommand::execute(){
 					bestConfig = endConfig;
 				}
 				
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 			}
 		}
 		
@@ -297,7 +297,7 @@ int NMDSCommand::execute(){
 		
 		outBest.close();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -319,7 +319,7 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 		
 		//calc euclid distances
 		vector< vector<double> > euclid = linearCalc.calculateEuclidianDistance(newConfig);
-		if (m->control_pressed) { return newConfig; }		
+		if (m->getControl_pressed()) { return newConfig; }		
 		
 		double stress2 = calculateStress(matrix, euclid);
 		stress1 = stress2 + 1.0 + epsilon;
@@ -330,7 +330,7 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 			
 			stress1 = stress2;
 			
-			if (m->control_pressed) { return newConfig; }
+			if (m->getControl_pressed()) { return newConfig; }
 			
 			vector< vector<double> > b; b.resize(euclid.size());
 			for (int i = 0; i < b.size(); i++) { b[i].resize(euclid[i].size(), 0.0); }
@@ -385,7 +385,7 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 		for (int i = 0; i < axes.size(); i++) {
 			for (int j = 0; j < axes[i].size(); j++) {
 				
-				if (m->control_pressed) { return axes; }
+				if (m->getControl_pressed()) { return axes; }
 				
 				//generate random int between 0 and 99999
                 int myrand = m->getRandomIndex(99999);
@@ -472,7 +472,7 @@ double NMDSCommand::calculateStress(vector< vector<double> >& matrix, vector< ve
 		//find raw stress
 		for (int i = 0; i < matrix.size(); i++) {
 			for (int j = 0; j < matrix[i].size(); j++) {
-				if (m->control_pressed) { return normStress; }
+				if (m->getControl_pressed()) { return normStress; }
 				
 				rawStress += ((matrix[i][j] - config[i][j]) * (matrix[i][j] - config[i][j]));
 				denom += (config[i][j] * config[i][j]);
@@ -549,7 +549,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return axes; }
+			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
 			in >> group; m->gobble(in);
@@ -573,7 +573,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		in.close();
 				
 		//sanity check
-		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return axes; }
+		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
 		
 		//put axes info in same order as distance file, just in case
 		for (int i = 0; i < names.size(); i++) {
@@ -586,7 +586,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 					axes[j][i] = thisGroupsAxes[j];
 				}
 				
-			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return axes; }
+			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
 		}
 		
 		return axes;

@@ -76,7 +76,7 @@ string RareFactSharedCommand::getOutputPattern(string type) {
         
         if (type == "sharedrarefaction") {  pattern = "[filename],shared.rarefaction"; }
         else if (type == "sharedr_nseqs") {  pattern = "[filename],shared.r_nseqs"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -217,7 +217,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
 			if (m->isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
-			m->jumble = jumble;
+			m->setJumble(jumble);
             
             temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);
@@ -267,7 +267,7 @@ int RareFactSharedCommand::execute(){
             if (groupMode) { outputNames = createGroupFile(outputNames); }
         }
                     
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -330,7 +330,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 subset->removeGroups(temp);
             }
             
-            if (subset->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+            if (subset->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
         }
         /******************************************************/
         
@@ -353,7 +353,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		//if the users entered no valid calculators don't execute command
         if (rDisplays.size() == 0) { delete lookup;  delete subset; return 0; }
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			delete lookup; delete subset;
@@ -368,7 +368,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((subset != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
                 delete lookup; delete subset;
@@ -434,7 +434,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
@@ -453,7 +453,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			}
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
@@ -554,7 +554,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                 
                 vector<vector<double> > thisFilesLines;
                 while (!in.eof()) {
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     vector<double> data; data.resize(numCols, 0);
                     //read numSampled line
                     for (int j = 0; j < numCols; j++) { in >> data[j]; m->gobble(in); }
@@ -565,7 +565,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                 m->mothurRemove(thisTypesFiles[i]);
             }
             
-            if (!m->control_pressed) {
+            if (!m->getControl_pressed()) {
                 //process results
                 map<string, string> variables; variables["[filename]"] = fileNameRoot + "ave-std." + thisLookup->getLabel() + ".";
 
@@ -756,7 +756,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 				
                 out << (*itNumSampled);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //each chunk
 				    //grab data for each group

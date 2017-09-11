@@ -56,7 +56,7 @@ string PCACommand::getOutputPattern(string type) {
         
         if (type == "pca") {  pattern = "[filename],[distance],pca.axes"; } 
         else if (type == "loadings") {  pattern = "[filename],[distance],pca.loadings"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -221,7 +221,7 @@ int PCACommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
 			
 			if(labels.count(lookupFloat->getLabel()) == 1){
 				processedLabels.insert(lookupFloat->getLabel());
@@ -254,7 +254,7 @@ int PCACommand::execute(){
 		}
 		
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat;  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat;  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -282,7 +282,7 @@ int PCACommand::execute(){
 		delete lookupFloat;
 		delete input;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -376,12 +376,12 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 		vector<double> d;
 		vector<double> e;
 
-		linearCalc.tred2(crossProduct, d, e);		if (m->control_pressed) { return 0; }
-		linearCalc.qtli(d, e, crossProduct);		if (m->control_pressed) { return 0; }
+		linearCalc.tred2(crossProduct, d, e);		if (m->getControl_pressed()) { return 0; }
+		linearCalc.qtli(d, e, crossProduct);		if (m->getControl_pressed()) { return 0; }
 		
 		vector<vector<double> > X = linearCalc.matrix_mult(centered, crossProduct);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		//string outputFileName = fbase + lookupFloat[0]->getLabel();
@@ -395,13 +395,13 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 				
 				vector< vector<double> > PCAEuclidDists = linearCalc.calculateEuclidianDistance(X, i); //G is the pca file
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 
 				double corr = linearCalc.calcPearson(PCAEuclidDists, observedEuclideanDistance);
 								
 				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			}
 		}
 		

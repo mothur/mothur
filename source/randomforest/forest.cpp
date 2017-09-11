@@ -47,17 +47,17 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
         // calculate feature vectors
         vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0) );
         for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { return globalDiscardedFeatureIndices; }
+            if (m->getControl_pressed()) { return globalDiscardedFeatureIndices; }
             for (int j = 0; j < numFeatures; j++) { featureVectors[j][i] = dataSet[i][j]; }
         }
         
         for (int i = 0; i < featureVectors.size(); i++) {
-            if (m->control_pressed) { return globalDiscardedFeatureIndices; }
+            if (m->getControl_pressed()) { return globalDiscardedFeatureIndices; }
             double standardDeviation = m->getStandardDeviation(featureVectors[i]);
             if (standardDeviation <= featureStandardDeviationThreshold){ globalDiscardedFeatureIndices.push_back(i); }
         }
         
-        if (m->debug) {
+        if (m->getDebug()) {
             m->mothurOut("number of global discarded features:  " + toString(globalDiscardedFeatureIndices.size())+ "\n");
             m->mothurOut("total features: " + toString(featureVectors.size())+ "\n");
         }

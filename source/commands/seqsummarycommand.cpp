@@ -58,7 +58,7 @@ string SeqSummaryCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -260,9 +260,9 @@ int SeqSummaryCommand::execute(){
         else if (summaryfile != "") {  sum.summarizeFastaSummary(summaryfile, nameOrCount);  }
         else if (contigsfile != "") {  sum.summarizeContigsSummary(contigsfile, nameOrCount);  }
         else if (alignfile != "") {  sum.summarizeAlignSummary(alignfile, nameOrCount);  }
-        else { m->mothurOut("[ERROR]: Unknown type: you may only use one of the following: fasta, summary, contigsreport or alignreport."); m->mothurOutEndLine(); m->control_pressed = true; }
+        else { m->mothurOut("[ERROR]: Unknown type: you may only use one of the following: fasta, summary, contigsreport or alignreport."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 
-        if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
+        if (m->getControl_pressed()) {  m->mothurRemove(outputFile); return 0; }
         
         long long size = sum.getTotalSeqs();
         long long numUniques = sum.getUniqueSeqs();
@@ -322,7 +322,7 @@ int SeqSummaryCommand::execute(){
             m->mothurOut("Mean:\t" + toString(length[7]) + "\t" + toString(sims[7]) + "\t" + toString(inserts[7]) + "\t" + toString(scores[7])); m->mothurOutEndLine();
         }
         
-        if (m->control_pressed) {  m->mothurRemove(outputFile); return 0; }
+        if (m->getControl_pressed()) {  m->mothurRemove(outputFile); return 0; }
         
         if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
         else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }

@@ -65,7 +65,7 @@ string IndicatorCommand::getOutputPattern(string type) {
         
         if (type == "tree") {  pattern = "[filename],indicator.tre"; } 
         else if (type == "summary") {  pattern = "[filename],indicator.summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -111,10 +111,11 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			m->runParse = true;
+			m->setRunParse(true);
 			m->clearGroups();
 			m->clearAllGroups();
-			m->Treenames.clear();
+            vector<string> temp2;
+			m->setTreenames(temp2);
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -263,11 +264,11 @@ int IndicatorCommand::execute(){
 		/***************************************************/
 		if (sharedfile != "") {  
 			getShared(); 
-            if (m->control_pressed) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
+            if (m->getControl_pressed()) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
 			if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file."); m->mothurOutEndLine(); return 0; }
 		}else { 
 			getSharedFloat(); 
-			if (m->control_pressed) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
+			if (m->getControl_pressed()) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 		}
 		
@@ -287,18 +288,19 @@ int IndicatorCommand::execute(){
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            for (int i = 0; i < m->Treenames.size(); i++) { 
-                nameMap.insert(m->Treenames[i]); 
+            vector<string> Treenames = m->getTreenames();
+            for (int i = 0; i < Treenames.size(); i++) {
+                nameMap.insert(Treenames[i]);
                 //sanity check - is this a group that is not in the sharedfile?
                 if (i == 0) { gps.insert("Group1"); }
 				if (designfile == "") {
-					if (!(m->inUsersGroups(m->Treenames[i], m->getAllGroups()))) {
-						m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
+					if (!(m->inUsersGroups(Treenames[i], m->getAllGroups()))) {
+						m->mothurOut("[ERROR]: " + Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
-					groupMap[m->Treenames[i]] = "Group1"; 
+					groupMap[Treenames[i]] = "Group1";
 				}else{
-					vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
+					vector<string> myGroups; myGroups.push_back(Treenames[i]);
 					vector<string> myNames = designMap->getNamesGroups(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
@@ -307,12 +309,12 @@ int IndicatorCommand::execute(){
 							mismatch = true;
 						}
 					}
-					groupMap[m->Treenames[i]] = "Group1";
+					groupMap[Treenames[i]] = "Group1";
 				}
             }
             ct->createTable(nameMap, groupMap, gps);
 			
-			if ((designfile != "") && (m->Treenames.size() != Groups.size())) { cout << Groups.size() << '\t' << m->Treenames.size() << endl; m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
+			if ((designfile != "") && (Treenames.size() != Groups.size())) { cout << Groups.size() << '\t' << Treenames.size() << endl; m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
 					
 			if (mismatch) { //cleanup and exit
 				if (designfile != "") { delete designMap; }
@@ -331,7 +333,7 @@ int IndicatorCommand::execute(){
 			
 			delete read;
 			
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  delete lookup; }
 				else { delete lookupFloat; }
@@ -351,7 +353,7 @@ int IndicatorCommand::execute(){
 			//no longer need original tree, we have output tree to use and label
 			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
 			
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				if (designfile != "") { delete designMap; }
                 if (sharedfile != "") {  delete lookup; }
                 else { delete lookupFloat; }
@@ -373,7 +375,7 @@ int IndicatorCommand::execute(){
         if (sharedfile != "") {  delete lookup; }
         else { delete lookupFloat; }
         
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		//set tree file as new current treefile
 		if (treefile != "") {
@@ -418,7 +420,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		if (sharedfile != "") { numBins = lookup->getNumBins(); }
 		else { numBins = lookupFloat->getNumBins(); }
 		
-		if (m->control_pressed) { out.close(); return 0; }
+		if (m->getControl_pressed()) { out.close(); return 0; }
 			
 		/*****************************************************/
 		//create vectors containing rabund info				 //
@@ -490,28 +492,29 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			pValues = getPValues(groupings, groupingNames, lookupFloat->size(), indicatorValues);
 		}
 			
-		if (m->control_pressed) { out.close(); return 0; }
+		if (m->getControl_pressed()) { out.close(); return 0; }
 			
 			
 		/******************************************************/
 		//output indicator values to table form               //
 		/*****************************************************/
 		out << "OTU\tIndicator_Groups\tIndicator_Value\tpValue" << endl;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		for (int j = 0; j < indicatorValues.size(); j++) {
 				
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
 			
-			out << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t';
+			out << currentLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t';
 			
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
-				cout << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
+				cout << currentLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
 				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 				else { cout << "<" << (1/(float)iters); }
-				m->mothurOutJustToLog(m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
+				m->mothurOutJustToLog(currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 				m->mothurOutEndLine(); 
 			}
 		}
@@ -549,7 +552,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << m->currentSharedBinLabels[i] << "_IndGroups" << '\t' << m->currentSharedBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+		for (int i = 0; i < numBins; i++) { out << currentLabels[i] << "_IndGroups" << '\t' << currentLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
 		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
@@ -563,7 +567,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		//create a map from tree node index to names of descendants, save time later to know which sharedRabund you need
 		map<int, set<string> > nodeToDescendants;
 		map<int, set<int> > descendantNodes;
-		for (int i = 0; i < T->getNumNodes(); i++) { if (m->control_pressed) { return 0; }
+		for (int i = 0; i < T->getNumNodes(); i++) { if (m->getControl_pressed()) { return 0; }
 			nodeToDescendants[i] = getDescendantList(T, i, nodeToDescendants, descendantNodes);
 		}
 		
@@ -574,7 +578,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		//for each node
 		for (int i = T->getNumLeaves(); i < T->getNumNodes(); i++) {
 			
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
 			
 			/*****************************************************/
 			//create vectors containing rabund info				 //
@@ -703,16 +707,17 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				pValues = getPValues(groupings, groupingNames, data.size(), indicatorValues);
 			}
 			
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
 			
 			
 			/******************************************************/
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
 			out << (i+1);
+            vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
-				if (m->control_pressed) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return 0; }
 				
 				if (pValues[j] < (1/(float)iters)) {
 					out  << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters);
@@ -721,11 +726,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j];
+					cout << i+1 << '\t' << currentLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j];
 					string pValueString = "\t<" + toString((1/(float)iters));
 					if (pValues[j] > (1/(float)iters)) { pValueString = toString('\t' + pValues[j]); cout << '\t' << pValues[j];}
 					else { cout << "\t<" << (1/(float)iters); }
-					m->mothurOutJustToLog(toString(i) + "\t" + m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
+					m->mothurOutJustToLog(toString(i) + "\t" + currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 					m->mothurOutEndLine(); 
 				}
 			}
@@ -772,7 +777,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 		//for each otu
 		for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
 			
-			if (m->control_pressed) { return values; }
+			if (m->getControl_pressed()) { return values; }
 			
 			vector<float> terms; 
 			float AijDenominator = 0.0;
@@ -1028,7 +1033,7 @@ int IndicatorCommand::getShared(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel());
@@ -1059,7 +1064,7 @@ int IndicatorCommand::getShared(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -1104,7 +1109,7 @@ int IndicatorCommand::getSharedFloat(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {   return 0;  }
+			if (m->getControl_pressed()) {   return 0;  }
 			
 			if(labels.count(lookupFloat->getLabel()) == 1){
 				processedLabels.insert(lookupFloat->getLabel());
@@ -1135,7 +1140,7 @@ int IndicatorCommand::getSharedFloat(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -1171,7 +1176,7 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundFloatVector*> 
         vector<string> notUsedGroupings;  //we dont care about the grouping for the pvalues since they are randomized, but we need to pass the function something to make it work.
 		
 		for(int i=0;i<numIters;i++){
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			map< vector<int>, vector<int> > groupingsMap = randomizeGroupings(groupings, num);
 			vector<float> randomIndicatorValues = getValues(groupings,groupingNames, notUsedGroupings, groupingsMap);
 			
@@ -1241,7 +1246,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                         int temp = processIDS[i];
                         wait(&temp);
                     }
-                    m->control_pressed = false;
+                    m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
                         m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
@@ -1252,7 +1257,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 			
             if (recalc) {
                 //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 //divide iters between processors
                 processIDS.resize(0);
@@ -1346,7 +1352,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                 //for each bin
                 for (int l = 0; l < groupings.size(); l++) {
                     for (int k = 0; k < groupings[l][0]->getNumBins(); k++) {
-                        if (m->control_pressed) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
+                        if (m->getControl_pressed()) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
                         
                         for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back(groupings[l][j]->get(k)); }
                     }
@@ -1401,7 +1407,7 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundVector*> >& gr
         vector<string> notUsedGroupings;  //we dont care about the grouping for the pvalues since they are randomized, but we need to pass the function something to make it work.
 		
 		for(int i=0;i<numIters;i++){
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			map< vector<int>, vector<int> > groupingsMap = randomizeGroupings(groupings, num);
 			vector<float> randomIndicatorValues = getValues(groupings, groupingNames, notUsedGroupings, groupingsMap);
 			
@@ -1475,7 +1481,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                         int temp = processIDS[i];
                         wait(&temp);
                     }
-                    m->control_pressed = false;
+                    m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
                         m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
@@ -1486,7 +1492,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 			
             if (recalc) {
                 //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+                    for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 //divide iters between processors
                 processIDS.resize(0);
@@ -1580,7 +1587,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                 //for each bin
                 for (int l = 0; l < groupings.size(); l++) {
                     for (int k = 0; k < groupings[l][0]->getNumBins(); k++) {
-                        if (m->control_pressed) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
+                        if (m->getControl_pressed()) { for (int j = 0; j < newGroupings.size(); j++) { for (int u = 0; u < newGroupings[j].size(); u++) { delete newGroupings[j][u];  } } return pvalues; }
                         
                         for (int j = 0; j < groupings[l].size(); j++) { newGroupings[l][j]->push_back((float)(groupings[l][j]->get(k))); }
                     }
@@ -1633,7 +1640,7 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 		map< vector<int>, vector<int> > randomGroupings; 
 		
 		for (int i = 0; i < numLookupGroups; i++) {
-			if (m->control_pressed) {break;}
+			if (m->getControl_pressed()) {break;}
 			
 			//get random groups to swap to switch with
 			//generate random int between 0 and groupings.size()-1

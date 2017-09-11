@@ -51,7 +51,7 @@ int DesignMap::read(string file) {
         for (int i = 1; i < columnHeaders.size(); i++) {  namesOfCategories.push_back(columnHeaders[i]);  originalGroupIndexes[i-1] = columnHeaders[i]; }
         if (columnHeaders.size() > 1) { defaultClass = columnHeaders[1]; }
         else {
-            m->mothurOut("[ERROR]: Your design file contains only one column. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your design file contains only one column. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         //sort groups to keep consistent with how we store the groups in groupmap
@@ -68,7 +68,7 @@ int DesignMap::read(string file) {
         if (temp != "group") {
             group = temp;
             m->checkGroupName(group);
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
             vector<string> categoryValues; categoryValues.resize(numCategories, "not found");
@@ -78,7 +78,7 @@ int DesignMap::read(string file) {
                 m->checkGroupName(temp);
                 categoryValues[thisIndex] = temp;
             
-                if (m->debug) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
                 
                 //do we have this value for this category already
                 map<string, int>::iterator it = totalCategories[thisIndex].find(temp);
@@ -101,11 +101,11 @@ int DesignMap::read(string file) {
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> group; m->gobble(in);
             m->checkGroupName(group);
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
             vector<string> categoryValues; categoryValues.resize(numCategories, "not found");
@@ -115,7 +115,7 @@ int DesignMap::read(string file) {
                 in >> temp; categoryValues[thisIndex] = temp; m->gobble(in);
                 m->checkGroupName(temp);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
                 
                 //do we have this value for this category already
                 map<string, int>::iterator it = totalCategories[thisIndex].find(temp);
@@ -137,7 +137,7 @@ int DesignMap::read(string file) {
         }
         in.close();
         
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
         
         return 0;
     }
@@ -154,7 +154,7 @@ string DesignMap::get(string groupName) {
         
         map<string, int>::iterator it2 = indexGroupNameMap.find(groupName);
         if (it2 == indexGroupNameMap.end()) {
-            m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->setControl_pressed(true);
         }else {
             return designMap[it2->second][indexCategoryMap[defaultClass]];
         }
@@ -193,7 +193,7 @@ vector<string> DesignMap::getCategory(string catName) {
         
         map<string, int>::iterator it2 = indexCategoryMap.find(catName);
         if (it2 == indexCategoryMap.end()) {
-            m->mothurOut("[ERROR]: category " + catName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: category " + catName + " is not in your design file. Please correct.\n"); m->setControl_pressed(true);
         }else {
             for (map<string, int>::iterator it = totalCategories[it2->second].begin(); it != totalCategories[it2->second].end(); it++) {
                 values.push_back(it->first);
@@ -215,11 +215,11 @@ string DesignMap::get(string groupName, string categoryName) {
         string value = "not found";
         map<string, int>::iterator it = indexCategoryMap.find(categoryName);
         if (it == indexCategoryMap.end()) {
-            m->mothurOut("[ERROR]: category " + categoryName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: category " + categoryName + " is not in your design file. Please correct.\n"); m->setControl_pressed(true);
         }else {
             map<string, int>::iterator it2 = indexGroupNameMap.find(groupName);
             if (it2 == indexGroupNameMap.end()) {
-                m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: group " + groupName + " is not in your design file. Please correct.\n"); m->setControl_pressed(true);
             }else {
                 return designMap[it2->second][it->second];
             }
@@ -238,7 +238,7 @@ int DesignMap::push_back(string group, vector<string> values) {
         m->checkGroupName(group);
         map<string, int>::iterator it = indexGroupNameMap.find(group);
         if (it == indexGroupNameMap.end()) {
-            if (values.size() != getNumCategories()) {  m->mothurOut("[ERROR]: Your design file has a " + toString(getNumCategories()) + " categories and " + group + " has " + toString(values.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  return 0; }
+            if (values.size() != getNumCategories()) {  m->mothurOut("[ERROR]: Your design file has a " + toString(getNumCategories()) + " categories and " + group + " has " + toString(values.size()) + ", please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
             
             for (int i = 0; i < values.size(); i++) {
                 //do we have this value for this category already
@@ -250,7 +250,7 @@ int DesignMap::push_back(string group, vector<string> values) {
             indexGroupNameMap[group] = count;
             designMap.push_back(values);
         }else {
-            m->mothurOut("[ERROR]: Your design file contains more than 1 group named " + group + ", group names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your design file contains more than 1 group named " + group + ", group names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return 0;
@@ -270,7 +270,7 @@ int DesignMap::setValues(string group, map<string, string> values) {
                 
                 map<string, int>::iterator it3 = indexCategoryMap.find(it2->first); //do we have this category
                 if (it3 == indexCategoryMap.end()) {
-                     m->mothurOut("[ERROR]: Your design file does not contain a category called " + it2->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+                     m->mothurOut("[ERROR]: Your design file does not contain a category called " + it2->first + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
                 }else {
                     string oldCategory = designMap[it->second][it3->second];
                     //adjust totals for old category
@@ -287,7 +287,7 @@ int DesignMap::setValues(string group, map<string, string> values) {
                 }
             }
         }else {
-            m->mothurOut("[ERROR]: Your design file does not contain a group named " + group + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your design file does not contain a group named " + group + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return 0;
@@ -323,7 +323,7 @@ int DesignMap::getNumUnique(map<string, vector<string> > selected) {
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
-                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0;
+                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0;
             }else {
                 indexes[it2->second] = it->second;
             }
@@ -356,7 +356,7 @@ int DesignMap::getNumShared(map<string, vector<string> > selected) {
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
-                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0;
+                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0;
             }else {
                 indexes[it2->second] = it->second;
             }
@@ -390,7 +390,7 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
-                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
             }else {
                 indexes[it2->second] = it->second;
             }
@@ -411,7 +411,7 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
             if (hasAll) {
                 map<int, string>::iterator it = reverse.find(j);
                 if (it == reverse.end()) {
-                    m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+                    m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
                 }else { names.push_back(it->second); }
             }
         }
@@ -434,7 +434,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
         for (map<string, vector<string> >::iterator it = selected.begin(); it != selected.end(); it++) {
             map<string, int>::iterator it2 = indexCategoryMap.find(it->first);
             if (it2 == indexCategoryMap.end()) {
-                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+                m->mothurOut("[ERROR]: Your design file does not contain a category named " + it->first + ". Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
             }else {
                 indexes[it2->second] = it->second;
             }
@@ -456,7 +456,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
             if (hasAny) {
                 map<int, string>::iterator it = reverse.find(j);
                 if (it == reverse.end()) {
-                    m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+                    m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
                 }else { names.push_back(it->second); }
             }
         }
@@ -479,7 +479,7 @@ vector<string> DesignMap::getNamesGroups(string category, string value) {
         
         map<string, int>::iterator it = indexCategoryMap.find(category);
         if (it == indexCategoryMap.end()) {
-            m->mothurOut("[ERROR]: category " + category + " is not in your design file. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: category " + category + " is not in your design file. Please correct.\n"); m->setControl_pressed(true);
         }else {
             int column = it->second;
             
@@ -493,7 +493,7 @@ vector<string> DesignMap::getNamesGroups(string category, string value) {
                 if (designMap[i][column] == value) {
                     map<int, string>::iterator it2 = reverse.find(i);
                     if (it2 == reverse.end()) {
-                        m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+                        m->mothurOut("[ERROR]: should never get here, oops. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
                     }else { names.push_back(it2->second); }
                 }
             }

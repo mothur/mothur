@@ -73,7 +73,7 @@ string PhyloDiversityCommand::getOutputPattern(string type) {
         if (type == "phylodiv") {  pattern = "[filename],[tag],phylodiv"; } 
         else if (type == "rarefy") {  pattern = "[filename],[tag],phylodiv.rarefaction"; } 
         else if (type == "summary") {  pattern = "[filename],[tag],phylodiv.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -290,7 +290,7 @@ int PhyloDiversityCommand::execute(){
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
-			if (m->control_pressed) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
+			if (m->getControl_pressed()) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
             map<string, string> variables; 
@@ -373,7 +373,7 @@ int PhyloDiversityCommand::execute(){
 		}
 		
 	
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity."); m->mothurOutEndLine();
 
@@ -436,7 +436,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
                 }
@@ -447,7 +447,8 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+                    for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //divide iters between processes
             procIters.clear();
@@ -617,7 +618,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
             for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = false;   }
             for(int k = 0; k < numLeafNodes; k++){
                 
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 
                 //calc branch length of randomLeaf k
                 vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch, rootForGroup);
@@ -774,7 +775,7 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, vector<
 		//while you aren't at root
 		while(t->tree[index].getParent() != -1){
             
-			if (m->control_pressed) {  return sums; }
+			if (m->getControl_pressed()) {  return sums; }
 			
 			for (int k = 0; k < groups.size(); k++) {
                 
@@ -823,7 +824,7 @@ map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
                     //while you aren't at root
                     while(t->tree[index].getParent() != -1){
                         
-                        if (m->control_pressed) {  return roots; }
+                        if (m->getControl_pressed()) {  return roots; }
                         
                         //do both your chidren have have descendants from the users groups? 
                         int lc = t->tree[index].getLChild();

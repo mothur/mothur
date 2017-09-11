@@ -78,7 +78,7 @@ void TestDataSet::fillSeqs() {
     m->openInputFile(testfile, in);
     
     while (!in.eof()) {
-        if (m->control_pressed) { break; }
+        if (m->getControl_pressed()) { break; }
         
         Sequence read(in); m->gobble(in);
         seqs.push_back(read);

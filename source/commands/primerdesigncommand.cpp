@@ -71,7 +71,7 @@ string PrimerDesignCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],[distance],otu.cons.fasta"; } 
         else if (type == "summary") {  pattern = "[filename],[distance],primer.summary"; }
         else if (type == "list") {  pattern = "[filename],pick,[extension]"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -271,10 +271,10 @@ int PrimerDesignCommand::execute(){
             else if (countfile != "") {
                 m->mothurOut("[ERROR]: Your list file contains " + toString(list->getNumSeqs()) + " sequences, and your count file contains " + toString(numSeqs) + " unique sequences, aborting. Do you have the correct files? Perhaps you forgot to include the count file when you clustered? \n");  
             }
-            m->control_pressed = true;
+            m->setControl_pressed(true);
         }
         
-        if (m->control_pressed) { delete list; return 0; }
+        if (m->getControl_pressed()) { delete list; return 0; }
         
         //////////////////////////////////////////////////////////////////////////////
         //              process data                                                //
@@ -297,7 +297,7 @@ int PrimerDesignCommand::execute(){
         
         set<string> primers = getPrimer(conSeqs[binIndex]);
         
-        if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
         string consSummaryFile = getOutputFileName("summary", variables);
         outputNames.push_back(consSummaryFile); outputTypes["summary"].push_back(consSummaryFile);
@@ -343,7 +343,7 @@ int PrimerDesignCommand::execute(){
         //check each otu's conseq for each primer in otunumber
         set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs, binIndex);
         
-        if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
         //print new list file
         map<string, string> mvariables; 
@@ -356,7 +356,7 @@ int PrimerDesignCommand::execute(){
         outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size());
         string headers = "label\tnumOtus";
         for (int j = 0; j < list->getNumBins(); j++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             //good otus
             if (otuToRemove.count(j) == 0) {  
                 string bin = list->get(j);
@@ -374,7 +374,7 @@ int PrimerDesignCommand::execute(){
         m->mothurRemove(newListFile+".temp");
         outputNames.push_back(newListFile); outputTypes["list"].push_back(newListFile);
         
-        if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
         delete list;
         
@@ -490,7 +490,7 @@ bool PrimerDesignCommand::findPrimer(string rawSequence, string primer, vector<i
         //search for primer
         for (int j = 0; j < rawSequence.length()-length; j++){
             
-            if (m->control_pressed) {  return foundAtLeastOne; }
+            if (m->getControl_pressed()) {  return foundAtLeastOne; }
             
             string rawChunk = rawSequence.substr(j, length);
             
@@ -521,7 +521,7 @@ set<string> PrimerDesignCommand::getPrimer(Sequence primerSeq){
         string rawSequence = primerSeq.getUnaligned();
         
         for (int j = 0; j < rawSequence.length()-length; j++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string primer = rawSequence.substr(j, length);
             primers.insert(primer);
@@ -591,7 +591,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));
                 }
@@ -602,7 +602,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) { m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) { m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int numOtusPerProcessor = numBins / processors;
@@ -665,7 +665,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
             
             int num;
             intemp >> num; m->gobble(intemp);
-            if (num != (lines[i+1].end - lines[i+1].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->control_pressed = true; }
+            if (num != (lines[i+1].end - lines[i+1].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->setControl_pressed(true); }
             intemp >> num; m->gobble(intemp);
             for (int k = 0; k < num; k++) {
                 int otu;
@@ -716,7 +716,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 				otusToRemove.insert(*it);  
 			}
             int num = pDataArray[i]->numBinsProcessed;
-            if (num != (lines[processIDS[i]].end - lines[processIDS[i]].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->control_pressed = true; }
+            if (num != (lines[processIDS[i]].end - lines[processIDS[i]].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->setControl_pressed(true); }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
@@ -747,7 +747,7 @@ set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& min
         
         for (int i = start; i < end; i++) {
         
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             if (i != (binIndex)) {
                 int primerIndex = 0;
@@ -799,26 +799,26 @@ vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(ma
 		fastaCount = 0;
         
 		while (!done) {
-            if (m->control_pressed) { in.close(); return counts; }
+            if (m->getControl_pressed()) { in.close(); return counts; }
             
 			Sequence seq(in); m->gobble(in);
             
 			if (seq.getName() != "") {
                 if (fastaCount == 0) { alignedLength = seq.getAligned().length(); initializeCounts(counts, alignedLength, seq2Bin, nameMap, otuCounts); }
                 else if (alignedLength != seq.getAligned().length()) {
-                    m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->control_pressed = true; break;
+                    m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->setControl_pressed(true); break;
                 }
                 
                 int num = 1;
                 map<string, int>::iterator itCount;
                 if (namefile != "") { 
                     itCount = nameMap.find(seq.getName());
-                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; break; }
+                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break; }
                     else { num = itCount->second; }
                     fastaCount+=num;
                 }else if (countfile != "") {
                     itCount = nameMap.find(seq.getName());
-                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your count file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; break; }
+                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your count file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break; }
                     else { num = itCount->second; }
                     fastaCount++;
                 }else {
@@ -829,9 +829,9 @@ vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(ma
                 itCount = seq2Bin.find(seq.getName());
                 if (itCount == seq2Bin.end()) {
                     if ((namefile != "") || (countfile != "")) {
-                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting. Perhaps you forgot to include your name or count file while clustering.\n"); m->mothurOutEndLine(); m->control_pressed = true; break;
+                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting. Perhaps you forgot to include your name or count file while clustering.\n"); m->mothurOutEndLine(); m->setControl_pressed(true); break;
                     }else{
-                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; break;
+                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break;
                     }
                 }else {
                     otuCounts[itCount->second] += num;
@@ -921,7 +921,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));
                 }
@@ -933,7 +933,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             positions.clear(); lines.clear();
             positions = m->divideFile(fastafile, processors);
@@ -998,13 +998,13 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
             unsigned long int num;
             intemp >> num; m->gobble(intemp); fastaCount += num;
             intemp >> num; m->gobble(intemp);
-            if (num != counts.size()) { m->mothurOut("[ERROR]: " + tempFile + " was not built correctly by the child process, quitting.\n"); m->control_pressed = true; }
+            if (num != counts.size()) { m->mothurOut("[ERROR]: " + tempFile + " was not built correctly by the child process, quitting.\n"); m->setControl_pressed(true); }
             else {
                 //read counts
                 for (int k = 0; k < num; k++) {
                     int alength;
                     intemp >> alength; m->gobble(intemp);
-                    if (alength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    if (alength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {
                         for (int j = 0; j < alength; j++) {
                             for (int l = 0; l < 5; l++) {  unsigned int numTemp; intemp >> numTemp; m->gobble(intemp); counts[k][j][l] += numTemp;  }
@@ -1032,17 +1032,17 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         //you will have a nameMap error if there is a namefile or countfile, but if those aren't given we want to make sure the fasta and list file match.
         if (fastaCount != numSeqs) {
             if ((namefile == "") && (countfile == ""))   {  m->mothurOut("[ERROR]: Your list file contains " + toString(list->getNumSeqs()) + " sequences, and your fasta file contains " + toString(fastaCount) + " sequences, aborting. Do you have the correct files? Perhaps you forgot to include the name or count file? \n");   }
-            m->control_pressed = true;
+            m->setControl_pressed(true);
         }
         
 		vector<Sequence> conSeqs;
         
-        if (m->control_pressed) { return conSeqs; }
+        if (m->getControl_pressed()) { return conSeqs; }
         
 		//build consensus seqs
         string snumBins = toString(counts.size());
         for (int i = 0; i < counts.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otuLabel = "Otu";
             string sbinNumber = toString(i+1);
@@ -1060,7 +1060,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
             conSeqs.push_back(consSeq);
         }
         
-        if (m->control_pressed) { conSeqs.clear(); return conSeqs; }
+        if (m->getControl_pressed()) { conSeqs.clear(); return conSeqs; }
         
         return conSeqs;
 	
@@ -1228,7 +1228,7 @@ map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
         numSeqs = ct.getNumUniqueSeqs();
         
         for (int i = 0; i < namesOfSeqs.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             nameMap[namesOfSeqs[i]] = ct.getNumSeqs(namesOfSeqs[i]);
         }
@@ -1256,7 +1256,7 @@ int PrimerDesignCommand::getListVector(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -1287,7 +1287,7 @@ int PrimerDesignCommand::getListVector(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -1375,7 +1375,7 @@ int PrimerDesignCommand::findIndex(string binLabel, vector<string> binLabels){
 	try {
         int index = -1;
         for (int i = 0; i < binLabels.size(); i++){
-            if (m->control_pressed) { return index; }
+            if (m->getControl_pressed()) { return index; }
             if (m->isLabelEquivalent(binLabel, binLabels[i])) { index = i; break; }
         }
         return index;

@@ -197,7 +197,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
             }
             
 			
-			if (error) { pDataArray->m->control_pressed = true; }
+			if (error) { pDataArray->m->setControl_pressed(true); }
 			
 			//sort by frequency
 			sort(sequences.rbegin(), sequences.rend());
@@ -372,7 +372,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
                                 vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();

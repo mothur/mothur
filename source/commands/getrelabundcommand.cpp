@@ -55,7 +55,7 @@ string GetRelAbundCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "relabund")      {   pattern = "[filename],relabund";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -188,12 +188,12 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->control_pressed) {  outputTypes.clear();  delete lookup; m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup; m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -206,7 +206,7 @@ int GetRelAbundCommand::execute(){
 				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -220,13 +220,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->control_pressed) {  outputTypes.clear();  m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();  m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -247,7 +247,7 @@ int GetRelAbundCommand::execute(){
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+			if (m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
 			getRelAbundance(lookup, out);
 			
 			delete lookup;
@@ -258,7 +258,7 @@ int GetRelAbundCommand::execute(){
 		delete input; 
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0;}
+		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -289,7 +289,7 @@ int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstre
 			
 			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 			
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 			
 				int abund = thisLookUp->get(j, groups[i]);
 				
@@ -309,7 +309,7 @@ int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstre
 					float averageOtu = totalOtu / (float) thisLookUp->size();
 					
 					relabund = abund / (float) averageOtu;
-				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 				
 				out  << '\t' << relabund;
 			}

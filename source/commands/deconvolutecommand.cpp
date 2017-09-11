@@ -56,7 +56,7 @@ string DeconvoluteCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],unique,[extension]"; } 
         else if (type == "name") {  pattern = "[filename],names-[filename],[tag],names"; } 
         else if (type == "count") {  pattern = "[filename],count_table-[filename],[tag],count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -232,7 +232,7 @@ int DeconvoluteCommand::execute() {
                 outCountFile = getOutputFileName("count", mvariables);   }
         }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		ifstream in; 
 		m->openInputFile(fastafile, in);
@@ -249,7 +249,7 @@ int DeconvoluteCommand::execute() {
 		int count = 0;
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); outFasta.close(); m->mothurRemove(outFastaFile); return 0; }
+			if (m->getControl_pressed()) { in.close(); outFasta.close(); m->mothurRemove(outFastaFile); return 0; }
 			
 			Sequence seq(in);
 			
@@ -329,7 +329,7 @@ int DeconvoluteCommand::execute() {
 		in.close();
 		outFasta.close();
 		
-		if (m->control_pressed) { m->mothurRemove(outFastaFile); return 0; }
+		if (m->getControl_pressed()) { m->mothurRemove(outFastaFile); return 0; }
         
 		//print new names file
 		ofstream outNames;
@@ -340,7 +340,7 @@ int DeconvoluteCommand::execute() {
         else if ((countfile == "") && (format == "count")) { newCt.printHeaders(outNames); }
 		
 		for (int i = 0; i < nameFileOrder.size(); i++) {
-			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); } return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); } return 0; }
 			
 			itStrings = sequenceStrings.find(nameFileOrder[i]);
 			
@@ -358,11 +358,11 @@ int DeconvoluteCommand::execute() {
                     if (countfile != "") {  ct.printSeq(outNames, itStrings->second);  }
                     else if (format == "count")  {  newCt.printSeq(outNames, itStrings->second);  }
                 }
-			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->control_pressed = true; }
+			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 		}
 		outNames.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outFastaFile); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

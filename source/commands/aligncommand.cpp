@@ -81,7 +81,7 @@ string AlignCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],align"; } //makes file like: amazon.align
         else if (type == "alignreport") {  pattern = "[filename],align.report"; }
         else if (type == "accnos") {  pattern = "[filename],flip.accnos"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -298,7 +298,7 @@ int AlignCommand::execute(){
 		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, m->getRandomNumber(), true);
 		
 		for (int s = 0; s < candidateFileNames.size(); s++) {
-			if (m->control_pressed) { outputTypes.clear(); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
 			
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
@@ -315,8 +315,6 @@ int AlignCommand::execute(){
 			
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-			int start = time(NULL);
-		
 
 			vector<unsigned long long> positions; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -339,13 +337,9 @@ int AlignCommand::execute(){
 			}
 		#endif
 			
-			if(processors == 1){
-				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
-			}else{
-				numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
-			}
+            numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
 				
-			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(alignFileName); m->mothurRemove(reportFileName); outputTypes.clear();  return 0; }
+			if (m->getControl_pressed()) { m->mothurRemove(accnosFileName); m->mothurRemove(alignFileName); m->mothurRemove(reportFileName); outputTypes.clear();  return 0; }
 			
 			//delete accnos file if its blank else report to user
 			if (m->isBlank(accnosFileName)) {  m->mothurRemove(accnosFileName);  hasAccnos = false; }
@@ -360,10 +354,6 @@ int AlignCommand::execute(){
 			outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
 			outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
 			if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
-
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
-			m->mothurOutEndLine();
-			m->mothurOutEndLine();
 		}
 		
 		//set align file as new current fastafile
@@ -385,9 +375,43 @@ int AlignCommand::execute(){
 		exit(1);
 	}
 }
-
+struct alignStruct {
+    string alignFName;
+    string reportFName;
+    string accnosFName;
+    string inputFilename;
+    string alignMethod, search;
+    float match, misMatch, gapOpen, gapExtend, threshold;
+    bool flip;
+    long long numSeqs;
+    
+    vector<long long> flippedResults;
+    linePair filePos;
+    
+    MothurOut* m;
+    AlignmentDB* templateDB;
+    mutex* mutex;
+    
+    alignStruct (linePair fP, string aFName, string reFName, string accnosFName, string filename, vector<long long>& flippedResults,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB* templateDB, string search, long long& numSeqs) {
+        
+        filePos.start = fP.start;
+        filePos.end = fP.end;
+        alignFName = aFName;
+        reportFName = reFName;
+        
+        
+        /////////////////////////////////
+        
+        //finish me
+        
+        ///////////////////////////////////
+        
+        
+    }
+    
+};
 //**********************************************************************************************************************
-long long AlignCommand::driver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& numFlipped){
+void alignDriver(linePair*& filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& flippedResults,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB*& templateDB, string search, long long& numSeqs, mutex& mutex) {
 	try {
 		ofstream alignmentFile;
 		m->openOutputFile(alignFName, alignmentFile);
@@ -403,14 +427,15 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 		inFASTA.seekg(filePos->start);
 
 		bool done = false;
+        
 		long long count = 0;
-        numFlipped[0] = 0;
-        numFlipped[1] = 0;
+        long long numFlipped_0 = 0;
+        long long numFlipped_1 = 0;
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
 		int longestBase = templateDB->getLongestBase();
-        if (m->debug) { m->mothurOut("[DEBUG]: template longest base = "  + toString(templateDB->getLongestBase()) + " \n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: template longest base = "  + toString(templateDB->getLongestBase()) + " \n"); }
 		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
 		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
@@ -423,7 +448,7 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 	
 		while (!done) {
 			
-			if (m->control_pressed) {  break; }
+			if (m->getControl_pressed()) {  break; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 			report.setCandidate(candidateSeq);
@@ -434,13 +459,13 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 	
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				if (candidateSeq->getUnaligned().length()+1 > alignment->getnRows()) {
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + candidateSeq->getName() + " " + toString(candidateSeq->getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + candidateSeq->getName() + " " + toString(candidateSeq->getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
 					alignment->resize(candidateSeq->getUnaligned().length()+2);
 				}
-				Sequence temp = templateDB->findClosestSequence(candidateSeq);
+                
+                float searchScore;
+				Sequence temp = templateDB->findClosestSequence(candidateSeq, searchScore);
 				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
-				
-				float searchScore = templateDB->getSearchScore();
 								
 				Nast* nast = new Nast(alignment, candidateSeq, templateSeq);
 		
@@ -454,7 +479,7 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 												
 				//if there is a possibility that this sequence should be reversed
 				if (candidateSeq->getNumBases() < numBasesNeeded) {
-					numFlipped[1]++;
+					numFlipped_1++;
 					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (flip) {
@@ -463,19 +488,17 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 						copy = new Sequence(candidateSeq->getName(), originalUnaligned);
 						copy->reverseComplement();
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
 						
 						//rerun alignment
-						Sequence temp2 = templateDB->findClosestSequence(copy);
+						Sequence temp2 = templateDB->findClosestSequence(copy, searchScore);
 						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
-						
-						searchScore = templateDB->getSearchScore();
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
 						
 						nast2 = new Nast(alignment, copy, templateSeq2);
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: completed Nast2 "  + candidateSeq->getName() + " flipped numBases = " + toString(copy->getNumBases()) + " old numbases = " + toString(candidateSeq->getNumBases()) +" \n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: completed Nast2 "  + candidateSeq->getName() + " flipped numBases = " + toString(copy->getNumBases()) + " old numbases = " + toString(candidateSeq->getNumBases()) +" \n"); }
 			
 						//check if any better
 						if (copy->getNumBases() > candidateSeq->getNumBases()) {
@@ -486,14 +509,14 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 							nast = nast2;
 							needToDeleteCopy = true;
 							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
-                            numFlipped[0]++;
+                            numFlipped_0++;
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;
                             delete templateSeq2;
 							delete copy;	
 						}
-                        if (m->debug) { m->mothurOut("[DEBUG]: done.\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: done.\n"); }
 					}
 					
 					//create accnos file with names
@@ -511,7 +534,7 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 				delete nast;
                 delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
-				
+                
 				count++;
 			}
 			delete candidateSeq;
@@ -529,13 +552,18 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 		}
 		//report progress
 		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+        
+        mutex.lock();
+        numSeqs += count;
+        flippedResults[0] += numFlipped_0;
+        flippedResults[1] += numFlipped_1;
+        mutex.unlock();
 		
 		delete alignment;
 		alignmentFile.close();
 		inFASTA.close();
 		accnosFile.close();
 		
-		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCommand", "driver");
@@ -543,222 +571,68 @@ long long AlignCommand::driver(linePair* filePos, string alignFName, string repo
 	}
 }
 /**************************************************************************************************/
-
+//void alignDriver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& numFlipped,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB* templateDB, string search, long long& count) {
 long long AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename, vector<long long>& numFlipped) {
 	try {
-		int num = 0;
-		processIDS.resize(0);
-        bool recalc = false;
+        //create array of worker threads
+        thread *workerThreads = new thread[processors-1];
+        mutex mutex;
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename, numFlipped);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = alignFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-                out << numFlipped[0] << endl << numFlipped[1] << endl;
-				out.close();
-				
-				exit(0);
-			}else { 
-				m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->control_pressed = false;
-                recalc = true;
-				break;
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> positions;
-			positions = m->divideFile(filename, processors);
-			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+        long long num = 0;
+        for (int i = 0; i < numFlipped.size(); i++) { numFlipped[i] = 0; }
+        
+        time_t start, end;
+        time(&start);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; ++i) {
+            workerThreads[i] = thread(alignDriver,
+                                      ref(lines[i+1]),
+                                      (alignFileName + toString(i+1) + ".temp"),
+                                      reportFileName + toString(i+1) + ".temp",
+                                      accnosFName + toString(i+1) + ".temp", filename, ref(numFlipped), m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, ref(templateDB), search, ref(num), ref(mutex));
+         }
+        
+        alignDriver(lines[0], alignFileName, reportFileName, accnosFName, filename, numFlipped,
+                                m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search, num, mutex);
+        
+        for (int i = 0; i < processors-1; ++i) { workerThreads[i].join(); }
+        delete [] workerThreads;
+        
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");
+        
+        vector<string> nonBlankAccnosFiles;
+        if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
+        else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
+        
+        for (int i = 0; i < processors-1; i++) {
+            m->appendFiles((alignFileName + toString(i+1) + ".temp"), alignFileName);
+            m->mothurRemove((alignFileName + toString(i+1) + ".temp"));
             
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
+            appendReportFiles((reportFileName + toString(i+1) + ".temp"), reportFileName);
+            m->mothurRemove((reportFileName + toString(i+1) + ".temp"));
             
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(lines[process], alignFileName + toString(m->mothurGetpid(process)) + ".temp", reportFileName + toString(m->mothurGetpid(process)) + ".temp", accnosFName + m->mothurGetpid(process) + ".temp", filename, numFlipped);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = alignFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out << numFlipped[0] << endl << numFlipped[1] << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
+            if (!(m->isBlank(accnosFName + toString(i+1) + ".temp"))) {
+                nonBlankAccnosFiles.push_back(accnosFName + toString(i+1) + ".temp");
+            }else { m->mothurRemove((accnosFName + toString(i+1) + ".temp"));  }
+            
         }
         
-		//do my part
-		num = driver(lines[0], alignFileName, reportFileName, accnosFName, filename, numFlipped);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		vector<string> nonBlankAccnosFiles;
-		if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
-		else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
-			
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) {
-                int tempNum = 0;
-                in >> tempNum; num += tempNum; m->gobble(in);
-                in >> tempNum; numFlipped[0] += tempNum; m->gobble(in);
-                in >> tempNum; numFlipped[1] += tempNum; m->gobble(in);
+        //append accnos files
+        if (nonBlankAccnosFiles.size() != 0) {
+            rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
+            
+            for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+                m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
+                m->mothurRemove(nonBlankAccnosFiles[h]);
             }
-			in.close(); m->mothurRemove(tempFile);
-			
-			m->appendFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
-			m->mothurRemove((alignFileName + toString(processIDS[i]) + ".temp"));
-			
-			appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
-			m->mothurRemove((reportFileName + toString(processIDS[i]) + ".temp"));
-			
-			if (!(m->isBlank(accnosFName + toString(processIDS[i]) + ".temp"))) {
-				nonBlankAccnosFiles.push_back(accnosFName + toString(processIDS[i]) + ".temp");
-			}else { m->mothurRemove((accnosFName + toString(processIDS[i]) + ".temp"));  }
-			
-		}
-		
-		//append accnos files
-		if (nonBlankAccnosFiles.size() != 0) { 
-			rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
-			
-			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
-				m->mothurRemove(nonBlankAccnosFiles[h]);
-			}
-		}else { //recreate the accnosfile if needed
-			ofstream out;
-			m->openOutputFile(accnosFName, out);
-			out.close();
-		}
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the alignData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<alignData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-        for( int i=0; i<processors-1; i++ ) {
-			
-			// Allocate memory for thread data.
-			string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; }
-			
-			alignData* tempalign = new alignData(templateFileName, (alignFileName + extension), (reportFileName + extension), (accnosFName + extension), filename, align, search, kmerSize, m, lines[i]->start, lines[i]->end, flip, match, misMatch, gapOpen, gapExtend, threshold, i);
-			pDataArray.push_back(tempalign);
-			processIDS.push_back(i);
-				
-			hThreadArray[i] = CreateThread(NULL, 0, MyAlignThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//need to check for line ending error
-		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
-		inFASTA.seekg(lines[processors-1]->start-1);
-		char c = inFASTA.peek();
-		
-		if (c != '>') { //we need to move back
-			lines[processors-1]->start--; 
-		}
-		
-		//using the main process as a worker saves time and memory
-		//do my part - do last piece because windows is looking for eof
-		num = driver(lines[processors-1], (alignFileName + toString(processors-1) + ".temp"), (reportFileName + toString(processors-1) + ".temp"), (accnosFName + toString(processors-1) + ".temp"), filename, numFlipped);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
-            }
-			num += pDataArray[i]->count;
-            numFlipped[0] += pDataArray[i]->numFlipped[0];
-            numFlipped[1] += pDataArray[i]->numFlipped[1];
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-		vector<string> nonBlankAccnosFiles;
-		if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
-		else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
-		
-		for (int i = 1; i < processors; i++) {
-			m->appendFiles((alignFileName + toString(i) + ".temp"), alignFileName);
-			m->mothurRemove((alignFileName + toString(i) + ".temp"));
-			
-			appendReportFiles((reportFileName + toString(i) + ".temp"), reportFileName);
-			m->mothurRemove((reportFileName + toString(i) + ".temp"));
-			
-			if (!(m->isBlank(accnosFName + toString(i) + ".temp"))) {
-				nonBlankAccnosFiles.push_back(accnosFName + toString(i) + ".temp");
-			}else { m->mothurRemove((accnosFName + toString(i) + ".temp"));  }
-		}
-		
-		//append accnos files
-		if (nonBlankAccnosFiles.size() != 0) { 
-			rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
-			
-			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
-				m->mothurRemove(nonBlankAccnosFiles[h]);
-			}
-		}else { //recreate the accnosfile if needed
-			ofstream out;
-			m->openOutputFile(accnosFName, out);
-			out.close();
-		}	
-#endif	
-		
-		return num;
+        }else { //recreate the accnosfile if needed
+            ofstream out;
+            m->openOutputFile(accnosFName, out);
+            out.close();
+        }
+        
+        return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCommand", "createProcesses");

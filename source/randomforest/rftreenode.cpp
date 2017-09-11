@@ -42,11 +42,11 @@ RFTreeNode::RFTreeNode(vector< vector<int> > bootstrappedTrainingSamples,
     m = MothurOut::getInstance();
     
     for (int i = 0; i < numSamples; i++) {    // just doing a simple transpose of the matrix
-        if (m->control_pressed) { break; }
+        if (m->getControl_pressed()) { break; }
         for (int j = 0; j < numFeatures; j++) { bootstrappedFeatureVectors[j][i] = bootstrappedTrainingSamples[i][j]; }
     }
     
-    for (int i = 0; i < numSamples; i++) { if (m->control_pressed) { break; }
+    for (int i = 0; i < numSamples; i++) { if (m->getControl_pressed()) { break; }
         bootstrappedOutputVector[i] = bootstrappedTrainingSamples[i][numFeatures]; }
     
     createLocalDiscardedFeatureList();
@@ -58,7 +58,7 @@ int RFTreeNode::createLocalDiscardedFeatureList(){
         
         for (int i = 0; i < numFeatures; i++) {
                 // TODO: need to check if bootstrappedFeatureVectors == numFeatures, in python code we are using bootstrappedFeatureVectors instead of numFeatures
-            if (m->control_pressed) { return 0; } 
+            if (m->getControl_pressed()) { return 0; } 
             vector<int>::iterator it = find(globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end(), i);
             if (it == globalDiscardedFeatureIndices.end()) {                           // NOT FOUND
                 double standardDeviation = m->getStandardDeviation(bootstrappedFeatureVectors[i]);  
@@ -84,7 +84,7 @@ int RFTreeNode::updateNodeEntropy() {
         int totalClassCounts = accumulate(classCounts.begin(), classCounts.end(), 0);
         double nodeEntropy = 0.0;
         for (int i = 0; i < classCounts.size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if (classCounts[i] == 0) continue;
             double probability = (double)classCounts[i] / (double)totalClassCounts;
             nodeEntropy += -(probability * log2(probability));

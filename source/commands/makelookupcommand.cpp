@@ -59,7 +59,7 @@ string MakeLookupCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "lookup") {  pattern = "[filename],lookup"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -210,11 +210,11 @@ int MakeLookupCommand::execute(){
         map<string, vector<double> > refFlowgrams;
         
         while(!refFASTA.eof()){
-            if (m->control_pressed) { refFASTA.close(); return 0; }
+            if (m->getControl_pressed()) { refFASTA.close(); return 0; }
             
             Sequence seq(refFASTA);  m->gobble(refFASTA);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: seq = " + seq.getName() + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: seq = " + seq.getName() + ".\n"); }
             
             string fullSequence = keySequence + barcodeSequence + seq.getAligned(); //  *   concatenate the keySequence, barcodeSequence, and
             //      referenceSequences
@@ -227,14 +227,14 @@ int MakeLookupCommand::execute(){
             lookupTable[i].resize(11, 0);
         }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: here .\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: here .\n"); }
         //Loop through each sequence in the flow file and the error summary file.
         ifstream flowFile;
         m->openInputFile(flowFileName, flowFile);
         int numFlows;
         flowFile >> numFlows;
         
-        if (m->debug) { m->mothurOut("[DEBUG]: numflows = " + toString(numFlows) +  ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: numflows = " + toString(numFlows) +  ".\n"); }
         
         ifstream errorFile;
         m->openInputFile(errorFileName, errorFile);
@@ -248,7 +248,7 @@ int MakeLookupCommand::execute(){
         
         while(errorFile && flowFile){
             
-            if (m->control_pressed) { errorFile.close(); flowFile.close(); return 0; }
+            if (m->getControl_pressed()) { errorFile.close(); flowFile.close(); return 0; }
             
             //  * if it's chimeric, chuck it
             errorFile >> errorQuery >> referenceName;
@@ -274,7 +274,7 @@ int MakeLookupCommand::execute(){
                     vector<double> refFlow = it->second;
                     vector<double> flowgram; flowgram.resize(numFlows);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: flowQuery = " + flowQuery +  ".\t" + "refName " + referenceName+  ".\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: flowQuery = " + flowQuery +  ".\t" + "refName " + referenceName+  ".\n"); }
                     
                     for(int i=0;i<numFlows;i++){
                         flowFile >> intensity;
@@ -282,13 +282,13 @@ int MakeLookupCommand::execute(){
                     }
                     m->gobble(flowFile);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: before align.\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: before align.\n"); }
                     
                     alignFlowGrams(flowgram, refFlow, gapOpening, penaltyMatrix, flowOrder);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: after align.\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: after align.\n"); }
                     
-                    if (m->control_pressed) { errorFile.close(); flowFile.close(); return 0; }
+                    if (m->getControl_pressed()) { errorFile.close(); flowFile.close(); return 0; }
                     
                     for(int i=0;i<flowgram.size();i++){
                         int count = (int)round(100*flowgram[i]);
@@ -325,7 +325,7 @@ int MakeLookupCommand::execute(){
         
         regress(std, N);  //bring back
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         double minProbability = 0.1 / (double)totalCount;
         
@@ -333,7 +333,7 @@ int MakeLookupCommand::execute(){
         double sqrtTwoPi = 2.50662827463;//pow(2.0 * 3.14159, 0.5);
         
         for(int i=0;i<1000;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             for(int j=0;j<N;j++){
                 if(lookupTable[i][j] == 0){
@@ -361,7 +361,7 @@ int MakeLookupCommand::execute(){
         }
         regress(negLogHomoProb, N);
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         //output data table.  column one is the probability of each homopolymer length
         map<string, string> variables;
@@ -385,7 +385,7 @@ int MakeLookupCommand::execute(){
         
         m->mothurOut("\nData for homopolymer lengths of " + toString(N) + " and longer were imputed for this analysis\n\n");
          
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -412,7 +412,7 @@ vector<double> MakeLookupCommand::convertSeqToFlow(string sequence, string order
         
         while(orderIndex < numFlows && sequenceIndex < seqLength){
             
-            if (m->control_pressed) { return flowgram; }
+            if (m->getControl_pressed()) { return flowgram; }
             
             int homopolymerLength = 1;
             
@@ -460,7 +460,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         vector<vector<char> > directMatrix; directMatrix.resize(numQueryFlows+1);
         
         for(int i=0;i<=numQueryFlows;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             scoreMatrix[i].resize(numRefFlows+1, 0.00);
             directMatrix[i].resize(numRefFlows+1, 'x');
             
@@ -479,7 +479,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         
         for(int i=1;i<=numQueryFlows;i++){
             for(int j=1;j<=numRefFlows;j++){
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 double diagonal = 1000000000;
                 if(flowOrder[i%flowOrder.length()] == flowOrder[j%flowOrder.length()]){
                     diagonal = scoreMatrix[i-1][j-1] + penaltyMatrix[round(flowgram[i-1])][refFlow[j-1]];
@@ -508,7 +508,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         int minRowIndex = numQueryFlows;
         double minRowScore = scoreMatrix[numQueryFlows][numRefFlows];
         for(int i=0;i<numQueryFlows;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if(scoreMatrix[i][numRefFlows] < minRowScore){
                 minRowScore = scoreMatrix[i][numRefFlows];
                 minRowIndex = i;
@@ -518,7 +518,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         int minColumnIndex = numRefFlows;
         double minColumnScore = scoreMatrix[numQueryFlows][numRefFlows];
         for(int i=0;i<numRefFlows;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if(scoreMatrix[numQueryFlows][i] < minColumnScore){
                 minColumnScore = scoreMatrix[numQueryFlows][i];
                 minColumnIndex = i;
@@ -533,7 +533,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         vector<double> newRefFlowgram;
        
         while(i > 0 && j > 0){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if(directMatrix[i][j] == 'd'){
                 newFlowgram.push_back(flowgram[i-1]);
                 newRefFlowgram.push_back(refFlow[j-1]);
@@ -576,7 +576,7 @@ int MakeLookupCommand::regress(vector<double>& data, int N){
         double yMean = 0;
         
         for(int i=1;i<N;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             xMean += i;
             yMean += data[i];
         }
@@ -586,7 +586,7 @@ int MakeLookupCommand::regress(vector<double>& data, int N){
         double numerator = 0;
         double denomenator = 0;
         for(int i=1;i<N;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             numerator += (i-xMean)*(data[i] - yMean);
             denomenator += (i-xMean) * (i-xMean);
         }

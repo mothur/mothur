@@ -540,12 +540,12 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
                                     for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                     //pDataArray->m->mothurOut(itN->second + '\n');
                                     
-                                }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+                                }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->setControl_pressed(true); }
                             }
                             out.close();
                             in.close();
                             pDataArray->m->renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
-                        }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + pDataArray->fileGroup[thisFastaName] + ".\n"); pDataArray->m->control_pressed = true; }
+                        }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + pDataArray->fileGroup[thisFastaName] + ".\n"); pDataArray->m->setControl_pressed(true); }
                     }
                     
                 }

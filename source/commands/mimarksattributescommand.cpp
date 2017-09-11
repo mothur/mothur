@@ -32,7 +32,7 @@ string MimarksAttributesCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "source") {  pattern = "[filename],source"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -137,18 +137,18 @@ int MimarksAttributesCommand::execute(){
         m->openInputFile(xmlFile, in);
         string header = m->getline(in); m->gobble(in);
         
-        if (header != "<BioSampleAttributes>") { m->mothurOut("[ERROR]: " + header + " is not a bioSample attribute file.\n"); m->control_pressed = true; }
+        if (header != "<BioSampleAttributes>") { m->mothurOut("[ERROR]: " + header + " is not a bioSample attribute file.\n"); m->setControl_pressed(true); }
         
         map<string, Group> categories;
         map<string, Group>::iterator it;
         
         while (!in.eof()) {
-            if (m->control_pressed) { in.close(); return 0; }
+            if (m->getControl_pressed()) { in.close(); return 0; }
             
             Attribute attribute = readAttribute(in);
             
             if (attribute.name != "") {
-                if (m->debug) {
+                if (m->getDebug()) {
                     m->mothurOut("[DEBUG]: name=" + attribute.name + " harmonizedName=" + attribute.harmonizedName + " format=" + attribute.format + " description=" + attribute.description + " package=" + attribute.getPackagesString() + "\n");
                 }
                 
@@ -363,7 +363,7 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         
         if (header == "</BioSampleAttributes>") { Attribute temp; return temp; }
         
-        if (header != "<Attribute>") {  m->mothurOut("[ERROR]: " + header + ", expected '<Attribute>' in file.\n"); m->control_pressed = true;  }
+        if (header != "<Attribute>") {  m->mothurOut("[ERROR]: " + header + ", expected '<Attribute>' in file.\n"); m->setControl_pressed(true);  }
         
         //read name
         //<Name>wastewater type</Name>
@@ -474,7 +474,7 @@ Package MimarksAttributesCommand::parsePackage(string package){
             string use = openingTag.substr(openingTag.find_first_of("\""), 11);
             if (use == "\"mandatory\"") { thispackage.required = true; }
         }else {
-            m->mothurOut("[ERROR]: parsing error - " + openingTag + ". Expeacted something like <Package use=\"optional\" group_name=\"Air\"> in file.\n"); m->control_pressed = true;  return thispackage;
+            m->mothurOut("[ERROR]: parsing error - " + openingTag + ". Expeacted something like <Package use=\"optional\" group_name=\"Air\"> in file.\n"); m->setControl_pressed(true);  return thispackage;
         }
         
         //selectedPackage = MIMARKS.survey.
@@ -507,7 +507,7 @@ string MimarksAttributesCommand::trimTags(string& value){
         
         
         for (int i = 0; i < value.length(); i++) {
-            if (m->control_pressed) { return forwardTag; }
+            if (m->getControl_pressed()) { return forwardTag; }
             
             if (value[i] == '<')         { openCarrot++;     }
             else if (value[i] == '>')    { closedCarrot++;   }

@@ -48,7 +48,7 @@ VsearchFileParser::VsearchFileParser(string f, string nameOrCount, string forma)
         
         if (format == "name") { namefile = nameOrCount; }
         else if (format == "count") { countfile = nameOrCount; }
-        else {  m->mothurOut("[ERROR]: " + format + " is not a valid file format for the VsearchFileParser, quitting.\n"); m->control_pressed = true;  }
+        else {  m->mothurOut("[ERROR]: " + format + " is not a valid file format for the VsearchFileParser, quitting.\n"); m->setControl_pressed(true);  }
         
     }
     catch(exception& e) {
@@ -59,7 +59,7 @@ VsearchFileParser::VsearchFileParser(string f, string nameOrCount, string forma)
 /***********************************************************************/
 string VsearchFileParser::getVsearchFile() {
     try {
-        if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->control_pressed = true;  }
+        if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->setControl_pressed(true);  }
         
         //Run unique.seqs on the data if a name or count file is not given
         if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                }
@@ -67,7 +67,7 @@ string VsearchFileParser::getVsearchFile() {
         
         if (countfile != "") { CountTable countTable; countTable.readTable(countfile, false, false);  counts = countTable.getNameMap(); }
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //Remove gap characters from each sequence if needed
         //Append the number of sequences that each unique sequence represents to the end of the fasta file name
@@ -96,13 +96,13 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close(); return vsearchFasta; }
+            if (m->getControl_pressed()) { in.close(); return vsearchFasta; }
             
             Sequence seq(in); m->gobble(in);
             
             it = counts.find(seq.getName());
             if (it == counts.end()) {
-                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name or countfile, quitting.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + seq.getName() + " is not in your name or countfile, quitting.\n"); m->setControl_pressed(true);
             }else {
                 seqPriorityNode temp(it->second, seq.getUnaligned(), it->first);
                 seqs.push_back(temp);
@@ -131,15 +131,14 @@ string VsearchFileParser::getNamesFile(string& inputFile){
         string inputString = "fasta=" + inputFile + ", format=count";
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
-        
+        m->setMothurCalling(true);
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         countfile = filenames["count"][0];
@@ -168,7 +167,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
         string seqName, recordType, length, percentIdentity, strand, notUsed1, notUsed2, compressedAlignment, repSequence;
         
         while(!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; m->gobble(in);
             
@@ -178,7 +177,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
                 
                 if (format == "name") {
                     itName = nameMap.find(seqName);
-                    if (itName == nameMap.end()) {  m->mothurOut("[ERROR]: " + seqName + " is not in your name file. Parsing error???\n"); m->control_pressed = true; }
+                    if (itName == nameMap.end()) {  m->mothurOut("[ERROR]: " + seqName + " is not in your name file. Parsing error???\n"); m->setControl_pressed(true); }
                     else{  seqName = itName->second;  }
                 }
                 
@@ -247,7 +246,7 @@ int VsearchFileParser::getNumBins(string logfile){
         
         string line;
         while(!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             line = m->getline(in); m->gobble(in);
             

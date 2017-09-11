@@ -76,7 +76,7 @@ string ParseFastaQCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],fasta-[filename],[group],[tag],fasta-[filename],[group],fasta"; }
         else if (type == "qfile") {  pattern = "[filename],qual-[filename],[group],[tag],qual-[filename],[group],qual"; }
         else if (type == "fastq") {  pattern = "[filename],[group],fastq-[filename],[group],[tag],fastq"; } //make.sra assumes the [filename],[group],[tag],fastq format for the 4 column file option. If this changes, may have to modify fixMap function. 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -254,7 +254,7 @@ int ParseFastaQCommand::execute(){
             files = readFile();
         }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
         pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
@@ -271,15 +271,15 @@ int ParseFastaQCommand::execute(){
         }else if (groupfile != "")   { readGroup(groupfile);     }
         
         if (file != "") {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             for (int i = 0; i < files.size(); i++) { //process each pair
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 if ((fileOption == 2) || (fileOption == 4))  {  processFile(files[i], trimOligos, rtrimOligos);  }
                 else if (fileOption == 3) {
-                    if (m->mothurCalling) {
+                    if (m->getMothurCalling()) {
                         //add group names to fastq files and make copies
                         ofstream temp, temp2;
                         map<string, string> variables;
@@ -391,7 +391,7 @@ int ParseFastaQCommand::execute(){
         else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
         
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";
@@ -449,7 +449,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         int count = 0;
         while (!inf.eof() && !inr.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             bool ignoref, ignorer;
             FastqRead thisfRead(inf, ignoref, format);
@@ -482,7 +482,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     thisrRead.getSequence().printSequence(outrFasta);
                 }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 if (split > 1) {
                     
                     Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
@@ -604,7 +604,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         if (qual)	{ outfQual.close();	outrQual.close();   }
         
         //report progress
-        if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+        if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
         
         
         return 0;
@@ -642,7 +642,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
         int count = 0;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             bool ignore;
             FastqRead thisRead(in, ignore, format);
@@ -663,7 +663,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                 //print sequence info to files
                 if (fasta) { thisRead.getSequence().printSequence(outFasta); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 if (split > 1) {
                     int barcodeIndex, primerIndex, trashCodeLength;
@@ -734,7 +734,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
         if (qual)	{ outQual.close();	}
         
         //report progress
-        if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+        if (!m->getControl_pressed()){   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
         
         
         return 0;
@@ -1002,7 +1002,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return files; }
+            if (m->getControl_pressed()) { return files; }
             
             string line = m->getline(in);  m->gobble(in);
             vector<string> pieces = m->splitWhiteSpace(line);
@@ -1016,8 +1016,8 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 rindex = "";
                 fileOption = 2;
             }else if (pieces.size() == 3) {
-                if (oligosfile != "") { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
-                if (groupfile != "") { m->mothurOut("[ERROR]: You cannot have an groupfile and 3 column file option at the same time. Aborting. \n"); m->control_pressed = true; }
+                if (oligosfile != "") { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
+                if (groupfile != "") { m->mothurOut("[ERROR]: You cannot have an groupfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
                 group = pieces[0];
                 m->checkGroupName(group);
                 forward = pieces[1];
@@ -1027,7 +1027,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 createFileGroup = true;
                 fileOption = 3;
             }else if (pieces.size() == 4) {
-                if (oligosfile == "") { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->control_pressed = true; }
+                if (oligosfile == "") { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
                 forward = pieces[0];
                 reverse = pieces[1];
                 findex = pieces[2];
@@ -1037,10 +1037,10 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 if ((findex == "none") || (findex == "NONE")){ findex = ""; }
                 if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->setControl_pressed(true);
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
             
             if (inputDir != "") {
                 string path = m->hasPath(forward);
@@ -1199,7 +1199,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 pair.push_back(reverse);
                 pair.push_back(findex);
                 pair.push_back(rindex);
-                if (((findex != "") || (rindex != "")) && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->control_pressed = true;  }
+                if (((findex != "") || (rindex != "")) && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
                 files.push_back(pair);
             }
         }
@@ -1221,7 +1221,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
         if (fileOption) { oligos.read(oligosfile, false);  } // like make.contigs
         else {  oligos.read(oligosfile);  }
         
-        if (m->control_pressed) { return false; } //error in reading oligos
+        if (m->getControl_pressed()) { return false; } //error in reading oligos
         
         if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes()) {
             pairedOligos = true;
@@ -1240,7 +1240,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
         vector<string> groupNames = oligos.getGroupNames();
         if (groupNames.size() == 0) { allBlank = true;  }
         
-        if (m->control_pressed) { return false; }
+        if (m->getControl_pressed()) { return false; }
         
         fastqFileNames.resize(oligos.getBarcodeNames().size());
 		for(int i=0;i<fastqFileNames.size();i++){

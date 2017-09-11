@@ -79,7 +79,7 @@ string HeatMapSimCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "svg") {  pattern = "[filename],svg"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -334,7 +334,7 @@ int HeatMapSimCommand::execute(){
 		
 		delete heatmap;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear(); return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear(); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -365,12 +365,12 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-        if (m->control_pressed) {  delete input;  delete lookup;  m->clearGroups(); return 0; }
+        if (m->getControl_pressed()) {  delete input;  delete lookup;  m->clearGroups(); return 0; }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { delete input;  delete lookup; m->clearGroups(); return 0; }
+			if (m->getControl_pressed()) { delete input;  delete lookup; m->clearGroups(); return 0; }
 
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
@@ -414,7 +414,7 @@ int HeatMapSimCommand::runCommandShared() {
 		}
 		
 			
-		if (m->control_pressed) {  delete input;  m->clearGroups();  return 0; }
+		if (m->getControl_pressed()) {  delete input;  m->clearGroups();  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -429,7 +429,7 @@ int HeatMapSimCommand::runCommandShared() {
 			}
 		}
 		
-		if (m->control_pressed) {  delete input;  m->clearGroups(); return 0; }
+		if (m->getControl_pressed()) {  delete input;  m->clearGroups(); return 0; }
 		
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -444,7 +444,7 @@ int HeatMapSimCommand::runCommandShared() {
 			delete lookup;
 		}
 		
-		if (m->control_pressed) {  delete input;  m->clearGroups(); return 0; }
+		if (m->getControl_pressed()) {  delete input;  m->clearGroups(); return 0; }
 			
 		//reset groups parameter
 		m->clearGroups();  
@@ -514,7 +514,7 @@ int HeatMapSimCommand::runCommandDist() {
 					in >> name;		
 					names.push_back(name);
 					
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					
 					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
 					m->gobble(in);
@@ -525,7 +525,7 @@ int HeatMapSimCommand::runCommandDist() {
 					in >> name;	
 					names.push_back(name);	
 					
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					
 					for(int j=0;j<i;j++){
 						in >> dist;
@@ -567,7 +567,7 @@ int HeatMapSimCommand::runCommandDist() {
 			while (!in.eof()) {
 				in >> first >> second >> dist; m->gobble(in);
 				
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
                 if (namefile != "") {
                     map<string, int>::iterator itA = nameMap->find(first);

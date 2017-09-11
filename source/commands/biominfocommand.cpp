@@ -63,7 +63,7 @@ string BiomInfoCommand::getOutputPattern(string type) {
         else if (type == "constaxonomy") {  pattern = "[filename],[tag],cons.taxonomy"; }
         else if (type == "taxonomy") {  pattern = "[filename],[tag],taxonomy"; }
         else if (type == "taxsummary") {  pattern = "[filename],[tag],[tag2],tax.summary"; } //tag2 = "" for taxonomy tag2 = cons for constaxonomy
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -178,7 +178,7 @@ int BiomInfoCommand::execute(){
         
         m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n");	m->mothurOutEndLine();
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } }
         
         string current = "";
         itTypes = outputTypes.find("shared");
@@ -256,7 +256,7 @@ int BiomInfoCommand::createFilesFromBiom() {
         string matrixElementType = "";
         
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             char c = in.get(); m->gobble(in);
             
@@ -297,31 +297,31 @@ int BiomInfoCommand::createFilesFromBiom() {
         else {
             string thisLine = it->second;
             biomType = getTag(thisLine);
-            //            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->control_pressed = true;  }
+            //            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->setControl_pressed(true);  }
         }
         
-        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_type provided.\n"); }
         else {
             string thisLine = it->second;
             matrixFormat = getTag(thisLine);
-            if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->control_pressed = true; }
+            if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->setControl_pressed(true); }
         }
         
-        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_element_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_element_type provided.\n"); }
         else {
             string thisLine = it->second;
             matrixElementType = getTag(thisLine);
-            if ((matrixElementType != "int") && (matrixElementType != "float")) { m->mothurOut("[ERROR]: " + matrixElementType + " is not a valid biom matrix_element_type for mothur. Types allowed are int and float.\n"); m->control_pressed = true; }
+            if ((matrixElementType != "int") && (matrixElementType != "float")) { m->mothurOut("[ERROR]: " + matrixElementType + " is not a valid biom matrix_element_type for mothur. Types allowed are int and float.\n"); m->setControl_pressed(true); }
             if (matrixElementType == "float") { m->mothurOut("[WARNING]: the shared file only uses integers, any float values will be rounded down to the nearest integer.\n"); }
         }
         
-        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         vector<string> conTaxonomy;
         it = fileLines.find("rows");
@@ -363,7 +363,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             }
         }
         
-        if (m->control_pressed) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("columns");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
@@ -389,7 +389,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 PhyloSummary taxaSum(g, relabund, printlevel);
                 
                 for (int i = 0; i < results[1].size(); i++) {
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     string newTax = m->addUnclassifieds(results[1][i], maxLevel, false);
                     outTax << results[0][i] << '\t' << newTax << endl;
@@ -419,7 +419,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
         }
         
-        if (m->control_pressed) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("shape");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a shape provided.\n"); }
@@ -428,18 +428,18 @@ int BiomInfoCommand::createFilesFromBiom() {
             getDims(thisLine, shapeNumRows, shapeNumCols);
             
             //check shape
-            if (shapeNumCols != numCols) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumCols) + " columns, but I only read " + toString(numCols) + " columns.\n"); m->control_pressed = true; }
+            if (shapeNumCols != numCols) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumCols) + " columns, but I only read " + toString(numCols) + " columns.\n"); m->setControl_pressed(true); }
             
-            if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->control_pressed = true; }
+            if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->setControl_pressed(true); }
         }
         
-        if (m->control_pressed) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
             string thisLine = it->second;
-            m->currentSharedBinLabels = otuNames;
+            m->setCurrentSharedBinLabels(otuNames);
             
             //read data
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
@@ -471,7 +471,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                         for (int i = 0; i < numBins; i++) {
                             vector<int> abunds;
                             for (int j = 0; j < lookup->size(); j++) {
-                                if (m->control_pressed) { break; }
+                                if (m->getControl_pressed()) { break; }
                                 abunds.push_back(lookup->get(i, groupNames[j]));
                             }
                             ct->push_back(otuNames[i], abunds);
@@ -481,7 +481,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                     PhyloSummary taxaSum(ct, relabund, printlevel);
                     
                     for (int i = 0; i < lookup->getNumBins(); i++) {
-                        if (m->control_pressed) { break; }
+                        if (m->getControl_pressed()) { break; }
                         
                         int total = 0;
                         map<string, bool> containsGroup;
@@ -548,7 +548,7 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
         int otuCount = 0;
         for (int i = 0; i < line.length(); i++) {
             
-            if (m->control_pressed) { return lookup; }
+            if (m->getControl_pressed()) { return lookup; }
             
             //look for opening [ to indicate data is starting
             if ((line[i] == '[') && (!dataStart)) { dataStart = true; i++;  if (!(i < line.length())) { break; } }
@@ -569,7 +569,7 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
                     if (matrixFormat == "dense") {
                         
                         //sanity check
-                        if (nums.size() != lookup->size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
+                        if (nums.size() != lookup->size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->setControl_pressed(true); }
                         
                         //set abundances for this otu
                         //nums contains [abundSample0, abundSample1, abundSample2, ...] for current OTU
@@ -578,7 +578,7 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
                         otuCount++;
                     }else {
                         //sanity check
-                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->control_pressed = true; }
+                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->setControl_pressed(true); }
                         
                         //nums contains [otuNum, sampleNum, abundance]
                         lookup->set(nums[0], nums[2], groupNames[nums[1]]);
@@ -664,7 +664,7 @@ vector< vector<string> > BiomInfoCommand::readRows(string line, int& numRows, bo
         
         for (int i = 0; i < line.length(); i++) {
             
-            if (m->control_pressed) { return results; }
+            if (m->getControl_pressed()) { return results; }
             
             if (line[i] == '[')         { countOpenBrace++;     }
             else if (line[i] == ']')    { countClosedBrace++;   }
@@ -786,7 +786,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
             
             string taxon;
             while((taxons.find_first_of(',') != -1)) {
-                if (m->control_pressed) {break;}
+                if (m->getControl_pressed()) {break;}
                 m->splitAtComma(taxon, taxons);
                 results.push_back(taxon);
             }
@@ -801,7 +801,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
             string bootValue;
             int i = 0;
             while((bootValues.find_first_of(',') != -1)) {
-                if (m->control_pressed) {break;}
+                if (m->getControl_pressed()) {break;}
                 m->splitAtComma(bootValue, bootValues);
                 results[i]+="("+bootValue+")";
                 i++;
@@ -811,7 +811,7 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
         
         string result = "";
         for (int i = 0; i < results.size(); i++) {
-            if (m->control_pressed) {result = ""; break;}
+            if (m->getControl_pressed()) {result = ""; break;}
             result += results[i] + ";";
         }
         

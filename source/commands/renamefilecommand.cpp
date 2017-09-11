@@ -91,7 +91,7 @@ RenameFileCommand::RenameFileCommand(){
 string RenameFileCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
-        m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;
+        m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);
         return pattern;
     }
     catch(exception& e) {
@@ -690,12 +690,12 @@ string RenameFileCommand::renameOrCopy(string oldName, string newName){
             string inputString = command + oldName + " " + newName;
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: system(" + inputString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* systemCommand = new SystemCommand(inputString);
             systemCommand->execute();
             delete systemCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         }
         

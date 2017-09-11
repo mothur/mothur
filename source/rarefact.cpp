@@ -75,7 +75,7 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 		
 			for(int i=0;i<numSeqs;i++){
 			
-				if (m->control_pressed) { delete lookup; delete rank; delete rcd; return 0;  }
+				if (m->getControl_pressed()) { delete lookup; delete rank; delete rcd; return 0;  }
 			
 				int binNumber = order.get(i);
 				int abundance = lookup->get(binNumber);
@@ -145,7 +145,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     for(int j=0;j<displays.size();j++){
                         m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");
@@ -158,7 +158,8 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             vector<int> procIters;
             int numItersPerProcessor = nIters / processors;
@@ -236,7 +237,7 @@ try {
 		}
 		
 		//if jumble is false all iters will be the same
-		if (m->jumble == false)  {  nIters = 1;  }
+		if (m->getJumble() == false)  {  nIters = 1;  }
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -250,7 +251,7 @@ try {
 			}
 			
             //randomize the groups
-			if (m->jumble == true)  { m->mothurRandomShuffle(lookup); }
+			if (m->getJumble() == true)  { m->mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->getNumBins());
@@ -261,7 +262,7 @@ try {
 			vector<SharedRAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
-				if (m->control_pressed) {  delete merge; delete rcd; return 0;  }
+				if (m->getControl_pressed()) {  delete merge; delete rcd; return 0;  }
 				
 				subset.clear(); //clears out old pair of sharedrabunds
 				//add in new pair of sharedrabunds

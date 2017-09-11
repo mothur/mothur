@@ -82,13 +82,13 @@ int Bellerophon::print(ostream& out, ostream& outAcc, string s) {
 		//sorted "best" preference scores for all seqs
 		vector<Preference> best = getBestPref();
 		
-		if (m->control_pressed) { return numSeqs; }
+		if (m->getControl_pressed()) { return numSeqs; }
 		
 		out << "Name\tScore\tLeft\tRight\t" << endl;
 		//output prefenence structure to .chimeras file
 		for (int i = 0; i < best.size(); i++) {
 			
-			if (m->control_pressed) {  return numSeqs; }
+			if (m->getControl_pressed()) {  return numSeqs; }
 			
 			out << best[i].name << '\t' << setprecision(3) << best[i].score << '\t' << best[i].leftParent << '\t' << best[i].rightParent << endl;
 			
@@ -205,7 +205,7 @@ int Bellerophon::createProcesses(vector<int> mid) {
             }else {
                 m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
                 for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 //wait to die
                 for (int i=0;i<processIDS.size();i++) {
                     int temp = processIDS[i];
@@ -218,7 +218,8 @@ int Bellerophon::createProcesses(vector<int> mid) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); }  m->control_pressed = false; processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); }  m->setControl_pressed(false);
+					 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int numSeqsPerProcessor = iters / processors;
@@ -288,14 +289,14 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 				pref[count][i].midpoint = midpoint;  
 			}
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//create 2 vectors of sequences, 1 for left side and one for right side
 			vector<Sequence> left;  vector<Sequence> right;
 			
 			for (int i = 0; i < seqs.size(); i++) {
 				
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
 				//cout << "midpoint = " << midpoint << "\twindow = " << window << endl;
 				//cout << "whole = " << seqs[i]->getAligned().length() << endl;
@@ -324,11 +325,11 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 			
 			createSparseMatrix(0, left.size(), SparseLeft, left);
 			
-			if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
+			if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
 			
 			createSparseMatrix(0, right.size(), SparseRight, right);
 			
-			if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
+			if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
 			
 			left.clear(); right.clear();
 			vector<SeqMap> distMapRight;
@@ -344,13 +345,13 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 			//cout << "left" << endl << endl;
 			for (MatData currentCell = SparseLeft->begin(); currentCell != SparseLeft->end(); currentCell++) {
 				distMapLeft[currentCell->row][currentCell->column] = currentCell->dist;
-				if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
+				if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
 				//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
 			}
 			//cout << "right" << endl << endl;
 			for (MatData currentCell = SparseRight->begin(); currentCell != SparseRight->end(); currentCell++) {
 				distMapRight[currentCell->row][currentCell->column] = currentCell->dist;
-				if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
+				if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
 				//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
 			}
 			
@@ -360,7 +361,7 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 			//fill preference structure
 			generatePreferences(distMapLeft, distMapRight, midpoint);
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//report progress
 			if((h+1) % 10 == 0){ m->mothurOutJustToScreen("Processing sliding window: " + toString(h+1) + "\n") ;		}
@@ -387,7 +388,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 			
 				distCalculator->calcDist(s[i], s[j]);
 				float dist = distCalculator->getDist();
@@ -421,7 +422,7 @@ int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, 
 			
 			for (int j = 0; j < i; j++) {
 			
-				if (m->control_pressed) {  return 0; }
+				if (m->getControl_pressed()) {  return 0; }
 				
 				itL = currentLeft.find(j);
 				itR = currentRight.find(j);
@@ -483,7 +484,7 @@ vector<Preference> Bellerophon::getBestPref() {
 			//set best pref score to first one
 			Preference temp = pref[0][i];
 			
-			if (m->control_pressed) { return best;  }
+			if (m->getControl_pressed()) { return best;  }
 			
 			//for each window
 			for (int j = 1; j < pref.size(); j++) {
@@ -503,7 +504,7 @@ vector<Preference> Bellerophon::getBestPref() {
 	
 		for (int i = 0; i < best.size(); i++) {
 
-			if (m->control_pressed) { return best; }
+			if (m->getControl_pressed()) { return best; }
 			
 			//gives the actual percentage of the dme this seq adds
 			best[i].score = best[i].score / dme;
@@ -537,7 +538,7 @@ int Bellerophon::writePrefs(string file, linePair tempLine) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->control_pressed) { outTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { outTemp.close(); m->mothurRemove(file); return 0; }
 				
 				outTemp << pref[i][j].name << '\t' << pref[i][j].leftParent << '\t' << pref[i][j].rightParent << '\t';
 				outTemp << pref[i][j].score << '\t' << pref[i][j].closestLeft << '\t' << pref[i][j].closestRight << '\t' << pref[i][j].midpoint <<  endl;
@@ -569,7 +570,7 @@ int Bellerophon::readPrefs(string file) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->control_pressed) { inTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { inTemp.close(); m->mothurRemove(file); return 0; }
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
@@ -600,7 +601,7 @@ vector<string> Bellerophon::getBestWindow(linePair line) {
 			//set best pref score to first one
 			Preference temp = pref[line.start][i];
 			
-			if (m->control_pressed) { return best;  }
+			if (m->getControl_pressed()) { return best;  }
 			
 			//for each window
 			for (int j = (line.start+1); j < (line.start+line.num); j++) {
@@ -630,7 +631,7 @@ int Bellerophon::fillPref(int process, vector<string>& best) {
 		
 		for (int i = 0; i < best.size(); i++) {
 		
-			if (m->control_pressed) { return 0;  }
+			if (m->getControl_pressed()) { return 0;  }
 			
 			istringstream iss (best[i],istringstream::in);
 			

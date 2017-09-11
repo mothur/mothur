@@ -93,7 +93,7 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
             
             readFasta(fastafile, countTable);
             
-        }else {  m->control_pressed = true;  m->mothurOut("[ERROR]: cannot parse fasta file by group with a count table that does not include group data, please correct.\n"); }
+        }else {  m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot parse fasta file by group with a count table that does not include group data, please correct.\n"); }
         
 	}
 	catch(exception& e) {
@@ -112,7 +112,7 @@ int SequenceCountParser::readFasta(string fastafile, CountTable& countTable) {
        
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             Sequence seq(in); m->gobble(in);
             
@@ -193,7 +193,7 @@ vector<Sequence> SequenceCountParser::getSeqs(string g){
 			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			seqForThisGroup = it->second;
-            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
 		}
 		
 		return seqForThisGroup; 
@@ -251,7 +251,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 				//print new file in order of
 				for (int i = 0; i < nameVector.size(); i++) {
 					
-					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 					
 					out << ">" << nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
@@ -260,7 +260,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
                 //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
-					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 					
 					seqForThisGroup[i].printSequence(out);	
 				}
@@ -287,7 +287,7 @@ map<string, int> SequenceCountParser::getCountTable(string g){
 			m->mothurOut("[ERROR]: No countTable available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			countForThisGroup = it->second;
-            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " count file has " + toString(countForThisGroup.size()) + " unique sequences.");  }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " count file has " + toString(countForThisGroup.size()) + " unique sequences.");  }
 		}
 		
 		return countForThisGroup; 
@@ -315,7 +315,7 @@ int SequenceCountParser::getCountTable(string g, string filename){
             
 			for (map<string, int>::iterator itFile = countForThisGroup.begin(); itFile != countForThisGroup.end(); itFile++) {
 				
-				if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+				if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 				
 				out << itFile->first << '\t' << itFile->second << '\t' << itFile->second << endl;
 			}

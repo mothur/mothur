@@ -89,7 +89,7 @@ int Pintail::doPrep() {
 		if (consfile == "") { 
 			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
 			probabilityProfile = decalc->calcFreq(templateSeqs, templateFileName); 
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			m->mothurOut("Done."); m->mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
 		m->mothurOutEndLine();
@@ -113,7 +113,7 @@ int Pintail::doPrep() {
 			    reRead = true;
 				//mask templates
 				for (int i = 0; i < temp.size(); i++) {
-					if (m->control_pressed) {  
+					if (m->getControl_pressed()) {  
 						for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 						return 0; 
 					}
@@ -123,7 +123,7 @@ int Pintail::doPrep() {
 
 			mergedFilterString = createFilter(temp, 0.5);
 			
-			if (m->control_pressed) {  
+			if (m->getControl_pressed()) {  
 				for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 				return 0; 
 			}
@@ -143,7 +143,7 @@ int Pintail::doPrep() {
 				reRead = true;
 				//mask templates
 				for (int i = 0; i < templateSeqs.size(); i++) {
-					if (m->control_pressed) {  return 0;  }
+					if (m->getControl_pressed()) {  return 0;  }
 					decalc->runMask(templateSeqs[i]);
 				}
 			}
@@ -151,7 +151,7 @@ int Pintail::doPrep() {
 			if (filter) { 
 				reRead = true;
 				for (int i = 0; i < templateSeqs.size(); i++) {
-					if (m->control_pressed) {  return 0;  }
+					if (m->getControl_pressed()) {  return 0;  }
 					runFilter(templateSeqs[i]);
 				}
 			}
@@ -161,7 +161,7 @@ int Pintail::doPrep() {
 				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
 		
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			string noOutliers, outliers;
 			
@@ -177,7 +177,7 @@ int Pintail::doPrep() {
 
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 		
 			string outputString = "#" + m->getVersion() + "\n";
 			
@@ -294,7 +294,7 @@ int Pintail::getChimeras(Sequence* query) {
 		//find pairs has to be done before a mask
 		bestfit = findPairs(query);
 		
-		if (m->control_pressed) {  return 0; } 
+		if (m->getControl_pressed()) {  return 0; } 
 		
 		//if they mask  
 		if (seqMask != "") {
@@ -318,11 +318,11 @@ int Pintail::getChimeras(Sequence* query) {
 		//find observed distance
 		obsDistance = decalc->calcObserved(query, bestfit, windowsForeachQuery, windowSizes);
 		
-		if (m->control_pressed) {  return 0; } 
+		if (m->getControl_pressed()) {  return 0; } 
 				
 		Qav = decalc->findQav(windowsForeachQuery, windowSizes, probabilityProfile);
 		
-		if (m->control_pressed) {  return 0; } 
+		if (m->getControl_pressed()) {  return 0; } 
 
 		//find alpha			
 		seqCoef	= decalc->getCoef(obsDistance, Qav);
@@ -330,12 +330,12 @@ int Pintail::getChimeras(Sequence* query) {
 		//calculating expected distance
 		expectedDistance = decalc->calcExpected(Qav, seqCoef);
 		
-		if (m->control_pressed) {  return 0; } 
+		if (m->getControl_pressed()) {  return 0; } 
 		
 		//finding de
 		DE = decalc->calcDE(obsDistance, expectedDistance);
 		
-		if (m->control_pressed) {  return 0; } 
+		if (m->getControl_pressed()) {  return 0; } 
 		
 		//find distance between query and closest match
 		it = trimmed.begin();
@@ -454,7 +454,7 @@ void Pintail::createProcessesQuan() {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".temp"));
                 }
@@ -465,7 +465,8 @@ void Pintail::createProcessesQuan() {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             for (int i = 0; i < templateLines.size(); i++) {  delete templateLines[i];  }  templateLines.clear();

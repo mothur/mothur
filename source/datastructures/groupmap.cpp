@@ -28,7 +28,7 @@ int GroupMap::addSeq(string name, string group) {
         m->checkGroupName(group);
         setNamesOfGroups(group);
         
-        if (m->debug) { m->mothurOut("[DEBUG]: name = '" + name + "', group = '" + group + "'\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + name + "', group = '" + group + "'\n"); }
         m->checkName(name);
         it = groupmap.find(name);
         
@@ -57,7 +57,7 @@ int GroupMap::readMap() {
         bool columnOne = true;
     
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
         
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
@@ -70,7 +70,7 @@ int GroupMap::readMap() {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -96,7 +96,7 @@ int GroupMap::readMap() {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -129,7 +129,7 @@ int GroupMap::readDesignMap() {
         bool columnOne = true;
         
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
@@ -142,7 +142,7 @@ int GroupMap::readDesignMap() {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -168,7 +168,7 @@ int GroupMap::readDesignMap() {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -205,7 +205,7 @@ int GroupMap::readMap(string filename) {
         bool columnOne = true;
         
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
@@ -218,7 +218,7 @@ int GroupMap::readMap(string filename) {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -244,7 +244,7 @@ int GroupMap::readMap(string filename) {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -280,7 +280,7 @@ int GroupMap::readDesignMap(string filename) {
         bool columnOne = true;
         
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
@@ -293,7 +293,7 @@ int GroupMap::readDesignMap(string filename) {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -319,7 +319,7 @@ int GroupMap::readDesignMap(string filename) {
                     m->checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     m->checkName(seqName);
                     it = groupmap.find(seqName);
                     
@@ -411,7 +411,7 @@ int GroupMap::getCopy(GroupMap* g) {
 	try {
         vector<string> names = g->getNamesSeqs();
         for (int i = 0; i < names.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             string group = g->getGroup(names[i]);
             setGroup(names[i], group);
         }
@@ -450,7 +450,7 @@ int GroupMap::renameSeq(string oldName, string newName) {
 		
 		if (itName == groupmap.end()) {
             m->mothurOut("[ERROR]: cannot find " + toString(oldName) + " in group file");
-            m->control_pressed = true;
+            m->setControl_pressed(true);
             return 0;
         }else {
             string group = itName->second;

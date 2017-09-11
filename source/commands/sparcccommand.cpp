@@ -63,7 +63,7 @@ string SparccCommand::getOutputPattern(string type) {
         if (type == "corr") {  pattern = "[filename],[distance],sparcc_correlation"; }
         else if (type == "pvalue") {  pattern = "[filename],[distance],sparcc_pvalue"; }
         else if (type == "sparccrelabund") {  pattern = "[filename],[distance],sparcc_relabund"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -209,7 +209,7 @@ int SparccCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }return 0; }
+            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -241,13 +241,13 @@ int SparccCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -274,7 +274,7 @@ int SparccCommand::execute(){
             delete lookup;
         }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to process.");
         m->mothurOutEndLine();
@@ -321,7 +321,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         cout.setf(ios::showpoint);
         
         vector<vector<float> > sharedVector;
-        vector<string> otuNames = m->currentSharedBinLabels;
+        vector<string> otuNames = m->getCurrentSharedBinLabels();
         vector<SharedRAbundVector*> data = shared->getSharedRAbundVectors();
         
         //fill sharedVector to pass to CalcSparcc
@@ -346,7 +346,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         
         relAbundFile << "OTU\taveRelAbund\n";
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); relAbundFile.close(); return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); relAbundFile.close(); return 0; }
             
             double relAbund = 0.0000;
             for(int j=0;j<numGroups;j++){
@@ -379,7 +379,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         if(numPermutations != 0){
             vector<vector<float> > pValues = createProcesses(sharedVector, origCorrMatrix);
             
-            if (m->control_pressed) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 0; }
             
             string pValueFileName = getOutputFileName("pvalue", variables);
             ofstream pValueFile;
@@ -466,7 +466,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
                         int temp = processIDS[i];
                         wait(&temp);
                     }
-                    m->control_pressed = false;
+                    m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
                         m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
@@ -477,7 +477,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 			
             if (recalc) {
                 //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 procIters.clear();
                 int numItersPerProcessor = numPermutations / processors;
@@ -620,7 +620,7 @@ vector<vector<float> > SparccCommand::driver(vector<vector<float> >& sharedVecto
         for(int i=0;i<numOTUs;i++){ pValues[i].assign(numOTUs, 0);  }
 
         for(int i=0;i<numPerms;i++){
-            if (m->control_pressed) { return pValues; }
+            if (m->getControl_pressed()) { return pValues; }
             sharedShuffled = shuffleSharedVector(sharedVector);
             CalcSparcc permutedData(sharedShuffled, maxIterations, numSamplings, normalizeMethod);
             vector<vector<float> > permuteCorrMatrix = permutedData.getRho();

@@ -69,7 +69,7 @@ bool Cluster::update(double& cutOFF){
 		bool changed;
         
 		for (int i=nRowCells-1;i>=0;i--) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
              
 			//if you are not the smallCell
 			if (dMatrix->seqVec[smallRow][i].index != smallCol) { 

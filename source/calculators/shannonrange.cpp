@@ -35,7 +35,7 @@ EstOutput RangeShannon::getValues(SAbundVector* rank){
         double denr = 0.0;
         for (int i = 0; i < freqx.size()-1; i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             if (freqx[i+1] == freqx[i]+1)   { numr = max(freqy[i+1]+1, aux);    }
             else                            { numr = aux;                       }
@@ -62,7 +62,7 @@ EstOutput RangeShannon::getValues(SAbundVector* rank){
         if (alpha == 1) {
             double sum = 0.0;
             for (int i = 0; i < freqy.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 sum += (freqy[i] * ests[i] * log(ests[i]));
             }
             data[0] = -sum;
@@ -70,7 +70,7 @@ EstOutput RangeShannon::getValues(SAbundVector* rank){
             data[2] = exp(data[0]+nbrup*(-abunup*log(abunup)));
         }else {
             for (int i = 0; i < freqy.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 data[0] += (freqy[i] * (pow(ests[i],alpha)));
             }
             data[1] = pow(data[0]+nbrup*pow(abunup,alpha), (1/(1-alpha)));

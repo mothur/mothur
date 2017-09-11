@@ -54,7 +54,7 @@ string OtuHierarchyCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "otuheirarchy") {  pattern = "[filename],[distance1],[tag],[distance2],otu.hierarchy"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -164,7 +164,7 @@ int OtuHierarchyCommand::execute(){
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector< vector<string> > lists = getListVectors();
 		
-		if (m->control_pressed) { outputTypes.clear(); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
 		
 		//determine which is little and which is big, putting little first
 		if (lists.size() == 4) {
@@ -189,7 +189,7 @@ int OtuHierarchyCommand::execute(){
         vector<string> binLabels0 = lists[0];
 		for (int i = 0; i < lists[0].size(); i++) {
 		
-			if (m->control_pressed) {  return 0; }
+			if (m->getControl_pressed()) {  return 0; }
 			string bin = lists[1][i];
             vector<string> names; m->splitAtComma(bin, names);
 			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
@@ -208,7 +208,7 @@ int OtuHierarchyCommand::execute(){
         vector<string> binLabels1 = lists[2];
 		for (int i = 0; i < lists[2].size(); i++) {
 		
-			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			string binnames = lists[3][i];
             vector<string> names; m->splitAtComma(binnames, names);
@@ -235,7 +235,7 @@ int OtuHierarchyCommand::execute(){
 		
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -261,7 +261,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVectors() { //return value 
             string realLabel;
             vector< vector<string> > thisList = getListVector(*it, realLabel);
             
-            if (m->control_pressed) {  return lists; }
+            if (m->getControl_pressed()) {  return lists; }
             
             for (int i = 0; i < thisList.size(); i++) { lists.push_back(thisList[i]); }
             
@@ -292,7 +292,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return myList;  }
+			if (m->getControl_pressed()) {  return myList;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -323,7 +323,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		}
 		
 		
-		if (m->control_pressed) {  return myList;  }
+		if (m->getControl_pressed()) {  return myList;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -348,7 +348,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
         myList.push_back(list->getLabels());
         vector<string> bins;
         for (int i = 0; i < list->getNumBins(); i++) {
-            if (m->control_pressed) {  return myList;  }
+            if (m->getControl_pressed()) {  return myList;  }
             bins.push_back(list->get(i));
         }
         myList.push_back(bins);

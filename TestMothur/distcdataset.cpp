@@ -18,7 +18,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         string inputString = "count=" + countFile;
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: list.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* listCommand = new ListSeqsCommand(inputString);
         listCommand->execute();
@@ -26,7 +26,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         map<string, vector<string> > filenames = listCommand->getOutputFiles();
         
         delete listCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         
         string accnosfile = filenames["accnos"][0];
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
@@ -39,7 +39,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         
         int count = 0; string name;
         while(!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> name; m->gobble(in);
             out << name << endl;
@@ -54,7 +54,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         inputString = "count=" + countFile + ", accnos=temp.accnos";
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: get.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* getCommand = new GetSeqsCommand(inputString);
         getCommand->execute();
@@ -62,7 +62,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         filenames = getCommand->getOutputFiles();
         
         delete getCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         
         string newCountfile = filenames["count"][0];
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
@@ -70,7 +70,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         inputString = "column=" + columnFile + ", accnos=temp.accnos";
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: get.dists(" + inputString + ")"); m->mothurOutEndLine();
-        m->mothurCalling = true;
+        m->setMothurCalling(true);
         
         Command* getDCommand = new GetDistsCommand(inputString);
         getDCommand->execute();
@@ -78,7 +78,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         filenames = getDCommand->getOutputFiles();
         
         delete getDCommand;
-        m->mothurCalling = false;
+        m->setMothurCalling(false);
         
         string newColumnfile = filenames["column"][0];
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();

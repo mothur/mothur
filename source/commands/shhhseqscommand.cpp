@@ -63,7 +63,7 @@ string ShhhSeqsCommand::getOutputPattern(string type) {
         if (type == "fasta")            {   pattern = "[filename],shhh_seqs.fasta";   }
         else if (type == "name")    {   pattern = "[filename],shhh_seqs.names";   }
         else if (type == "map")        {   pattern = "[filename],shhh_seqs.map";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -217,7 +217,7 @@ int ShhhSeqsCommand::execute() {
 			SequenceParser parser(groupfile, fastafile, namefile, temp);
 			vector<string> groups = parser.getNamesOfGroups();
 			
-			if (m->control_pressed) {  return 0; }
+			if (m->getControl_pressed()) {  return 0; }
 			
 			//clears files
 			ofstream out, out1, out2;
@@ -229,14 +229,14 @@ int ShhhSeqsCommand::execute() {
 			if(processors == 1)	{	mapFileNames = driverGroups(parser, outputFileName, nameFileName, mapFileName, 0, groups.size(), groups);	}
 			else				{	mapFileNames = createProcessesGroups(parser, outputFileName, nameFileName, mapFileName, groups);			}
 			
-			if (m->control_pressed) {    return 0;	}	
+			if (m->getControl_pressed()) {    return 0;	}	
 			
 			for (int j = 0; j < mapFileNames.size(); j++) { outputNames.push_back(mapFileNames[j]); outputTypes["map"].push_back(mapFileNames[j]); }
 			
 			//deconvolute results by running unique.seqs
 			deconvoluteResults(outputFileName, nameFileName);
 			
-			if (m->control_pressed) {   return 0;	}				
+			if (m->getControl_pressed()) {   return 0;	}				
 			
 		}else{	
 			vector<string> sequences;
@@ -249,20 +249,20 @@ int ShhhSeqsCommand::execute() {
 			
 			//reads fasta and name file and loads them in order
 			readData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq);
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//calc distances for cluster
 			string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "shhh.dist";
 			correct->execute(distFileName);
 			delete correct;
 			
-			if (m->control_pressed) { m->mothurRemove(distFileName); return 0; }
+			if (m->getControl_pressed()) { m->mothurRemove(distFileName); return 0; }
 			
 			driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, outputFileName, nameFileName, mapFileName); 
 			outputNames.push_back(mapFileName); outputTypes["map"].push_back(mapFileName);
 		}
 		
-		if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+		if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 		
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
@@ -305,7 +305,7 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			Sequence seq(in); m->gobble(in);
 			
@@ -324,7 +324,7 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 		}
 		in.close();
 		
-		if (error) { m->control_pressed = true; }
+		if (error) { m->setControl_pressed(true); }
 		
 		return seqs.size();
 		
@@ -341,7 +341,7 @@ int ShhhSeqsCommand::loadData(correctDist* correct, seqNoise& noise, vector<stri
 		
 		for (int i = 0; i < sequences.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if (sequences[i].getName() != "") {
 				correct->addSeq(sequences[i].getName(), sequences[i].getAligned());
@@ -357,7 +357,7 @@ int ShhhSeqsCommand::loadData(correctDist* correct, seqNoise& noise, vector<stri
 			}
 		}
 				
-		if (error) { m->control_pressed = true; }
+		if (error) { m->setControl_pressed(true); }
 		
 		return seqs.size();
 		
@@ -422,7 +422,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(newFName + (toString(processIDS[i]) + ".temp"));
                     m->mothurRemove(newNName + (toString(processIDS[i]) + ".temp"));
@@ -435,7 +435,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int remainingPairs = groups.size();
@@ -542,7 +542,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
 			for (int j = 0; j < pDataArray[i]->mapfileNames.size(); j++) {
 				mapfileNames.push_back(pDataArray[i]->mapfileNames[j]);
@@ -580,7 +580,7 @@ vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newF
 			
 			start = time(NULL);
 			
-			if (m->control_pressed) {  return mapFileNames; }
+			if (m->getControl_pressed()) {  return mapFileNames; }
             
             string lowerCaseName = groups[i];
             for (int j = 0; j < lowerCaseName.length(); j++) { lowerCaseName[j] = tolower(lowerCaseName[j]);    }
@@ -604,18 +604,18 @@ vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newF
                 
                 //load this groups info in order
                 loadData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq, thisNameMap, thisSeqs);
-                if (m->control_pressed) { return mapFileNames; }
+                if (m->getControl_pressed()) { return mapFileNames; }
                 
                 //calc distances for cluster
                 string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
-                if (m->control_pressed) { m->mothurRemove(distFileName); return mapFileNames; }
+                if (m->getControl_pressed()) { m->mothurRemove(distFileName); return mapFileNames; }
                 
                 driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
                 
-                if (m->control_pressed) { return mapFileNames; }
+                if (m->getControl_pressed()) { return mapFileNames; }
                 
                 m->appendFiles(newFFile+groups[i], newFFile); m->mothurRemove(newFFile+groups[i]);
                 m->appendFiles(newNFile+groups[i], newNFile); m->mothurRemove(newNFile+groups[i]);
@@ -664,19 +664,19 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 		delete clusterCommand;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
-		if (m->control_pressed) { m->mothurRemove(distFileName); m->mothurRemove(listFileName); return 0; }
+		if (m->getControl_pressed()) { m->mothurRemove(distFileName); m->mothurRemove(listFileName); return 0; }
 		
 		vector<double> distances(numSeqs * numSeqs);
 		noise.getDistanceData(distFileName, distances);
 		m->mothurRemove(distFileName); 
-		if (m->control_pressed) { m->mothurRemove(listFileName); return 0; }
+		if (m->getControl_pressed()) { m->mothurRemove(listFileName); return 0; }
 		
 		vector<int> otuData(numSeqs);
 		vector<int> otuFreq;
 		vector<vector<int> > otuBySeqLookUp;
 		noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
 		m->mothurRemove(listFileName);
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		int numOTUs = otuFreq.size();
 		
@@ -693,20 +693,20 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 		
 		while(numIters < minIter || ((maxDelta > minDelta) && (numIters < maxIter))){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
-			noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (m->control_pressed) { return 0; }
-			maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (m->control_pressed) { return 0; }
+			noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (m->getControl_pressed()) { return 0; }
+			maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (m->getControl_pressed()) { return 0; }
 			
-			noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->control_pressed) { return 0; }
-			noise.checkCentroids(weights, centroids); if (m->control_pressed) { return 0; }
+			noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
+			noise.checkCentroids(weights, centroids); if (m->getControl_pressed()) { return 0; }
 			 
 			otuFreq.assign(numOTUs, 0);
 			
 			int total = 0;
 			
 			for(int i=0;i<numSeqs;i++){
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
 				double offset = 1e6;
 				double norm = 0.0000;
@@ -714,14 +714,14 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 				vector<double> currentTau(numOTUs);
 				
 				for(int j=0;j<numOTUs;j++){
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					if(weights[j] > minWeight && distances[i * numSeqs+centroids[j]] < offset){
 						offset = distances[i * numSeqs+centroids[j]];
 					}
 				}
 				
 				for(int j=0;j<numOTUs;j++){
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					if(weights[j] > minWeight){
 						currentTau[j] = exp(sigma * (-distances[(i * numSeqs + centroids[j])] + offset)) * weights[j];
 						norm += currentTau[j];
@@ -732,12 +732,12 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 				}			
 				
 				for(int j=0;j<numOTUs;j++){
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					currentTau[j] /= norm;
 				}
 				
 				for(int j=0;j<numOTUs;j++){
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					
 					if(currentTau[j] > 1.0e-4){
 						int oldTotal = total;
@@ -759,19 +759,19 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 			numIters++;
 		}
 		
-		noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (m->control_pressed) { return 0; }
+		noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (m->getControl_pressed()) { return 0; }
 		
 		vector<double> percentage(numSeqs);
-		noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (m->control_pressed) { return 0; }
-		noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (m->control_pressed) { return 0; }
+		noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (m->getControl_pressed()) { return 0; }
+		noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (m->getControl_pressed()) { return 0; }
 		
 		change.assign(numOTUs, 1);
-		noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->control_pressed) { return 0; }
+		noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
 		
 		
 		vector<int> finalTau(numOTUs, 0);
 		for(int i=0;i<numSeqs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			finalTau[otuData[i]] += int(seqFreq[i]);
 		}
 		
@@ -793,7 +793,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->mothurCalling = true;
+		m->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -801,7 +801,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->mothurCalling = false;
+		m->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		string newnameFile = filenames["name"][0];

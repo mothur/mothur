@@ -155,7 +155,7 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
 			
 			if (current.getName() != "") {
                 if (pDataArray->m->debug) { pDataArray->m->mothurOutJustToScreen("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();}
-                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->debug) { pDataArray->m->control_pressed = true; }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
+                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->debug) { pDataArray->m->setControl_pressed(true); }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
                 
                 if(pDataArray->trump != '*')			{	pDataArray->F.doTrump(current);		}
                 if(pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0)	{	pDataArray->F.getFreqs(current);	}
@@ -169,7 +169,7 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
         
 		in.close();
         
-        if (error) { pDataArray->m->control_pressed = true; }
+        if (error) { pDataArray->m->setControl_pressed(true); }
 		
 		return 0;
 		

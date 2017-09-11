@@ -41,7 +41,7 @@ int TreeMap::readMap(string gf) {
         bool columnOne = true;
         
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
@@ -120,7 +120,7 @@ int TreeMap::readMap() {
         bool columnOne = true;
         
         while (!fileHandle.eof()) {
-            if (m->control_pressed) { fileHandle.close();  return 1; }
+            if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
             vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());

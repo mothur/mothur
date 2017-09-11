@@ -30,7 +30,7 @@ int Collect::getCurve(float percentFreq = 0.01){
 																						                                                                        
                 for(int i=0;i<numSeqs;i++){
 						
-						if (m->control_pressed) { delete lookup; delete rank; delete ccd;  return 1;  }
+						if (m->getControl_pressed()) { delete lookup; delete rank; delete ccd;  return 1;  }
 						
                         int binNumber = order->get(i);
                         int abundance = lookup->get(binNumber);
@@ -112,7 +112,7 @@ try {
                 //sample all the members
                 for(int i=0;i<numSeqs;i++){
 				
-						if (m->control_pressed) { for (int j = 0; j < lookup.size(); j++) {  delete lookup[j]; } delete ccd;  return 1;  }
+						if (m->getControl_pressed()) { for (int j = 0; j < lookup.size(); j++) {  delete lookup[j]; } delete ccd;  return 1;  }
 						
                         //get first sample
                         individual chosen = sharedorder->get(i);

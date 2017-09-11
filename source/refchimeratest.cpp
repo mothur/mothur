@@ -203,7 +203,7 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
             
             for(int i=0;i<=breakLeft;i++){
                 
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 
                 if(left[i] != '-' && left[i] != '.'){
                     reference += left[i];
@@ -213,7 +213,7 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
             
             for(int i=breakRight;i<right.length();i++){
                 
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 
                 if(right[i] != '-' && right[i] != '.'){
                     reference += right[i];
@@ -265,26 +265,26 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
         vector<vector<char> > alignMoves; alignMoves.resize(queryLength + 1);
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i].resize(refLength + 1, 0);
 			alignMoves[i].resize(refLength + 1, 'x');
 		}
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i][0] = 0;//GAP * i;
 			alignMoves[i][0] = 'u';
 		}
 		
 		for(int i=0;i<=refLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[0][i] = 0;//GAP * i;
 			alignMoves[0][i] = 'l';
 		}
 		        
 		for(int i=1;i<=queryLength;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int j=1;j<=refLength;j++){
 				
@@ -373,7 +373,7 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
 
 		while(i > 0 && j > 0){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(alignMoves[i][j] == 'd'){
 				qAlign = query[i-1] + qAlign;
@@ -429,7 +429,7 @@ int RefChimeraTest::getUnalignedDiffs(string qAlign, string rAlign, vector<int>&
 		int lCount = 0;
 		for(int l=0;l<alignLength;l++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qAlign[l] == '-'){
 				lDiffs++;		
@@ -453,7 +453,7 @@ int RefChimeraTest::getUnalignedDiffs(string qAlign, string rAlign, vector<int>&
 		int rCount = 0;
 		for(int l=alignLength-1;l>=0;l--){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qAlign[l] == '-'){
 				rDiffs++;		

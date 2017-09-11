@@ -59,7 +59,7 @@ string MakeLefseCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "lefse") {  pattern = "[filename],[distance],lefse"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -220,7 +220,7 @@ int MakeLefseCommand::execute(){
         map<int, consTax2> consTax;
         if (constaxonomyfile != "") {  m->readConsTax(constaxonomyfile, consTax);  }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         if (sharedfile != "") {
             inputFile = sharedfile;
@@ -232,7 +232,7 @@ int MakeLefseCommand::execute(){
             runRelabund(consTax, lookup);
         }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
         //output files created by command
 		m->mothurOutEndLine();
@@ -271,15 +271,15 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
             for (int j = 0; j < categories.size(); j++) {
                 out << categories[j];
                 for (int i = 0; i < namesOfGroups.size()-1; i++) {
-                    if (m->control_pressed) { out.close(); delete designMap; return 0; }
+                    if (m->getControl_pressed()) { out.close(); delete designMap; return 0; }
                     string value = designMap->get(namesOfGroups[i], categories[j]);
                     if (value == "not found") {
-                        m->mothurOut("[ERROR]: " + namesOfGroups[i] + " is not in your design file, please correct.\n"); m->control_pressed = true;
+                        m->mothurOut("[ERROR]: " + namesOfGroups[i] + " is not in your design file, please correct.\n"); m->setControl_pressed(true);
                     }else { out  << '\t' << value; }
                 }
                 string value = designMap->get(namesOfGroups[namesOfGroups.size()-1], categories[j]);
                 if (value == "not found") {
-                    m->mothurOut("[ERROR]: " + namesOfGroups[namesOfGroups.size()-1] + " is not in your design file, please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: " + namesOfGroups[namesOfGroups.size()-1] + " is not in your design file, please correct.\n"); m->setControl_pressed(true);
                 }else { out << '\t' << value; }
                 out << endl;
             }
@@ -289,9 +289,10 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
         for (int i = 0; i < namesOfGroups.size(); i++) {  out  << '\t' << namesOfGroups[i]; }
         out << endl;
         
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins(); i++) { //process each otu
-            if (m->control_pressed) { break; }
-            string nameOfOtu = m->currentSharedBinLabels[i];
+            if (m->getControl_pressed()) { break; }
+            string nameOfOtu = m->getCurrentSharedBinLabels()[i];
             
             if (constaxonomyfile != "") { //try to find the otuName in consTax to replace with consensus taxonomy
                 int simpleLabel;
@@ -307,9 +308,9 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
                         if (nameOfOtu[j] == ';') { fixedName += '|'; }
                         else { fixedName += nameOfOtu[j]; }
                     }
-                    nameOfOtu = fixedName + m->currentSharedBinLabels[i] + "|";
+                    nameOfOtu = fixedName + currentLabels[i] + "|";
                 }else {
-                    m->mothurOut("[ERROR]: can't find " + nameOfOtu + " in constaxonomy file. Do the distances match, did you forget to use the label parameter?\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: can't find " + nameOfOtu + " in constaxonomy file. Do the distances match, did you forget to use the label parameter?\n"); m->setControl_pressed(true);
                 }
                 
             }
@@ -346,7 +347,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             
             //as long as you are not at the end of the file or done wih the lines you want
             while((templookup != NULL) && (userLabels.size() != 0)) {
-                if (m->control_pressed) {  delete templookup; return NULL;  }
+                if (m->getControl_pressed()) {  delete templookup; return NULL;  }
                 
                 if(labels.count(templookup->getLabel()) == 1){
                     processedLabels.insert(templookup->getLabel());
@@ -377,7 +378,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             }
             
             
-            if (m->control_pressed) { delete templookup; return NULL;  }
+            if (m->getControl_pressed()) { delete templookup; return NULL;  }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -411,7 +412,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             
 			for (int j = 0; j < data[i]->getNumBins(); j++) {
                 
-				if (m->control_pressed) { for (int k = 0; k < data.size(); k++) {  delete data[k];  } return lookup; }
+				if (m->getControl_pressed()) { for (int k = 0; k < data.size(); k++) {  delete data[k];  } return lookup; }
                 
 				int abund = data[i]->get(j);
 				float relabund = 0.0;
@@ -432,7 +433,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 					float averageOtu = totalOtu / (float) data.size();
 					
 					relabund = abund / (float) averageOtu;
-				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true;  }
+				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
 				
 				rel->push_back(relabund);
 			}
@@ -467,7 +468,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {  return lookupFloat;  }
+			if (m->getControl_pressed()) {  return lookupFloat;  }
 			
 			if(labels.count(lookupFloat->getLabel()) == 1){
 				processedLabels.insert(lookupFloat->getLabel());
@@ -498,7 +499,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		}
 		
 		
-		if (m->control_pressed) { return lookupFloat;  }
+		if (m->getControl_pressed()) { return lookupFloat;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;

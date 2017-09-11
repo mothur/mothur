@@ -133,7 +133,7 @@ int MergeFileCommand::execute(){
 		m->mothurRemove(outputFileName);
 		for(int i=0;i<numInputFiles;i++){  m->appendFiles(fileNames[i], outputFileName);  }
 		
-		if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
+		if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

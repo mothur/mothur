@@ -39,7 +39,7 @@ string Summary::addSeq(Sequence seq) {
             //make sure this sequence is in the namefile, else error
             itFindName = nameMap.find(seq.getName());
             
-            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else { num = itFindName->second; }
         }
 
@@ -98,7 +98,7 @@ string Summary::addSeq(string name, int start, int end, int length, int ambigs, 
             //make sure this sequence is in the namefile, else error
             itFindName = nameMap.find(name);
             
-            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else { numReps = itFindName->second; }
         }
         
@@ -147,7 +147,7 @@ string Summary::addSeq(string name, int length, int olength, int ostart, int oen
             //make sure this sequence is in the namefile, else error
             itFindName = nameMap.find(name);
             
-            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else { numReps = itFindName->second; }
         }
         
@@ -200,7 +200,7 @@ string Summary::addSeq(string name, int length, float SimBtwnQueryTemplate, floa
             //make sure this sequence is in the namefile, else error
             itFindName = nameMap.find(name);
             
-            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+            if (itFindName == nameMap.end()) { m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
             else { numReps = itFindName->second; }
         }
         
@@ -470,7 +470,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -481,7 +481,8 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+				for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -659,7 +660,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
             num += pDataArray[i]->count;
             total += pDataArray[i]->total;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
             for (map<int, long long>::iterator it = pDataArray[i]->startPosition.begin(); it != pDataArray[i]->startPosition.end(); it++)		{
                 map<int, long long>::iterator itMain = startPosition.find(it->first);
@@ -711,7 +712,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         
         if (hasNameOrCount) {
             if (nameCountNumUniques != num) { // do fasta and name/count files match
-                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
             }
         }
         
@@ -747,13 +748,13 @@ int Summary::driverSummarize(string fastafile, string output, linePair lines) {
         
         while (!done) {
             
-            if (m->control_pressed) { in.close(); return 1; }
+            if (m->getControl_pressed()) { in.close(); return 1; }
             
             Sequence current(in); m->gobble(in);
 
             if (current.getName() != "") {
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t" + toString(current.getNumBases()) + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t" + toString(current.getNumBases()) + "\n"); }
     
                 string seqInfo = addSeq(current); count++;
                 if (output != "") { out << seqInfo << endl; }
@@ -858,7 +859,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -869,7 +870,8 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(summaryfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1028,7 +1030,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
             num += pDataArray[i]->count;
             total += pDataArray[i]->total;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
             for (map<int, long long>::iterator it = pDataArray[i]->startPosition.begin(); it != pDataArray[i]->startPosition.end(); it++)		{
                 map<int, long long>::iterator itMain = startPosition.find(it->first);
@@ -1067,7 +1069,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         
         if (hasNameOrCount) {
             if (nameCountNumUniques != num) { // do fasta and name/count files match
-                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
             }
         }
         
@@ -1099,12 +1101,12 @@ int Summary::driverFastaSummarySummarize(string fastafile, linePair lines) {
         
         while (!done) {
             
-            if (m->control_pressed) { in.close(); return 1; }
+            if (m->getControl_pressed()) { in.close(); return 1; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
             
             if (name != "") {  addSeq(name, start, end, length, ambigs, polymer, numReps); count++; }
             
@@ -1208,7 +1210,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -1219,7 +1221,8 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 for (int i=0;i<processIDS.size();i++) {m->mothurRemove(summaryfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1390,7 +1393,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
             num += pDataArray[i]->count;
             total += pDataArray[i]->total;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
             for (map<int, long long>::iterator it = pDataArray[i]->ostartPosition.begin(); it != pDataArray[i]->ostartPosition.end(); it++)		{
                 map<int, long long>::iterator itMain = ostartPosition.find(it->first);
@@ -1435,7 +1438,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         
         if (hasNameOrCount) {
             if (nameCountNumUniques != num) { // do fasta and name/count files match
-                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
             }
         }
         
@@ -1478,12 +1481,12 @@ int Summary::driverContigsSummarySummarize(string fastafile, linePair lines) {
         
         while (!done) {
             
-            if (m->control_pressed) { in.close(); return 1; }
+            if (m->getControl_pressed()) { in.close(); return 1; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; m->gobble(in);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(length) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(length) + "\n"); }
             
             if (name != "") {
                 string seqInfo = addSeq(name, length, OLength, thisOStart, thisOEnd, numMisMatches, numns); count++;
@@ -1573,7 +1576,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -1584,7 +1587,8 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastafile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(summaryfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1729,7 +1733,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
             num += pDataArray[i]->count;
             total += pDataArray[i]->total;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
             for (map<float, long long>::iterator it = pDataArray[i]->sims.begin(); it != pDataArray[i]->sims.end(); it++)		{
                 map<float, long long>::iterator itMain = sims.find(it->first);
@@ -1762,7 +1766,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         
         if (hasNameOrCount) {
             if (nameCountNumUniques != num) { // do fasta and name/count files match
-                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
             }
         }
         
@@ -1795,12 +1799,12 @@ int Summary::driverAlignSummarySummarize(string alignfile, linePair lines) {
         
         while (!done) {
             
-            if (m->control_pressed) { in.close(); return 1; }
+            if (m->getControl_pressed()) { in.close(); return 1; }
             
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in);
 
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(TemplateName) + "\t" + toString(SearchScore) + "\t" + toString(length) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + "\t" + toString(TemplateName) + "\t" + toString(SearchScore) + "\t" + toString(length) + "\n"); }
             
             if (name != "") {
                 string seqInfo = addSeq(name, length, SimBtwnQueryTemplate, SearchScore, LongestInsert); count++;

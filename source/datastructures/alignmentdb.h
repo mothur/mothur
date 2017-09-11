@@ -24,11 +24,11 @@ public:
 	AlignmentDB(string);
 	~AlignmentDB();
 	
-	Sequence findClosestSequence(Sequence*);
-	float getSearchScore()  {  return search->getSearchScore();  }
+	Sequence findClosestSequence(Sequence*, float&); //sequence to align, searchScore
 	int getLongestBase()	{  return longest;  }
 	
 private:
+    mutex mutex;
 	int numSeqs, longest, threadID;
 	string method;
 	

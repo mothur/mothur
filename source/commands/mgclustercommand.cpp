@@ -80,7 +80,7 @@ string MGClusterCommand::getOutputPattern(string type) {
         else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
         else if (type == "steps") {  pattern = "[filename],[clustertag],steps"; }
         else if (type == "sensspec") {  pattern = "[filename],[clustertag],sensspec"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -402,7 +402,7 @@ int MGClusterCommand::runOptiCluster(){
             
             int start = time(NULL);
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
             
             cluster.update(listVectorMetric);
@@ -430,7 +430,7 @@ int MGClusterCommand::runOptiCluster(){
             //assign each sequence to bins
             map<string, int> seqToBin;
             for (int i = 0; i < list->getNumBins(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 string bin = list->get(i);
                 vector<string> names; m->splitAtComma(bin, names);
                 for (int j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
@@ -465,7 +465,7 @@ int MGClusterCommand::runOptiCluster(){
             if (mergedBinCount != 0) { m->mothurOut("Merged " + toString(mergedBinCount) + " OTUs based on blast overlap.\n\n"); }
         }
         
-        if (!m->printedListHeaders) { m->listBinLabelsInFile.clear(); list->printHeaders(listFile); }
+        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
@@ -560,7 +560,7 @@ int MGClusterCommand::runMothurCluster(){
             rabund = new RAbundVector(list->getRAbundVector());
         }
         
-        if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
+        if (m->getControl_pressed()) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
         
         
         oldList = *list;
@@ -574,7 +574,7 @@ int MGClusterCommand::runMothurCluster(){
         m->openOutputFile(listFileName,	listFile);
         list->printHeaders(listFile);
         
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             delete nameMap; delete read; delete list; delete rabund;
             listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();  m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
             outputTypes.clear();
@@ -596,7 +596,7 @@ int MGClusterCommand::runMothurCluster(){
         Seq2Bin = cluster->getSeqtoBin();
         oldSeq2Bin = Seq2Bin;
         
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
             listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
             outputTypes.clear();
@@ -607,11 +607,11 @@ int MGClusterCommand::runMothurCluster(){
         //cluster using cluster classes
         while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
             
-            if (m->debug) {  cout << "numNodes=" << distMatrix->getNNodes() << " smallDist = " << distMatrix->getSmallDist() << endl; }
+            if (m->getDebug()) {  cout << "numNodes=" << distMatrix->getNNodes() << " smallDist = " << distMatrix->getSmallDist() << endl; }
             
             cluster->update(cutoff);
             
-            if (m->control_pressed) {
+            if (m->getControl_pressed()) {
                 delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
                 listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
                 outputTypes.clear();
@@ -629,7 +629,7 @@ int MGClusterCommand::runMothurCluster(){
                 if (merge) {
                     ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
                     
-                    if (m->control_pressed) {
+                    if (m->getControl_pressed()) {
                         delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
                         listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
                         outputTypes.clear();
@@ -660,7 +660,7 @@ int MGClusterCommand::runMothurCluster(){
             if (merge) {
                 ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
                 
-                if (m->control_pressed) {
+                if (m->getControl_pressed()) {
                     delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
                     listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
                     outputTypes.clear();
@@ -688,7 +688,7 @@ int MGClusterCommand::runMothurCluster(){
             sabundFile.close();
             rabundFile.close();
         }
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             delete nameMap;
             listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
             outputTypes.clear();
@@ -725,7 +725,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 		if (overlapMatrix.size() == 0)  {  done = true;  }
 		
 		while (!done) {
-			if (m->control_pressed) {  return newList; }
+			if (m->getControl_pressed()) {  return newList; }
 			
 			//get next overlap
 			seqDist overlapNode;

@@ -238,7 +238,7 @@ SAbundVector SharedRAbundVector::getSAbundVector() {
 
 OrderVector SharedRAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
     try {
-    m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->control_pressed = true;
+    m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->setControl_pressed(true);
             OrderVector o; return o;
     }
     catch(exception& e) {

@@ -63,7 +63,7 @@ string CreateDatabaseCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "database") {  pattern = "[filename],database"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -258,13 +258,13 @@ int CreateDatabaseCommand::execute(){
         vector<string> otuLabels;
         vector<int> classifyOtuSizes = readTax(taxonomies, otuLabels);
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         vector<Sequence> seqs;
         vector<int> repOtusSizes;
         if (repfastafile != "") { repOtusSizes = readFasta(seqs); }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         //names redundants to uniques. backwards to how we normally do it, but each bin is the list file will be a key entry in the map.
         map<string, string> repNames;
@@ -295,27 +295,27 @@ int CreateDatabaseCommand::execute(){
             nameMap = ct.getNameMap();
         }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         if (repfastafile != "") {
             
             //are there the same number of otus in the fasta and name files
-            if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
+            if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->setControl_pressed(true); }
             
             //are there the same number of OTUs in the tax and fasta file
-            if (classifyOtuSizes.size() != repOtusSizes.size()) { m->mothurOut("[ERROR]: you have " + toString(classifyOtuSizes.size()) + " taxonomies in your contaxonomy file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
+            if (classifyOtuSizes.size() != repOtusSizes.size()) { m->mothurOut("[ERROR]: you have " + toString(classifyOtuSizes.size()) + " taxonomies in your contaxonomy file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->setControl_pressed(true); }
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //at this point we have the same number of OTUs. Are the sizes we have found so far accurate?
             for (int i = 0; i < classifyOtuSizes.size(); i++) {
                 if (classifyOtuSizes[i] != repOtusSizes[i]) {
-                    m->mothurOut("[ERROR]: OTU size info does not match for bin " + toString(i+1) + ". The contaxonomy file indicated the OTU represented " + toString(classifyOtuSizes[i]) + " sequences, but the repfasta file had " + toString(repOtusSizes[i]) + ".  These should match. Make sure you are using files for the same distance.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: OTU size info does not match for bin " + toString(i+1) + ". The contaxonomy file indicated the OTU represented " + toString(classifyOtuSizes[i]) + " sequences, but the repfasta file had " + toString(repOtusSizes[i]) + ".  These should match. Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);
                 }
             }
         }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         
         map<string, string> variables; 
@@ -335,9 +335,9 @@ int CreateDatabaseCommand::execute(){
             ListVector* list = getList();
             
             if (otuLabels.size() != list->getNumBins()) { 
-                m->mothurOut("[ERROR]: you have " + toString(otuLabels.size()) + " otus in your contaxonomy file, but your list file has " + toString(list->getNumBins()) + " otus. These should match. Make sure you are using files for the same distance.\n"); m->control_pressed = true;  }
+                m->mothurOut("[ERROR]: you have " + toString(otuLabels.size()) + " otus in your contaxonomy file, but your list file has " + toString(list->getNumBins()) + " otus. These should match. Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);  }
             
-            if (m->control_pressed) { delete list; return 0; }
+            if (m->getControl_pressed()) { delete list; return 0; }
             
             GroupMap* groupmap = NULL;
             if (groupfile != "") {
@@ -345,7 +345,7 @@ int CreateDatabaseCommand::execute(){
                 groupmap->readMap();
             }
             
-            if (m->control_pressed) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
+            if (m->getControl_pressed()) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
             
             if (groupfile != "") { 
                 header = "OTUNumber";
@@ -365,9 +365,9 @@ int CreateDatabaseCommand::execute(){
             for (int i = 0; i < list->getNumBins(); i++) {
                 
                 int index = findIndex(otuLabels, binLabels[i]);
-                if (index == -1) {  m->mothurOut("[ERROR]: " + binLabels[i] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
+                if (index == -1) {  m->mothurOut("[ERROR]: " + binLabels[i] + " is not in your constaxonomy file, aborting.\n"); m->setControl_pressed(true); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 out << otuLabels[index];
                 
@@ -388,12 +388,12 @@ int CreateDatabaseCommand::execute(){
                     map<string, string>::iterator it = repNames.find(bin);
                     
                     if (it == repNames.end()) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);   break;
                     }else { seqRepName = it->second;  numSeqsRep = binNames.size(); }
                     
                     //sanity check
                     if (binNames.size() != classifyOtuSizes[index]) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);   break;
                     }
                 }else if ((countfile != "") && (repfastafile != "")) {
                     //find rep sequence in bin
@@ -407,11 +407,11 @@ int CreateDatabaseCommand::execute(){
                     }
                     
                     if (seqRepName == "") {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the count file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the count file. Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);   break;
                     }
                     
                     if (numSeqsRep != classifyOtuSizes[i]) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(numSeqsRep) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(numSeqsRep) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->setControl_pressed(true);   break;
                     }
                 }
                 
@@ -435,7 +435,7 @@ int CreateDatabaseCommand::execute(){
                     //output counts
                     for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << '\t' << counts[(groupmap->getNamesOfGroups())[j]];  }
                     
-                    if (error) { m->control_pressed = true; }
+                    if (error) { m->setControl_pressed(true); }
                 }else if ((countfile != "") && (repfastafile != "")) {
                     if (ct.hasGroupInfo()) {
                         vector<int> groupCounts = ct.getGroupCounts(seqRepName);
@@ -471,14 +471,15 @@ int CreateDatabaseCommand::execute(){
             header += "\tOTUConTaxonomy";
             out << header << endl;
             
+            vector<string> currentLabels = m->getCurrentSharedBinLabels();
             for (int h = 0; h < lookup->getNumBins(); h++) {
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
-                int index = findIndex(otuLabels, m->currentSharedBinLabels[h]);
-                if (index == -1) {  m->mothurOut("[ERROR]: " + m->currentSharedBinLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
+                int index = findIndex(otuLabels, currentLabels[h]);
+                if (index == -1) {  m->mothurOut("[ERROR]: " + currentLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->setControl_pressed(true); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 out << otuLabels[index];
                 
@@ -491,7 +492,7 @@ int CreateDatabaseCommand::execute(){
                 
                 //sanity check
                 if (totalAbund != classifyOtuSizes[index]) {
-                    m->mothurOut("[WARNING]: OTU " + m->currentSharedBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->control_pressed = true;   break;
+                    m->mothurOut("[WARNING]: OTU " + currentLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->setControl_pressed(true);   break;
                 }
                 
                 //output repSeq
@@ -500,7 +501,7 @@ int CreateDatabaseCommand::execute(){
             }
         }
         out.close();
-        if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
+        if (m->getControl_pressed()) { m->mothurRemove(outputFileName); return 0; }
         
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -543,7 +544,7 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otu = ""; string tax = "unknown";
             int size = 0;
@@ -576,7 +577,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
         set<int> sanity;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string binInfo;
             Sequence seq(in, binInfo, true);  m->gobble(in);
@@ -584,7 +585,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             //the binInfo should look like - binNumber|size ie. 1|200 if it is binNumber|size|group then the user gave us the wrong repfasta file
             vector<string> info;
             m->splitAtChar(binInfo, info, '|');
-            //if (info.size() != 2) { m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;}
+            //if (info.size() != 2) { m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->setControl_pressed(true); break;}
             
             int size = 0;
             m->mothurConvert(info[1], size);
@@ -595,7 +596,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             m->mothurConvert(m->getSimpleLabel(temp), binNumber);
             set<int>::iterator it = sanity.find(binNumber);
             if (it != sanity.end()) {
-                m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;
+                m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->setControl_pressed(true); break;
             }else { sanity.insert(binNumber); }
             
             sizes.push_back(size);
@@ -626,7 +627,7 @@ ListVector* CreateDatabaseCommand::getList(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  delete input; return list;  }
+			if (m->getControl_pressed()) {  delete input; return list;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -657,7 +658,7 @@ ListVector* CreateDatabaseCommand::getList(){
 		}
 		
 		
-		if (m->control_pressed) { delete input; return list;  }
+		if (m->getControl_pressed()) { delete input; return list;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -703,7 +704,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return lookup;  }
+			if (m->getControl_pressed()) {  return lookup;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel());
@@ -734,7 +735,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		}
 		
 		
-		if (m->control_pressed) { return lookup;  }
+		if (m->getControl_pressed()) { return lookup;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;

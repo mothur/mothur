@@ -99,7 +99,7 @@ string GetSeqsCommand::getOutputPattern(string type) {
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "accnosreport")      {   pattern = "[filename],pick.accnos.report";    }
         else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -349,7 +349,7 @@ int GetSeqsCommand::execute(){
 		//get names you want to keep
 		names = m->readAccnos(accnosfile);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
@@ -369,9 +369,9 @@ int GetSeqsCommand::execute(){
 		if (qualfile != "")			{		readQual();			}
 		if (accnosfile2 != "")		{		compareAccnos();	}
         
-        if (m->debug) { runSanityCheck(); }
+        if (m->getDebug()) { runSanityCheck(); }
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		
 		if (outputNames.size() != 0) {
@@ -447,7 +447,7 @@ int GetSeqsCommand::readFastq(){
         set<string> uniqueNames;
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			//read sequence name
             bool ignore;
@@ -506,12 +506,12 @@ int GetSeqsCommand::readFasta(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-        if (m->debug) { set<string> temp; sanity["fasta"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["fasta"] = temp; }
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -533,7 +533,7 @@ int GetSeqsCommand::readFasta(){
                         selectedCount++;
                         uniqueNames.insert(name);
                     
-                        if (m->debug) { sanity["fasta"].insert(name); }
+                        if (m->getDebug()) { sanity["fasta"].insert(name); }
                     }else {
                         m->mothurOut("[WARNING]: " + name + " is in your fasta file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                     }
@@ -578,7 +578,7 @@ int GetSeqsCommand::readQual(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
 		
-        if (m->debug) { set<string> temp; sanity["qual"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["qual"] = temp; }
 		
         set<string> uniqueNames;
 		while(!in.eof()){	
@@ -618,7 +618,7 @@ int GetSeqsCommand::readQual(){
                     
                     out << name << endl << scores;
                     selectedCount++;
-                    if (m->debug) { sanity["qual"].insert(name); }
+                    if (m->getDebug()) { sanity["qual"].insert(name); }
                 }else {
                     m->mothurOut("[WARNING]: " + saveName + " is in your qfile more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
@@ -671,12 +671,12 @@ int GetSeqsCommand::readCount(){
         set<string> uniqueNames;
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
             if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) != 0) {
                 if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
@@ -728,7 +728,7 @@ int GetSeqsCommand::readList(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-        if (m->debug) { set<string> temp; sanity["list"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
 		
         
 		while(!in.eof()){
@@ -753,7 +753,7 @@ int GetSeqsCommand::readList(){
             vector<string> binLabels = list.getLabels();
             vector<string> newBinLabels;
             
-            if (m->control_pressed) { in.close(); out.close();  return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close();  return 0; }
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -773,7 +773,7 @@ int GetSeqsCommand::readList(){
                             uniqueNames.insert(name);
                             newNames += name + ",";
                             selectedCount++;
-                            if (m->debug) { sanity["list"].insert(name); }
+                            if (m->getDebug()) { sanity["list"].insert(name); }
                         }else {
                             m->mothurOut("[WARNING]: " + name + " is in your list file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                         }
@@ -834,13 +834,13 @@ int GetSeqsCommand::readName(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-        if (m->debug) { set<string> temp; sanity["name"] = temp; }
-        if (m->debug) { set<string> temp; sanity["dupname"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["name"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["dupname"] = temp; }
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;			m->gobble(in);
 			in >> secondCol;
@@ -859,7 +859,7 @@ int GetSeqsCommand::readName(){
                         uniqueNames.insert(parsedNames[i]);
                         validSecond.push_back(parsedNames[i]);
                         parsedNames2.push_back(parsedNames[i]);
-                        if (m->debug) { sanity["dupname"].insert(parsedNames[i]); }
+                        if (m->getDebug()) { sanity["dupname"].insert(parsedNames[i]); }
                     }else {
                         m->mothurOut("[WARNING]: " + parsedNames[i] + " is in your name file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                         parsedError = true;
@@ -876,11 +876,11 @@ int GetSeqsCommand::readName(){
             }
 
 			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
-				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->debug) { sanity["dupname"].insert(parsedNames[i]); } }
+				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->getDebug()) { sanity["dupname"].insert(parsedNames[i]); } }
 				out << firstCol << '\t' << hold << endl;
 				wroteSomething = true;
 				selectedCount += parsedNames.size();
-                if (m->debug) { sanity["name"].insert(firstCol); }
+                if (m->getDebug()) { sanity["name"].insert(firstCol); }
 			}else {
                 
                 if (validSecond.size() != 0) {
@@ -897,7 +897,7 @@ int GetSeqsCommand::readName(){
                         for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
                         out << validSecond[validSecond.size()-1] << endl;
                         
-                        if (m->debug) { sanity["name"].insert(firstCol); }
+                        if (m->getDebug()) { sanity["name"].insert(firstCol); }
                         
                         
                         //make first name in set you come to first column and then add the remaining names to second column
@@ -916,7 +916,7 @@ int GetSeqsCommand::readName(){
                             for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
                             out << validSecond[validSecond.size()-1] << endl;
                             
-                            if (m->debug) { sanity["name"].insert(validSecond[0]); }
+                            if (m->getDebug()) { sanity["name"].insert(validSecond[0]); }
                         }
                     }
                 }
@@ -960,12 +960,12 @@ int GetSeqsCommand::readGroup(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-        if (m->debug) { set<string> temp; sanity["group"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["group"] = temp; }
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;		m->gobble(in);		//read from first column
@@ -980,7 +980,7 @@ int GetSeqsCommand::readGroup(){
                     out << name << '\t' << group << endl;
                     selectedCount++;
                     
-                    if (m->debug) {  sanity["group"].insert(name); }
+                    if (m->getDebug()) {  sanity["group"].insert(name); }
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your group file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
@@ -1024,12 +1024,12 @@ int GetSeqsCommand::readTax(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-        if (m->debug) { set<string> temp; sanity["tax"] = temp; }
+        if (m->getDebug()) { set<string> temp; sanity["tax"] = temp; }
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1048,7 +1048,7 @@ int GetSeqsCommand::readTax(){
                     out << name << '\t' << tax << endl;
                     selectedCount++;
                 
-                    if (m->debug) { sanity["tax"].insert(name); }
+                    if (m->getDebug()) { sanity["tax"].insert(name); }
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your taxonomy file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
@@ -1100,7 +1100,7 @@ int GetSeqsCommand::readAlign(){
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -1279,7 +1279,7 @@ int GetSeqsCommand::compareAccnos(){
 			
 			while(!inName.eof()){
 				
-				if (m->control_pressed) { inName.close(); return 0; }
+				if (m->getControl_pressed()) { inName.close(); return 0; }
 				
 				string thisname, repnames;
 				

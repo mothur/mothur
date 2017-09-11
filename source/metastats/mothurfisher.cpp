@@ -25,7 +25,7 @@ double MothurFisher::fexact(double n11_, double n12_, double n21_, double n22_, 
 		double n_1 = n11_+n21_;
 		double n   = n11_ +n12_ +n21_ +n22_;
         
-        if (m->debug) { m->mothurOut("[DEBUG]: fisher:fexact n11_, n1_, n_1, n " + toString(n11_) + " " + toString(n1_) + " " + toString(n_1) + " " + toString(n) + " \n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: fisher:fexact n11_, n1_, n_1, n " + toString(n11_) + " " + toString(n1_) + " " + toString(n_1) + " " + toString(n) + " \n"); }
 		exact(n11_,n1_,n_1,n);
 		double twotail = sleft+sright;
 		

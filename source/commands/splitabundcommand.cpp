@@ -71,7 +71,7 @@ string SplitAbundCommand::getOutputPattern(string type) {
         else if (type == "count")   {   pattern = "[filename],[tag],[tag2],count_table-[filename],[tag],count_table";     }
         else if (type == "group")   {   pattern = "[filename],[tag],[tag2],groups-[filename],[tag],[group],[tag2],groups";          }
         else if (type == "accnos")  {   pattern = "[filename],[tag],[tag2],accnos-[filename],[tag],[group],[tag2],accnos";          }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -304,11 +304,11 @@ int SplitAbundCommand::execute(){
 			if (namefile != "") {  readNamesFile();		}
 			else				{ createNameMap(list);	}
 			
-			if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-				if (m->control_pressed) {  delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+				if (m->getControl_pressed()) {  delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 				if(allLines == 1 || labels.count(list->getLabel()) == 1){
 						
@@ -342,7 +342,7 @@ int SplitAbundCommand::execute(){
 				list = input.getListVector(); //get new list vector to process
 			}
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -358,7 +358,7 @@ int SplitAbundCommand::execute(){
 
 			}
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//run last label if you need to
 			if (needToRun == true)  {
@@ -371,7 +371,7 @@ int SplitAbundCommand::execute(){
 				delete list;
 			}
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }	return 0;	}
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }	return 0;	}
 									
 		}else if (namefile != "") { //you are using the namefile to determine abundance
 			if (outputDir == "") { outputDir = m->hasPath(namefile); }
@@ -445,7 +445,7 @@ int SplitAbundCommand::splitList(ListVector* thisList) {
 		//get rareNames and abundNames
         int numRareBins = 0;
 		for (int i = 0; i < thisList->getNumBins(); i++) {
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			string bin = thisList->get(i);
 						
@@ -514,7 +514,7 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
             vector<string> binLabels = thisList->getLabels();
             string rareHeader = "label\tnumOtus"; string abundHeader = "label\tnumOtus";
 			for (int i = 0; i < thisList->getNumBins(); i++) {
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 			
 				string bin = thisList->get(i); 
                 vector<string> names;
@@ -588,7 +588,7 @@ int SplitAbundCommand::writeList(ListVector* thisList, string tag, int numRareBi
 			}
             vector<string> binLabels = thisList->getLabels();
 			for (int i = 0; i < thisList->getNumBins(); i++) {
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 			
 				map<string, string> groupBins;
 				string bin = thisList->get(i); 
@@ -669,7 +669,7 @@ int SplitAbundCommand::splitCount() { //countfile
 		vector<string> allNames = ct.getNamesOfSeqs();
         for (int i = 0; i < allNames.size(); i++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             int size = ct.getNumSeqs(allNames[i]);
             nameMap[allNames[i]] = allNames[i];
@@ -703,7 +703,7 @@ int SplitAbundCommand::splitNames() { //namefile
 		m->openInputFile(namefile, in);
 		
 		while (!in.eof()) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
 			in >> firstCol >> secondCol; m->gobble(in);
@@ -736,7 +736,7 @@ int SplitAbundCommand::readNamesFile() {
 		m->openInputFile(namefile, in);
 		
 		while (!in.eof()) {
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
 			in >> firstCol >> secondCol; m->gobble(in);
@@ -759,7 +759,7 @@ int SplitAbundCommand::createNameMap(ListVector* thisList) {
 		
 		if (thisList != NULL) {
 			for (int i = 0; i < thisList->getNumBins(); i++) {
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
 				string bin = thisList->get(i);
 							
@@ -1225,7 +1225,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			m->openInputFile(fastafile, in);
 	
 			while (!in.eof()) {
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 		
 				Sequence seq(in); m->gobble(in);
 				
@@ -1277,7 +1277,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			m->openInputFile(fastafile, in);
 	
 			while (!in.eof()) {
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 		
 				Sequence seq(in); m->gobble(in);
 				

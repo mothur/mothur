@@ -66,7 +66,7 @@ string DistanceCommand::getOutputPattern(string type) {
         
         if (type == "phylip") {  pattern = "[filename],[outputtag],dist"; } 
         else if (type == "column") { pattern = "[filename],dist"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -237,7 +237,7 @@ int DistanceCommand::execute(){
 		//sanity check the oldfasta and column file as well as add oldfasta sequences to alignDB
 		if ((oldfastafile != "") && (column != ""))  {	if (!(sanityCheck())) { return 0; }  }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		int numSeqs = alignDB.getNumSeqs();
 		//cutoff += 0.005;
@@ -280,7 +280,7 @@ int DistanceCommand::execute(){
 			createProcesses(outputFile, numSeqs);
 		}
 
-		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
 		
 		ifstream fileHandle;
 		fileHandle.open(outputFile.c_str());
@@ -310,7 +310,7 @@ int DistanceCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
 		
 		//set phylip file as new current phylipfile
 		string current = "";
@@ -390,7 +390,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
 			if (pid > 0) {
                 processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                 process++;
-                if (m->debug) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
             }else if (pid == 0){
 				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
 				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
@@ -406,7 +406,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
 			}
@@ -414,7 +414,8 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));}m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));}m->setControl_pressed(false);
+					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             processIDS.resize(0);
             process = 1;
@@ -439,7 +440,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
                 if (pid > 0) {
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
-                    if (m->debug) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
                 }else if (pid == 0){
                     if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
                     else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
@@ -497,7 +498,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != (pDataArray[i]->endLine-pDataArray[i]->startLine)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->endLine-pDataArray[i]->startLine) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->endLine-pDataArray[i]->startLine) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -506,7 +507,7 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
 		
 		//append and remove temp files
 		for (int i=0;i<processIDS.size();i++) {
-            if (m->debug) { m->mothurOut("[DEBUG]: parent process is appending child pid " + toString(processIDS[i]) + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is appending child pid " + toString(processIDS[i]) + ".\n"); }
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
 			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
@@ -561,7 +562,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			}
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
+				if (m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
                 
 				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
 				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
@@ -640,7 +641,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
+				if (m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
@@ -705,7 +706,7 @@ bool DistanceCommand::sanityCheck() {
 		m->openInputFile(oldfastafile, inFasta);
 		
 		while (!inFasta.eof()) {
-			if (m->control_pressed) {  inFasta.close(); return good;  }
+			if (m->getControl_pressed()) {  inFasta.close(); return good;  }
 		
 			Sequence temp(inFasta);
 			
@@ -730,7 +731,7 @@ bool DistanceCommand::sanityCheck() {
 		string name1, name2;
 		float dist;
 		while (!inDist.eof()) {
-			if (m->control_pressed) {  inDist.close(); outDist.close(); m->mothurRemove(outputFile); return good;  }
+			if (m->getControl_pressed()) {  inDist.close(); outDist.close(); m->mothurRemove(outputFile); return good;  }
 		
 			inDist >> name1 >> name2 >> dist; m->gobble(inDist);
 			

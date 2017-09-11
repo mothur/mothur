@@ -108,7 +108,7 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
         else if (type == "accnos") {  pattern = "[filename],[tag],uchime.accnos"; }
         else if (type == "alns") {  pattern = "[filename],[tag],uchime.alns"; }
         else if (type == "count") {  pattern = "[filename],[tag],uchime.pick.count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -561,7 +561,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			string uchimeCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			uchimeCommand = path + "uchime";	//	format the database, -o option gives us the ability
-            if (m->debug) { 
+            if (m->getDebug()) { 
                 m->mothurOut("[DEBUG]: Uchime location using \"which uchime\" = "); 
                 Command* newCommand = new SystemCommand("which uchime"); m->mothurOutEndLine();
                 newCommand->execute();
@@ -651,7 +651,7 @@ int ChimeraUchimeCommand::execute(){
 				}else { nameFile = getNamesFile(fastaFileNames[s]); }
 										
 				map<string, string> seqs;  
-				readFasta(fastaFileNames[s], seqs);  if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+				readFasta(fastaFileNames[s], seqs);  if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 
 				//read namefile
 				vector<seqPriorityNode> nameMapCount;
@@ -668,7 +668,7 @@ int ChimeraUchimeCommand::execute(){
                         }
                     }
                 }else {
-                    error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                    error = m->readNames(nameFile, nameMapCount, seqs); if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
                 }
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
@@ -677,7 +677,7 @@ int ChimeraUchimeCommand::execute(){
 				fastaFileNames[s] = newFasta;
 			}
 			
-			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 			
 			if (hasGroup) {
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
@@ -698,7 +698,7 @@ int ChimeraUchimeCommand::execute(){
                     uniqueNames = sparser->getAllSeqsMap();
                 }
 					
-				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 								
 				//clears files
 				ofstream out, out1, out2;
@@ -728,7 +728,7 @@ int ChimeraUchimeCommand::execute(){
 
                 }else{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s]);			}
 
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
                
                 
                 if (!dups) { 
@@ -763,10 +763,10 @@ int ChimeraUchimeCommand::execute(){
                 if (hasCount) { delete cparser; }
                 else { delete sparser; }
                 
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 					
 			}else{
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			
 				int numSeqs = 0;
 				int numChimeras = 0;
@@ -783,7 +783,7 @@ int ChimeraUchimeCommand::execute(){
 				m->appendFiles(outputFileName, outputFileName+".temp");
 				m->mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
 				
-				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 			
 				//remove file made for uchime
 				if (templatefile == "self") {  m->mothurRemove(fastaFileNames[s]); }
@@ -842,14 +842,14 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
             m->openInputFile(accnosFileName, in2);
             
             while (!in2.eof()) {
-                if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+                if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
                 
                 in2 >> name; m->gobble(in2);
                 
                 //find unique name
                 itUnique = uniqueNames.find(name);
                 
-                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                 else {
                     itChimeras = chimerasInFile.find((itUnique->second));
                     
@@ -889,7 +889,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
 			in >> temp1;	m->gobble(in);
@@ -910,7 +910,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 			//find unique name
 			itUnique = uniqueNames.find(name);
 			
-			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 			else {
 				name = itUnique->second;
 				//is this name already in the file
@@ -941,7 +941,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 					}
 					
 					itUnique = uniqueNames.find(parent1);
-					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else {	out << itUnique->second << restOfName << '\t';	}
 				}else { out << parent1 << '\t'; }
 				
@@ -955,7 +955,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 					}
 					
 					itUnique = uniqueNames.find(parent2);
-					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else {	out << itUnique->second << restOfName << '\t';	}
 				}else { out << parent2 << '\t'; }
 				
@@ -1013,7 +1013,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 			string line = "";
 			
 			while (!in3.eof()) {
-				if (m->control_pressed) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName)); m->mothurRemove((alnsFileName+".temp")); return 0; }
+				if (m->getControl_pressed()) { in3.close(); out3.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName)); m->mothurRemove((alnsFileName+".temp")); return 0; }
 				
 				line = "";
 				line = m->getline(in3); 
@@ -1032,8 +1032,8 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 							else { out3 << line[i]; }
 						}
 						
-						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 						else {
 							out << line[spot] << line[spot+1];
 							
@@ -1050,7 +1050,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 							//find unique name
 							itUnique = uniqueNames.find(name);
 							
-							if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing alns results. Cannot find "+ name + "."); m->mothurOutEndLine();m->control_pressed = true;  }
+							if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing alns results. Cannot find "+ name + "."); m->mothurOutEndLine();m->setControl_pressed(true);  }
 							else {
 								//only limit repeats on query names
 								if (temp == "Query") {
@@ -1094,7 +1094,7 @@ int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			Sequence seq(in); m->gobble(in);
 			seqs[seq.getName()] = seq.getAligned();
@@ -1120,7 +1120,7 @@ string ChimeraUchimeCommand::getNamesFile(string& inputFile){
 		string inputString = "fasta=" + inputFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->mothurCalling = true;
+		m->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -1128,7 +1128,7 @@ string ChimeraUchimeCommand::getNamesFile(string& inputFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->mothurCalling = false;
+		m->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		nameFile = filenames["name"][0];
@@ -1153,20 +1153,20 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
         if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }
         
 		for (int i = start; i < end; i++) {
-			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
+			int start = time(NULL);	 if (m->getControl_pressed()) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
             long long numSeqs = 0;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
 			totalSeqs += numSeqs;
             
 			driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//remove file made for uchime
-			if (!m->debug) {  m->mothurRemove(filename);  }
+			if (!m->getDebug()) {  m->mothurRemove(filename);  }
             else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
 			
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
@@ -1194,7 +1194,7 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
                                 vector<string> tempNames; m->splitAtComma(itN->second, tempNames); 
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
@@ -1237,11 +1237,11 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		alns = "\"" + alns + "\"";
         
         if (filename.length() > 257) {
-            m->mothurOut("[ERROR]: " + filename + " filename is " + toString(filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+            m->mothurOut("[ERROR]: " + filename + " filename is " + toString(filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->setControl_pressed(true); return 0;
         }else if ((alns.length() > 257) && (chimealns)) {
-            m->mothurOut("[ERROR]: " + alns + " filename is " + toString(alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->control_pressed = true; return 0;
+            m->mothurOut("[ERROR]: " + alns + " filename is " + toString(alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->setControl_pressed(true); return 0;
         }else if (outputFName.length() > 257) {
-            m->mothurOut("[ERROR]: " + outputFName + " filename is " + toString(outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); m->control_pressed = true; return 0;
+            m->mothurOut("[ERROR]: " + outputFName + " filename is " + toString(outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); m->setControl_pressed(true); return 0;
         }
 				
 		vector<char*> cPara;
@@ -1497,7 +1497,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 #else
 		commandString = "\"" + commandString + "\"";
 #endif
-        if (m->debug) { m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
 		system(commandString.c_str());
 		
 		//free memory
@@ -1509,7 +1509,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		filename = filename.substr(1, filename.length()-2);
 		alns = alns.substr(1, alns.length()-2);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//create accnos file from uchime results
 		ifstream in; 
@@ -1522,7 +1522,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		numChimeras = 0;
 		while(!in.eof()) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			string name = "";
 			string chimeraFlag = "";
@@ -1570,7 +1570,7 @@ int ChimeraUchimeCommand::prepFile(string filename, string output) {
         m->openOutputFile(output, out);
         
         while (!in.eof()) {
-            if (m->control_pressed) { break;  }
+            if (m->getControl_pressed()) { break;  }
             
             Sequence seq(in); m->gobble(in);
             
@@ -1600,7 +1600,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		//break up file into multiple files
 		m->divideFile(filename, processors, files);
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 				
 		//loop through and create all the processes you want
 		while (process != processors) {

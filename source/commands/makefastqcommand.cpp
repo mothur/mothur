@@ -54,7 +54,7 @@ string MakeFastQCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fastq") {  pattern = "[filename],fastq"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -186,7 +186,7 @@ int MakeFastQCommand::execute(){
         
 		while (!fFile.eof() && !qFile.eof()) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			Sequence currSeq(fFile); m->gobble(fFile);
 			QualityScores currQual(qFile);  m->gobble(qFile);
@@ -199,7 +199,7 @@ int MakeFastQCommand::execute(){
 		qFile.close();
 		out.close();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

@@ -23,7 +23,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		
 		numGroups = m->getNumGroups();
 		
-		if (m->control_pressed) { return data; }
+		if (m->getControl_pressed()) { return data; }
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		vector< vector<string> > namesOfGroupCombos;
@@ -97,7 +97,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
                 }
@@ -108,7 +108,8 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 	
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             
@@ -174,7 +175,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			wait(&temp);
 		}
 	
-		if (m->control_pressed) { return results; }
+		if (m->getControl_pressed()) { return results; }
 		
 		//get data created by processes
 		for (int i=0;i<(processors-1);i++) { 
@@ -187,7 +188,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				int num;
 				in >> num; m->gobble(in);
 				
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 
 				double w; 
 				for (int j = 0; j < num; j++) {
@@ -256,7 +257,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		int count = 0;
 		for (int h = start; h < (start+num); h++) {
 		
-			if (m->control_pressed) { return results; }
+			if (m->getControl_pressed()) { return results; }
 		
 			//initialize weighted score
 			string groupA = namesOfGroupCombos[h][0]; 
@@ -301,7 +302,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 			//calculate u for the group comb 
 			for(int i=0;i<t->getNumNodes();i++){
 				
-				if (m->control_pressed) { return data; }
+				if (m->getControl_pressed()) { return data; }
 				
 				double u;
 				//int pcountSize = 0;
@@ -365,7 +366,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
      
         CountTable* ct = t->getCountTable();
 		
-		if (m->control_pressed) { return data; }
+		if (m->getControl_pressed()) { return data; }
 		
 		//initialize weighted score
 		WScore[(groupA+groupB)] = 0.0;
@@ -399,7 +400,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
 		 
-			if (m->control_pressed) { return data; }
+			if (m->getControl_pressed()) { return data; }
 			
 			double u;
 			//int pcountSize = 0;
@@ -468,7 +469,7 @@ double Weighted::getLengthToRoot(Tree* t, int v, string groupA, string groupB) {
 		//while you aren't at root
 		while(t->tree[index].getParent() != -1){
 
-			if (m->control_pressed) {  return sum; }
+			if (m->getControl_pressed()) {  return sum; }
 			
 			int parent = t->tree[index].getParent();
 			

@@ -29,7 +29,7 @@ int seqNoise::getSequenceData(string sequenceFileName, vector<string>& sequences
 		
 		while(!sequenceFile.eof()){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			Sequence temp(sequenceFile); m->gobble(sequenceFile);
 			
@@ -67,7 +67,7 @@ int seqNoise::getRedundantNames(string namesFileName, vector<string>& uniqueName
 		
 		for(int i=0;i<redundantNames.size();i++){
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			namesFile >> uniqueNames[i]; m->gobble(namesFile);
 			namesFile >> redundantNames[i]; m->gobble(namesFile);
@@ -112,7 +112,7 @@ int seqNoise::getDistanceData(string distFileName, vector<double>& distances){
 		
 		for(int i=0;i<numSeqs;i++){
 			
-			if (m->control_pressed) {  break; }
+			if (m->getControl_pressed()) {  break; }
 			
 			distances[i * numSeqs + i] = 0.0000;
 			
@@ -164,7 +164,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
                     
                     for(int i=0;i<numOTUs;i++){
                         
-                        if (m->control_pressed) { return 0; }
+                        if (m->getControl_pressed()) { return 0; }
                         
                         string otu = list.get(i);
                         int count = 0;
@@ -194,11 +194,11 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
                     int numSeqs = otuData.size();
                     
                     for(int i=0;i<numSeqs;i++){
-                        if (m->control_pressed) { return 0; }
+                        if (m->getControl_pressed()) { return 0; }
                         otuBySeqLookUp[otuData[i]].push_back(i);
                     }
                     for(int i=0;i<numOTUs;i++){
-                        if (m->control_pressed) { return 0; }
+                        if (m->getControl_pressed()) { return 0; }
                         for(int j=otuBySeqLookUp[i].size();j<numSeqs;j++){
                             otuBySeqLookUp[i].push_back(0);
                         }
@@ -222,7 +222,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 			
 			for(int i=0;i<numOTUs;i++){
 				
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				
 				string otu = list->get(i);
 				
@@ -253,11 +253,11 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 			int numSeqs = otuData.size();
 			
 			for(int i=0;i<numSeqs;i++){
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				otuBySeqLookUp[otuData[i]].push_back(i);
 			}
 			for(int i=0;i<numOTUs;i++){
-				if (m->control_pressed) { return 0; }
+				if (m->getControl_pressed()) { return 0; }
 				for(int j=otuBySeqLookUp[i].size();j<numSeqs;j++){
 					otuBySeqLookUp[i].push_back(0);
 				}
@@ -290,7 +290,7 @@ int seqNoise::updateOTUCountData(vector<int> otuFreq,
 		for(int i=0;i<numOTUs;i++){
 			cumCount[i] = count;
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int j=0;j<otuFreq[i];j++){
 				anP[count] = otuBySeqLookUp[i][j];
@@ -326,7 +326,7 @@ double seqNoise::calcNewWeights(
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			double change = weights[i];
 			
@@ -375,7 +375,7 @@ int seqNoise::calcCentroids(
 		
 		for(int i=0;i<numOTUs;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			int minFIndex = -1;
 			double minFValue = 1e10;
@@ -446,12 +446,12 @@ int seqNoise::checkCentroids(vector<double>& weights, vector<int> centroids){
 		
 		double minWeight = MIN_WEIGHT;
 		for(int i=0;i<numOTUs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			if(weights[i] < minWeight){	unique[i] = -1;	}
 		}
 		
 		for(int i=0;i<numOTUs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			if(unique[i] == 1){
 				for(int j=i+1; j<numOTUs;j++){
 					if(unique[j] == 1){
@@ -485,7 +485,7 @@ int seqNoise::setUpOTUData(vector<int>& otuData, vector<double>& percentage, vec
 		vector<double> bestIndex(numSeqs, -1);
 		
 		for(int i=0;i<numOTUs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			for(int j=0;j<otuFreq[i];j++){
 				
 				int index1 = cumCount[i] + j;
@@ -500,7 +500,7 @@ int seqNoise::setUpOTUData(vector<int>& otuData, vector<double>& percentage, vec
 		}
 		
 		for(int i=0;i<numSeqs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			otuData[i] = bestIndex[i];
 			percentage[i] = 1 - bestTau[i];
 		}
@@ -526,7 +526,7 @@ int seqNoise::finishOTUData(vector<int> otuData, vector<int>& otuFreq, vector<in
 		anI.assign(numSeqs, 0);
 		
 		for(int i=0;i<numSeqs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			int otu = otuData[i];
 			total++;
 			
@@ -550,7 +550,7 @@ int seqNoise::getLastMatch(char direction, vector<vector<char> >& alignMoves, in
 		char nullReturn = -1;
 		
 		while(i>=1 && j>=1){
-			if (m->control_pressed) { return nullReturn; }
+			if (m->getControl_pressed()) { return nullReturn; }
 			if(direction == 'd'){
 				if(seqA[i-1] == seqB[j-1])	{	return seqA[i-1];	}
 				else						{	return nullReturn;	}
@@ -608,25 +608,25 @@ int seqNoise::countDiffs(vector<int> query, vector<int> ref){
 		vector<vector<char> > alignMoves(queryLength + 1);
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i].resize(refLength + 1, 0);
 			alignMoves[i].resize(refLength + 1, 'x');
 		}
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i][0] = 15.0 * i;
 			alignMoves[i][0] = 'u';
 		}
 		
 		for(int i=0;i<=refLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[0][i] = 15.0 * i;
 			alignMoves[0][i] = 'l';
 		}
 		
 		for(int i=1;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			for(int j=1;j<=refLength;j++){
 				
 				double nogap;		
@@ -700,7 +700,7 @@ int seqNoise::countDiffs(vector<int> query, vector<int> ref){
 		//	string bases = "ACTG";
 		
 		while(i > 0 && j > 0){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			if(alignMoves[i][j] == 'd'){
 				//			alignA = bases[query[i-1]] + alignA;
 				//			alignB = bases[ref[j-1]] + alignB;
@@ -753,7 +753,7 @@ vector<int> seqNoise::convertSeq(string bases){
 		vector<int> numbers(bases.length(), -1);
 		
 		for(int i=0;i<bases.length();i++){
-			if (m->control_pressed) { return numbers; }
+			if (m->getControl_pressed()) { return numbers; }
 			
 			char b = bases[i];
 			
@@ -780,7 +780,7 @@ string seqNoise::degapSeq(string aligned){
 		
 		for(int i=0;i<aligned.length();i++){
 			
-			if (m->control_pressed) { return ""; }
+			if (m->getControl_pressed()) { return ""; }
 			
 			if(aligned[i] != '-' && aligned[i] != '.'){
 				unaligned += aligned[i];
@@ -810,7 +810,7 @@ int seqNoise::writeOutput(string fastaFileName, string namesFileName, string uMa
 		vector<int> maxSequenceIndex(numOTUs, 0);
 		
 		for(int i=0;i<numSeqs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			if(maxSequenceAbund[otuData[i]] < seqFreq[i]){
 				maxSequenceAbund[otuData[i]] = seqFreq[i];
 				maxSequenceIndex[otuData[i]] = i;
@@ -820,7 +820,7 @@ int seqNoise::writeOutput(string fastaFileName, string namesFileName, string uMa
 		int count = 1;
 		
 		for(int i=0;i<numOTUs;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(finalTau[i] > 0){
 				
@@ -855,7 +855,7 @@ int seqNoise::writeOutput(string fastaFileName, string namesFileName, string uMa
 				
 				
 				for(int j=0;j<frequencyData.size();j++){
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					redundantSeqs += ',' + redundantNames[frequencyData[j].index];
 					
 					uMapFile << uniqueNames[frequencyData[j].index] << '\t' << seqFreq[frequencyData[j].index] << '\t';

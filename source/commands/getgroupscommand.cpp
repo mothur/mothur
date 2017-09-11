@@ -77,7 +77,7 @@ string GetGroupsCommand::getOutputPattern(string type) {
         else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],pick,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -420,7 +420,7 @@ int GetGroupsCommand::execute(){
             }
         }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
@@ -434,7 +434,7 @@ int GetGroupsCommand::execute(){
         if (phylipfile != "")		{		readPhylip();	}
         if (columnfile != "")		{		readColumn();	}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		
 		if (outputNames.size() != 0) {
@@ -526,7 +526,7 @@ int GetGroupsCommand::readFasta(){
 		int selectedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -591,7 +591,7 @@ int GetGroupsCommand::readShared(){
 			m->openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 			
-            if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
+            if (m->getControl_pressed()) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
 			
 			lookup->printHeaders(out);
             lookup->print(out);
@@ -659,7 +659,7 @@ int GetGroupsCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+				if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -736,7 +736,7 @@ int GetGroupsCommand::readName(){
 		int selectedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -820,7 +820,7 @@ int GetGroupsCommand::readGroup(){
 		int selectedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -887,10 +887,10 @@ int GetGroupsCommand::readCount(){
         string name; int oldTotal;
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); in >> oldTotal; m->gobble(in);
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
             
             if (names.count(name) != 0) {
                 //if group info, then read it
@@ -985,7 +985,7 @@ int GetGroupsCommand::readTax(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1071,7 +1071,7 @@ int GetGroupsCommand::readPhylip(){
                 row++;
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
@@ -1082,14 +1082,14 @@ int GetGroupsCommand::readPhylip(){
                 if (names.count(name) != 0) { rows.insert(row); }
                 row++;
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
         }
         in.close();
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //read through file only printing rows and columns of seqs in names
         ifstream inPhylip;
@@ -1112,7 +1112,7 @@ int GetGroupsCommand::readPhylip(){
                 else{ out << name << '\t'; count++; }
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close();  return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -1132,7 +1132,7 @@ int GetGroupsCommand::readPhylip(){
                 else{ out << name << '\t'; count++; }
                 
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close(); return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -1199,7 +1199,7 @@ int GetGroupsCommand::readColumn(){
         float distance;
         while (!in.eof()) {
             
-            if (m->control_pressed) { out.close(); in.close(); return 0; }
+            if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
             in >> firstName >> secondName >> distance; m->gobble(in);
             
@@ -1235,7 +1235,7 @@ int GetGroupsCommand::fillNames(){
 		
 		for (int i = 0; i < seqs.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			string group = groupMap->getGroup(seqs[i]);
 			

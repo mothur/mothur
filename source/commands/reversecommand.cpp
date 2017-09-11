@@ -51,7 +51,7 @@ string ReverseSeqsCommand::getOutputPattern(string type) {
         
         if (type == "fasta") {  pattern = "[filename],rc,[extension]"; } 
         else if (type == "qfile") {  pattern = "[filename],rc,[extension]"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -185,7 +185,7 @@ int ReverseSeqsCommand::execute(){
 			m->openOutputFile(fastaReverseFileName, outFASTA);
 			
 			while(!inFASTA.eof()){
-				if (m->control_pressed) {  inFASTA.close();  outFASTA.close(); m->mothurRemove(fastaReverseFileName); return 0; }
+				if (m->getControl_pressed()) {  inFASTA.close();  outFASTA.close(); m->mothurRemove(fastaReverseFileName); return 0; }
 				 
 				Sequence currSeq(inFASTA);  m->gobble(inFASTA);
 				if (currSeq.getName() != "") {
@@ -216,7 +216,7 @@ int ReverseSeqsCommand::execute(){
             m->openOutputFile(qualReverseFileName, outQual);
 
 			while(!inQual.eof()){
-				if (m->control_pressed) {  inQual.close();  outQual.close(); m->mothurRemove(qualReverseFileName); return 0; }
+				if (m->getControl_pressed()) {  inQual.close();  outQual.close(); m->mothurRemove(qualReverseFileName); return 0; }
 				currQual = QualityScores(inQual);  m->gobble(inQual);
 				currQual.flipQScores();	
 				currQual.printQScores(outQual);
@@ -226,7 +226,7 @@ int ReverseSeqsCommand::execute(){
 			outputNames.push_back(qualReverseFileName); outputTypes["qfile"].push_back(qualReverseFileName);
 		}
 		
-		if (m->control_pressed) {  m->mothurRemove(qualReverseFileName); m->mothurRemove(fastaReverseFileName); return 0; }
+		if (m->getControl_pressed()) {  m->mothurRemove(qualReverseFileName); m->mothurRemove(fastaReverseFileName); return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";

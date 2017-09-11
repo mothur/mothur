@@ -56,7 +56,7 @@ string GetRAbundCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "rabund")      {   pattern = "[filename],rabund";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -221,14 +221,14 @@ int GetRAbundCommand::execute(){
             set<string> processedLabels;
             set<string> userLabels = labels;
             
-            if (m->control_pressed) {  outputTypes.clear();  out.close(); m->mothurRemove(filename); delete rabund;  return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear();  out.close(); m->mothurRemove(filename); delete rabund;  return 0; }
             
             while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
                 if(allLines == 1 || labels.count(rabund->getLabel()) == 1){
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);   delete rabund;  return 0;  }
+					if (m->getControl_pressed()) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);   delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -245,7 +245,7 @@ int GetRAbundCommand::execute(){
 					
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete rabund;  return 0;  }
+					if (m->getControl_pressed()) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -283,7 +283,7 @@ int GetRAbundCommand::execute(){
                 
                 m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
                 
-                if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);   delete rabund;  return 0; }
+                if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);   delete rabund;  return 0; }
                 
                 if(sorted)	{   rabund->print(out);				}
                 else		{	rabund->nonSortedPrint(out);	}
@@ -292,7 +292,7 @@ int GetRAbundCommand::execute(){
             }
 		}
         
-        if (m->control_pressed) {  outputTypes.clear();  out.close(); m->mothurRemove(filename);  return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear();  out.close(); m->mothurRemove(filename);  return 0; }
         
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -330,14 +330,14 @@ int GetRAbundCommand::processList(ofstream& out){
         set<string> processedLabels;
         set<string> userLabels = labels;
         
-        if (m->control_pressed) {  delete list;  return 0; }
+        if (m->getControl_pressed()) {  delete list;  return 0; }
         
         while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
             if(allLines == 1 || labels.count(list->getLabel()) == 1){
                 m->mothurOut(list->getLabel()); m->mothurOutEndLine();
                 
-                if (m->control_pressed) {   delete list;  return 0;  }
+                if (m->getControl_pressed()) {   delete list;  return 0;  }
                 
                 RAbundVector* rabund = new RAbundVector();
                 createRabund(ct, list, rabund);
@@ -358,7 +358,7 @@ int GetRAbundCommand::processList(ofstream& out){
                 
                 m->mothurOut(list->getLabel()); m->mothurOutEndLine();
                 
-                if (m->control_pressed) {    delete list;  return 0;  }
+                if (m->getControl_pressed()) {    delete list;  return 0;  }
                 
                 RAbundVector* rabund = new RAbundVector();
                 createRabund(ct, list, rabund);
@@ -400,7 +400,7 @@ int GetRAbundCommand::processList(ofstream& out){
             
             m->mothurOut(list->getLabel()); m->mothurOutEndLine();
             
-            if (m->control_pressed) {   delete list;  return 0; }
+            if (m->getControl_pressed()) {   delete list;  return 0; }
             
             RAbundVector* rabund = new RAbundVector();
             createRabund(ct, list, rabund);
@@ -426,7 +426,7 @@ int GetRAbundCommand::createRabund(CountTable& ct, ListVector*& list, RAbundVect
         
         rabund->setLabel(list->getLabel());
         for(int i = 0; i < list->getNumBins(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             vector<string> binNames;
             string bin = list->get(i);
             m->splitAtComma(bin, binNames);

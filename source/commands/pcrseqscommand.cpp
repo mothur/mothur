@@ -74,7 +74,7 @@ string PcrSeqsCommand::getOutputPattern(string type) {
         else if (type == "group")       {   pattern = "[filename],pcr,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pcr,[extension]";    }
         else if (type == "accnos")      {   pattern = "[filename],bad.accnos";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -331,8 +331,8 @@ int PcrSeqsCommand::execute(){
 		
 		
         length = 0;
-		if(oligosfile != ""){    readOligos();     if (m->debug) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(numFPrimers) + ", revprimers = " + toString(numRPrimers) + ".\n"); } }  if (m->control_pressed) {  return 0; }
-        if(ecolifile != "") {    readEcoli();      }  if (m->control_pressed) {  return 0; }
+		if(oligosfile != ""){    readOligos();     if (m->getDebug()) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(numFPrimers) + ", revprimers = " + toString(numRPrimers) + ".\n"); } }  if (m->getControl_pressed()) {  return 0; }
+        if(ecolifile != "") {    readEcoli();      }  if (m->getControl_pressed()) {  return 0; }
         
         vector<unsigned long long> positions; 
         int numFastaSeqs = 0;
@@ -355,27 +355,27 @@ int PcrSeqsCommand::execute(){
             }
         }
 #endif
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
 
         set<string> badNames;
         numFastaSeqs = createProcesses(fastafile, trimSeqFile, badSeqFile, badNames);  	
 		
-		if (m->control_pressed) {  return 0; }		
+		if (m->getControl_pressed()) {  return 0; }		
         
         //don't write or keep if blank
         if (badNames.size() != 0)   { writeAccnos(badNames);        }   
         if (m->isBlank(badSeqFile)) { m->mothurRemove(badSeqFile);  }
         else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         if (namefile != "")			{		readName(badNames);		}   
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         if (groupfile != "")		{		readGroup(badNames);    }
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		if (taxfile != "")			{		readTax(badNames);		}
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
   		if (countfile != "")			{		readCount(badNames);		}
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
       
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -471,7 +471,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
                 }
@@ -483,7 +483,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -609,7 +609,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
             if (pDataArray[i]->count != pDataArray[i]->fend) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->fend) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->fend) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
             if (pDataArray[i]->adjustNeeded) { adjustNeeded = true; }
             if (pDataArray[i]->pstart != -1)   {
@@ -644,7 +644,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             
             while(!inLocations.eof()) {
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 string name = "";
                 int thisStart = -1; int thisEnd = -1;
@@ -722,7 +722,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
         
 		while (!done) {
             
-			if (m->control_pressed) {  break; }
+			if (m->getControl_pressed()) {  break; }
 			
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
             
@@ -738,11 +738,11 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             int totalDiffs = 0;
             string commentString = "";
             
-            if (m->control_pressed) {  break; }
+            if (m->getControl_pressed()) {  break; }
             
 			if (currSeq.getName() != "") {
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
                 
                 bool goodSeq = true;
                 if (oligosfile != "") {
@@ -833,9 +833,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     }
                 }else if (ecolifile != "") {
                     //make sure the seqs are aligned
-                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
+                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->setControl_pressed(true); break; }
                     else if (currSeq.getAligned().length() != length) {
-                        m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->control_pressed = true; break; 
+                        m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->setControl_pressed(true); break; 
                     }else {
                         if (keepdots)   {
                             currSeq.filterFromPos(end);
@@ -848,10 +848,10 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
-                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
+                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->setControl_pressed(true); break; }
                     else {
                         if (end != -1) {
-                            if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
+                            if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->setControl_pressed(true); break; }
                             else {
                                 if (keepdots)   { currSeq.filterFromPos(end); }
                                 else {
@@ -883,7 +883,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                 
 				if(goodSeq == 1)    {
                     currSeq.printSequence(goodFile);
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + locationsString + "\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + locationsString + "\n"); }
                     if (thisPStart != -1)   { locations.insert(thisPStart);  }
                     if (locationsString != "") { locationsFile << locationsString; }
                 }
@@ -913,7 +913,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 		inFASTA.close();
         locationsFile.close();
         
-        if (m->debug) { m->mothurOut("[DEBUG]: fileAligned = " + toString(fileAligned) +'\n'); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: fileAligned = " + toString(fileAligned) +'\n'); }
     
         if (fileAligned && !keepdots) { //print out smallest start value and largest end value
             if (locations.size() > 1) { adjustNeeded = true; }
@@ -963,7 +963,7 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         //if (pstart > pend) { //swap them
         
         while(!inFasta.eof()) {
-            if(m->control_pressed) { break; }
+            if(m->getControl_pressed()) { break; }
             
             Sequence seq(inFasta); m->gobble(inFasta);
             
@@ -1036,7 +1036,7 @@ bool PcrSeqsCommand::readEcoli(){
             length = ecoli.getAligned().length();
             start = ecoli.getStartPos();
             end = ecoli.getEndPos();
-        }else { in.close(); m->control_pressed = true; return false; }
+        }else { in.close(); m->setControl_pressed(true); return false; }
         in.close();    
 			
         return true;
@@ -1061,7 +1061,7 @@ int PcrSeqsCommand::writeAccnos(set<string> badNames){
         m->openOutputFile(outputFileName, out);
         
         for (set<string>::iterator it = badNames.begin(); it != badNames.end(); it++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             out << (*it) << endl;
         }
         
@@ -1095,7 +1095,7 @@ int PcrSeqsCommand::readName(set<string>& names){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -1156,7 +1156,7 @@ int PcrSeqsCommand::readGroup(set<string> names){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;		m->gobble(in);		//read from first column
 			in >> group;	m->gobble(in);		//read from second column
@@ -1204,7 +1204,7 @@ int PcrSeqsCommand::readTax(set<string> names){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1254,7 +1254,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
         bool wroteSomething = false;
         while (!in.eof()) {
             
-			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
+			if (m->getControl_pressed()) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
             
 			in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
@@ -1269,7 +1269,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
 		in.close();
 		goodCountOut.close();
         
-        if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
+        if (m->getControl_pressed()) { m->mothurRemove(goodCountFile);   }
         
         if (wroteSomething == false) {  m->mothurOut("Your count file contains only sequences from the .accnos file."); m->mothurOutEndLine(); }
         
@@ -1280,7 +1280,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
             ct.printTable(goodCountFile);
         }
 		
-		if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
+		if (m->getControl_pressed()) { m->mothurRemove(goodCountFile);   }
         
         m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
 
@@ -1299,7 +1299,7 @@ int PcrSeqsCommand::readOligos(){
 	try {
         oligos.read(oligosfile);
         
-        if (m->control_pressed) { return false; } //error in reading oligos
+        if (m->getControl_pressed()) { return false; } //error in reading oligos
         
         if (oligos.hasPairedPrimers()) {
             pairedOligos = true;

@@ -106,7 +106,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         //sanity check
         bool okay = phyloTree->ErrorCheck(names);
         
-        if (!okay) { m->control_pressed = true; }
+        if (!okay) { m->setControl_pressed(true); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Classify", "generateDatabaseAndNames");
@@ -124,14 +124,14 @@ int Classify::readTaxonomy(string file) {
 		string name, taxInfo;
 		
 		m->mothurOut("\nReading in the " + file + " taxonomy...\t");	cout.flush();
-        if (m->debug) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
         
         taxonomy.clear(); 
         m->readTax(file, taxonomy, true);
         
         for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {
             phyloTree->addSeqToTree(itTax->first, itTax->second);
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
         }
        
 		phyloTree->assignHeirarchyIDs(0);

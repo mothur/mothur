@@ -61,26 +61,26 @@ double Perseus::basicPairwiseAlignSeqs(string query, string reference, string& q
 		vector<vector<char> > alignMoves(queryLength + 1);
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i].resize(refLength + 1, 0);
 			alignMoves[i].resize(refLength + 1, 'x');
 		}
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i][0] = GAP * i;
 			alignMoves[i][0] = 'u';
 		}
 		
 		for(int i=0;i<=refLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[0][i] = GAP * i;
 			alignMoves[0][i] = 'l';
 		}
 		
 		for(int i=1;i<=queryLength;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int j=1;j<=refLength;j++){
 				
@@ -131,7 +131,7 @@ double Perseus::basicPairwiseAlignSeqs(string query, string reference, string& q
 		
 		while(i > 0 && j > 0){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(alignMoves[i][j] == 'd'){
 				qAlign = query[i-1] + qAlign;
@@ -161,7 +161,7 @@ double Perseus::basicPairwiseAlignSeqs(string query, string reference, string& q
 		
 		while(i>0){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			rAlign = '.' + rAlign;
 			qAlign = query[i-1] + qAlign;
@@ -170,7 +170,7 @@ double Perseus::basicPairwiseAlignSeqs(string query, string reference, string& q
 		
 		while(j>0){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			rAlign = reference[j-1] + rAlign;
 			qAlign = '.' + qAlign;
@@ -196,7 +196,7 @@ int Perseus::getDiffs(string qAlign, string rAlign, vector<int>& leftDiffs, vect
 		int lCount = 0;
 		for(int l=0;l<alignLength;l++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qAlign[l] == '-'){
 				lDiffs++;		
@@ -220,7 +220,7 @@ int Perseus::getDiffs(string qAlign, string rAlign, vector<int>& leftDiffs, vect
 		int rCount = 0;
 		for(int l=alignLength-1;l>=0;l--){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qAlign[l] == '-'){
 				rDiffs++;		
@@ -256,7 +256,7 @@ int Perseus::getLastMatch(char direction, vector<vector<char> >& alignMoves, int
 		
 		while(i>=1 && j>=1){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(direction == 'd'){
 				if(seqA[i-1] == seqB[j-1])	{	return seqA[i-1];	}
@@ -304,26 +304,26 @@ double Perseus::modeledPairwiseAlignSeqs(string query, string reference, string&
 		vector<vector<char> > alignMoves(queryLength + 1);
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i].resize(refLength + 1, 0);
 			alignMoves[i].resize(refLength + 1, 'x');
 		}
 		
 		for(int i=0;i<=queryLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[i][0] = 15.0 * i;
 			alignMoves[i][0] = 'u';
 		}
 		
 		for(int i=0;i<=refLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			alignMatrix[0][i] = 15.0 * i;
 			alignMoves[0][i] = 'l';
 		}
 		
 		for(int i=1;i<=queryLength;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int j=1;j<=refLength;j++){
 				
@@ -394,7 +394,7 @@ double Perseus::modeledPairwiseAlignSeqs(string query, string reference, string&
 		
 		while(i > 0 && j > 0){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(alignMoves[i][j] == 'd'){
 				qAlign = query[i-1] + qAlign;
@@ -450,7 +450,7 @@ int Perseus::getAlignments(int curSequenceIndex, vector<seqData> sequences, vect
 		
 		for(int i=0;i<numSeqs;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(i != curSequenceIndex && restricted[i] != 1 && sequences[i].frequency >= 2 * curFrequency){
 				string refSequence = sequences[i].sequence;
@@ -510,7 +510,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 
 		for(int l=0;l<seqLength;l++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int i=0;i<numRefSeqs;i++){
 				
@@ -528,7 +528,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 		
 		for(int l=0;l<seqLength;l++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			for(int i=0;i<numRefSeqs;i++){
 				
@@ -550,7 +550,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 		
 		for(int l=0;l<seqLength-1;l++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			int chimera = singleLeft[l] + singleRight[seqLength - l - 2];
 			if(chimera < bestChimeraMismatches){
@@ -582,7 +582,7 @@ string Perseus::stitchBimera(vector<pwAlign>& alignments, int leftParent, int ri
 		
 		for(int i=0;i<=breakLeft;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(left[i] != '-' && left[i] != '.'){
 				chimera += left[i];
@@ -592,7 +592,7 @@ string Perseus::stitchBimera(vector<pwAlign>& alignments, int leftParent, int ri
 
 		for(int i=breakRight;i<right.length();i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(right[i] != '-' && right[i] != '.'){
 				chimera += right[i];
@@ -635,7 +635,7 @@ int Perseus::getTrimera(vector<seqData>& sequences,
 		vector<vector<int> > minDeltaSeq(alignLength);
 		
 		for(int i=0;i<alignLength;i++){
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			minDelta[i].assign(alignLength, PERSEUSMAXINT);
 			minDeltaSeq[i].assign(alignLength, -1);
 		}
@@ -644,7 +644,7 @@ int Perseus::getTrimera(vector<seqData>& sequences,
 			for(int y=x;y<alignLength-1;y++){
 				for(int i=0;i<numRefSeqs;i++){
 					
-					if (m->control_pressed) { return 0; }
+					if (m->getControl_pressed()) { return 0; }
 					
 					if(restricted[i] == 0){
 						int delta = leftDiffs[i][y] - leftDiffs[i][x];
@@ -688,21 +688,21 @@ string Perseus::stitchTrimera(vector<pwAlign> alignments, int leftParent, int mi
 		
 		string chimeraRefSeq;
 		for(int i=0;i<=p1SplitPoint;i++){
-			if (m->control_pressed) { return chimeraRefSeq; }
+			if (m->getControl_pressed()) { return chimeraRefSeq; }
 			if(alignments[leftParent].reference[i] != '-' && alignments[leftParent].reference[i] != '.'){
 				chimeraRefSeq += alignments[leftParent].reference[i];
 			}
 		}
 		
 		for(int i=p1SplitPoint+1;i<=p2SplitPoint;i++){
-			if (m->control_pressed) { return chimeraRefSeq; }
+			if (m->getControl_pressed()) { return chimeraRefSeq; }
 			if(alignments[middleParent].reference[i] != '-' && alignments[middleParent].reference[i] != '.'){
 				chimeraRefSeq += alignments[middleParent].reference[i];
 			}
 		}
 		
 		for(int i=p3SplitPoint;i<alignments[rightParent].reference.length();i++){
-			if (m->control_pressed) { return chimeraRefSeq; }
+			if (m->getControl_pressed()) { return chimeraRefSeq; }
 			if(alignments[rightParent].reference[i] != '-' && alignments[rightParent].reference[i] != '.'){
 				chimeraRefSeq += alignments[rightParent].reference[i];
 			}
@@ -739,7 +739,7 @@ int Perseus::threeWayAlign(string query, string parent1, string parent2, string&
 		
 		while(lIndex<lLength || rIndex<rLength){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qL[lIndex] == qR[rIndex]){
 				qLNew += qL[lIndex];
@@ -794,7 +794,7 @@ int Perseus::threeWayAlign(string query, string parent1, string parent2, string&
 		
 		for(int i=0;i<qAlign.length();i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(qStart == 0){
 				if(qAlign[i] == '-')	{	qAlign[i] = '.';	}
@@ -845,7 +845,7 @@ double Perseus::calcLoonIndex(string query, string parent1, string parent2, int 
 		
 		for(int i=0;i<endPos;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(queryAln[i] != leftParentAln[i]){
 				diffToLeftMap[diffToLeftCount] = i;
@@ -876,7 +876,7 @@ double Perseus::calcLoonIndex(string query, string parent1, string parent2, int 
 			
 		while(indexL < diffToLeftCount || indexR < diffToRightCount){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(diffToLeftMap[indexL] <= diffToRightMap[indexR]){
 				diffs.push_back(diffs[indexS - 1] + 1);
@@ -898,7 +898,7 @@ double Perseus::calcLoonIndex(string query, string parent1, string parent2, int 
 		int minIndex = -1;
 		for(int i=0;i<indexS;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if(diffs[i] < minDiff){
 				minDiff = diffs[i];
@@ -919,7 +919,7 @@ double Perseus::calcLoonIndex(string query, string parent1, string parent2, int 
 		
 		for(int i=0;i<endPos;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			char bQuery = queryAln[i];
 			char bP1 = leftParentAln[i];
@@ -1033,7 +1033,7 @@ double Perseus::calcBestDistance(string query, string reference){
 		
 		for(int i=0;i<alignLength;i++){
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			if((query[i] != '.' || reference[i] != '.') && (query[i] != '-' && reference[i] != '-')){
 				if(query[i] != reference[i]){	mismatch++;	}

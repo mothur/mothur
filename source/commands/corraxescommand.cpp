@@ -62,7 +62,7 @@ string CorrAxesCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "corraxes") {  pattern = "[filename],[tag],corr.axes"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -233,7 +233,7 @@ int CorrAxesCommand::execute(){
 			getSharedFloat(input); 
 			delete input;
 			
-            if (m->control_pressed) {  delete lookupFloat; return 0; }
+            if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (relabundfile != "") { 
@@ -241,16 +241,16 @@ int CorrAxesCommand::execute(){
 			getSharedFloat(input); 
 			delete input;
 			
-			if (m->control_pressed) {  delete lookupFloat; return 0; }
+			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (metadatafile != "") { 
 			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
-			if (m->control_pressed) {  delete lookupFloat; return 0; }
+			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading metadata file."); m->mothurOutEndLine(); return 0; }
 		}else {	m->mothurOut("[ERROR]: no file given."); m->mothurOutEndLine(); return 0; }
 		
-		if (m->control_pressed) {  delete lookupFloat; return 0; }
+		if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 		
 		//this is for a sanity check to make sure the axes file and shared file match
         vector<string> lookupGroups = lookupFloat->getNamesGroups();
@@ -263,7 +263,7 @@ int CorrAxesCommand::execute(){
 		//read axes file
 		map<string, vector<float> > axes = readAxes();
 		
-		if (m->control_pressed) {  delete lookupFloat; return 0; }
+		if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 		
 		//sanity check, the read only adds groups that are in the shared or relabund file, but we want to make sure the axes file isn't missing anyone
 		if (axes.size() != lookupGroups.size()) {
@@ -272,10 +272,10 @@ int CorrAxesCommand::execute(){
 				it = axes.find(lookupGroups[i]);
 				if (it == axes.end()) { m->mothurOut(lookupGroups[i] + " is in your shared of relabund file but not in your axes file, please correct."); m->mothurOutEndLine(); }
 			}
-			m->control_pressed = true;
+			m->setControl_pressed(true);
 		}
 		
-		if (m->control_pressed) {  delete lookupFloat; return 0; }
+		if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 		
 		/*************************************************************************************/
 		// calc the r values																//
@@ -304,7 +304,7 @@ int CorrAxesCommand::execute(){
 		out.close();
 		delete lookupFloat;
 		
-		if (m->control_pressed) {  return 0; }
+		if (m->getControl_pressed()) {  return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -336,10 +336,11 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   
 	   for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
 	   
+       vector<string> currentLabels = m->getCurrentSharedBinLabels();
 	   //for each otu
 	   for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		   
-		   if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
+		   if (metadatafile == "") {  out << currentLabels[i];	}
 		   else {  out << metadataLabels[i];		}
 		   		   
 		   //find the averages this otu - Y
@@ -468,11 +469,12 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
             sf.push_back(sfTemp);
 		}
 		
-				
+		vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 			
-			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
+			if (metadatafile == "") {  out << currentLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
@@ -623,10 +625,12 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 			}
 		}
 		
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		
-			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
+			if (metadatafile == "") {  out << currentLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
@@ -736,7 +740,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(lookupFloat->getLabel()) == 1){
 				processedLabels.insert(lookupFloat->getLabel());
@@ -767,7 +771,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		}
 		
 		
-		if (m->control_pressed) { return 0;  }
+		if (m->getControl_pressed()) { return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -820,7 +824,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return axes; }
+			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
 			in >> group; m->gobble(in);
@@ -877,7 +881,7 @@ int CorrAxesCommand::getMetadata(){
         lookupFloat = new SharedRAbundFloatVectors();
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			string group = "";
 			in >> group; m->gobble(in);

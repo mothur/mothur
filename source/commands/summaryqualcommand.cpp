@@ -54,7 +54,7 @@ string SummaryQualCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],qual.summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -192,7 +192,7 @@ int SummaryQualCommand::execute(){
 		vector<int> averageQ;
 		vector< vector<int> > scores;
 				
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		if (namefile != "") { nameMap = m->readNames(namefile); }
 		else if (countfile != "") {
@@ -226,7 +226,7 @@ int SummaryQualCommand::execute(){
 		if(processors == 1){ numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[0]);  }
 		else{  numSeqs = createProcessesCreateSummary(position, averageQ, scores, qualfile);  }
 		
-		if (m->control_pressed) {  return 0; }
+		if (m->getControl_pressed()) {  return 0; }
 		
 		//print summary file
         map<string, string> variables; 
@@ -234,7 +234,7 @@ int SummaryQualCommand::execute(){
 		string summaryFile = getOutputFileName("summary",variables);
 		printQual(summaryFile, position, averageQ, scores);
 		
-		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
+		if (m->getControl_pressed()) {  m->mothurRemove(summaryFile); return 0; }
 		
 		//output results to screen
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -276,7 +276,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 		
 		while (!done) {
 			
-			if (m->control_pressed) { in.close(); return 1; }
+			if (m->getControl_pressed()) { in.close(); return 1; }
 			
 			QualityScores current(in); m->gobble(in);
 			
@@ -287,7 +287,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else { num = it->second; }
 				}
 				
@@ -306,7 +306,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 				for (int i = 0; i < thisScores.size(); i++) { 
 					position[i] += num; 
 					averageQ[i] += (thisScores[i] * num); //weighting for namesfile
-					if (thisScores[i] > 41) { m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (thisScores[i] > 41) { m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else { scores[i][thisScores[i]] += num; }  
 				}
 				
@@ -378,7 +378,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));
                 }
@@ -389,7 +389,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -512,7 +512,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		for(int i=0; i < pDataArray.size(); i++){
 			numSeqs += pDataArray[i]->numSeqs;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
             int tempNum = pDataArray[i]->position.size();
             if (position.size() < tempNum) { position.resize(tempNum, 0); }
@@ -552,7 +552,7 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 		
 		for (int i = 0; i < position.size(); i++) {
 			
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
 			
 			double average = averageQ[i] / (float) position[i];
 			out << i << '\t' << position[i] << '\t' << average;

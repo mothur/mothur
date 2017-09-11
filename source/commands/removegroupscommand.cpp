@@ -77,7 +77,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
         else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],[tag],pick,[extension]-[filename],pick,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -431,7 +431,7 @@ int RemoveGroupsCommand::execute(){
         }
 
 				
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
@@ -445,7 +445,7 @@ int RemoveGroupsCommand::execute(){
         if (phylipfile != "")		{		readPhylip();		}
         if (columnfile != "")		{		readColumn();       }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -536,7 +536,7 @@ int RemoveGroupsCommand::readFasta(){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -606,10 +606,11 @@ int RemoveGroupsCommand::readShared(){
 		delete lookup;
 		m->setGroups(groupsToKeep);
 		m->clearAllGroups();
-		m->saveNextLabel = "";
-		m->printedSharedHeaders = false;
-		m->currentSharedBinLabels.clear();
-		m->sharedBinLabelsInFile.clear();
+		m->setSaveNextLabel("");
+		m->setPrintedSharedHeaders(false);
+        vector<string> temp2;
+		m->setCurrentSharedBinLabels(temp2);
+		m->setSharedBinLabelsInFile(temp2);
 		
 		InputData input2(sharedfile, "sharedfile");
 		lookup = input2.getSharedRAbundVectors();
@@ -624,7 +625,7 @@ int RemoveGroupsCommand::readShared(){
 			m->openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 			
-            if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
+            if (m->getControl_pressed()) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
 			
             if (lookup->size() != 0) { wroteSomething = true; }
 			lookup->printHeaders(out);
@@ -695,7 +696,7 @@ int RemoveGroupsCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+				if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -778,7 +779,7 @@ int RemoveGroupsCommand::readName(){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -861,7 +862,7 @@ int RemoveGroupsCommand::readGroup(){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -933,10 +934,10 @@ int RemoveGroupsCommand::readCount(){
         string name; int oldTotal;
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); in >> oldTotal; m->gobble(in);
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
             
             if (names.count(name) == 0) {
                 //if group info, then read it
@@ -1041,7 +1042,7 @@ int RemoveGroupsCommand::readTax(){
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1128,7 +1129,7 @@ int RemoveGroupsCommand::readPhylip(){
                 row++;
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
@@ -1139,14 +1140,14 @@ int RemoveGroupsCommand::readPhylip(){
                 if (names.count(name) == 0) { rows.insert(row);  }
                 row++;
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
         }
         in.close();
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //read through file only printing rows and columns of seqs in names
         ifstream inPhylip;
@@ -1170,7 +1171,7 @@ int RemoveGroupsCommand::readPhylip(){
                 else{ out << name; keptCount++; }
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close();  return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -1190,7 +1191,7 @@ int RemoveGroupsCommand::readPhylip(){
                 else{ out << name; keptCount++; }
                 
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close(); return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -1258,7 +1259,7 @@ int RemoveGroupsCommand::readColumn(){
         bool wrote = false;
         while (!in.eof()) {
             
-            if (m->control_pressed) { out.close(); in.close(); return 0; }
+            if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
             in >> firstName >> secondName >> distance; m->gobble(in);
             
@@ -1299,7 +1300,7 @@ int RemoveGroupsCommand::fillNames(){
 		
 		for (int i = 0; i < seqs.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			string group = groupMap->getGroup(seqs[i]);
 			

@@ -65,7 +65,7 @@ string SortSeqsCommand::getOutputPattern(string type) {
         else if (type == "count")       {   pattern = "[filename],sorted,[extension]";    }
         else if (type == "flow")        {   pattern = "[filename],sorted,[extension]";    }
         else if (type == "qfile")      {   pattern = "[filename],sorted,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -291,7 +291,7 @@ int SortSeqsCommand::execute(){
         if (countfile != "")		{		readCount();	}
         if (taxfile != "")			{		readTax();		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -376,7 +376,7 @@ int SortSeqsCommand::readFasta(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     Sequence currSeq(in);
                     name = currSeq.getName();
@@ -409,14 +409,14 @@ int SortSeqsCommand::readFasta(){
                     ifstream in2;
                     m->openInputFile(fastafile, in2);
                     
-                    if (m->control_pressed) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->control_pressed) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
@@ -434,7 +434,7 @@ int SortSeqsCommand::readFasta(){
                                     seqs[thisSeqsPlace] = currSeq; 
                                     found++;
                                 }
-                            }else { m->mothurOut("[ERROR]: in logic of readFasta function.\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: in logic of readFasta function.\n"); m->setControl_pressed(true); }
                         }
                         m->gobble(in2);
                     }
@@ -462,7 +462,7 @@ int SortSeqsCommand::readFasta(){
                 for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     Sequence currSeq(in);
                     name = currSeq.getName();
@@ -496,7 +496,7 @@ int SortSeqsCommand::readFasta(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 Sequence currSeq(in);
                 name = currSeq.getName();
@@ -555,7 +555,7 @@ int SortSeqsCommand::readFlow(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     in >> name;	
                     string rest = m->getline(in);
@@ -587,14 +587,14 @@ int SortSeqsCommand::readFlow(){
                     ifstream in2;
                     m->openInputFile(flowfile, in2); in2 >> numFlows; m->gobble(in2);
                     
-                    if (m->control_pressed) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->control_pressed) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
@@ -612,7 +612,7 @@ int SortSeqsCommand::readFlow(){
                                     seqs[thisSeqsPlace] = (name +'\t' + rest); 
                                     found++;
                                 }
-                            }else { m->mothurOut("[ERROR]: in logic of readFlow function.\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: in logic of readFlow function.\n"); m->setControl_pressed(true); }
                         }
                         m->gobble(in2);
                     }
@@ -641,7 +641,7 @@ int SortSeqsCommand::readFlow(){
                 vector<string> seqs; seqs.resize(names.size(), "");
                 
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     in >> name;	
                     string rest = m->getline(in);
@@ -676,7 +676,7 @@ int SortSeqsCommand::readFlow(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> name;	
                 string rest = m->getline(in);
@@ -733,7 +733,7 @@ int SortSeqsCommand::readQual(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     QualityScores currQual;
                     currQual = QualityScores(in); 
@@ -768,14 +768,14 @@ int SortSeqsCommand::readQual(){
                     ifstream in2;
                     m->openInputFile(qualfile, in2);
                     
-                    if (m->control_pressed) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->control_pressed) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
@@ -794,7 +794,7 @@ int SortSeqsCommand::readQual(){
                                     seqs[thisSeqsPlace] = currQual; 
                                     found++;
                                 }
-                            }else { m->mothurOut("[ERROR]: in logic of readQual function.\n"); m->control_pressed = true; }
+                            }else { m->mothurOut("[ERROR]: in logic of readQual function.\n"); m->setControl_pressed(true); }
                         }
                         m->gobble(in2);
                     }
@@ -825,7 +825,7 @@ int SortSeqsCommand::readQual(){
                 for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     QualityScores currQual;
                     currQual = QualityScores(in); 
@@ -858,7 +858,7 @@ int SortSeqsCommand::readQual(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 QualityScores currQual;
                 currQual = QualityScores(in);  
@@ -910,7 +910,7 @@ int SortSeqsCommand::readName(){
                 vector<string> seqs; seqs.resize(names.size(), "");
                 
                 while(!in.eof()){
-                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                     
                     in >> firstCol;		m->gobble(in);		
                     in >> secondCol;    m->gobble(in);
@@ -940,7 +940,7 @@ int SortSeqsCommand::readName(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> firstCol;		m->gobble(in);		
                 in >> secondCol;    m->gobble(in);
@@ -991,7 +991,7 @@ int SortSeqsCommand::readCount(){
             string headers = m->getline(in); m->gobble(in);
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> firstCol;		m->gobble(in);		
                 rest = m->getline(in);    m->gobble(in);
@@ -1025,7 +1025,7 @@ int SortSeqsCommand::readCount(){
             out << headers << endl;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> firstCol;		m->gobble(in);		
                 rest = m->getline(in);  m->gobble(in);
@@ -1074,7 +1074,7 @@ int SortSeqsCommand::readGroup(){
             vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> name;		m->gobble(in);		
                 in >> group;    m->gobble(in);
@@ -1104,7 +1104,7 @@ int SortSeqsCommand::readGroup(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> name;		m->gobble(in);		
                 in >> group;    m->gobble(in);
@@ -1154,7 +1154,7 @@ int SortSeqsCommand::readTax(){
             vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> name; m->gobble(in);
                 tax = m->getline(in); m->gobble(in);
@@ -1184,7 +1184,7 @@ int SortSeqsCommand::readTax(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
                 
                 in >> name; m->gobble(in);
                 tax = m->getline(in); m->gobble(in);

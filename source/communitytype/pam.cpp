@@ -21,7 +21,7 @@ Pam::Pam(vector<vector<int> > c, vector<vector<double> > d, int p) : CommunityTy
         largestDist = 0;
         for (int i = 0; i < dists.size(); i++) {
             for (int j = i; j < dists.size(); j++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 if (dists[i][j] > largestDist) { largestDist = dists[i][j]; } 
             }
         }
@@ -40,7 +40,7 @@ Pam::Pam(vector<vector<int> > c, vector<vector<double> > d, int p) : CommunityTy
 int Pam::buildPhase() {
     try {
         
-        if (m->debug) { m->mothurOut("[DEBUG]: building medoids\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: building medoids\n"); }
         
         vector<double> gains; gains.resize(numSamples);
         
@@ -60,7 +60,7 @@ int Pam::buildPhase() {
             double clusterGain = 0.0;
             
             for (int i = 0; i < numSamples; i++) {  //does this need to be square?? can we do lt?
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
         
                 if (medoids.count(i) == 0) { //is this sample is NOT a medoid?
                     gains[i] = 0.0;
@@ -69,7 +69,7 @@ int Pam::buildPhase() {
                         totalGain = Dp[j][0] - dists[i][j];
                         if (totalGain > 0.0) { gains[i] += totalGain; }
                     }
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) +  " totalGain = " + toString(totalGain) + "\n"); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) +  " totalGain = " + toString(totalGain) + "\n"); }
                    
                     if (clusterGain <= gains[i]) {
                         clusterGain = gains[i];
@@ -81,14 +81,14 @@ int Pam::buildPhase() {
             //save medoid value
             medoids.insert(medoid);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: new medoid " + toString(medoid) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: new medoid " + toString(medoid) + "\n"); }
             
             //update dp values
             for (int i = 0; i < numSamples; i++) {
                 if (Dp[i][0] > dists[i][medoid]) { Dp[i][0] = dists[i][medoid]; }
             }
         }
-        if (m->debug) { m->mothurOut("[DEBUG]: done building medoids\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: done building medoids\n"); }
         return 0;
     }
 	catch(exception& e) {
@@ -100,7 +100,7 @@ int Pam::buildPhase() {
 //goal to swap medoids with non-medoids to see if we can reduce the overall cost
 int Pam::swapPhase() {
     try {
-        if (m->debug) { m->mothurOut("[DEBUG]: swapping  medoids\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: swapping  medoids\n"); }
         //calculate cost of initial choice - average distance of samples to their closest medoid
         double sky = 0.0;
         double dzsky = 1.0;
@@ -109,21 +109,21 @@ int Pam::swapPhase() {
         bool done = false;
         int hbest, nbest; hbest = -1; nbest = -1;
         while (!done) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             updateDp();
             
             dzsky = 1;
             
             for (int h = 0; h < numSamples; h++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 if (medoids.count(h) == 0) { //this is NOT a medoid
                     for (int i = 0; i < numSamples; i++) {
                         if (medoids.count(i) != 0) { //this is a medoid
                         
                             double dz = 0.0; //Tih sum of distances between objects and closest medoid caused by swapping i and h. Basically the change in cost. If this < 0 its a "good" swap. When all Tih are > 0, then we stop the algo, because we have the optimal medoids.
                             for (int j = 0; j < numSamples; j++) {
-                                if (m->control_pressed) { break; }
+                                if (m->getControl_pressed()) { break; }
                                 if (dists[i][j] == Dp[j][0]) {
                                     double smallValue; smallValue = 0.0;
                                     if (Dp[j][1] > dists[h][j]) {   smallValue = dists[h][j];    }
@@ -146,7 +146,7 @@ int Pam::swapPhase() {
             if (dzsky < -16 *DBL_EPSILON * fabs(sky)) {
                 medoids.insert(hbest);
                 medoids.erase(nbest);
-                if (m->debug) { m->mothurOut("[DEBUG]: swapping " + toString(hbest) + " " + toString(nbest) + "\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: swapping " + toString(hbest) + " " + toString(nbest) + "\n"); }
                 sky += dzsky;
             }else { done = true; } //stop algo.
         }
@@ -177,7 +177,7 @@ int Pam::swapPhase() {
         }
         laplace /= (double) numSamples;
         
-        if (m->debug) {
+        if (m->getDebug()) {
             for(int i=0;i<numPartitions;i++){
                 m->mothurOut("[DEBUG]: partition 1: "); 
                 for (int j = 0; j < numSamples; j++) {
@@ -193,7 +193,7 @@ int Pam::swapPhase() {
             m->mothurOut("[DEBUG]: laplace : " + toString(laplace));  m->mothurOut("\n");
         }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: done swapping  medoids\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: done swapping  medoids\n"); }
         return 0;
     }
     catch(exception& e) {
@@ -206,7 +206,7 @@ int Pam::swapPhase() {
 int Pam::updateDp() {
     try {
         for (int j = 0; j < numSamples; j++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             //initialize dp and ep
             Dp[j][0] = largestDist; Dp[j][1] = largestDist;
@@ -247,7 +247,7 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         map<int, int> clusterMap; //map sample to partition
         for (int i = 0; i < numPartitions; i++) {
             for (int j = 0; j < numSamples; j++) {
-                if (m->control_pressed) { return 0.0; }
+                if (m->getControl_pressed()) { return 0.0; }
                 if (zMatrix[i][j] != 0) { clusterMap[j] = i; }
             }
         }
@@ -256,7 +256,7 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         vector<vector<double> > relativeAbundance(numSamples); //[numSamples][numOTUs]
         //get relative abundance
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             int groupTotal = 0;
             
             relativeAbundance[i].assign(numOTUs, 0.0);
@@ -284,11 +284,11 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         
         double allMeanDist = rMedoid(relativeAbundance, dists);
         
-        if (m->debug) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
         
         for (int i = 0; i < relativeAbundance.size(); i++) {//numSamples
             for (int j = 0; j < relativeAbundance[i].size(); j++) { //numOtus
-                if (m->control_pressed) {  return 0; }
+                if (m->getControl_pressed()) {  return 0; }
                 //x <- (x - centers[cl, ])^2
                 relativeAbundance[i][j] = ((relativeAbundance[i][j] - centers[clusterMap[i]][j])*(relativeAbundance[i][j] - centers[clusterMap[i]][j]));
             }
@@ -297,7 +297,7 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         double wgss = 0.0;
         for (int j = 0; j < numOTUs; j++) {
             for(int i=0;i<numSamples;i++){
-                if (m->control_pressed) { return 0.0; }
+                if (m->getControl_pressed()) { return 0.0; }
                 wgss += relativeAbundance[i][j];
             }
         }

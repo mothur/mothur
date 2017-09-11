@@ -67,7 +67,7 @@ string ChimeraCcodeCommand::getOutputPattern(string type) {
         if (type == "chimera") {  pattern = "[filename],[tag],ccode.chimeras-[filename],ccode.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],[tag],ccode.accnos-[filename],ccode.accnos"; } 
         else if (type == "mapinfo") {  pattern =  "[filename],mapinfo"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -287,7 +287,7 @@ int ChimeraCcodeCommand::execute(){
             outputFileName = getOutputFileName("chimera", variables);
             accnosFileName = getOutputFileName("accnos", variables);
 						
-			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
+			if (m->getControl_pressed()) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
 			
 			ofstream outHeader;
 			string tempHeader = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + "ccode.chimeras.tempHeader";
@@ -311,7 +311,7 @@ int ChimeraCcodeCommand::execute(){
 										
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					if (m->control_pressed) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
+					if (m->getControl_pressed()) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -333,7 +333,7 @@ int ChimeraCcodeCommand::execute(){
 						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
 					}
 					
-					if (m->control_pressed) { 
+					if (m->getControl_pressed()) { 
 						m->mothurRemove(outputFileName); 
 						m->mothurRemove(accnosFileName);
 						for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();
@@ -348,7 +348,7 @@ int ChimeraCcodeCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				if (m->control_pressed) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
+				if (m->getControl_pressed()) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 				
 			#endif
 	
@@ -409,7 +409,7 @@ int ChimeraCcodeCommand::driver(linePair* filePos, string outputFName, string fi
 	
 		while (!done) {
 		
-			if (m->control_pressed) {	return 1;	}
+			if (m->getControl_pressed()) {	return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
@@ -421,7 +421,7 @@ int ChimeraCcodeCommand::driver(linePair* filePos, string outputFName, string fi
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 					
-					if (m->control_pressed) {	delete candidateSeq; return 1;	}
+					if (m->getControl_pressed()) {	delete candidateSeq; return 1;	}
 		
 					//print results
 					chimera->print(out, out2);
@@ -489,7 +489,7 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -497,7 +497,8 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             vector<unsigned long long> positions;
             positions = m->divideFile(filename, processors);

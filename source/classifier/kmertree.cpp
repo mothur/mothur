@@ -28,7 +28,7 @@ KmerTree::KmerTree(string referenceFileName, string taxonomyFileName, int k, int
         bool error = false;
         while(!referenceFile.eof()){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             Sequence seq(referenceFile);  m->gobble(referenceFile);
             
@@ -46,7 +46,7 @@ KmerTree::KmerTree(string referenceFileName, string taxonomyFileName, int k, int
         }
         referenceFile.close();
         
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
         
         numTaxa = (int)tree.size();
         numLevels = 0;
@@ -95,7 +95,7 @@ vector<int> KmerTree::ripKmerProfile(string sequence){
         
         for(int i=0;i<nKmers;i++){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             int kmer = 0;
             for(int j=0;j<kmerSize;j++){
@@ -130,10 +130,10 @@ int KmerTree::addTaxonomyToTree(string seqName, string taxonomy, vector<int>& se
         
         for(int i=0;i<taxonomy.length();i++){			//	step through taxonomy string...
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             if(taxonomy[i] == ';'){						//	looking for semicolons...
                 
-                if (taxonName == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); m->control_pressed = true; }
+                if (taxonName == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); m->setControl_pressed(true); }
                 
                 int newIndex = tree[treePosition]->getChildIndex(taxonName);//	look to see if your current node already
                 //	   has a child with the new taxonName
@@ -178,12 +178,12 @@ int KmerTree::aggregateThetas(){
         vector<vector<int> > levelMatrix(numLevels+1);
         
         for(int i=0;i<tree.size();i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             levelMatrix[tree[i]->getLevel()].push_back(i);
         }
         
         for(int i=numLevels-1;i>0;i--) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             for(int j=0;j<levelMatrix[i].size();j++){
                 
@@ -211,7 +211,7 @@ int KmerTree::getMinRiskIndexKmer(vector<int>& sequence, vector<int>& taxaIndice
         vector<double> risk(numProbs, 0);
         
         for(int i=1;i<numProbs;i++){ //use if you want the outlier group
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             G[i] = tree[taxaIndices[i]]->getSimToConsensus(sequence);
         }
         
@@ -219,7 +219,7 @@ int KmerTree::getMinRiskIndexKmer(vector<int>& sequence, vector<int>& taxaIndice
         int minRiskIndex = 0;
         
         for(int i=0;i<numProbs;i++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             for(int j=0;j<numProbs;j++){
                 if(i != j){
                     risk[i] += probabilities[j] * G[j];
@@ -247,7 +247,7 @@ int KmerTree::sanityCheck(vector<vector<int> >& indices, vector<int>& maxIndices
         int finalLevel = (int)indices.size()-1;
         
         for(int position=1;position<indices.size();position++){
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             int predictedParent = tree[indices[position][maxIndices[position]]]->getParent();
             int actualParent = indices[position-1][maxIndices[position-1]];
             
@@ -277,13 +277,13 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
         vector<vector<double> > pXgivenKj_D_j(numLevels);
         vector<vector<int> > indices(numLevels);
         for(int i=0;i<numLevels;i++){
-            if (m->control_pressed) { return taxonProbabilityString; }
+            if (m->getControl_pressed()) { return taxonProbabilityString; }
             pXgivenKj_D_j[i].push_back(logPOutlier);
             indices[i].push_back(-1);
         }
         
         for(int i=0;i<numTaxa;i++){
-            if (m->control_pressed) { return taxonProbabilityString; }
+            if (m->getControl_pressed()) { return taxonProbabilityString; }
             pXgivenKj_D_j[tree[i]->getLevel()].push_back(tree[i]->getPxGivenkj_D_j(queryProfile));
             indices[tree[i]->getLevel()].push_back(i);
         }
@@ -295,7 +295,7 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
         
         //let's find the best level and taxa within that level
         for(int i=0;i<numLevels;i++){ //go across all j's - from the root to genus
-            if (m->control_pressed) { return taxonProbabilityString; }
+            if (m->getControl_pressed()) { return taxonProbabilityString; }
             
             int numTaxaInLevel = (int)indices[i].size();
             
@@ -347,7 +347,7 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
         int savedspot = 1;
         taxonProbabilityString = "";
         for(int i=1;i<=saneDepth;i++){
-            if (m->control_pressed) { return taxonProbabilityString; }
+            if (m->getControl_pressed()) { return taxonProbabilityString; }
             int confidenceScore = (int) (bestPosterior[i] * 100);
             if (confidenceScore >= confidenceThreshold) {
                 if(indices[i][maxIndex[i]] != -1){
@@ -368,7 +368,7 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
         
         
         for(int i=savedspot+1;i<numLevels;i++){
-            if (m->control_pressed) { return taxonProbabilityString; }
+            if (m->getControl_pressed()) { return taxonProbabilityString; }
             taxonProbabilityString += "unclassified(0);";
             simpleTax += "unclassified;";
         }

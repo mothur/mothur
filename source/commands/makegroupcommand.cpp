@@ -54,7 +54,7 @@ string MakeGroupCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "group") {  pattern = "[filename],groups"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -224,7 +224,7 @@ int MakeGroupCommand::execute(){
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 		
-			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(filename); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(filename); return 0; }
 			
 			ifstream in;
 			m->openInputFile(fastaFileNames[i], in);
@@ -233,7 +233,7 @@ int MakeGroupCommand::execute(){
 				
 				Sequence seq(in, "no align"); m->gobble(in);
 				
-				if (m->control_pressed) { outputTypes.clear();  in.close(); out.close(); m->mothurRemove(filename); return 0; }
+				if (m->getControl_pressed()) { outputTypes.clear();  in.close(); out.close(); m->mothurRemove(filename); return 0; }
 				
 				if (seq.getName() != "") {	out << seq.getName() << '\t' << groupsNames[i] << endl;		}
 			}

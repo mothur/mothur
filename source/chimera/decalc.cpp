@@ -401,7 +401,7 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 				
 				Sequence* subject = new Sequence(seqs[j]->getName(), seqs[j]->getAligned());
 				
-				if (m->control_pressed) { delete query; delete subject; return quan; }
+				if (m->getControl_pressed()) { delete query; delete subject; return quan; }
 				
 				map<int, int> trim;
 				map<int, int>::iterator it;
@@ -794,7 +794,7 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 		float maxDist = 1.0 - (minSim / 100.0);
 
 		for (int i = 0; i < numWanted+1; i++) {
-			if (m->control_pressed) { return seqsMatches; }
+			if (m->getControl_pressed()) { return seqsMatches; }
 			
 			//add left if you havent already
 			it = seen.find(thisTemplate[distsLeft[i].index]->getName());

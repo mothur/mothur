@@ -49,7 +49,7 @@ string DeuniqueTreeCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "tree") {  pattern = "[filename],deunique.tre"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }

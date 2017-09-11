@@ -96,7 +96,7 @@ string ClassifySeqsCommand::getOutputPattern(string type) {
         else if (type == "taxsummary") {  pattern = "[filename],[tag],[tag2],tax.summary"; } 
         else if (type == "accnos") {  pattern =  "[filename],[tag],[tag2],flip.accnos"; }
         else if (type == "matchdist") {  pattern =  "[filename],[tag],[tag2],match.dist"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -608,7 +608,7 @@ int ClassifySeqsCommand::execute(){
 			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, m->getRandomNumber(), flip, writeShortcuts);	
 		}
 		
-		if (m->control_pressed) { delete classify; return 0; }
+		if (m->getControl_pressed()) { delete classify; return 0; }
 				
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 		
@@ -719,7 +719,7 @@ int ClassifySeqsCommand::execute(){
             }
             
             while (!inTax.eof()) {
-                if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+                if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                 
                 inTax >> name; m->gobble(inTax);
                 taxon = m->getline(inTax); m->gobble(inTax);
@@ -750,7 +750,7 @@ int ClassifySeqsCommand::execute(){
             m->mothurRemove(newTaxonomyFile);
             m->renameFile(unclass, newTaxonomyFile);
             
-            if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
             
             //print summary file
             ofstream outTaxTree;
@@ -833,7 +833,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setMothurCalling(false);
                 recalc = true;
                 break;
             }
@@ -841,7 +841,8 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
             vector<unsigned long long> positions = m->divideFile(filename, processors);
             for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
@@ -928,7 +929,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -996,7 +997,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		int count = 0;
 		
 		while (!done) {
-			if (m->control_pressed) { 
+			if (m->getControl_pressed()) { 
 				inFASTA.close();
 				outTax.close();
 				outTaxSimple.close();
@@ -1008,7 +1009,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
-				if (m->control_pressed) { delete candidateSeq; return 0; }
+				if (m->getControl_pressed()) { delete candidateSeq; return 0; }
 				
 				if (taxonomy == "unknown;") { m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); m->mothurOutEndLine(); }
 				

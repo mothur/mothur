@@ -283,7 +283,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             }
             
 			//sanity check
-			if (error) { pDataArray->m->control_pressed = true; }
+			if (error) { pDataArray->m->setControl_pressed(true); }
 			
 			thisSeqs.clear();
 			numSeqs = alignSeqs.size();
@@ -292,7 +292,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			
 			if (pDataArray->m->control_pressed) {   delete parser; delete alignment; return 0; }
 			
-            if (pDataArray->method == "aligned") { if (pDataArray->diffs > length) { pDataArray->m->mothurOut("Error: diffs is greater than your sequence length."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; delete alignment; return 0;  } }
+            if (pDataArray->method == "aligned") { if (pDataArray->diffs > length) { pDataArray->m->mothurOut("Error: diffs is greater than your sequence length."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); delete alignment; return 0;  } }
 			
 			////////////////////////////////////////////////////
 			//int count = process(); - same function below

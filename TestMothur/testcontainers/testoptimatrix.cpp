@@ -21,7 +21,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     string inputString = "fasta=" + filenames[0] + ", output=lt";
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
     m->mothurOut("Running command: dist.seqs(" + inputString + ")"); m->mothurOutEndLine();
-    m->mothurCalling = true;
+    m->setMothurCalling(true);
     
     Command* dist2Command = new DistanceCommand(inputString);
     dist2Command->execute();
@@ -29,7 +29,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     map<string, vector<string> > outputFilenames = dist2Command->getOutputFiles();
     
     delete dist2Command;
-    m->mothurCalling = false;
+    m->setMothurCalling(false);
     
     phylipFile = outputFilenames["phylip"][0];
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();

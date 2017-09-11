@@ -91,7 +91,7 @@ bool OptiCluster::update(double& listMetric) {
         //for each sequence (singletons removed on read)
         for (int i = 0; i < randomizeSeqs.size(); i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
             
@@ -161,7 +161,7 @@ bool OptiCluster::update(double& listMetric) {
         
         listMetric = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
         
-        if (m->debug) { ListVector* list = getList(); list->print(cout); delete list; }
+        if (m->getDebug()) { ListVector* list = getList(); list->print(cout); delete list; }
         
         return 0;
         
@@ -281,7 +281,7 @@ int OptiCluster::findInsert() {
         //initially there are bins for each sequence (excluding singletons removed on read)
         for (int i = 0; i < bins.size(); i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             if (bins[i].size() == 0) { return i;  } //this bin is empty
         }

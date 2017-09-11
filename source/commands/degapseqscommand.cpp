@@ -53,7 +53,7 @@ string DegapSeqsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         if (type == "fasta") {  pattern = "[filename],ng.fasta"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -221,7 +221,7 @@ int DegapSeqsCommand::execute(){
 			
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
             
-			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 		}
 		
 		//set fasta file as new current fastafile
@@ -285,7 +285,7 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 recalc = true;
                 break;
             }
@@ -293,7 +293,8 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             lines.clear();
             positions.clear();
             positions = m->divideFile(filename, processors);
@@ -398,7 +399,7 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         //Close all thread handles and free memory allocations.
         for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
             numSeqs += pDataArray[i]->count;
             CloseHandle(hThreadArray[i]);
@@ -435,7 +436,7 @@ int DegapSeqsCommand::driver(linePair filePos, string filename, string outputFil
         m->openOutputFile(outputFileName, outFASTA);
         
         while(!inFASTA.eof()){
-            if (m->control_pressed) {  break; }
+            if (m->getControl_pressed()) {  break; }
             
             Sequence currSeq(inFASTA);  m->gobble(inFASTA);
             if (currSeq.getName() != "") {

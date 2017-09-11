@@ -63,7 +63,7 @@ string SummaryTaxCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],tax.summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -240,7 +240,7 @@ int SummaryTaxCommand::execute(){
         if (countfile != "") { taxaSum = new PhyloSummary(ct, relabund, printlevel);
         }else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel);  }
         
-		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
+		if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		int numSeqs = 0;
         map<string, vector<string> > nameMap;
@@ -253,7 +253,7 @@ int SummaryTaxCommand::execute(){
         string name, taxon;
         while(!in.eof()){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> name; m->gobble(in);
             taxon = m->getline(in); m->gobble(in);
@@ -285,7 +285,7 @@ int SummaryTaxCommand::execute(){
         in.close();
         
 		
-		if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
+		if (m->getControl_pressed()) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		//print summary file
 		ofstream outTaxTree;
@@ -299,7 +299,7 @@ int SummaryTaxCommand::execute(){
 		delete taxaSum;
         if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { numSeqs = ct->getNumSeqs();  delete ct; }
 		
-		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
+		if (m->getControl_pressed()) {  m->mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();

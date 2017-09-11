@@ -73,12 +73,6 @@ class MothurOut {
 		int getNumAllGroups() { return namesOfGroups.size(); }
 	
 		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
-		vector<string> Treenames;
-		vector<string> sharedBinLabelsInFile;
-		vector<string> currentSharedBinLabels;
-        vector<string> listBinLabelsInFile;
-		string saveNextLabel, sharedHeaderMode, groupMode, testDirectory;
-		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
 		//file operations
@@ -253,9 +247,52 @@ class MothurOut {
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&, vector< vector<seqDist> >&);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&);
-		int control_pressed;
-		bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
-		
+    
+        int getControl_pressed()                        { return control_pressed;           }
+        void setControl_pressed(int t)                  { control_pressed = t;              }
+        vector<string> getTreenames()                   { return Treenames;                 }
+        void setTreenames(vector<string> t)             { Treenames = t;                    }
+        vector<string> getSharedBinLabelsInFile()       { return sharedBinLabelsInFile;     }
+        void setSharedBinLabelsInFile(vector<string> t) { sharedBinLabelsInFile = t;        }
+        vector<string> getCurrentSharedBinLabels()      { return currentSharedBinLabels;    }
+        void setCurrentSharedBinLabels(vector<string> t){ currentSharedBinLabels = t;       }
+        void eraseCurrentSharedBinLabel(int bin)        { currentSharedBinLabels.erase(currentSharedBinLabels.begin()+bin);       }
+        vector<string> getListBinLabelsInFile()         { return listBinLabelsInFile;       }
+        void setListBinLabelsInFile(vector<string> t)   { listBinLabelsInFile = t;          }
+        string getSaveNextLabel()                       { return saveNextLabel;             }
+        void setSaveNextLabel(string t)                 { saveNextLabel = t;                }
+        string getSharedHeaderMode()                    { return sharedHeaderMode;          }
+        void setSharedHeaderMode(string t)              { sharedHeaderMode = t;             }
+        string getGroupMode()                           { return groupMode;                 }
+        void setGroupMode(string t)                     { groupMode = t;                    }
+        string getTestDirectory()                       { return testDirectory;             }
+        void setTestDirectory(string t)                 { testDirectory = t;                }
+        bool getPrintedSharedHeaders()                  { return printedSharedHeaders;      }
+        void setPrintedSharedHeaders(bool t)            { printedSharedHeaders = t;         }
+        bool getPrintedListHeaders()                    { return printedListHeaders;        }
+        void setPrintedListHeaders(bool t)              { printedListHeaders = t;           }
+        bool getCommandInputsConvertError()             { return commandInputsConvertError; }
+        void setCommandInputsConvertError(bool t)       { commandInputsConvertError = t;    }
+        bool getChangedSeqNames()                       { return changedSeqNames;           }
+        void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
+        bool getModifyNames()                           { return modifyNames;               }
+        void setModifyNames(bool t)                     { modifyNames = t;                  }
+        bool getExecuting()                             { return executing;                 }
+        void setExecuting(bool t)                       { executing = t;                    }
+        bool getRunParse()                              { return runParse;                  }
+        void setRunParse(bool t)                        { runParse = t;                     }
+        bool getJumble()                                { return jumble;                    }
+        void setJumble(bool t)                          { jumble = t;                       }
+        bool getGui()                                   { return gui;                       }
+        void setGui(bool t)                             { gui = t;                          }
+        bool getMothurCalling()                         { return mothurCalling;             }
+        void setMothurCalling(bool t)                   { mothurCalling = t;                }
+        bool getDebug()                                 { return debug;                     }
+        void setDebug(bool t)                           { debug = t;                        }
+        bool getQuietMode()                             { return quietMode;                 }
+        void setQuietMode(bool t)                       { quietMode = t;                    }
+
+    
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes/hasCurrentFiles. add a get and set function.
 		string getPhylipFile()		{ return phylipfile;		}
 		string getColumnFile()		{ return columnfile;		}
@@ -384,6 +421,15 @@ class MothurOut {
 		vector<string> namesOfGroups;
 		ofstream out;
         int numErrors, numWarnings;
+        mutex threadModerator;
+        vector<string> Treenames;
+        vector<string> sharedBinLabelsInFile;
+        vector<string> currentSharedBinLabels;
+        vector<string> listBinLabelsInFile;
+        string saveNextLabel, sharedHeaderMode, groupMode, testDirectory;
+        bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
+        bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
+        int control_pressed;
 		
 };
 /***********************************************/

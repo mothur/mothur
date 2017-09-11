@@ -82,7 +82,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 			
 			//run filter on template copying templateSeqs into filteredTemplateSeqs
 			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->control_pressed) {  break; }
+				if (m->getControl_pressed()) {  break; }
 				
 				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
 				runFilter(newSeq);  
@@ -131,7 +131,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 			
 			//run filter on template copying templateSeqs into filteredTemplateSeqs
 			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->control_pressed) {  break; }
+				if (m->getControl_pressed()) {  break; }
 				
 				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
 				runFilter(newSeq);  
@@ -158,11 +158,11 @@ int ChimeraSlayer::doPrep() {
 		
 			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 		
-			if (m->control_pressed) {  return 0; } 
+			if (m->getControl_pressed()) {  return 0; } 
 		
 			//run filter on template copying templateSeqs into filteredTemplateSeqs
 			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->control_pressed) {  return 0; }
+				if (m->getControl_pressed()) {  return 0; }
 				
 				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
 				runFilter(newSeq);  
@@ -195,7 +195,7 @@ int ChimeraSlayer::doPrep() {
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
 					
-					if (m->control_pressed) { return 0; } 
+					if (m->getControl_pressed()) { return 0; } 
 					
 					string leftFrag = templateSeqs[i]->getUnaligned();
 					leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
@@ -225,7 +225,7 @@ int ChimeraSlayer::doPrep() {
 			if(needToGenerateRight){	
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
-					if (m->control_pressed) { return 0; } 
+					if (m->getControl_pressed()) { return 0; } 
 					
 					string rightFrag = templateSeqs[i]->getUnaligned();
 					rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
@@ -247,7 +247,7 @@ int ChimeraSlayer::doPrep() {
 			//generate blastdb
 			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(fastafile)), -1.0, -1.0, 1, -3, blastlocation, threadID);
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 
 			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
 			databaseLeft->generateDB();
@@ -274,7 +274,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 		
 		for (int i = 0; i < templateSeqs.size(); i++) {
 			
-			if (m->control_pressed) { return userTemplate; } 
+			if (m->getControl_pressed()) { return userTemplate; } 
 			
 			//have I reached a sequence with the same abundance as myself?
 			if (!(priority[templateSeqs[i]->getName()] > myAbund)) { break; }
@@ -306,7 +306,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			
 			for (int i = 0; i < userTemplate.size(); i++) {
 				
-				if (m->control_pressed) { return userTemplate; } 
+				if (m->getControl_pressed()) { return userTemplate; } 
 				
 				string leftFrag = userTemplate[i]->getUnaligned();
 				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
@@ -318,7 +318,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			databaseLeft->setNumSeqs(userTemplate.size());
 				
 			for (int i = 0; i < userTemplate.size(); i++) {
-				if (m->control_pressed) { return userTemplate; }  
+				if (m->getControl_pressed()) { return userTemplate; }  
 					
 				string rightFrag = userTemplate[i]->getUnaligned();
 				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
@@ -334,9 +334,9 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			//generate blastdb
 			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3, blastlocation, threadID);
 			
-			if (m->control_pressed) { return userTemplate; }
+			if (m->getControl_pressed()) { return userTemplate; }
 
-			for (int i = 0; i < userTemplate.size(); i++) { if (m->control_pressed) { return userTemplate; }   databaseLeft->addSequence(*userTemplate[i]);	}
+			for (int i = 0; i < userTemplate.size(); i++) { if (m->getControl_pressed()) { return userTemplate; }   databaseLeft->addSequence(*userTemplate[i]);	}
 			databaseLeft->generateDB();
 			databaseLeft->setNumSeqs(userTemplate.size());
 		}
@@ -535,7 +535,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (templateFileName != "self") { thisTemplate = templateSeqs; thisFilteredTemplate = filteredTemplateSeqs; }
 		else {  thisTemplate = getTemplate(*query, thisFilteredTemplate);  } //fills this template and creates the databases
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		if (thisTemplate.size() == 0) {  return 0; } //not chimeric
 		
 		//moved this out of maligner - 4/29/11
@@ -549,11 +549,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			else if (searchMethod == "blast") {  delete databaseLeft; }
 		}
 	
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 
 		string chimeraFlag = maligner.getResults(*query, decalc);
 
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		vector<results> Results = maligner.getOutput();
 		
@@ -634,11 +634,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 //				cout << seqs[k].seq->getName() << endl;
 			}
 			
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 
 			//send to slayer
 			chimeraFlags = slayer.getResults(*query, seqsForSlayer);
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			chimeraResults = slayer.getOutput();
 			
 			printResults.flag = chimeraFlags;
@@ -837,7 +837,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 //		for (int i = 0; i < smaller.size(); i++) {
 		while(index < tempIndexesLeft.size() && index < tempIndexesRight.size()){
 			
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 	
 			//add left if you havent already
 			it = seen.find(tempIndexesLeft[index]);
@@ -857,7 +857,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 
 		
 		for (int i = index; i < tempIndexesLeft.size(); i++) {
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
 			it = seen.find(tempIndexesLeft[i]);
@@ -868,7 +868,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		}
 
 		for (int i = index; i < tempIndexesRight.size(); i++) {
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
 			it = seen.find(tempIndexesRight[i]);
@@ -926,7 +926,7 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		//		for (int i = 0; i < smaller.size(); i++) {
 		while(index < tempIndexesLeft.size() && index < tempIndexesRight.size()){
 			
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add left if you havent already
 			it = seen.find(tempIndexesLeft[index]);
@@ -946,7 +946,7 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		
 		
 		for (int i = index; i < tempIndexesLeft.size(); i++) {
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
 			it = seen.find(tempIndexesLeft[i]);
@@ -957,7 +957,7 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		}
 		
 		for (int i = index; i < tempIndexesRight.size(); i++) {
-			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
 			it = seen.find(tempIndexesRight[i]);

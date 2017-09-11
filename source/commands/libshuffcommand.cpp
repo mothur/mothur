@@ -72,7 +72,7 @@ string LibShuffCommand::getOutputPattern(string type) {
         
         if (type == "coverage") {  pattern = "[filename],libshuff.coverage"; } 
         else if (type == "libshuffsummary") {  pattern = "[filename],libshuff.summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -225,7 +225,7 @@ int LibShuffCommand::execute(){
 		matrix = new FullMatrix(in, groupMap, sim); //reads the matrix file
 		in.close();
 		
-		if (m->control_pressed) { delete groupMap; delete matrix; return 0; }
+		if (m->getControl_pressed()) { delete groupMap; delete matrix; return 0; }
 		
 		//if files don't match...
 		if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
@@ -239,7 +239,7 @@ int LibShuffCommand::execute(){
 			m->openOutputFile(newGroupFile, outGroups);
 			
 			for (int i = 0; i < matrix->getNumSeqs(); i++) {
-				if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); m->mothurRemove(newGroupFile); return 0; }
+				if (m->getControl_pressed()) { delete groupMap; delete matrix; outGroups.close(); m->mothurRemove(newGroupFile); return 0; }
 				
 				Names temp = matrix->getRowInfo(i);
 				outGroups << temp.seqName << '\t' << temp.groupName << endl;
@@ -255,15 +255,15 @@ int LibShuffCommand::execute(){
 			groupMap = new GroupMap(groupfile);
 			groupMap->readMap();
 			
-			if (m->control_pressed) { delete groupMap; delete matrix; m->mothurRemove(newGroupFile); return 0; }
+			if (m->getControl_pressed()) { delete groupMap; delete matrix; m->mothurRemove(newGroupFile); return 0; }
 		}
 		
 			
 		setGroups();								//set the groups to be analyzed and sorts them
 		
-		if (numGroups < 2) { m->mothurOut("[ERROR]: libshuff requires at least 2 groups, you only have " + toString(numGroups) + ", aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if (numGroups < 2) { m->mothurOut("[ERROR]: libshuff requires at least 2 groups, you only have " + toString(numGroups) + ", aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 		
-		if (m->control_pressed) { delete groupMap; delete matrix; return 0; }
+		if (m->getControl_pressed()) { delete groupMap; delete matrix; return 0; }
 		
 		/********************************************************************************************/
 		//this is needed because when we read the matrix we sort it into groups in alphabetical order
@@ -285,21 +285,21 @@ int LibShuffCommand::execute(){
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
-		if (m->control_pressed) {  delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
+		if (m->getControl_pressed()) {  delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
 	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
 	
-		if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
 				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->control_pressed) {  outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+				if (m->getControl_pressed()) {  outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
 				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
@@ -307,13 +307,13 @@ int LibShuffCommand::execute(){
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					reading->update(p);			
 				}
@@ -322,7 +322,7 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 	
 		reading->finish();
 		delete reading;
@@ -337,7 +337,7 @@ int LibShuffCommand::execute(){
 		
 		delete matrix; delete groupMap;
 		
-		if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -383,7 +383,7 @@ int LibShuffCommand::printCoverageFile() {
 				
 				for(int k=0;k<savedMinValues[spoti][spotj].size();k++){
 					
-					if(m->control_pressed)  { outCov.close(); return 0; }
+					if(m->getControl_pressed())  { outCov.close(); return 0; }
 					
 					if(allDistances[savedMinValues[spoti][spotj][k]].size() != 0){
 						allDistances[savedMinValues[spoti][spotj][k]][indices[i][j]]++;
@@ -418,7 +418,7 @@ int LibShuffCommand::printCoverageFile() {
 		}
 		for (int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
-				if(m->control_pressed)  { outCov.close(); return 0; }
+				if(m->getControl_pressed())  { outCov.close(); return 0; }
 				outCov << '\t' << groupNames[i] << '-' << groupNames[j] << '\t';
 				outCov << groupNames[j] << '-' << groupNames[i];
 			}
@@ -432,7 +432,7 @@ int LibShuffCommand::printCoverageFile() {
 			}
 			for(int i=0;i<numGroups;i++){
 				for(int j=i+1;j<numGroups;j++){
-					if(m->control_pressed)  { outCov.close(); return 0; }
+					if(m->getControl_pressed())  { outCov.close(); return 0; }
 					
 					outCov << it->second[indices[i][j]]/(float)lastRow[indices[i][j]] << '\t';
 					outCov << it->second[indices[j][i]]/(float)lastRow[indices[j][i]] << '\t';
@@ -472,7 +472,7 @@ int LibShuffCommand::printSummaryFile() {
 		int precision = (int)log10(iters);
 		for(int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
-				if(m->control_pressed)  { outSum.close(); return 0; }
+				if(m->getControl_pressed())  { outSum.close(); return 0; }
 				
 				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
 				int spotj = groupMap->groupIndex[groupNames[j]];

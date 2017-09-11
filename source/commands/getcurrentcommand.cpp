@@ -61,7 +61,7 @@ string GetCurrentCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],current_files.summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -121,7 +121,7 @@ int GetCurrentCommand::execute(){
 		if (types.size() != 0) {
 			for (int i = 0; i < types.size(); i++) {
 				
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 				
 				//look for file types
 				if (types[i] == "fasta") {

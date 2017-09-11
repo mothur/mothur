@@ -45,7 +45,7 @@ InteractEngine::InteractEngine(string path){
     #ifdef MOTHUR_FILES
     #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->mothurProgramPath != "") { mout->setDefaultPath(mout->mothurProgramPath); }
+        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
     #endif
 }
 
@@ -66,11 +66,11 @@ bool InteractEngine::getInput(){
 		while(quitCommandCalled != 1){
 
                     
-			if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+			if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
                     
 			input = getCommand();	
 			
-			if (mout->control_pressed) { input = "quit()"; }
+			if (mout->getControl_pressed()) { input = "quit()"; }
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -81,31 +81,32 @@ bool InteractEngine::getInput(){
 			options = parser.getOptionString();
 			
 			if (commandName != "") {
-					mout->executing = true;
+					mout->setExecuting(true);
 
 					//executes valid command
-                    mout->changedSeqNames = false;
-					mout->runParse = true;
+                    mout->setChangedSeqNames(false);
+					mout->setRunParse(true);
 					mout->clearGroups();
 					mout->clearAllGroups();
-					mout->Treenames.clear();
-					mout->saveNextLabel = "";
-                    mout->commandInputsConvertError = false;
-					mout->printedSharedHeaders = false;
-					mout->currentSharedBinLabels.clear();
-					mout->sharedBinLabelsInFile.clear();
-                    mout->printedListHeaders = false;
-                    mout->listBinLabelsInFile.clear();
+                    vector<string> temp;
+					mout->setTreenames(temp);
+					mout->setSaveNextLabel("");
+                    mout->setCommandInputsConvertError(false);
+					mout->setPrintedSharedHeaders(false);
+					mout->setCurrentSharedBinLabels(temp);
+					mout->setSharedBinLabelsInFile(temp);
+                    mout->setPrintedListHeaders(false);
+                    mout->setListBinLabelsInFile(temp);
 							
 					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
 					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
 
-					mout->control_pressed = 0;
-					mout->executing = false;
+					mout->setControl_pressed(false);
+					mout->setExecuting(false);
 										
 				}else {		
 					mout->mothurOut("Invalid.\n");
@@ -183,7 +184,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 #ifdef MOTHUR_FILES
 #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->mothurProgramPath != "") { mout->setDefaultPath(mout->mothurProgramPath); }
+        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
 #endif
 
 				
@@ -221,12 +222,12 @@ bool BatchEngine::getInput(){
 			count++;
 			
             if (input[0] != '#') {
-				if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+				if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 				
 				mout->mothurOut("\nmothur > " + input + "\n");
 				
 							
-				if (mout->control_pressed) { input = "quit()"; }
+				if (mout->getControl_pressed()) { input = "quit()"; }
 				
 				//allow user to omit the () on the quit command
 				if (input == "quit") { input = "quit()"; }
@@ -236,33 +237,33 @@ bool BatchEngine::getInput(){
 				options = parser.getOptionString();
 										
 				if (commandName != "") {
-					mout->executing = true;
+					mout->setExecuting(true);
 					
 					//executes valid command
-                    mout->changedSeqNames = false;
-					mout->runParse = true;
+                    mout->setChangedSeqNames(false);
+					mout->setRunParse(true);
 					mout->clearGroups();
 					mout->clearAllGroups();
-					mout->Treenames.clear();
-					mout->saveNextLabel = "";
-					mout->commandInputsConvertError = false;
-                    mout->printedSharedHeaders = false;
-                    mout->currentSharedBinLabels.clear();
-                    mout->sharedBinLabelsInFile.clear();
-                    mout->printedListHeaders = false;
-                    mout->listBinLabelsInFile.clear();
-
+					vector<string> temp;
+					mout->setTreenames(temp);
+					mout->setSaveNextLabel("");
+					mout->setCommandInputsConvertError(false);
+                    mout->setPrintedSharedHeaders(false);
+                    mout->setPrintedListHeaders(false);
+                    mout->setListBinLabelsInFile(temp);
+                    mout->setCurrentSharedBinLabels(temp);
+                    mout->setSharedBinLabelsInFile(temp);
 							
 					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
 					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
                     
-                    if (mout->control_pressed) { break;  }
-					mout->control_pressed = 0;
-					mout->executing = false;
+                    if (mout->getControl_pressed()) { break;  }
+                    mout->setControl_pressed(false);
+                    mout->setExecuting(false);
 										
 				}else {		
 					mout->mothurOut("Invalid.\n");
@@ -354,9 +355,9 @@ bool ScriptEngine::getInput(){
 			
 			if (input == "") { input = "quit()"; }
                     
-            if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+            if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 			
-			if (mout->gui) {
+			if (mout->getGui()) {
 				if ((input.find("quit") != string::npos) || (input.find("set.logfile") != string::npos)) {}
 				else if ((input.find("get.current") != string::npos) && (!mout->hasCurrentFiles())) {}
 				else {  mout->mothurOut("\nmothur > " + input + "\n");  }
@@ -364,7 +365,7 @@ bool ScriptEngine::getInput(){
 				mout->mothurOut("\nmothur > " + input + "\n");
 			}
 			
-            if (mout->control_pressed) { input = "quit()"; }
+            if (mout->getControl_pressed()) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -374,32 +375,33 @@ bool ScriptEngine::getInput(){
 			options = parser.getOptionString();
 										
 			if (commandName != "") {
-					mout->executing = true;
+					mout->setExecuting(true);
 					
 					//executes valid command
-                    mout->changedSeqNames = false;
-					mout->runParse = true;
+                    mout->setChangedSeqNames(false);
+					mout->setRunParse(true);
 					mout->clearGroups();
 					mout->clearAllGroups();
-					mout->Treenames.clear();
-					mout->saveNextLabel = "";
-                    mout->commandInputsConvertError = false;
-                    mout->printedSharedHeaders = false;
-                    mout->currentSharedBinLabels.clear();
-                    mout->sharedBinLabelsInFile.clear();
-                    mout->printedListHeaders = false;
-                    mout->listBinLabelsInFile.clear();
+					vector<string> temp;
+					mout->setTreenames(temp);
+					mout->setSaveNextLabel("");
+                    mout->setCommandInputsConvertError(false);
+                    mout->setPrintedSharedHeaders(false);
+                    mout->setCurrentSharedBinLabels(temp);
+                    mout->setSharedBinLabelsInFile(temp);
+                    mout->setPrintedListHeaders(false);
+                    mout->setListBinLabelsInFile(temp);
 
 					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
 					else { quitCommandCalled = command->execute(); }
 					
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
 					
-                    if (mout->control_pressed) { break;  }
-					mout->control_pressed = 0;
-					mout->executing = false;
+                    if (mout->getControl_pressed()) { break;  }
+                    mout->setControl_pressed(false);
+                    mout->setExecuting(false);
 									
 				}else {		
 					mout->mothurOut("Invalid.\n");

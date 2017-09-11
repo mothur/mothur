@@ -37,7 +37,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (nameMap->size() == 0) { readNames(nameMap);  }
 		int nseqs = nameMap->size();
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 
 		ifstream fileHandle;
 		m->openInputFile(blastfile, fileHandle);
@@ -57,7 +57,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
         matrix->resize(nseqs);
 		
 		
-		if (m->control_pressed) { fileHandle.close(); delete matrix; return 0; }
+		if (m->getControl_pressed()) { fileHandle.close(); delete matrix; return 0; }
 		
 		Progress* reading = new Progress("Reading blast:     ", nseqs * nseqs);
 		
@@ -99,7 +99,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		//read file
 		while(!fileHandle.eof()){  
 		
-			if (m->control_pressed) { fileHandle.close(); delete matrix; delete reading; return 0; }
+			if (m->getControl_pressed()) { fileHandle.close(); delete matrix; delete reading; return 0; }
 			
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -241,11 +241,11 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		thisRowsBlastScores.clear();
 		dists.clear();
 		
-		if (m->control_pressed) {  fileHandle.close(); delete matrix; delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix; delete reading; return 0; }
 		
         sort(overlap.begin(), overlap.end(), compareOverlap);
  
-		if (m->control_pressed) {  fileHandle.close(); delete matrix; delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix; delete reading; return 0; }
 		
 		reading->finish();
 		delete reading;
@@ -282,7 +282,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		nameMap->push_back(prevName);
 		
 		while (!in.eof()) {
-			if (m->control_pressed) { in.close(); return 0; }
+			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			//read line
 			in >> name;
@@ -294,7 +294,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			if (name != prevName) {
 				prevName = name;
                 
-                if (nameMap->get(name) != -1) { m->mothurOut("[ERROR]: trying to exact names from blast file, and I found dups.  Are you sequence names unique? quitting.\n"); m->control_pressed = true; }
+                if (nameMap->get(name) != -1) { m->mothurOut("[ERROR]: trying to exact names from blast file, and I found dups.  Are you sequence names unique? quitting.\n"); m->setControl_pressed(true); }
                 else {
                     nameMap->push_back(name);
                 }
@@ -312,7 +312,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		//nameMap->print(out);
 		//out.close();
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();
 		

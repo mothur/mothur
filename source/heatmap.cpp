@@ -53,7 +53,7 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		for(int i=0;i<numBinsToDisplay;i++){
 			float relAbund = rabund->get(i) / (float)rabund->getNumSeqs();
 			
-			if (m->control_pressed) { return "control"; }
+			if (m->getControl_pressed()) { return "control"; }
 			
 			if (rabund->get(i) != 0) { //don't want log value of 0.
 				if (scaler == "log10") {
@@ -90,7 +90,7 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		y = 70;
 
 		for (int i = 0; i < scaleRelAbund.size(); i++) {
-			if (m->control_pressed) { outsvg.close(); return "control"; }
+			if (m->getControl_pressed()) { outsvg.close(); return "control"; }
 			
 			outsvg << "<rect fill=\"#" + scaleRelAbund[i] + "\" stroke=\"#" + scaleRelAbund[i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
 			y += 5;
@@ -119,7 +119,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		}
 		
 		//sort lookup so shared bins are on top
-        vector<string> sortedLabels = m->currentSharedBinLabels;
+        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -139,7 +139,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		for(int i=0;i<lookup.size();i++){
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
-				if (m->control_pressed) {  return "control"; }
+				if (m->getControl_pressed()) {  return "control"; }
 				float relAbund = lookup[i]->get(j) / (float)lookup[i]->getNumSeqs();
 				
 				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
@@ -197,7 +197,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
             outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + sortedLabels[i] + "</text>\n";
             x += labelBump;
 			for (int j = 0; j < scaleRelAbund.size(); j++) {
-				if (m->control_pressed) { outsvg.close(); return "control"; }
+				if (m->getControl_pressed()) { outsvg.close(); return "control"; }
 				
 				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"" + toString(binWidth) +  "\" height=\"" + toString(binHeight) +  "\"/>\n";
 				x += binWidth;
@@ -226,7 +226,8 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->currentSharedBinLabels;
+        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels  = m->getCurrentSharedBinLabels();
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -254,7 +255,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 				int newAbund = looktemp[j]->get(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
 			}
-            sortedLabels[place[i]] = m->currentSharedBinLabels[i];
+            sortedLabels[place[i]] = currentLabels[i];
 		}
 		
 		//delete looktemp -- Sarah look at - this is causing segmentation faults
@@ -430,7 +431,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		}
 		
 		//sort lookup so shared bins are on top
-		vector<string> sortedLabels = m->currentSharedBinLabels;
+		vector<string> sortedLabels = m->getCurrentSharedBinLabels();
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -450,7 +451,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		for(int i=0;i<lookup.size();i++){
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
-				if (m->control_pressed) {  return "control"; }
+				if (m->getControl_pressed()) {  return "control"; }
 				float relAbund = lookup[i]->get(j);
 				
 				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
@@ -508,7 +509,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
             outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + sortedLabels[i] + "</text>\n";
             x += labelBump;
 			for (int j = 0; j < scaleRelAbund.size(); j++) {
-				if (m->control_pressed) { outsvg.close(); return "control"; }
+				if (m->getControl_pressed()) { outsvg.close(); return "control"; }
 				
 				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"" + toString(binWidth) +  "\" height=\"" + toString(binHeight) +  "\"/>\n";
 				x += binWidth;
@@ -536,7 +537,8 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> looku
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->currentSharedBinLabels;
+        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -563,7 +565,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> looku
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
 				float newAbund = looktemp[j]->get(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
-                sortedLabels[place[i]] = m->currentSharedBinLabels[i];
+                sortedLabels[place[i]] = currentLabels[i];
 			}
 		}
 		

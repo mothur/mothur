@@ -53,7 +53,7 @@ string PCOACommand::getOutputPattern(string type) {
         
         if (type == "pcoa") {  pattern = "[filename],pcoa.axes"; } 
         else if (type == "loadings") {  pattern = "[filename],pcoa.loadings"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -167,7 +167,7 @@ int PCOACommand::execute(){
 		ReadPhylipVector readFile(filename);
 		names = readFile.read(D);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
    	
 		double offset = 0.0000;
 		vector<double> d;
@@ -178,18 +178,18 @@ int PCOACommand::execute(){
 		m->mothurOut("\nProcessing...\n");
 		
 		for(int count=0;count<2;count++){
-			linearCalc.recenter(offset, D, G);		if (m->control_pressed) { return 0; }
-			linearCalc.tred2(G, d, e);				if (m->control_pressed) { return 0; }
-			linearCalc.qtli(d, e, G);				if (m->control_pressed) { return 0; }
+			linearCalc.recenter(offset, D, G);		if (m->getControl_pressed()) { return 0; }
+			linearCalc.tred2(G, d, e);				if (m->getControl_pressed()) { return 0; }
+			linearCalc.qtli(d, e, G);				if (m->getControl_pressed()) { return 0; }
 			offset = d[d.size()-1];
 			if(offset > 0.0) break;
 		} 
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		output(fbase, names, G, d);
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (metric) {   
 			
@@ -197,13 +197,13 @@ int PCOACommand::execute(){
 							
 				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pcoa file
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 				
 				double corr = linearCalc.calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
 				
 				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
-				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			}
 		}
 		

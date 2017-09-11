@@ -74,7 +74,7 @@ string UnifracUnweightedCommand::getOutputPattern(string type) {
         else if (type == "phylip")           {  pattern = "[filename],[tag],[tag2],dist";   }
         else if (type == "column")           {  pattern = "[filename],[tag],[tag2],dist";   }
         else if (type == "tree")             {  pattern = "[filename],[tag],[tag2],tre";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -353,7 +353,7 @@ int UnifracUnweightedCommand::execute() {
 	 
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
-			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			
             counter = 0;
 			
@@ -376,7 +376,7 @@ int UnifracUnweightedCommand::execute() {
 
 			userData = unweighted.getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
 		
-			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }return 0; }
+			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }return 0; }
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
@@ -391,25 +391,25 @@ int UnifracUnweightedCommand::execute() {
             
             if (random) {  runRandomCalcs(T[i], userData);  }
 			
-			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
+			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
             
             int startSubsample = time(NULL);
             
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
                  
                 //uses method of setting groups to doNotIncludeMe
                 int sampleTime = 0;
-                if (m->debug) { sampleTime = time(NULL); }
+                if (m->getDebug()) { sampleTime = time(NULL); }
                 SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
@@ -426,7 +426,7 @@ int UnifracUnweightedCommand::execute() {
             }
             if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
             
-            if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
+            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
 
             if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i); }
             if (consensus) {  getConsensusTrees(calcDistsTotals, i);  }
@@ -448,7 +448,7 @@ int UnifracUnweightedCommand::execute() {
 		delete ct; 
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }	return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }	return 0; }
 		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted."); m->mothurOutEndLine();
 		
@@ -505,7 +505,7 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
             stddists.push_back(temp);
         }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: about to fill matrix.\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to fill matrix.\n"); }
         
         //flip it so you can print it
         int count = 0;
@@ -519,7 +519,7 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
             }
         }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: done filling matrix.\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: done filling matrix.\n"); }
         
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
@@ -595,7 +595,7 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
 	try {
         
         //used in tree constructor 
-        m->runParse = false;
+        m->setRunParse(false);
         
         //create treemap class from groupmap for tree class to use
         CountTable newCt;
@@ -609,15 +609,12 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         }
         newCt.createTable(nameMap, groupMap, gps);
         
-        //clear  old tree names if any
-        m->Treenames.clear();
-        
         //fills globaldatas tree names
-        m->Treenames = m->getGroups();
+        m->setTreenames(m->getGroups());
         
         vector<Tree*> newTrees = buildTrees(dists, treeNum, newCt); //also creates .all.tre file containing the trees created
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         Consensus con;
         Tree* conTree = con.getTree(newTrees);
@@ -664,7 +661,7 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
         
         for (int i = 0; i < dists.size(); i++) { //dists[0] are the dists for the first subsampled tree.
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             //make matrix with scores in it
             vector< vector<double> > sims;	sims.resize(m->getNumGroups());
@@ -694,7 +691,7 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
         
         outAll.close();
         
-        if (m->control_pressed) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } m->mothurRemove(outputFile); }
+        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } m->mothurRemove(outputFile); }
         
         return trees;
     }
@@ -717,7 +714,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
             //we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
             randomData = unweighted.getValues(thisTree, "", "", processors, outputDir);
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
 			
             for(int k = 0; k < numComp; k++) {	
                 //add trees unweighted score to map of scores

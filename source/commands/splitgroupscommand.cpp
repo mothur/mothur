@@ -61,7 +61,7 @@ string SplitGroupCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],[group],fasta"; } 
         else if (type == "name") {  pattern = "[filename],[group],names"; } 
         else if (type == "count") {  pattern = "[filename],[group],count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -236,7 +236,7 @@ int SplitGroupCommand::execute(){
         if (countfile == "" ) {  runNameGroup();  }
         else { runCount();  }
 				
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		string current = "";
 		itTypes = outputTypes.find("fasta");
@@ -273,7 +273,7 @@ int SplitGroupCommand::runNameGroup(){
 		if (namefile == "") {	parser = new SequenceParser(groupfile, fastafile, Groups);				}
 		else				{	parser = new SequenceParser(groupfile, fastafile, namefile, Groups);	}
 		
-		if (m->control_pressed) { delete parser; return 0; }
+		if (m->getControl_pressed()) { delete parser; return 0; }
         
 		vector<string> namesGroups = parser->getNamesOfGroups();
 		SharedUtil util;  util.setGroups(Groups, namesGroups);  
@@ -297,14 +297,14 @@ int SplitGroupCommand::runNameGroup(){
             long long numSeqs = 0;
 			parser->getSeqs(Groups[i], newFasta, "/ab=", "/", numSeqs, false);
 			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
-			if (m->control_pressed) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+			if (m->getControl_pressed()) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
             
 			if (namefile != "") { 
 				parser->getNameMap(Groups[i], newName); 
 				outputNames.push_back(newName); outputTypes["name"].push_back(newName);
 			}
 			
-			if (m->control_pressed) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+			if (m->getControl_pressed()) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		}
 		
 		delete parser;
@@ -323,9 +323,9 @@ int SplitGroupCommand::runCount(){
         
         CountTable ct;
         ct.readTable(countfile, true, false);
-        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->control_pressed = true; }
+        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->setControl_pressed(true); }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         vector<string> namesGroups = ct.getNamesOfGroups();
         SharedUtil util;  util.setGroups(Groups, namesGroups); 
@@ -357,7 +357,7 @@ int SplitGroupCommand::runCount(){
         while (!in.eof()) {
             Sequence seq(in); m->gobble(in);
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             if (seq.getName() != "") {
                 vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
                 for (int i = 0; i < thisSeqsGroups.size(); i++) {

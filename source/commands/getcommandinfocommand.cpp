@@ -93,7 +93,7 @@ int GetCommandInfoCommand::execute(){
 		//loop through each command outputting info
 		for (it = commands.begin(); it != commands.end(); it++) {
 			
-			if (m->control_pressed) { m->mothurOut("[ERROR]: did not complete making the file."); m->mothurOutEndLine(); out.close(); m->mothurRemove((output+".temp")); }
+			if (m->getControl_pressed()) { m->mothurOut("[ERROR]: did not complete making the file."); m->mothurOutEndLine(); out.close(); m->mothurRemove((output+".temp")); }
 			
 			Command* thisCommand = commandFactory->getCommand(it->first);
 			

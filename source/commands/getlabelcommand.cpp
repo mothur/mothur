@@ -167,7 +167,7 @@ int GetlabelCommand::execute(){
 		
 		while (order != NULL) {
 			
-			if (m->control_pressed) { delete input;  delete order; return 0; }
+			if (m->getControl_pressed()) { delete input;  delete order; return 0; }
 			
 			label = order->getLabel();	
 			

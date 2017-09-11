@@ -64,7 +64,7 @@ class Command {
                             for (int i = 0; i < numVariablesPerPattern.size(); i++) {
                                 if (numVariablesPerPattern[i] < variableParts.size()) { pattern = patterns[i]; foundPattern = true; break; }
                             }
-                            if (!foundPattern) {  m->mothurOut("[ERROR]: Not enough variable pieces for " + type + ".\n"); m->control_pressed = true; }
+                            if (!foundPattern) {  m->mothurOut("[ERROR]: Not enough variable pieces for " + type + ".\n"); m->setControl_pressed(true); }
                         }
                         
                         if (pattern != "") {
@@ -79,7 +79,7 @@ class Command {
                                 if (pieces[i][0] == '[') {
                                     map<string, string>::iterator it = variableParts.find(pieces[i]);
                                     if (it == variableParts.end()) {
-                                        m->mothurOut("[ERROR]: Did not provide variable for " + pieces[i] + ".\n"); m->control_pressed = true;
+                                        m->mothurOut("[ERROR]: Did not provide variable for " + pieces[i] + ".\n"); m->setControl_pressed(true);
                                     }else {
                                         if (it->second != "") {
                                             if (it->first == "[filename]") { filename += it->second; }

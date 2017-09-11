@@ -77,7 +77,7 @@ string TreeGroupCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "tree") {  pattern = "[filename],[calc],[distance],[tag],tre-[filename],tre"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -417,7 +417,7 @@ int TreeGroupCommand::execute(){
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine();  return 0; }
 			
 			//used in tree constructor 
-			m->runParse = false;
+			m->setRunParse(false);
 			
 			//create treemap class from groupmap for tree class to use
 			ct = new CountTable();
@@ -431,18 +431,16 @@ int TreeGroupCommand::execute(){
             }
             ct->createTable(nameMap, groupMap, gps);
 			
-			//clear globaldatas old tree names if any
-			m->Treenames.clear();
-			
+						
 			//fills tree names with shared files groups
-			m->Treenames = lookup->getNamesGroups();
+			m->setTreenames(lookup->getNamesGroups());
             
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//create tree file
 			makeSimsShared(lookup);
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
 		}else{
 			//read in dist file
 			filename = inputfile;
@@ -471,7 +469,7 @@ int TreeGroupCommand::execute(){
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
             
             //clear globaldatas old tree names if any
-			m->Treenames.clear();
+			vector<string> Treenames;
             
 			//make treemap
             if (ct != NULL) { delete ct; }
@@ -484,23 +482,24 @@ int TreeGroupCommand::execute(){
                 nameMap.insert(bin); 
                 gps.insert(bin); 
                 groupMap[bin] = bin;
-                m->Treenames.push_back(bin);
+                Treenames.push_back(bin);
             }
+            m->setTreenames(Treenames);
             ct->createTable(nameMap, groupMap, gps);
 			
 			vector<string> namesGroups = ct->getNamesOfGroups();
 			m->setGroups(namesGroups);
 			
 			//used in tree constructor 
-			m->runParse = false;
+			m->setRunParse(false);
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			vector< vector<double> > matrix = makeSimsDist(dMatrix);
             delete readMatrix;
             delete dMatrix;
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 
 			//create a new filename
             map<string, string> variables; 
@@ -512,7 +511,7 @@ int TreeGroupCommand::execute(){
             
             if (newTree != NULL) {  writeTree(outputFile, newTree); delete newTree; }
 			
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 
 			m->mothurOut("Tree complete. "); m->mothurOutEndLine();
 			
@@ -547,7 +546,7 @@ Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 		//create tree
 		t = new Tree(ct, simMatrix);
         
-        if (m->control_pressed) { delete t; t = NULL; return t; }
+        if (m->getControl_pressed()) { delete t; t = NULL; return t; }
 		
         //assemble tree
 		t->assembleTree();
@@ -566,7 +565,7 @@ int TreeGroupCommand::writeTree(string out, Tree* T) {
         //print newick file
 		t->createNewickFile(out);
 		
-        if (m->control_pressed) { m->mothurRemove(out); outputNames.pop_back(); return 1; }
+        if (m->getControl_pressed()) { m->mothurRemove(out); outputNames.pop_back(); return 1; }
         
         return 0;
         
@@ -619,7 +618,7 @@ vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* ma
                     simMatrix[i][matrix->seqVec[i][j].index] = -(matrix->seqVec[i][j].dist -1.0);	
                     simMatrix[matrix->seqVec[i][j].index][i] = -(matrix->seqVec[i][j].dist -1.0);	
 			
-                    if (m->control_pressed) { return simMatrix; }
+                    if (m->getControl_pressed()) { return simMatrix; }
                 }
             }
 		}
@@ -642,10 +641,10 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
             }else {
                 lookup->removeGroups(subsampleSize);
                 Groups = m->getGroups();
-                m->Treenames = Groups;
+                m->setTreenames(Groups);
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
         }
         numGroups = lookup->size();
         
@@ -670,7 +669,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->control_pressed) { delete lookup; for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+            if (m->getControl_pressed()) { delete lookup; for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -703,7 +702,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 			lookup = input->getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+		if (m->getControl_pressed()) { for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -797,7 +796,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                             int temp = processIDS[i];
                             wait(&temp);
                         }
-                        m->control_pressed = false;
+                        m->setControl_pressed(false);
                         for (int i=0;i<processIDS.size();i++) {
                             m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));
                         }
@@ -808,7 +807,8 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 
                 if (recalc) {
                     //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                     
                     /******************************************************/
                     //comparison breakup to be used by different processes later
@@ -923,7 +923,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
                     if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
                     }
                     for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
                     
@@ -946,16 +946,16 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); } }
             
             delete thisItersLookup;
-            if (m->debug) {  m->mothurOut("[DEBUG]: iter = " + toString(thisIter) + ".\n"); }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: iter = " + toString(thisIter) + ".\n"); }
 		}
         
-		if (m->debug) {  m->mothurOut("[DEBUG]: done with iters.\n"); }
+		if (m->getDebug()) {  m->mothurOut("[DEBUG]: done with iters.\n"); }
             
         if (iters != 1) {
             //we need to find the average distance and standard deviation for each groups distance
             vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);  
             
-            if (m->debug) {  m->mothurOut("[DEBUG]: found averages.\n"); }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: found averages.\n"); }
             
             //create average tree for each calc
             for (int i = 0; i < calcDists.size(); i++) {
@@ -986,11 +986,11 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 if (newTree != NULL) { writeTree(outputFile, newTree); }                
             }
             
-            if (m->debug) {  m->mothurOut("[DEBUG]: done averages trees.\n"); }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: done averages trees.\n"); }
             
             //create all trees for each calc and find their consensus tree
             for (int i = 0; i < calcDists.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 //create a new filename
                 //create a new filename
@@ -1008,7 +1008,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 vector<Tree*> trees; 
                 for (int myIter = 0; myIter < iters; myIter++) {
                     
-                    if(m->control_pressed) { break; }
+                    if(m->getControl_pressed()) { break; }
                     
                     //initialize matrix
                     vector< vector<double> > matrix; //square matrix to represent the distance
@@ -1032,16 +1032,16 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                     }
                 }
                 outAll.close();
-                if (m->control_pressed) { for (int k = 0; k < trees.size(); k++) { delete trees[k]; } }
+                if (m->getControl_pressed()) { for (int k = 0; k < trees.size(); k++) { delete trees[k]; } }
                 
-                if (m->debug) {  m->mothurOut("[DEBUG]: done all trees.\n"); }
+                if (m->getDebug()) {  m->mothurOut("[DEBUG]: done all trees.\n"); }
                 
                 Consensus consensus;
                 //clear old tree names if any
-                m->Treenames.clear(); m->Treenames = m->getGroups(); //may have changed if subsample eliminated groups
+                m->setTreenames(m->getGroups()); //may have changed if subsample eliminated groups
                 Tree* conTree = consensus.getTree(trees);
                 
-                if (m->debug) {  m->mothurOut("[DEBUG]: done cons tree.\n"); }
+                if (m->getDebug()) {  m->mothurOut("[DEBUG]: done cons tree.\n"); }
                 
                 //create a new filename
                 variables["[tag]"] = "cons";
@@ -1056,7 +1056,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
         }else {
             
             for (int i = 0; i < calcDists.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 //initialize matrix
                 vector< vector<double> > matrix; //square matrix to represent the distance
@@ -1120,7 +1120,7 @@ int TreeGroupCommand::driver(SharedRAbundVectors*& thislookup, int start, int en
 						
 						vector<double> tempdata = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 						
-                        if (m->control_pressed) { for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  } return 1; }
+                        if (m->getControl_pressed()) { for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  } return 1; }
 						
 						seqDist temp(l, k, -(tempdata[0]-1.0));
 						calcDists[i].push_back(temp);

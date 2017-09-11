@@ -30,7 +30,7 @@ AbstractDecisionTree::AbstractDecisionTree(vector<vector<int> >& baseDataSet,
         // clacualte this once in the RandomForest class and pass the values
         m = MothurOut::getInstance();
         for (int i = 0;  i < numSamples; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             int outcome = baseDataSet[i][numFeatures];
             vector<int>::iterator it = find(outputClasses.begin(), outputClasses.end(), outcome);
             if (it == outputClasses.end()){       // find() will return classes.end() if the element is not found
@@ -39,7 +39,7 @@ AbstractDecisionTree::AbstractDecisionTree(vector<vector<int> >& baseDataSet,
             }
         }
         
-        if (m->debug) {
+        if (m->getDebug()) {
             //m->mothurOut("outputClasses = " + toStringVectorInt(outputClasses));
             m->mothurOut("numOutputClasses = " + toString(numOutputClasses) + '\n');
         }
@@ -56,7 +56,7 @@ int AbstractDecisionTree::createBootStrappedSamples(){
         vector<bool> isInTrainingSamples(numSamples, false);
         
         for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
         
             int randomIndex = m->getRandomIndex(numSamples-1);
             bootstrappedTrainingSamples.push_back(baseDataSet[randomIndex]);
@@ -64,7 +64,7 @@ int AbstractDecisionTree::createBootStrappedSamples(){
         }
         
         for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if (isInTrainingSamples[i]){ bootstrappedTrainingSampleIndices.push_back(i); }
             else{
                 bootstrappedTestSamples.push_back(baseDataSet[i]);
@@ -74,11 +74,11 @@ int AbstractDecisionTree::createBootStrappedSamples(){
         
             // do the transpose of Test Samples
         for (int i = 0; i < bootstrappedTestSamples[0].size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             vector<int> tmpFeatureVector(bootstrappedTestSamples.size(), 0);
             for (int j = 0; j < bootstrappedTestSamples.size(); j++) {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 
                 tmpFeatureVector[j] = bootstrappedTestSamples[j][i];
             }
@@ -103,7 +103,7 @@ int AbstractDecisionTree::getMinEntropyOfFeature(vector<int> featureVector,
         vector< pair<int, int> > featureOutputPair(featureVector.size(), pair<int, int>(0, 0));
         
         for (int i = 0; i < featureVector.size(); i++) { 
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             featureOutputPair[i].first = featureVector[i];
             featureOutputPair[i].second = outputVector[i];
@@ -118,7 +118,7 @@ int AbstractDecisionTree::getMinEntropyOfFeature(vector<int> featureVector,
         
         for (int i = 0; i < featureOutputPair.size(); i++) {
 
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             int featureValue = featureOutputPair[i].first;
 
             vector<int>::iterator it = find(uniqueFeatureValues.begin(), uniqueFeatureValues.end(), featureValue);
@@ -181,7 +181,7 @@ int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< pair<int, int> > fea
         vector<double> intrinsicValues;
         
         for (int i = 0; i < splitPoints.size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             int index = splitPoints[i];
             int valueAtSplitPoint = featureOutputPairs[index].first;
 
@@ -189,7 +189,7 @@ int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< pair<int, int> > fea
             int numGreaterThanValueAtSplitPoint = 0;
             
             for (int j = 0; j < featureOutputPairs.size(); j++) {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 pair<int, int> record = featureOutputPairs[j];
                 if (record.first < valueAtSplitPoint){ numLessThanValueAtSplitPoint++; }
                 else{ numGreaterThanValueAtSplitPoint++; }
@@ -226,12 +226,12 @@ double AbstractDecisionTree::calcSplitEntropy(vector< pair<int, int> > featureOu
         
         if (isUpperSplit) { 
             for (int i = 0; i < splitIndex; i++) {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 classCounts[featureOutputPairs[i].second]++;
             }
         } else {
             for (int i = splitIndex; i < featureOutputPairs.size(); i++) { 
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 classCounts[featureOutputPairs[i].second]++;
             }
         }
@@ -241,7 +241,7 @@ double AbstractDecisionTree::calcSplitEntropy(vector< pair<int, int> > featureOu
         double splitEntropy = 0.0;
         
         for (int i = 0; i < classCounts.size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if (classCounts[i] == 0) { continue; }
             double probability = (double) classCounts[i] / (double) totalClassCounts;
             splitEntropy += -(probability * log2(probability));
@@ -269,9 +269,9 @@ int AbstractDecisionTree::getSplitPopulation(RFTreeNode* node, vector< vector<in
         int splitFeatureGlobalIndex = node->getSplitFeatureIndex();
         
         for (int i = 0; i < node->getBootstrappedTrainingSamples().size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             vector<int> sample =  node->getBootstrappedTrainingSamples()[i];
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             if (sample[splitFeatureGlobalIndex] < node->getSplitFeatureValue()) { leftChildSamples.push_back(sample); }
             else { rightChildSamples.push_back(sample); }
@@ -292,7 +292,7 @@ bool AbstractDecisionTree::checkIfAlreadyClassified(RFTreeNode* treeNode, int& o
 
         vector<int> tempOutputClasses;
         for (int i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             int sampleOutputClass = treeNode->getBootstrappedTrainingSamples()[i][numFeatures];
             vector<int>::iterator it = find(tempOutputClasses.begin(), tempOutputClasses.end(), sampleOutputClass);
             if (it == tempOutputClasses.end()) {               // NOT FOUND

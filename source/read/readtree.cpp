@@ -31,7 +31,7 @@ int ReadTree::AssembleTrees() {
 	 try {
 		 //assemble users trees
 		 for (int i = 0; i < Trees.size(); i++) {
-			 if (m->control_pressed) { return 0;  }
+			 if (m->getControl_pressed()) { return 0;  }
 			 Trees[i]->assembleTree();
 		 }
 		 return 0;
@@ -123,9 +123,9 @@ int ReadNewickTree::read(CountTable* ct) {
 		//if you are not a nexus file 
 		if ((c = filehandle.peek()) != '#') {  
 			while((c = filehandle.peek()) != EOF) {
-                if (m->control_pressed) {  filehandle.close(); return 0; }
+                if (m->getControl_pressed()) {  filehandle.close(); return 0; }
 				while ((c = filehandle.peek()) != EOF) {
-                    if (m->control_pressed) {  filehandle.close(); return 0; }
+                    if (m->getControl_pressed()) {  filehandle.close(); return 0; }
 					// get past comments
 					if(c == '[') {
 						comment = 1;
@@ -156,10 +156,10 @@ int ReadNewickTree::read(CountTable* ct) {
 			
 			nexusTranslation(ct);  //reads file through the translation and updates treemap
 			while((c = filehandle.peek()) != EOF) {
-                if (m->control_pressed) {  filehandle.close(); return 0; }
+                if (m->getControl_pressed()) {  filehandle.close(); return 0; }
 				// get past comments
 				while ((c = filehandle.peek()) != EOF) {
-                    if (m->control_pressed) {  filehandle.close(); return 0; }
+                    if (m->getControl_pressed()) {  filehandle.close(); return 0; }
 					if(holder == "[" || holder == "[!"){
 						comment = 1;
 					}
@@ -206,7 +206,7 @@ string ReadNewickTree::nexusTranslation(CountTable* ct) {
 	try {
 		
 		holder = "";
-		int numSeqs = m->Treenames.size(); //must save this some when we clear old names we can still know how many sequences there were
+		int numSeqs = m->getTreenames().size(); //must save this some when we clear old names we can still know how many sequences there were
 		int comment = 0;
 		
 		// get past comments
@@ -253,7 +253,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T, ct);
-			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); m->control_pressed = true; return -1; } //reports an error in reading
+			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); m->setControl_pressed(true); return -1; } //reports an error in reading
 	
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -265,7 +265,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 		
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T, ct);
-				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); m->control_pressed = true; return -1; } //reports an error in reading
+				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); m->setControl_pressed(true); return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
@@ -312,7 +312,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 	try {
 		
-		if (m->control_pressed) { return -1; } 
+		if (m->getControl_pressed()) { return -1; } 
 		
 		int c = readNodeChar(f);
 

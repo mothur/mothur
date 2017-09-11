@@ -70,7 +70,7 @@ string GetSharedOTUCommand::getOutputPattern(string type) {
         if (type == "fasta")            {   pattern =  "[filename],[distance],[group],shared.fasta";   }
         else if (type == "accnos")      {   pattern =  "[filename],[distance],[group],accnos";         }
         else if (type == "sharedseqs")  {   pattern =  "[filename],[distance],[group],shared.seqs";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -300,7 +300,7 @@ int GetSharedOTUCommand::execute(){
                 ct->readTable(countfile, true, false);
             }
             
-            if (m->control_pressed) { delete groupMap; return 0; }
+            if (m->getControl_pressed()) { delete groupMap; return 0; }
             
             if (Groups.size() == 0) {
                 if (groupfile != "") { Groups = groupMap->getNamesOfGroups(); }
@@ -334,7 +334,7 @@ int GetSharedOTUCommand::execute(){
                 m->openInputFile(fastafile, inFasta);
                 
                 while(!inFasta.eof()) {
-                    if (m->control_pressed) { outputTypes.clear(); inFasta.close(); delete groupMap; return 0; }
+                    if (m->getControl_pressed()) { outputTypes.clear(); inFasta.close(); delete groupMap; return 0; }
                     
                     Sequence seq(inFasta); m->gobble(inFasta);
                     if (seq.getName() != "") {  seqs.push_back(seq);   }
@@ -355,7 +355,7 @@ int GetSharedOTUCommand::execute(){
             //as long as you are not at the end of the file or done wih the lines you want
             while((!in.eof()) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->control_pressed) { 
+                if (m->getControl_pressed()) { 
                     if (lastlist != NULL) {		delete lastlist;	}
                     for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear();
                     if (groupfile != "") { delete groupMap; }else { delete ct; } return 0;
@@ -420,7 +420,7 @@ int GetSharedOTUCommand::execute(){
             
             if (lastlist != NULL) {		delete lastlist;	}
             
-            if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 
+            if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 
 		}
 		//set fasta file as new current fastafile
 		string current = "";
@@ -475,7 +475,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		//go through each bin, find out if shared
         vector<string> binLabels = shared->getLabels();
 		for (int i = 0; i < shared->getNumBins(); i++) {
-			if (m->control_pressed) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
+			if (m->getControl_pressed()) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
 			
@@ -582,7 +582,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			outputNames.push_back(outputFileFasta); outputTypes["fasta"].push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {
-				if (m->control_pressed) { outFasta.close(); return 0; }
+				if (m->getControl_pressed()) { outFasta.close(); return 0; }
 			
 				//if this is a sequence we want, output it
 				it = fastaMap.find(seqs[k].getName());
@@ -642,7 +642,7 @@ int GetSharedOTUCommand::runShared() {
         
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
                 outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
                 delete lookup; m->clearGroups(); return 0;
 			}
@@ -680,7 +680,7 @@ int GetSharedOTUCommand::runShared() {
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) {
+		if (m->getControl_pressed()) {
             outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
             delete lookup; m->clearGroups(); return 0;
         }
@@ -739,8 +739,9 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 		int num = 0;
         
 		//go through each bin, find out if shared
+        vector<string> currentSharedBinLabels = m->getCurrentSharedBinLabels();
 		for (int i = 0; i < lookup->getNumBins(); i++) {
-			if (m->control_pressed) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
+			if (m->getControl_pressed()) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
 			map<string, int> atLeastOne;
@@ -751,7 +752,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
             vector<string> groupNames = lookup->getNamesGroups();
 			for(int j = 0; j < lookup->size(); j++) {
 				string seqGroup = groupNames[j];
-                string name = m->currentSharedBinLabels[i];
+                string name = currentSharedBinLabels[i];
                 int abund = lookup->get(i, seqGroup);
 				
                 if (abund != 0) {

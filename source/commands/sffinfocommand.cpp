@@ -86,7 +86,7 @@ string SffInfoCommand::getOutputPattern(string type) {
         else if (type == "sfftxt")        {   pattern =  "[filename],sff.txt";   }
         else if (type == "sff")        {   pattern =  "[filename],[group],sff";   }
         else if (type == "qfile")       {   pattern =  "[filename],qual-[filename],[tag],qual";   }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -512,7 +512,7 @@ int SffInfoCommand::execute(){
      
 		for (int s = 0; s < filenames.size(); s++) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 			
 			int start = time(NULL);
 			
@@ -533,7 +533,7 @@ int SffInfoCommand::execute(){
 		
 		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";
@@ -578,7 +578,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
         TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
         if (hasOligos)   {
             readOligos(oligos);    split = 2;
-            if (m->control_pressed) { delete oligosObject; return 0; }
+            if (m->getControl_pressed()) { delete oligosObject; return 0; }
             trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligosObject->getPrimers(), oligosObject->getBarcodes(), oligosObject->getReversePrimers(), oligosObject->getLinkers(), oligosObject->getSpacers());  numFPrimers = oligosObject->getPrimers().size(); numBarcodes = oligosObject->getBarcodes().size();
             if (reorient) {
                 rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligosObject->getReorientedPairedPrimers(), oligosObject->getReorientedPairedBarcodes(), false); numBarcodes = oligosObject->getReorientedPairedBarcodes().size();
@@ -652,13 +652,13 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			//report progress
 			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
 		
-			if (m->control_pressed) { count = 0; break;   }
+			if (m->getControl_pressed()) { count = 0; break;   }
 			
 			if (count >= header.numReads) { break; }
 		}
 		
 		//report progress
-		if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
 		in.close();
 		
@@ -761,7 +761,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			in.read(buffer4, 4);
 			header.numReads =  be_int4(*(unsigned int *)(&buffer4));
             
-            if (m->debug) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
 				
 			//read header length
 			char buffer5 [2];
@@ -1757,7 +1757,7 @@ int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& heade
         int endValue = header.clipQualRight;
         if (header.clipQualRight == 0) {
             endValue = read.flowIndex.size();
-            if (m->debug) { m->mothurOut("[DEBUG]: " + header.name + " has clipQualRight=0.\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + header.name + " has clipQualRight=0.\n"); }
         }
         if(endValue > header.clipQualLeft){
             
@@ -1792,7 +1792,7 @@ int SffInfoCommand::readAccnosFile(string filename) {
 						
 			seqNames.insert(name);
 			
-			if (m->control_pressed) { seqNames.clear(); break; }
+			if (m->getControl_pressed()) { seqNames.clear(); break; }
 		}
 		in.close();		
 		
@@ -1914,11 +1914,11 @@ int SffInfoCommand::parseSffTxt() {
 			//report progress
 			if((i+1) % 10000 == 0){	m->mothurOut(toString(i+1)); m->mothurOutEndLine();		}
 			
-			if (m->control_pressed) {  break;  }
+			if (m->getControl_pressed()) {  break;  }
 		}
 		
 		//report progress
-		if (!m->control_pressed) {   if((numReads) % 10000 != 0){	m->mothurOut(toString(numReads)); m->mothurOutEndLine();		}  }
+		if (!m->getControl_pressed()) {   if((numReads) % 10000 != 0){	m->mothurOut(toString(numReads)); m->mothurOutEndLine();		}  }
 		
 		inSFF.close();
 		
@@ -2044,11 +2044,11 @@ bool SffInfoCommand::readOligos(string oligoFile){
 		bool allBlank = false;
         oligosObject->read(oligoFile);
         
-        if (m->control_pressed) { return false; } //error in reading oligos
+        if (m->getControl_pressed()) { return false; } //error in reading oligos
         
         if (oligosObject->hasPairedPrimers() || oligosObject->hasPairedBarcodes()) {
             pairedOligos = true;
-            m->mothurOut("[ERROR]: sffinfo does not support paired barcodes and primers, aborting.\n"); m->control_pressed = true; return true;
+            m->mothurOut("[ERROR]: sffinfo does not support paired barcodes and primers, aborting.\n"); m->setControl_pressed(true); return true;
         }else {
             pairedOligos = false;
             numFPrimers = oligosObject->getPrimers().size();

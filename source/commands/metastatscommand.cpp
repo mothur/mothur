@@ -68,7 +68,7 @@ string MetaStatsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "metastats") {  pattern = "[filename],[distance],[group],metastats"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -253,7 +253,7 @@ int MetaStatsCommand::execute(){
 		
 		//only 1 combo
 		if (numGroups == 2) { processors = 1; }
-		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command."); m->mothurOutEndLine(); m->control_pressed = true; }
+		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 
         if(processors != 1){
             int remainingPairs = namesOfGroupCombos.size();
@@ -270,7 +270,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->control_pressed) {  outputTypes.clear(); delete lookup; m->clearGroups(); delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup; m->clearGroups(); delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -301,13 +301,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->control_pressed) {  outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -338,7 +338,7 @@ int MetaStatsCommand::execute(){
 		m->clearGroups();
 		delete designMap;
 		
-        if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+        if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -383,7 +383,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
                                 int temp = processIDS[i];
                                 wait(&temp);
                             }
-                            m->control_pressed = false;
+                            m->setControl_pressed(false);
                             recalc = true;
                             break;
 						}
@@ -391,7 +391,8 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
 					
                     if (recalc) {
                         //test line, also set recalc to true.
-                        //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                        //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                         
                         //redo file divide
                         lines.clear();
@@ -471,7 +472,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
                     //Close all thread handles and free memory allocations.
                     for(int i=0; i < pDataArray.size(); i++){
                         if (pDataArray[i]->count != (pDataArray[i]->num)) {
-                            m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->num) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                            m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->num) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
                         }
                         delete pDataArray[i]->thisLookUp;
                         for (int j = 0; j < pDataArray[i]->outputNames.size(); j++) {  
@@ -610,7 +611,7 @@ int MetaStatsCommand::convertToShared(string filename) {
         
         int otuCount = 0;
         while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otuname;
             in >> otuname; m->gobble(in);
@@ -670,8 +671,9 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector
         }
         out << endl;
         
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < subset[0]->getNumBins(); i++) {
-            out << m->currentSharedBinLabels[i];
+            out << currentLabels[i];
             for (int j = 0; j < subset.size(); j++) {
                 out  << '\t' << subset[j]->get(i);
             }

@@ -71,7 +71,7 @@ string RemoveRareCommand::getOutputPattern(string type) {
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -284,7 +284,7 @@ int RemoveRareCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (sabundfile != "")		{		processSabund();	}
@@ -292,7 +292,7 @@ int RemoveRareCommand::execute(){
 		if (listfile != "")			{		processList();		}
 		if (sharedfile != "")		{		processShared();	}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -435,7 +435,7 @@ int RemoveRareCommand::processList(){
 			
 			//for each bin
 			for (int i = 0; i < list->getNumBins(); i++) {
-				if (m->control_pressed) {  if (groupfile != "") { delete groupMap; outGroup.close(); m->mothurRemove(outputGroupFileName); } out.close();  m->mothurRemove(outputFileName);  return 0; }
+				if (m->getControl_pressed()) {  if (groupfile != "") { delete groupMap; outGroup.close(); m->mothurRemove(outputGroupFileName); } out.close();  m->mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list->get(i);
@@ -549,7 +549,7 @@ int RemoveRareCommand::processSabund(){
 		
 		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { delete sabund; out.close(); return 0; }
+			if (m->getControl_pressed()) { delete sabund; out.close(); return 0; }
 			
 			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 				
@@ -590,7 +590,7 @@ int RemoveRareCommand::processSabund(){
 			sabund = input.getSAbundVector();
 		}
 		
-		if (m->control_pressed) {  out.close(); return 0; }	
+		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -651,7 +651,7 @@ int RemoveRareCommand::processRabund(){
 		
 		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { delete rabund; out.close(); return 0; }
+			if (m->getControl_pressed()) { delete rabund; out.close(); return 0; }
 			
 			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
 				
@@ -696,7 +696,7 @@ int RemoveRareCommand::processRabund(){
 			rabund = input.getRAbundVector();
 		}
 		
-		if (m->control_pressed) {  out.close(); return 0; }	
+		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -750,7 +750,7 @@ int RemoveRareCommand::processShared(){
 		
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->control_pressed) { delete lookup; return 0; }
+            if (m->getControl_pressed()) { delete lookup; return 0; }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -783,7 +783,7 @@ int RemoveRareCommand::processShared(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) {  return 0; }	
+		if (m->getControl_pressed()) {  return 0; }	
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -841,13 +841,14 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 		}
 		
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		if (byGroup) {
 			
 			//for each otu
 			for (int i = 0; i < lookup->getNumBins(); i++) {
 				bool allZero = true;
 				
-				if (m->control_pressed) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return 0; }
 				
 				//for each group
                 vector<int> abunds = lookup->getOTU(i);
@@ -862,21 +863,21 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 				if (allZero) { }
                 else {
                     for (int j = 0; j < abunds.size(); j++) {  newRabunds[j].push_back(abunds[j]); }
-                    headers.push_back(m->currentSharedBinLabels[i]);
+                    headers.push_back(currentLabels[i]);
                 }
 			}
 		}else {
 			//for each otu
 			for (int i = 0; i < lookup->getNumBins(); i++) {
 				
-				if (m->control_pressed) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return 0; }
 				
                 int totalAbund = lookup->getOTUTotal(i);
 				
 				//eliminates otus below rare cutoff
 				if (totalAbund <= nseqs) {  } //ignore
                 else {
-                    headers.push_back(m->currentSharedBinLabels[i]);
+                    headers.push_back(currentLabels[i]);
                     for (int j = 0; j < data.size(); j++) { newRabunds[j].push_back(data[j]->get(i)); }
                 }
 			}

@@ -27,7 +27,7 @@ CalcSparcc::CalcSparcc(vector<vector<float> > sharedVector, int maxIterations, i
         //    unsigned long long cycTimeStart = time(NULL);
         
         for(int i=0;i<numSamplings;i++){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             vector<float> logFractions =  getLogFractions(sharedVector, method);
             getT_Matrix(logFractions);     //this step is slow...
             getT_Vector();
@@ -53,7 +53,7 @@ CalcSparcc::CalcSparcc(vector<vector<float> > sharedVector, int maxIterations, i
             allCorrelations[i] = correlation;
         }
         
-        if (!m->control_pressed) {
+        if (!m->getControl_pressed()) {
             if(numSamplings > 1){
                 getMedian(allCorrelations);
             }
@@ -74,7 +74,7 @@ CalcSparcc::CalcSparcc(vector<vector<float> > sharedVector, int maxIterations, i
 void CalcSparcc::addPseudoCount(vector<vector<float> >& sharedVector){
     try {
         for(int i=0;i<numGroups;i++){   //iterate across the groups
-            if (m->control_pressed) { return; }
+            if (m->getControl_pressed()) { return; }
             for(int j=0;j<numOTUs;j++){
                 sharedVector[i][j] += 1;
             }
@@ -96,7 +96,7 @@ vector<float> CalcSparcc::getLogFractions(vector<vector<float> > sharedVector, s
         if(method == "dirichlet"){
             vector<float> alphas(numGroups);
             for(int i=0;i<numGroups;i++){   //iterate across the groups
-                if (m->control_pressed) { return logSharedFractions; }
+                if (m->getControl_pressed()) { return logSharedFractions; }
                 alphas = RNG.randomDirichlet(sharedVector[i]);
                 
                 for(int j=0;j<numOTUs;j++){
@@ -106,7 +106,7 @@ vector<float> CalcSparcc::getLogFractions(vector<vector<float> > sharedVector, s
         }
         else if(method == "relabund"){
             for(int i=0;i<numGroups;i++){
-                if (m->control_pressed) { return logSharedFractions; }
+                if (m->getControl_pressed()) { return logSharedFractions; }
                 float total = 0.0;
                 for(int j=0;j<numOTUs;j++){
                     total += sharedVector[i][j];
@@ -140,7 +140,7 @@ void CalcSparcc::getT_Matrix(vector<float> sharedFractions){
         
         for(int j1=0;j1<numOTUs;j1++){
             for(int j2=0;j2<j1;j2++){
-                if (m->control_pressed) { return; }
+                if (m->getControl_pressed()) { return; }
                 float mean = 0.0;
                 for(int i=0;i<numGroups;i++){
                     diff[i] = sharedFractions[i * numOTUs + j1] - sharedFractions[i * numOTUs + j2];
@@ -173,7 +173,7 @@ void CalcSparcc::getT_Vector(){
         tVector.assign(numOTUs, 0);
         
         for(int j1=0;j1<numOTUs;j1++){
-            if (m->control_pressed) { return; }
+            if (m->getControl_pressed()) { return; }
             for(int j2=0;j2<numOTUs;j2++){
                 tVector[j1] += tMatrix[j1 * numOTUs + j2];
             }
@@ -193,7 +193,7 @@ void CalcSparcc::getD_Matrix(){
         
         dMatrix.resize(numOTUs);
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) { return; }
+            if (m->getControl_pressed()) { return; }
             dMatrix[i].resize(numOTUs, 1);
             dMatrix[i][i] = d;
         }
@@ -213,7 +213,7 @@ vector<float> CalcSparcc::getBasisVariances(){
         vector<float> variances = LA.solveEquations(dMatrix, tVector);
         
         for(int i=0;i<variances.size();i++){
-            if (m->control_pressed) { return variances; }
+            if (m->getControl_pressed()) { return variances; }
             if(variances[i] < 0){   variances[i] = 1e-4;    }
         }
         
@@ -239,7 +239,7 @@ vector<vector<float> > CalcSparcc::getBasisCorrelations(vector<float> basisVaria
             rho[i][i] = 1.00;
             
             for(int j=0;j<i;j++){
-                if (m->control_pressed) { return rho; }
+                if (m->getControl_pressed()) { return rho; }
                 float var_j = basisVariance[j];
                 
                 rho[i][j] = (var_i + var_j - tMatrix[i * numOTUs + j]) / (2.0 * sqrt_var_i * sqrt(var_j));
@@ -270,7 +270,7 @@ float CalcSparcc::getExcludedPairs(vector<vector<float> > rho, int& maxRow, int&
         for(int i=0;i<numOTUs;i++){
             
             for(int j=0;j<i;j++){
-                if (m->control_pressed) { return maxRho; }
+                if (m->getControl_pressed()) { return maxRho; }
                 float tester = abs(rho[i][j]);
                 
                 if(tester > maxRho && excluded[i][j] != 1){
@@ -323,7 +323,7 @@ void CalcSparcc::getMedian(vector<vector<vector<float> > > allCorrelations){
         
         for(int i=0;i<numOTUs;i++){
             for(int j=0;j<i;j++){
-                if (m->control_pressed) { return; }
+                if (m->getControl_pressed()) { return; }
                 
                 for(int k=0;k<numSamples;k++){
                     hold[k] = allCorrelations[k][i][j];

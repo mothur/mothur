@@ -105,7 +105,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
         else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; }
         else if (type == "group") {  pattern = "[filename],[tag],contigs.groups"; }
         else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -429,7 +429,7 @@ int MakeContigsCommand::execute(){
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
         
-        if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+        if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
     
         
         if (renameSeq) {
@@ -448,7 +448,7 @@ int MakeContigsCommand::execute(){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* renameSeqsCommand = new RenameSeqsCommand(inputString);
             renameSeqsCommand->execute();
@@ -456,7 +456,7 @@ int MakeContigsCommand::execute(){
             map<string, vector<string> > filenames = renameSeqsCommand->getOutputFiles();
             
             delete renameSeqsCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             vector<string> mapFiles = filenames["map"];
@@ -508,7 +508,7 @@ int MakeContigsCommand::execute(){
                 inputString = "file=" + tempFileFile;
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
-                m->mothurCalling = true;
+                m->setMothurCalling(true);
                 
                 Command* renameSeqsAllFilesCommand = new RenameSeqsCommand(inputString);
                 renameSeqsAllFilesCommand->execute();
@@ -516,7 +516,7 @@ int MakeContigsCommand::execute(){
                 filenames = renameSeqsAllFilesCommand->getOutputFiles();
                 
                 delete renameSeqsAllFilesCommand;
-                m->mothurCalling = false;
+                m->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 
                 int countFasta = 0;
@@ -595,7 +595,7 @@ int MakeContigsCommand::execute(){
 		}
 		if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
-		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
         
         //output files created by command
 		m->mothurOutEndLine();
@@ -677,24 +677,24 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 else {   allGZ = false;  }
             }
             if (!allGZ && !allPlainTxt) { //mixed bag of files, uh oh...
-                m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->setControl_pressed(true);
             }
         }
 #else
         #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         #else
         string extension = m->getExtension(fileInputs[0]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
         extension = m->getExtension(fileInputs[1]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
         if (qualOrIndexInputs.size() != 0) {
             if (qualOrIndexInputs[0] != "NONE") {
                 extension = m->getExtension(qualOrIndexInputs[0]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
             }
             if (qualOrIndexInputs[1] != "NONE") {
                 extension = m->getExtension(qualOrIndexInputs[1]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
             }
         }
         #endif
@@ -729,7 +729,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
         m->mothurOut("Making contigs...\n");
         numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group);
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
         
         if(allFiles){
             // so we don't add the same groupfile multiple times
@@ -771,7 +771,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(map<string, int>&
                 m->openOutputFile(thisGroupName, out);
                 
                 while (!in.eof()){
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     Sequence currSeq(in); m->gobble(in);
                     out << currSeq.getName() << '\t' << it->second << endl;
@@ -823,7 +823,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
     try {
         
         //read file
-        vector< vector<string> > fileInputs = readFileNames(file);  if (m->control_pressed) { return 0; }
+        vector< vector<string> > fileInputs = readFileNames(file);  if (m->getControl_pressed()) { return 0; }
         
         unsigned long long numReads = 0;
         
@@ -867,7 +867,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(map<string, int
             for (int l = 0; l < fileInputs.size(); l++) {
                 int startTime = time(NULL);
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 m->mothurOut("\n>>>>>\tProcessing file pair " + fileInputs[l][0] + " - " + fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(fileInputs.size()) + ")\t<<<<<\n");
                 
@@ -969,7 +969,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             pid_t pid = fork();
             
             if (pid > 0) {
-                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+                processIDS.push_back(process);  //create map from line number to pid so you can append files in correct order later
                 process++;
             }else if (pid == 0){
                 
@@ -1016,7 +1016,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -1027,7 +1027,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             vector<linePair> startEndIndexes;
             
@@ -1245,7 +1245,7 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
         for (int l = start; l < end; l++) {
             int startTime = time(NULL);
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             m->mothurOut("\n>>>>>\tProcessing file pair " + fileInputs[l][0] + " - " + fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(fileInputs.size()) + ")\t<<<<<\n");
             
@@ -1321,7 +1321,7 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
             
             m->mothurOut("Done.\n");
             
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete oligos; return 0; }
             
             if(allFiles){
                 // so we don't add the same groupfile multiple times
@@ -1361,7 +1361,7 @@ unsigned long long MakeContigsCommand::driverGroups(vector< vector<string> > fil
                     m->openOutputFile(thisGroupName, out);
                     
                     while (!in.eof()){
-                        if (m->control_pressed) { break; }
+                        if (m->getControl_pressed()) { break; }
                         
                         Sequence currSeq(in); m->gobble(in);
                         out << currSeq.getName() << '\t' << it->second << endl;
@@ -1468,7 +1468,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 			pid_t pid = fork();
 			
 			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				processIDS.push_back(process);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
                 vector<vector<string> > tempFASTAFileNames = fastaFileNames;
@@ -1529,7 +1529,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove((toString(processIDS[i]) + ".num.temp"));
                 }
@@ -1540,7 +1540,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1767,7 +1767,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
             if (!pDataArray[i]->done) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
             }
             for (map<string, int>::iterator it = pDataArray[i]->groupCounts.begin(); it != pDataArray[i]->groupCounts.end(); it++) {
                 map<string, int>::iterator it2 = groupCounts.find(it->first);
@@ -1848,7 +1848,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             thisrqualindexfile = qualOrIndexFiles[1];
         }
         
-        if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
         
         ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
         #ifdef USE_BOOST
@@ -1915,7 +1915,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
             hasQuality = true;
         }
         
-        if (m->debug) { if (hasQuality) { m->mothurOut("[DEBUG]: hasQuality = true\n");  } else { m->mothurOut("[DEBUG]: hasQuality = false\n"); } }
+        if (m->getDebug()) { if (hasQuality) { m->mothurOut("[DEBUG]: hasQuality = true\n");  } else { m->mothurOut("[DEBUG]: hasQuality = false\n"); } }
         
         TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, oligos->getPairedPrimers(), oligos->getPairedBarcodes(), hasIndex);
 
@@ -1930,7 +1930,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         bool good = true;
         while (good) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             int success = 1;
             string trashCode = "";
@@ -2061,11 +2061,11 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                 if(trashCode.length() == 0){
                     bool ignore = false;
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + fSeq.getName()); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + fSeq.getName()); }
                     
                     if (createOligosGroup) {
                         string thisGroup = oligos->getGroupName(barcodeIndex, primerIndex);
-                        if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
+                        if (m->getDebug()) { m->mothurOut(", group= " + thisGroup + "\n"); }
                         
                         int pos = thisGroup.find("ignore");
                         if (pos == string::npos) {
@@ -2085,7 +2085,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
                             else { groupCounts[it->first] ++; }
                         }else { ignore = true; }
                     }
-                    if (m->debug) { m->mothurOut("\n"); }
+                    if (m->getDebug()) { m->mothurOut("\n"); }
                     
                     if(!ignore){
                         //output
@@ -2197,7 +2197,7 @@ unsigned long long MakeContigsCommand::driver(vector<string> inputFiles, vector<
         delete alignment;
         if (reorient) { delete rtrimOligos; }
         
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             m->mothurRemove(outputFasta); m->mothurRemove(outputScrapFasta); m->mothurRemove(outputMisMatches);
             if (hasQuality) { m->mothurRemove(outputQual); m->mothurRemove(outputScrapQual); }
         }
@@ -2531,7 +2531,7 @@ int MakeContigsCommand::setNameType(string forward, string reverse) {
             if (tempForward == tempReverse) { type = poundMatch;    }
             else {
                 char delim = ':';
-                if (m->changedSeqNames) { delim = '_'; }
+                if (m->getChangedSeqNames()) { delim = '_'; }
                 vector<char> delims; delims.push_back(delim); delims.push_back('/');
                 
                 for (int j = 0; j < delims.size(); j++) {
@@ -2731,15 +2731,15 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     m->mothurOut(it->first + " is in your forward fastq file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
                 }
             }
-            m->control_pressed = true;
+            m->setControl_pressed(true);
             return processors;
         }
 
         //fill lines with paired forward and reverse fasta lines
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-            if (m->debug) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
             lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
-            if (m->debug) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
             lines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));
         }
         
@@ -2803,7 +2803,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             m->mothurOut(it->first + " is in your forward fastq file and reverse fastq file, but not your forward index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
                         }
                     }
-                    m->control_pressed = true;
+                    m->setControl_pressed(true);
                     return processors;
                 }
             }
@@ -2866,7 +2866,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             }
                         }
                     }
-                    m->control_pressed = true;
+                    m->setControl_pressed(true);
                     return processors;
                 }
             }
@@ -2877,9 +2877,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             
             //fill lines with paired forward and reverse fasta lines
             for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-                if (m->debug) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: forward " + toString(i) +'\t' + toString(qfileFilePos[i]) + '\t' + toString(qfileFilePos[i+1]) + '\n'); }
                 qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));
-                if (m->debug) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(temp[i]) + '\t' + toString(temp[i+1]) + '\n'); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: reverse " + toString(i) +'\t' + toString(temp[i]) + '\t' + toString(temp[i+1]) + '\n'); }
                 qLines.push_back(linePair(temp[i], temp[(i+1)]));
             }
         }else {  qLines = lines;	} //files with duds
@@ -2904,9 +2904,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             
             if (numFastaSeqs != numRFastaSeqs) {
                 if (delim == '>') {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, but " + toString(numRFastaSeqs) + " sequences in your reverse fasta file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, but " + toString(numRFastaSeqs) + " sequences in your reverse fasta file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                 }else {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, but " + toString(numRFastaSeqs) + " sequences in your reverse fastq file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, but " + toString(numRFastaSeqs) + " sequences in your reverse fastq file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                 }
             }
             
@@ -2935,14 +2935,14 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
                 if ((numFQualSeqs != numRQualSeqs) || (numFQualSeqs != numFastaSeqs)){
                     if (delim == '>') {
-                        m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                        m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                     }else {
                         if (qual[0] != "NONE") {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                         }else if (qual[1] != "NONE") {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numFQualSeqs) + " sequences in your forward index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numFQualSeqs) + " sequences in your forward index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                         }else {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file, " + toString(numFQualSeqs) + " sequences in your forward index file, " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->control_pressed = true; return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file, " + toString(numFQualSeqs) + " sequences in your forward index file, " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
                         }
                     }
                 }
@@ -2988,12 +2988,12 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
         
         while(!in.eof()) {
             
-            if (m->control_pressed) { return files; }
+            if (m->getControl_pressed()) { return files; }
             
             bool skip = false;
             string line = m->getline(in);  m->gobble(in);
             
-            if (m->debug) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
             
             vector<string> pieces = m->splitWhiteSpace(line);
             
@@ -3020,10 +3020,10 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 if ((findex == "none") || (findex == "NONE")){ findex = "NONE"; }
                 if ((rindex == "none") || (rindex == "NONE")){ rindex = "NONE"; }
             }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: file lines can be 2, 3, or 4 columns. The forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one. \n"); m->setControl_pressed(true);
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
             
             if (inputDir != "") {
                 string path = m->hasPath(forward);
@@ -3250,23 +3250,23 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                     else {   allGZ = false;  }
                 }
                 if (!allGZ && !allPlainTxt) { //mixed bag of files, uh oh...
-                    m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->setControl_pressed(true);
                 }
 #else
                 allGZ=false;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
                 string extension = m->getExtension(forward);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
                 extension = m->getExtension(reverse);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
                 if ((findex != "") && (findex != "NONE")) {
                         extension = m->getExtension(findex);
-                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
                 }
                 if ((rindex != "") && (rindex != "NONE")) {
                         extension = m->getExtension(rindex);
-                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->control_pressed = true; }
+                        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
                 }
                 
 #endif
@@ -3276,7 +3276,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
                 pair.push_back(reverse);
                 pair.push_back(findex);
                 pair.push_back(rindex);
-                if (((findex != "") || (rindex != "")) && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->control_pressed = true;  }
+                if (((findex != "") || (rindex != "")) && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
                 files.push_back(pair);
             }
         }
@@ -3286,7 +3286,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             gz = true;
         }else { gz = false; }
         
-        if (files.size() == 0) { m->control_pressed = true; }
+        if (files.size() == 0) { m->setControl_pressed(true); }
         
         return files;
     }
@@ -3302,21 +3302,21 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 //PRIMER   atgcatgc   atgcatgc
 bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, string rootname, map<string, string>& fastaFile2Group){
 	try {
-        if (m->debug) { m->mothurOut("[DEBUG]: oligosfile = " + oligosfile + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: oligosfile = " + oligosfile + "\n"); }
         
         bool allBlank = false;
         oligos->read(oligosfile, false);
         
-        if (m->control_pressed) { return false; } //error in reading oligos
+        if (m->getControl_pressed()) { return false; } //error in reading oligos
         
         if (oligos->hasPairedBarcodes() || oligos->hasPairedPrimers()) {
             numFPrimers = oligos->getPairedPrimers().size();
             numBarcodes = oligos->getPairedBarcodes().size();
         }else {
-            m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); m->setControl_pressed(true);
         }
     
-        if (m->control_pressed) { return false; }
+        if (m->getControl_pressed()) { return false; }
     
         numLinkers = oligos->getLinkers().size();
         numSpacers = oligos->getSpacers().size();

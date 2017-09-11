@@ -22,7 +22,7 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix, vector<int> ro
             
             for(int j=i+1;j<nrows;j++)
             {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 for(int k=0;k<ncols;k++)
                 {
                     if((co_matrix[i][k]==1)&&(co_matrix[j][k]==1)) //if both are 1s ie co-occurrence
@@ -75,7 +75,7 @@ int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int> rowto
         {
             for(int j=i+1;j<nrows;j++)
             {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 //s[i][j]=0;
                 for(int k=0;k<ncols;k++)
                 {
@@ -123,14 +123,14 @@ double TrialSwap2::calc_vratio (int nrows, int ncols, vector<int> rowtotal, vect
         
         for(int i=0;i<nrows;i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             p = (double) rowtotal[i]/(double) ncols;
             rowVar += p * (1.0-p);
         }
         
         for(int i=0;i<ncols;i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             colVar += pow(((double) columntotal[i]-colAvg),2);
         }
         
@@ -200,9 +200,9 @@ int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix, int ncols, 
         for(int a=0;a<1000;a++){
             int i, j, k, l;
             i = m->getRandomIndex(nrows-1);
-            while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}
+            while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->getControl_pressed()) { return 0; }}
             k = m->getRandomIndex(ncols-1);
-            while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->control_pressed) { return 0; }}
+            while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->getControl_pressed()) { return 0; }}
 
             if((co_matrix[i][k]*co_matrix[j][l]==1 && co_matrix[i][l]+co_matrix[j][k]==0)||(co_matrix[i][k]+co_matrix[j][l]==0 && co_matrix[i][l]*co_matrix[j][k]==1)) //checking for checkerboard value and swap
             {
@@ -229,7 +229,7 @@ double TrialSwap2::calc_pvalue_greaterthan (vector<double> scorevec, double init
         double p = 0.0;
         for( int i=0;i<runs;i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if(scorevec[i]>=initialscore)
                 p++;
         }
@@ -248,7 +248,7 @@ double TrialSwap2::calc_pvalue_lessthan (vector<double> scorevec, double initial
         double p = 0.0;
         for( int i=0;i<runs;i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             if(scorevec[i]<=initialscore)
                 p++;
         }
@@ -269,7 +269,7 @@ double TrialSwap2::t_test (double initialscore, int runs, double nullMean, vecto
         
         for(int i=0;i<runs;i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             sum += pow((scorevec[i] - nullMean),2);
             //cout << "scorevec[" << i << "]" << scorevec[i] << endl;
         }
@@ -298,7 +298,7 @@ double TrialSwap2::getSD (int runs, vector<double> scorevec, double nullMean)
         double sum = 0;
         for(int i=0;i<runs;i++)
             {
-                if (m->control_pressed) { return 0; }
+                if (m->getControl_pressed()) { return 0; }
                 sum += pow((scorevec[i] - nullMean),2);
             }
         return sqrt( (1/double(runs)) * sum );
@@ -327,7 +327,7 @@ int TrialSwap2::print_matrix(vector<vector<int> > &matrix, int nrows, int ncols)
         
         for (int i = 0; i < nrows; i++)
         {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             for (int j = 0; j < ncols; j++)
             {
                 m->mothurOut(toString(matrix[i][j]));

@@ -21,7 +21,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		groupMap = new GroupMap(groupFile);
 		error = groupMap->readMap();
 		
-		if (error == 1) { m->control_pressed = true; }
+		if (error == 1) { m->setControl_pressed(true); }
 		
 		//initialize maps
         vector<string> namesOfGroups = groupMap->getNamesOfGroups();
@@ -49,7 +49,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             Sequence seq(in); m->gobble(in);
             
@@ -103,7 +103,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
         }
 		in.close();
 				 
-		if (error == 1) { m->control_pressed = true; }
+		if (error == 1) { m->setControl_pressed(true); }
 		
 	}
 	catch(exception& e) {
@@ -122,7 +122,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 		groupMap = new GroupMap(groupFile);
 		error = groupMap->readMap();
 		
-		if (error == 1) { m->control_pressed = true; }
+		if (error == 1) { m->setControl_pressed(true); }
 		
 		//initialize maps
         vector<string> namesOfGroups = groupMap->getNamesOfGroups();
@@ -144,7 +144,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			Sequence seq(in); m->gobble(in);
 			
@@ -161,7 +161,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 		}
 		in.close();
 		
-		if (error == 1) { m->control_pressed = true; }
+		if (error == 1) { m->setControl_pressed(true); }
 		
 	}
 	catch(exception& e) {
@@ -208,7 +208,7 @@ vector<Sequence> SequenceParser::getSeqs(string g){
 			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			seqForThisGroup = it->second;
-            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
 		}
 		
 		return seqForThisGroup; 
@@ -269,7 +269,7 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 				//print new file in order of
 				for (int i = 0; i < nameVector.size(); i++) {
 					
-					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 					
 					out << ">" <<  nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
@@ -278,7 +278,7 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
                 //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
-					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 					
 					seqForThisGroup[i].printSequence(out);	
 				}
@@ -305,7 +305,7 @@ map<string, string> SequenceParser::getNameMap(string g){
 			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			nameMapForThisGroup = it->second;
-            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " name file has " + toString(nameMapForThisGroup.size()) + " unique sequences.");  }
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " name file has " + toString(nameMapForThisGroup.size()) + " unique sequences.");  }
 		}
 		
 		return nameMapForThisGroup; 
@@ -332,7 +332,7 @@ int SequenceParser::getNameMap(string g, string filename){
 			
 			for (map<string, string>::iterator itFile = nameMapForThisGroup.begin(); itFile != nameMapForThisGroup.end(); itFile++) {
 				
-				if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
+				if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
 				
 				out << itFile->first << '\t' << itFile->second << endl;
 			}

@@ -68,7 +68,7 @@ string MergeGroupsCommand::getOutputPattern(string type) {
         else if (type == "group") {  pattern = "[filename],merge,[extension]"; }
         else if (type == "count") {  pattern = "[filename],merge,[extension]"; }
         else if (type == "fasta") {  pattern = "[filename],merge,[extension]"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -277,7 +277,7 @@ int MergeGroupsCommand::execute(){
             vector<string> treatments = designMap->getCategory(defaultClass);
             set<int> numGroupsPerTreatment;
             for (int i = 0; i < treatments.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 map<string, vector<string> > checkTreatments;
                 vector<string> temp; temp.push_back(treatments[i]);
                 checkTreatments[defaultClass] = temp;
@@ -294,7 +294,7 @@ int MergeGroupsCommand::execute(){
 		m->clearGroups();  
 		delete designMap;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
 		
 		
 		//set shared file as new current sharedfile
@@ -346,7 +346,7 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out)
  
         //for each OTU
         for (int j = 0; j < data[0]->getNumBins(); j++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             map<string, vector<int> > otusGroupAbunds;
             map<string, vector<int> >::iterator itAbunds;
@@ -379,12 +379,12 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out)
         //free memory
         for (int i = 0; i < data.size(); i++) {	delete data[i]; 	}
         
-        if (m->control_pressed) { delete merged; return 0; }
+        if (m->getControl_pressed()) { delete merged; return 0; }
         
         merged->eliminateZeroOTUS(); // remove any zero OTUs created by median option.
         
         //print new file
-        if (!m->printedSharedHeaders) { merged->printHeaders(out); }
+        if (m->getPrintedSharedHeaders()){ merged->printHeaders(out); }
         merged->print(out);
         delete merged;
         
@@ -423,7 +423,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->control_pressed) {  out.close(); delete lookup; m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) {  out.close(); delete lookup; m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -454,13 +454,13 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->control_pressed) {  out.close(); m->clearGroups();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  out.close(); m->clearGroups();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { out.close(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) { out.close(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -528,7 +528,7 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 		
 		for (int i = 0; i < namesOfSeqs.size(); i++) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			string thisGroup = groupMap.getGroup(namesOfSeqs[i]);
 			
@@ -543,7 +543,7 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 			}
 		}
 		
-		if (error) { m->control_pressed = true; }
+		if (error) { m->setControl_pressed(true); }
 
 		out.close();
 		
@@ -560,7 +560,7 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
     try {
         CountTable countTable;
-        if (!countTable.testGroups(countfile)) { m->mothurOut("[ERROR]: your countfile contains no group information, please correct.\n"); m->control_pressed = true; return 0; }
+        if (!countTable.testGroups(countfile)) { m->mothurOut("[ERROR]: your countfile contains no group information, please correct.\n"); m->setControl_pressed(true); return 0; }
         
         //read countTable
         countTable.readTable(countfile, true, false);
@@ -577,12 +577,12 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         if (nameGroups.size() == dnamesGroups.size()) { //at least there are the same number
             //is every group in counttable also in designmap
             for (int i = 0; i < nameGroups.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 if (!m->inUsersGroups(nameGroups[i], dnamesGroups)) { error = true; break; }
             }
             
         }
-        if (error) { m->mothurOut("[ERROR]: Your countfile does not contain the same groups as your design file, please correct\n"); m->control_pressed = true; return 0; }
+        if (error) { m->mothurOut("[ERROR]: Your countfile does not contain the same groups as your design file, please correct\n"); m->setControl_pressed(true); return 0; }
         
         //user selected groups - remove some groups from table
         if (Groups.size() != nameGroups.size()) {
@@ -609,7 +609,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         vector<string> namesOfSeqs = countTable.getNamesOfSeqs();
         for (int i = 0; i < namesOfSeqs.size(); i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             vector<int> thisSeqsCounts = countTable.getGroupCounts(namesOfSeqs[i]);
             map<string, vector<int> > thisSeqsMap = clearedMap;
@@ -632,7 +632,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             }else { newTable.push_back(namesOfSeqs[i], newCounts); }
         }
         
-        if (error) { m->control_pressed = true; return 0; }
+        if (error) { m->setControl_pressed(true); return 0; }
         
         //remove sequences zeroed out by median method
         if (namesToRemove.size() != 0) {
@@ -643,7 +643,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             
             //output to .accnos file
             for (set<string>::iterator it = namesToRemove.begin(); it != namesToRemove.end(); it++) {
-                if (m->control_pressed) {  out.close(); m->mothurRemove(accnosFile); return 0; }
+                if (m->getControl_pressed()) {  out.close(); m->mothurRemove(accnosFile); return 0; }
                 out << *it << endl;
             }
             out.close();
@@ -653,7 +653,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* removeCommand = new RemoveSeqsCommand(inputString);
             removeCommand->execute();
@@ -661,7 +661,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             
             delete removeCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             m->mothurRemove(accnosFile);
@@ -698,7 +698,7 @@ int MergeGroupsCommand::mergeAbund(vector<int> values){
         }else if (method == "median") {
             abund = m->median(values);
         }else {
-            m->mothurOut("[ERROR]: Invalid method. \n"); m->control_pressed = true; return 0;
+            m->mothurOut("[ERROR]: Invalid method. \n"); m->setControl_pressed(true); return 0;
         }
         
         return abund;

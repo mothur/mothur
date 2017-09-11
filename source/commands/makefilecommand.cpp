@@ -56,7 +56,7 @@ string MakeFileCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "file") {  pattern = "[filename],[tag],files-[filename],files"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -156,7 +156,7 @@ int MakeFileCommand::execute(){
         m->readAccnos(tempFile, fastqFiles, "no error");
         m->mothurRemove(tempFile);
         
-        if (m->debug) {
+        if (m->getDebug()) {
             m->mothurOut("[DEBUG]: Found " + toString(fastqFiles.size()) + " files of type " + typeFile + ".\n");
             for (int i = 0; i < fastqFiles.size(); i++) { m->mothurOut("[DEBUG]: " + toString(i) + " = " + fastqFiles[i] + "\n");}
         }
@@ -173,10 +173,10 @@ int MakeFileCommand::execute(){
             string lastFile = "";
             for (int i = 0; i < fastqFiles.size()-1; i++) {
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) + ".\n"); }
-                if (m->debug) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
                 
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 string simpleName1 = m->getRootName(m->getSimpleName(fastqFiles[i]));
                 string simpleName2 = m->getRootName(m->getSimpleName(fastqFiles[i+1]));
@@ -192,7 +192,7 @@ int MakeFileCommand::execute(){
                     else { //only one diff = paired files
                         vector<string> temp;
                         temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
-                        if (m->debug) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
                         paired.push_back(temp);
                         i++;
                     }
@@ -241,7 +241,7 @@ int MakeFileCommand::execute(){
             }
             
         }
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -274,7 +274,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             map<int, set<string> > posToWord;
             
             for (int i = 0; i < paired.size(); i++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 string filename = m->getRootName(m->getSimpleName(paired[i][0]));
                 
@@ -366,13 +366,13 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
         findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
-        if (m->debug) { m->mothurOut(findCommand + "\n"); }
+        if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
         
 #else
         //use ls command
         findCommand = "find \"\" "  + inputDir.substr(0, inputDir.length()-1) + "\\*." + typeFile + " > " + tempFile;
-        if (m->debug) { m->mothurOut(findCommand + "\n"); }
+        if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
 
         ifstream in;
@@ -387,7 +387,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         
         string junk, filename;
         while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             in >> junk; m->gobble(in);
             in >> filename; m->gobble(in);
             

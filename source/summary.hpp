@@ -200,7 +200,7 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
                     //make sure this sequence is in the namefile, else error
                     map<string, int>::iterator it = pDataArray->nameMap.find(current.getName());
                     
-                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
                     else { num = it->second; }
                 }
                 
@@ -293,7 +293,7 @@ static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
                     //make sure this sequence is in the namefile, else error
                     map<string, int>::iterator it = pDataArray->nameMap.find(name);
                     
-                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
                     else { numReps = it->second; }
                 }
                 
@@ -367,7 +367,7 @@ static DWORD WINAPI MySeqContigsSumThreadFunction(LPVOID lpParam){
                     //make sure this sequence is in the namefile, else error
                     map<string, int>::iterator it = pDataArray->nameMap.find(name);
                     
-                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
                     else { numReps = it->second; }
                 }
                 
@@ -445,7 +445,7 @@ static DWORD WINAPI MySeqAlignSumThreadFunction(LPVOID lpParam){
                     //make sure this sequence is in the namefile, else error
                     map<string, int>::iterator it = pDataArray->nameMap.find(name);
                     
-                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                    if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
                     else { numReps = it->second; }
                 }
                 

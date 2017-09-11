@@ -46,8 +46,9 @@ TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfi
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            for (int i = 0; i < m->Treenames.size(); i++) { nameMap.insert(m->Treenames[i]);  }
-            if (groupfile == "") { gps.insert("Group1"); for (int i = 0; i < m->Treenames.size(); i++) { groupMap[m->Treenames[i]] = "Group1"; } }
+            vector<string> Treenames = m->getTreenames();
+            for (int i = 0; i < Treenames.size(); i++) { nameMap.insert(Treenames[i]);  }
+            if (groupfile == "") { gps.insert("Group1"); for (int i = 0; i < Treenames.size(); i++) { groupMap[Treenames[i]] = "Group1"; } }
             else {
                 GroupMap g(groupfile); 
                 g.readMap();
@@ -78,7 +79,7 @@ bool TreeReader::readTrees()  {
 		ReadTree* read = new ReadNewickTree(treefile);
 		int readOk = read->read(ct); 
 		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine();  delete read; m->control_pressed=true; return 0; }
+		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine();  delete read; m->setControl_pressed(true); return 0; }
 		
 		read->AssembleTrees();
 		trees = read->getTrees();
@@ -87,10 +88,11 @@ bool TreeReader::readTrees()  {
 		//make sure all files match
 		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
 		int numNamesInTree;
+        vector<string> Treenames = m->getTreenames();
 		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = ct->getNumSeqs();  }
-			else {   numNamesInTree = m->Treenames.size();  }
-		}else {  numNamesInTree = m->Treenames.size();  }
+			if (numUniquesInName == Treenames.size()) {  numNamesInTree = ct->getNumSeqs();  }
+			else {   numNamesInTree = Treenames.size();  }
+		}else {  numNamesInTree = Treenames.size();  }
 		
 		
 		//output any names that are in group file but not in tree
@@ -99,15 +101,15 @@ bool TreeReader::readTrees()  {
 			for (int i = 0; i < namesSeqsCt.size(); i++) {
 				//is that name in the tree?
 				int count = 0;
-				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (namesSeqsCt[i] == m->Treenames[j]) { break; } //found it
+				for (int j = 0; j < Treenames.size(); j++) {
+					if (namesSeqsCt[i] == Treenames[j]) { break; } //found it
 					count++;
 				}
 				
-				if (m->control_pressed) { for (int i = 0; i < trees.size(); i++) { delete trees[i]; } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < trees.size(); i++) { delete trees[i]; } return 0; }
 				
 				//then you did not find it so report it 
-				if (count == m->Treenames.size()) { 
+				if (count == Treenames.size()) {
                     m->mothurOut(namesSeqsCt[i] + " is in your name or group file and not in your tree. It will be disregarded."); m->mothurOutEndLine();
                     ct->remove(namesSeqsCt[i]);
 				}

@@ -71,7 +71,7 @@ string FilterSharedCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "shared")      {   pattern = "[filename],[distance],filter,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -236,7 +236,7 @@ int FilterSharedCommand::execute(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->control_pressed) {   delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;  }
+            if (m->getControl_pressed()) {   delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -274,7 +274,7 @@ int FilterSharedCommand::execute(){
 		}
 		
 		
-		if (m->control_pressed) {   return 0;  }
+		if (m->getControl_pressed()) {   return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -325,7 +325,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentSharedBinLabels;
+		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -333,7 +333,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         variables["[distance]"] = sharedLookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         map<string, int> labelsForRare;
         vector<string> filteredLabels;
@@ -371,7 +371,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                                 indexFirstNotRare = i+1; tie = false; break;
                             }
                         }
-                        if (tie) { if (m->debug) { m->mothurOut("For distance " + sharedLookup->getLabel() + " all rare OTUs abundance tie with first 'non rare' OTU, not removing any for rarepercent parameter.\n"); }indexFirstNotRare = 0; }
+                        if (tie) { if (m->getDebug()) { m->mothurOut("For distance " + sharedLookup->getLabel() + " all rare OTUs abundance tie with first 'non rare' OTU, not removing any for rarepercent parameter.\n"); }indexFirstNotRare = 0; }
                     }
                 }
             }
@@ -384,7 +384,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         int numRemoved = 0;
         for (int i = 0; i < sharedLookup->getNumBins();) {
             
-            if (m->control_pressed) { for (int j = 0; j < data.size(); j++) { delete data[j]; } return 0; }
+            if (m->getControl_pressed()) { for (int j = 0; j < data.size(); j++) { delete data[j]; } return 0; }
             
             bool okay = true; //innocent until proven guilty
             if (minAbund != -1) {
@@ -468,7 +468,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 string simpleLastLabel = m->getSimpleLabel(tempLabel);
                 m->mothurConvert(simpleLastLabel, otuNum); otuNum++;
                 while (notDone) {
-                    if (m->control_pressed) { notDone = false; break; }
+                    if (m->getControl_pressed()) { notDone = false; break; }
                     
                     string potentialLabel = toString(otuNum);
                     it = labelsForRare.find(potentialLabel);
@@ -490,7 +490,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-        m->currentSharedBinLabels = filteredLabels;
+        m->setCurrentSharedBinLabels(filteredLabels);
         
 		sharedLookup->printHeaders(out);
         sharedLookup->print(out);
@@ -498,7 +498,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         
         //save mothurOut's binLabels to restore for next label
-		m->currentSharedBinLabels = saveBinLabels;
+		m->setCurrentSharedBinLabels(saveBinLabels);
         
         m->mothurOut("\nRemoved " + toString(numRemoved) + " OTUs.\n");
         

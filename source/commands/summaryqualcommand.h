@@ -111,7 +111,7 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = pDataArray->nameMap.find(current.getName());
 					
-					if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+					if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
 					else { num = it->second; }
 				}
 				
@@ -130,7 +130,7 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 				for (int i = 0; i < thisScores.size(); i++) { 
 					pDataArray->position.at(i) += num; 
 					pDataArray->averageQ.at(i) += (thisScores[i] * num); //weighting for namesfile
-					if (thisScores[i] > 41) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+					if (thisScores[i] > 41) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); }
 					else { pDataArray->scores.at(i)[thisScores[i]] += num; }  
 				}
 				

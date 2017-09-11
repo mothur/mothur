@@ -80,7 +80,7 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 		int hold;
         
         //are we at the beginning of the file??
-		if (m->saveNextLabel == "") {
+		if (m->getSaveNextLabel() == "") {
 			f >> label;
             
 			//is this a shared file that has headers
@@ -94,15 +94,15 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-				m->listBinLabelsInFile.clear();
+                vector<string> fileLabels;
 				while(!iStringStream.eof()){
-					if (m->control_pressed) { break; }
+					if (m->getControl_pressed()) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
                     
-					m->listBinLabelsInFile.push_back(temp);
+					fileLabels.push_back(temp);
 				}
-				
+				m->setListBinLabelsInFile(fileLabels);
 				f >> label >> hold;
 			}else {
                 //read in first row
@@ -110,7 +110,8 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(hold);
-                m->listBinLabelsInFile.clear();
+                vector<string> fileLabels;
+                
                 for (int i = 0; i < hold; i++) {
                     //if there is a bin label use it otherwise make one
                     string binLabel = "Otu";
@@ -120,16 +121,18 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
-                    m->listBinLabelsInFile.push_back(binLabel);
+                    fileLabels.push_back(binLabel);
                 }
+                m->setListBinLabelsInFile(fileLabels);
             }
-            m->saveNextLabel = label;
+            m->setSaveNextLabel(label);
 		}else {
             f >> label >> hold;
-            m->saveNextLabel = label;
+            m->setSaveNextLabel(label);
         }
 	
-        binLabels.assign(m->listBinLabelsInFile.begin(), m->listBinLabelsInFile.begin()+hold);
+        vector<string> fileLabels = m->getListBinLabelsInFile();
+        binLabels.assign(fileLabels.begin(), fileLabels.begin()+hold);
 		
 		data.assign(hold, "");
 		string inputData = "";
@@ -140,7 +143,7 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 		}
 		m->gobble(f);
         
-        if (f.eof()) { m->saveNextLabel = ""; }
+        if (f.eof()) { m->setSaveNextLabel(""); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "ListVector");
@@ -193,7 +196,7 @@ vector<string> ListVector::getLabels(){
     try {
         
         string tagHeader = "Otu";
-        if (m->sharedHeaderMode == "tax") { tagHeader = "PhyloType"; }
+        if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
         
         if (binLabels.size() < data.size()) {
             string snumBins = toString(numBins);
@@ -273,7 +276,7 @@ void ListVector::printHeaders(ostream& output){
 	try {
 		string snumBins = toString(numBins);
         string tagHeader = "Otu";
-        if (m->sharedHeaderMode == "tax") { tagHeader = "PhyloType"; }
+        if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
 		output << "label\tnum" + tagHeader + "s";
         
         vector<string> theseLabels = getLabels();
@@ -284,7 +287,7 @@ void ListVector::printHeaders(ostream& output){
 					
         output << endl;
 		
-		m->printedListHeaders = true;
+		m->setPrintedListHeaders(true);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "printHeaders");
@@ -309,7 +312,7 @@ void ListVector::print(ostream& output, map<string, int>& ct){
                 for (int j = 0; j < binNames.size(); j++) {
                     map<string, int>::iterator it = ct.find(binNames[j]);
                     if (it == ct.end()) {
-                        m->mothurOut("[ERROR]: " + binNames[j] + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                        m->mothurOut("[ERROR]: " + binNames[j] + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                     }else { total += ct[binNames[j]]; }
                 }
                 listCt temp(data[i], total);

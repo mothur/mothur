@@ -33,7 +33,7 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
         //n contains treenames
         for (set<string>::iterator it = n.begin(); it != n.end(); it++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string seqName = *it;
             
@@ -64,7 +64,7 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
             }
 
         }
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
         else { //check for zero groups
             if (hasGroups) {
                 for (int i = 0; i < totalGroups.size(); i++) {
@@ -133,7 +133,7 @@ bool CountTable::setNamesOfGroups(vector<string> mygroups) {
         }
         
         //false if error
-        return (!m->control_pressed);
+        return (!m->getControl_pressed());
     }
     catch(exception& e) {
         m->errorOut(e, "CountTable", "setNamesOfGroups");
@@ -144,7 +144,7 @@ bool CountTable::setNamesOfGroups(vector<string> mygroups) {
 int CountTable::createTable(string namefile, string groupfile, bool createGroup) {
     try {
         
-        if (namefile == "") { m->mothurOut("[ERROR]: namefile cannot be blank when creating a count table.\n"); m->control_pressed = true; }
+        if (namefile == "") { m->mothurOut("[ERROR]: namefile cannot be blank when creating a count table.\n"); m->setControl_pressed(true); }
                                            
         GroupMap* groupMap;
         int numGroups = 0;
@@ -184,7 +184,7 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
         
         int total = 0;
         while (!in.eof()) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string firstCol, secondCol;
             in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
@@ -245,7 +245,7 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
         }
         in.close();
 		
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
         else { //check for zero groups
             if (hasGroups) {
                 for (int i = 0; i < totalGroups.size(); i++) {
@@ -293,10 +293,10 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
         total = 0;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> name; m->gobble(in); in >> thisTotal; m->gobble(in);
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
             if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
             }
@@ -325,7 +325,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
         }
         in.close();
         
-        if (error) { m->control_pressed = true; }
+        if (error) { m->setControl_pressed(true); }
         else { //check for zero groups
             if (hasGroups) {
                 for (int i = 0; i < totalGroups.size(); i++) {
@@ -413,7 +413,7 @@ int CountTable::printSeq(ofstream& out, string seqName) {
     try {
 		map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else { 
             out << it->first << '\t' << totals[it->second];
             if (hasGroups) {
@@ -442,11 +442,11 @@ vector<int> CountTable::getGroupCounts(string seqName) {
                 if (m->inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
-                m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 temp = counts[it->second];
             }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n"); m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n"); m->setControl_pressed(true); }
         
         return temp;
     }
@@ -462,11 +462,11 @@ int CountTable::getGroupCount(string groupName) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 return totalGroups[it->second];
             }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
 
         return 0;
     }
@@ -482,7 +482,7 @@ int CountTable::getGroupCount(string seqName, string groupName) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 map<string, int>::iterator it2 = indexNameMap.find(seqName);
                 if (it2 == indexNameMap.end()) {
@@ -490,12 +490,12 @@ int CountTable::getGroupCount(string seqName, string groupName) {
                     if (m->inUsersGroups(seqName, groups)) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
-                    m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else { 
                     return counts[it2->second][it->second];
                 }
             }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         
         return 0;
     }
@@ -511,7 +511,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 map<string, int>::iterator it2 = indexNameMap.find(seqName);
                 if (it2 == indexNameMap.end()) {
@@ -519,7 +519,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                     if (m->inUsersGroups(seqName, groups)) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
-                    m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else { 
                     int oldCount = counts[it2->second][it->second];
                     counts[it2->second][it->second] = num;
@@ -528,7 +528,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                     totals[it2->second] += (num - oldCount);
                 }
             }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         
         return 0;
     }
@@ -542,7 +542,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
 int CountTable::addGroup(string groupName) {
     try {        
         bool sanity = m->inUsersGroups(groupName, groups);
-        if (sanity) { m->mothurOut("[ERROR]: " + groupName + " is already in the count table, cannot add again.\n"); m->control_pressed = true;  return 0; }
+        if (sanity) { m->mothurOut("[ERROR]: " + groupName + " is already in the count table, cannot add again.\n"); m->setControl_pressed(true);  return 0; }
         
         groups.push_back(groupName);
         if (!hasGroups) { counts.resize(uniques);  }
@@ -596,7 +596,7 @@ int CountTable::removeGroup(string groupName) {
             
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 int indexOfGroupToRemove = it->second;
                 map<string, int> currentGroupIndex = indexGroupMap;
@@ -631,7 +631,7 @@ int CountTable::removeGroup(string groupName) {
                 
                 if (groups.size() == 0) { hasGroups = false; }
             }
-        }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove group " + groupName + ".\n"); m->control_pressed = true; }
+        }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove group " + groupName + ".\n"); m->setControl_pressed(true); }
     
         return 0;
     }
@@ -650,7 +650,7 @@ vector<string> CountTable::getGroups(string seqName) {
             for (int i = 0; i < thisCounts.size(); i++) {  
                 if (thisCounts[i] != 0) {  thisGroups.push_back(groups[i]); }
             } 
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         
         return thisGroups;
     }
@@ -672,7 +672,7 @@ int CountTable::renameSeq(string oldSeqName, string newSeqName) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + oldSeqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
-            m->mothurOut("[ERROR]: " + oldSeqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: " + oldSeqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else {  
             int index = it->second;
             indexNameMap.erase(it);
@@ -700,7 +700,7 @@ int CountTable::getNumSeqs(string seqName) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
-            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else { 
             return totals[it->second];
         }
@@ -719,7 +719,7 @@ int CountTable::setNumSeqs(string seqName, int abund) {
         
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true; return -1;
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true); return -1;
         }else {
             int diff = totals[it->second] - abund;
             totals[it->second] = abund;
@@ -747,7 +747,7 @@ int CountTable::get(string seqName) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
-            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else { return it->second; }
         
         return -1;
@@ -763,13 +763,13 @@ int CountTable::push_back(string seqName) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
             indexNameMap[seqName] = uniques;
             totals.push_back(1);
             total++;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return 1;
@@ -799,7 +799,7 @@ int CountTable::remove(string seqName) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
-            m->mothurOut("[ERROR]: Your count table contains does not include " + seqName + ", cannot remove."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your count table contains does not include " + seqName + ", cannot remove."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return 0;
@@ -815,13 +815,13 @@ int CountTable::push_back(string seqName, int thisTotal) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
             indexNameMap[seqName] = uniques;
             totals.push_back(thisTotal);
             total+=thisTotal;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return thisTotal;
@@ -838,7 +838,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
         int thisTotal = 0;
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
             
             for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
             if (hasGroups) {  counts.push_back(groupCounts);  }
@@ -847,7 +847,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
             total+= thisTotal;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         return thisTotal;
@@ -864,7 +864,7 @@ ListVector CountTable::getListVector() {
     try {
         ListVector list(indexNameMap.size());
         for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { 
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             list.set(it->second, it->first); 
         }
         return list;
@@ -915,13 +915,13 @@ vector<string> CountTable::getNamesOfSeqs(string group) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(group);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: " + group + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + group + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 != indexNameMap.end(); it2++) {
                     if (counts[it2->second][it->second] != 0) {  names.push_back(it2->first); }
                 }
             }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->control_pressed = true; }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         
         return names;
     }
@@ -942,7 +942,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq1 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
-            m->mothurOut("[ERROR]: " + seq1 + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            m->mothurOut("[ERROR]: " + seq1 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else { 
             map<string, int>::iterator it2 = indexNameMap.find(seq2);
             if (it2 == indexNameMap.end()) {
@@ -952,7 +952,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq2 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
                 }
-                m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else { 
                 //merge data
                 for (int i = 0; i < groups.size(); i++) { counts[it->second][i] += counts[it2->second][i]; }

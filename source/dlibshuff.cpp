@@ -50,19 +50,19 @@ double DLibshuff::dCalculate(int x, int y){
 	
 	minX = getMinX(x);
 	
-	if (m->control_pressed) { return sum; }
+	if (m->getControl_pressed()) { return sum; }
 	
 	minXY = getMinXY(x, y);
 	
-	if (m->control_pressed) { return sum; }
+	if (m->getControl_pressed()) { return sum; }
 	
 	vector<int> nx = calcN(minX);
 	
-	if (m->control_pressed) { return sum; }
+	if (m->getControl_pressed()) { return sum; }
 	
 	vector<int> nxy = calcN(minXY);
 	
-	if (m->control_pressed) { return sum; }
+	if (m->getControl_pressed()) { return sum; }
 
 	for(int i=0;i<numDXs;i++){
 		float h = (nx[i] - nxy[i]) / (float) groupSizes[x];

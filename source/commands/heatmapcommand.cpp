@@ -68,7 +68,7 @@ string HeatMapCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "svg") {  pattern = "[filename],svg"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -301,7 +301,7 @@ int HeatMapCommand::execute(){
 		
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->control_pressed) {
+				if (m->getControl_pressed()) {
                     delete lookup;
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					m->clearGroups(); 
@@ -348,7 +348,7 @@ int HeatMapCommand::execute(){
 			}
 			
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				m->clearGroups(); 
 				delete input; delete heatmap; return 0;
@@ -387,7 +387,7 @@ int HeatMapCommand::execute(){
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->control_pressed) {   
+				if (m->getControl_pressed()) {   
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					delete rabund;  delete input; delete heatmap; return 0;	
 				}
@@ -426,7 +426,7 @@ int HeatMapCommand::execute(){
 				rabund = input->getRAbundVector();
 			}
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				delete input; delete heatmap; return 0;
 			}
@@ -460,7 +460,7 @@ int HeatMapCommand::execute(){
 		
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->control_pressed) {
+				if (m->getControl_pressed()) {
                     delete lookupFloat;
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					m->clearGroups(); 
@@ -507,7 +507,7 @@ int HeatMapCommand::execute(){
 			}
 			
 			
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				m->clearGroups(); 
 				delete input; delete heatmap; return 0;
@@ -547,7 +547,7 @@ int HeatMapCommand::execute(){
 		delete input; 
 		delete heatmap;
 		
-		if (m->control_pressed) {
+		if (m->getControl_pressed()) {
 			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
 		}
 		

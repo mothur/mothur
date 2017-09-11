@@ -60,7 +60,7 @@ string NormalizeSharedCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "shared") {  pattern = "[filename],[distance],norm.shared"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -241,7 +241,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup; m->clearGroups();   return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup; m->clearGroups();   return 0; }
 				
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
@@ -272,13 +272,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookup;
 				
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();  return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();  return 0; }
 				
 				//get next line to process
 				lookup = input.getSharedRAbundVectors();
 			}
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -342,7 +342,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat; m->clearGroups();  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat; m->clearGroups();  return 0; }
 				
 				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
 					
@@ -375,13 +375,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookupFloat;
 				
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
 				
 				//get next line to process
 				lookupFloat = input.getSharedRAbundFloatVectors();
 			}
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -412,7 +412,7 @@ int NormalizeSharedCommand::execute(){
 		//reset groups parameter
 		m->clearGroups();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -439,7 +439,7 @@ int NormalizeSharedCommand::execute(){
 int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 	try {
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentSharedBinLabels;
+		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
 		
         map<string, string> variables; 
@@ -461,7 +461,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
                 
                 for (int i = 0; i < lookupGroups.size(); i++) {
                     
-                    if (m->control_pressed) { out.close(); return 0; }
+                    if (m->getControl_pressed()) { out.close(); return 0; }
                     
                     int abund = thisLookUp->get(j, lookupGroups[i]);
                     
@@ -479,7 +479,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 			
 			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 				
-				if (m->control_pressed) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return 0; }
 				
 				//calc mean
 				float mean = 0.0;
@@ -505,14 +505,14 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 				}
 			}
 						
-		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 				
 		thisLookUp->eliminateZeroOTUS();
 		thisLookUp->printHeaders(out);
         thisLookUp->print(out);
 		out.close();
 		
-		m->currentSharedBinLabels = saveBinLabels;
+		m->setCurrentSharedBinLabels(saveBinLabels);
 		
 		return 0;
 	}
@@ -527,7 +527,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentSharedBinLabels;
+		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
 		
         map<string, string> variables; 
@@ -548,7 +548,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 				
 				for (int i = 0; i < lookupGroups.size(); i++) {
 					
-					if (m->control_pressed) { out.close(); return 0; }
+					if (m->getControl_pressed()) { out.close(); return 0; }
 					
 					float abund = thisLookUp->get(j, lookupGroups[i]);
 					
@@ -562,7 +562,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 		}else if (method == "zscore") {
 			for (int j = 0; j < thisLookUp->getNumBins(); j++) {
 				
-				if (m->control_pressed) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return 0; }
 				
 				//calc mean
 				float mean = 0.0;
@@ -585,7 +585,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
                 }
 			}			
 			
-		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 		
 		
         thisLookUp->eliminateZeroOTUS();
@@ -593,7 +593,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
         thisLookUp->print(out);
         out.close();
 		
-		m->currentSharedBinLabels = saveBinLabels;
+		m->setCurrentSharedBinLabels(saveBinLabels);
 		
 		return 0;
 	}

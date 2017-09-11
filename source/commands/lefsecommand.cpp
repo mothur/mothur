@@ -92,7 +92,7 @@ string LefseCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "summary") {  pattern = "[filename],[distance],lefse_summary"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -306,7 +306,7 @@ int LefseCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { delete lookup;  return 0; }
+            if (m->getControl_pressed()) { delete lookup;  return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -338,13 +338,13 @@ int LefseCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();
         }
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -439,7 +439,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
         
         int numSigBeforeWilcox = significantOtuLabels.size();
         
-        if (m->debug) { m->mothurOut("[DEBUG]: completed Kruskal Wallis\n"); } 
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: completed Kruskal Wallis\n"); } 
         
         //check for subclass
         string wilcoxString = "";
@@ -447,7 +447,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
         
         int numSigAfterWilcox = significantOtuLabels.size();
         
-        if (m->debug) { m->mothurOut("[DEBUG]: completed Wilcoxon\n"); } 
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: completed Wilcoxon\n"); } 
         
         m->mothurOut("\nNumber of significantly discriminative features: " + toString(numSigAfterWilcox) + wilcoxString + ".\n"); 
         
@@ -458,7 +458,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
         }
         else { m->mothurOut("No features with significant differences between the classes.\n"); }
         
-        if (m->debug) { m->mothurOut("[DEBUG]: completed lda\n"); } 
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: completed lda\n"); } 
         
         printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes);
         
@@ -505,11 +505,11 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             treatments.insert(treatment);
         }
-        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->control_pressed = true; }
+        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->setControl_pressed(true); }
         
         LinearAlgebra linear;
         for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             vector<spearmanRank> values;
             vector<float> abunds = lookup->getOTU(i);
@@ -547,7 +547,7 @@ map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, De
         
         int numBins = lookup->getNumBins();
         for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             it = bins.find(i);
             if (it != bins.end()) { //flagged in Kruskal Wallis
@@ -581,7 +581,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
         for(map<string, set<string> >::iterator it=class2SubClasses.begin();it!=class2SubClasses.end();it++){
             itB = it;itB++;
             for(itB;itB!=class2SubClasses.end();itB++){
-                if (m->control_pressed) { return false; }
+                if (m->getControl_pressed()) { return false; }
                 bool first = true;
                 int dirCmp = 0; // not set?? dir_cmp = "not_set" # 0=notset or none, 1=true, 2=false.
                 int curv_sign = 0;
@@ -594,7 +594,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                         string subclass2 = *itClass2;
                         count++;
                         
-                        if (m->debug) { m->mothurOut( "[DEBUG comparing " + it->first + "-" + *itClass1 + " to " + itB->first + "-" + *itClass2 + "\n"); }
+                        if (m->getDebug()) { m->mothurOut( "[DEBUG comparing " + it->first + "-" + *itClass1 + " to " + itB->first + "-" + *itClass2 + "\n"); }
                         
                         string treatment1 = subclass2Class[subclass1];
                         string treatment2 = subclass2Class[subclass2];
@@ -704,7 +704,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
         if (multiClassStrat == "onevall") {
             int tot_k = class2SubClasses.size();
             for(map<string, set<string> >::iterator it=class2SubClasses.begin();it!=class2SubClasses.end();it++){
-                if (m->control_pressed) { return false; }
+                if (m->getControl_pressed()) { return false; }
                 int nk = 0;
                 //is this class okay in all comparisons
                 for (int h = 0; h < allDiffs.size(); h++) {
@@ -734,14 +734,14 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
         vector< vector<double> > adjustedLookup;
         
         for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: bin = " + toString(i) + "\n."); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: bin = " + toString(i) + "\n."); }
             
             it = bins.find(i);
             if (it != bins.end()) { //flagged in Kruskal Wallis and Wilcoxon(if we ran it)
                 
-                if (m->debug) { m->mothurOut("[DEBUG]:flagged bin = " + toString(i) + "\n."); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]:flagged bin = " + toString(i) + "\n."); }
                 
                 //fill x with this OTUs abundances
                 vector<float> tempx = lookup->getOTU(i);
@@ -750,7 +750,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
                 //go through classes
                 for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: class = " + it->first + "\n."); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: class = " + it->first + "\n."); }
                     
                     //max(float(feats['class'].count(c))*0.5,4)
                     //max(numGroups in this class*0.5, 4.0)
@@ -790,13 +790,13 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
         minCl = (int)((float)(minCl*fBoots*fBoots*0.05));
         minCl = max(minCl, 1);
  
-        if (m->debug) { m->mothurOut("[DEBUG]: about to start iters. FractionGroups = " + toString(fractionNumGroups) + "\n."); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: about to start iters. FractionGroups = " + toString(fractionNumGroups) + "\n."); }
         
         vector< vector< vector<double> > > results;//[iters][numComparison][numOTUs]
         for (int j = 0; j < iters; j++) {
-            if (m->control_pressed) { return sigOTUS; }
+            if (m->getControl_pressed()) { return sigOTUS; }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: iter = " + toString(j) + "\n."); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: iter = " + toString(j) + "\n."); }
             
             //find "good" random vector
             vector<int> rand_s;
@@ -809,9 +809,9 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
                 if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
             
-            if (m->control_pressed) { return sigOTUS; }
+            if (m->getControl_pressed()) { return sigOTUS; }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: after 1000. \n."); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: after 1000. \n."); }
             
             //print data in R input format for testing
             if (false) {
@@ -824,13 +824,13 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
                 //for each pair of classes
                 vector< vector<double> > temp = lda(adjustedLookup, rand_s, indexToClass, classes); //[numComparison][numOTUs]
                 if (temp.size() != 0) { results.push_back(temp); }
-                if (m->debug) { m->mothurOut("[DEBUG]: after lda. \n."); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: after lda. \n."); }
             }
         }
         
         if (results.size() == 0) { return sigOTUS; }
         
-        if (m->control_pressed) { return sigOTUS; }
+        if (m->getControl_pressed()) { return sigOTUS; }
         
         //m = max([numpy.mean([means[k][kk][p] for kk in range(boots)]) for p in range(len(pairs))])
         int k = 0;
@@ -881,7 +881,7 @@ vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors*& looku
         for (int i = 0; i < numBins; i++) {
             vector<float> abunds = lookup->getOTU(i);
             for (int j = 0; j < abunds.size(); j++) {
-                if (m->control_pressed) { return means; }
+                if (m->getControl_pressed()) { return means; }
                 means[i][quickIndex[indexToClass[j]]] += abunds[j];
             }
         }
@@ -925,7 +925,7 @@ vector< vector<double> > LefseCommand::lda(vector< vector<double> >& adjustedLoo
         vector< vector<double> > means; bool ignore;
         vector< vector<double> > scaling = linear.lda(a, randClass, means, ignore); //means are returned sorted, quickIndex sorts as well since it uses a map. means[class][otu] =
         if (ignore) { scaling.clear(); return scaling; }
-        if (m->control_pressed) { return scaling; }
+        if (m->getControl_pressed()) { return scaling; }
         
         vector< vector<double> > w; w.resize(a.size()); //w.unit <- w/sqrt(sum(w^2))
         double denom = 0.0;
@@ -946,7 +946,7 @@ vector< vector<double> > LefseCommand::lda(vector< vector<double> >& adjustedLoo
 		for (int i = 0; i < LDMeans.size(); i++) {
 			for (int l = 0; l < i; l++) {
                 
-                if (m->control_pressed) { return scaling; }
+                if (m->getControl_pressed()) { return scaling; }
                 //robjects.r('effect.size <- abs(mean(LD[sub_d[,"class"]=="'+p[0]+'"]) - mean(LD[sub_d[,"class"]=="'+p[1]+'"]))')
                 double effectSize = abs(LDMeans[i] - LDMeans[l]);
                 //scal = robjects.r('wfinal <- w.unit * effect.size')
@@ -1001,7 +1001,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
         //for this otu
         int numBins = lookup.size();
         for (int i = 0; i < numBins; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
                 
             //break up random sampling by class
             map<string, set<double> > class2Values; //maps class name -> set of abunds present in random sampling. F003Early -> 0.001, 0.003... 
@@ -1038,6 +1038,7 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
         out << "OTU\tLogMaxMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < means.size(); i++) { //[numOTUs][classes]
             //find max mean of classes
             double maxMean = -1.0; string maxClass = "none";
@@ -1048,13 +1049,13 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
             if (maxMean > logMaxMean) { logMaxMean = maxMean; }
             logMaxMean = log10(logMaxMean);
             
-            out << m->currentSharedBinLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->debug) { temp = m->currentSharedBinLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
+            out << currentLabels[i] << '\t' << logMaxMean << '\t';
+            if (m->getDebug()) { temp = m->getCurrentSharedBinLabels()[i] + '\t' + toString(logMaxMean) + '\t'; }
             
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
                 out << maxClass << '\t' << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look
-                if (m->debug) { temp += maxClass + '\t' + toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
+                if (m->getDebug()) { temp += maxClass + '\t' + toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
             }else { out << '-' << endl; }
         }
         
@@ -1076,10 +1077,11 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         
         //print otu data
         int count = 0;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
-            cout << m->currentSharedBinLabels[it->first] << " <- c(";
+            cout << currentLabels[it->first] << " <- c(";
             for (int h = 0; h < rand_s.size()-1; h++) {  cout << (adjustedLookup[count][rand_s[h]]) << ", "; }
             cout << (adjustedLookup[count][rand_s[rand_s.size()-1]]) << ")\n";
             count++;
@@ -1133,9 +1135,9 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         //print data frame
         tempOutput = "dat <- data.frame(";
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
-            tempOutput += "\"" + m->currentSharedBinLabels[it->first] + "\"=" + m->currentSharedBinLabels[it->first] + ",";
+            tempOutput += "\"" + currentLabels[it->first] + "\"=" + currentLabels[it->first] + ",";
         }
         //tempOutput = tempOutput.substr(0, tempOutput.length()-1);
         tempOutput += " class=treatments";
@@ -1146,9 +1148,9 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
                 
         tempOutput = "z <- suppressWarnings(mylda(as.formula(class ~ ";
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
-            tempOutput +=  m->currentSharedBinLabels[it->first] + "+";
+            tempOutput +=  currentLabels[it->first] + "+";
         }
         tempOutput = tempOutput.substr(0, tempOutput.length()-1); //rip off extra plus sign
         tempOutput += "), data = dat, tol = 1e-10))";
@@ -1178,7 +1180,7 @@ int LefseCommand::makeShared(int numDesignLines) {
         m->openInputFile(sharedfile, in);
         vector< vector<string> > lines;
         for(int i = 0; i < numDesignLines; i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);
             cout << line << endl;
@@ -1210,7 +1212,7 @@ int LefseCommand::makeShared(int numDesignLines) {
         m->currentSharedBinLabels.clear();
         int count = 0;
         while (!in.eof()) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             string line = m->getline(in);
             vector<string> pieces = m->splitWhiteSpace(line);

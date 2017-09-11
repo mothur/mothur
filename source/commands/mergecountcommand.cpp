@@ -139,7 +139,7 @@ int MergeCountCommand::execute(){
         set<string> allGroups;
         for(int i = 0; i < numInputFiles; i++) {
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             vector<string> thisTablesGroups;
             CountTable table;
@@ -153,9 +153,9 @@ int MergeCountCommand::execute(){
         int numGroups = allGroups.size();
         
         //check to make sure all files are one type - quit if not
-        if (!allContainGroups && !allNoGroups) { m->mothurOut("[ERROR]: your have countfiles that contains group information and count files that do not. These cannot be combined without loss of information, please correct.\n"); m->control_pressed = true; return 0; }
+        if (!allContainGroups && !allNoGroups) { m->mothurOut("[ERROR]: your have countfiles that contains group information and count files that do not. These cannot be combined without loss of information, please correct.\n"); m->setControl_pressed(true); return 0; }
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         //Create Blank Table - (set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
         set<string> seqNames; map<string, string> seqGroup; set<string> g;
@@ -176,7 +176,7 @@ int MergeCountCommand::execute(){
         //for each file
         for(int i = 0; i < numInputFiles; i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
 
             if (allContainGroups) {
                 
@@ -185,7 +185,7 @@ int MergeCountCommand::execute(){
                 
                 vector<string> seqs = table.getNamesOfSeqs();
                 for (int j = 0; j < seqs.size(); j++) {
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     vector<int> abunds = table.getGroupCounts(seqs[j]);
                     vector<int> newAbunds; newAbunds.resize(numGroups, 0);
                     for (int k = 0; k < abunds.size(); k++) {
@@ -201,12 +201,12 @@ int MergeCountCommand::execute(){
             else {  m->appendFilesWithoutHeaders(fileNames[i], outputFileName); } //No group info so simple append
         }
         
-        if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
+        if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
         
         //print new table
         if (allContainGroups) {  completeTable.printTable(outputFileName); }
         
-        if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
+        if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
         
         //update current count file
         m->setCountTableFile(outputFileName);

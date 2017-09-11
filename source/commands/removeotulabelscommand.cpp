@@ -60,7 +60,7 @@ string RemoveOtuLabelsCommand::getOutputPattern(string type) {
         else if (type == "corraxes")        {   pattern = "[filename],pick,[extension]";                }
         else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";     }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";     }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -240,9 +240,9 @@ int RemoveOtuLabelsCommand::execute(){
         for (set<string>::iterator it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(m->getSimpleLabel(*it)); }
         otulabels = newLabels;
         
-        if (m->debug) { m->mothurOut("[DEBUG]: numlabels = " + toString(otulabels.size()) + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: numlabels = " + toString(otulabels.size()) + "\n"); }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (constaxonomyfile != "")	{		readClassifyOtu();      }
@@ -251,7 +251,7 @@ int RemoveOtuLabelsCommand::execute(){
         if (listfile != "")         {		readList();             }
         if (sharedfile != "")		{		readShared();           }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
 		m->mothurOutEndLine();
@@ -307,7 +307,7 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otu = ""; string tax = "unknown";
             int size = 0;
@@ -315,7 +315,7 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
             in >> otu >> size; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
             
             if (otulabels.count(m->getSimpleLabel(otu)) == 0) {
 				wroteSomething = true;
@@ -362,7 +362,7 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otu1 = ""; 
             string otu2 = ""; 
@@ -416,7 +416,7 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
         
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             string otu = ""; 
             in >> otu;
@@ -450,20 +450,21 @@ int RemoveOtuLabelsCommand::readShared(){
         
         SharedRAbundVectors* lookup = getShared();
         
-        if (m->control_pressed) { delete lookup; return 0; }
+        if (m->getControl_pressed()) { delete lookup; return 0; }
         
         vector<string> newLabels;
 
         bool wroteSomething = false;
         int numRemoved = 0;
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins();) {
             
-            if (m->control_pressed) { delete lookup; return 0; }
+            if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
-            if (otulabels.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
+            if (otulabels.count(m->getSimpleLabel(currentLabels[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(m->currentSharedBinLabels[i]);
+                newLabels.push_back(currentLabels[i]);
                 ++i;
             }else { numRemoved++; lookup->removeOTU(i); }
         }
@@ -479,7 +480,7 @@ int RemoveOtuLabelsCommand::readShared(){
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        m->currentSharedBinLabels = newLabels;
+        m->setCurrentSharedBinLabels(newLabels);
         
         lookup->printHeaders(out);
         lookup->print(out);
@@ -503,7 +504,7 @@ int RemoveOtuLabelsCommand::readList(){
 	try {
         getListVector();
         
-        if (m->control_pressed) { delete list; return 0;}
+        if (m->getControl_pressed()) { delete list; return 0;}
         
         ListVector newList;
         newList.setLabel(list->getLabel());
@@ -514,7 +515,7 @@ int RemoveOtuLabelsCommand::readList(){
         vector<string> newLabels;
         for (int i = 0; i < list->getNumBins(); i++) {
             
-            if (m->control_pressed) { delete list; return 0;}
+            if (m->getControl_pressed()) { delete list; return 0;}
             
             if (otulabels.count(m->getSimpleLabel(binLabels[i])) == 0) {
                 newList.push_back(list->get(i));
@@ -570,7 +571,7 @@ int RemoveOtuLabelsCommand::getListVector(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  return 0;  }
+			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -601,7 +602,7 @@ int RemoveOtuLabelsCommand::getListVector(){
 		}
 		
 		
-		if (m->control_pressed) {  return 0;  }
+		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -647,7 +648,7 @@ SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
         
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && (userLabels.size() != 0)) {
-            if (m->control_pressed) {   delete lookup; return NULL;  }
+            if (m->getControl_pressed()) {   delete lookup; return NULL;  }
             
             if(labels.count(lookup->getLabel()) == 1){
                 processedLabels.insert(lookup->getLabel());
@@ -678,7 +679,7 @@ SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
         }
         
         
-        if (m->control_pressed) {  return 0;  }
+        if (m->getControl_pressed()) {  return 0;  }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;

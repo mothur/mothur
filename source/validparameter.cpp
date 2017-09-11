@@ -226,8 +226,8 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 else {
                 
 				int pos = (it->second).find(".tx.");
-				if (pos != string::npos) { m->sharedHeaderMode = "tax"; }
-				else { m->sharedHeaderMode = "otu"; }
+				if (pos != string::npos) { m->setSharedHeaderMode("tax"); }
+				else { m->setSharedHeaderMode("otu"); }
 			
 				ifstream in;
 				ableToOpen = m->openInputFile(it->second, in, "noerror");

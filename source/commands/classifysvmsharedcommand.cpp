@@ -97,7 +97,7 @@ string ClassifySvmSharedCommand::getOutputPattern(string type) {
         } //makes file like: amazon.0.03.fasta
         else {
             m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n");
-            m->control_pressed = true;
+            m->setControl_pressed(true);
         }
 
         return pattern;
@@ -454,7 +454,7 @@ int ClassifySvmSharedCommand::execute() {
       //as long as you are not at the end of the file or done wih the lines you want
     while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-        if (m->control_pressed) { delete lookup;  return 0; }
+        if (m->getControl_pressed()) { delete lookup;  return 0; }
 
       if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -488,13 +488,13 @@ int ClassifySvmSharedCommand::execute() {
         //prevent memory leak
       delete lookup;
 
-      if (m->control_pressed) { return 0; }
+      if (m->getControl_pressed()) { return 0; }
 
         //get next line to process
       lookup = input.getSharedRAbundVectors();
     }
 
-    if (m->control_pressed) {  return 0; }
+    if (m->getControl_pressed()) {  return 0; }
 
       //output error messages about any remaining user labels
     set<string>::iterator it;
@@ -561,6 +561,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
 }
 
 void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
+    vector<string> currentLabels = m->getCurrentSharedBinLabels();
     for ( int j = 0; j < lookup.size(); j++ ) {
         //i++;
         //vector<individual> data = lookup[j]->getData();
@@ -575,7 +576,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
             //cout << " abundance " << data[k].abundance;
             observation->at(k) = double(lookup[j]->get(k));
             if ( j == 0) {
-                featureVector.push_back(Feature(k, m->currentSharedBinLabels[k]));
+                featureVector.push_back(Feature(k, currentLabels[k]));
             }
         }
         //cout << endl;

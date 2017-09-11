@@ -49,7 +49,7 @@ int AlignNode::loadSequence(string& sequence){
         
         for(int i=0;i<alignLength;i++){
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             char base = sequence[i];
             
@@ -77,7 +77,7 @@ int AlignNode::checkTheta(){
     try {
         for(int i=0;i<alignLength;i++){
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             if(theta[i].gap == columnCounts[i]){
                 columnCounts[i] = 0;
@@ -117,7 +117,7 @@ int AlignNode::addThetas(vector<thetaAlign> newTheta, int newNumSeqs){
         
         for(int i=0;i<alignLength;i++){	
             
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
             
             theta[i].A += newTheta[i].A;		columnCounts[i] += newTheta[i].A;
             theta[i].T += newTheta[i].T;		columnCounts[i] += newTheta[i].T;
@@ -146,7 +146,7 @@ double AlignNode::getSimToConsensus(string& query){
         
         for(int i=0;i<alignLength;i++){
             
-            if (m->control_pressed) { return similarity; }
+            if (m->getControl_pressed()) { return similarity; }
             
             char base = query[i];
             
@@ -210,7 +210,7 @@ double AlignNode::getPxGivenkj_D_j(string& query){	//P(x | k_j, D, j)
         
         for(int s=0;s<alignLength;s++){
             
-            if (m->control_pressed) { return PxGivenkj_D_j; }
+            if (m->getControl_pressed()) { return PxGivenkj_D_j; }
             
             char base = query[s];
             thetaAlign thetaS = theta[s];

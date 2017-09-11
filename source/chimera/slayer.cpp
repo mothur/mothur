@@ -22,7 +22,7 @@ string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 		
 			for (int j = i+1; j < refSeqs.size(); j++) {
 			
-				if (m->control_pressed) { return "no";  }
+				if (m->getControl_pressed()) { return "no";  }
 	
 				//make copies of query and each parent because runBellerophon removes gaps and messes them up
 				Sequence q(query.getName(), query.getAligned());
@@ -39,7 +39,7 @@ string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
 	
-				if (m->control_pressed) { return "no"; }
+				if (m->getControl_pressed()) { return "no"; }
 //				cout << "examining:\t" << refSeqs[i]->getName() << '\t' << refSeqs[j]->getName() << endl;
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
@@ -47,7 +47,7 @@ string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 					vector<snps> snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
 					vector<snps> snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
 	
-					if (m->control_pressed) {  return "no"; }
+					if (m->getControl_pressed()) {  return "no"; }
 					
 					int numSNPSLeft = snpsLeft.size();
 					int numSNPSRight = snpsRight.size();
@@ -59,7 +59,7 @@ string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 						float BS_A, BS_B;
 						bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, iters);
 						
-						if (m->control_pressed) { return "no"; }
+						if (m->getControl_pressed()) { return "no"; }
 
 						divs[k].bsa = BS_A;
 						divs[k].bsb = BS_B;
@@ -71,7 +71,7 @@ string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 //						if ((divs[k].bsMax >= (minBS-10)) && (iters < 1000)) {
 //							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, 1000);
 //								
-//							if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
+//							if (m->getControl_pressed()) { delete q; delete leftParent; delete rightParent; return "no"; }
 //								
 //							divs[k].bsa = BS_A;
 //							divs[k].bsb = BS_B;
@@ -145,7 +145,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence q, Sequence pA, Sequence pB,
 		
 		for (int i = windowSize-1; i <= (length - windowSize); i += windowStep) {
 		
-			if (m->control_pressed) { return data; }
+			if (m->getControl_pressed()) { return data; }
 		
 			int breakpoint = i;
 			int leftLength = breakpoint + 1;
@@ -294,7 +294,7 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 		for (int i = 0; i < numIters; i++) {
 			//random sampling with replacement.
 		
-			if (m->control_pressed) { return 0;  }
+			if (m->getControl_pressed()) { return 0;  }
 			
 			vector<snps> selectedLeft;
 

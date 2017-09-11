@@ -102,13 +102,13 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             string temp = validParameter.validFile(parameters, "debug", false);			
 			if (temp == "not found") {  debug = false;  nodebug=true; }
             else {  debug = m->isTrue(temp); }
-            m->debug = debug;
+            m->setDebug(debug);
             
             bool nomod = false;
             temp = validParameter.validFile(parameters, "modifynames", false);
 			if (temp == "not found") {  modifyNames = true;  nomod=true; }
             else {  modifyNames = m->isTrue(temp); }
-            m->modifyNames = modifyNames;
+            m->setModifyNames(modifyNames);
             
             bool seed = false;
             temp = validParameter.validFile(parameters, "seed", false);

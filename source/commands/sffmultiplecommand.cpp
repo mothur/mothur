@@ -107,7 +107,7 @@ string SffMultipleCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],fasta"; } 
         else if (type == "name") {  pattern = "[filename],names"; } 
         else if (type == "group") {  pattern = "[filename],groups"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -349,7 +349,7 @@ int SffMultipleCommand::execute(){
         string name = getOutputFileName("name",variables);
         string group = getOutputFileName("group",variables);
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         if (sffFiles.size() < processors) { processors = sffFiles.size(); }
         
@@ -361,7 +361,7 @@ int SffMultipleCommand::execute(){
         if (processors == 1) { driver(sffFiles, oligosFiles, 0, sffFiles.size(), fasta, name, group); }
         else { createProcesses(sffFiles, oligosFiles, fasta, name, group); } 
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 		
         if (append) { 
             outputNames.push_back(fasta); outputTypes["fasta"].push_back(fasta);
@@ -398,7 +398,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
         string oligos, sff;
         while (!in.eof()) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             in >> sff;
             
@@ -464,17 +464,17 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
             m->mothurOut("Running command: sffinfo(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* sffCommand = new SffInfoCommand(inputString);
             sffCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             map<string, vector<string> > filenames = sffCommand->getOutputFiles();
             
             delete sffCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             m->mothurOutEndLine(); 
             
             redirects = "";
@@ -484,24 +484,24 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             string fastaFile = "";
             map<string, vector<string> >::iterator it = filenames.find("fasta");
             if (it != filenames.end()) {  if ((it->second).size() != 0) { fastaFile = (it->second)[0];  } }
-            else {  m->mothurOut("[ERROR]: sffinfo did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: sffinfo did not create a fasta file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             inputString = "fasta=" + fastaFile + ", processors=1";
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* summarySeqsCommand = new SeqSummaryCommand(inputString);
             summarySeqsCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             map<string, vector<string> > temp = summarySeqsCommand->getOutputFiles();
             mergeOutputFileList(filenames, temp);
             
             delete summarySeqsCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             
             m->mothurOutEndLine(); 
             
@@ -509,7 +509,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             string flowFile = "";
             it = filenames.find("flow");
             if (it != filenames.end()) {  if ((it->second).size() != 0) { flowFile = (it->second)[0];  } }
-            else {  m->mothurOut("[ERROR]: sffinfo did not create a flow file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: sffinfo did not create a flow file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             inputString = "flow=" + flowFile;
             if (oligos != "") { inputString += ", oligos=" + oligos; }
@@ -519,18 +519,18 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.flows(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* trimFlowCommand = new TrimFlowsCommand(inputString);
             trimFlowCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             temp = trimFlowCommand->getOutputFiles();
             mergeOutputFileList(filenames, temp);
             
             delete trimFlowCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             
             
             string fileFileName = "";
@@ -538,12 +538,12 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (oligos != "") { 
                 it = temp.find("file");
                 if (it != temp.end()) {  if ((it->second).size() != 0) { fileFileName = (it->second)[0];  } }
-                else {  m->mothurOut("[ERROR]: trim.flows did not create a file file, quitting.\n"); m->control_pressed = true; break;  }
+                else {  m->mothurOut("[ERROR]: trim.flows did not create a file file, quitting.\n"); m->setControl_pressed(true); break;  }
             }else {
                 vector<string> flowFiles;
                 it = temp.find("flow");
                 if (it != temp.end()) {  if ((it->second).size() != 0) { flowFiles = (it->second);  } }
-                else {  m->mothurOut("[ERROR]: trim.flows did not create a flow file, quitting.\n"); m->control_pressed = true; break;  }
+                else {  m->mothurOut("[ERROR]: trim.flows did not create a flow file, quitting.\n"); m->setControl_pressed(true); break;  }
                 
                 for (int i = 0; i < flowFiles.size(); i++) {
                     string end = flowFiles[i].substr(flowFiles[i].length()-9);
@@ -553,7 +553,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
                 }
             }
             
-            if ((fileFileName == "") && (flowFile == "")) { m->mothurOut("[ERROR]: trim.flows did not create a file file or a trim.flow file, quitting.\n"); m->control_pressed = true; break;  }
+            if ((fileFileName == "") && (flowFile == "")) { m->mothurOut("[ERROR]: trim.flows did not create a file file or a trim.flow file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             if (fileFileName != "") { inputString = "file=" + fileFileName; }
             else { inputString = "flow=" + flowFile; }
@@ -567,28 +567,28 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             //run shhh.flows
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: shhh.flows(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* shhhFlowCommand = new ShhherCommand(inputString);
             shhhFlowCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             temp = shhhFlowCommand->getOutputFiles();
             mergeOutputFileList(filenames, temp);
             
             delete shhhFlowCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             
             vector<string> fastaFiles;
             vector<string> nameFiles;
             it = temp.find("fasta");
             if (it != temp.end()) {  if ((it->second).size() != 0) { fastaFiles = (it->second);  } }
-            else {  m->mothurOut("[ERROR]: shhh.flows did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: shhh.flows did not create a fasta file, quitting.\n"); m->setControl_pressed(true); break;  }
            
             it = temp.find("name");
             if (it != temp.end()) {  if ((it->second).size() != 0) { nameFiles = (it->second);  } }
-            else {  m->mothurOut("[ERROR]: shhh.flows did not create a name file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: shhh.flows did not create a name file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             //find fasta and name files with the shortest name.  This is because if there is a composite name it will be the shortest.
             fastaFile = fastaFiles[0];
@@ -615,22 +615,22 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             //run trim.seqs
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             Command* trimseqsCommand = new TrimSeqsCommand(inputString);
             trimseqsCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             temp = trimseqsCommand->getOutputFiles();
             mergeOutputFileList(filenames, temp);
             
             delete trimseqsCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             
             it = temp.find("fasta");
             if (it != temp.end()) {  if ((it->second).size() != 0) { fastaFiles = (it->second);  } }
-            else {  m->mothurOut("[ERROR]: trim.seqs did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: trim.seqs did not create a fasta file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             for (int i = 0; i < fastaFiles.size(); i++) {
                 string end = fastaFiles[i].substr(fastaFiles[i].length()-10);
@@ -641,7 +641,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             
             it = temp.find("name");
             if (it != temp.end()) {  if ((it->second).size() != 0) { nameFiles = (it->second);  } }
-            else {  m->mothurOut("[ERROR]: trim.seqs did not create a name file, quitting.\n"); m->control_pressed = true; break;  }
+            else {  m->mothurOut("[ERROR]: trim.seqs did not create a name file, quitting.\n"); m->setControl_pressed(true); break;  }
             
             for (int i = 0; i < nameFiles.size(); i++) {
                 string end = nameFiles[i].substr(nameFiles[i].length()-10);
@@ -665,18 +665,18 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->mothurCalling = true;
+            m->setMothurCalling(true);
             
             summarySeqsCommand = new SeqSummaryCommand(inputString);
             summarySeqsCommand->execute();
             
-            if (m->control_pressed){ break; }
+            if (m->getControl_pressed()){ break; }
             
             temp = summarySeqsCommand->getOutputFiles();
             mergeOutputFileList(filenames, temp);
             
             delete summarySeqsCommand;
-            m->mothurCalling = false;
+            m->setMothurCalling(false);
             
             m->mothurOutEndLine(); 
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
@@ -774,7 +774,7 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));
                     m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));
@@ -787,7 +787,7 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();

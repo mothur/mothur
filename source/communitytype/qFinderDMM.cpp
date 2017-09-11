@@ -20,14 +20,14 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
         numSamples = (int)countMatrix.size();
         numOTUs = (int)countMatrix[0].size();
         
-       // if (m->debug) { m->mothurOut("before kmeans\n"); }
+       // if (m->getDebug()) { m->mothurOut("before kmeans\n"); }
         findkMeans();
-       //if (m->debug) { m->mothurOut("done kMeans\n"); }
+       //if (m->getDebug()) { m->mothurOut("done kMeans\n"); }
         
         optimizeLambda();
         
         
-         //if (m->debug) { m->mothurOut("done optimizeLambda\n"); }
+         //if (m->getDebug()) { m->mothurOut("done optimizeLambda\n"); }
         
         double change = 1.0000;
         currNLL = 0.0000;
@@ -36,12 +36,12 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
         
         while(change > 1.0e-6 && iter < 100){
             
-           // if (m->debug) { m->mothurOut("Calc_Z: \n"); }
+           // if (m->getDebug()) { m->mothurOut("Calc_Z: \n"); }
             calculatePiK();
             
             optimizeLambda();
             
-              // if (m->debug) { m->mothurOut("Iter: " + toString(iter) + "\n"); }
+              // if (m->getDebug()) { m->mothurOut("Iter: " + toString(iter) + "\n"); }
             
             for(int i=0;i<numPartitions;i++){
                 weights[i] = 0.0000;
@@ -62,7 +62,7 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             
             iter++;
         }
-        //if (m->debug) { m->mothurOut("done while loop\n"); }
+        //if (m->getDebug()) { m->mothurOut("done while loop\n"); }
         error.resize(numPartitions);
         
         logDeterminant = 0.0000;
@@ -73,16 +73,16 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             
             error[currentPartition].assign(numOTUs, 0.0000);
             
-            if (m->debug) { m->mothurOut("current partition = " + toString(currentPartition) + "\n"); }
+            if (m->getDebug()) { m->mothurOut("current partition = " + toString(currentPartition) + "\n"); }
             
             if(currentPartition > 0){
                 logDeterminant += (2.0 * log(numSamples) - log(weights[currentPartition]));
             }
-            //if (m->debug) { m->mothurOut("before hession\n"); }
+            //if (m->getDebug()) { m->mothurOut("before hession\n"); }
             vector<vector<double> > hessian = getHessian();
-            //if (m->debug) { m->mothurOut("after hession\n"); }
+            //if (m->getDebug()) { m->mothurOut("after hession\n"); }
             vector<vector<double> > invHessian = l.getInverse(hessian);
-            //if (m->debug) { m->mothurOut("after inverse\n"); }
+            //if (m->getDebug()) { m->mothurOut("after inverse\n"); }
             for(int i=0;i<numOTUs;i++){
                 logDeterminant += log(abs(hessian[i][i]));
                 error[currentPartition][i] = invHessian[i][i];
@@ -343,7 +343,7 @@ int qFinderDMM::lineMinimizeFletcher(vector<double>& x, vector<double>& p, doubl
         int iter = 0;
         int maxIters = 100;
         while(iter++ < maxIters){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             for(int i=0;i<numOTUs;i++){
                 xalpha[i] = x[i] + alpha * p[i];
@@ -389,7 +389,7 @@ int qFinderDMM::lineMinimizeFletcher(vector<double>& x, vector<double>& p, doubl
         
         iter = 0;
         while(iter++ < maxIters){
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             double delta = b - a;
             
@@ -488,7 +488,7 @@ int qFinderDMM::bfgs2_Solver(vector<double>& x){
 //        cout << "before while" << endl;
         
         while(g0norm > 0.001 && bfgsIter++ < maxIter){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
 
             double f0 = f;
             vector<double> dx(numOTUs, 0.0000);
@@ -610,7 +610,7 @@ double qFinderDMM::negativeLogEvidenceLambdaPi(vector<double>& x){
         }
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             double lambda = x[i];
             double alpha = exp(x[i]);
             logEAlpha += lgamma(alpha);
@@ -661,7 +661,7 @@ void qFinderDMM::negativeLogDerivEvidenceLambdaPi(vector<double>& x, vector<doub
 
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) {  return; }
+            if (m->getControl_pressed()) {  return; }
 //            cout << "start i loop" << endl;
 //            
 //            cout << i << '\t' << alpha[i] << '\t' << x[i] << '\t' << exp(x[i]) << '\t' << store << endl;
@@ -719,7 +719,7 @@ double qFinderDMM::getNegativeLogEvidence(vector<double>& lambda, int group){
         double logEvidence = 0.0000;
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             double alpha = exp(lambda[i]);
             double X = countMatrix[group][i];
             double alphaX = alpha + X;
@@ -747,7 +747,7 @@ double qFinderDMM::getNegativeLogEvidence(vector<double>& lambda, int group){
 void qFinderDMM::optimizeLambda(){    
     try {
         for(currentPartition=0;currentPartition<numPartitions;currentPartition++){
-            if (m->control_pressed) {  return; }
+            if (m->getControl_pressed()) {  return; }
             bfgs2_Solver(lambdaMatrix[currentPartition]);
         }
     }
@@ -763,7 +763,7 @@ void qFinderDMM::calculatePiK(){
         vector<double> store(numPartitions);
         
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  return; }
+            if (m->getControl_pressed()) {  return; }
             double sum = 0.0000;
             double minNegLogEvidence =numeric_limits<double>::max();
             
@@ -777,7 +777,7 @@ void qFinderDMM::calculatePiK(){
             }
             
             for(int j=0;j<numPartitions;j++){
-                if (m->control_pressed) {  return; }
+                if (m->getControl_pressed()) {  return; }
                 zMatrix[j][i] = weights[j] * exp(-(store[j] - minNegLogEvidence));
                 sum += zMatrix[j][i];
             }
@@ -808,7 +808,7 @@ double qFinderDMM::getNegativeLogLikelihood(){
         double doubleSum = 0.0000;
         
         for(int i=0;i<numPartitions;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             double sumAlphaK = 0.0000;
             
             pi[i] = weights[i] / (double)numSamples;
@@ -823,7 +823,7 @@ double qFinderDMM::getNegativeLogLikelihood(){
         }
         
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             
             double probability = 0.0000;
             double factor = 0.0000;
@@ -873,7 +873,7 @@ double qFinderDMM::getNegativeLogLikelihood(){
         
         for(int i=0;i<numPartitions;i++){
             for(int j=0;j<numOTUs;j++){
-                if (m->control_pressed) {  return 0; }
+                if (m->getControl_pressed()) {  return 0; }
                 alphaSum += exp(lambdaMatrix[i][j]);
                 lambdaSum += lambdaMatrix[i][j];
             }

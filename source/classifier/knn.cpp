@@ -59,7 +59,7 @@ string Knn::getTaxonomy(Sequence* seq) {
 	
 		if (search == "distance") { ofstream outDistance; m->openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << database->getSearchScore() << endl; outDistance.close();  }
 	
-		if (m->control_pressed) { return tax; }
+		if (m->getControl_pressed()) { return tax; }
 
 		vector<string> closestNames;
 		for (int i = 0; i < closest.size(); i++) {
@@ -99,7 +99,7 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 		int smallest = 100;
 		
 		for (int i = 0; i < closest.size(); i++) {
-			if (m->control_pressed) { return "control"; }
+			if (m->getControl_pressed()) { return "control"; }
 		
 			string tax = taxonomy[closest[i]];  //we know its there since we checked in getTaxonomy
 			cout << tax << endl;
@@ -115,7 +115,7 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 		//start at the highest level all the closest seqs have
 		string common = "";
 		for (int i = (smallest-1); i >= 0; i--) {
-			if (m->control_pressed) { return "control"; }
+			if (m->getControl_pressed()) { return "control"; }
 
 			string thistax = taxons[0][i];
 			int num = 0;

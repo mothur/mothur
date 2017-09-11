@@ -166,7 +166,7 @@ void CommunityTypeFinder::printRelAbund(string fileName, vector<string> otuNames
         
         for(int i=0;i<numOTUs;i++){
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             printRA << otuNames[i];
             for(int j=0;j<numPartitions;j++){
@@ -211,7 +211,7 @@ vector<vector<double> > CommunityTypeFinder::getHessian(){
         
         for(int j=0;j<numOTUs;j++){
             
-            if (m->control_pressed) {  break; }
+            if (m->getControl_pressed()) {  break; }
             
             alpha[j] = exp(lambdaMatrix[currentPartition][j]);
             alphaSum += alpha[j];
@@ -234,7 +234,7 @@ vector<vector<double> > CommunityTypeFinder::getHessian(){
         double weight = 0.0000;
         
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  break; }
+            if (m->getControl_pressed()) {  break; }
             weight += pi[i];
             double sum = 0.0000;
             for(int j=0;j<numOTUs;j++){     sum += alpha[j] + countMatrix[i][j];    }
@@ -250,7 +250,7 @@ vector<vector<double> > CommunityTypeFinder::getHessian(){
         for(int i=0;i<numOTUs;i++){ hessian[i].assign(numOTUs, 0.0000); }
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) {  break; }
+            if (m->getControl_pressed()) {  break; }
             double term1 = -alpha[i] * (- psi_ajk[i] + psi_Ak + psi_cjk[i] - psi_Ck);
             double term2 = -alpha[i] * alpha[i] * (-psi1_ajk[i] + psi1_Ak + psi1_cjk[i] - psi1_Ck);
             double term3 = 0.1 * alpha[i];
@@ -289,12 +289,12 @@ double CommunityTypeFinder::psi1(double xx){
         double value = pmax*((kmax+xx)/(s-1.0) + 0.5);
         
         for(k=0; k<kmax; k++) {
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             value += pow(k + xx, -s);
         }
         
         for(j=0; j<=jmax; j++) {
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             double delta = hzeta_c[j+1] * scp * pcp;
             value += delta;
             
@@ -354,7 +354,7 @@ double CommunityTypeFinder::cheb_eval(const double seriesData[], int order, doub
         double x2 = xx * 2.0000;
         
         for(int j=order;j>=1;j--){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             double temp = d;
             d = x2 * d - dd + seriesData[j];
             dd = temp;
@@ -385,7 +385,7 @@ int CommunityTypeFinder::findkMeans(){
         
         //get relative abundance
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             int groupTotal = 0;
             
             relativeAbundance[i].assign(numOTUs, 0.0);
@@ -431,7 +431,7 @@ int CommunityTypeFinder::findkMeans(){
         
         while(maxChange > 1e-6 && iteration < maxIters){
             
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             //calcualte average relative abundance
             maxChange = 0.0000;
             for(int i=0;i<numPartitions;i++){
@@ -467,7 +467,7 @@ int CommunityTypeFinder::findkMeans(){
             
             //calcualte distance between each sample in partition and the average relative abundance
             for(int i=0;i<numSamples;i++){
-                if (m->control_pressed) {  return 0; }
+                if (m->getControl_pressed()) {  return 0; }
                 
                 double normalizationFactor = 0;
                 vector<double> totalDistToPartition(numPartitions, 0);
@@ -506,7 +506,7 @@ int CommunityTypeFinder::findkMeans(){
         
         
         for(int i=0;i<numOTUs;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             for(int j=0;j<numPartitions;j++){
                 if(alphaMatrix[j][i] > 0){
                     lambdaMatrix[j][i] = log(alphaMatrix[j][i]);
@@ -536,7 +536,7 @@ double CommunityTypeFinder::rMedoid(vector< vector<double> > x, vector< vector<d
         int minGroup = -1;
         
         for (int i = 0; i < d.size(); i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             double thisSum = 0.0;
             for (int j = 0; j < d[i].size(); j++) { thisSum += d[i][j];  }
@@ -548,13 +548,13 @@ double CommunityTypeFinder::rMedoid(vector< vector<double> > x, vector< vector<d
         
         if (minGroup != -1) {
             for (int i = 0; i < numOTUs; i++) {  results[i] = x[minGroup][i];  } //save minGroups relativeAbundance for each OTU
-        }else { m->mothurOut("[ERROR]: unable to find rMedoid group.\n"); m->control_pressed = true; }
+        }else { m->mothurOut("[ERROR]: unable to find rMedoid group.\n"); m->setControl_pressed(true); }
         
         
         double allMeanDist = 0.0;
         for (int i = 0; i < x.size(); i++) { //numSamples
             for (int j = 0; j < x[i].size(); j++) { //numOTus
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 allMeanDist += ((x[i][j]-results[j])*(x[i][j]-results[j])); //(otuX sampleY - otuX bestMedoid)^2
                 
             }
@@ -583,7 +583,7 @@ double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
         for (int j = 0; j < numSamples; j++) {
             double maxValue = -1e6;
             for (int i = 0; i < numPartitions; i++) {
-                if (m->control_pressed) { return 0.0; }
+                if (m->getControl_pressed()) { return 0.0; }
                 if (zMatrix[i][j] > maxValue) { //for kmeans zmatrix contains values for each sample in each partition. partition with highest value for that sample is the partition where the sample should be
                     clusterMap[j] = i;
                     maxValue = zMatrix[i][j];
@@ -595,7 +595,7 @@ double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
         vector<vector<double> > relativeAbundance(numSamples); //[numSamples][numOTUs]
         //get relative abundance
         for(int i=0;i<numSamples;i++){
-            if (m->control_pressed) {  return 0; }
+            if (m->getControl_pressed()) {  return 0; }
             int groupTotal = 0;
             
             relativeAbundance[i].assign(numOTUs, 0.0);
@@ -611,15 +611,15 @@ double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
         //find centers
         vector<vector<double> > centers = calcCenters(dists, clusterMap, relativeAbundance);
         
-        if (m->control_pressed) { return 0.0; }
+        if (m->getControl_pressed()) { return 0.0; }
         
         double allMeanDist = rMedoid(relativeAbundance, dists);
         
-        if (m->debug) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
         
         for (int i = 0; i < relativeAbundance.size(); i++) {//numSamples
             for (int j = 0; j < relativeAbundance[i].size(); j++) { //numOtus
-                if (m->control_pressed) {  return 0; }
+                if (m->getControl_pressed()) {  return 0; }
                 //x <- (x - centers[cl, ])^2
                 relativeAbundance[i][j] = ((relativeAbundance[i][j] - centers[clusterMap[i]][j])*(relativeAbundance[i][j] - centers[clusterMap[i]][j]));
             }
@@ -628,7 +628,7 @@ double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
         double wgss = 0.0;
         for (int j = 0; j < numOTUs; j++) {
             for(int i=0;i<numSamples;i++){
-                if (m->control_pressed) { return 0.0; }
+                if (m->getControl_pressed()) { return 0.0; }
                 wgss += relativeAbundance[i][j];
             }
         }
@@ -686,7 +686,7 @@ vector<vector<double> > CommunityTypeFinder::calcCenters(vector<vector<double> >
             vector<int> members = it->second;
             double minSumDist = 1e6;
             for (int i = 0; i < members.size(); i++) {
-                if (m->control_pressed) { return centers; }
+                if (m->getControl_pressed()) { return centers; }
                 if (sums[members[i]] < minSumDist) {
                     minSumDist = sums[members[i]];
                     medoidsVector[it->first] = members[i];
@@ -737,7 +737,7 @@ vector<double> CommunityTypeFinder::calcSilhouettes(vector<vector<double> > dist
         for (int j = 0; j < numSamples; j++) {
             double maxValue = 0.0;
             for (int i = 0; i < numPartitions; i++) {
-                if (m->control_pressed) { return silhouettes; }
+                if (m->getControl_pressed()) { return silhouettes; }
                 if (zMatrix[i][j] > maxValue) { //for kmeans zmatrix contains values for each sample in each partition. partition with highest value for that sample is the partition where the sample should be
                     clusterMap[j] = i;
                     maxValue = zMatrix[i][j];
@@ -755,7 +755,7 @@ vector<double> CommunityTypeFinder::calcSilhouettes(vector<vector<double> > dist
             counts[partitionI]++;
             
             for (int j = i+1; j < numSamples; j++) {
-                if (m->control_pressed) { return silhouettes; }
+                if (m->getControl_pressed()) { return silhouettes; }
                 int partitionJ = clusterMap[j];
                 
                 DiC[numPartitions*i+partitionJ] += dists[i][j];
@@ -765,7 +765,7 @@ vector<double> CommunityTypeFinder::calcSilhouettes(vector<vector<double> > dist
         
         vector<int> neighbor; neighbor.resize(numSamples, -1);
         for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { return silhouettes; }
+            if (m->getControl_pressed()) { return silhouettes; }
             int ki = numPartitions*i;
             int partitionI = clusterMap[i];
             computeSi = true;

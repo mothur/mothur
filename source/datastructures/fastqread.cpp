@@ -38,7 +38,7 @@ FastqRead::FastqRead(Sequence s, QualityScores q) {
             convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
         
-        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->control_pressed = true; }
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->setControl_pressed(true); }
         else {
             name = s.getName();
             comment = s.getComment();
@@ -66,7 +66,7 @@ FastqRead::FastqRead(Sequence s, QualityScores q, string f) {
             convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
         
-        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->control_pressed = true; }
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->setControl_pressed(true); }
         else {
             name = s.getName();
             comment = s.getComment();
@@ -164,7 +164,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         scores = convertQual(quality);
         m->checkName(name);
         
-        if (m->debug) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
     
     }
     catch(exception& e) {
@@ -222,7 +222,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
             scores = convertQual(quality);
             m->checkName(name);
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + " " + sequence + " " + quality + "\n"); }
         }
         
     }
@@ -257,7 +257,7 @@ vector<int> FastqRead::convertQual(string qual) {
             qualScores.push_back(temp);
         }
         
-        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
+        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->setControl_pressed(true);  }
         
         return qualScores;
     }

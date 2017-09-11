@@ -81,7 +81,7 @@ string ClassifyOtuCommand::getOutputPattern(string type) {
         
         if (type == "constaxonomy") {  pattern = "[filename],[distance],cons.taxonomy"; } 
         else if (type == "taxsummary") {  pattern = "[filename],[distance],cons.tax.summary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -310,7 +310,7 @@ int ClassifyOtuCommand::execute(){
         
         if (threshold != 0) {  processTaxMap();  }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		input = new InputData(listfile, "list");
 		list = input->getListVector();
@@ -320,7 +320,7 @@ int ClassifyOtuCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -329,7 +329,7 @@ int ClassifyOtuCommand::execute(){
                 
 					m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
 					process(list);
-					if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; return 0; }
+					if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -346,7 +346,7 @@ int ClassifyOtuCommand::execute(){
 					process(list);
 				
 					
-					if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
+					if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -383,14 +383,14 @@ int ClassifyOtuCommand::execute(){
 			process(list);
 			delete list;
 			
-			if (m->control_pressed) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
 		}
 		
 		delete input;  
         if (groupMap != NULL) { delete groupMap; }
         if (ct != NULL) { delete ct; }
 				
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
         //set constaxonomy file as new current constaxonomyfile
         string current = "";
@@ -492,7 +492,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
                 }
             }
 			
-			if (m->control_pressed) { delete phylo; return allNames; }
+			if (m->getControl_pressed()) { delete phylo; return allNames; }
 			
 		}
 		
@@ -608,7 +608,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->getNumBins(); i++) {
 			
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			vector<string> names;
             string binnames = processList->get(i);
@@ -617,7 +617,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
             
 			names = findConsensusTaxonomy(thisNames, size, conTax, "");
 		
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 
 			out << binLabels[i] << '\t' << size << '\t' << conTax << endl;
 			
@@ -692,7 +692,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 for (itParsed = parsedNames.begin(); itParsed != parsedNames.end(); itParsed++) {
                     vector<string> theseNames = findConsensusTaxonomy(itParsed->second, size, conTax, itParsed->first);
                     
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     ofstream out; m->openOutputFileAppend(outs[groupIndex[itParsed->first]], out);
                     out << binLabels[i] << '\t' << size << '\t' << conTax << endl;
@@ -752,7 +752,7 @@ int ClassifyOtuCommand::processTaxMap() {
         
         for (map<string, string>::iterator it = taxMap.begin(); it != taxMap.end(); it++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             vector<string> taxons;
             string tax = it->second;

@@ -152,11 +152,11 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
         string taxon;
         while(seqTaxonomy != ""){
 			
-			if (m->control_pressed) { return names; }
+			if (m->getControl_pressed()) { return names; }
 			
 			taxon = getNextTaxon(seqTaxonomy, "");
             
-            if (m->debug) { m->mothurOut(taxon +'\n'); }
+            if (m->getDebug()) { m->mothurOut(taxon +'\n'); }
 			
 			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); break;  }
 			
@@ -166,7 +166,7 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 				currentNode = childPointer->second;
 			}
 			else{											//otherwise, error this taxonomy is not in tree
-				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
 			}
             
 			if (seqTaxonomy == "") {   names = tree[currentNode].accessions;	}
@@ -199,13 +199,13 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			
 			level++;
 		
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
 			taxon = getNextTaxon(seqTaxonomy, seqName);
             
-            if (m->debug) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
+            if (m->getDebug()) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
 			
 			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies.insert(currentNode); } break;  }
 			
@@ -255,7 +255,7 @@ vector<int> PhyloTree::getGenusNodes()	{
         for (map<string, int>::iterator itName = name2Taxonomy.begin(); itName != name2Taxonomy.end(); itName++) {
             map<int, int>::iterator itTemp = temp.find(itName->second);
             if (itTemp != temp.end()) { name2GenusNodeIndex[itName->first] = itTemp->second; }
-            else {  m->mothurOut("[ERROR]: trouble making name2GenusNodeIndex, aborting.\n"); m->control_pressed = true; }
+            else {  m->mothurOut("[ERROR]: trouble making name2GenusNodeIndex, aborting.\n"); m->setControl_pressed(true); }
         }
         
 		return genusIndex;
@@ -295,7 +295,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
         
 		for(it=tree[index].children.begin();it!=tree[index].children.end();it++){
             
-            if (m->debug) { m->mothurOut(toString(index) +'\t' + tree[it->second].name +'\n'); }
+            if (m->getDebug()) { m->mothurOut(toString(index) +'\t' + tree[it->second].name +'\n'); }
                 
 			tree[it->second].heirarchyID = tree[index].heirarchyID + '.' + toString(counter);
 			counter++;
@@ -346,7 +346,7 @@ void PhyloTree::binUnclassified(string file){
 			}
 		}
 		
-        if (m->debug) { m->mothurOut("maxLevel = " + toString(maxLevel) +'\n'); }
+        if (m->getDebug()) { m->mothurOut("maxLevel = " + toString(maxLevel) +'\n'); }
         
 		int copyNodes = copy.size();
 	
@@ -354,18 +354,18 @@ void PhyloTree::binUnclassified(string file){
 		map<int, int>::iterator itLeaf;
 		for (itLeaf = leafNodes.begin(); itLeaf != leafNodes.end(); itLeaf++) {
 			
-			if (m->control_pressed) {  out.close(); break;  }
+			if (m->getControl_pressed()) {  out.close(); break;  }
 			
 			int level = copy[itLeaf->second].level;
 			int currentNode = itLeaf->second;
             
-            if (m->debug) { m->mothurOut(copy[currentNode].name +'\n'); }
+            if (m->getDebug()) { m->mothurOut(copy[currentNode].name +'\n'); }
 			
 			//this sequence is unclassified at some levels
 			while(level < maxLevel){
 		
 				level++;
-                if (m->debug) { m->mothurOut("level = " + toString(level) +'\n'); }
+                if (m->getDebug()) { m->mothurOut("level = " + toString(level) +'\n'); }
 			
 				string taxon = "unclassified";	
 				
@@ -387,7 +387,7 @@ void PhyloTree::binUnclassified(string file){
 			}
 		}
 		
-		if (!m->control_pressed) {
+		if (!m->getControl_pressed()) {
 			//print copy tree
 			print(out, copy);
 		}
@@ -566,7 +566,7 @@ bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
 		map<string, int>::iterator itFind;
 		map<string, int> taxonomyFileNames = name2Taxonomy;
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: in error check. Numseqs in template = " + toString(templateFileNames.size()) + ". Numseqs in taxonomy = " + toString(taxonomyFileNames.size()) + ".\n"); }
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: in error check. Numseqs in template = " + toString(templateFileNames.size()) + ". Numseqs in taxonomy = " + toString(taxonomyFileNames.size()) + ".\n"); }
         
 		for (int i = 0; i < templateFileNames.size(); i++) {
 			itFind = taxonomyFileNames.find(templateFileNames[i]);

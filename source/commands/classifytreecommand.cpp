@@ -61,7 +61,7 @@ string ClassifyTreeCommand::getOutputPattern(string type) {
         
         if (type == "summary") {  pattern = "[filename],taxonomy.summary"; } //makes file like: amazon.0.03.fasta
         else if (type == "tree") {  pattern = "[filename],taxonomy.tre"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -247,7 +247,7 @@ int ClassifyTreeCommand::execute(){
 
         if (namefile != "") { m->readNames(namefile, nameMap, nameCount); }
                         
-        if (m->control_pressed) { delete tmap;  delete outputTree;  return 0; }
+        if (m->getControl_pressed()) { delete tmap;  delete outputTree;  return 0; }
 		
         m->readTax(taxonomyfile, taxMap, true);
         
@@ -257,7 +257,7 @@ int ClassifyTreeCommand::execute(){
         getClassifications(outputTree);
         delete outputTree; delete tmap;
 			
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		//set tree file as new current treefile
 		if (treefile != "") {
@@ -312,7 +312,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		//create a map from tree node index to names of descendants, save time later
 		map<int, map<string, set<string> > > nodeToDescendants; //node# -> (groupName -> groupMembers)
 		for (int i = 0; i < T->getNumNodes(); i++) {
-            if (m->control_pressed) { return 0; }
+            if (m->getControl_pressed()) { return 0; }
 			
 			nodeToDescendants[i] = getDescendantList(T, i, nodeToDescendants);
 		}
@@ -320,7 +320,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		//for each node
 		for (int i = T->getNumLeaves(); i < T->getNumNodes(); i++) {
 			
-			if (m->control_pressed) { out.close(); return 0; }
+			if (m->getControl_pressed()) { out.close(); return 0; }
             
 			string tax = "not classifed";
             int size;
@@ -421,7 +421,7 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
                     }				}
 			}
             
-			if (m->control_pressed) { delete phylo; return conTax; }
+			if (m->getControl_pressed()) { delete phylo; return conTax; }
 			
 		}
 		

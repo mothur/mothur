@@ -115,7 +115,7 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         else if (type == "group") {  pattern = "[filename],groups"; }
         else if (type == "name") {  pattern = "[filename],[tag],names"; }
         else if (type == "count") {  pattern = "[filename],[tag],count_table-[filename],count_table"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -437,7 +437,7 @@ int TrimSeqsCommand::execute(){
 		}
 
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		string outputGroupFileName;
 		if(oligoFile != ""){
@@ -450,7 +450,7 @@ int TrimSeqsCommand::execute(){
 			}
 		}
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
             
         //fills lines and qlines
 		setLines(fastaFile, qFileName);
@@ -462,7 +462,7 @@ int TrimSeqsCommand::execute(){
         }	
 		
 		
-		if (m->control_pressed) {  return 0; }			
+		if (m->getControl_pressed()) {  return 0; }			
  	
 		if(allFiles){
 			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
@@ -516,7 +516,7 @@ int TrimSeqsCommand::execute(){
                 if (countfile != "") {  out << "Representative_Sequence\ttotal\t" << it->second << endl;  }
                 
                 while (!in.eof()){
-                    if (m->control_pressed) { break; }
+                    if (m->getControl_pressed()) { break; }
                     
                     Sequence currSeq(in); m->gobble(in);
                     if (countfile == "") {  
@@ -555,13 +555,13 @@ int TrimSeqsCommand::execute(){
                     newCt.push_back(itNames->first, tempCounts); //add it to the table with no abundance so we can set the groups abundance
                     map<string, string>::iterator it2 = groupMap.find(itNames->first);
                     if (it2 != groupMap.end()) { newCt.setAbund(itNames->first, it2->second, itNames->second); }
-                    else { m->mothurOut("[ERROR]: missing group info for " + itNames->first + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                    else { m->mothurOut("[ERROR]: missing group info for " + itNames->first + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                 }
                 newCt.printTable(trimCountFile);
             }
 		}
 		
-		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
 
 		//output group counts
 		m->mothurOutEndLine();
@@ -572,7 +572,7 @@ int TrimSeqsCommand::execute(){
 		}
 		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
-		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
 
 		//set fasta file as new current fastafile
 		string current = "";
@@ -722,7 +722,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
             int obsPDiffs = 0;
             
             
-			if (m->control_pressed) {
+			if (m->getControl_pressed()) {
                 delete trimOligos; if (reorient) { delete rtrimOligos; }
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
 				if ((createGroup) && (countfile == "")) {	 outGroupsFile.close();   }
@@ -933,7 +933,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					}
 				}
 				
-                if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
 
                 string seqComment = currSeq.getComment();
                 currSeq.setComment("\t" + commentString + "\t" + seqComment);
@@ -983,7 +983,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                         if (createGroup) {
                             if(numBarcodes != 0){
                                                                 
-                                if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
+                                if (m->getDebug()) { m->mothurOut(", group= " + thisGroup + "\n"); }
                                 
                                 if (countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
                                 else {   groupMap[currSeq.getName()] = thisGroup; }
@@ -1150,7 +1150,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 lines[process],
 								 qLines[process]);
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
 				
 				//pass groupCounts to parent
 				if(createGroup){
@@ -1179,7 +1179,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(trimFASTAFileName + (toString(processIDS[i]) + ".temp"));
                     m->mothurRemove(scrapFASTAFileName + (toString(processIDS[i]) + ".temp"));
@@ -1222,7 +1222,8 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -1283,7 +1284,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                                      lines[process],
                                      qLines[process]);
                     
-                    if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
                     
                     //pass groupCounts to parent
                     if(createGroup){
@@ -1450,7 +1451,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->count != pDataArray[i]->lineEnd) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->lineEnd) + " sequences assigned to it, quitting. \n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->lineEnd) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
             }
 			for (map<string, int>::iterator it = pDataArray[i]->groupCounts.begin(); it != pDataArray[i]->groupCounts.end(); it++) {
                 map<string, int>::iterator it2 = groupCounts.find(it->first);
@@ -1659,7 +1660,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         }
         
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-            if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
 			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
 			if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
 		}	
@@ -1684,7 +1685,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                 qfileFilePos = m->setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->control_pressed = true; 
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->setControl_pressed(true); 
                 }
             }
         
@@ -1731,7 +1732,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 
 			inOligos >> type; 
             
-		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
+		 	if (m->getDebug()) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
             
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
@@ -1744,7 +1745,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				
 				inOligos >> oligo;
                 
-                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
 				
 				for(int i=0;i<oligo.length();i++){
 					oligo[i] = toupper(oligo[i]);
@@ -1766,7 +1767,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
 					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
+                    if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
                     
 					primers[oligo]=indexPrimer; indexPrimer++;		
 					primerNameVector.push_back(group);
@@ -1794,14 +1795,14 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                     
                     oligosPair newPrimer(oligo, roligo);
                     
-                     if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
+                     if (m->getDebug()) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
                     if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
                     else { uniquePrimers.insert(tempPair); }
 					
-                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
+                    if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
                     
 					pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
 					primerNameVector.push_back(group);
@@ -1841,7 +1842,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                         reverseBarcode = reverseOligo(reverseBarcode);
                         oligosPair newPair(oligo, reverseBarcode);
                         
-                        if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
                         
                         //check for repeat barcodes
                         string tempPair = oligo+reverseBarcode;
@@ -1871,7 +1872,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		
         if (hasPairedBarcodes || hasPrimer) {
             pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
+            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
         }
         
 		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}

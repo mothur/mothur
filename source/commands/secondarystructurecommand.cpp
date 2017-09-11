@@ -54,7 +54,7 @@ string AlignCheckCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "aligncheck") {  pattern = "[filename],align.check"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -205,7 +205,7 @@ int AlignCheckCommand::execute(){
             nameMap = ct.getNameMap();
         }
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		ifstream in;
 		m->openInputFile(fastafile, in);
@@ -230,20 +230,20 @@ int AlignCheckCommand::execute(){
 		
 		int count = 0;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outfile); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outfile); return 0; }
 			
 			Sequence seq(in);  m->gobble(in);
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
-				if (haderror == 1) { m->control_pressed = true; break; }
+				if (haderror == 1) { m->setControl_pressed(true); break; }
 				
 				int num = 1;
 				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(seq.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 					else { num = it->second; }
 				}
 				
@@ -267,7 +267,7 @@ int AlignCheckCommand::execute(){
 		in.close();
 		out.close();
 		
-		if (m->control_pressed) {  m->mothurRemove(outfile); return 0; }
+		if (m->getControl_pressed()) {  m->mothurRemove(outfile); return 0; }
 		
 		sort(pound.begin(), pound.end());
 		sort(dash.begin(), dash.end());
@@ -285,7 +285,7 @@ int AlignCheckCommand::execute(){
 		int ptile97_5	= int(size * 0.975);
 		int ptile100	= size - 1;
 		
-		if (m->control_pressed) {  m->mothurRemove(outfile); return 0; }
+		if (m->getControl_pressed()) {  m->mothurRemove(outfile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal"); m->mothurOutEndLine();

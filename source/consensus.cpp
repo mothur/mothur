@@ -19,7 +19,7 @@ Tree* Consensus::getTree(vector<Tree*>& t){
 		//get the possible pairings
 		getSets(t);	
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		consensusTree = new Tree(t[0]->getCountTable());
 		
@@ -35,11 +35,11 @@ Tree* Consensus::getTree(vector<Tree*>& t){
 		
 		buildConsensusTree(treeSet);
 		
-		if (m->control_pressed) {  delete consensusTree; return 0; }
+		if (m->getControl_pressed()) {  delete consensusTree; return 0; }
 		
 		consensusTree->assembleTree();
 		
-		if (m->control_pressed) {  delete consensusTree; return 0; }
+		if (m->getControl_pressed()) {  delete consensusTree; return 0; }
 				
 		return consensusTree; 
 		
@@ -65,12 +65,12 @@ int Consensus::printSetsInfo() {
 		//output sets included
 		out2 << endl << "Sets included in the consensus tree:" << endl << endl;
 		
-		if (m->control_pressed) {  return 0; }
+		if (m->getControl_pressed()) {  return 0; }
 		
 		vector<string> temp;
 		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
             
-			if (m->control_pressed) {  return 0; }
+			if (m->getControl_pressed()) {  return 0; }
 			
 			//only output pairs not leaves
 			if (it2->first.size() > 1) { 
@@ -98,7 +98,7 @@ int Consensus::printSetsInfo() {
 		out2 << endl << "Sets NOT included in the consensus tree:" << endl << endl;
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
             
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 			
 			temp.clear();
 			//initialize temp to all "."
@@ -131,7 +131,7 @@ int Consensus::buildConsensusTree(vector<string> nodeSet) {
 		vector<string> leftChildSet;
 		vector<string> rightChildSet;
 		
-		if (m->control_pressed) { return 1; }
+		if (m->getControl_pressed()) { return 1; }
 		
 		//if you are at a leaf
 		if (nodeSet.size() == 1) {
@@ -171,7 +171,7 @@ int Consensus::getSets(vector<Tree*>& t) {
 			//for each non-leaf node get descendant info.
 			for (int j = numLeaves; j < numNodes; j++) {
 				
-				if (m->control_pressed) { return 1; }
+				if (m->getControl_pressed()) { return 1; }
 				
 				temp.clear();
 				//go through pcounts and pull out descendants
@@ -197,7 +197,7 @@ int Consensus::getSets(vector<Tree*>& t) {
 		//for each leaf node get descendant info.
 		for (int j = 0; j < numLeaves; j++) {
 		
-			if (m->control_pressed) { return 1; }
+			if (m->getControl_pressed()) { return 1; }
             
 			//only need the first one since leaves have no descendants but themselves
 			it = t[0]->tree[j].pcount.begin(); 
@@ -218,7 +218,7 @@ int Consensus::getSets(vector<Tree*>& t) {
 		
 		//set initial rating on pairs to sightings + subgroup sightings
 		while (nodePairsCopy.size() != 0) {
-			if (m->control_pressed) { return 1; }
+			if (m->getControl_pressed()) { return 1; }
 		
 			vector<string> smallOne = getSmallest(nodePairsCopy);
 			

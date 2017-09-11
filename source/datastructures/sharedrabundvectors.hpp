@@ -53,7 +53,7 @@ public:
     vector<string> getNamesGroups(); //same order as Rabunds
     int getNumGroups() { return lookup.size(); }
     int getNumSeqs(string); //group
-    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->control_pressed = true; }
+    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->setControl_pressed(true); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
     
     void print(ostream&);
@@ -62,7 +62,7 @@ public:
     RAbundVector getRAbundVector();
     RAbundVector getRAbundVector(string); //group you want the rabund for
     SAbundVector getSAbundVector();
-    OrderVector getOrderVector(map<string,int>*) { m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->control_pressed = true; OrderVector o; return o; }
+    OrderVector getOrderVector(map<string,int>*) { m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->setControl_pressed(true); OrderVector o; return o; }
     SharedOrderVector getSharedOrderVector();
     vector<SharedRAbundVector*> getSharedRAbundVectors();
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();

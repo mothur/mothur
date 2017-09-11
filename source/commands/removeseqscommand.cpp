@@ -74,7 +74,7 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
         else if (type == "list")        {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -333,7 +333,7 @@ int RemoveSeqsCommand::execute(){
 		//get names you want to keep
 		names = m->readAccnos(accnosfile);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
@@ -352,7 +352,7 @@ int RemoveSeqsCommand::execute(){
 		if (qualfile != "")			{		readQual();		}
         if (countfile != "")		{		readCount();		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -429,7 +429,7 @@ int RemoveSeqsCommand::readFasta(){
 		
         set<string> uniqueNames;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
             
@@ -492,7 +492,7 @@ int RemoveSeqsCommand::readFastq(){
 		set<string> uniqueNames;
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
             //read sequence name
             bool ignore;
@@ -642,12 +642,12 @@ int RemoveSeqsCommand::readCount(){
         set<string> uniqueNames;
         while (!in.eof()) {
             
-            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
             
             in >> name; m->gobble(in); 
             in >> thisTotal; m->gobble(in);
             if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
-            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) == 0) {
                 if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
@@ -720,11 +720,11 @@ int RemoveSeqsCommand::readList(){
             vector<string> binLabels = list.getLabels();
             vector<string> newBinLabels;
             
-            if (m->control_pressed) { in.close(); out.close();  return 0; }
+            if (m->getControl_pressed()) { in.close(); out.close();  return 0; }
 
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+				if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 				//parse out names that are in accnos file
 				string bin = list.get(i);
@@ -802,7 +802,7 @@ int RemoveSeqsCommand::readName(){
 		
         set<string> uniqueNames;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -902,7 +902,7 @@ int RemoveSeqsCommand::readGroup(){
 		
         set<string> uniqueNames;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;			m->gobble(in);		//read from first column
 			in >> group;			//read from second column
@@ -957,7 +957,7 @@ int RemoveSeqsCommand::readTax(){
 		
         set<string> uniqueNames;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
             in >> name; m->gobble(in);
             tax = m->getline(in); m->gobble(in);
@@ -1023,7 +1023,7 @@ int RemoveSeqsCommand::readAlign(){
 		
         set<string> uniqueNames;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
             

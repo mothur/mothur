@@ -58,7 +58,7 @@ string GetCoreMicroBiomeCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "coremicrobiome") {  pattern = "[filename],[tag],core.microbiome"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -234,7 +234,7 @@ int GetCoreMicroBiomeCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->control_pressed) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -266,13 +266,13 @@ int GetCoreMicroBiomeCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();				
         }
         
-        if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -301,7 +301,7 @@ int GetCoreMicroBiomeCommand::execute(){
 
         }
         
-        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
 		m->mothurOutEndLine();
@@ -355,9 +355,10 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         }
         
         vector<string> sampleNames = lookup->getNamesGroups();
+        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < numOtus; i++) {
             
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             
             //count number of samples in this otu with a relabund >= spot in count
             vector<int> counts; counts.resize(factor+1, 0);
@@ -373,14 +374,14 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
                 for (int k = 0; k < counts[j]; k++) { table[j][k]++; }
                 
                 if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
-                    if (counts[j] >= samples) { otuNames[j].push_back(m->currentSharedBinLabels[i]); }
+                    if (counts[j] >= samples) { otuNames[j].push_back(currentLabels[i]); }
                 }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
                     if (j == (abund*factor)) {
-                        for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(m->currentSharedBinLabels[i]); }
+                        for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(currentLabels[i]); }
                     }
                 }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
                     if ((j == (abund*factor)) && (counts[j] >= samples)) {
-                        otuNames[j].push_back(m->currentSharedBinLabels[i]); 
+                        otuNames[j].push_back(currentLabels[i]);
                     }
                 }
             }
@@ -394,13 +395,13 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         int precisionLength = (toString(factor)).length();
         for (int i = 0; i < table.size(); i++) {
             out << "Relabund-" << setprecision(precisionLength-1)<< (float)(i/(float)factor) << "\t";
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             for (int j = 0; j < table[i].size(); j++) {  if (output == "fraction") { table[i][j] /= (double) numOtus; } }
         }
         out << endl;
         
         for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
             out << i+1;
             for (int j = 0; j < table.size(); j++) {  out << setprecision(6) << '\t' << table[j][i]; }
             out << endl;
@@ -408,7 +409,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
 
         out.close();
         
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
         
         if ((samples != -1) || (abund != -1))  {
             string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
@@ -425,7 +426,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
             }
 
             for (map<int, vector<string> >::iterator it = otuNames.begin(); it != otuNames.end(); it++) {
-                if (m->control_pressed) { break; }
+                if (m->getControl_pressed()) { break; }
                 
                 vector<string> temp = it->second;
                 string list = m->makeList(temp);

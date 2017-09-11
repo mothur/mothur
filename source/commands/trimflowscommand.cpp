@@ -75,7 +75,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
         if (type == "flow") {  pattern = "[filename],[tag],flow"; } 
         else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
         else if (type == "file") {  pattern = "[filename],flow.files"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -321,7 +321,7 @@ int TrimFlowsCommand::execute(){
 			createProcessesCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames); 
 		}	
 		
-		if (m->control_pressed) {  return 0; }			
+		if (m->getControl_pressed()) {  return 0; }			
 		
 		string flowFilesFileName;
 		ofstream output;
@@ -451,7 +451,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		
 		while(moreSeqs) {
 				
-			if (m->control_pressed) { break; }
+			if (m->getControl_pressed()) { break; }
 			
 			int success = 1;
 			int currentSeqDiffs = 0;
@@ -484,7 +484,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 
             }
             
-            if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
             
 			if(numBarcodes != 0){
 				vector<int> results = trimOligos->stripBarcode(currSeq, barcodeIndex);
@@ -646,7 +646,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
         bool allBlank = false;
         oligos.read(oligoFileName);
         
-        if (m->control_pressed) { return 0; } //error in reading oligos
+        if (m->getControl_pressed()) { return 0; } //error in reading oligos
         
         if (oligos.hasPairedBarcodes()) {
             pairedOligos = true;
@@ -890,7 +890,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
                     m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
@@ -913,7 +913,8 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+				for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();

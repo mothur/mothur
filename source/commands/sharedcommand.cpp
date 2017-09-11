@@ -65,7 +65,7 @@ string SharedCommand::getOutputPattern(string type) {
         // else if (type == "rabund") {  pattern = "[filename],[group],rabund"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
         else if (type == "map") {  pattern = "[filename],map"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
 
         return pattern;
     }
@@ -258,7 +258,7 @@ int SharedCommand::execute(){
         if (listfile != "") {  createSharedFromListGroup();  }
         else {   createSharedFromBiom();  }
 
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
 			for (int i = 0; i < outputNames.size(); i++) {
 				m->mothurRemove(outputNames[i]);
 			}
@@ -333,7 +333,7 @@ int SharedCommand::createSharedFromBiom() {
         string matrixElementType = "";
 
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
-            if (m->control_pressed) { break; }
+            if (m->getControl_pressed()) { break; }
 
             char c = in.get(); m->gobble(in);
 
@@ -374,31 +374,31 @@ int SharedCommand::createSharedFromBiom() {
         else {
             string thisLine = it->second;
             biomType = getTag(thisLine);
-//            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->control_pressed = true;  }
+//            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->setControl_pressed(true);  }
         }
 
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("matrix_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_type provided.\n"); }
         else {
             string thisLine = it->second;
             matrixFormat = getTag(thisLine);
-            if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->control_pressed = true; }
+            if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->setControl_pressed(true); }
         }
 
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("matrix_element_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_element_type provided.\n"); }
         else {
             string thisLine = it->second;
             matrixElementType = getTag(thisLine);
-            if ((matrixElementType != "int") && (matrixElementType != "float")) { m->mothurOut("[ERROR]: " + matrixElementType + " is not a valid biom matrix_element_type for mothur. Types allowed are int and float.\n"); m->control_pressed = true; }
+            if ((matrixElementType != "int") && (matrixElementType != "float")) { m->mothurOut("[ERROR]: " + matrixElementType + " is not a valid biom matrix_element_type for mothur. Types allowed are int and float.\n"); m->setControl_pressed(true); }
             if (matrixElementType == "float") { m->mothurOut("[WARNING]: the shared file only uses integers, any float values will be rounded down to the nearest integer.\n"); }
         }
 
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("rows");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a rows provided.\n"); }
@@ -431,7 +431,7 @@ int SharedCommand::createSharedFromBiom() {
             }else{  otuNames = readRows(thisLine, numRows); }
         }
 
-        if (m->control_pressed) { out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("columns");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
@@ -452,7 +452,7 @@ int SharedCommand::createSharedFromBiom() {
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
         }
 
-        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) {  out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("shape");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a shape provided.\n"); }
@@ -461,18 +461,18 @@ int SharedCommand::createSharedFromBiom() {
             getDims(thisLine, shapeNumRows, shapeNumCols);
 
             //check shape
-            if (shapeNumCols != numCols) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumCols) + " columns, but I only read " + toString(numCols) + " columns.\n"); m->control_pressed = true; }
+            if (shapeNumCols != numCols) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumCols) + " columns, but I only read " + toString(numCols) + " columns.\n"); m->setControl_pressed(true); }
 
-            if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->control_pressed = true; }
+            if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->setControl_pressed(true); }
         }
 
-        if (m->control_pressed) {  out.close(); m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) {  out.close(); m->mothurRemove(filename); return 0; }
 
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
             string thisLine = it->second;
-            m->currentSharedBinLabels = otuNames;
+            m->setCurrentSharedBinLabels(otuNames);
 
             //read data
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
@@ -483,7 +483,7 @@ int SharedCommand::createSharedFromBiom() {
             printSharedData(lookup, out);
         }
 
-        if (m->control_pressed) {  m->mothurRemove(filename); return 0; }
+        if (m->getControl_pressed()) {  m->mothurRemove(filename); return 0; }
 
         return 0;
     }
@@ -513,7 +513,7 @@ SharedRAbundVectors* SharedCommand::readData(string matrixFormat, string line, s
         int otuCount = 0;
         for (int i = 0; i < line.length(); i++) {
 
-            if (m->control_pressed) { return lookup; }
+            if (m->getControl_pressed()) { return lookup; }
 
             //look for opening [ to indicate data is starting
             if ((line[i] == '[') && (!dataStart)) { dataStart = true; i++;  if (!(i < line.length())) { break; } }
@@ -534,7 +534,7 @@ SharedRAbundVectors* SharedCommand::readData(string matrixFormat, string line, s
                     if (matrixFormat == "dense") {
 
                         //sanity check
-                        if (nums.size() != lookup->getNumGroups()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
+                        if (nums.size() != lookup->getNumGroups()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->setControl_pressed(true); }
 
                         //set abundances for this otu
                         //nums contains [abundSample0, abundSample1, abundSample2, ...] for current OTU
@@ -543,7 +543,7 @@ SharedRAbundVectors* SharedCommand::readData(string matrixFormat, string line, s
                         otuCount++;
                     }else {
                         //sanity check
-                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->control_pressed = true; }
+                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->setControl_pressed(true); }
 
                         //nums contains [otuNum, sampleNum, abundance]
                         lookup->set(nums[0], nums[2], groupNames[nums[1]]);
@@ -632,7 +632,7 @@ vector<string> SharedCommand::readRows(string line, int& numRows) {
 
         for (int i = 0; i < line.length(); i++) {
 
-            if (m->control_pressed) { return names; }
+            if (m->getControl_pressed()) { return names; }
 
             if (line[i] == '[')         { countOpenBrace++;     }
             else if (line[i] == ']')    { countClosedBrace++;   }
@@ -721,7 +721,7 @@ int SharedCommand::createSharedFromListGroup() {
             countTable->readTable(countfile, true, false);
         }
 
-        if (m->control_pressed) { return 0; }
+        if (m->getControl_pressed()) { return 0; }
 
         pickedGroups = false;
 
@@ -757,7 +757,7 @@ int SharedCommand::createSharedFromListGroup() {
         string lastLabel = SharedList->getLabel();
         SharedRAbundVectors* lookup;
 
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
             out.close(); if (!pickedGroups) { m->mothurRemove(filename); }
             return 0;
@@ -766,12 +766,12 @@ int SharedCommand::createSharedFromListGroup() {
         //sanity check
         vector<string> namesSeqs;
         int numGroupNames = 0;
-        if (m->groupMode == "group") { namesSeqs = groupMap->getNamesSeqs(); numGroupNames = groupMap->getNumSeqs(); }
+        if (m->getGroupMode() == "group") { namesSeqs = groupMap->getNamesSeqs(); numGroupNames = groupMap->getNumSeqs(); }
         else { namesSeqs = countTable->getNamesOfSeqs(); numGroupNames = countTable->getNumUniqueSeqs(); }
         int error = ListGroupSameSeqs(namesSeqs, SharedList);
 
         if ((!pickedGroups) && (SharedList->getNumSeqs() != numGroupNames)) {  //if the user has not specified any groups and their files don't match exit with error
-            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
 
             out.close(); if (!pickedGroups) { m->mothurRemove(filename); } //remove blank shared file you made
 
@@ -780,10 +780,10 @@ int SharedCommand::createSharedFromListGroup() {
             return 0;
         }
 
-        if (error == 1) { m->control_pressed = true; }
+        if (error == 1) { m->setControl_pressed(true); }
 
         //if user has specified groups make new groupfile for them
-        if ((pickedGroups) && (m->groupMode == "group")) { //make new group file
+        if ((pickedGroups) && (m->getGroupMode() == "group")) { //make new group file
             string groups = "";
             if (m->getNumGroups() < 4) {
                 for (int i = 0; i < m->getNumGroups()-1; i++) {
@@ -816,7 +816,7 @@ int SharedCommand::createSharedFromListGroup() {
         set<string> userLabels = labels;
     
         while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->control_pressed) {
+            if (m->getControl_pressed()) {
                 delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                 if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
                 return 0;
@@ -828,7 +828,7 @@ int SharedCommand::createSharedFromListGroup() {
 
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 
-                if (m->control_pressed) {
+                if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                     delete lookup;
                     if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
@@ -848,15 +848,15 @@ int SharedCommand::createSharedFromListGroup() {
                     ofstream out2;
                     m->openOutputFile(filename, out2);
 
-                    vector<string> savedLabels = m->currentSharedBinLabels;
+                    vector<string> savedLabels = m->getCurrentSharedBinLabels();
                     lookup->eliminateZeroOTUS();
                     lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
-                    m->currentSharedBinLabels = savedLabels; //restore old labels
+                    m->setCurrentSharedBinLabels(savedLabels); //restore old labels
 
                 }else {
-                    if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+                    if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -874,7 +874,7 @@ int SharedCommand::createSharedFromListGroup() {
                 lookup = SharedList->getSharedRAbundVector();
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 
-                if (m->control_pressed) {
+                if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                     delete lookup;
                     if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
@@ -894,15 +894,15 @@ int SharedCommand::createSharedFromListGroup() {
                     ofstream out2;
                     m->openOutputFile(filename, out2);
 
-                    vector<string> savedLabels = m->currentSharedBinLabels;
+                    vector<string> savedLabels = m->getCurrentSharedBinLabels();
                     lookup->eliminateZeroOTUS();
                     lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
-                    m->currentSharedBinLabels = savedLabels; //restore old labels
+                    m->setCurrentSharedBinLabels(savedLabels); //restore old labels
 
                 }else {
-                    if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+                    if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -938,7 +938,7 @@ int SharedCommand::createSharedFromListGroup() {
             lookup = SharedList->getSharedRAbundVector();
             m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 
-            if (m->control_pressed) {
+            if (m->getControl_pressed()) {
                 if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
                 if (!pickedGroups) { out.close(); m->mothurRemove(filename); }
                 return 0;
@@ -957,15 +957,15 @@ int SharedCommand::createSharedFromListGroup() {
                 ofstream out2;
                 m->openOutputFile(filename, out2);
 
-                vector<string> savedLabels = m->currentSharedBinLabels;
+                vector<string> savedLabels = m->getCurrentSharedBinLabels();
                 lookup->eliminateZeroOTUS();
                 lookup->printHeaders(out2);
                 printSharedData(lookup, out2);
                 out2.close();
-                m->currentSharedBinLabels = savedLabels; //restore old labels
+                m->setCurrentSharedBinLabels(savedLabels); //restore old labels
 
             }else {
-                if (!m->printedSharedHeaders) { lookup->printHeaders(out); }
+                if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                 printSharedData(lookup, out); //prints info to the .shared file
             }
             delete lookup;
@@ -976,7 +976,7 @@ int SharedCommand::createSharedFromListGroup() {
 
         if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
 
-        if (m->control_pressed) {
+        if (m->getControl_pressed()) {
             if (!pickedGroups) { m->mothurRemove(filename); }
             return 0;
         }
@@ -1044,7 +1044,7 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
 
 		//go through list and if group returns "not found" output it
 		for (int i = 0; i < SharedList->getNumBins(); i++) {
-			if (m->control_pressed) { return 0; }
+			if (m->getControl_pressed()) { return 0; }
 
 			string names = SharedList->get(i);
 
@@ -1097,7 +1097,7 @@ int SharedCommand::readOrderFile() {
 
 			order.push_back(thisGroup);
 
-			if (m->control_pressed) { order.clear(); break; }
+			if (m->getControl_pressed()) { order.clear(); break; }
 		}
 		in.close();
 

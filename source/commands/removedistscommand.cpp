@@ -50,7 +50,7 @@ string RemoveDistsCommand::getOutputPattern(string type) {
         
         if (type == "phylip")           {   pattern = "[filename],pick,[extension]";    }
         else if (type == "column")      {   pattern = "[filename],pick,[extension]";    }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -189,13 +189,13 @@ int RemoveDistsCommand::execute(){
 		//get names you want to keep
 		names = m->readAccnos(accnosfile);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (phylipfile != "")		{		readPhylip();		}
 		if (columnfile != "")		{		readColumn();       }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		
 		if (outputNames.size() != 0) {
@@ -282,7 +282,7 @@ int RemoveDistsCommand::readPhylip(){
                 row++;
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
@@ -293,14 +293,14 @@ int RemoveDistsCommand::readPhylip(){
                 if (names.count(name) == 0) { rows.insert(row);  }
                 row++;
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  in.close(); return 0;  }
+                    if (m->getControl_pressed()) {  in.close(); return 0;  }
                     in >> distance;
                 }
             }
         }
         in.close();
         
-        if (m->control_pressed) {  return 0; }
+        if (m->getControl_pressed()) {  return 0; }
         
         //read through file only printing rows and columns of seqs in names
         ifstream inPhylip;
@@ -324,7 +324,7 @@ int RemoveDistsCommand::readPhylip(){
                 else{ out << name; keptCount++; }
                 
                 for(int j=0;j<i;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close();  return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close();  return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -344,7 +344,7 @@ int RemoveDistsCommand::readPhylip(){
                 else{ out << name; keptCount++; }
                 
                 for(int j=0;j<nseqs;j++){
-                    if (m->control_pressed) {  inPhylip.close(); out.close(); return 0;  }
+                    if (m->getControl_pressed()) {  inPhylip.close(); out.close(); return 0;  }
                     inPhylip >> distance;
                     if (!ignoreRow) {
                         //is this a column we want
@@ -412,7 +412,7 @@ int RemoveDistsCommand::readColumn(){
         bool wrote = false;
         while (!in.eof()) {
             
-            if (m->control_pressed) { out.close(); in.close(); return 0; }
+            if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
             in >> firstName >> secondName >> distance; m->gobble(in);
             

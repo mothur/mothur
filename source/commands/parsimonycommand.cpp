@@ -61,7 +61,7 @@ string ParsimonyCommand::getOutputPattern(string type) {
         
         if (type == "parsimony") {  pattern = "[filename],parsimony"; } 
         else if (type == "psummary") {  pattern = "[filename],psummary"; } 
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -283,7 +283,7 @@ int ParsimonyCommand::execute() {
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 			delete reading; delete output;
 			delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
@@ -308,7 +308,7 @@ int ParsimonyCommand::execute() {
 			for (int i = 0; i < T.size(); i++) {
 				userData = pars.getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
 				
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					delete reading; delete output;
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
@@ -347,7 +347,7 @@ int ParsimonyCommand::execute() {
 				//get pscore of random tree
 				randomData = pars.getValues(randT, processors, outputDir);
 				
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					delete reading;  delete output; delete randT;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -385,7 +385,7 @@ int ParsimonyCommand::execute() {
 
 				randT->assembleRandomTree();
 				
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					delete reading; delete output; delete randT; delete ct; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
@@ -394,7 +394,7 @@ int ParsimonyCommand::execute() {
 				//get pscore of random tree
 				randomData = pars.getValues(randT, processors, outputDir);
 				
-				if (m->control_pressed) { 
+				if (m->getControl_pressed()) { 
 					delete reading; delete output; delete randT; delete ct; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
@@ -447,7 +447,7 @@ int ParsimonyCommand::execute() {
 			}
 		}
 		
-		if (m->control_pressed) { 
+		if (m->getControl_pressed()) { 
 				delete reading; delete output;
 				delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
@@ -464,7 +464,7 @@ int ParsimonyCommand::execute() {
 				
         delete output; delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -527,7 +527,7 @@ int ParsimonyCommand::printUSummaryFile() {
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
-				if (m->control_pressed) {  outSum.close(); return 0; }
+				if (m->getControl_pressed()) {  outSum.close(); return 0; }
 				if (UScoreSig[a][i] > (1/(float)iters)) {
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
 					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
@@ -588,8 +588,8 @@ void ParsimonyCommand::getUserInput() {
 		string s;	
 		getline(cin, s);
 		
-		m->Treenames = ct->getNamesOfSeqs(); 
-        m->runParse = false;
+		m->setTreenames(ct->getNamesOfSeqs());
+        m->setRunParse(false);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "getUserInput");

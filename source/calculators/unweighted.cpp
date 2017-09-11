@@ -95,7 +95,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				EstOutput myresults;
 				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 				
-				if (m->control_pressed) { exit(0); }
+				if (m->getControl_pressed()) { exit(0); }
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -114,7 +114,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));
                 }
@@ -125,7 +125,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+				 for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".unweighted.results.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //if the users enters no groups then give them the score of all groups
             int numGroups = m->getNumGroups();
@@ -185,7 +186,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     EstOutput myresults;
                     myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
                     
-                    if (m->control_pressed) { exit(0); }
+                    if (m->getControl_pressed()) { exit(0); }
                     
                     //pass numSeqs to parent
                     ofstream out;
@@ -212,7 +213,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			wait(&temp);
 		}
 		
-		if (m->control_pressed) { return results; }
+		if (m->getControl_pressed()) { return results; }
 		
 		//get data created by processes
 		for (int i=0;i<(processors-1);i++) { 
@@ -225,7 +226,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				int num;
 				in >> num; m->gobble(in);
 				
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 				
 				double w; 
 				for (int j = 0; j < num; j++) {
@@ -296,7 +297,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					
 		for (int h = start; h < (start+num); h++) {
 				
-			if (m->control_pressed) { return results; }
+			if (m->getControl_pressed()) { return results; }
 		
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
@@ -321,7 +322,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				//cout << "here" << endl;	
 				for(int i=0;i<t->getNumNodes();i++){
 					
-					if (m->control_pressed) {  return data; }
+					if (m->getControl_pressed()) {  return data; }
 					//cout << i << endl;	
 					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
 					//pcountSize = 2, not unique to one group
@@ -447,7 +448,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				EstOutput myresults;
 				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, usingGroups, ct);
 				
-				if (m->control_pressed) { exit(0); }
+				if (m->getControl_pressed()) { exit(0); }
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -466,7 +467,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     int temp = processIDS[i];
                     wait(&temp);
                 }
-                m->control_pressed = false;
+                m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));
                 }
@@ -477,7 +478,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->control_pressed = false;  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
+					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //if the users enters no groups then give them the score of all groups
             int numGroups = m->getNumGroups();
@@ -536,7 +538,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     EstOutput myresults;
                     myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, usingGroups, ct);
                     
-                    if (m->control_pressed) { exit(0); }
+                    if (m->getControl_pressed()) { exit(0); }
                     
                     //pass numSeqs to parent
                     ofstream out;
@@ -563,7 +565,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			wait(&temp);
 		}
 		
-		if (m->control_pressed) { return results; }
+		if (m->getControl_pressed()) { return results; }
 		
 		//get data created by processes
 		for (int i=0;i<(processors-1);i++) { 
@@ -576,7 +578,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				int num;
 				in >> num; m->gobble(in);
 					
-				if (m->control_pressed) { break; }
+				if (m->getControl_pressed()) { break; }
 				
 				double w; 
 				for (int j = 0; j < num; j++) {
@@ -652,7 +654,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		
 		for (int h = start; h < (start+num); h++) {
 		
-			if (m->control_pressed) { return results; }
+			if (m->getControl_pressed()) { return results; }
 		
 			//copy random tree passed in
 			copyTree->getCopy(t);
@@ -682,7 +684,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				
 				for(int i=0;i<copyTree->getNumNodes();i++){
 					
-					if (m->control_pressed) {  return data; }
+					if (m->getControl_pressed()) {  return data; }
 					
 					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
 					//pcountSize = 2, not unique to one group
@@ -743,7 +745,7 @@ int Unweighted::getRoot(Tree* t, int v, vector<string> grouping) {
 			//while you aren't at root
 			while(t->tree[index].getParent() != -1){
 				//cout << index << endl;	
-				if (m->control_pressed) {  return 0; }
+				if (m->getControl_pressed()) {  return 0; }
 				
 				//am I the root for this grouping? if so I want to stop "early"
 				//does my sibling have descendants from the users groups? 

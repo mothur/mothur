@@ -73,7 +73,7 @@ string NewCommand::getOutputPattern(string type) {
         if (type == "fileType1") {  pattern = "[filename],tag1"; }
         else if (type == "fileType2") {  pattern = "[filename],tag2"; }
         else if (type == "fileType3") {  pattern = "[filename],tag3"; }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
@@ -348,7 +348,7 @@ int NewCommand::execute(){
          //as long as you are not at the end of the file or done wih the lines you want
          while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
          
-         if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+         if (m->getControl_pressed()) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
          
          if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
          
@@ -385,13 +385,13 @@ int NewCommand::execute(){
          //prevent memory leak
          for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
          
-         if (m->control_pressed) { return 0; }
+         if (m->getControl_pressed()) { return 0; }
          
          //get next line to process
          lookup = input.getSharedRAbundVectors();				
          }
          
-         if (m->control_pressed) {  return 0; }
+         if (m->getControl_pressed()) {  return 0; }
          
          //output error messages about any remaining user labels
          set<string>::iterator it;
