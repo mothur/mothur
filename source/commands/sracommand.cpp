@@ -1013,10 +1013,10 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(thisFileName1, in2, "noerror");
+            bool openForward = m->openInputFile(thisFileName1, in2, "noerror");
             
             //if you can't open it, try default location
-            if (openForward == 1) {
+            if (!openForward) {
                 
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName1);
@@ -1029,7 +1029,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             }
             
             //if you can't open it, try output location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1040,18 +1040,18 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }
             }
             
-            if (openForward == 1) { //can't find it
+            if (!openForward) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
             }else{  in2.close();  }
             
-            int openReverse = 0;
+            bool openReverse = true;
             
             if (thisFileName2 != "") {
                 ifstream in3;
                 openReverse = m->openInputFile(thisFileName2, in3, "noerror");
                 
                 //if you can't open it, try default location
-                if (openReverse == 1) {
+                if (!openReverse) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
                         m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1063,7 +1063,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }
                 
                 //if you can't open it, try output location
-                if (openReverse == 1) {
+                if (!openReverse) {
                     if (m->getOutputDir() != "") { //default path is set
                         string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
                         m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1074,18 +1074,18 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }
                 
-                if (openReverse == 1) { //can't find it
+                if (!openReverse) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
                 }else{  in3.close();  }
             }
             
-            int openFindex = 0;
+            bool openFindex = true;
             if (findex != "") {
                 ifstream in4;
                 openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
                 
                 //if you can't open it, try default location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1097,7 +1097,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }
                 
                 //if you can't open it, try output location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         string tryPath = m->getOutputDir() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1108,18 +1108,18 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }
                 
-                if (openFindex == 1) { //can't find it
+                if (!openFindex) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
                 }
             }
             
-            int openRindex = 0;
+            bool openRindex = true;
             if (rindex != "") {
                 ifstream in7;
                 openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
                 
                 //if you can't open it, try default location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1131,7 +1131,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 }
                 
                 //if you can't open it, try output location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         string tryPath = m->getOutputDir() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1142,13 +1142,13 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     }
                 }
                 
-                if (openRindex == 1) { //can't find it
+                if (!openRindex) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n");
                 }
             }
 
             
-            if ((pieces.size() == 2) && (openForward != 1) && (openReverse != 1)) { //good pair and sff or fastq and oligos
+            if ((pieces.size() == 2) && (openForward) && (openReverse)) { //good pair and sff or fastq and oligos
                 libLayout = "single";
                 if (!setOligosParameter) {
                     //process pair
@@ -1173,7 +1173,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         if (m->debug) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
-            }else if((pieces.size() == 3) && (openForward != 1) && (openReverse != 1)) { //good pair and paired read
+            }else if((pieces.size() == 3) && (openForward) && (openReverse)) { //good pair and paired read
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
@@ -1184,7 +1184,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     files[group].push_back(thisname);
                 }
                 fileOption = 4;
-            }else if ((pieces.size() == 4) && (openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) {
+            }else if ((pieces.size() == 4) && (openForward) && (openReverse) && (openFindex) && (openRindex)) {
                 libLayout = "paired"; runParseFastqFile = true; fileOption = 5;
             }
         }

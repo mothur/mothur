@@ -187,13 +187,13 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
 		
-						int ableToOpen;
+						bool ableToOpen;
 						ifstream in;
 						
 						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -204,7 +204,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 							}
 						}
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -217,7 +217,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
@@ -263,8 +263,8 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				}
 
 				ifstream in;
-				int	ableToOpen = m->openInputFile(maskfile, in, "no error");
-				if (ableToOpen == 1) { 
+				bool	ableToOpen = m->openInputFile(maskfile, in, "no error");
+				if (!ableToOpen) { 
 					if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(maskfile);
 							m->mothurOut("Unable to open " + maskfile + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -275,7 +275,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 					}
 				}
 				
-				if (ableToOpen == 1) {
+				if (!ableToOpen) {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(maskfile);
 							m->mothurOut("Unable to open " + maskfile + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -288,7 +288,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				
 				in.close();
 					
-				if (ableToOpen == 1) { 
+				if (!ableToOpen) { 
 						m->mothurOut("Unable to open " + maskfile + "."); m->mothurOutEndLine(); 
 						abort = true;
 				}

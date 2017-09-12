@@ -1062,10 +1062,10 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(forward, in2, "noerror");
+            bool openForward = m->openInputFile(forward, in2, "noerror");
             
             //if you can't open it, try default location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1077,7 +1077,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             }
             
             //if you can't open it, try output location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1088,15 +1088,15 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 }
             }
             
-            if (openForward == 1) { //can't find it
+            if (!openForward) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + forward + ", ignoring pair.\n");
             }else{  in2.close();  }
             
             ifstream in3;
-            int openReverse = m->openInputFile(reverse, in3, "noerror");
+            bool openReverse = m->openInputFile(reverse, in3, "noerror");
             
             //if you can't open it, try default location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1108,7 +1108,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             }
             
             //if you can't open it, try output location
-            if (openReverse == 1) {
+            if (!openReverse) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1119,17 +1119,17 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 }
             }
             
-            if (openReverse == 1) { //can't find it
+            if (!openReverse) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + reverse + ", ignoring pair.\n");
             }else{  in3.close();  }
             
-            int openFindex = 0;
+            bool openFindex = true;
             if (findex != "") {
                 ifstream in4;
                 openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
                 
                 //if you can't open it, try default location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1141,7 +1141,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 }
                 
                 //if you can't open it, try output location
-                if (openFindex == 1) {
+                if (!openFindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         string tryPath = m->getOutputDir() + m->getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1152,18 +1152,18 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                     }
                 }
                 
-                if (openFindex == 1) { //can't find it
+                if (!openFindex) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
                 }
             }
             
-            int openRindex = 0;
+            bool openRindex = true;
             if (rindex != "") {
                 ifstream in7;
                 openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
                 
                 //if you can't open it, try default location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getDefaultPath() != "") { //default path is set
                         string tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -1175,7 +1175,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 }
                 
                 //if you can't open it, try output location
-                if (openRindex == 1) {
+                if (!openRindex) {
                     if (m->getOutputDir() != "") { //default path is set
                         string tryPath = m->getOutputDir() + m->getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -1186,13 +1186,13 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                     }
                 }
                 
-                if (openRindex == 1) { //can't find it
+                if (!openRindex) { //can't find it
                     m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n");
                 }
             }
             
             
-            if ((openForward != 1) && (openReverse != 1) && (openFindex != 1) && (openRindex != 1)) { //good pair
+            if ((openForward) && (openReverse) && (openFindex) && (openRindex)) { //good pair
                 file2Group[files.size()] = group;
                 vector<string> pair;
                 pair.push_back(forward);

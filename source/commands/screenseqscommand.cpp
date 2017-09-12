@@ -1270,9 +1270,9 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 		
         //read badSeqs in because root process doesnt know what other "bad" seqs the children found
         ifstream inBad;
-        int ableToOpen = m->openInputFile(badAccnos, inBad, "no error");
+        bool ableToOpen = m->openInputFile(badAccnos, inBad, "no error");
         
-        if (ableToOpen == 0) {
+        if (ableToOpen) {
             badSeqNames.clear();
             string tempName, trashCode;
             while (!inBad.eof()) {

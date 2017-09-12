@@ -175,13 +175,13 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
                         }
                         
-                        int ableToOpen;
+                        bool ableToOpen;
                         ifstream in;
                         
                         ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
                         
                         //if you can't open it, try default location
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getDefaultPath() != "") { //default path is set
                                 string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
                                 m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -192,7 +192,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             }
                         }
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getOutputDir() != "") { //default path is set
                                 string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
                                 m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -205,7 +205,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                         
                         in.close();
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
                             //erase from file list
                             fastaFileNames.erase(fastaFileNames.begin()+i);
@@ -250,13 +250,13 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
                         }
                         
-                        int ableToOpen;
+                        bool ableToOpen;
                         ifstream in;
                         
                         ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
                         
                         //if you can't open it, try default location
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getDefaultPath() != "") { //default path is set
                                 string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
                                 m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -267,7 +267,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             }
                         }
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getOutputDir() != "") { //default path is set
                                 string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
                                 m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -280,7 +280,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                         
                         in.close();
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
                             //erase from file list
                             nameFileNames.erase(nameFileNames.begin()+i);
@@ -325,13 +325,13 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
                         }
                         
-                        int ableToOpen;
+                        bool ableToOpen;
                         ifstream in;
                         
                         ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
                         
                         //if you can't open it, try default location
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getDefaultPath() != "") { //default path is set
                                 string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
                                 m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -342,7 +342,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             }
                         }
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getOutputDir() != "") { //default path is set
                                 string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
                                 m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -355,7 +355,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                         
                         in.close();
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
                             //erase from file list
                             countfileNames.erase(countfileNames.begin()+i);
@@ -405,13 +405,13 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
                         }
                         
-                        int ableToOpen;
+                        bool ableToOpen;
                         ifstream in;
                         
                         ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
                         
                         //if you can't open it, try default location
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getDefaultPath() != "") { //default path is set
                                 string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
                                 m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -422,7 +422,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                             }
                         }
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             if (m->getOutputDir() != "") { //default path is set
                                 string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
                                 m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -435,7 +435,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                         
                         in.close();
                         
-                        if (ableToOpen == 1) {
+                        if (!ableToOpen) {
                             m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
                             //erase from file list
                             groupFileNames.erase(groupFileNames.begin()+i);
@@ -531,8 +531,8 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             //test to make sure uchime exists
             ifstream in;
             vsearchCommand = m->getFullPathName(vsearchCommand);
-            int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
-            if(ableToOpen == 1) {
+            bool ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+            if(!ableToOpen) {
                 m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 
@@ -546,7 +546,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
                 
-                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
                 else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
             }else {  vsearchLocation = vsearchCommand; }
             

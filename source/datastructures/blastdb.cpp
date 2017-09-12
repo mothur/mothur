@@ -56,8 +56,8 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		//test to make sure formatdb exists
 		ifstream in;
 		formatdbCommand = m->getFullPathName(formatdbCommand);
-		int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		bool ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		string blastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -72,7 +72,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		ifstream in2;
 		blastCommand = m->getFullPathName(blastCommand);
 		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 		string megablastCommand;
@@ -86,7 +86,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		ifstream in3;
 		megablastCommand = m->getFullPathName(megablastCommand);
 		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
         
 	}
 	catch(exception& e) {
@@ -135,8 +135,8 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		//test to make sure formatdb exists
 		ifstream in;
 		formatdbCommand = m->getFullPathName(formatdbCommand);
-		int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		bool ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " +  formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		string blastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -151,7 +151,7 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		ifstream in2;
 		blastCommand = m->getFullPathName(blastCommand);
 		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 		string megablastCommand;
@@ -167,7 +167,7 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		ifstream in3;
 		megablastCommand = m->getFullPathName(megablastCommand);
 		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 	}

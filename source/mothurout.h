@@ -113,14 +113,14 @@ class MothurOut {
         int openOutputFileBinary(string, ofstream&);
 		int openOutputFileAppend(string, ofstream&);
         int openOutputFileBinaryAppend(string, ofstream&);
-		int openInputFile(string, ifstream&);
+		bool openInputFile(string, ifstream&);
         int openInputFileBinary(string, ifstream&);
         int openInputFileBinary(string, ifstream&, string);
     #ifdef USE_BOOST
         int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
         int openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
     #endif
-		int openInputFile(string, ifstream&, string); //no error given
+		bool openInputFile(string, ifstream&, string); //no error given
         vector<bool> allGZFiles(vector<string>&);
         vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
         bool fileExists(string name);
