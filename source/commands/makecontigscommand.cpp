@@ -1479,11 +1479,11 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
 							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += toString(process) + ".temp";
+								tempFASTAFileNames[i][j] += m->mothurGetpid(process) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 							}
                             if (tempQUALFileNames[i][j] != "") {
-                                tempQUALFileNames[i][j] += toString(process) + ".temp";
+                                tempQUALFileNames[i][j] += m->mothurGetpid(process) + ".temp";
                                 m->openOutputFile(tempQUALFileNames[i][j], temp);			temp.close();
                             }
 						}
@@ -1493,16 +1493,16 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                 int spot = process*2;
                 
                 num = driver(fileInputs, qualOrIndexFiles,
-                             outputFasta + toString(process) + ".temp",
-                             outputScrapFasta + toString(process) + ".temp",
-                             outputQual + toString(process) + ".temp",
-                             outputScrapQual + toString(process) + ".temp",
-                             outputMisMatches + toString(process) + ".temp",
+                             outputFasta + m->mothurGetpid(process) + ".temp",
+                             outputScrapFasta + m->mothurGetpid(process) + ".temp",
+                             outputQual + m->mothurGetpid(process) + ".temp",
+                             outputScrapQual + m->mothurGetpid(process) + ".temp",
+                             outputMisMatches + m->mothurGetpid(process) + ".temp",
                              tempFASTAFileNames, tempQUALFileNames, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1], group);
                 
 				//pass groupCounts to parent
                 ofstream out;
-                string tempFile = toString(process) + ".num.temp";
+                string tempFile = m->mothurGetpid(process) + ".num.temp";
                 m->openOutputFile(tempFile, out);
                 out << num << endl;
 				if (createFileGroup || createOligosGroup) {
@@ -1600,7 +1600,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
                     
                     //pass groupCounts to parent
                     ofstream out;
-                    string tempFile = toString(process) + ".num.temp";
+                    string tempFile = m->mothurGetpid(process) + ".num.temp";
                     m->openOutputFile(tempFile, out);
                     out << num << endl;
                     if (createFileGroup || createOligosGroup) {
