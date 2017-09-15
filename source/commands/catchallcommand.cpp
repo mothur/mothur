@@ -643,7 +643,7 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 		ifstream in;
 		bool able = m->openInputFile(file1, in, "noerror");
 		
-		if (able == 1) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->setControl_pressed(true); return 0; }
+		if (!able) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->setControl_pressed(true);  return 0; }
 			
 		if (!in.eof()) {
 			

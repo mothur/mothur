@@ -478,7 +478,7 @@ int ClusterCommand::runVsearchCluster(){
             ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
 #endif
             
-            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
             else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
         }else {  vsearchLocation = vsearchCommand; }
         
