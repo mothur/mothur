@@ -178,10 +178,10 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 		
 						ifstream in;
-						int ableToOpen = m->openInputFile(filenames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(filenames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -193,7 +193,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -206,7 +206,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
@@ -248,10 +248,10 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 		
 						ifstream in;
-						int ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
 								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -262,7 +262,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							}
 						}
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
 								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -274,7 +274,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							accnosFileNames.erase(accnosFileNames.begin()+i);
@@ -316,10 +316,10 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
                         
 						ifstream in;
-						int ableToOpen = m->openInputFile(oligosFileNames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(oligosFileNames[i], in, "noerror");
                         
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(oligosFileNames[i]);
 								m->mothurOut("Unable to open " + oligosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -330,7 +330,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							}
 						}
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(oligosFileNames[i]);
 								m->mothurOut("Unable to open " + oligosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -342,7 +342,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 						in.close();
 						
-						if (ableToOpen == 1) { 
+						if (!ableToOpen) { 
 							m->mothurOut("Unable to open " + oligosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							oligosFileNames.erase(oligosFileNames.begin()+i);
@@ -384,10 +384,10 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
                         
 						ifstream in;
-						int ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
                         
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
 								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -398,7 +398,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							}
 						}
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
 								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -410,7 +410,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 						in.close();
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							groupFileNames.erase(groupFileNames.begin()+i);

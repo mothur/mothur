@@ -463,8 +463,8 @@ int ClusterCommand::runVsearchCluster(){
         //test to make sure vsearch exists
         ifstream in;
         vsearchCommand = m->getFullPathName(vsearchCommand);
-        int ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
-        if(ableToOpen == 1) {
+        bool ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+        if(!ableToOpen) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
             //check to see if vsearch is in the path??
 

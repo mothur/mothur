@@ -219,8 +219,8 @@ int CatchAllCommand::execute() {
         //test to make sure formatdb exists
 		ifstream in;
 		catchAllTest = m->getFullPathName(catchAllTest);
-		int ableToOpen = m->openInputFile(catchAllTest, in, "no error"); in.close();
-		if(ableToOpen == 1) {	
+		bool ableToOpen = m->openInputFile(catchAllTest, in, "no error"); in.close();
+		if(!ableToOpen) {	
             m->mothurOut(catchAllTest + " file does not exist. Checking path... \n");
             
             programName = "CatchAllcmdW.exe";
@@ -232,7 +232,7 @@ int CatchAllCommand::execute() {
             ifstream in2;
             ableToOpen = m->openInputFile(cLocation, in2, "no error"); in2.close();
 
-            if(ableToOpen == 1) {
+            if(!ableToOpen) {
                 programName = "catchall";
                 
                 string cLocation = m->findProgramPath(programName);
@@ -240,7 +240,7 @@ int CatchAllCommand::execute() {
                 ifstream in3;
                 ableToOpen = m->openInputFile(cLocation, in3, "no error"); in3.close();
                 
-                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; }else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
+                if(!ableToOpen) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; }else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
             }
             else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
         }
@@ -641,7 +641,7 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 	try {
 		
 		ifstream in;
-		int able = m->openInputFile(file1, in, "noerror");
+		bool able = m->openInputFile(file1, in, "noerror");
 		
 		if (able == 1) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->setControl_pressed(true); return 0; }
 			

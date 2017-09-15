@@ -147,10 +147,10 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 						}
                         
 						ifstream in;
-						int ableToOpen = m->openInputFile(filenames[i], in, "noerror");
+						bool ableToOpen = m->openInputFile(filenames[i], in, "noerror");
                         
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getDefaultPath() != "") { //default path is set
 								string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -162,7 +162,7 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 						}
 						
 						//if you can't open it, try default location
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							if (m->getOutputDir() != "") { //default path is set
 								string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -175,7 +175,7 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 						
 						in.close();
 						
-						if (ableToOpen == 1) {
+						if (!ableToOpen) {
 							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
@@ -778,10 +778,10 @@ int MergeSfffilesCommand::readFile(){
             
             //check to make sure both are able to be opened
             ifstream in2;
-            int openForward = m->openInputFile(filename, in2, "noerror");
+            bool openForward = m->openInputFile(filename, in2, "noerror");
             
             //if you can't open it, try default location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getDefaultPath() != "") { //default path is set
                     string tryPath = m->getDefaultPath() + m->getSimpleName(filename);
                     m->mothurOut("Unable to open " + filename + ". Trying default " + tryPath); m->mothurOutEndLine();
@@ -793,7 +793,7 @@ int MergeSfffilesCommand::readFile(){
             }
             
             //if you can't open it, try output location
-            if (openForward == 1) {
+            if (!openForward) {
                 if (m->getOutputDir() != "") { //default path is set
                     string tryPath = m->getOutputDir() + m->getSimpleName(filename);
                     m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath); m->mothurOutEndLine();
@@ -804,7 +804,7 @@ int MergeSfffilesCommand::readFile(){
                 }
             }
             
-            if (openForward == 1) { //can't find it
+            if (!openForward) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + filename + ", ignoring.\n");
             }else{  filenames.push_back(filename); }
             
