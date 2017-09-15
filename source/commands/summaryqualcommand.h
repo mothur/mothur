@@ -100,7 +100,7 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
         pDataArray->numSeqs = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 				
-			if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+			if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
 			
 			QualityScores current(in); pDataArray->m->gobble(in);
 			

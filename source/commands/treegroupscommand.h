@@ -273,7 +273,7 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
 						
 						vector<double> tempdata = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 						
-						if (pDataArray->m->control_pressed) { return 1; }
+						if (pDataArray->m->getControl_pressed()) { return 1; }
 						
 						seqDist temp(l, k, -(tempdata[0]-1.0));
 						pDataArray->calcDists[i].push_back(temp);

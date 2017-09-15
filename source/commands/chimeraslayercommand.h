@@ -207,7 +207,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
 		
-		if (pDataArray->m->control_pressed) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
+		if (pDataArray->m->getControl_pressed()) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
 		
 		if (chimera->getUnaligned()) { 
 			pDataArray->m->mothurOut("Your template sequences are different lengths, please correct."); pDataArray->m->mothurOutEndLine(); 
@@ -222,7 +222,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){
 			
-			if (pDataArray->m->control_pressed) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
+			if (pDataArray->m->getControl_pressed()) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->m->gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
@@ -234,7 +234,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 					
-					if (pDataArray->m->control_pressed) {	delete candidateSeq; delete chimera; return 1;	}
+					if (pDataArray->m->getControl_pressed()) {	delete candidateSeq; delete chimera; return 1;	}
 					
 					//if you are not chimeric, then check each half
 					data_results wholeResults = chimera->getResults();
@@ -353,7 +353,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 		
 		for (map<string, map<string, int> >::iterator itFile = pDataArray->fileToPriority.begin(); itFile != pDataArray->fileToPriority.end(); itFile++) {
 			
-			if (pDataArray->m->control_pressed) {  return 0;  }
+			if (pDataArray->m->getControl_pressed()) {  return 0;  }
 			
 			int start = time(NULL);
 			string thisFastaName = itFile->first;
@@ -385,7 +385,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			
 			int numSeqs = 0;
 			
-			if (pDataArray->m->control_pressed) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
+			if (pDataArray->m->getControl_pressed()) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
 			
 			if (chimera->getUnaligned()) { 
 				pDataArray->m->mothurOut("Your template sequences are different lengths, please correct."); pDataArray->m->mothurOutEndLine(); 
@@ -398,7 +398,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			bool done = false;
 			while (!done) {
 				
-				if (pDataArray->m->control_pressed) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
+				if (pDataArray->m->getControl_pressed()) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
 				
 				Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->m->gobble(inFASTA);
 				string candidateAligned = candidateSeq->getAligned();
@@ -410,7 +410,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 						//find chimeras
 						chimera->getChimeras(candidateSeq);
 						
-						if (pDataArray->m->control_pressed) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete candidateSeq; delete chimera; return 1;	}
+						if (pDataArray->m->getControl_pressed()) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete candidateSeq; delete chimera; return 1;	}
 						
 						//if you are not chimeric, then check each half
 						data_results wholeResults = chimera->getResults();

@@ -96,7 +96,7 @@ private:
     string addSeq(string name, int length, int olength, int ostart, int oend, int mismatches, int numns);
     string addSeq(string name, int start, int end, int length, int ambigs, int polymer, long long numReps);
     string addSeq(string name, int length, float SimBtwnQueryTemplate, float SearchScore, int LongestInsert);
-    int driverSummarize(string, string, linePair lines); //fastafile, outputfile (optional set to "" to ignore), file positions
+    //int driverSummarize(string, string, linePair lines); //fastafile, outputfile (optional set to "" to ignore), file positions
     void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
     int driverFastaSummarySummarize(string, linePair lines); //summaryfile, file positions
     int driverContigsSummarySummarize(string, linePair lines); //summaryfile, file positions
@@ -110,9 +110,6 @@ private:
     
 };
 /**************************************************************************************************/
-//custom data structure for threads to use.
-// This is passed by void pointer so it can be any data type
-// that can be passed using a single void pointer (LPVOID).
 struct seqSumData {
     map<int, long long> startPosition;
     map<int, long long> endPosition;
@@ -129,7 +126,7 @@ struct seqSumData {
     map<int, long long> inserts;
 
 
-    string filename, summaryFile, contigsfile;
+    string filename, summaryFile, contigsfile, output;
     unsigned long long start;
     unsigned long long end;
     long long count;
@@ -149,6 +146,7 @@ struct seqSumData {
         hasNameMap = na;
         nameMap = nam;
         count = 0;
+        total = 0;
         summaryFile = sum;
     }
     
@@ -161,6 +159,7 @@ struct seqSumData {
         hasNameMap = na;
         nameMap = nam;
         count = 0;
+        total = 0;
     }
 };
 
@@ -189,7 +188,7 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
         
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
             
             Sequence current(in); pDataArray->m->gobble(in);
             
@@ -280,12 +279,12 @@ static DWORD WINAPI MySeqFastaSumThreadFunction(LPVOID lpParam){
         
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; pDataArray->m->gobble(in);
             
-            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
+            if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
             
             if (name != "") {
                 
@@ -354,12 +353,12 @@ static DWORD WINAPI MySeqContigsSumThreadFunction(LPVOID lpParam){
 
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; pDataArray->m->gobble(in);
 
-            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(OLength) + "\n"); }
+            if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(OLength) + "\n"); }
             
             numReps = 1;
             if (name != "") {
@@ -433,11 +432,11 @@ static DWORD WINAPI MySeqAlignSumThreadFunction(LPVOID lpParam){
         
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+            if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
             
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; pDataArray->m->gobble(in);
             
-            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(length) + "\t" + toString(SearchScore) + "\t" + toString(SimBtwnQueryTemplate) + "\n"); }
+            if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: " + name + "\t" + toString(length) + "\t" + toString(SearchScore) + "\t" + toString(SimBtwnQueryTemplate) + "\n"); }
             
             numReps = 1;
             if (name != "") {

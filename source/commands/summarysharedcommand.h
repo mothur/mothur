@@ -255,7 +255,7 @@ static DWORD WINAPI MySummarySharedThreadFunction(LPVOID lpParam){
 					
 					vector<double> tempdata = sumCalculators[i]->getValues(subset); //saves the calculator outputs
 					
-					if (pDataArray->m->control_pressed) { for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } outputFileHandle.close(); return 1; }
+					if (pDataArray->m->getControl_pressed()) { for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } outputFileHandle.close(); return 1; }
 					
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);

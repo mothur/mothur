@@ -74,7 +74,7 @@ static DWORD WINAPI MyParsimonyThreadFunction(LPVOID lpParam){
 		
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             
-			if (pDataArray->m->control_pressed) { delete copyTree; return 0; }
+			if (pDataArray->m->getControl_pressed()) { delete copyTree; return 0; }
             
 			int score = 0;
 			
@@ -91,7 +91,7 @@ static DWORD WINAPI MyParsimonyThreadFunction(LPVOID lpParam){
 			
 			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
 				
-				if (pDataArray->m->control_pressed) { return 0; }
+				if (pDataArray->m->getControl_pressed()) { return 0; }
 				
 				int lc = copyTree->tree[i].getLChild();
 				int rc = copyTree->tree[i].getRChild();

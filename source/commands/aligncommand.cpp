@@ -321,20 +321,16 @@ int AlignCommand::execute(){
 			positions = m->divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 		#else
-			if (processors == 1) {
-				lines.push_back(new linePair(0, 1000));
-			}else {
-				positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs); 
-				if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                
-				//figure out how many sequences you have to process
-				int numSeqsPerProcessor = numFastaSeqs / processors;
-				for (int i = 0; i < processors; i++) {
-					int startIndex =  i * numSeqsPerProcessor;
-					if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-					lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-				}
-			}
+            positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs);
+            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFastaSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
+            }
 		#endif
 			
             numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
@@ -392,39 +388,44 @@ struct alignStruct {
     AlignmentDB* templateDB;
     mutex* mutex;
     
-    alignStruct (linePair fP, string aFName, string reFName, string accnosFName, string filename, vector<long long>& flippedResults,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB* templateDB, string search, long long& numSeqs) {
+       alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
         
         filePos.start = fP.start;
         filePos.end = fP.end;
         alignFName = aFName;
         reportFName = reFName;
-        
-        
-        /////////////////////////////////
-        
-        //finish me
-        
-        ///////////////////////////////////
-        
-        
+        accnosFName = ac;
+        inputFilename = fname;
+        numSeqs = 0;
+        m = mo;
+        alignMethod = al;
+        match = ma;
+        misMatch = misMa;
+        gapOpen = gOpen;
+        gapExtend = gExtend;
+        threshold = thr;
+        flip = fl;
+        templateDB = tB;
+        search = se;
+        flippedResults.resize(2, 0);
     }
     
 };
 //**********************************************************************************************************************
-void alignDriver(linePair*& filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& flippedResults,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB*& templateDB, string search, long long& numSeqs, mutex& mutex) {
+void alignDriver(alignStruct* params) {
 	try {
 		ofstream alignmentFile;
-		m->openOutputFile(alignFName, alignmentFile);
+		params->m->openOutputFile(params->alignFName, alignmentFile);
 		
 		ofstream accnosFile;
-		m->openOutputFile(accnosFName, accnosFile);
+		params->m->openOutputFile(params->accnosFName, accnosFile);
 		
-		NastReport report(reportFName);
+		NastReport report(params->reportFName);
 		
 		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
+		params->m->openInputFile(params->inputFilename, inFASTA);
 
-		inFASTA.seekg(filePos->start);
+		inFASTA.seekg(params->filePos.start);
 
 		bool done = false;
         
@@ -434,37 +435,37 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
-		int longestBase = templateDB->getLongestBase();
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: template longest base = "  + toString(templateDB->getLongestBase()) + " \n"); }
-		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
-		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		int longestBase = params->templateDB->getLongestBase();
+        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: template longest base = "  + toString(longestBase) + " \n"); }
+		if(params->alignMethod == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, longestBase);			}
+		else if(params->alignMethod == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, longestBase);				}
+		else if(params->alignMethod == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
+		else if(params->alignMethod == "noalign")		{	alignment = new NoAlign();													}
 		else {
-			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
-			m->mothurOutEndLine();
-			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+			params->m->mothurOut(params->alignMethod + " is not a valid alignment option. I will run the command using needleman.");
+			params->m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, longestBase);
 		}
 	
 		while (!done) {
 			
-			if (m->getControl_pressed()) {  break; }
+			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  params->m->gobble(inFASTA);
 			report.setCandidate(candidateSeq);
 
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
-			int numBasesNeeded = origNumBases * threshold;
+			int numBasesNeeded = origNumBases * params->threshold;
 	
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				if (candidateSeq->getUnaligned().length()+1 > alignment->getnRows()) {
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + candidateSeq->getName() + " " + toString(candidateSeq->getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
+                    if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + candidateSeq->getName() + " " + toString(candidateSeq->getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
 					alignment->resize(candidateSeq->getUnaligned().length()+2);
 				}
                 
                 float searchScore;
-				Sequence temp = templateDB->findClosestSequence(candidateSeq, searchScore);
+				Sequence temp = params->templateDB->findClosestSequence(candidateSeq, searchScore);
 				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
 								
 				Nast* nast = new Nast(alignment, candidateSeq, templateSeq);
@@ -482,23 +483,23 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 					numFlipped_1++;
 					string wasBetter =  "";
 					//if the user wants you to try the reverse
-					if (flip) {
+					if (params->flip) {
 				
 						//get reverse compliment
 						copy = new Sequence(candidateSeq->getName(), originalUnaligned);
 						copy->reverseComplement();
                         
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
+                        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
 						
 						//rerun alignment
-						Sequence temp2 = templateDB->findClosestSequence(copy, searchScore);
+						Sequence temp2 = params->templateDB->findClosestSequence(copy, searchScore);
 						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
                         
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
+                        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
 						
 						nast2 = new Nast(alignment, copy, templateSeq2);
                         
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: completed Nast2 "  + candidateSeq->getName() + " flipped numBases = " + toString(copy->getNumBases()) + " old numbases = " + toString(candidateSeq->getNumBases()) +" \n"); }
+                        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: completed Nast2 "  + candidateSeq->getName() + " flipped numBases = " + toString(copy->getNumBases()) + " old numbases = " + toString(candidateSeq->getNumBases()) +" \n"); }
 			
 						//check if any better
 						if (copy->getNumBases() > candidateSeq->getNumBases()) {
@@ -516,7 +517,7 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
                             delete templateSeq2;
 							delete copy;	
 						}
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: done.\n"); }
+                        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: done.\n"); }
 					}
 					
 					//create accnos file with names
@@ -524,8 +525,8 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 				}
 				
 				report.setTemplate(templateSeq);
-				report.setSearchParameters(search, searchScore);
-				report.setAlignmentParameters(align, alignment);
+				report.setSearchParameters(params->search, searchScore);
+				report.setAlignmentParameters(params->alignMethod, alignment);
 				report.setNastParameters(*nast);
 	
 				alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
@@ -541,24 +542,22 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
+				if ((pos == -1) || (pos >= params->filePos.end)) { break; }
 			#else
-				if (inFASTA.eof()) { break; }
+				if (count == params->filePos.end) { break; }
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+			if((count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+		if((count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
         
-        mutex.lock();
-        numSeqs += count;
-        flippedResults[0] += numFlipped_0;
-        flippedResults[1] += numFlipped_1;
-        mutex.unlock();
-		
+        params->numSeqs += count;
+        params->flippedResults[0] += numFlipped_0;
+        params->flippedResults[1] += numFlipped_1;
+        
 		delete alignment;
 		alignmentFile.close();
 		inFASTA.close();
@@ -566,7 +565,7 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "driver");
+		params->m->errorOut(e, "AlignCommand", "driver");
 		exit(1);
 	}
 }
@@ -575,7 +574,8 @@ void alignDriver(linePair*& filePos, string alignFName, string reportFName, stri
 long long AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename, vector<long long>& numFlipped) {
 	try {
         //create array of worker threads
-        thread *workerThreads = new thread[processors-1];
+        vector<thread*> workerThreads;
+        vector<alignStruct*> data;
         mutex mutex;
         
         long long num = 0;
@@ -585,18 +585,32 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         time(&start);
         //Lauch worker threads
         for (int i = 0; i < processors-1; ++i) {
-            workerThreads[i] = thread(alignDriver,
-                                      ref(lines[i+1]),
-                                      (alignFileName + toString(i+1) + ".temp"),
-                                      reportFileName + toString(i+1) + ".temp",
-                                      accnosFName + toString(i+1) + ".temp", filename, ref(numFlipped), m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, ref(templateDB), search, ref(num), ref(mutex));
+            //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
+            alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(i+1) + ".temp"),
+                                                        reportFileName + toString(i+1) + ".temp",
+                                                        accnosFName + toString(i+1) + ".temp", filename,
+                                                        m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+            data.push_back(dataBundle);
+
+            workerThreads.push_back(new thread(alignDriver, dataBundle));
          }
         
-        alignDriver(lines[0], alignFileName, reportFileName, accnosFName, filename, numFlipped,
-                                m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search, num, mutex);
+        alignStruct* dataBundle = new alignStruct(*lines[0], (alignFileName), reportFileName, accnosFName, filename,
+                                                  m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+        alignDriver(dataBundle);
+        numFlipped[0] = dataBundle->flippedResults[0];
+        numFlipped[1] = dataBundle->flippedResults[1];
+        num = dataBundle->numSeqs;
         
-        for (int i = 0; i < processors-1; ++i) { workerThreads[i].join(); }
-        delete [] workerThreads;
+        for (int i = 0; i < processors-1; ++i) {
+            workerThreads[i]->join();
+            num += data[i]->numSeqs;
+            numFlipped[0] += data[i]->flippedResults[0];
+            numFlipped[1] += data[i]->flippedResults[1];
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");

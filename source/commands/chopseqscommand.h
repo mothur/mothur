@@ -118,7 +118,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 						
-			if (pDataArray->m->control_pressed) {  in.close(); out.close(); outAcc.close(); pDataArray->m->mothurRemove(pDataArray->outFasta); pDataArray->m->mothurRemove(pDataArray->outAccnos); if (pDataArray->fastaFileTemp != "") { outfTemp.close(); pDataArray->m->mothurRemove(pDataArray->fastaFileTemp); } return 0;  }
+			if (pDataArray->m->getControl_pressed()) {  in.close(); out.close(); outAcc.close(); pDataArray->m->mothurRemove(pDataArray->outFasta); pDataArray->m->mothurRemove(pDataArray->outAccnos); if (pDataArray->fastaFileTemp != "") { outfTemp.close(); pDataArray->m->mothurRemove(pDataArray->fastaFileTemp); } return 0;  }
             
             Sequence seq(in); pDataArray->m->gobble(in);
 			

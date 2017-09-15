@@ -102,7 +102,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				}
 				for(int j=0;j<i;j++){
 					
-					if (pDataArray->m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
+					if (pDataArray->m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
 					
 					//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
 					//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
@@ -138,7 +138,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				
 				for(int j=0;j<pDataArray->alignDB.getNumSeqs();j++){
 					
-					if (pDataArray->m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
+					if (pDataArray->m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
 					
 					distCalculator->calcDist(pDataArray->alignDB.get(i), pDataArray->alignDB.get(j));
 					double dist = distCalculator->getDist();

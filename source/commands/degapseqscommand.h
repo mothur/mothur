@@ -92,7 +92,7 @@ static DWORD WINAPI MyDegapThreadFunction(LPVOID lpParam){
         
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) {  break; }
+            if (pDataArray->m->getControl_pressed()) {  break; }
             
             Sequence currSeq(inFASTA);  pDataArray->m->gobble(inFASTA);
             if (currSeq.getName() != "") {

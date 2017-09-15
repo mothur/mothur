@@ -189,7 +189,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             
 			int start = time(NULL);
 			
-            if (pDataArray->m->control_pressed) { if (pDataArray->countfile != "") { delete cparser; } else { delete parser; } delete alignment;return 0; }
+            if (pDataArray->m->getControl_pressed()) { if (pDataArray->countfile != "") { delete cparser; } else { delete parser; } delete alignment;return 0; }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Processing group " + pDataArray->groups[k] + ":"); pDataArray->m->mothurOutEndLine();
 			
@@ -217,7 +217,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 		 	
 			for (int i = 0; i < thisSeqs.size(); i++) {
 				
-				if (pDataArray->m->control_pressed) { delete parser; delete alignment; return 0; }
+				if (pDataArray->m->getControl_pressed()) { delete parser; delete alignment; return 0; }
 				
 				if (pDataArray->namefile != "") {
 					it = thisNameMap.find(thisSeqs[i].getName());
@@ -290,7 +290,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			
 			////////////////////////////////////////////////////
 			
-			if (pDataArray->m->control_pressed) {   delete parser; delete alignment; return 0; }
+			if (pDataArray->m->getControl_pressed()) {   delete parser; delete alignment; return 0; }
 			
             if (pDataArray->method == "aligned") { if (pDataArray->diffs > length) { pDataArray->m->mothurOut("Error: diffs is greater than your sequence length."); pDataArray->m->mothurOutEndLine(); pDataArray->m->setControl_pressed(true); delete alignment; return 0;  } }
 			
@@ -321,7 +321,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                         //try to merge it with all smaller seqs
                         for (int j = i+1; j < numSeqs; j++) {
                             
-                            if (pDataArray->m->control_pressed) { delete parser; delete alignment; return 0; }
+                            if (pDataArray->m->getControl_pressed()) { delete parser; delete alignment; return 0; }
                             
                             if (alignSeqs[j].active) {  //this sequence has not been merged yet
                                 //are you within "diff" bases
@@ -394,7 +394,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                     //try to merge it into larger seqs
                     for (int j = i+1; j < numSeqs; j++) {
                         
-                        if (pDataArray->m->control_pressed) { out.close(); delete alignment; return 0; }
+                        if (pDataArray->m->getControl_pressed()) { out.close(); delete alignment; return 0; }
                         
                         if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
                             //are you within "diff" bases
@@ -459,7 +459,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
             if(numSeqs % 100 != 0)	{ pDataArray->m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
 			////////////////////////////////////////////////////
 			
-			if (pDataArray->m->control_pressed) {  delete parser; return 0; }
+			if (pDataArray->m->getControl_pressed()) {  delete parser; return 0; }
 			
 			pDataArray->m->mothurOut("Total number of sequences before pre.cluster was " + toString(alignSeqs.size()) + ".");pDataArray-> m->mothurOutEndLine();
 			pDataArray->m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOutEndLine(); 

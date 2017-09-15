@@ -184,14 +184,14 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 
 		
 		for (int i = pDataArray->start; i < pDataArray->end; i++) {
-			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
+			int start = time(NULL);	 if (pDataArray->m->getControl_pressed()) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			int error;
             long long numSeqs = 0;
             if (pDataArray->hasCount) { 
-                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
+                error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->getControl_pressed()) {  delete cparser; return 0; }
             }else {
-               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; }
+               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || pDataArray->m->getControl_pressed()) {  delete parser; return 0; }
             }
 			
 			//driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
@@ -434,7 +434,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			//cout << "commandString = " << commandString << endl;
 			commandString = "\"" + commandString + "\"";
             
-            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
+            if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
             
 			system(commandString.c_str());
 			
@@ -447,7 +447,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			filename = filename.substr(1, filename.length()-2);
 			alns = alns.substr(1, alns.length()-2);
 			
-			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
+			if (pDataArray->m->getControl_pressed()) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			//create accnos file from uchime results
 			ifstream in; 
@@ -465,7 +465,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
                 
 			while(!in.eof()) {
 				
-				if (pDataArray->m->control_pressed) { break; }
+				if (pDataArray->m->getControl_pressed()) { break; }
 				
 				string name = "";
 				string chimeraFlag = "";
@@ -504,7 +504,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			totalSeqs += num;
 			pDataArray->numChimeras += numChimeras;
 			
-			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
+			if (pDataArray->m->getControl_pressed()) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			//remove file made for uchime
 			pDataArray->m->mothurRemove(filename);
@@ -545,7 +545,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		int totalSeqs = 0;
 		int numChimeras = 0;
 	
-		int start = time(NULL);	 if (pDataArray->m->control_pressed) { return 0; }
+		int start = time(NULL);	 if (pDataArray->m->getControl_pressed()) { return 0; }
 			
 		//to allow for spaces in the path
 		string outputFName = "\"" + pDataArray->outputFName + "\"";
@@ -588,7 +588,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         
         int fcount = 0;
         while (!in23.eof()) {
-            if (pDataArray->m->control_pressed) { break;  }
+            if (pDataArray->m->getControl_pressed()) { break;  }
             
             Sequence seq(in23); pDataArray->m->gobble(in23);
             
@@ -823,7 +823,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         
 		//uchime_main(numArgs, uchimeParameters); 
 		//cout << "commandString = " << commandString << endl;
-        if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
+        if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
 		system(commandString.c_str());
 		
 		//free memory
@@ -835,7 +835,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		filename = filename.substr(1, filename.length()-2);
 		alns = alns.substr(1, alns.length()-2);
 		
-		if (pDataArray->m->control_pressed) { return 0; }
+		if (pDataArray->m->getControl_pressed()) { return 0; }
 		
 		//create accnos file from uchime results
 		ifstream in; 
@@ -847,7 +847,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		numChimeras = 0;
 		while(!in.eof()) {
 			
-			if (pDataArray->m->control_pressed) { break; }
+			if (pDataArray->m->getControl_pressed()) { break; }
 			
 			string name = "";
 			string chimeraFlag = "";
@@ -864,7 +864,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		
         if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->setControl_pressed(true); }
         
-		if (pDataArray->m->control_pressed) { return 0; }
+		if (pDataArray->m->getControl_pressed()) { return 0; }
 		
 		pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences.");	pDataArray->m->mothurOutEndLine();					
 	

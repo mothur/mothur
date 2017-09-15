@@ -238,7 +238,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
         for (int l = pDataArray->start; l < pDataArray->end; l++) {
             int startTime = time(NULL);
             
-            if (pDataArray->m->control_pressed) { break; }
+            if (pDataArray->m->getControl_pressed()) { break; }
             
             pDataArray->m->mothurOut("\n>>>>>\tProcessing file pair " + pDataArray->fileInputs[l][0] + " - " + pDataArray->fileInputs[l][1] + " (files " + toString(l+1) + " of " + toString(pDataArray->fileInputs.size()) + ")\t<<<<<\n");
             
@@ -280,7 +280,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 if (tempForward == tempReverse) { type = poundMatch;    }
                 else {
                     char delim = ':';
-                    if (pDataArray->m->changedSeqNames) { delim = '_'; }
+                    if (pDataArray->m->getChangedSeqNames()) { delim = '_'; }
                     
                     vector<char> delims; delims.push_back(delim); delims.push_back('/');
                     
@@ -368,7 +368,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 numRPrimers = 0; numSpacers = 0; numLinkers = 0; numBarcodes = 0; numFPrimers = 0;
                 oligos.read(pDataArray->oligosfile, false);
                 
-                if (pDataArray->m->control_pressed) { break; } //error in reading oligos
+                if (pDataArray->m->getControl_pressed()) { break; } //error in reading oligos
                 
                 if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
                     numFPrimers = oligos.getPairedPrimers().size();
@@ -377,7 +377,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     pDataArray->m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); pDataArray->m->setControl_pressed(true);
                 }
                 
-                if (pDataArray->m->control_pressed) { break; }
+                if (pDataArray->m->getControl_pressed()) { break; }
                 
                 numLinkers = oligos.getLinkers().size();
                 numSpacers = oligos.getSpacers().size();
@@ -600,7 +600,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 thisrqualindexfile = pDataArray->qualOrIndexFiles[1];
             }
             
-            if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
+            if (pDataArray->m->getDebug()) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
             
             ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
 #ifdef USE_BOOST
@@ -689,7 +689,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             bool good = true;
             while (good) {
                 
-                if (pDataArray->m->control_pressed) { break; }
+                if (pDataArray->m->getControl_pressed()) { break; }
                 
                 int success = 1;
                 string trashCode = "";
@@ -1944,11 +1944,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     if(trashCode.length() == 0){
                         bool ignore = false;
                         
-                        if (pDataArray->m->debug) { pDataArray->m->mothurOut(fSeq.getName()); }
+                        if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut(fSeq.getName()); }
                         
                         if (pDataArray->createOligosGroup) {
                             string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
-                            if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
+                            if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
                             
                             int pos = thisGroup.find("ignore");
                             if (pos == string::npos) {
@@ -1968,7 +1968,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 else { pDataArray->groupCounts[it->first] ++; }
                             }else { ignore = true; }
                         }
-                        if (pDataArray->m->debug) { pDataArray->m->mothurOut("\n"); }
+                        if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("\n"); }
                         
                         if(!ignore){
                             //output
@@ -2072,7 +2072,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             if (pDataArray->reorient) { delete rtrimOligos; }
             
             pDataArray->done = true;
-            if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
+            if (pDataArray->m->getControl_pressed()) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
                 if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
             }
             }
@@ -2083,7 +2083,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             pDataArray->m->mothurOut("Done.\n");
             
-            if (pDataArray->m->control_pressed) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }   return 0; }
+            if (pDataArray->m->getControl_pressed()) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }   return 0; }
             
             
             if(pDataArray->allFiles){
@@ -2125,7 +2125,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     pDataArray->m->openOutputFile(thisGroupName, out);
                     
                     while (!in.eof()){
-                        if (pDataArray->m->control_pressed) { break; }
+                        if (pDataArray->m->getControl_pressed()) { break; }
                         
                         Sequence currSeq(in); pDataArray->m->gobble(in);
                         out << currSeq.getName() << '\t' << it->second << endl;
@@ -2429,7 +2429,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             thisrqualindexfile = pDataArray->qualOrIndexFiles[1];
         }
         
-        if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
+        if (pDataArray->m->getDebug()) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: fqualindex = " + thisfqualindexfile + ".\n[DEBUG]: rqualindex = " + thisfqualindexfile + ".\n"); }
         
         ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
@@ -2504,7 +2504,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         
         for(int i = 0; i < pDataArray->linesInput_end; i++){ //end is the number of sequences to process
             
-            if (pDataArray->m->control_pressed) { break; }
+            if (pDataArray->m->getControl_pressed()) { break; }
             
             int success = 1;
             string trashCode = "";
@@ -3288,11 +3288,11 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 if(trashCode.length() == 0){
                     bool ignore = false;
                     
-                    if (pDataArray->m->debug) { pDataArray->m->mothurOut(fSeq.getName()); }
+                    if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut(fSeq.getName()); }
                     
                     if (pDataArray->createOligosGroup) {
                         string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
-                        if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
+                        if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
                         
                         int pos = thisGroup.find("ignore");
                         if (pos == string::npos) {
@@ -3312,7 +3312,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             else { pDataArray->groupCounts[it->first] ++; }
                         }else { ignore = true; }
                     }
-                    if (pDataArray->m->debug) { pDataArray->m->mothurOut("\n"); }
+                    if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("\n"); }
                     
                     if(!ignore){
                         //output
@@ -3382,7 +3382,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         if (pDataArray->reorient) { delete rtrimOligos; }
         
         pDataArray->done = true;
-        if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
+        if (pDataArray->m->getControl_pressed()) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
             if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
         }
         

@@ -157,7 +157,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
             pDataArray->count++;
-			if (pDataArray->m->control_pressed) {  break; }
+			if (pDataArray->m->getControl_pressed()) {  break; }
 			
 			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
             
@@ -353,7 +353,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         badFile.close();
         locationsFile.close();
         
-        if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: fileAligned = " + toString(pDataArray->fileAligned) +'\n'); }
+        if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: fileAligned = " + toString(pDataArray->fileAligned) +'\n'); }
         
         if (pDataArray->fileAligned && !pDataArray->keepdots) { //print out smallest start value and largest end value
             if (locations.size() > 1) { pDataArray->adjustNeeded = true; }

@@ -36,6 +36,7 @@ private:
 	vector<Sequence> templateSequences;
 	Sequence emptySequence;
 	MothurOut* m;
+    std::mutex token;
 };
 
 /**************************************************************************************************/

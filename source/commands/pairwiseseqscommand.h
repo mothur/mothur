@@ -167,7 +167,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 			
 			for(int j=0;j<pDataArray->alignDB.getNumSeqs();j++){
 				
-				if (pDataArray->m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
+				if (pDataArray->m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (pDataArray->alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(pDataArray->alignDB.get(i).getUnaligned().length()+1);
@@ -187,7 +187,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
                 
-                if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
                 
 				outFile  << '\t' << dist;
 			}
@@ -269,7 +269,7 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 			
 			for(int j=0;j<i;j++){
 				
-				if (pDataArray->m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
+				if (pDataArray->m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (pDataArray->alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(pDataArray->alignDB.get(i).getUnaligned().length()+1);
@@ -289,7 +289,7 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
                 
-                if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                if (pDataArray->m->getDebug()) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
                 
 				if(dist <= pDataArray->cutoff){
 					if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }

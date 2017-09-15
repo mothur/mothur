@@ -113,7 +113,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
             
 			int start = time(NULL);
 			
-			if (pDataArray->m->control_pressed) {  return 0; }
+			if (pDataArray->m->getControl_pressed()) {  return 0; }
 			
             string lowerCaseName = pDataArray->groups[k];
             for (int j = 0; j < lowerCaseName.length(); j++) { lowerCaseName[j] = tolower(lowerCaseName[j]);    }
@@ -126,7 +126,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 thisNameMap = parser.getNameMap(pDataArray->groups[k]);
                 vector<Sequence> thisSeqs = parser.getSeqs(pDataArray->groups[k]);
                 
-                if (pDataArray->m->control_pressed) {  return 0; }
+                if (pDataArray->m->getControl_pressed()) {  return 0; }
                 
                 vector<string> sequences;
                 vector<string> uniqueNames;
@@ -144,7 +144,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 
                 for (int i = 0; i < thisSeqs.size(); i++) {
                     
-                    if (pDataArray->m->control_pressed) { return 0; }
+                    if (pDataArray->m->getControl_pressed()) { return 0; }
                     
                     if (thisSeqs[i].getName() != "") {
                         correct->addSeq(thisSeqs[i].getName(), thisSeqs[i].getAligned());
@@ -163,14 +163,14 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 if (error) { return 0; }
                 //////////////////////////////////////////////////////////////////////////////////////////////////
                 
-                if (pDataArray->m->control_pressed) { return 0; }
+                if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 //calc distances for cluster
                 string distFileName = pDataArray->m->getRootName(pDataArray->m->getSimpleName(pDataArray->fastafile)) + pDataArray->groups[k] + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
-                if (pDataArray->m->control_pressed) { pDataArray->m->mothurRemove(distFileName); return 0; }
+                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(distFileName); return 0; }
                 
                 //driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
                 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,19 +198,19 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 delete clusterCommand;
                 pDataArray->m->mothurOut("/******************************************/"); pDataArray->m->mothurOutEndLine();
                 
-                if (pDataArray->m->control_pressed) { pDataArray->m->mothurRemove(distFileName); pDataArray->m->mothurRemove(listFileName); return 0; }
+                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(distFileName); pDataArray->m->mothurRemove(listFileName); return 0; }
                 
                 vector<double> distances(numSeqs * numSeqs);
                 noise.getDistanceData(distFileName, distances);
                 pDataArray->m->mothurRemove(distFileName);
-                if (pDataArray->m->control_pressed) { pDataArray->m->mothurRemove(listFileName); return 0; }
+                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(listFileName); return 0; }
                 
                 vector<int> otuData(numSeqs);
                 vector<int> otuFreq;
                 vector<vector<int> > otuBySeqLookUp;
                 noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
                 pDataArray->m->mothurRemove(listFileName);
-                if (pDataArray->m->control_pressed) { return 0; }
+                if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 int numOTUs = otuFreq.size();
                 
@@ -227,20 +227,20 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 
                 while(numIters < minIter || ((maxDelta > minDelta) && (numIters < maxIter))){
                     
-                    if (pDataArray->m->control_pressed) { return 0; }
+                    if (pDataArray->m->getControl_pressed()) { return 0; }
                     
-                    noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (pDataArray->m->control_pressed) { return 0; }
-                    maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (pDataArray->m->control_pressed) { return 0; }
+                    noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (pDataArray->m->getControl_pressed()) { return 0; }
+                    maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (pDataArray->m->getControl_pressed()) { return 0; }
                     
-                    noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (pDataArray->m->control_pressed) { return 0; }
-                    noise.checkCentroids(weights, centroids); if (pDataArray->m->control_pressed) { return 0; }
+                    noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (pDataArray->m->getControl_pressed()) { return 0; }
+                    noise.checkCentroids(weights, centroids); if (pDataArray->m->getControl_pressed()) { return 0; }
                     
                     otuFreq.assign(numOTUs, 0);
                     
                     int total = 0;
                     
                     for(int i=0;i<numSeqs;i++){
-                        if (pDataArray->m->control_pressed) { return 0; }
+                        if (pDataArray->m->getControl_pressed()) { return 0; }
                         
                         double offset = 1e6;
                         double norm = 0.0000;
@@ -248,14 +248,14 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                         vector<double> currentTau(numOTUs);
                         
                         for(int j=0;j<numOTUs;j++){
-                            if (pDataArray->m->control_pressed) { return 0; }
+                            if (pDataArray->m->getControl_pressed()) { return 0; }
                             if(weights[j] > minWeight && distances[i * numSeqs+centroids[j]] < offset){
                                 offset = distances[i * numSeqs+centroids[j]];
                             }
                         }
                         
                         for(int j=0;j<numOTUs;j++){
-                            if (pDataArray->m->control_pressed) { return 0; }
+                            if (pDataArray->m->getControl_pressed()) { return 0; }
                             if(weights[j] > minWeight){
                                 currentTau[j] = exp(pDataArray->sigma * (-distances[(i * numSeqs + centroids[j])] + offset)) * weights[j];
                                 norm += currentTau[j];
@@ -266,12 +266,12 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                         }
                         
                         for(int j=0;j<numOTUs;j++){
-                            if (pDataArray->m->control_pressed) { return 0; }
+                            if (pDataArray->m->getControl_pressed()) { return 0; }
                             currentTau[j] /= norm;
                         }
                         
                         for(int j=0;j<numOTUs;j++){
-                            if (pDataArray->m->control_pressed) { return 0; }
+                            if (pDataArray->m->getControl_pressed()) { return 0; }
                             
                             if(currentTau[j] > 1.0e-4){
                                 int oldTotal = total;
@@ -293,19 +293,19 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                     numIters++;
                 }
                 
-                noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (pDataArray->m->control_pressed) { return 0; }
+                noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 vector<double> percentage(numSeqs);
-                noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (pDataArray->m->control_pressed) { return 0; }
-                noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (pDataArray->m->control_pressed) { return 0; }
+                noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (pDataArray->m->getControl_pressed()) { return 0; }
+                noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 change.assign(numOTUs, 1);
-                noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (pDataArray->m->control_pressed) { return 0; }
+                noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 
                 vector<int> finalTau(numOTUs, 0);
                 for(int i=0;i<numSeqs;i++){
-                    if (pDataArray->m->control_pressed) { return 0; }
+                    if (pDataArray->m->getControl_pressed()) { return 0; }
                     finalTau[otuData[i]] += int(seqFreq[i]);
                 }
                 
@@ -313,7 +313,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 
                 ///////////////////////////////////////////////////////////////////////////////////////////////////
                 
-                if (pDataArray->m->control_pressed) { return 0; }
+                if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 pDataArray->m->appendFiles(pDataArray->newFName+pDataArray->groups[k], pDataArray->newFName); pDataArray->m->mothurRemove(pDataArray->newFName+pDataArray->groups[k]);
                 pDataArray->m->appendFiles(pDataArray->newNName+pDataArray->groups[k], pDataArray->newNName); pDataArray->m->mothurRemove(pDataArray->newNName+pDataArray->groups[k]);

@@ -113,7 +113,7 @@ static DWORD WINAPI MyWeightedRandomThreadFunction(LPVOID lpParam){
         
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             
-			if (pDataArray->m->control_pressed) { return 0; }
+			if (pDataArray->m->getControl_pressed()) { return 0; }
             
 			//initialize weighted score
 			string groupA = pDataArray->namesOfGroupCombos[h][0];
@@ -125,12 +125,12 @@ static DWORD WINAPI MyWeightedRandomThreadFunction(LPVOID lpParam){
 			//create a random tree with same topology as T[i], but different labels
 			randT->assembleRandomUnifracTree(groupA, groupB);
 			
-			if (pDataArray->m->control_pressed) { delete randT;  return 0;  }
+			if (pDataArray->m->getControl_pressed()) { delete randT;  return 0;  }
             
 			//get wscore of random tree
 			EstOutput randomData = weighted.getValues(randT, groupA, groupB);
             
-			if (pDataArray->m->control_pressed) { delete randT;  return 0;  }
+			if (pDataArray->m->getControl_pressed()) { delete randT;  return 0;  }
             
 			//save scores
 			pDataArray->scores[h].push_back(randomData[0]);

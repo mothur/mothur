@@ -85,7 +85,7 @@ static DWORD WINAPI MyWeightedThreadFunction(LPVOID lpParam){
         
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             
-			if (pDataArray->m->control_pressed) { return 0; }
+			if (pDataArray->m->getControl_pressed()) { return 0; }
             
 			//initialize weighted score
 			string groupA = pDataArray->namesOfGroupCombos[h][0];
@@ -117,7 +117,7 @@ static DWORD WINAPI MyWeightedThreadFunction(LPVOID lpParam){
                 //while you aren't at root
                 while(pDataArray->t->tree[index].getParent() != -1){
                     
-                    if (pDataArray->m->control_pressed) {  return 0; }
+                    if (pDataArray->m->getControl_pressed()) {  return 0; }
                     
                     int parent = pDataArray->t->tree[index].getParent();
                     
@@ -198,7 +198,7 @@ static DWORD WINAPI MyWeightedThreadFunction(LPVOID lpParam){
                 //while you aren't at root
                 while(pDataArray->t->tree[index].getParent() != -1){
                     
-                    if (pDataArray->m->control_pressed) {  return 0; }
+                    if (pDataArray->m->getControl_pressed()) {  return 0; }
                     
                     int parent = pDataArray->t->tree[index].getParent();
                     
@@ -271,7 +271,7 @@ static DWORD WINAPI MyWeightedThreadFunction(LPVOID lpParam){
 			//calculate u for the group comb
 			for(int i=0;i<pDataArray->t->getNumNodes();i++){
 				
-				if (pDataArray->m->control_pressed) { return 0; }
+				if (pDataArray->m->getControl_pressed()) { return 0; }
 				
 				double u;
 				//int pcountSize = 0;

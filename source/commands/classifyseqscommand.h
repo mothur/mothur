@@ -167,12 +167,12 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);	
 		}
 		
-		if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
+		if (pDataArray->m->getControl_pressed()) { delete myclassify; return 0; }
 		
 		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
-			if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
+			if (pDataArray->m->getControl_pressed()) { delete myclassify; return 0; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA); pDataArray->m->gobble(inFASTA);
 			
@@ -180,7 +180,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 				
 				taxonomy = myclassify->getTaxonomy(candidateSeq);
 				
-				if (pDataArray->m->control_pressed) { delete candidateSeq; return 0; }
+				if (pDataArray->m->getControl_pressed()) { delete candidateSeq; return 0; }
 				
 				if (taxonomy == "unknown;") { pDataArray->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); pDataArray->m->mothurOutEndLine(); }
 

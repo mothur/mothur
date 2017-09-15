@@ -81,7 +81,7 @@ static DWORD WINAPI MyUnWeightedThreadFunction(LPVOID lpParam){
 		int count = 0;
 		        
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
-			if (pDataArray->m->control_pressed) { return 0; }
+			if (pDataArray->m->getControl_pressed()) { return 0; }
             
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
@@ -118,7 +118,7 @@ static DWORD WINAPI MyUnWeightedThreadFunction(LPVOID lpParam){
                     //while you aren't at root
                     while(pDataArray->t->tree[index].getParent() != -1){
                         //cout << index << endl;
-                        if (pDataArray->m->control_pressed) {  return 0; }
+                        if (pDataArray->m->getControl_pressed()) {  return 0; }
                         
                         //am I the root for this grouping? if so I want to stop "early"
                         //does my sibling have descendants from the users groups?
@@ -159,7 +159,7 @@ static DWORD WINAPI MyUnWeightedThreadFunction(LPVOID lpParam){
                 
 				for(int i=0;i<pDataArray->t->getNumNodes();i++){
 					
-					if (pDataArray->m->control_pressed) {  return 0; }
+					if (pDataArray->m->getControl_pressed()) {  return 0; }
 					//cout << i << endl;
 					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
 					//pcountSize = 2, not unique to one group
@@ -216,7 +216,7 @@ static DWORD WINAPI MyUnWeightedRandomThreadFunction(LPVOID lpParam){
 		
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             
-			if (pDataArray->m->control_pressed) { return 0; }
+			if (pDataArray->m->getControl_pressed()) { return 0; }
             
             map< vector<string>, set<int> > rootForGrouping;
             
@@ -260,7 +260,7 @@ static DWORD WINAPI MyUnWeightedRandomThreadFunction(LPVOID lpParam){
                     //while you aren't at root
                     while(copyTree->tree[index].getParent() != -1){
                         //cout << index << endl;
-                        if (pDataArray->m->control_pressed) {  return 0; }
+                        if (pDataArray->m->getControl_pressed()) {  return 0; }
                         
                         //am I the root for this grouping? if so I want to stop "early"
                         //does my sibling have descendants from the users groups?
@@ -300,7 +300,7 @@ static DWORD WINAPI MyUnWeightedRandomThreadFunction(LPVOID lpParam){
                 /////////////////////////////////////////////////////////////////////////////
 				for(int i=0;i<copyTree->getNumNodes();i++){
 					
-					if (pDataArray->m->control_pressed) {  return 0; }
+					if (pDataArray->m->getControl_pressed()) {  return 0; }
 					
 					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
 					//pcountSize = 2, not unique to one group

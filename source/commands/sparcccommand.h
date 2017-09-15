@@ -86,7 +86,7 @@ static DWORD WINAPI MySparccThreadFunction(LPVOID lpParam){
         for(int i=0;i<numOTUs;i++){ pDataArray->pValues[i].assign(numOTUs, 0);  }
         
         for(int i=0;i<pDataArray->numPerms;i++){
-            if (pDataArray->m->control_pressed) { return 0; }
+            if (pDataArray->m->getControl_pressed()) { return 0; }
             
             //sharedShuffled = shuffleSharedVector(sharedVector);
             //////////////////////////////////////////////////////////

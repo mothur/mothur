@@ -157,7 +157,7 @@ static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){
 			
             pDataArray->count++;
             
-			if (pDataArray->m->control_pressed) { in.close(); badAccnosFile.close(); goodFile.close(); pDataArray->count = 1; return 1; }
+			if (pDataArray->m->getControl_pressed()) { in.close(); badAccnosFile.close(); goodFile.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence currSeq(in); pDataArray->m->gobble(in); 
 			

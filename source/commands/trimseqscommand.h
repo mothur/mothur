@@ -289,7 +289,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
 			           
-			if (pDataArray->m->control_pressed) {
+			if (pDataArray->m->getControl_pressed()) {
                 delete trimOligos; if (pDataArray->reorient) { delete rtrimOligos; }
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
 				if ((pDataArray->createGroup) && (pDataArray->countfile == "")) {	 outGroupsFile.close();   }

@@ -114,7 +114,7 @@ static DWORD WINAPI MyPrimerThreadFunction(LPVOID lpParam){
         
         for (int i = pDataArray->start; i < pDataArray->end; i++) {
             
-            if (pDataArray->m->control_pressed) { break; }
+            if (pDataArray->m->getControl_pressed()) { break; }
             
             if (i != (pDataArray->binIndex)) {
                 int primerIndex = 0;
@@ -136,7 +136,7 @@ static DWORD WINAPI MyPrimerThreadFunction(LPVOID lpParam){
                         //search for primer
                         for (int j = 0; j < rawSequence.length()-pDataArray->length; j++){
                             
-                            if (pDataArray->m->control_pressed) {  found = false; break; }
+                            if (pDataArray->m->getControl_pressed()) {  found = false; break; }
                             
                             string rawChunk = rawSequence.substr(j, pDataArray->length);
                             

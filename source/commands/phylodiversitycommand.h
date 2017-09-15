@@ -112,7 +112,7 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
             for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = false;   }
             for(int k = 0; k < numLeafNodes; k++){
                 
-                if (pDataArray->m->control_pressed) { return 0; }
+                if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 //calc branch length of randomLeaf k
                 //vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch, rootForGroup);
@@ -136,7 +136,7 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
                 //while you aren't at root
                 while(pDataArray->t->tree[index].getParent() != -1){
                     
-                    if (pDataArray->m->control_pressed) {  return 0; }
+                    if (pDataArray->m->getControl_pressed()) {  return 0; }
                     
                     for (int k = 0; k < groups.size(); k++) {
                         

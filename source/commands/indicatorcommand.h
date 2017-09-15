@@ -98,7 +98,7 @@ static DWORD WINAPI MyIndicatorThreadFunction(LPVOID lpParam){
 		pDataArray->pvalues.resize(pDataArray->indicatorValues.size(), 0);
 		
 		for(int i=0;i<pDataArray->iters;i++){
-			if (pDataArray->m->control_pressed) { break; }
+			if (pDataArray->m->getControl_pressed()) { break; }
             
 			//groupingsMap = randomizeGroupings(groupings, num);
             ///////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ static DWORD WINAPI MyIndicatorThreadFunction(LPVOID lpParam){
             //for each otu
             for (int i = 0; i < pDataArray->groupings[0][0]->getNumBins(); i++) {
                 
-                if (pDataArray->m->control_pressed) { return 0; }
+                if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 vector<float> terms;
                 float AijDenominator = 0.0;

@@ -149,13 +149,13 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
         bool error = false;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
-			if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
+			if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence current(in); pDataArray->m->gobble(in); 
 			
 			if (current.getName() != "") {
-                if (pDataArray->m->debug) { pDataArray->m->mothurOutJustToScreen("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();}
-                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->debug) { pDataArray->m->setControl_pressed(true); }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
+                if (pDataArray->m->getDebug()) { pDataArray->m->mothurOutJustToScreen("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();}
+                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->getDebug()) { pDataArray->m->setControl_pressed(true); }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
                 
                 if(pDataArray->trump != '*')			{	pDataArray->F.doTrump(current);		}
                 if(pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0)	{	pDataArray->F.getFreqs(current);	}
@@ -203,7 +203,7 @@ static DWORD WINAPI MyRunFilterThreadFunction(LPVOID lpParam){
 		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
-			if (pDataArray->m->control_pressed) { in.close(); out.close(); pDataArray->count = 1; return 1; }
+			if (pDataArray->m->getControl_pressed()) { in.close(); out.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence seq(in); pDataArray->m->gobble(in);
             if (seq.getName() != "") {
