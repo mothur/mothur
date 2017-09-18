@@ -421,7 +421,6 @@ class MothurOut {
 		vector<string> namesOfGroups;
 		ofstream out;
         int numErrors, numWarnings;
-        mutex threadModerator;
         vector<string> Treenames;
         vector<string> sharedBinLabelsInFile;
         vector<string> currentSharedBinLabels;

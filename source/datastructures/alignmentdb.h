@@ -28,7 +28,7 @@ public:
 	int getLongestBase()	{  return longest;  }
 	
 private:
-    mutex mutex;
+    std::mutex mutex;
 	int numSeqs, longest, threadID;
 	string method;
 	
@@ -36,7 +36,6 @@ private:
 	vector<Sequence> templateSequences;
 	Sequence emptySequence;
 	MothurOut* m;
-    std::mutex token;
 };
 
 /**************************************************************************************************/

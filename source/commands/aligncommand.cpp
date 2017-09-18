@@ -386,7 +386,6 @@ struct alignStruct {
     
     MothurOut* m;
     AlignmentDB* templateDB;
-    mutex* mutex;
     
        alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
         
@@ -576,7 +575,6 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<alignStruct*> data;
-        mutex mutex;
         
         long long num = 0;
         for (int i = 0; i < numFlipped.size(); i++) { numFlipped[i] = 0; }
