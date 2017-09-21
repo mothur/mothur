@@ -18,7 +18,6 @@ vector<string> ChimeraBellerophonCommand::setParameters(){
 		CommandParameter pcorrection("correction", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcorrection);
 		CommandParameter pwindow("window", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pwindow);
 		CommandParameter pincrement("increment", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pincrement);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -41,7 +40,6 @@ string ChimeraBellerophonCommand::getHelpString(){
 		helpString += "The fasta parameter is required.  You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter, default=false. \n";
 		helpString += "The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n";
-		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default is 1/4 sequence length. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 25.\n";
 		helpString += "chimera.bellerophon(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors) \n";
@@ -205,10 +203,6 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
 			correction = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, window);
 			
@@ -233,7 +227,7 @@ int ChimeraBellerophonCommand::execute(){
 			
 			int start = time(NULL);	
 			
-			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, processors, outputDir);	
+			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, outputDir);	
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it	
             map<string, string> variables; 
