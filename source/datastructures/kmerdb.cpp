@@ -55,13 +55,13 @@ KmerDB::~KmerDB(){}
 
 /**************************************************************************************************/
 
-vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
+vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores){
 	try {
 		if (num > numSeqs) { m->mothurOut("[WARNING]: you requested " + toString(num) + " closest sequences, but the template only contains " + toString(numSeqs) + ", adjusting."); m->mothurOutEndLine(); num = numSeqs; }
 		
 		vector<int> topMatches;
 		Kmer kmer(kmerSize);
-		searchScore = 0;
+		float searchScore = 0;
 		Scores.clear();
 		
 		vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
@@ -91,7 +91,8 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 			
 			searchScore = seqMatches[0].match;
 			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
-		
+            Scores.push_back(searchScore);
+            
 			//save top matches
 			for (int i = 0; i < num; i++) {
 				topMatches.push_back(seqMatches[i].seq);

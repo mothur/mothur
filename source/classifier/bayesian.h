@@ -21,7 +21,7 @@ public:
 	Bayesian(string, string, string, int, int, int, int, bool, bool);
 	~Bayesian();
 	
-	string getTaxonomy(Sequence*);
+	string getTaxonomy(Sequence*, string&, bool&);
 	
 private:
 	vector< vector<float> > wordGenusProb;	//vector of maps from genus to probability
@@ -34,7 +34,7 @@ private:
 	
 	int kmerSize, numKmers, confidenceThreshold, iters;
 	
-	string bootstrapResults(vector<int>, int, int);
+	string bootstrapResults(vector<int>, int, int, string&);
 	int getMostProbableTaxonomy(vector<int>);
 	void readProbFile(ifstream&, ifstream&, string, string);
 	bool checkReleaseDate(ifstream&, ifstream&, ifstream&, ifstream&);

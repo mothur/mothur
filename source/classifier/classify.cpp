@@ -114,7 +114,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 	}
 }
 /**************************************************************************************************/
-Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL; flipped=false;  maxLevel = 0; }
+Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL;   maxLevel = 0; }
 /**************************************************************************************************/
 
 int Classify::readTaxonomy(string file) {

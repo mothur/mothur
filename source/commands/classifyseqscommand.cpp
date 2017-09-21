@@ -635,6 +635,7 @@ int ClassifySeqsCommand::execute(){
 			string newaccnosFile = getOutputFileName("accnos", variables);
 			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
 			string taxSummary = getOutputFileName("taxsummary", variables);
+            
 			
 			if ((method == "knn") && (search == "distance")) { 
 				string DistName = getOutputFileName("matchdist", variables);
@@ -648,31 +649,9 @@ int ClassifySeqsCommand::execute(){
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 		
-			vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			positions = m->divideFile(fastaFileNames[s], processors);
-			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
-#else
-			if (processors == 1) {
-				lines.push_back(new linePair(0, 1000));
-			}else {
-				positions = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); 
-                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-				
-				//figure out how many sequences you have to process
-				int numSeqsPerProcessor = numFastaSeqs / processors;
-				for (int i = 0; i < processors; i++) {
-					int startIndex =  i * numSeqsPerProcessor;
-					if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-					lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-				}
-			}
-#endif
-			if(processors == 1){
-				numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]);
-			}else{
-				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]); 
-			}
+						
+            numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]);
+			
 			
 			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
                 outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
@@ -684,7 +663,6 @@ int ClassifySeqsCommand::execute(){
             
             //read namefile
             if(namefile != "") {
-                
                 m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
                 nameMap.clear(); //remove old names
                 m->readNames(namefileNames[s], nameMap);
@@ -795,263 +773,187 @@ int ClassifySeqsCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+void driverClassifier(classifyData* params){
+    try {
+        ofstream outTax;
+        params->m->openOutputFile(params->taxFName, outTax);
+        
+        ofstream outTaxSimple;
+        params->m->openOutputFile(params->tempTFName, outTaxSimple);
+        
+        ofstream outAcc;
+        params->m->openOutputFile(params->accnos, outAcc);
+        
+        ifstream inFASTA;
+        params->m->openInputFile(params->filename, inFASTA);
+        
+        string taxonomy;
+        
+        inFASTA.seekg(params->start);
+        
+        bool done = false;
+        
+        while (!done) {
+            if (params->m->getControl_pressed()) { break; }
+            
+            Sequence* candidateSeq = new Sequence(inFASTA); params->m->gobble(inFASTA);
+            
+            if (candidateSeq->getName() != "") {
+                
+                string simpleTax = ""; bool flipped = false;
+                taxonomy = params->classify->getTaxonomy(candidateSeq, simpleTax, flipped);
+                
+                if (params->m->getControl_pressed()) { delete candidateSeq; break; }
+                
+                if (taxonomy == "unknown;") { params->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); params->m->mothurOutEndLine(); }
+                
+                //output confidence scores or not
+                if (params->probs) {
+                    outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+                }else{
+                    outTax << candidateSeq->getName() << '\t' << simpleTax << endl;
+                }
+                
+                if (flipped) { outAcc << candidateSeq->getName() << endl; }
+                
+                outTaxSimple << candidateSeq->getName() << '\t' << simpleTax << endl;
+                
+                params->count++;
+            }
+            delete candidateSeq;
+            
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            unsigned long long pos = inFASTA.tellg();
+            if ((pos == -1) || (pos >= params->end)) { break; }
+#else
+            if (params->count == params->end) { break; }
+#endif
+            
+            //report progress
+            if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count) +"\n"); 		}
+            
+        }
+        //report progress
+        if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 		}
+        
+        inFASTA.close();
+        outTax.close();
+        outTaxSimple.close();
+        outAcc.close();
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "ClassifySeqsCommand", "driver");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+/*classifyData(string acc, bool p, string a, string r, string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
+    accnos = acc;
+    taxFName = a;
+    tempTFName = r;
+    filename = f;
+    m = mout;
+    start = st;
+    end = en;
+    probs = p;
+    count = 0;
+}*/
 /**************************************************************************************************/
 
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
-		
-		int num = 0;
-		processIDS.clear();
-        bool recalc = false;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(lines[process], taxFileName + m->mothurGetpid(process) + ".temp", tempTaxFile + m->mothurGetpid(process) + ".temp", accnos + m->mothurGetpid(process) + ".temp", filename);
-
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setMothurCalling(false);
-                recalc = true;
-                break;
-            }
-		}
         
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<classifyData*> data;
+        
+        long long num = 0;
+        
+        time_t start, end;
+        time(&start);
+
+        vector<unsigned long long> positions;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        positions = m->divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+#else
+        if (processors == 1) {
+            lines.push_back(new linePair(0, 1000));
+        }else {
+            positions = m->setFilePosFasta(filename, num);
+            if (num < processors) { processors = num; }
             
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(lines[process], taxFileName + m->mothurGetpid(process) + ".temp", tempTaxFile + m->mothurGetpid(process) + ".temp", accnos + m->mothurGetpid(process) + ".temp", filename);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = num / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
+                lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
             }
         }
-
-		
-		//parent does its part
-		num = driver(lines[0], taxFileName, tempTaxFile, accnos, filename);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); m->mothurRemove(m->getFullPathName(tempFile));
-		}
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the alignData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<classifyData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			// Allocate memory for thread data.
-			string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
-			
-			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip, false);
-			pDataArray.push_back(tempclass);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyClassThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);  
-			
-		}
-		
-		//parent does its part
-		num = driver(lines[processors-1], taxFileName + toString(processors-1) + ".temp", tempTaxFile + toString(processors-1) + ".temp", accnos + toString(processors-1) + ".temp", filename);
-		processIDS.push_back((processors-1));
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-	#endif	
-        vector<string> nonBlankAccnosFiles;
-		if (!(m->isBlank(accnos))) { nonBlankAccnosFiles.push_back(accnos); }
-		else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
+#endif
         
-		for(int i=0;i<processIDS.size();i++){
-			m->appendFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
-			m->appendFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
-            if (!(m->isBlank(accnos + toString(processIDS[i]) + ".temp"))) {
-				nonBlankAccnosFiles.push_back(accnos + toString(processIDS[i]) + ".temp");
-			}else { m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));  }
-
-			m->mothurRemove((m->getFullPathName(taxFileName) + toString(processIDS[i]) + ".temp"));
-			m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(processIDS[i]) + ".temp"));
-		}
-		
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; ++i) {
+            //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
+            classifyData* dataBundle = new classifyData((accnos + toString(i+1) + ".temp"), probs, (taxFileName + toString(i+1) + ".temp"), (tempTaxFile + toString(i+1) + ".temp"), filename, m, lines[i+1]->start, lines[i+1]->end, flip, classify);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverClassifier, dataBundle));
+        }
+        
+        classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, m, lines[0]->start, lines[0]->end, flip, classify);
+        driverClassifier(dataBundle);
+        num = dataBundle->count;
+        
+        for (int i = 0; i < processors-1; ++i) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
+        
+        vector<string> nonBlankAccnosFiles;
+        if (!(m->isBlank(accnos))) { nonBlankAccnosFiles.push_back(accnos); }
+        else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
+        
+        for (int i = 0; i < processors-1; i++) {
+            m->appendFiles((taxFileName + toString(i+1) + ".temp"), taxFileName);
+            m->appendFiles((tempTaxFile + toString(i+1) + ".temp"), tempTaxFile);
+            if (!(m->isBlank(accnos + toString(i+1) + ".temp"))) {
+                nonBlankAccnosFiles.push_back(accnos + toString(i+1) + ".temp");
+            }else { m->mothurRemove((accnos + toString(i+1) + ".temp"));  }
+            
+            m->mothurRemove((m->getFullPathName(taxFileName) + toString(i+1) + ".temp"));
+            m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(i+1) + ".temp"));
+        }
+        
         //append accnos files
-		if (nonBlankAccnosFiles.size() != 0) { 
-			rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
-			
-			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				m->appendFiles(nonBlankAccnosFiles[h], accnos);
-				m->mothurRemove(nonBlankAccnosFiles[h]);
-			}
-		}else { //recreate the accnosfile if needed
-			ofstream out;
-			m->openOutputFile(accnos, out);
-			out.close();
-		}
-
-		return num;
-		
+        if (nonBlankAccnosFiles.size() != 0) {
+            rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
+            
+            for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+                m->appendFiles(nonBlankAccnosFiles[h], accnos);
+                m->mothurRemove(nonBlankAccnosFiles[h]);
+            }
+        }else { //recreate the accnosfile if needed
+            ofstream out;
+            m->openOutputFile(accnos, out);
+            out.close();
+        }
+        
+        return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifySeqsCommand", "createProcesses");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string accnos, string filename){
-	try {
-		ofstream outTax;
-		m->openOutputFile(taxFName, outTax);
-		
-		ofstream outTaxSimple;
-		m->openOutputFile(tempTFName, outTaxSimple);
-		
-		ofstream outAcc;
-		m->openOutputFile(accnos, outAcc);
-	
-		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
-		
-		string taxonomy;
-
-		inFASTA.seekg(filePos->start);
-
-		bool done = false;
-		int count = 0;
-		
-		while (!done) {
-			if (m->getControl_pressed()) { 
-				inFASTA.close();
-				outTax.close();
-				outTaxSimple.close();
-				outAcc.close(); return 0; }
-		
-			Sequence* candidateSeq = new Sequence(inFASTA); m->gobble(inFASTA);
-			
-			if (candidateSeq->getName() != "") {
-			
-				taxonomy = classify->getTaxonomy(candidateSeq);
-				
-				if (m->getControl_pressed()) { delete candidateSeq; return 0; }
-				
-				if (taxonomy == "unknown;") { m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); m->mothurOutEndLine(); }
-				
-				//output confidence scores or not
-				if (probs) {
-					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-				}else{
-					outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-				}
-				
-				if (classify->getFlipped()) { outAcc << candidateSeq->getName() << endl; }
-				
-				outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-				
-				count++;
-			}
-			delete candidateSeq;
-			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
-			#else
-				if (inFASTA.eof()) { break; }
-			#endif
-			
-			//report progress
-			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) +"\n"); 		}
-			
-		}
-		//report progress
-		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 		}
-			
-		inFASTA.close();
-		outTax.close();
-		outTaxSimple.close();
-		outAcc.close();
-		
-		return count;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "driver");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
+
+

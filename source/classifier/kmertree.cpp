@@ -265,8 +265,9 @@ int KmerTree::sanityCheck(vector<vector<int> >& indices, vector<int>& maxIndices
 }
 
 /**************************************************************************************************/
-string KmerTree::getTaxonomy(Sequence* thisSeq){
+string KmerTree::getTaxonomy(Sequence* thisSeq, string& simpleTax, bool& flipped){
 	try {
+        simpleTax = "";
         string seqName = thisSeq->getName(); string querySequence = thisSeq->getAligned(); string taxonProbabilityString = "";
         string unalignedSeq = thisSeq->getUnaligned();
         
@@ -317,32 +318,8 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
             bestPosterior[i] = posteriors[maxIndex[i]];	
         }
         
-        //	vector<double> pX_level(numLevels, 0);
-        //	
-        //	for(int i=0;i<numLevels;i++){
-        //		pX_level[i] = pXgivenKj_D_j[i][maxIndex[i]] - tree[indices[i][maxIndex[i]]]->getNumSeqs();
-        //	}
-        //	
-        //	int max_pLevel_X_index = -1;
-        //	double pX_level_sum = getLogExpSum(pX_level, max_pLevel_X_index);
-        //	double max_pLevel_X = exp(pX_level[max_pLevel_X_index] - pX_level_sum);
-        //	
-        //	vector<double> pLevel_X(numLevels, 0);
-        //	for(int i=0;i<numLevels;i++){
-        //		pLevel_X[i] = exp(pX_level[i] - pX_level_sum);
-        //	}
-        
         int saneDepth = sanityCheck(indices, maxIndex);
         
-        
-        //	stringstream levelProbabilityOutput;
-        //	levelProbabilityOutput.setf(ios::fixed, ios::floatfield);
-        //	levelProbabilityOutput.setf(ios::showpoint);
-        
-        
-        //taxonProbabilityOutput << seqName << '\t';
-        //	taxonProbabilityOutput << seqName << '(' << max_pLevel_X_index << ';' << max_pLevel_X << ')' << '\t';
-        //	levelProbabilityOutput << seqName << '(' << max_pLevel_X_index << ';' << max_pLevel_X << ')' << '\t';
         simpleTax = "";
         int savedspot = 1;
         taxonProbabilityString = "";
@@ -353,12 +330,9 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
                 if(indices[i][maxIndex[i]] != -1){
                     taxonProbabilityString += tree[indices[i][maxIndex[i]]]->getName() + "(" + toString(confidenceScore) + ");";
                     simpleTax += tree[indices[i][maxIndex[i]]]->getName() + ";";
-                    
-                    //			levelProbabilityOutput << tree[indices[i][maxIndex[i]]]->getName() << '(' << setprecision(6) << pLevel_X[i] << ");";
                 }
                 else{
                     taxonProbabilityString += "unclassified(" + toString(confidenceScore) + ");";
-                    //			levelProbabilityOutput << "unclassified" << '(' << setprecision(6) << pLevel_X[i] << ");";
                     simpleTax += "unclassified;";
                 }
             }else { break; }

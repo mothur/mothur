@@ -209,7 +209,9 @@ void MothurOut::clearCurrentFiles()  {
         biomfile = "";
         counttablefile = "";
         summaryfile = "";
-		processors = "1";
+        unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
+        if (concurentThreadsSupported < 1) { concurentThreadsSupported = 1; } //in case thread errors
+        processors = toString(concurentThreadsSupported);
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "clearCurrentFiles");

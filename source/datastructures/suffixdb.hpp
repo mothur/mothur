@@ -31,7 +31,7 @@ public:
 	
 	void generateDB() {}; //adding sequences generates the db
 	void addSequence(Sequence);
-	vector<int> findClosestSequences(Sequence*, int);
+	vector<int> findClosestSequences(Sequence*, int, vector<float>&);
 
 private:
 	vector<SuffixTree> suffixForest;

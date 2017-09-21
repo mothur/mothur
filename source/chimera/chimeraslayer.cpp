@@ -817,6 +817,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
+        
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
 				
@@ -914,8 +915,9 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
-		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, num);
-		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, num);
+        vector<float> Scores;
+		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, num, Scores);
+		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, num, Scores);
 		
 		//merge results		
 		map<int, int> seen;

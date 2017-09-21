@@ -149,10 +149,11 @@ AlignmentDB::~AlignmentDB() {  delete search;	}
 Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) {
 	try{
         lock_guard<std::mutex> guard(mutex);
-		vector<int> spot = search->findClosestSequences(seq, 1);
+        vector<float> scores;
+		vector<int> spot = search->findClosestSequences(seq, 1, scores);
 	
-		if (spot.size() != 0)	{	searchScore	= search->getSearchScore(); return templateSequences[spot[0]];	}
-        else					{	searchScore = 0.0; 	return emptySequence;                                   }
+        if (spot.size() != 0)	{	searchScore = scores[0]; return templateSequences[spot[0]];	}
+        else					{ 	searchScore = 0; return emptySequence;                      }
 		
 	}
 	catch(exception& e) {

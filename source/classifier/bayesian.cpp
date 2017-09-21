@@ -187,9 +187,10 @@ Bayesian::~Bayesian() {
 }
 
 /**************************************************************************************************/
-string Bayesian::getTaxonomy(Sequence* seq) {
+string Bayesian::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 	try {
 		string tax = "";
+        simpleTax = "";
 		Kmer kmer(kmerSize);
 		flipped = false;
 		
@@ -232,7 +233,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 	
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
-		tax = bootstrapResults(queryKmers, index, numToSelect);
+		tax = bootstrapResults(queryKmers, index, numToSelect, simpleTax);
         
         if (m->getDebug()) {  m->mothurOut("\n"); }
 		
@@ -244,7 +245,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 	}
 }
 /**************************************************************************************************/
-string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
+string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect, string& simpleTax) {
 	try {
 				
 		map<int, int> confidenceScores; 

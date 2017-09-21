@@ -371,6 +371,7 @@ int AlignCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
 struct alignStruct {
     string alignFName;
     string reportFName;

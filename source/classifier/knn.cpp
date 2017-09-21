@@ -50,14 +50,15 @@ Knn::~Knn() {
 	}
 }
 /**************************************************************************************************/
-string Knn::getTaxonomy(Sequence* seq) {
+string Knn::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 	try {
 		string tax;
-		
+		simpleTax = "";
 		//use database to find closest seq
-		vector<int> closest = database->findClosestSequences(seq, num);
+        vector<float> Scores;
+		vector<int> closest = database->findClosestSequences(seq, num, Scores); 
 	
-		if (search == "distance") { ofstream outDistance; m->openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << database->getSearchScore() << endl; outDistance.close();  }
+		if (search == "distance") { ofstream outDistance; m->openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << Scores[0] << endl; outDistance.close();  }
 	
 		if (m->getControl_pressed()) { return tax; }
 
@@ -91,48 +92,7 @@ string Knn::getTaxonomy(Sequence* seq) {
 /**************************************************************************************************/
 string Knn::findCommonTaxonomy(vector<string> closest)  {
 	try {
-		/*vector< vector<string> > taxons;  //taxon[0] = vector of taxonomy info for closest[0].
-										//so if closest[0] taxonomy is Bacteria;Alphaproteobacteria;Rhizobiales;Azorhizobium_et_rel.;Methylobacterium_et_rel.;Bosea;
-										//taxon[0][0] = Bacteria, taxon[0][1] = Alphaproteobacteria....
-										
-		taxons.resize(closest.size());
-		int smallest = 100;
-		
-		for (int i = 0; i < closest.size(); i++) {
-			if (m->getControl_pressed()) { return "control"; }
-		
-			string tax = taxonomy[closest[i]];  //we know its there since we checked in getTaxonomy
-			cout << tax << endl;
-		
-			taxons[i] = parseTax(tax);
-		
-			//figure out who has the shortest taxonomy info. so you can start comparing there
-			if (taxons[i].size() < smallest) {
-				smallest = taxons[i].size();
-			}
-		}
-	
-		//start at the highest level all the closest seqs have
-		string common = "";
-		for (int i = (smallest-1); i >= 0; i--) {
-			if (m->getControl_pressed()) { return "control"; }
-
-			string thistax = taxons[0][i];
-			int num = 0;
-			for (int j = 1; j < taxons.size(); j++) {
-				if (taxons[j][i] != thistax) { break; }
-				num = j;
-			}
-		
-			if (num == (taxons.size()-1)) { //they all match at this level
-				for (int k = 0; k <= i; k++) {
-					common += taxons[0][k] + ';';
-				}
-				break;
-			}
-		}*/
-		
-		string conTax;
+        string conTax;
 		
 		//create a tree containing sequences from this bin
 		PhyloTree* p = new PhyloTree();

@@ -264,7 +264,6 @@
 		481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
 		481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		481FB62A1AC1B7EA0076CFF3 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
-		481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BD12D37EC400DA6239 /* database.cpp */; };
 		481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77916E6176F7F7600EEFE18 /* designmap.cpp */; };
 		481FB62D1AC1B7EA0076CFF3 /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */; };
 		481FB62E1AC1B7EA0076CFF3 /* fastamap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */; };
@@ -578,7 +577,6 @@
 		A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */; };
 		A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */; };
 		A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BB12D37EC400DA6239 /* coverage.cpp */; };
-		A7E9B8B712D37EC400DA6239 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BD12D37EC400DA6239 /* database.cpp */; };
 		A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C112D37EC400DA6239 /* decalc.cpp */; };
 		A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */; };
 		A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */; };
@@ -1251,7 +1249,6 @@
 		A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = corraxescommand.h; path = source/commands/corraxescommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6BB12D37EC400DA6239 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coverage.cpp; path = source/calculators/coverage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BC12D37EC400DA6239 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = coverage.h; path = source/calculators/coverage.h; sourceTree = SOURCE_ROOT; };
-		A7E9B6BD12D37EC400DA6239 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = source/datastructures/database.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BE12D37EC400DA6239 /* database.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = database.hpp; path = source/datastructures/database.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BF12D37EC400DA6239 /* datavector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = datavector.hpp; path = source/datastructures/datavector.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6C012D37EC400DA6239 /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dayhoff.h; path = source/calculators/dayhoff.h; sourceTree = SOURCE_ROOT; };
@@ -2557,7 +2554,6 @@
 				48844B261AA74AF9006EF2B8 /* compare.h */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
@@ -3059,7 +3055,6 @@
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
 				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
-				481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
 				481FB5991AC1B71B0076CFF3 /* chimeraperseuscommand.cpp in Sources */,
@@ -3306,7 +3301,6 @@
 				A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */,
 				A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */,
 				A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */,
-				A7E9B8B712D37EC400DA6239 /* database.cpp in Sources */,
 				A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */,
 				A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */,
 				A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */,

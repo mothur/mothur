@@ -22,7 +22,7 @@ public:
 	~Knn();
 	
 	void setDistName(string s);
-	string getTaxonomy(Sequence*);
+	string getTaxonomy(Sequence*, string&, bool&);
 	
 private:
 	int num;

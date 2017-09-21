@@ -72,14 +72,11 @@ private:
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
 	
-	int driver(linePair*, string, string, string, string);
+	//int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 
 };
 
 /**************************************************************************************************/
-//custom data structure for threads to use.
-// This is passed by void pointer so it can be any data type
-// that can be passed using a single void pointer (LPVOID).
 struct classifyData {
 	string taxFName; 
 	string tempTFName; 
@@ -88,135 +85,27 @@ struct classifyData {
 	unsigned long long start;
 	unsigned long long end;
 	MothurOut* m;
+    Classify* classify;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, kmerSize, threadID, cutoff, iters, numWanted;
 	bool probs, flip, writeShortcuts;
 	 
 	classifyData(){}
-	classifyData(string acc, bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid, bool fli, bool wsh) {
-		accnos = acc;
-		taxonomyFileName = tx;
-		templateFileName = te;
-		taxFName = a;
-		tempTFName = r;
-		filename = f;
-		search = se;
-		method = me;
-		m = mout;
-		start = st;
-		end = en;
-		match = ma; 
-		misMatch = misMa;
-		gapOpen = gapO; 
-		gapExtend = gapE; 
-		kmerSize = ks;
-		cutoff = cut;
-		iters = i;
-		numWanted = numW;
-		threadID = tid;
-		probs = p;
-		count = 0;
-		flip = fli;
-        writeShortcuts = wsh;
-	}
+    classifyData(string acc, bool p, string a, string r, string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
+        accnos = acc;
+        taxFName = a;
+        tempTFName = r;
+        filename = f;
+        m = mout;
+        start = st;
+        end = en;
+        probs = p;
+        flip = fli;
+        count = 0;
+        classify = c;
+    }
 };
-
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){ 
-	classifyData* pDataArray;
-	pDataArray = (classifyData*)lpParam;
-	
-	try {
-		ofstream outTax;
-		pDataArray->m->openOutputFile(pDataArray->taxFName, outTax);
-		
-		ofstream outTaxSimple;
-		pDataArray->m->openOutputFile(pDataArray->tempTFName, outTaxSimple);
-		
-		ofstream outAcc;
-		pDataArray->m->openOutputFile(pDataArray->accnos, outAcc);
-		
-		ifstream inFASTA;
-		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
-		
-		string taxonomy;
-				
-		//print header if you are process 0
-		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
-			inFASTA.seekg(0);
-            pDataArray->m->zapGremlins(inFASTA);
-		}else { //this accounts for the difference in line endings. 
-			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
-		}
-		
-		//make classify
-		Classify* myclassify;
-        string outputMethodTag = pDataArray->method + ".";
-		if(pDataArray->method == "wang"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
-		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
-        else if(pDataArray->method == "zap"){	
-            outputMethodTag = pDataArray->search + "_" + outputMethodTag;
-            if (pDataArray->search == "kmer") {   myclassify = new KmerTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->kmerSize, pDataArray->cutoff); }
-            else {  myclassify = new AlignTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->cutoff);  }
-        }
-		else {
-			pDataArray->m->mothurOut(pDataArray->method + " is not a valid method option. I will run the command using wang.");
-			pDataArray->m->mothurOutEndLine();
-			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);	
-		}
-		
-		if (pDataArray->m->getControl_pressed()) { delete myclassify; return 0; }
-		
-		pDataArray->count = 0;
-		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
-			
-			if (pDataArray->m->getControl_pressed()) { delete myclassify; return 0; }
-			
-			Sequence* candidateSeq = new Sequence(inFASTA); pDataArray->m->gobble(inFASTA);
-			
-			if (candidateSeq->getName() != "") {
-				
-				taxonomy = myclassify->getTaxonomy(candidateSeq);
-				
-				if (pDataArray->m->getControl_pressed()) { delete candidateSeq; return 0; }
-				
-				if (taxonomy == "unknown;") { pDataArray->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); pDataArray->m->mothurOutEndLine(); }
-
-				//output confidence scores or not
-				if (pDataArray->probs) {
-					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-				}else{
-					outTax << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
-				}
-					
-				outTaxSimple << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
-					
-				if (myclassify->getFlipped()) { outAcc << candidateSeq->getName() << endl; }
-				
-				pDataArray->count++;
-			}
-			delete candidateSeq;
-			//report progress
-			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 	}
-			
-		}
-		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
-		
-		delete myclassify;
-		inFASTA.close();
-		outTax.close();
-		outTaxSimple.close();
-		
-	}
-	catch(exception& e) {
-		pDataArray->m->errorOut(e, "ClassifySeqsCommand", "MyClassThreadFunction");
-		exit(1);
-	}
-} 
-#endif
 
 
 

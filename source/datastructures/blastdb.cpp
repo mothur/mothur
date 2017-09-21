@@ -197,7 +197,7 @@ BlastDB::~BlastDB(){
 }
 /**************************************************************************************************/
 //assumes you have added all the template sequences using the addSequence function and run generateDB.
-vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
+vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& scores) {
 	try{
 		vector<int> topMatches;
 		
@@ -210,7 +210,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
 
-				
+		lock_guard<std::mutex> guard(mutex);		
 		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
@@ -237,6 +237,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		m->gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
+            float searchScore;
 			m8FileHandle >> dummy >> templateAccession >> searchScore;
 			
 			//get rest of junk in line
@@ -244,6 +245,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			
 			m->gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
+            scores.push_back(searchScore);
 		}
 		m8FileHandle.close();
 		m->mothurRemove((queryFileName+pid+toString(randNumber)));
@@ -262,8 +264,8 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 	try{
 		vector<int> topMatches;
-		float numBases, mismatch, gap, startQuery, endQuery, startRef, endRef, score;
-		Scores.clear();
+		float numBases, mismatch, gap, startQuery, endQuery, startRef, endRef, score, searchScore;
+		
 		
 		ofstream queryFile;
 		int randNumber = m->getRandomNumber();
@@ -311,7 +313,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 			m->gobble(m8FileHandle);
 			if (searchScore >= minPerID) { 
 				topMatches.push_back(templateAccession);
-				Scores.push_back(searchScore);
+				//Scores.push_back(searchScore);
 			}
 //cout << templateAccession << endl;
 		}

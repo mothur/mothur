@@ -891,7 +891,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
             unsigned long long pos = in.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
-            if (params->end == param->count) { break; }
+            if (params->end == params->count) { break; }
 #endif
         }
         
