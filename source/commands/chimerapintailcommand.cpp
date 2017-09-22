@@ -22,7 +22,6 @@ vector<string> ChimeraPintailCommand::setParameters(){
 		CommandParameter pwindow("window", "Number", "", "0", "", "", "","","",false,false); parameters.push_back(pwindow);
 		CommandParameter pincrement("increment", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pincrement);
 		CommandParameter pmask("mask", "String", "", "", "", "", "","",false,false); parameters.push_back(pmask);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -48,7 +47,6 @@ string ChimeraPintailCommand::getHelpString(){
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n";
 		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences, by default no mask is applied.  You can apply an ecoli mask by typing, mask=default. \n";
-		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=300. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n";
 		helpString += "The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n";
@@ -235,11 +233,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
 			filter = m->isTrue(temp);
-			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-			
+						
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, window);
 			
@@ -389,7 +383,7 @@ int ChimeraPintailCommand::execute(){
 					}
 				}
 			}
-			chimera = new Pintail(fastaFileNames[s], templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
+			chimera = new Pintail(fastaFileNames[s], templatefile, filter, maskfile, consfile, quanfile, window, increment, outputDir);
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
@@ -409,60 +403,11 @@ int ChimeraPintailCommand::execute(){
 			}
 			templateSeqsLength = chimera->getLength();
 		
+            numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName);
+            
+            if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  delete chimera; return 0; }
 								
-			//break up file
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				vector<unsigned long long> positions = m->divideFile(fastaFileNames[s], processors);
-			
-				for (int i = 0; i < (positions.size()-1); i++) {
-					lines.push_back(new linePair(positions[i], positions[(i+1)]));
-				}	
-			
-				if(processors == 1){
-		
-					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
-					
-					if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
-					
-				}else{
-					processIDS.resize(0);
-					
-					numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName); 
-				
-					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-					rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
-						
-					//append output files
-					for(int i=1;i<processors;i++){
-						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-						m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
-					}
-					
-					//append output files
-					for(int i=1;i<processors;i++){
-						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
-						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
-					}
-										
-					if (m->getControl_pressed()) { 
-						m->mothurRemove(outputFileName); 
-						m->mothurRemove(accnosFileName);
-						for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();
-						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-						delete chimera;
-						return 0;
-					}
-				}
-
-			#else
-				lines.push_back(new linePair(0, 1000));
-				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
-				
-				if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
-			#endif
-			
 			delete chimera;
-			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
@@ -493,7 +438,7 @@ int ChimeraPintailCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string filename, string accnos){
+int ChimeraPintailCommand::driver(string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
 		m->openOutputFile(outputFName, out);
@@ -504,14 +449,11 @@ int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string 
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(filePos->start);
-
-		bool done = false;
 		int count = 0;
 	
-		while (!done) {
+		while (!inFASTA.eof()) {
 				
-			if (m->getControl_pressed()) {	return 1;	}
+			if (m->getControl_pressed()) {	break;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
@@ -532,13 +474,6 @@ int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string 
 			}
 			delete candidateSeq;
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
-			#else
-				if (inFASTA.eof()) { break; }
-			#endif
-			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) + "\n"); 		}
 		}
@@ -556,111 +491,6 @@ int ChimeraPintailCommand::driver(linePair* filePos, string outputFName, string 
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-int ChimeraPintailCommand::createProcesses(string outputFileName, string filename, string accnos) {
-	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 0;
-		int num = 0;
-        bool recalc = false;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp");
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-			}
-		}
-
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {
-                lines.push_back(new linePair(positions[i], positions[(i+1)]));
-            }
-            num = 0;
-            processIDS.resize(0);
-            process = 0;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(lines[process], outputFileName + toString(m->mothurGetpid(process)) + ".temp", filename, accnos + toString(m->mothurGetpid(process)) + ".temp");
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); m->mothurRemove(tempFile);
-		}
-		
-		return num;
-#endif		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "createProcesses");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 
 

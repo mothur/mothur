@@ -18,13 +18,12 @@ inline bool compareQuanMembers(quanMember left, quanMember right){
 } 
 //***************************************************************************************************************
 
-Pintail::Pintail(string filename, string temp, bool f, int p, string mask, string cons, string q, int win, int inc, string o) : MothurChimera() { 
+Pintail::Pintail(string filename, string temp, bool f, string mask, string cons, string q, int win, int inc, string o) : MothurChimera() {
 	try {
 	
 		fastafile = filename; 
 		templateFileName = temp; templateSeqs = readSeqs(temp);
 		filter = f;
-		processors = p;
 		setMask(mask);
 		consfile = cons;
 		quanfile = q;
@@ -70,20 +69,6 @@ int Pintail::doPrep() {
 		else						{	decalc->setAlignmentLength(seqMask.length());						}
 		
 		decalc->setMask(seqMask);
-
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			//find breakup of templatefile for quantiles
-			if (processors == 1) {   templateLines.push_back(new linePair(0, templateSeqs.size()));  }
-			else { 
-				for (int i = 0; i < processors; i++) {
-					templateLines.push_back(new linePair());
-					templateLines[i]->start = int (sqrt(float(i)/float(processors)) * templateSeqs.size());
-					templateLines[i]->end = int (sqrt(float(i+1)/float(processors)) * templateSeqs.size());
-				}
-			}
-		#else
-			templateLines.push_back(new linePair(0, templateSeqs.size()));
-		#endif
 		
 		m->mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
@@ -157,10 +142,10 @@ int Pintail::doPrep() {
 			}
 			
 			m->mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
-			if (processors == 1) { 
-				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
-			}else {		createProcessesQuan();		}
-		
+            
+            
+            quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
+            
 			if (m->getControl_pressed()) {  return 0;  }
 			
 			string noOutliers, outliers;
@@ -232,10 +217,6 @@ int Pintail::doPrep() {
 			templateSeqs = readSeqs(templateFileName);
 		}
 
-		
-		//free memory
-		for (int i = 0; i < templateLines.size(); i++) { delete templateLines[i];  }
-		
 		return 0;
 		
 	}
@@ -407,168 +388,6 @@ Sequence* Pintail::findPairs(Sequence* q) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "findPairs");
-		exit(1);
-	}
-}
-//**************************************************************************************************
-void Pintail::createProcessesQuan() {
-	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		vector<int> processIDS;
-        bool recalc = false;
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  
-				process++;
-			}else if (pid == 0){
-				
-				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
-				
-				//write out data to file so parent can read it
-				ofstream out;
-				string s = m->mothurGetpid(process) + ".temp";
-				m->openOutputFile(s, out);
-								
-				//output observed distances
-				for (int i = 0; i < quantilesMembers.size(); i++) {
-					out << quantilesMembers[i].size();
-					for (int j = 0; j < quantilesMembers[i].size(); j++) {
-						out << '\t' << quantilesMembers[i][j];
-					}
-					out << endl;
-				}
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove((toString(processIDS[i]) + ".temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					 for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            for (int i = 0; i < templateLines.size(); i++) {  delete templateLines[i];  }  templateLines.clear();
-            for (int i = 0; i < processors; i++) {
-                templateLines.push_back(new linePair());
-                templateLines[i]->start = int (sqrt(float(i)/float(processors)) * templateSeqs.size());
-                templateLines[i]->end = int (sqrt(float(i+1)/float(processors)) * templateSeqs.size());
-            }
-            
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);
-                    process++;
-                }else if (pid == 0){
-                    
-                    quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
-                    
-                    //write out data to file so parent can read it
-                    ofstream out;
-                    string s = m->mothurGetpid(process) + ".temp";
-                    m->openOutputFile(s, out);
-                    
-                    //output observed distances
-                    for (int i = 0; i < quantilesMembers.size(); i++) {
-                        out << quantilesMembers[i].size();
-                        for (int j = 0; j < quantilesMembers[i].size(); j++) {
-                            out << '\t' << quantilesMembers[i][j];
-                        }
-                        out << endl;
-                    }
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		
-		//parent does its part
-		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[0]->start, templateLines[0]->end);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<(processors-1);i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-
-		//get data created by processes
-		for (int i=0;i<(processors-1);i++) { 
-			ifstream in;
-			string s = toString(processIDS[i]) + ".temp";
-			m->openInputFile(s, in);
-			
-			vector< vector<float> > quan; 
-			quan.resize(100);
-			
-			//get quantiles
-			for (int h = 0; h < quan.size(); h++) {
-				int num;
-				in >> num; 
-				
-				m->gobble(in);
-
-				vector<float> q;  float w; 
-				for (int j = 0; j < num; j++) {
-					in >> w;
-					q.push_back(w);
-				}
-
-				quan[h] = q;
-				m->gobble(in);
-			}
-			
-	
-			//save quan in quantiles
-			for (int j = 0; j < quan.size(); j++) {
-				//put all values of q[i] into quan[i]
-				for (int l = 0; l < quan[j].size(); l++) {  quantilesMembers[j].push_back(quan[j][l]);   }
-				//quantilesMembers[j].insert(quantilesMembers[j].begin(), quan[j].begin(), quan[j].end());
-			}
-					
-			in.close();
-			m->mothurRemove(s);
-		}
-
-#else
-		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
-#endif		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Pintail", "createProcessesQuan");
 		exit(1);
 	}
 }
