@@ -869,11 +869,11 @@ void SeqErrorCommand::getReferences(){
             int numAmbigs = currentSeq.getAmbigBases();
             if(numAmbigs > 0){	numAmbigSeqs++;	}
             
-            //			int startPos = currentSeq.getStartPos();
-            //			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
-            //
-            //			int endPos = currentSeq.getEndPos();
-            //			if(endPos < minEndPos)		{	minEndPos = endPos;		}
+            			int startPos = currentSeq.getStartPos();
+            			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+            
+            			int endPos = currentSeq.getEndPos();
+            			if(endPos < minEndPos)		{	minEndPos = endPos;		}
             if (currentSeq.getNumBases() == 0) {
                 m->mothurOut("[WARNING]: " + currentSeq.getName() + " is blank, ignoring.");m->mothurOutEndLine();
             }else {
