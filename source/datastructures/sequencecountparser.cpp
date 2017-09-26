@@ -147,6 +147,7 @@ vector<string> SequenceCountParser::getNamesOfGroups(){ return namesOfGroups; }
 /************************************************************/
 int SequenceCountParser::getNumSeqs(string g){ 
 	try {
+        lock_guard<std::mutex> guard(token);
 		map<string, vector<Sequence> >::iterator it;
 		int num = 0;
 		
@@ -167,6 +168,7 @@ int SequenceCountParser::getNumSeqs(string g){
 /************************************************************/
 map<string, string> SequenceCountParser::getAllSeqsMap(){
     try {
+        lock_guard<std::mutex> guard(token);
         map<string, string > allSeqsMap;
         map<string, vector<Sequence> >::iterator it;
         
@@ -185,6 +187,7 @@ map<string, string> SequenceCountParser::getAllSeqsMap(){
 /************************************************************/
 vector<Sequence> SequenceCountParser::getSeqs(string g){ 
 	try {
+        lock_guard<std::mutex> guard(token);
 		map<string, vector<Sequence> >::iterator it;
 		vector<Sequence> seqForThisGroup;
 		
@@ -206,6 +209,9 @@ vector<Sequence> SequenceCountParser::getSeqs(string g){
 /************************************************************/
 int SequenceCountParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
 	try {
+        
+        lock_guard<std::mutex> guard(token);
+        
 		map<string, vector<Sequence> >::iterator it;
 		vector<Sequence> seqForThisGroup;
 		vector<seqPriorityNode> nameVector;
@@ -279,6 +285,8 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 /************************************************************/
 map<string, int> SequenceCountParser::getCountTable(string g){ 
 	try {
+        lock_guard<std::mutex> guard(token);
+        
 		map<string, map<string, int> >::iterator it;
 		map<string, int> countForThisGroup;
 		
@@ -300,6 +308,8 @@ map<string, int> SequenceCountParser::getCountTable(string g){
 /************************************************************/
 int SequenceCountParser::getCountTable(string g, string filename){ 
 	try {
+        lock_guard<std::mutex> guard(token);
+        
 		map<string, map<string, int> >::iterator it;
 		map<string, int> countForThisGroup;
 		
