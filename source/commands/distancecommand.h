@@ -25,19 +25,18 @@
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distanceData {
-	int startLine;
-	int endLine;
+	long long startLine, endLine;
 	string dFileName;
 	float cutoff;
 	SequenceDB alignDB;
 	vector<string> Estimators;
 	MothurOut* m;
 	string output;
-	int numNewFasta, count;
-	string countends;
+	long long numNewFasta, count;
+	bool countends;
 	
 	distanceData(){}
-	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, MothurOut* mout, string o, int num, string count) {
+	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, MothurOut* mout, string o, long long num, bool cnt) {
 		startLine = s;
 		endLine = e;
 		dFileName = dbname;
@@ -47,129 +46,11 @@ struct distanceData {
 		m = mout;
 		output = o;
 		numNewFasta = num;
-		countends = count;
+		countends = cnt;
+        count = 0;
 		
 	}
 };
-
-/**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){ 
-	distanceData* pDataArray;
-	pDataArray = (distanceData*)lpParam;
-	
-	try {
-		ValidCalculators validCalculator;
-		DistCalc* distCalculator;
-		if (pDataArray->m->isTrue(pDataArray->countends) == true) {
-			for (int i=0; i<pDataArray->Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", pDataArray->Estimators[i]) == true) { 
-					if (pDataArray->Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-					else if (pDataArray->Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-					else if (pDataArray->Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-				}
-			}
-		}else {
-			for (int i=0; i<pDataArray->Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", pDataArray->Estimators[i]) == true) { 
-					if (pDataArray->Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-					else if (pDataArray->Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-					else if (pDataArray->Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-				}
-			}
-		}
-		
-		int startTime = time(NULL);
-		
-		//column file
-		ofstream outFile(pDataArray->dFileName.c_str(), ios::trunc);
-		outFile.setf(ios::fixed, ios::showpoint);
-		outFile << setprecision(4);
-		pDataArray->count = 0;
-		long long distsBelowCutoff = 0;
-        
-		if (pDataArray->output != "square") { 
-			if((pDataArray->output == "lt") && (pDataArray->startLine == 0)){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
-			
-			for(int i=pDataArray->startLine;i<pDataArray->endLine;i++){
-				if(pDataArray->output == "lt")	{	
-					string name = pDataArray->alignDB.get(i).getName();
-					if (name.length() < 10) { //pad with spaces to make compatible
-						while (name.length() < 10) {  name += " ";  }
-					}
-					outFile << name;
-				}
-				for(int j=0;j<i;j++){
-					
-					if (pDataArray->m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
-					
-					//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
-					//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
-					if ((i >= pDataArray->numNewFasta) && (j >= pDataArray->numNewFasta)) { break; }
-					
-					distCalculator->calcDist(pDataArray->alignDB.get(i), pDataArray->alignDB.get(j));
-					double dist = distCalculator->getDist();
-					
-					if(dist <= pDataArray->cutoff){
-						if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }
-                        distsBelowCutoff++;
-					}
-					if (pDataArray->output == "lt") {  outFile  << '\t' << dist; }
-				}
-				
-				if (pDataArray->output == "lt") { outFile << endl; }
-				
-				if(i % 100 == 0){
-					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n"); 				}
-				pDataArray->count++;
-			}
-			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
-		}else{
-			if(pDataArray->startLine == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
-			
-			for(int i=pDataArray->startLine;i<pDataArray->endLine;i++){
-				
-				string name = pDataArray->alignDB.get(i).getName();
-				//pad with spaces to make compatible
-				if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
-				
-				outFile << name;
-				
-				for(int j=0;j<pDataArray->alignDB.getNumSeqs();j++){
-					
-					if (pDataArray->m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
-					
-					distCalculator->calcDist(pDataArray->alignDB.get(i), pDataArray->alignDB.get(j));
-					double dist = distCalculator->getDist();
-                    
-                    if(dist <= pDataArray->cutoff){ distsBelowCutoff++; }
-					
-					outFile  << '\t' << dist;
-				}
-				
-				outFile << endl; 
-				
-				if(i % 100 == 0){
-					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
-				}
-				pDataArray->count++;
-			}
-			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
-		}
-		
-		outFile.close();
-		delete distCalculator;
-		
-		return 0; 
-	}
-	catch(exception& e) {
-		pDataArray->m->errorOut(e, "DistanceCommand", "MyDistThreadFunction");
-		exit(1);
-	}
-} 
-#endif
-
 /**************************************************************************************************/
 class DistanceCommand : public Command {
 
@@ -192,24 +73,19 @@ public:
 	
 	
 private:
-	struct distlinePair {
-		int start;
-		int end;
-	};
-
-	SequenceDB alignDB;
-	string countends, output, fastafile, calc, outputDir, oldfastafile, column, compress;
-	int processors, numNewFasta;
-	float cutoff;
-	vector<int> processIDS;   //end line, processid
-	vector<distlinePair> lines;
 	
-	bool abort;
+    SequenceDB alignDB;
+	string output, fastafile, calc, outputDir, oldfastafile, column, compress;
+    int processors;
+    long long numNewFasta, numSeqs;
+	float cutoff;
+	
+	bool abort, countends;
 	vector<string>  Estimators, outputNames; //holds estimators to be used
 	
-	void createProcesses(string, int);
-	int driver(/*Dist*, SequenceDB, */int, int, string, float);
-	int driver(int, int, string, string);
+	void createProcesses(string);
+	//int driver(/*Dist*, SequenceDB, */int, int, string, float);
+	//int driver(int, int, string, string);
 	bool sanityCheck();
 };
 
