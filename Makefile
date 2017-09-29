@@ -35,7 +35,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
 endif
 
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -std=c++0x
-LDFLAGS += -std=c++0x
+LDFLAGS += -std=c++0x -pthread
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
