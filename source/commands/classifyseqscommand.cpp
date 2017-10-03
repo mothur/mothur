@@ -895,7 +895,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 #endif
         
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
             classifyData* dataBundle = new classifyData((accnos + toString(i+1) + ".temp"), probs, (taxFileName + toString(i+1) + ".temp"), (tempTaxFile + toString(i+1) + ".temp"), filename, m, lines[i+1]->start, lines[i+1]->end, flip, classify);
             data.push_back(dataBundle);
@@ -906,8 +906,9 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, m, lines[0]->start, lines[0]->end, flip, classify);
         driverClassifier(dataBundle);
         num = dataBundle->count;
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             

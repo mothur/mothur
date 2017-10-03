@@ -84,8 +84,6 @@ private:
 	vector<string>  Estimators, outputNames; //holds estimators to be used
 	
 	void createProcesses(string);
-	//int driver(/*Dist*, SequenceDB, */int, int, string, float);
-	//int driver(int, int, string, string);
 	bool sanityCheck();
 };
 

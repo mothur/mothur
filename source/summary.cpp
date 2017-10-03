@@ -324,7 +324,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         vector<seqSumData*> data;
 
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             string extension = "";
             extension = toString(i) + ".temp";
             string outputName = output + extension;
@@ -347,8 +347,9 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         ambigBases = dataBundle->ambigBases;
         longHomoPolymer = dataBundle->longHomoPolymer;
         numNs = dataBundle->numNs;
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             total += data[i]->total;
@@ -395,7 +396,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         }
         
         //append files
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             string extension = "";
             extension = toString(i) + ".temp";
             string outputName = output + extension;
@@ -538,7 +539,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         vector<seqSumData*> data;
         
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             
             seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
@@ -556,9 +557,9 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         seqLength = dataBundle->seqLength;
         ambigBases = dataBundle->ambigBases;
         longHomoPolymer = dataBundle->longHomoPolymer;
-
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             total += data[i]->total;
@@ -734,7 +735,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         vector<seqSumData*> data;
         
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             
             seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
@@ -753,9 +754,10 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         oseqLength = dataBundle->oseqLength;
         misMatches = dataBundle->misMatches;
         numNs = dataBundle->numNs;
+        delete dataBundle;
         
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             total += data[i]->total;
@@ -930,7 +932,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         vector<seqSumData*> data;
         
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             
             seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
@@ -947,8 +949,9 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         scores = dataBundle->scores;
         inserts = dataBundle->inserts;
         seqLength = dataBundle->seqLength;
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             total += data[i]->total;

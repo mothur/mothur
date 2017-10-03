@@ -583,7 +583,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         time_t start, end;
         time(&start);
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
             alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(i+1) + ".temp"),
                                                         reportFileName + toString(i+1) + ".temp",
@@ -600,8 +600,9 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         numFlipped[0] = dataBundle->flippedResults[0];
         numFlipped[1] = dataBundle->flippedResults[1];
         num = dataBundle->numSeqs;
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->numSeqs;
             numFlipped[0] += data[i]->flippedResults[0];

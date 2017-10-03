@@ -537,7 +537,7 @@ void DistanceCommand::createProcesses(string filename) {
         time_t start, end;
         time(&start);
         //Lauch worker threads
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             distanceData* dataBundle = new distanceData(lines[i+1].start, lines[i+1].end, (filename + toString(i+1) + ".temp"),
                                                       cutoff, alignDB, Estimators, m, output, numNewFasta, countends);
             data.push_back(dataBundle);
@@ -550,8 +550,9 @@ void DistanceCommand::createProcesses(string filename) {
         if (output != "square") { driverColumn(dataBundle); }
         else { driverPhylip(dataBundle); }
         long long distsBelowCutoff = dataBundle->count;
+        delete dataBundle;
         
-        for (int i = 0; i < processors-1; ++i) {
+        for (int i = 0; i < processors-1; i++) {
             distsBelowCutoff += data[i]->count;
             workerThreads[i]->join();
             delete data[i];
