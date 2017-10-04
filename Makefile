@@ -15,6 +15,9 @@
 # BOOST_INCLUDE_DIR - location of boost include files
 # MOTHUR_FILES - default location for mothur to look for input files at runtime. Most often used for reference files.
 
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+
 64BIT_VERSION ?= yes
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
@@ -89,7 +92,11 @@ mothur : $(OBJECTS) uchime
 uchime:
 	cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
 
-install : mothur
+install :
+	mkdir -p $(BINDIR)
+	for file in mothur uchime; do \
+		cp -f $$file $(BINDIR) ; \
+	done
 
 
 %.o : %.c %.h
