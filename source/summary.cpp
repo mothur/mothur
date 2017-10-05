@@ -445,7 +445,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); }
+        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
         
         bool done = false;
         string name;
@@ -513,16 +513,17 @@ void driverFastaSummarySummarize(seqSumData* params) {
 /**********************************************************************************************************************/
 long long Summary::summarizeFastaSummary(string summaryfile) {
     try {
-        long long num = 0;
+        int num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        string p = m->getProcessors();
+        string p = m->getProcessors(); 
         int processors = 1; m->mothurConvert(p, processors);
+        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(summaryfile, processors);
+        positions = m->divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, num);
+        positions = m->setFilePosEachLine(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
@@ -540,7 +541,6 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            
             seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
             
@@ -550,7 +550,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
         driverFastaSummarySummarize(dataBundle);
-        num = dataBundle->count;
+        num = dataBundle->count-1; //header line
         total = dataBundle->total;
         startPosition = dataBundle->startPosition;
         endPosition = dataBundle->endPosition;

@@ -600,41 +600,17 @@ int ScreenSeqsCommand::execute(){
 //***************************************************************************************************************/
 int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
 	try{
-        int numFastaSeqs = 0;
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
         variables["[extension]"] = m->getExtension(fastafile);
 		string goodSeqFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(goodSeqFile); outputTypes["fasta"].push_back(goodSeqFile);
 		
-        vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(fastafile, processors);
-        for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
-#else
-        if(processors == 1){ lines.push_back(linePair(0, 1000));  }
-        else {
-            int numFastaSeqs = 0;
-            positions = m->setFilePosFasta(fastafile, numFastaSeqs);
-            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numFastaSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-        }
-#endif
-        
-        if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}
-        else{ numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); }
+        int numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames);
         
         if (m->getControl_pressed()) { m->mothurRemove(goodSeqFile); return numFastaSeqs; }
 		
 		return numFastaSeqs;
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "runFastaScreening");
@@ -647,30 +623,9 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
         int numFastaSeqs = 0;
         
         //did not provide a summary file, but set a parameter that requires summarizing the fasta file
-        //or did provide a summary file, but set maxn parameter so we must summarize the fasta file 
-        vector<unsigned long long> positions;
+        //or did provide a summary file, but set maxn parameter so we must summarize the fasta file
         if (((summaryfile == "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) || ((summaryfile != "") && m->inUsersGroups("maxn", optimize))) {  
             getSummary();
-        }else {
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                positions = m->divideFile(fastafile, processors);
-                for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
-            #else 
-                if(processors == 1){ lines.push_back(linePair(0, 1000));  }
-                else {
-                    int numFastaSeqs = 0;
-                    positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
-                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                
-                    //figure out how many sequences you have to process
-                    int numSeqsPerProcessor = numFastaSeqs / processors;
-                    for (int i = 0; i < processors; i++) {
-                        int startIndex =  i * numSeqsPerProcessor;
-                        if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                        lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-                    }
-                }
-            #endif
         }
         
         if ((summaryfile != "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) { //summarize based on summaryfile
@@ -1080,83 +1035,81 @@ int ScreenSeqsCommand::getSummary(){
 }
 //**********************************************************************************************************************
 
-int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccnosFName, string filename, map<string, string>& badSeqNames){
+void driverScreen(sumScreenData* params){
 	try {
 		ofstream goodFile;
-		m->openOutputFile(goodFName, goodFile);
+		params->m->openOutputFile(params->goodFName, goodFile);
 		
 		ofstream badAccnosFile;
-		m->openOutputFile(badAccnosFName, badAccnosFile);
+		params->m->openOutputFile(params->badAccnosFName, badAccnosFile);
 		
 		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
+		params->m->openInputFile(params->filename, inFASTA);
 
-        inFASTA.seekg(filePos.start);
+        inFASTA.seekg(params->start);
 
         //print header if you are process 0
-        if (filePos.start == 0) { m->zapGremlins(inFASTA); m->gobble(inFASTA); }
+        if (params->start == 0) { params->m->zapGremlins(inFASTA); params->m->gobble(inFASTA); }
 
 		bool done = false;
-		int count = 0;
+		params->count = 0;
         
 		while (!done) {
 		
-			if (m->getControl_pressed()) {  return 0; }
+			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence currSeq(inFASTA); m->gobble(inFASTA);
+			Sequence currSeq(inFASTA); params->m->gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
                 string trashCode = "";
                 //have the report files found you bad
-                map<string, string>::iterator it = badSeqNames.find(currSeq.getName());
-                if (it != badSeqNames.end()) { goodSeq = 0;  trashCode = it->second; }  
+                map<string, string>::iterator it = params->badSeqNames.find(currSeq.getName());
+                if (it != params->badSeqNames.end()) { goodSeq = 0;  trashCode = it->second; }
                 
-                if (summaryfile == "") { //summaryfile includes these so no need to check again
-                    if(startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	trashCode += "start|"; }
-                    if(endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";}
-                    if(maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";}
-                    if(maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";}
-                    if(minLength > currSeq.getNumBases())                           {	goodSeq = 0;	trashCode += "<length|";}
-                    if(maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
+                if (params->summaryfile == "") { //summaryfile includes these so no need to check again
+                    if(params->startPos != -1 && params->startPos < currSeq.getStartPos())			{	goodSeq = 0;	trashCode += "start|";  }
+                    if(params->endPos != -1 && params->endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";    }
+                    if(params->maxAmbig != -1 && params->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";  }
+                    if(params->maxHomoP != -1 && params->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";  }
+                    if(params->minLength > currSeq.getNumBases())                                   {	goodSeq = 0;	trashCode += "<length|";}
+                    if(params->maxLength != -1 && params->maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
                     
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
+                    if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
                 }
                 
-                if (contigsreport == "") { //contigs report includes this so no need to check again
-                    if(maxN != -1 && maxN < currSeq.getNumNs())                     {	goodSeq = 0;	trashCode += "n|"; }
+                if (params->contigsreport == "") { //contigs report includes this so no need to check again
+                    if(params->maxN != -1 && params->maxN < currSeq.getNumNs())                     {	goodSeq = 0;	trashCode += "n|"; }
                 }
 				
 				if(goodSeq == 1){
 					currSeq.printSequence(goodFile);	
 				}else{
 					badAccnosFile << currSeq.getName() << '\t' << trashCode.substr(0, trashCode.length()-1) << endl;
-					badSeqNames[currSeq.getName()] = trashCode;
+					params->badSeqNames[currSeq.getName()] = trashCode;
 				}
-                count++;
+                params->count++;
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos.end)) { break; }
+				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
-				if (inFASTA.eof()) { break; }
+				if (params->end == params->count) { break; }
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 		}
+			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 	}
+		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 	}
 		
 			
 		goodFile.close();
 		inFASTA.close();
 		badAccnosFile.close();
-		
-		return count;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "driver");
+		params->m->errorOut(e, "ScreenSeqsCommand", "driverScreen");
 		exit(1);
 	}
 }
@@ -1165,176 +1118,72 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, string filename, map<string, string>& badSeqNames) {
 	try {
         
-        vector<int> processIDS;   
-        int process = 1;
-		int num = 0;
-        bool recalc = false;
-
+        vector<linePair> lines;
+        vector<unsigned long long> positions;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(lines[process], goodFileName + m->mothurGetpid(process) + ".temp", badAccnos + m->mothurGetpid(process) + ".temp", filename, badSeqNames);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(lines[process], goodFileName + m->mothurGetpid(process) + ".temp", badAccnos + m->mothurGetpid(process) + ".temp", filename, badSeqNames);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-		
-        num = driver(lines[0], goodFileName, badAccnos, filename, badSeqNames);
-        
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); m->mothurRemove(tempFile);
-            
-            m->appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
-            m->mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
-			
-            m->appendFiles((badAccnos + toString(processIDS[i]) + ".temp"), badAccnos);
-            m->mothurRemove((badAccnos + toString(processIDS[i]) + ".temp"));
-		}
-		
-        //read badSeqs in because root process doesnt know what other "bad" seqs the children found
-        ifstream inBad;
-        bool ableToOpen = m->openInputFile(badAccnos, inBad, "no error");
-        
-        if (ableToOpen) {
-            badSeqNames.clear();
-            string tempName, trashCode;
-            while (!inBad.eof()) {
-                inBad >> tempName >> trashCode; m->gobble(inBad);
-                badSeqNames[tempName] = trashCode;
-            }
-            inBad.close();
-        }
+        positions = m->divideFile(fastafile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
         
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the sumScreenData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to badSeqNames.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<sumScreenData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-            
-            string extension = "";
-            if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
-            
-			// Allocate memory for thread data.
-			sumScreenData* tempSum = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, m, lines[i].start, lines[i].end,goodFileName+extension, badAccnos+extension);
-			pDataArray.push_back(tempSum);
-			
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MySumScreenThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-        //do your part
-        num = driver(lines[processors-1], (goodFileName+toString(processors-1)+".temp"), (badAccnos+toString(processors-1)+".temp"), filename, badSeqNames);
-        processIDS.push_back(processors-1);
+        int numFastaSeqs = 0;
+        positions = m->setFilePosFasta(fastafile, numFastaSeqs);
+        if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-            for (map<string, string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numFastaSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
         
-        for (int i = 0; i < processIDS.size(); i++) {
-            m->appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
-            m->mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
-			
-            m->appendFiles((badAccnos + toString(processIDS[i]) + ".temp"), badAccnos);
-            m->mothurRemove((badAccnos + toString(processIDS[i]) + ".temp"));
-		}
-
-#endif	
+#endif
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<sumScreenData*> data;
+        
+        long long num = 0;
+        
+        time_t start, end;
+        time(&start);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, m, lines[i+1].start, lines[i+1].end,goodFileName+extension, badAccnos+extension);
+            
+            data.push_back(dataBundle);
+            workerThreads.push_back(new thread(driverScreen, dataBundle));
+        }
+        
+        sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, m, lines[0].start, lines[0].end,goodFileName, badAccnos);
+        driverScreen(dataBundle);
+        num = dataBundle->count;
+        for (map<string, string>::iterator it = dataBundle->badSeqNames.begin(); it != dataBundle->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            
+            for (map<string, string>::iterator it = data[i]->badSeqNames.begin(); it != data[i]->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        long long numRemoved = badSeqNames.size();
+        
+        time(&end);
+        m->mothurOut("\nIt took " + toString(difftime(end, start)) + " secs to screen " + toString(num) + " sequences, removed " + toString(numRemoved) + ".\n\n");
+        
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            m->appendFiles((goodFileName + extension), goodFileName);
+            m->mothurRemove((goodFileName + extension));
+            
+            m->appendFiles(badAccnos + extension, badAccnos);
+            m->mothurRemove(badAccnos + extension);
+        }
         
         return num;
         
