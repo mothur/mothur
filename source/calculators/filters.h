@@ -19,7 +19,7 @@
 class Filters {
 
 public:
-	Filters() { m = MothurOut::getInstance(); };
+    Filters() { m = MothurOut::getInstance(); numSeqs = 0; };
 	~Filters(){};
 		
 	string getFilter()			{	return filter;		}
@@ -100,7 +100,7 @@ public:
 
 	void getFreqs(Sequence seq) {
 	
-		string curAligned = seq.getAligned();
+        string curAligned = seq.getAligned(); numSeqs++;
 	
 		for(int j=0;j<alignmentLength;j++){
 			if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}

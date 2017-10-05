@@ -357,9 +357,8 @@ int FilterSeqsCommand::filterSequences() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             positions = m->divideFile(fastafileNames[s], processors);
 #else
-            long long numFastaSeqs = 0;
-            positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs);
-            if (numFastaSeqs < processors) { processors = numFastaSeqs; }
+            positions = m->setFilePosFasta(fastafileNames[s], numSeqs);
+            if (numSeqs < processors) { processors = numSeqs; }
 #endif
             }
             
@@ -368,15 +367,17 @@ int FilterSeqsCommand::filterSequences() {
 			for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 		#else
             
-                long long numFSeqs = positions.size()-1;
-                
-                //figure out how many sequences you have to process
-                long long numSeqsPerProcessor = numFSeqs / processors;
-                for (int i = 0; i < processors; i++) {
-                    long long startIndex =  i * numSeqsPerProcessor;
-                    if(i == (processors - 1)){	numSeqsPerProcessor = numFSeqs - i * numSeqsPerProcessor; 	}
-                    lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-                }
+            long long numFSeqs = positions.size()-1;
+            if (numFSeqs < processors) { processors = numFSeqs; }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                long long startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+            }
+
 		#endif
             
             long long numFastaSeqs = createProcessesRunFilter(filter, fastafileNames[s], filteredFasta, lines);
@@ -476,8 +477,10 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
-            num += data[i]->count;
             workerThreads[i]->join();
+            
+            num += data[i]->count;
+            
             delete data[i];
             delete workerThreads[i];
         }
@@ -509,9 +512,7 @@ string FilterSeqsCommand::createFilter() {
 		
 		F.setLength(alignmentLength);
 		
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){
-			F.initialize();
-		}
+		if(trump != '*' || m->isTrue(vertical) || soft != 0){ F.initialize(); }
 		
 		if(hard.compare("") != 0)	{	F.doHard(hard);		}
 		else						{	F.setFilter(string(alignmentLength, '1'));	}
@@ -520,31 +521,7 @@ string FilterSeqsCommand::createFilter() {
 		if(trump != '*' || m->isTrue(vertical) || soft != 0){
 			for (int s = 0; s < fastafileNames.size(); s++) {
 			
-                vector<linePair> lines;
-                vector<unsigned long long> positions;
-                long long numFastaSeqs = 0;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				positions = m->divideFile(fastafileNames[s], processors);
-				for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
-        #else
-
-                positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs);
-                if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                    
-                //figure out how many sequences you have to process
-                int numSeqsPerProcessor = numFastaSeqs / processors;
-                for (int i = 0; i < processors; i++) {
-                    long long startIndex =  i * numSeqsPerProcessor;
-                    if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                    lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-                }
-        #endif
-                
-                numFastaSeqs = createProcessesCreateFilter(F, fastafileNames[s], lines);
-                numSeqs += numFastaSeqs;
-                
-                //save the file positions so we can reuse them in the runFilter function
-                if (!recalced) {  savedPositions[s] = positions; }
+                numSeqs += createProcessesCreateFilter(F, fastafileNames[s]);
                 
 				if (m->getControl_pressed()) {  return filterString; }
 			}
@@ -596,11 +573,11 @@ void driverCreateFilter(filterData* params) {
                     if (params->m->getDebug()) { params->m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
                 if (seq.getAligned().length() != params->alignmentLength) { params->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!params->m->getDebug()) { params->m->setControl_pressed(true); }else{ params->m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
 					
-					if(params->trump != '*')			{	params->F.doTrump(seq);		}
+					if(params->trump != '*')                    {	params->F.doTrump(seq);		}
 					if(params->vertical || params->soft != 0)	{	params->F.getFreqs(seq);	}
 					cout.flush();
 					params->count++;
-			}
+            }
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
@@ -615,7 +592,7 @@ void driverCreateFilter(filterData* params) {
 		//report progress
 		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
 		in.close();
-		
+        
         if (error) { params->m->setControl_pressed(true); }
         
 	}
@@ -626,8 +603,31 @@ void driverCreateFilter(filterData* params) {
 }
 /**************************************************************************************************/
 
-long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename, vector<linePair> lines) {
+long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
 	try {
+        vector<linePair> lines;
+        vector<unsigned long long> positions;
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        positions = m->divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
+#else
+        long long numFastaSeqs = 0;
+        positions = m->setFilePosFasta(filename, numFastaSeqs);
+        if (numFastaSeqs < processors) { processors = numFastaSeqs; }
+        
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numFastaSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            long long startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
+        
+        //save the file positions so we can reuse them in the runFilter function
+        if (!recalced) {  savedPositions.push_back(positions); }
+        
 		long long num = 0;
         bool doVertical = m->isTrue(vertical);
 
@@ -639,13 +639,13 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         time(&start);
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            filterData* dataBundle = new filterData(filename, m, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard);
+            filterData* dataBundle = new filterData(filename, m, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard, i+1);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverCreateFilter, dataBundle));
         }
         
-        filterData* dataBundle = new filterData(filename, m, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard);
+        filterData* dataBundle = new filterData(filename, m, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard, 0);
         driverCreateFilter(dataBundle);
         
         num = dataBundle->count;
@@ -660,8 +660,9 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
-            num += data[i]->count;
+            workerThreads[i]->join();
             
+            num += data[i]->count;
             F.mergeFilter(data[i]->F.getFilter());
             
             for (int k = 0; k < alignmentLength; k++) {	 F.a[k] += data[i]->F.a[k];       }
@@ -670,11 +671,10 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
             for (int k = 0; k < alignmentLength; k++) {	 F.c[k] += data[i]->F.c[k];       }
             for (int k = 0; k < alignmentLength; k++) {	 F.gap[k] += data[i]->F.gap[k];   }
             
-            workerThreads[i]->join();
+            
             delete data[i];
             delete workerThreads[i];
         }
-        
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to create filter for " + toString(num) + " sequences.\n");

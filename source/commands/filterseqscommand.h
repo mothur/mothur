@@ -35,7 +35,7 @@ public:
 	
 private:
 
-    map<int, vector<unsigned long long> > savedPositions;
+    vector< vector<unsigned long long> >  savedPositions;
 
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	
@@ -50,7 +50,7 @@ private:
 	
 	string createFilter();
 	int filterSequences();
-	long long createProcessesCreateFilter(Filters&, string, vector<linePair>);
+	long long createProcessesCreateFilter(Filters&, string);
 	long long createProcessesRunFilter(string, string, string, vector<linePair>);	
 };
 
@@ -61,7 +61,7 @@ private:
 // that can be passed using a single void pointer (LPVOID).
 struct filterData {
 	Filters F;
-    int alignmentLength;
+    int alignmentLength, threadid;
     unsigned long long start, end;
     long long count;
     MothurOut* m;
@@ -71,7 +71,7 @@ struct filterData {
     bool vertical;
 	
 	filterData(){}
-	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha) {
+	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha, int tid) {
         filename = fn;
 		m = mout;
 		start = st;
@@ -82,6 +82,7 @@ struct filterData {
         soft = so;
         hard = ha;
 		count = 0;
+        threadid = tid;
 	}
 };
 /**************************************************************************************************/

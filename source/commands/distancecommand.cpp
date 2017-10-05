@@ -553,8 +553,10 @@ void DistanceCommand::createProcesses(string filename) {
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
-            distsBelowCutoff += data[i]->count;
             workerThreads[i]->join();
+            
+            distsBelowCutoff += data[i]->count;
+            
             delete data[i];
             delete workerThreads[i];
         }
