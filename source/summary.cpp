@@ -637,7 +637,7 @@ void driverContigsSummarySummarize(seqSumData* params) {
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); }
+        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
         
         bool done = false;
         string name;
@@ -715,10 +715,10 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         string p = m->getProcessors();
         int processors = 1; m->mothurConvert(p, processors);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(summaryfile, processors);
+        positions = m->divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, num);
+        positions = m->setFilePosEachLine(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
@@ -746,7 +746,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
         driverFastaSummarySummarize(dataBundle);
-        num = dataBundle->count;
+        num = dataBundle->count-1; //header line
         total = dataBundle->total;
         ostartPosition = dataBundle->ostartPosition;
         oendPosition = dataBundle->oendPosition;
@@ -841,7 +841,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); }
+        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
         
         bool done = false;
         string name, TemplateName, SearchMethod, AlignmentMethod;
@@ -913,10 +913,10 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         string p = m->getProcessors();
         int processors = 1; m->mothurConvert(p, processors);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(summaryfile, processors);
+        positions = m->divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        positions = m->setFilePosFasta(summaryfile, num);
+        positions = m->setFilePosEachLine(summaryfile, num);
         if (num < processors) { processors = num; }
         
         //figure out how many sequences you have to process
@@ -943,7 +943,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
         driverFastaSummarySummarize(dataBundle);
-        num = dataBundle->count;
+        num = dataBundle->count-1; //header line
         total = dataBundle->total;
         sims = dataBundle->sims;
         scores = dataBundle->scores;
