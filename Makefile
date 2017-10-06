@@ -92,7 +92,7 @@ uchime:
 	cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
 
 install : mothur uchime
-	if [[ "${CURDIR}" -ef "$(PREFIX)" ]]; then \
+	if [ "${CURDIR}" = "$(PREFIX)" ]; then \
 		echo 'done' \
 	else \
 		mkdir -p $(PREFIX); \
