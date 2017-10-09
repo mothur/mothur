@@ -93,7 +93,7 @@ uchime:
 
 install : mothur uchime
 	if [ "${CURDIR}" = "$(PREFIX)" ]; then \
-		echo 'done' \
+		echo 'done'; \
 	else \
 		mkdir -p $(PREFIX); \
 		for file in mothur uchime; do \
