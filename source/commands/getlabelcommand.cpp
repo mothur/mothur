@@ -159,7 +159,7 @@ GetlabelCommand::GetlabelCommand(string option)  {
 int GetlabelCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		InputData* input = new InputData(inputfile, format);
 		OrderVector* order = input->getOrderVector();

@@ -244,7 +244,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 int PrimerDesignCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         int start = time(NULL);
         //////////////////////////////////////////////////////////////////////////////
@@ -1264,7 +1264,7 @@ int PrimerDesignCommand::getListVector(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -1303,7 +1303,7 @@ int PrimerDesignCommand::getListVector(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list; 
 			list = input.getListVector(lastLabel);
 		}	

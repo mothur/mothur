@@ -266,7 +266,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 
 int PairwiseSeqsCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
 		
@@ -540,13 +540,13 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (countends) {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) ) { 
                 if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
                 else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) ) { 
                 if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                 else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
@@ -640,13 +640,13 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (countends) {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) ) { 
                 if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
                 else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) ) { 
                 if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                 else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}

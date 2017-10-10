@@ -611,7 +611,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 int ChimeraUchimeCommand::execute(){
 	try{
         
-        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		m->mothurOut("\nuchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\n\n");
 		

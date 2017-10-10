@@ -201,7 +201,7 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 int ShhhSeqsCommand::execute() {
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it		
 		

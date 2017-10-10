@@ -442,7 +442,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 int ScreenSeqsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> badSeqNames;
         int start = time(NULL);
@@ -1125,7 +1125,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
         
-        int numFastaSeqs = 0;
+        long long numFastaSeqs = 0;
         positions = m->setFilePosFasta(fastafile, numFastaSeqs);
         if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         

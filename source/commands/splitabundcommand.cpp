@@ -279,7 +279,7 @@ SplitAbundCommand::~SplitAbundCommand(){}
 int SplitAbundCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         if (Groups.size() != 0) {
             vector<string> allGroups;
@@ -319,7 +319,7 @@ int SplitAbundCommand::execute(){
 						userLabels.erase(list->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 						string saveLabel = list->getLabel();
 						
 						delete list;
@@ -361,7 +361,7 @@ int SplitAbundCommand::execute(){
 			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (list != NULL) {	delete list;	}
 				list = input.getListVector(lastLabel); //get new list vector to process
 				

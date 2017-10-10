@@ -352,7 +352,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 int SubSampleCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (sharedfile != "")	{   getSubSampleShared();	}
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;}
@@ -862,7 +862,7 @@ int SubSampleCommand::getSubSampleShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				if (lookup != NULL) { delete lookup; lookup = NULL; }
@@ -904,7 +904,7 @@ int SubSampleCommand::getSubSampleShared() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (lookup != NULL) { delete lookup; lookup = NULL; }
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
@@ -1172,7 +1172,7 @@ int SubSampleCommand::getSubSampleList() {
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list; 
@@ -1214,7 +1214,7 @@ int SubSampleCommand::getSubSampleList() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) { delete list; }
 			
 			list = input->getListVector(lastLabel);
@@ -1400,7 +1400,7 @@ int SubSampleCommand::getSubSampleRabund() {
 				userLabels.erase(rabund->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = rabund->getLabel();
 				
 				delete rabund; 
@@ -1443,7 +1443,7 @@ int SubSampleCommand::getSubSampleRabund() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (rabund != NULL) { delete rabund; }
 			
 			rabund = input->getRAbundVector(lastLabel);
@@ -1556,7 +1556,7 @@ int SubSampleCommand::getSubSampleSabund() {
 				userLabels.erase(sabund->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = sabund->getLabel();
 				
 				delete sabund; 
@@ -1599,7 +1599,7 @@ int SubSampleCommand::getSubSampleSabund() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (sabund != NULL) { delete sabund; }
 			
 			sabund = input->getSAbundVector(lastLabel);

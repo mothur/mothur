@@ -204,7 +204,7 @@ ParseListCommand::ParseListCommand(string option)  {
 int ParseListCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -236,7 +236,7 @@ int ParseListCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					list = input.getListVector(lastLabel); //get new list vector to process
@@ -285,7 +285,7 @@ int ParseListCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {	delete list;	}
 			list = input.getListVector(lastLabel); //get new list vector to process
 			

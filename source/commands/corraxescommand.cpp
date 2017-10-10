@@ -223,7 +223,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 int CorrAxesCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		/*************************************************************************************/
 		// use smart distancing to get right sharedRabund and convert to relabund if needed  //
@@ -748,7 +748,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
 				delete lookupFloat;
@@ -787,7 +787,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookupFloat;
 			lookupFloat = input->getSharedRAbundFloatVectors();
 		}	

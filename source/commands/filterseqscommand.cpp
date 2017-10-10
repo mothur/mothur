@@ -266,7 +266,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 int FilterSeqsCommand::execute() {	
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ifstream inFASTA;
 		m->openInputFile(fastafileNames[0], inFASTA);

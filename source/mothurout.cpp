@@ -1900,70 +1900,6 @@ string MothurOut::sortFile(string distFile, string outputDir){
 	}	
 }
 /**************************************************************************************************/
-vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long& num) {
-	try {
-			vector<unsigned long long> positions;
-			ifstream inFASTA;
-			//openInputFileBinary(filename, inFASTA);
-            string completeFileName = getFullPathName(filename);
-            inFASTA.open(completeFileName.c_str(), ios::binary);
-						
-			string input;
-			unsigned long long count = 0;
-			while(!inFASTA.eof()){
-				//input = getline(inFASTA); 
-				//cout << input << '\t' << inFASTA.tellg() << endl;
-				//if (input.length() != 0) {
-				//	if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	 cout << (pos - input.length() - 1) << endl; }
-				//}
-				//gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
-				char c = inFASTA.get(); count++;
-				if (c == '>') {
-					positions.push_back(count-1);
-					if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
-				}
-			}
-			inFASTA.close();
-		
-			num = positions.size();
-            if (debug) { mothurOut("[DEBUG]: num = " + toString(num) + ".\n"); }
-			FILE * pFile;
-			unsigned long long size;
-		
-			//get num bytes in file
-			pFile = fopen (completeFileName.c_str(),"rb");
-			if (pFile==NULL) perror ("Error opening file");
-			else{
-				fseek (pFile, 0, SEEK_END);
-				size=ftell (pFile);
-				fclose (pFile);
-			}
-			
-			/*unsigned long long size = positions[(positions.size()-1)];
-			ifstream in;
-			openInputFile(filename, in);
-			
-			in.seekg(size);
-		
-			while(in.get()){
-				if(in.eof())		{	break;	}
-				else				{	size++;	}
-			}
-			in.close();*/
-        
-            if (debug) { mothurOut("[DEBUG]: size = " + toString(size) + ".\n"); }
-        
-			positions.push_back(size);
-			positions[0] = 0;
-		
-			return positions;
-	}
-	catch(exception& e) {
-		errorOut(e, "MothurOut", "setFilePosFasta");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
 vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long& num, char delim) {
     try {
         vector<unsigned long long> positions;
@@ -2030,23 +1966,17 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num) {
+vector<unsigned long long> MothurOut::setFilePosFasta(string filename, long long& num) {
     try {
         vector<unsigned long long> positions;
         ifstream inFASTA;
-        //openInputFile(filename, inFASTA);
+        //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
         
         string input;
         unsigned long long count = 0;
         while(!inFASTA.eof()){
-            //input = getline(inFASTA);
-            //cout << input << '\t' << inFASTA.tellg() << endl;
-            //if (input.length() != 0) {
-            //	if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	 cout << (pos - input.length() - 1) << endl; }
-            //}
-            //gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
             char c = inFASTA.get(); count++;
             if (c == '>') {
                 positions.push_back(count-1);
@@ -2069,18 +1999,6 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
             fclose (pFile);
         }
         
-        /*unsigned long long size = positions[(positions.size()-1)];
-         ifstream in;
-         openInputFile(filename, in);
-         
-         in.seekg(size);
-         
-         while(in.get()){
-         if(in.eof())		{	break;	}
-         else				{	size++;	}
-         }
-         in.close();*/
-        
         if (debug) { mothurOut("[DEBUG]: size = " + toString(size) + ".\n"); }
         
         positions.push_back(size);
@@ -2093,7 +2011,6 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 vector<consTax> MothurOut::readConsTax(string inputfile){
 	try {
@@ -2197,7 +2114,7 @@ bool MothurOut::isCountFile(string inputfile){
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& num) {
+vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, long long& num) {
 	try {
 			filename = getFullPathName(filename);
 			
@@ -4669,7 +4586,7 @@ bool MothurOut::anyLabelsToProcess(string label, set<string>& userLabels, string
 		for(it = userLabels.begin(); it != userLabels.end();) {
 			
 			float temp;
-			if ((*it != "unique") && (convertTestFloat(*it, temp) == true)){
+			if ((*it != "unique") && (convertTestFloat(*it, temp) )){
 				convert(*it, temp);
 				orderFloat.push_back(temp);
 				userMap[*it] = temp;

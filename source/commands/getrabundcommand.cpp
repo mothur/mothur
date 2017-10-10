@@ -203,7 +203,7 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 int GetRAbundCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
@@ -237,7 +237,7 @@ int GetRAbundCommand::execute(){
 					userLabels.erase(rabund->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = rabund->getLabel();
 					
 					delete rabund;
@@ -277,7 +277,7 @@ int GetRAbundCommand::execute(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
+            if (needToRun )  {
                 if (rabund != NULL) {	delete rabund;	}
                 rabund = input.getRAbundVector(lastLabel);
                 
@@ -350,7 +350,7 @@ int GetRAbundCommand::processList(ofstream& out){
                 userLabels.erase(list->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = list->getLabel();
                 
                 delete list;
@@ -394,7 +394,7 @@ int GetRAbundCommand::processList(ofstream& out){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             if (list != NULL) {	delete list;	}
             list = input.getListVector(lastLabel);
             

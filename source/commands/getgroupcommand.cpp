@@ -116,7 +116,7 @@ GetgroupCommand::GetgroupCommand(string option)  {
 int GetgroupCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 					
 		InputData input(sharedfile, "sharedfile");
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();

@@ -219,7 +219,7 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 int ChimeraBellerophonCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 			

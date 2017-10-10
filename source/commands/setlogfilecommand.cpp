@@ -84,7 +84,7 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 int SetLogFileCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         commandFactory = CommandFactory::getInstance();
         

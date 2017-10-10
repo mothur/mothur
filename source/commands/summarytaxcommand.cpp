@@ -220,7 +220,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 
 int SummaryTaxCommand::execute(){
 	try{
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         int maxLevel = findMaxLevel(taxfile);
         

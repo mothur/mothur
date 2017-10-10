@@ -254,7 +254,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 //**********************************************************************************************************************
 int MGClusterCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         fileroot = outputDir + m->getRootName(m->getSimpleName(blastfile));
         tag = "";

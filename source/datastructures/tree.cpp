@@ -40,7 +40,7 @@ Tree::Tree(CountTable* t) : ct(t) {
 	try {
 		m = MothurOut::getInstance();
 		
-		if (m->getRunParse() == true) {  parseTreeFile();  m->setRunParse(false);  }
+		if (m->getRunParse() ) {  parseTreeFile();  m->setRunParse(false);  }
         
         vector<string> Treenames = m->getTreenames();
 		numLeaves = Treenames.size();
@@ -107,7 +107,7 @@ Tree::Tree(CountTable* t, vector< vector<double> >& sims) : ct(t) {
 	try {
 		m = MothurOut::getInstance();
 		
-		if (m->getRunParse() == true) {  parseTreeFile();  m->setRunParse(false);  }
+		if (m->getRunParse() ) {  parseTreeFile();  m->setRunParse(false);  }
         vector<string> Treenames = m->getTreenames();
 		numLeaves = Treenames.size();
 		numNodes = 2*numLeaves - 1;
@@ -848,7 +848,7 @@ void Tree::randomLabels(vector<string> g) {
 			treez = m->inUsersGroups(tree[z].getGroup(), g);
 			treei = m->inUsersGroups(tree[i].getGroup(), g);
 			
-			if ((treez == true) && (treei == true)) {
+			if ((treez ) && (treei )) {
 				//switches node i and node z's info.
 				map<string,int> lib_hold = tree[z].pGroups;
 				tree[z].pGroups = (tree[i].pGroups);

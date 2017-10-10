@@ -295,7 +295,7 @@ SummaryCommand::SummaryCommand(string option)  {
 int SummaryCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
@@ -328,7 +328,7 @@ int SummaryCommand::execute(){
 			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("summary", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("summary", Estimators[i]) ) { 
 					if(Estimators[i] == "sobs"){
 						sumCalculators.push_back(new Sobs());
 					}else if(Estimators[i] == "chao"){
@@ -448,7 +448,7 @@ int SummaryCommand::execute(){
 					numLines++;
 				}
 				
-				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
@@ -489,7 +489,7 @@ int SummaryCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input.getSAbundVector(lastLabel);
 				

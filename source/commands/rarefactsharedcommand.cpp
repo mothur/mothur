@@ -247,7 +247,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 int RareFactSharedCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap;
         if (designfile == "") { //fake out designMap to run with process
@@ -338,7 +338,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         variables["[filename]"] = fileNameRoot;
 		ValidCalculators validCalculator;
 		for (int i=0; i<Estimators.size(); i++) {
-			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
+			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) ) { 
 				if (Estimators[i] == "sharedobserved") { 
 					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
 					outputNames.push_back(getOutputFileName("sharedrarefaction",variables)); outputTypes["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));
@@ -389,7 +389,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 				userLabels.erase(subset->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(subset->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(subset->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = subset->getLabel();
                 
                 delete subset;
@@ -460,7 +460,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookup; delete subset;
             lookup = input.getSharedRAbundVectors();
             
@@ -517,7 +517,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             
             ValidCalculators validCalculator;
             for (int i=0; i<Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
+                if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) ) { 
                     if (Estimators[i] == "sharedobserved") { 
                         rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
                         filenames["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));

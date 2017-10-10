@@ -216,7 +216,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 int GetCoreMicroBiomeCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         InputData input(inputFileName, format);
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
@@ -246,7 +246,7 @@ int GetCoreMicroBiomeCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -288,7 +288,7 @@ int GetCoreMicroBiomeCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
  
             lookup = input.getSharedRAbundFloatVectors(lastLabel);

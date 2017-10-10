@@ -351,7 +351,7 @@ CollectCommand::CollectCommand(string option)  {
 int CollectCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
@@ -373,7 +373,7 @@ int CollectCommand::execute(){
 			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("single", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("single", Estimators[i]) ) { 
 					if (Estimators[i] == "sobs") { 
 						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(getOutputFileName("sobs", variables))));
 						outputNames.push_back(getOutputFileName("sobs", variables)); outputTypes["sobs"].push_back(getOutputFileName("sobs", variables));
@@ -502,7 +502,7 @@ int CollectCommand::execute(){
 					
 				}
 				//you have a label the user want that is smaller than this label and the last label has not already been processed 
-				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
@@ -550,7 +550,7 @@ int CollectCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (order != NULL) {	delete order;	}
 				order = (input->getOrderVector(lastLabel));
 				

@@ -159,7 +159,7 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
         vector<Calculator*> treeCalculators;
         ValidCalculators validCalculator;
         for (int i=0; i<pDataArray->Estimators.size(); i++) {
-            if (validCalculator.isValidCalculator("matrix", pDataArray->Estimators[i]) == true) { 
+            if (validCalculator.isValidCalculator("matrix", pDataArray->Estimators[i]) ) { 
                 if (pDataArray->Estimators[i] == "sharedsobs") { 
                     treeCalculators.push_back(new SharedSobsCS());
                 }else if (pDataArray->Estimators[i] == "sharedchao") { 

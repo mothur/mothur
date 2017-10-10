@@ -276,7 +276,7 @@ int LefseCommand::execute(){
         //for reading lefse formatted file and running in mothur for testing - pass number of rows used for design file
         if (false) {  makeShared(1); exit(1); }
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap(designfile);
         
@@ -318,7 +318,7 @@ int LefseCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -360,7 +360,7 @@ int LefseCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             

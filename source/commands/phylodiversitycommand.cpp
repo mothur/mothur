@@ -264,7 +264,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 int PhyloDiversityCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         int start = time(NULL);
         
@@ -309,7 +309,7 @@ int PhyloDiversityCommand::execute(){
 			//create a vector containing indexes of leaf nodes, randomize it, select nodes to send to calculator
 			vector<int> randomLeaf;
 			for (int j = 0; j < numLeafNodes; j++) {  
-				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), mGroups) == true) { //is this a node from the group the user selected.
+				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), mGroups) ) { //is this a node from the group the user selected.
 					randomLeaf.push_back(j); 
 				}
 			}

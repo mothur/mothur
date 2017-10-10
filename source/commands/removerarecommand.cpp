@@ -282,7 +282,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 int RemoveRareCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (m->getControl_pressed()) { return 0; }
 		
@@ -368,7 +368,7 @@ int RemoveRareCommand::processList(){
 					break;
 				}
 				
-				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
 					delete list;
@@ -564,7 +564,7 @@ int RemoveRareCommand::processSabund(){
 				if (sabund->getNumBins() > 0) { sabund->print(out); }
 			}
 			
-			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = sabund->getLabel();
 				
 				delete sabund;
@@ -606,7 +606,7 @@ int RemoveRareCommand::processSabund(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (sabund != NULL) {	delete sabund;	}
 			sabund = input.getSAbundVector(lastLabel);
 			
@@ -668,7 +668,7 @@ int RemoveRareCommand::processRabund(){
 				if (newRabund.getNumBins() > 0) { newRabund.print(out); }
 			}
 			
-			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = rabund->getLabel();
 				
 				delete rabund;
@@ -712,7 +712,7 @@ int RemoveRareCommand::processRabund(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (rabund != NULL) {	delete rabund;	}
 			rabund = input.getRAbundVector(lastLabel);
 			
@@ -761,7 +761,7 @@ int RemoveRareCommand::processShared(){
 				processLookup(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -799,7 +799,7 @@ int RemoveRareCommand::processShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			

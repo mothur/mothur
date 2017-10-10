@@ -74,13 +74,13 @@ TEST_CASE("Testing OptiMatrix Class") {
         INFO("Sequences 0 and 1") // Only appears on a FAIL
         
         CAPTURE(matrix.isClose(0, 12));
-        CHECK(matrix.isClose(0, 12) == true);
+        CHECK(matrix.isClose(0, 12) );
         CAPTURE(matrix.isClose(0, 44));
-        CHECK(matrix.isClose(0, 44) == true);
+        CHECK(matrix.isClose(0, 44) );
         CAPTURE(matrix.isClose(1, 23));
-        CHECK(matrix.isClose(1, 23) == true);
+        CHECK(matrix.isClose(1, 23) );
         CAPTURE(matrix.isClose(1, 36));
-        CHECK(matrix.isClose(1, 36) == true);
+        CHECK(matrix.isClose(1, 36) );
     }
 }*/
 /**************************************************************************************************/

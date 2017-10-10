@@ -39,7 +39,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			}
 			
 			//they are shared
-			if (sharedByAll == true) { 
+			if (sharedByAll ) { 
 				//find f1 and f2values
 				updateTree(temp);
 			}

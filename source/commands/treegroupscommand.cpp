@@ -299,7 +299,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 //**********************************************************************************************************************
 
 TreeGroupCommand::~TreeGroupCommand(){
-	if (abort == false) {
+	if (!abort) {
 		if (format == "sharedfile") {  delete input; }
 		else { delete list; }
 		delete ct;  
@@ -312,14 +312,14 @@ TreeGroupCommand::~TreeGroupCommand(){
 int TreeGroupCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (format == "sharedfile") {
 			
 			ValidCalculators validCalculator;
 		
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("treegroup", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("treegroup", Estimators[i]) ) { 
 					if (Estimators[i] == "sharedsobs") { 
 						treeCalculators.push_back(new SharedSobsCS());
 					}else if (Estimators[i] == "sharedchao") { 
@@ -679,7 +679,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -718,7 +718,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 

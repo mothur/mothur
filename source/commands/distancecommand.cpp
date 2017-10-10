@@ -227,7 +227,7 @@ DistanceCommand::DistanceCommand(string option) {
 int DistanceCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int startTime = time(NULL);
 		
@@ -350,7 +350,7 @@ void driverColumn(distanceData* params){
         DistCalc* distCalculator;
         if (params->countends) {
             for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) == true) {
+                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
                     if (params->Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
                     else if (params->Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
                     else if (params->Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
@@ -358,7 +358,7 @@ void driverColumn(distanceData* params){
             }
         }else {
             for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) == true) {
+                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
                     if (params->Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
                     else if (params->Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                     else if (params->Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
@@ -430,7 +430,7 @@ void driverPhylip(distanceData* params){
         DistCalc* distCalculator;
         if (params->countends) {
             for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) == true) {
+                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
                     if (params->Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
                     else if (params->Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
                     else if (params->Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
@@ -438,7 +438,7 @@ void driverPhylip(distanceData* params){
             }
         }else {
             for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) == true) {
+                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
                     if (params->Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
                     else if (params->Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                     else if (params->Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}

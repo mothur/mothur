@@ -330,7 +330,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 			
 			if(childPointer != tree[currentNode].children.end()){	//if the node already exists, update count and move on
                 for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-                    if (itGroup->second == true) {
+                    if (itGroup->second ) {
                         tree[childPointer->second].groupCount[itGroup->first]++;
                     }
                 }
@@ -350,7 +350,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					tree[currentNode].children[taxon] = index;
 						
                     for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-                        if (itGroup->second == true) {
+                        if (itGroup->second ) {
                             tree[index].groupCount[itGroup->first]++;
                         }
                     }

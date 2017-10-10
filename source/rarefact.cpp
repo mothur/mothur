@@ -251,7 +251,7 @@ try {
 			}
 			
             //randomize the groups
-			if (m->getJumble() == true)  { m->mothurRandomShuffle(lookup); }
+			if (m->getJumble() )  { m->mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->getNumBins());

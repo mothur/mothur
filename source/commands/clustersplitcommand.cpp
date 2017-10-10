@@ -452,7 +452,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 int ClusterSplitCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         time_t estart;
         vector<string> listFileNames;
@@ -687,7 +687,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
         for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
             double temp = -10.0;
             
-            if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	m->mothurConvert(*it, temp);	}
+            if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	m->mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
             double ttemp = temp * 1000; ttemp = ceil(temp);

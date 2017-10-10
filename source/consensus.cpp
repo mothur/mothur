@@ -313,7 +313,7 @@ int Consensus::getSubgroupRating(vector<string> group) {
 		//go through the sets
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
 			//are you a subset of bigset, then save in possiblePairings
-			if (isSubset(group, it2->first) == true) {  possiblePairing[it2->first] = it2->second;  }
+			if (isSubset(group, it2->first) ) {  possiblePairing[it2->first] = it2->second;  }
 		}		
 	
 		map< vector< vector<string> > , int > rating;

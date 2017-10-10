@@ -183,10 +183,10 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 int SummaryQualCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
-		int numSeqs = 0;
+		long long numSeqs = 0;
 		
 		vector<int> position;
 		vector<int> averageQ;

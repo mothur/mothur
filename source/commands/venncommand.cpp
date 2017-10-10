@@ -248,13 +248,13 @@ VennCommand::VennCommand(string option)  {
 int VennCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
 		ValidCalculators validCalculator;
 					
 		if (format == "list") {
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("vennsingle", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("vennsingle", Estimators[i]) ) { 
 					if (Estimators[i] == "sobs") { 
 						vennCalculators.push_back(new Sobs());
 					}else if (Estimators[i] == "chao") { 
@@ -267,7 +267,7 @@ int VennCommand::execute(){
 			}
 		}else {
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("vennshared", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("vennshared", Estimators[i]) ) { 
 					if (Estimators[i] == "sharedsobs") { 
 						vennCalculators.push_back(new SharedSobsCS());
 					}else if (Estimators[i] == "sharedchao") { 
@@ -339,7 +339,7 @@ int VennCommand::execute(){
                     for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
 				}
 				
-				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup->getLabel();
 					
                     delete lookup;
@@ -401,7 +401,7 @@ int VennCommand::execute(){
 			}
 		
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 					delete lookup;
 					lookup = input.getSharedRAbundVectors(lastLabel);
 
@@ -464,7 +464,7 @@ int VennCommand::execute(){
 					userLabels.erase(sabund->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 				
 					delete sabund;
@@ -508,7 +508,7 @@ int VennCommand::execute(){
 			}
 		
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input.getSAbundVector(lastLabel);
 					

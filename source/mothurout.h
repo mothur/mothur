@@ -83,11 +83,10 @@ class MothurOut {
         vector<unsigned long long> divideFile(string filename, int& proc, char delimChar);
         vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
 		int divideFile(string, int&, vector<string>&);
-		vector<unsigned long long> setFilePosEachLine(string, int&);
+		vector<unsigned long long> setFilePosEachLine(string, long long&);
         vector<unsigned long long> setFilePosEachLine(string, unsigned long long&);
 		vector<unsigned long long> setFilePosFasta(string, long long&);
         vector<unsigned long long> setFilePosFasta(string, long long&, char);
-        vector<unsigned long long> setFilePosFasta(string, int&);
 		string sortFile(string, string);
 		int appendFiles(string, string);
         int appendBinaryFiles(string, string);

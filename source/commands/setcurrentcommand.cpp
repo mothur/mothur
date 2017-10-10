@@ -517,7 +517,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 int SetCurrentCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
 		//user wants to clear a type
 		if (types.size() != 0) {

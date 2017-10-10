@@ -89,7 +89,7 @@ string SystemCommand::getHelpString(){
 int SystemCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if command contains a redirect don't add the redirect
 		bool usedRedirect = false;

@@ -48,11 +48,11 @@ public:
 	void notifyDisplays(){	
 		for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
 			
-			if ((*pos)->calcNeedsAll() == true) {
+			if ((*pos)->calcNeedsAll() ) {
 				(*pos)->update(shared, NumSeqs, NumGroupComb);
 			}else{
 				
-				if ( ((*pos)->isCalcMultiple() == true) && ((*pos)->getAll() == true) && (!pairs) ) {
+				if ( ((*pos)->isCalcMultiple() ) && ((*pos)->getAll() ) && (!pairs) ) {
 					(*pos)->update(shared, NumSeqs, NumGroupComb);
 				}else {
 					vector<SharedRAbundVector*> temp; temp.push_back(shared[0]); temp.push_back(shared[1]);

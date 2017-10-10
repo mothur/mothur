@@ -257,7 +257,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 int ClearcutCommand::execute() {	
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//prepare filename
         map<string, string> variables; 

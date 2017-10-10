@@ -209,7 +209,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 int NormalizeSharedCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		InputData input(inputfile, format);
         
@@ -252,7 +252,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookup->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup->getLabel();
 					
 					delete lookup;
@@ -294,7 +294,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -354,7 +354,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookupFloat->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookupFloat->getLabel();
 					
 					delete lookupFloat;
@@ -397,7 +397,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				delete lookupFloat;
 				lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 				

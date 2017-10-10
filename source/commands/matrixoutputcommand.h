@@ -141,7 +141,7 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
         vector<Calculator*> matrixCalculators;
         ValidCalculators validCalculator;
         for (int i=0; i<pDataArray->Estimators.size(); i++) {
-            if (validCalculator.isValidCalculator("matrix", pDataArray->Estimators[i]) == true) { 
+            if (validCalculator.isValidCalculator("matrix", pDataArray->Estimators[i]) ) { 
                 if (pDataArray->Estimators[i] == "sharedsobs") { 
                     matrixCalculators.push_back(new SharedSobsCS());
                 }else if (pDataArray->Estimators[i] == "sharedchao") { 

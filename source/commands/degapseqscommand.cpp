@@ -202,7 +202,7 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 int DegapSeqsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				
@@ -248,7 +248,7 @@ int DegapSeqsCommand::execute(){
 //***************************************************************************************************************
 int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
     try{
-        int numSeqs = 0;
+        long long numSeqs = 0;
         vector<int> processIDS; processIDS.resize(0);
         bool recalc = false;
         vector<linePair> lines;
@@ -277,57 +277,9 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
                 out.close();
                 
                 exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
             }
         }
         
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            lines.clear();
-            positions.clear();
-            positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-            
-            numSeqs = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    numSeqs = driver(lines[process], filename, outputFileName + toString(m->mothurGetpid(process)) + ".temp");
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << numSeqs << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
         
         //do my part
         numSeqs = driver(lines[0], filename, outputFileName);

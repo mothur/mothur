@@ -250,7 +250,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 int CreateDatabaseCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         //taxonomies holds the taxonomy info for each Otu
         //classifyOtuSizes holds the size info of each Otu to help with error checking
@@ -635,7 +635,7 @@ ListVector* CreateDatabaseCommand::getList(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -674,7 +674,7 @@ ListVector* CreateDatabaseCommand::getList(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list;
 			list = input->getListVector(lastLabel);
 		}	
@@ -712,7 +712,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;
@@ -751,7 +751,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}	

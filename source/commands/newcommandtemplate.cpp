@@ -327,7 +327,7 @@ NewCommand::NewCommand(string option)  {
 int NewCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         // reading and processing a shared file code example
         // Note: As long as you set groups and labels as shown in the constructor, you can use this code without modification other than adding your function call which is passed the lookup vector.
@@ -362,7 +362,7 @@ int NewCommand::execute(){
          userLabels.erase(lookup[0]->getLabel());
          }
          
-         if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+         if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
          string saveLabel = lookup[0]->getLabel();
          
          for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
@@ -407,7 +407,7 @@ int NewCommand::execute(){
          }
          
          //run last label if you need to
-         if (needToRun == true)  {
+         if (needToRun )  {
          for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
          lookup = input.getSharedRAbundVectors(lastLabel);
          

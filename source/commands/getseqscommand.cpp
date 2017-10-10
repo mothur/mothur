@@ -344,7 +344,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 int GetSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get names you want to keep
 		names = m->readAccnos(accnosfile);

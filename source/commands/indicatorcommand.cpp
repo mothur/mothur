@@ -240,7 +240,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 int IndicatorCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
@@ -1041,7 +1041,7 @@ int IndicatorCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;
@@ -1080,7 +1080,7 @@ int IndicatorCommand::getShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}	
@@ -1117,7 +1117,7 @@ int IndicatorCommand::getSharedFloat(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
 				delete lookupFloat;
@@ -1156,7 +1156,7 @@ int IndicatorCommand::getSharedFloat(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookupFloat;
 			lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 		}	

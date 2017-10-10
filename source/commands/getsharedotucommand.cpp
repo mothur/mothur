@@ -283,7 +283,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 int GetSharedOTUCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         if ( sharedfile != "") { runShared(); }
         else {
@@ -371,7 +371,7 @@ int GetSharedOTUCommand::execute(){
                     userLabels.erase(list->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                         string saveLabel = list->getLabel();
                         
                         m->mothurOut(lastlist->getLabel()); 
@@ -406,7 +406,7 @@ int GetSharedOTUCommand::execute(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
+            if (needToRun )  {
                     m->mothurOut(lastlist->getLabel()); 
                     process(lastlist);
                         
@@ -656,7 +656,7 @@ int GetSharedOTUCommand::runShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -699,7 +699,7 @@ int GetSharedOTUCommand::runShared() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             

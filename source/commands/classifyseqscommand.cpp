@@ -584,7 +584,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 
 //**********************************************************************************************************************
 ClassifySeqsCommand::~ClassifySeqsCommand(){	
-	if (abort == false) {
+	if (!abort) {
 		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 	}
 }
@@ -592,7 +592,7 @@ ClassifySeqsCommand::~ClassifySeqsCommand(){
 
 int ClassifySeqsCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, m->getRandomNumber(), flip, writeShortcuts);	}

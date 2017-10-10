@@ -263,7 +263,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 int TrimFlowsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
@@ -294,7 +294,7 @@ int TrimFlowsCommand::execute(){
 		if (processors == 1) {
 			lines.push_back(new linePair(0, 1000));
 		}else {
-			int numFlowLines;
+			long long numFlowLines;
 			flowFilePos = m->setFilePosEachLine(flowFileName, numFlowLines);
 			flowFilePos.erase(flowFilePos.begin() + 1); numFlowLines--;
 			

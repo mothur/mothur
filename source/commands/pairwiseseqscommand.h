@@ -141,13 +141,13 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (pDataArray->countends) {
-            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
+            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) ) { 
                 if (pDataArray->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (pDataArray->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
                 else if (pDataArray->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
+            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) ) { 
                 if (pDataArray->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (pDataArray->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                 else if (pDataArray->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
@@ -239,13 +239,13 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (pDataArray->countends) {
-            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
+            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) ) { 
                 if (pDataArray->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (pDataArray->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
                 else if (pDataArray->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) == true) { 
+            if (validCalculator.isValidCalculator("distance", pDataArray->distcalcType) ) { 
                 if (pDataArray->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (pDataArray->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                 else if (pDataArray->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}

@@ -278,12 +278,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
 			m->mothurConvert(temp, fontsize);
 			
-			if (abort == false) {
+			if (!abort) {
 				ValidCalculators validCalculator;
 			
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("heat", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("heat", Estimators[i]) ) { 
 						if (Estimators[i] == "jabund") { 	
 							heatCalculators.push_back(new JAbund());
 						}else if (Estimators[i] == "sorabund") { 
@@ -324,7 +324,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 int HeatMapSimCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		heatmap = new HeatMapSim(outputDir, inputfile, fontsize);
 		
@@ -384,7 +384,7 @@ int HeatMapSimCommand::runCommandShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 				
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -432,7 +432,7 @@ int HeatMapSimCommand::runCommandShared() {
 		if (m->getControl_pressed()) {  delete input;  m->clearGroups(); return 0; }
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookup;
             lookup = input->getSharedRAbundVectors(lastLabel);
             
@@ -509,7 +509,7 @@ int HeatMapSimCommand::runCommandDist() {
 			}
 			
 			//read rest of matrix
-			if (square == true) { 
+			if (square ) { 
 				for(int i=1;i<numSeqs;i++){
 					in >> name;		
 					names.push_back(name);

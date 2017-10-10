@@ -56,7 +56,7 @@ FullMatrix::FullMatrix(ifstream& filehandle, GroupMap* g, bool s) : groupmap(g),
 		}
 	
 		//read rest of matrix
-		if (square == true) {  readSquareMatrix(filehandle); }
+		if (square ) {  readSquareMatrix(filehandle); }
 		else {  readLTMatrix(filehandle); }
 		
 		filehandle.close();

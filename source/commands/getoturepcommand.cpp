@@ -396,7 +396,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 int GetOTURepCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		int error;
 		list = NULL;
 		
@@ -460,7 +460,7 @@ int GetOTURepCommand::execute(){
                 userLabels.erase(list->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = list->getLabel();
                 
                 delete list;
@@ -501,7 +501,7 @@ int GetOTURepCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             if (list != NULL) {	delete list;	}
             list = input.getListVector(lastLabel);
             m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();

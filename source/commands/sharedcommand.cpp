@@ -253,7 +253,7 @@ SharedCommand::SharedCommand(string option)  {
 int SharedCommand::execute(){
 	try {
 
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         if (listfile != "") {  createSharedFromListGroup();  }
         else {   createSharedFromBiom();  }
@@ -865,7 +865,7 @@ int SharedCommand::createSharedFromListGroup() {
                 userLabels.erase(SharedList->getLabel());
             }
 
-            if ((m->anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = SharedList->getLabel();
 
                 delete SharedList;
@@ -931,7 +931,7 @@ int SharedCommand::createSharedFromListGroup() {
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             if (SharedList != NULL) {	delete SharedList;	}
             SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 

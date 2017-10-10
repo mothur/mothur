@@ -197,7 +197,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 int CatchAllCommand::execute() {	
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get location of catchall
 		path = m->getProgramPath();
@@ -349,7 +349,7 @@ int CatchAllCommand::execute() {
 						userLabels.erase(sabund->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 						string saveLabel = sabund->getLabel();
 						
 						delete sabund;		
@@ -437,7 +437,7 @@ int CatchAllCommand::execute() {
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = (input.getSAbundVector(lastLabel));
 				

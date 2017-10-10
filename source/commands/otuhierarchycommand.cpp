@@ -159,7 +159,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 int OtuHierarchyCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector< vector<string> > lists = getListVectors();
@@ -300,7 +300,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -339,7 +339,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list;
 			list = input.getListVector(lastLabel);
 		}

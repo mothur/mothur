@@ -197,13 +197,13 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
             
             if (subsample == false) { iters = 0; }
             
-			if (abort == false) {
+			if (!abort) {
 			
 				ValidCalculators validCalculator;
 				
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("matrix", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("matrix", Estimators[i]) ) { 
 						if (Estimators[i] == "sharedsobs") { 
 							matrixCalculators.push_back(new SharedSobsCS());
 						}else if (Estimators[i] == "sharedchao") { 
@@ -309,7 +309,7 @@ MatrixOutputCommand::~MatrixOutputCommand(){}
 int MatrixOutputCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 			
 		//if the users entered no valid calculators don't execute command
 		if (matrixCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine();  return 0; }
@@ -361,7 +361,7 @@ int MatrixOutputCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -402,7 +402,7 @@ int MatrixOutputCommand::execute(){
 		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 

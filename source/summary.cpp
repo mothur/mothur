@@ -513,7 +513,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
 /**********************************************************************************************************************/
 long long Summary::summarizeFastaSummary(string summaryfile) {
     try {
-        int num = 0;
+        long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
         string p = m->getProcessors(); 

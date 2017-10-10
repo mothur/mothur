@@ -314,7 +314,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 int PcrSeqsCommand::execute(){
 	try{
         
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         int start = time(NULL);
         fileAligned = true; pairedOligos = false;
@@ -335,7 +335,7 @@ int PcrSeqsCommand::execute(){
         if(ecolifile != "") {    readEcoli();      }  if (m->getControl_pressed()) {  return 0; }
         
         vector<unsigned long long> positions; 
-        int numFastaSeqs = 0;
+        long long numFastaSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         positions = m->divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}

@@ -230,7 +230,7 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 int GetMetaCommunityCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         InputData input(sharedfile, "sharedfile");
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -267,7 +267,7 @@ int GetMetaCommunityCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -309,7 +309,7 @@ int GetMetaCommunityCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
@@ -878,7 +878,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
         ValidCalculators validCalculator;
         int i = 0;
         
-        if (validCalculator.isValidCalculator("matrix", Estimators[i]) == true) {
+        if (validCalculator.isValidCalculator("matrix", Estimators[i]) ) {
             if (Estimators[i] == "sharedsobs") {
                 matrixCalculator = new SharedSobsCS();
             }else if (Estimators[i] == "sharedchao") {

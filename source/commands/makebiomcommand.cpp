@@ -342,7 +342,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 int MakeBiomCommand::execute(){
 	try {
         
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         SharedRAbundVectors* lookup = NULL;
         SharedRAbundFloatVectors* lookupRel = NULL;
@@ -385,7 +385,7 @@ int MakeBiomCommand::execute(){
                     userLabels.erase(lookup->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                     string saveLabel = lookup->getLabel();
                     
                     delete lookup;
@@ -423,7 +423,7 @@ int MakeBiomCommand::execute(){
                     userLabels.erase(lookupRel->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(lookupRel->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(lookupRel->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                     string saveLabel = lookupRel->getLabel();
                     
                     delete lookupRel;
@@ -463,7 +463,7 @@ int MakeBiomCommand::execute(){
 		}
         
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             if (fileFormat == "sharedfile") {
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);

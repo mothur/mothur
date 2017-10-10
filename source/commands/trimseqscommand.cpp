@@ -375,7 +375,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 int TrimSeqsCommand::execute(){
 	try{
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         pairedOligos = false;
 		numFPrimers = 0;  //this needs to be initialized
@@ -1676,12 +1676,12 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             lines.push_back(linePair(0, 1000));
             if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); }
         }else{
-            int numFastaSeqs = 0;
+            long long numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
             if (qfilename != "") { 
-                int numQualSeqs = 0;
+                long long numQualSeqs = 0;
                 qfileFilePos = m->setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {

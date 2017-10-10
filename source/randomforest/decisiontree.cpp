@@ -239,7 +239,7 @@ int DecisionTree::splitRecursively(RFTreeNode* rootNode) {
         
         int classifiedOutputClass;
         bool isAlreadyClassified = checkIfAlreadyClassified(rootNode, classifiedOutputClass);    
-        if (isAlreadyClassified == true){
+        if (isAlreadyClassified ){
             rootNode->setIsLeaf(true);
             rootNode->setOutputClass(classifiedOutputClass);
             return 0;

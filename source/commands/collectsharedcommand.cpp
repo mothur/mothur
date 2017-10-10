@@ -342,7 +342,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
 			all = m->isTrue(temp);
 						
-			if (abort == false) {
+			if (!abort) {
 				
 				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
 				map<string, string> variables; 
@@ -351,7 +351,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 				ValidCalculators validCalculator;
 				
 				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("shared", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("shared", Estimators[i]) ) { 
 						if (Estimators[i] == "sharedchao") { 
 							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(getOutputFileName("sharedchao", variables))));
 							outputNames.push_back(getOutputFileName("sharedchao", variables)); outputTypes["sharedchao"].push_back(getOutputFileName("sharedchao", variables));
@@ -496,7 +496,7 @@ CollectSharedCommand::~CollectSharedCommand(){}
 int CollectSharedCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
@@ -541,7 +541,7 @@ int CollectSharedCommand::execute(){
 			}
 			
 			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = order->getLabel();
 				
 				delete order;
@@ -590,7 +590,7 @@ int CollectSharedCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (order != NULL) {  delete order;  }
 			order = input->getSharedOrderVector(lastLabel);
 			

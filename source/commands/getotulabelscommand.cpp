@@ -231,7 +231,7 @@ GetOtuLabelsCommand::GetOtuLabelsCommand(string option)  {
 int GetOtuLabelsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         //get labels you want to keep
 		labels = m->readAccnos(accnosfile);
@@ -585,7 +585,7 @@ int GetOtuLabelsCommand::getListVector(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -624,7 +624,7 @@ int GetOtuLabelsCommand::getListVector(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list; 
 			list = input.getListVector(lastLabel);
 		}	
@@ -660,7 +660,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;
@@ -699,7 +699,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}	

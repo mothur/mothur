@@ -167,7 +167,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 int ReverseSeqsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string fastaReverseFileName;
 		

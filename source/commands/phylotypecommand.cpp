@@ -205,7 +205,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 int PhylotypeCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 

@@ -59,7 +59,8 @@ private:
 
 	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
 	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;
-	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
+	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, templateSeqsLength;
+    long long numSeqs;
 	float divR;
 	
     map<string, map<string, string> > group2NameMap;

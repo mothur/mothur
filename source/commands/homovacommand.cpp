@@ -181,7 +181,7 @@ HomovaCommand::HomovaCommand(string option) {
 int HomovaCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
 		designMap = new DesignMap(designFileName);

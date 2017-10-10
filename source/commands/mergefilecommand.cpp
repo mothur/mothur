@@ -128,7 +128,7 @@ MergeFileCommand::MergeFileCommand(string option)  {
 
 int MergeFileCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		m->mothurRemove(outputFileName);
 		for(int i=0;i<numInputFiles;i++){  m->appendFiles(fileNames[i], outputFileName);  }

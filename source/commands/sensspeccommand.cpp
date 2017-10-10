@@ -254,7 +254,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 
 int SensSpecCommand::execute(){
 	try{
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         int startTime = time(NULL);
 
@@ -466,7 +466,7 @@ int SensSpecCommand::processListFile(){
 				process(list, getCutoff, origCutoff);
 			}
 
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 
 				string saveLabel = list->getLabel();
 
@@ -503,7 +503,7 @@ int SensSpecCommand::processListFile(){
 		}
 
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {	delete list;	}
 			list = input.getListVector(lastLabel);
 

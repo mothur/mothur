@@ -319,7 +319,7 @@ RareFactCommand::RareFactCommand(string option)  {
 int RareFactCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
@@ -344,7 +344,7 @@ int RareFactCommand::execute(){
             variables["[filename]"] = fileNameRoot;
 			  
 			for (i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("rarefaction", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("rarefaction", Estimators[i]) ) { 
 					if (Estimators[i] == "sobs") { 
 						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(getOutputFileName("rarefaction",variables))));
 						outputNames.push_back(getOutputFileName("rarefaction",variables)); outputTypes["rarefaction"].push_back(getOutputFileName("rarefaction",variables));
@@ -434,7 +434,7 @@ int RareFactCommand::execute(){
 					userLabels.erase(order->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
@@ -480,7 +480,7 @@ int RareFactCommand::execute(){
 			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (order != NULL) {	delete order;	}
 				order = (input.getOrderVector(lastLabel));
 				

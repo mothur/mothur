@@ -138,7 +138,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 
 int SetDirectoryCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         if (debugorSeedOnly) {  }
         else {

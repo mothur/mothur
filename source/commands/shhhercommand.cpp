@@ -388,7 +388,7 @@ ShhherCommand::ShhherCommand(string option) {
 
 int ShhherCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
 		getJointLookUp();	if (m->getControl_pressed()) { return 0; }

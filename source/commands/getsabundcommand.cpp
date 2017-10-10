@@ -195,7 +195,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 int GetSAbundCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
 		filename = getOutputFileName("sabund", variables);
@@ -229,7 +229,7 @@ int GetSAbundCommand::execute(){
 					userLabels.erase(sabund->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
@@ -268,7 +268,7 @@ int GetSAbundCommand::execute(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
+            if (needToRun )  {
                 if (sabund != NULL) {	delete sabund;	}
                 sabund = (input.getSAbundVector(lastLabel));
                 
@@ -337,7 +337,7 @@ int GetSAbundCommand::processList(ofstream& out){
                 userLabels.erase(list->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = list->getLabel();
                 
                 delete list;
@@ -380,7 +380,7 @@ int GetSAbundCommand::processList(ofstream& out){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             if (list != NULL) {	delete list;	}
             list = input.getListVector(lastLabel);
             

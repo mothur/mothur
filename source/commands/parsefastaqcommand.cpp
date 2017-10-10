@@ -246,7 +246,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 
 int ParseFastaQCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         vector< vector<string> > files;
         if (file != "") {

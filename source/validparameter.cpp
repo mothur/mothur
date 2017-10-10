@@ -220,7 +220,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 		it = container.find(parameter);
 		if(it != container.end()){ //no parameter given
             
-			if(isFile == true) {
+			if(isFile ) {
 				
                 if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
                 else {

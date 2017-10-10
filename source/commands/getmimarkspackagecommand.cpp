@@ -195,7 +195,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 int GetMIMarksPackageCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         if ((oligosfile != "") && (file != "")) { Oligos oligos(oligosfile); createGroupNames(oligos);  }
         else if (file != "")  { readFile();     }

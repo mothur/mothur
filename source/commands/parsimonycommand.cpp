@@ -230,7 +230,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 int ParsimonyCommand::execute() {
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		
 		//randomtree will tell us if user had their own treefile or if they just want the random distribution

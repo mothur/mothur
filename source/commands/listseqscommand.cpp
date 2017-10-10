@@ -251,7 +251,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 int ListSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read functions fill names vector
 		if (fastafile != "")		{	inputFileName = fastafile;	readFasta();	}

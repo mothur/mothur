@@ -49,7 +49,7 @@ public:
 			n++;
 		}
 			
-		if ((estimate->getMultiple() == true) && all) { 
+		if ((estimate->getMultiple() ) && all) { 
 			numGroupComb++; 
 			groupData.resize((numGroupComb*data.size()), 0);
 			//is this the time its called with all values

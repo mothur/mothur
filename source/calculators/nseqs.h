@@ -39,7 +39,7 @@ public:
 			}
 			
 			//they are shared
-			if (sharedByAll == true) {  for (int j = 0; j < numGroups; j++) {  data[j] += shared[j]->get(i);  } }
+			if (sharedByAll ) {  for (int j = 0; j < numGroups; j++) {  data[j] += shared[j]->get(i);  } }
 		}
 
 		return data;

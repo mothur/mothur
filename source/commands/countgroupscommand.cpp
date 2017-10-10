@@ -214,7 +214,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 int CountGroupsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
 		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }

@@ -181,7 +181,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 int CooccurrenceCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		InputData input(sharedfile, "sharedfile");
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -215,7 +215,7 @@ int CooccurrenceCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -255,7 +255,7 @@ int CooccurrenceCommand::execute(){
 		}
 	
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			

@@ -235,7 +235,7 @@ BinSeqCommand::~BinSeqCommand(){}
 
 int BinSeqCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
 		int error = 0;
 		
@@ -276,7 +276,7 @@ int BinSeqCommand::execute(){
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -314,7 +314,7 @@ int BinSeqCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {		delete list;	}
 			list = input->getListVector(lastLabel);
 				

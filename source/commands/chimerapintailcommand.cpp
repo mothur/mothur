@@ -331,7 +331,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 int ChimeraPintailCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				

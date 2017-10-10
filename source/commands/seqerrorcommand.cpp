@@ -274,7 +274,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				parser.getNameFile(files);
 			}
 
-            if(aligned == true){
+            if(aligned ){
                 if((reportFileName != "" && qualFileName == "") || (reportFileName == "" && qualFileName != "")){
                     m->mothurOut("if you use either a qual file or a report file, you have to have both.");
                     m->mothurOutEndLine();
@@ -301,7 +301,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 
 int SeqErrorCommand::execute(){
 	try{
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
 		maxLength = 5000;
@@ -1483,7 +1483,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
             qfileFilePos.push_back(size);
         }
         
-         if (reportFileName != "" && aligned == true) {
+         if (reportFileName != "" && aligned ) {
              rfileFilePos.push_back(0);
              
              //get last file position of qualfile
@@ -1509,7 +1509,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
             lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
             if (qualFileName != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
-            if (reportFileName != "" && aligned == true) {  rLines.push_back(linePair(rfileFilePos[i], rfileFilePos[(i+1)]));  }
+            if (reportFileName != "" && aligned ) {  rLines.push_back(linePair(rfileFilePos[i], rfileFilePos[(i+1)]));  }
         }
         if(qualFileName == "")	{	qLines = lines;	rLines = lines; } //fills with duds
         if(aligned == false){   rLines = lines; }

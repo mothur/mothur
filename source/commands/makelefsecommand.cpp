@@ -215,7 +215,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 int MakeLefseCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
       
         map<int, consTax2> consTax;
         if (constaxonomyfile != "") {  m->readConsTax(constaxonomyfile, consTax);  }
@@ -355,7 +355,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
                     break;
                 }
                 
-                if ((m->anyLabelsToProcess(templookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((m->anyLabelsToProcess(templookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                     string saveLabel = templookup->getLabel();
                     
                     delete templookup;
@@ -394,7 +394,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
+            if (needToRun )  {
                 delete templookup;
                 templookup = input.getSharedRAbundVectors(lastLabel);
             }
@@ -476,7 +476,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
                 delete lookupFloat;
@@ -515,7 +515,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookupFloat;
 			lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 		}

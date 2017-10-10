@@ -284,7 +284,7 @@ AlignCommand::AlignCommand(string option)  {
 //**********************************************************************************************************************
 AlignCommand::~AlignCommand(){	
 
-	if (abort == false) {
+	if (!abort) {
 		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 		delete templateDB;
 	}
@@ -293,7 +293,7 @@ AlignCommand::~AlignCommand(){
 
 int AlignCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
 		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, m->getRandomNumber(), true);
 		
@@ -313,7 +313,7 @@ int AlignCommand::execute(){
             numFlipped.push_back(0); //numflipped because reverse was better
             numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
 			
-			int numFastaSeqs = 0;
+			long long numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 
 			vector<unsigned long long> positions; 

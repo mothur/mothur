@@ -100,7 +100,7 @@ try {
 						}
 
 						string groupLabelAll = groupLabel + label + "all\t"; 
-						if ((displays[i]->isCalcMultiple() == true) && (displays[i]->getAll() == true)) {   displays[i]->init(groupLabelAll); }
+						if ((displays[i]->isCalcMultiple() ) && (displays[i]->getAll() )) {   displays[i]->init(groupLabelAll); }
 						else {  displays[i]->init(groupLabel);  }           
                 }
                 
