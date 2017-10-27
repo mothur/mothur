@@ -456,15 +456,13 @@ int RemoveOtuLabelsCommand::readShared(){
 
         bool wroteSomething = false;
         int numRemoved = 0;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
-            if (otulabels.count(m->getSimpleLabel(currentLabels[i])) == 0) {
+            if (otulabels.count(m->getSimpleLabel(lookup->getOTUNames()[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(currentLabels[i]);
                 ++i;
             }else { numRemoved++; lookup->removeOTU(i); }
         }
@@ -479,8 +477,6 @@ int RemoveOtuLabelsCommand::readShared(){
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-        m->setCurrentSharedBinLabels(newLabels);
         
         lookup->printHeaders(out);
         lookup->print(out);

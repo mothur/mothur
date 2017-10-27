@@ -10,7 +10,7 @@
 #include "classifyotucommand.h"
 #include "phylotree.h"
 #include "phylosummary.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> ClassifyOtuCommand::setParameters(){	
@@ -312,7 +312,7 @@ int ClassifyOtuCommand::execute(){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		input = new InputData(listfile, "list");
+		input = new InputData(listfile, "list", nullVector);
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 

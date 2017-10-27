@@ -16,7 +16,7 @@
 #include "collect.h"
 #include "display.h"
 #include "validcalculator.h"
-#include "sharedutilities.h"
+
 
 
 class CollectSharedCommand : public Command {

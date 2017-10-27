@@ -41,7 +41,7 @@ inline bool comparebinFloatCounts(binCountFloat left, binCountFloat right){
 class HeatMap {
 	
 	public:
-		HeatMap(string, string, int, int, string, string);
+		HeatMap(string, string, int, int, string, string, vector<string>);
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
@@ -58,6 +58,7 @@ class HeatMap {
 		ofstream outsvg;
 		MothurOut* m;
 		int numOTU, fontSize;
+        vector<string> currentLabels;
 		
 		map<int, int> orderTopGroup(vector<SharedRAbundVector*>);
 		map<int, int> orderTopOtu(vector<SharedRAbundVector*>);

@@ -34,7 +34,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
+//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -86,14 +86,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	vector<linePair> lines;
-	
-	void printSims(ostream&, vector< vector<double> >&, vector<string>);
-	int process(SharedRAbundVectors*&);
-	
-	vector<Calculator*> matrixCalculators;
-	//SharedRAbundVectors* lookup;
-	string exportFileName, output, sharedfile;
+    string exportFileName, output, sharedfile;
 	int numGroups, processors, iters, subsampleSize;
 	ofstream out;
 
@@ -101,8 +94,10 @@ private:
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
-	int process(SharedRAbundVectors*&, string, string);
-	int driver(vector<SharedRAbundVector*>&, int, int, vector< vector<seqDist> >&);
+	
+    int createProcesses(SharedRAbundVectors*&);
+	int driver(vector<SharedRAbundVector*>&, vector< vector<seqDist> >&, vector<Calculator*>);
+    void printSims(ostream&, vector< vector<double> >&, vector<string>);
 
 };
 	
@@ -111,22 +106,25 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distSharedData {
-    vector<SharedRAbundVector*> thisLookup;
-    vector< vector<seqDist> > calcDists;
+    SharedRAbundVectors* thisLookup;
+    vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
+    vector< vector< vector<double> > > matrices; //for each calculator a square matrix to represent the distances, only filled by main thread
     vector<string>  Estimators;
-	unsigned long long start;
-	unsigned long long end;
+    long long numIters;
 	MothurOut* m;
-    int count;
+    int count, subsampleSize;
+    bool mainThread, subsample;
 	
 	distSharedData(){}
-	distSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*>& lu) {
+	distSharedData(MothurOut* mout, long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
 		m = mout;
-		start = st;
-		end = en;
+		numIters = st;
         Estimators = est;
         thisLookup = lu;
         count = 0;
+        mainThread = mt;
+        subsample = su;
+        subsampleSize = subsize;
 	}
 };
 /**************************************************************************************************/

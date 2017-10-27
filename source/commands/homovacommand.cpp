@@ -10,7 +10,7 @@
 #include "homovacommand.h"
 #include "groupmap.h"
 #include "readphylipvector.h"
-#include "sharedutilities.h"
+
 #include "designmap.h"
 
 //**********************************************************************************************************************

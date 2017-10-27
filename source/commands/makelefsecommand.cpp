@@ -172,6 +172,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 			if (groups == "not found") { groups = "";  }
 			else {
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				m->setGroups(Groups);
 			}
 
@@ -289,10 +290,9 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
         for (int i = 0; i < namesOfGroups.size(); i++) {  out  << '\t' << namesOfGroups[i]; }
         out << endl;
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins(); i++) { //process each otu
             if (m->getControl_pressed()) { break; }
-            string nameOfOtu = m->getCurrentSharedBinLabels()[i];
+            string nameOfOtu = lookup->getOTUName(i);
             
             if (constaxonomyfile != "") { //try to find the otuName in consTax to replace with consensus taxonomy
                 int simpleLabel;
@@ -308,7 +308,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
                         if (nameOfOtu[j] == ';') { fixedName += '|'; }
                         else { fixedName += nameOfOtu[j]; }
                     }
-                    nameOfOtu = fixedName + currentLabels[i] + "|";
+                    nameOfOtu = fixedName + lookup->getOTUName(i) + "|";
                 }else {
                     m->mothurOut("[ERROR]: can't find " + nameOfOtu + " in constaxonomy file. Do the distances match, did you forget to use the label parameter?\n"); m->setControl_pressed(true);
                 }

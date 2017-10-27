@@ -8,7 +8,7 @@
  */
 
 #include "countgroupscommand.h"
-#include "sharedutilities.h"
+
 #include "inputdata.h"
 
 //**********************************************************************************************************************
@@ -156,6 +156,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else {
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				m->setGroups(Groups);
 			}
 			

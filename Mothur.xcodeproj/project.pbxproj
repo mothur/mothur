@@ -337,7 +337,6 @@
 		481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		481FB67C1AC1B88F0076CFF3 /* splitmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B84312D37EC400DA6239 /* splitmatrix.cpp */; };
 		481FB67D1AC1B88F0076CFF3 /* treereader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D755D91535F679009BF21A /* treereader.cpp */; };
-		481FB67E1AC1B8960076CFF3 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */; };
 		481FB67F1AC1B8960076CFF3 /* singlelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */; };
 		481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B83012D37EC400DA6239 /* slibshuff.cpp */; };
 		481FB6811AC1B8960076CFF3 /* subsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7876A25152A017C00A0AE86 /* subsample.cpp */; };
@@ -730,7 +729,6 @@
 		A7E9B95E12D37EC400DA6239 /* sharedsorest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81D12D37EC400DA6239 /* sharedsorest.cpp */; };
 		A7E9B95F12D37EC400DA6239 /* sharedthetan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81F12D37EC400DA6239 /* sharedthetan.cpp */; };
 		A7E9B96012D37EC400DA6239 /* sharedthetayc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82112D37EC400DA6239 /* sharedthetayc.cpp */; };
-		A7E9B96112D37EC400DA6239 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */; };
 		A7E9B96212D37EC400DA6239 /* shen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82512D37EC400DA6239 /* shen.cpp */; };
 		A7E9B96312D37EC400DA6239 /* shhhercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */; };
 		A7E9B96412D37EC400DA6239 /* simpson.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82912D37EC400DA6239 /* simpson.cpp */; };
@@ -1572,8 +1570,6 @@
 		A7E9B82012D37EC400DA6239 /* sharedthetan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedthetan.h; path = source/calculators/sharedthetan.h; sourceTree = SOURCE_ROOT; };
 		A7E9B82112D37EC400DA6239 /* sharedthetayc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedthetayc.cpp; path = source/calculators/sharedthetayc.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B82212D37EC400DA6239 /* sharedthetayc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedthetayc.h; path = source/calculators/sharedthetayc.h; sourceTree = SOURCE_ROOT; };
-		A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedutilities.cpp; path = source/sharedutilities.cpp; sourceTree = "<group>"; };
-		A7E9B82412D37EC400DA6239 /* sharedutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedutilities.h; path = source/sharedutilities.h; sourceTree = "<group>"; };
 		A7E9B82512D37EC400DA6239 /* shen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shen.cpp; path = source/calculators/shen.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B82612D37EC400DA6239 /* shen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shen.h; path = source/calculators/shen.h; sourceTree = SOURCE_ROOT; };
 		A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shhhercommand.cpp; path = source/commands/shhhercommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1809,8 +1805,6 @@
 				A77410F514697C300098E6AC /* seqnoise.h */,
 				A77410F414697C300098E6AC /* seqnoise.cpp */,
 				A7E9BA5312D39A5E00DA6239 /* read */,
-				A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */,
-				A7E9B82412D37EC400DA6239 /* sharedutilities.h */,
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
@@ -2387,8 +2381,8 @@
 				48910D421D5243E500F60EDB /* mergecountcommand.hpp */,
 				A7E9B75412D37EC400DA6239 /* mergefilecommand.h */,
 				A7E9B75312D37EC400DA6239 /* mergefilecommand.cpp */,
-				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */,
+				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				48705AC019BE32C50075E977 /* mergesfffilecommand.h */,
 				48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */,
 				A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */,
@@ -2608,12 +2602,12 @@
 				A7E9B80512D37EC400DA6239 /* sharedlistvector.h */,
 				A7E9B80E12D37EC400DA6239 /* sharedordervector.h */,
 				A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */,
-				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
-				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
 				485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */,
 				485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */,
 				485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */,
 				485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */,
+				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
+				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
 				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
 				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
@@ -2907,7 +2901,6 @@
 				481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */,
 				481FB5FD1AC1B7970076CFF3 /* removeotulabelscommand.cpp in Sources */,
 				481FB63F1AC1B7EA0076CFF3 /* sequencecountparser.cpp in Sources */,
-				481FB67E1AC1B8960076CFF3 /* sharedutilities.cpp in Sources */,
 				481FB67C1AC1B88F0076CFF3 /* splitmatrix.cpp in Sources */,
 				48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
 				481FB59C1AC1B71B0076CFF3 /* chopseqscommand.cpp in Sources */,
@@ -3474,7 +3467,6 @@
 				A7E9B95E12D37EC400DA6239 /* sharedsorest.cpp in Sources */,
 				A7E9B95F12D37EC400DA6239 /* sharedthetan.cpp in Sources */,
 				A7E9B96012D37EC400DA6239 /* sharedthetayc.cpp in Sources */,
-				A7E9B96112D37EC400DA6239 /* sharedutilities.cpp in Sources */,
 				A7E9B96212D37EC400DA6239 /* shen.cpp in Sources */,
 				A7E9B96312D37EC400DA6239 /* shhhercommand.cpp in Sources */,
 				A7E9B96412D37EC400DA6239 /* simpson.cpp in Sources */,

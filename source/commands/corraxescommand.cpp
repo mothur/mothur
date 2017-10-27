@@ -8,7 +8,7 @@
  */
 
 #include "corraxescommand.h"
-#include "sharedutilities.h"
+
 #include "linearalgebra.h"
 
 //**********************************************************************************************************************
@@ -174,9 +174,9 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);	
+				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	
 			}			
-			m->setGroups(Groups);
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
 			
@@ -229,7 +229,7 @@ int CorrAxesCommand::execute(){
 		// use smart distancing to get right sharedRabund and convert to relabund if needed  //
 		/************************************************************************************/
 		if (sharedfile != "") {  
-			InputData* input = new InputData(sharedfile, "sharedfile");
+			InputData* input = new InputData(sharedfile, "sharedfile", Groups);
 			getSharedFloat(input); 
 			delete input;
 			
@@ -237,7 +237,7 @@ int CorrAxesCommand::execute(){
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (relabundfile != "") { 
-			InputData* input = new InputData(relabundfile, "relabund");
+			InputData* input = new InputData(relabundfile, "relabund", Groups);
 			getSharedFloat(input); 
 			delete input;
 			
@@ -336,7 +336,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   
 	   for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
 	   
-       vector<string> currentLabels = m->getCurrentSharedBinLabels();
+       vector<string> currentLabels = lookupFloat->getOTUNames();
 	   //for each otu
 	   for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		   
@@ -469,7 +469,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
             sf.push_back(sfTemp);
 		}
 		
-		vector<string> currentLabels = m->getCurrentSharedBinLabels();
+		vector<string> currentLabels = lookupFloat->getOTUNames();
         
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
@@ -625,7 +625,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 			}
 		}
 		
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookupFloat->getOTUNames();
         
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {

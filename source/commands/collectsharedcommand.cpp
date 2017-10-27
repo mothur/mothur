@@ -29,7 +29,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
+//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -332,8 +332,8 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
-			m->setGroups(Groups);
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -502,29 +502,21 @@ int CollectSharedCommand::execute(){
 		if (cDisplays.size() == 0) { return 0; }
 		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
 	
-		input = new InputData(sharedfile, "sharedfile");
+		input = new InputData(sharedfile, "sharedfile", Groups);
 		order = input->getSharedOrderVector();
 		string lastLabel = order->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-			
-		//set users groups
-		SharedUtil* util = new SharedUtil();
-		Groups = m->getGroups();
-		vector<string> allGroups = m->getAllGroups();
-		util->setGroups(Groups, allGroups, "collect");
-		m->setGroups(Groups);
-		m->setAllGroups(allGroups);
-		delete util;
+        Groups = order->getGroups();
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) { 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; delete input;
-					m->clearGroups();
+					
 					return 0;
 			}
 
@@ -571,7 +563,7 @@ int CollectSharedCommand::execute(){
 		if (m->getControl_pressed()) { 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					m->clearGroups();
+					
 					delete input;
 					return 0;
 		}
@@ -604,7 +596,7 @@ int CollectSharedCommand::execute(){
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
 				delete input;
-				m->clearGroups();
+				
 				return 0;
 			}
 
@@ -614,7 +606,7 @@ int CollectSharedCommand::execute(){
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter
-		m->clearGroups(); 
+		 
 		delete input;
 		
 		m->mothurOutEndLine();

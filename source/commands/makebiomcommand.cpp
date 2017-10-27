@@ -9,7 +9,7 @@
 #include "makebiomcommand.h"
 
 #include "inputdata.h"
-#include "sharedutilities.h"
+
 #include "phylotree.h"
 
 //taken from http://biom-format.org/documentation/biom_format.html
@@ -313,6 +313,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				m->setGroups(Groups);
 			}
 			
@@ -547,7 +548,7 @@ int MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup){
         out << spaces + "\"rows\":[\n";
         string rowFront = spaces + spaces + "{\"id\":\"";
         string rowBack = "\", \"metadata\":";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < numBins-1; i++) {
             if (m->getControl_pressed()) {  out.close(); return 0; }
             out << rowFront << currentLabels[i] << rowBack << metadata[i] << "},\n";
@@ -688,7 +689,7 @@ int MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup){
         out << spaces + "\"rows\":[\n";
         string rowFront = spaces + spaces + "{\"id\":\"";
         string rowBack = "\", \"metadata\":";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < numBins-1; i++) {
             if (m->getControl_pressed()) {  out.close(); return 0; }
             out << rowFront << currentLabels[i] << rowBack << metadata[i] << "},\n";
@@ -822,7 +823,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors*& lookup){
             in.close();
             
             //should the labels be Otu001 or PhyloType001
-            string firstBin = m->getCurrentSharedBinLabels()[0];
+            string firstBin = lookup->getOTUNames()[0];
             string binTag = "Otu";
             if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
             
@@ -864,7 +865,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors*& lookup){
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
+            vector<string> currentLabels = lookup->getOTUNames();
             for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->getControl_pressed()) { return metadata; }
@@ -940,7 +941,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors*& lookup){
             in.close();
             
             //should the labels be Otu001 or PhyloType001
-            string firstBin = m->getCurrentSharedBinLabels()[0];
+            string firstBin = lookup->getOTUNames()[0];
             string binTag = "Otu";
             if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
             
@@ -975,7 +976,7 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundFloatVectors*& lookup){
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
+            vector<string> currentLabels = lookup->getOTUNames();
             for (int i = 0; i < lookup->getNumBins(); i++) {
                 
                 if (m->getControl_pressed()) { return metadata; }
@@ -1085,7 +1086,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
 		}
 		
         map<string, int> labelIndex;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
 		for (int i = 0; i < currentLabels.size(); i++) {  labelIndex[m->getSimpleLabel(currentLabels[i])] = i; }
         
         vector<string> newBinLabels;
@@ -1156,7 +1157,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
         for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
         lookup->eliminateZeroOTUS();
 		
-		m->setCurrentSharedBinLabels(newBinLabels);
+		lookup->setOTUNames(newBinLabels);
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
@@ -1249,7 +1250,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
         }
         
         map<string, int> labelIndex;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < currentLabels.size(); i++) {  labelIndex[m->getSimpleLabel(currentLabels[i])] = i; }
         
         vector<string> newBinLabels;
@@ -1325,7 +1326,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
         for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
         lookup->eliminateZeroOTUS();
         
-        m->setCurrentSharedBinLabels(newBinLabels);
+        lookup->setOTUNames(newBinLabels);
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;

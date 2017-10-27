@@ -213,7 +213,7 @@ int GetRAbundCommand::execute(){
         if (countfile != "") {
             processList(out);
         }else {
-            InputData input(inputfile, format);
+            InputData input(inputfile, format, nullVector);
             RAbundVector* rabund = input.getRAbundVector();
             string lastLabel = rabund->getLabel();
             
@@ -322,7 +322,7 @@ int GetRAbundCommand::processList(ofstream& out){
         CountTable ct;
         ct.readTable(countfile, false, false);
         
-        InputData input(inputfile, format);
+        InputData input(inputfile, format, nullVector);
         ListVector* list = input.getListVector();
         string lastLabel = list->getLabel();
         

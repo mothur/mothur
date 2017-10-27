@@ -291,8 +291,10 @@ NewCommand::NewCommand(string option)  {
             //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
             string groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
-			m->setGroups(Groups);
+			else {
+                m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+            }
             
             //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
             string label = validParameter.validFile(parameters, "label", false);			

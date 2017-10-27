@@ -8,7 +8,7 @@
  */
 
 #include "splitgroupscommand.h"
-#include "sharedutilities.h"
+
 #include "sequenceparser.h"
 #include "counttable.h"
 
@@ -205,7 +205,8 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups);	}
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}
 						
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -276,7 +277,6 @@ int SplitGroupCommand::runNameGroup(){
 		if (m->getControl_pressed()) { delete parser; return 0; }
         
 		vector<string> namesGroups = parser->getNamesOfGroups();
-		SharedUtil util;  util.setGroups(Groups, namesGroups);  
 		
 		string fastafileRoot = outputDir + m->getRootName(m->getSimpleName(fastafile));
 		string namefileRoot = outputDir + m->getRootName(m->getSimpleName(namefile));
@@ -328,7 +328,6 @@ int SplitGroupCommand::runCount(){
         if (m->getControl_pressed()) { return 0; }
         
         vector<string> namesGroups = ct.getNamesOfGroups();
-        SharedUtil util;  util.setGroups(Groups, namesGroups); 
         
         //fill filehandles with neccessary ofstreams
         map<string, string> ffiles; //group -> filename

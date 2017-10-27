@@ -170,7 +170,8 @@ SparccCommand::SparccCommand(string option)  {
     
             string groups = validParameter.validFile(parameters, "groups", false);
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 			m->setGroups(Groups);
             
             string label = validParameter.validFile(parameters, "label", false);
@@ -321,7 +322,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         cout.setf(ios::showpoint);
         
         vector<vector<float> > sharedVector;
-        vector<string> otuNames = m->getCurrentSharedBinLabels();
+        vector<string> otuNames = shared->getOTUNames();
         vector<SharedRAbundVector*> data = shared->getSharedRAbundVectors();
         
         //fill sharedVector to pass to CalcSparcc

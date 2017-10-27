@@ -185,6 +185,7 @@ int KruskalWallisCommand::execute(){
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        vector<string> currentLabels = lookup->getOTUNames();
         
         
         //as long as you are not at the end of the file or done wih the lines you want
@@ -197,7 +198,7 @@ int KruskalWallisCommand::execute(){
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                process(data, designMap);
+                process(data, designMap, currentLabels);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
                 
                 processedLabels.insert(lookup->getLabel());
@@ -212,7 +213,7 @@ int KruskalWallisCommand::execute(){
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                process(data, designMap);
+                process(data, designMap, currentLabels);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
                 
                 processedLabels.insert(lookup->getLabel());
@@ -254,7 +255,7 @@ int KruskalWallisCommand::execute(){
             
             m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-            process(data, designMap);
+            process(data, designMap, currentLabels);
             for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
             
             delete lookup;
@@ -276,7 +277,7 @@ int KruskalWallisCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
+int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, vector<string> currentLabels) {
 	try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -299,7 +300,6 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
         if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->setControl_pressed(true); }
         
         LinearAlgebra linear;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < numBins; i++) {
             if (m->getControl_pressed()) { break; }
             

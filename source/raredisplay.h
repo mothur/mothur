@@ -16,7 +16,7 @@ public:
 	void init(string);
 	void reset();
 	void update(SAbundVector*);
-	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb);
+	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string>);
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
@@ -29,6 +29,7 @@ private:
 	string label;
 	map<int, vector<double> > results; //maps seqCount to results for that number of sequences
 	int nIters;
+    vector<string> Groups;
 };
 
 #endif

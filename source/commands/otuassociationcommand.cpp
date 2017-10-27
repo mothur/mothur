@@ -160,7 +160,8 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);	
+				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	
 			}			
 			m->setGroups(Groups);
 			
@@ -350,7 +351,7 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
@@ -515,7 +516,7 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
@@ -582,7 +583,7 @@ int OTUAssociationCommand::readMetadata(){
             if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
 			metadataLabels.push_back(columnLabel);
 		}
-        vector<string> savedLabels = m->getCurrentSharedBinLabels();
+        
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
         metadataLookup->setLabels("1");
@@ -615,11 +616,8 @@ int OTUAssociationCommand::readMetadata(){
 		}
 		in.close();
         
-        //elimnatezeros remove zero otus, we want to remove the extra labels from metaLabels
-        m->setCurrentSharedBinLabels(metadataLabels);
+        metadataLookup->setOTUNames(metadataLabels);
         metadataLookup->eliminateZeroOTUS();
-        metadataLabels = m->getCurrentSharedBinLabels();
-        m->setCurrentSharedBinLabels(savedLabels);
         
         metadata.resize(metadataLookup->getNumBins());
         vector<string> sampleNames = metadataLookup->getNamesGroups();

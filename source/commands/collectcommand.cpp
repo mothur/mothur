@@ -358,7 +358,7 @@ int CollectCommand::execute(){
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}    return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -459,7 +459,7 @@ int CollectCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (cDisplays.size() == 0) { return 0; }
 			
-			input = new InputData(inputFileNames[p], format);
+			input = new InputData(inputFileNames[p], format, nullVector);
 			order = input->getOrderVector();
 			string lastLabel = order->getLabel();
 			
@@ -472,7 +472,7 @@ int CollectCommand::execute(){
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 				delete input;  
 				delete order; 
-				m->clearGroups();
+				
 				return 0;
 			}
 
@@ -484,7 +484,7 @@ int CollectCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order; 
-					m->clearGroups();
+					
 					return 0;
 				}
 
@@ -532,7 +532,7 @@ int CollectCommand::execute(){
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
-					m->clearGroups();
+					
 					return 0;
 			}
 				
@@ -565,7 +565,7 @@ int CollectCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order;
-					m->clearGroups();
+					
 					return 0;
 				}
 				delete order;
@@ -600,7 +600,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		map<string, string> files;
 		map<string, string>::iterator it3;
 					
-		input = new InputData(filename, "sharedfile");
+		input = new InputData(filename, "sharedfile", groups);
 		SharedRAbundVectors* shared = input->getSharedRAbundVectors();
 		
 		string sharedFileRoot = m->getRootName(filename);

@@ -8,7 +8,7 @@
  */
 
 #include "subsamplecommand.h"
-#include "sharedutilities.h"
+
 #include "deconvolutecommand.h"
 #include "getseqscommand.h"
 #include "subsample.h"
@@ -299,7 +299,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
@@ -439,11 +439,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (groupfile != "") {
 			groupMap.readMap(groupfile);
 			
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util;
-			vector<string> namesGroups = groupMap.getNamesOfGroups();
-			util.setGroups(Groups, namesGroups);
-			
+            if (Groups.size() == 0) { Groups = groupMap.getNamesOfGroups(); }
 			//file mismatch quit
 			if (names.size() != groupMap.getNumSeqs()) { 
 				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
@@ -451,11 +447,7 @@ int SubSampleCommand::getSubSampleFasta() {
 				return 0;
 			}			
 		}else if (countfile != "") {
-            if (ct.hasGroupInfo()) {
-                SharedUtil util;
-                vector<string> namesGroups = ct.getNamesOfGroups();
-                util.setGroups(Groups, namesGroups);
-            }
+            if (ct.hasGroupInfo()) { if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); } }
             
             //file mismatch quit
 			if (names.size() != ct.getNumUniqueSeqs()) { 
@@ -830,7 +822,7 @@ int SubSampleCommand::readNames() {
 int SubSampleCommand::getSubSampleShared() {
 	try {
 		
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
         
@@ -842,7 +834,7 @@ int SubSampleCommand::getSubSampleShared() {
 			size = lookup->getNumSeqsSmallestGroup();
         }else {
             lookup->removeGroups(size);
-			Groups = m->getGroups();
+            Groups = lookup->getNamesGroups();
 		}
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine();  return 0; }
 		
@@ -926,11 +918,7 @@ int SubSampleCommand::getSubSampleShared() {
 //**********************************************************************************************************************
 int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 	try {
-		
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
-		
-		string thisOutputDir = outputDir;
+        string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -946,15 +934,10 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-        m->setCurrentSharedBinLabels(subsampledLabels);
-        
+
 		thislookup->printHeaders(out);
 		thislookup->print(out);
         out.close();
-        
-        //save mothurOut's binLabels to restore for next label
-		m->setCurrentSharedBinLabels(saveBinLabels);
 		
 		return 0;
 		
@@ -970,7 +953,7 @@ int SubSampleCommand::getSubSampleList() {
         
 		if (namefile != "") { m->readNames(namefile, nameMap); }
         
-		InputData* input = new InputData(listfile, "list");
+		InputData* input = new InputData(listfile, "list", nullVector);
 		ListVector* list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -984,7 +967,7 @@ int SubSampleCommand::getSubSampleList() {
 			groupMap.readMap(groupfile);
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util; vector<string> namesGroups = groupMap.getNamesOfGroups(); util.setGroups(Groups, namesGroups);
+            if (Groups.size() == 0) { Groups = groupMap.getNamesOfGroups(); }
 			
 			//create outputfiles
 			string groupOutputDir = outputDir;
@@ -999,11 +982,7 @@ int SubSampleCommand::getSubSampleList() {
 				m->mothurOutEndLine(); delete list; delete input;  outGroup.close(); return 0;
 			}			
 		}else if (countfile != "") {
-            if (ct.hasGroupInfo()) {
-                SharedUtil util;
-                vector<string> namesGroups = ct.getNamesOfGroups();
-                util.setGroups(Groups, namesGroups);
-            }
+            if (ct.hasGroupInfo()) { if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); } }
             
             //file mismatch quit
 			if (list->getNumSeqs() != ct.getNumUniqueSeqs()) { 
@@ -1231,7 +1210,7 @@ int SubSampleCommand::getSubSampleList() {
         
         if (taxonomyfile != "") {
             if (namefile == "") {
-                InputData input(listfile, "list");
+                InputData input(listfile, "list", Groups);
                 ListVector* list = input.getListVector();
                 string lastLabel = list->getLabel();
                 
@@ -1362,7 +1341,7 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleRabund() {
 	try {
-		InputData* input = new InputData(rabundfile, "rabund");
+		InputData* input = new InputData(rabundfile, "rabund", nullVector);
 		RAbundVector* rabund = input->getRAbundVector();
 		string lastLabel = rabund->getLabel();
 		
@@ -1516,7 +1495,7 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 int SubSampleCommand::getSubSampleSabund() {
 	try {
 				
-		InputData* input = new InputData(sabundfile, "sabund");
+		InputData* input = new InputData(sabundfile, "sabund", nullVector);
 		SAbundVector* sabund = input->getSAbundVector();
 		string lastLabel = sabund->getLabel();
 		

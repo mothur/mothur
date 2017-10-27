@@ -7,18 +7,16 @@
 //
 
 #include "sharedrabundvectors.hpp"
-#include "sharedutilities.h"
+
 
 /***********************************************************************/
 //reads a shared file
-SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
+SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups) : DataVector(){
     try {
-        m->clearAllGroups();
-        vector<string> allGroups;
-        
         int num, count;
         count = 0;
         string holdLabel, nextLabel, groupN;
+        int numUserGroups = userGroups.size();
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
         
@@ -39,7 +37,6 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
                 
                 //parse labels to save
                 istringstream iStringStream(label);
-                vector<string> currentLabels;
                 while(!iStringStream.eof()){
                     if (m->getControl_pressed()) { break; }
                     string temp;
@@ -47,7 +44,6 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
                     
                     currentLabels.push_back(temp);
                 }
-                m->setSharedBinLabelsInFile(currentLabels);
                 f >> label >> groupN >> num;
             }else {
                 //read in first row since you know there is at least 1 group.
@@ -55,7 +51,6 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(num);
-                vector<string> currentLabels;
                 for (int i = 0; i < num; i++) {
                     //if there is a bin label use it otherwise make one
                     string binLabel = "Otu";
@@ -67,7 +62,6 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
                     binLabel += sbinNumber;
                     currentLabels.push_back(binLabel);
                 }
-                m->setSharedBinLabelsInFile(currentLabels);
             }
         }else {
             label = m->getSaveNextLabel();
@@ -77,29 +71,55 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f) : DataVector(){
         }
         
         //reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-        m->setCurrentSharedBinLabels(m->getSharedBinLabelsInFile());
+        //m->setCurrentSharedBinLabels(m->getSharedBinLabelsInFile());
         
         holdLabel = label;
-        allGroups.push_back(groupN);
         numBins = num;
-        
-        //add new vector to lookup
-        SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN, numBins); m->gobble(f);
-        push_back(temp);
+        bool readData = false;
+        bool remove = false;
+        if (numUserGroups == 0) { //user has not specified groups, so we will use all of them
+            userGroups.push_back(groupN);
+            readData = true;
+        }else{
+            if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+            else { remove = true; }
+        }
+
+        if (readData) {
+            //add new vector to lookup
+            SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN, numBins);
+            push_back(temp);
+        } else { m->getline(f); }
+        m->gobble(f);
+
         
         if (!(f.eof())) { f >> nextLabel; }
         
         //read the rest of the groups info in
         while ((nextLabel == holdLabel) && (f.eof() != true)) {
             f >> groupN >> num;
-            SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN, numBins); m->gobble(f);
-            push_back(temp);
-            allGroups.push_back(groupN);
+            bool readData = false;
+            if (numUserGroups == 0) { //user has not specified groups, so we will use all of them
+                userGroups.push_back(groupN);
+                readData = true;
+            }else{
+                if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+                else { remove = true; }// skipline because you are a group we dont care about
+            }
+
+            if (readData) {
+                //add new vector to lookup
+                SharedRAbundVector* temp = new SharedRAbundVector(f, label, groupN, numBins);
+                push_back(temp);
+            } else { m->getline(f); }
+            m->gobble(f);
+
             
             if (f.eof() != true) { f >> nextLabel; }
         }
         m->setSaveNextLabel(nextLabel);
-        m->setAllGroups(allGroups);
+        
+        if (remove) { eliminateZeroOTUS(); }
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "SharedRAbundVectors");
@@ -121,48 +141,69 @@ void SharedRAbundVectors::print(ostream& output){
     }
 }
 /***********************************************************************/
+void SharedRAbundVectors::setOTUNames(vector<string> names){
+    try {
+        currentLabels.clear();
+        currentLabels = names;
+        getOTUNames();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "setOTUNames");
+        exit(1);
+    }
+}
+/***********************************************************************/
+string SharedRAbundVectors::getOTUName(int bin){
+    try {
+        if (currentLabels.size() < bin) {  }
+        else { getOTUNames(); }
+        return currentLabels[bin];
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "getOTUName");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void SharedRAbundVectors::setOTUName(int bin, string otuName){
+    try {
+        if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+        else {
+            getOTUNames(); //fills currentLabels if needed
+            if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+            else {
+                m->setControl_pressed(true);
+                m->mothurOut("[ERROR]: " + toString(bin) + " bin does not exist\n");
+            }
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "setOTUName");
+        exit(1);
+    }
+}
+
+
+/***********************************************************************/
+vector<string> SharedRAbundVectors::getOTUNames(){
+    try {
+        m->getOTUNames(currentLabels, numBins);
+        return currentLabels;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "getOTUNames");
+        exit(1);
+    }
+}
+/***********************************************************************/
 void SharedRAbundVectors::printHeaders(ostream& output){
     try {
-        string snumBins = toString(numBins);
-        output << "label\tGroup\tnumOtus";
+        getOTUNames();
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
-        if (m->getSharedHeaderMode() == "tax") {
-            for (int i = 0; i < numBins; i++) {
-                
-                //if there is a bin label use it otherwise make one
-                string binLabel = "PhyloType";
-                string sbinNumber = toString(i+1);
-                if (sbinNumber.length() < snumBins.length()) {
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                if (i < currentLabels.size()) {  binLabel = currentLabels[i]; }
-                
-                output << '\t' << binLabel ;
-            }
-            output << endl;
-        }else {
-            for (int i = 0; i < numBins; i++) {
-                //if there is a bin label use it otherwise make one
-                string binLabel = "Otu";
-                
-                if (i < currentLabels.size()) {  binLabel = currentLabels[i]; }
-                else {
-                    string sbinNumber = toString(i+1);
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                }
-                
-                output  << '\t' << binLabel;
-            }
-            
-            output << endl;
-        }
+        output << "label\tGroup\tnumOtus";
+        for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
+        
         m->setPrintedSharedHeaders(true);
     }
     catch(exception& e) {
@@ -195,9 +236,8 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
         if (abunds.size() != lookup.size()) {  m->mothurOut("[ERROR]: you have provided " + toString(abunds.size()) + " abundances, but mothur was expecting " + toString(lookup.size()) + ", please correct.\n"); m->setControl_pressed(true); return 0; }
         
         for (int i = 0; i < lookup.size(); i ++) { lookup[i]->push_back(abunds[i]); }
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        //vector<string> currentLabels = m->getCurrentSharedBinLabels();
         if (binLabel == "") { //create one
-            map<string, int>::iterator it;
             int otuNum = 0; bool notDone = true;
             
             //find label prefix
@@ -227,8 +267,6 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             binLabel = potentialLabel;
         }
         currentLabels.push_back(binLabel);
-        vector<string> temp = m->getSharedBinLabelsInFile(); temp.push_back(binLabel); m->setSharedBinLabelsInFile(temp);
-        m->setCurrentSharedBinLabels(currentLabels);
         
         return lookup.size();
     }
@@ -321,7 +359,7 @@ int SharedRAbundVectors::removeOTU(int bin){
         for (int i = 0; i < lookup.size(); i ++) {
             totalOTUAbund += lookup[i]->remove(bin);            
         }
-        m->eraseCurrentSharedBinLabel(bin);
+        currentLabels.erase(currentLabels.begin()+bin);
         numBins--;
         
         return totalOTUAbund;
@@ -346,25 +384,6 @@ vector<string> SharedRAbundVectors::getNamesGroups(){
 /***********************************************************************/
 SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
     try {
-        SharedUtil util;
-        
-        vector<string> Groups = m->getGroups();
-        vector<string> allGroups = m->getAllGroups();
-        util.setGroups(Groups, allGroups);
-        m->setGroups(Groups);
-        
-        bool remove = false;
-        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
-            //if this sharedrabund is not from a group the user wants then delete it.
-            if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
-                remove = true;
-                delete (*it); (*it) = NULL;
-                it = lookup.erase(it);
-            }else { ++it; }
-        }
-        
-        if (remove) { eliminateZeroOTUS(); }
-        
         SharedOrderVector order;
         for (int i = 0; i < lookup.size(); i++) {
             for (int j = 0; j < lookup[i]->getNumBins(); j++) {
@@ -387,17 +406,10 @@ SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
 /***********************************************************************/
 void SharedRAbundVectors::removeGroups(vector<string> g){
     try {
-        SharedUtil util;
-        
-        vector<string> Groups = m->getGroups();
-        vector<string> allGroups = m->getAllGroups();
-        util.setGroups(Groups, allGroups);
-        m->setGroups(Groups);
-        
         bool remove = false;
         for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
-            if (util.isValidGroup((*it)->getGroup(), g) == false) {
+            if (m->inUsersGroups((*it)->getGroup(), g)) {
                 remove = true;
                 delete (*it); (*it) = NULL;
                 it = lookup.erase(it);
@@ -429,7 +441,6 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
                 ++it;
             }
         }
-        m->setGroups(Groups);
         
         if (remove) { eliminateZeroOTUS(); }
         
@@ -462,27 +473,7 @@ int SharedRAbundVectors::getNumSeqsSmallestGroup(){
 /***********************************************************************/
 vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
     try {
-        SharedUtil util;
-        
-        vector<string> Groups = m->getGroups();
-        vector<string> allGroups = m->getAllGroups();
-        util.setGroups(Groups, allGroups);
-        m->setGroups(Groups);
-        
         vector<SharedRAbundVector*> newLookup;
-        bool remove = false;
-        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
-            if (m->getControl_pressed()) { return newLookup; }
-            //if this sharedrabund is not from a group the user wants then delete it.
-            if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
-                remove = true;
-                delete (*it); (*it) = NULL;
-                it = lookup.erase(it);
-            }else { ++it; }
-        }
-
-        if (remove) { eliminateZeroOTUS(); }
-        
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { return newLookup; }
             SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
@@ -499,27 +490,8 @@ vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
 /***********************************************************************/
 vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVectors(){
     try {
-        SharedUtil util;
-        
-        vector<string> Groups = m->getGroups();
-        vector<string> allGroups = m->getAllGroups();
-        util.setGroups(Groups, allGroups);
-        m->setGroups(Groups);
-        
+        eliminateZeroOTUS();
         vector<SharedRAbundFloatVector*> newLookup;
-        bool remove = false;
-        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
-            if (m->getControl_pressed()) { return newLookup; }
-            //if this sharedrabund is not from a group the user wants then delete it.
-            if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
-                remove = true;
-                delete (*it); (*it) = NULL;
-                it = lookup.erase(it);
-            }else { ++it; }
-        }
-        
-        if (remove) { eliminateZeroOTUS(); }
-        
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { return newLookup; }
             vector<float> abunds;
@@ -542,25 +514,6 @@ vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVector
 /***********************************************************************/
 RAbundVector SharedRAbundVectors::getRAbundVector(){
     try {
-        SharedUtil util;
-        
-        vector<string> Groups = m->getGroups();
-        vector<string> allGroups = m->getAllGroups();
-        util.setGroups(Groups, allGroups);
-        m->setGroups(Groups);
-        
-        bool remove = false;
-        for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
-            //if this sharedrabund is not from a group the user wants then delete it.
-            if (util.isValidGroup((*it)->getGroup(), m->getGroups()) == false) {
-                remove = true;
-                delete (*it); (*it) = NULL;
-                it = lookup.erase(it);
-            }else { ++it; }
-        }
-        
-        if (remove) { eliminateZeroOTUS(); }
-        
         RAbundVector rav;
         for (int i = 0; i < numBins; i++) {
             int abund = getOTUTotal(i);
@@ -605,29 +558,19 @@ SAbundVector SharedRAbundVectors::getSAbundVector(){
         exit(1);
     }
 }
-/***********************************************************************
-OrderVector SharedRAbundVectors::getOrderVector(map<string,int>* nameMap = NULL){
-    try {
-        RAbundVector rav = getRAbundVector();
-        return rav.getOrderVector(NULL);
-    }
-    catch(exception& e) {
-        m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
-        exit(1);
-    }
-}
 /**********************************************************************************************************************/
 void SharedRAbundVectors::eliminateZeroOTUS() {
     try {
-        
-        for (int i = 0; i < lookup[0]->getNumBins();) {
-            if (m->getControl_pressed()) { break; }
-            
-            int total = getOTUTotal(i);
-            
-            //if they are not all zero add this bin
-            if (total == 0) { removeOTU(i);  }
-            else { i++;  }
+        if (lookup.size() > 1) {
+            for (int i = 0; i < lookup[0]->getNumBins();) {
+                if (m->getControl_pressed()) { break; }
+                
+                int total = getOTUTotal(i);
+                
+                //if they are not all zero add this bin
+                if (total == 0) { removeOTU(i);  }
+                else { i++;  }
+            }
         }
     }
     catch(exception& e) {

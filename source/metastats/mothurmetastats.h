@@ -19,7 +19,7 @@ class MothurMetastats {
 		MothurMetastats(double, int); //threshold, numPermutations
 		~MothurMetastats();
 	
-		int runMetastats(string, vector< vector<double> >&, int); //outputFileName, data, secondGroupingStart
+		int runMetastats(string, vector< vector<double> >&, int, vector<string>); //outputFileName, data, secondGroupingStart, otuNames
 	
 	private:
 		MothurOut* m;

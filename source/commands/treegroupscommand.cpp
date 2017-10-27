@@ -242,7 +242,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -410,9 +410,10 @@ int TreeGroupCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
 			
-			input = new InputData(sharedfile, "sharedfile");
+			input = new InputData(sharedfile, "sharedfile", Groups);
 			SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
+            Groups = lookup->getNamesGroups();
 			
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine();  return 0; }
 			
@@ -424,10 +425,10 @@ int TreeGroupCommand::execute(){
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            for (int i = 0; i < m->getAllGroups().size(); i++) { 
-                nameMap.insert(m->getAllGroups()[i]); 
-                gps.insert(m->getAllGroups()[i]); 
-                groupMap[m->getAllGroups()[i]] = m->getAllGroups()[i];
+            for (int i = 0; i < Groups.size(); i++) {
+                nameMap.insert(Groups[i]);
+                gps.insert(Groups[i]);
+                groupMap[Groups[i]] = Groups[i];
             }
             ct->createTable(nameMap, groupMap, gps);
 			
@@ -488,7 +489,6 @@ int TreeGroupCommand::execute(){
             ct->createTable(nameMap, groupMap, gps);
 			
 			vector<string> namesGroups = ct->getNamesOfGroups();
-			m->setGroups(namesGroups);
 			
 			//used in tree constructor 
 			m->setRunParse(false);
@@ -518,7 +518,7 @@ int TreeGroupCommand::execute(){
 		}
 				
 		//reset groups parameter
-		m->clearGroups(); 
+		 
 		
 		//set tree file as new current treefile
 		string current = "";
@@ -640,7 +640,7 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
                 lookup->removeGroups(subsampleSize);
-                Groups = m->getGroups();
+                Groups = lookup->getNamesGroups();
                 m->setTreenames(Groups);
             }
             
@@ -760,7 +760,6 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
             }else{
                 int process = 1;
                 vector<int> processIDS;
-                bool recalc = false;
                 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 //loop through and create all the processes you want
@@ -788,76 +787,10 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                         outtemp.close();
                         
                         exit(0);
-                    }else { 
-                        m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                        //wait to die
-                        for (int i=0;i<processIDS.size();i++) {
-                            int temp = processIDS[i];
-                            wait(&temp);
-                        }
-                        m->setControl_pressed(false);
-                        for (int i=0;i<processIDS.size();i++) {
-                            m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));
-                        }
-                        recalc = true;
-                        break;
                     }
                 }
                 
-                if (recalc) {
-                    //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                    
-                    /******************************************************/
-                    //comparison breakup to be used by different processes later
-                    lines.clear();
-                    numGroups = thisLookup->size();
-                    lines.resize(processors);
-                    for (int i = 0; i < processors; i++) {
-                        lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-                        lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-                    }
-                    /******************************************************/
-                    
-                    calcDists.clear(); calcDists.resize(treeCalculators.size());
-                    processIDS.resize(0);
-                    process = 1;
-                    
-                    //loop through and create all the processes you want
-                    while (process != processors) {
-                        pid_t pid = fork();
-                        
-                        if (pid > 0) {
-                            processIDS.push_back(pid);
-                            process++;
-                        }else if (pid == 0){
-                            
-                            driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);
-                            
-                            string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
-                            ofstream outtemp;
-                            m->openOutputFile(tempdistFileName, outtemp);
-                            
-                            for (int i = 0; i < calcDists.size(); i++) {
-                                outtemp << calcDists[i].size() << endl;
-                                
-                                for (int j = 0; j < calcDists[i].size(); j++) {
-                                    outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                                }
-                            }
-                            outtemp.close();
-                            
-                            exit(0);
-                        }else {
-                            m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                            exit(0);
-                        }
-                    }                    
-                }
-
+                
                 //parent do your part
                 driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
                 
@@ -1038,7 +971,7 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 
                 Consensus consensus;
                 //clear old tree names if any
-                m->setTreenames(m->getGroups()); //may have changed if subsample eliminated groups
+                m->setTreenames(thisLookup->getNamesGroups()); //may have changed if subsample eliminated groups
                 Tree* conTree = consensus.getTree(trees);
                 
                 if (m->getDebug()) {  m->mothurOut("[DEBUG]: done cons tree.\n"); }

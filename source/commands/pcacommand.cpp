@@ -174,7 +174,8 @@ PCACommand::PCACommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  }
-			else { m->splitAtDash(groups, Groups);	}			
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}			
 			m->setGroups(Groups);			
 			
 		}

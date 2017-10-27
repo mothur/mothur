@@ -250,6 +250,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             }
             else {
                 m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
             }
             m->setGroups(Groups);
 
@@ -443,7 +444,7 @@ int ClassifySvmSharedCommand::execute() {
 
     InputData input(sharedfile, "sharedfile");
     SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-
+      vector<string> currentLabels = lookup->getOTUNames();
     //read design file
     designMap.read(designfile);
 
@@ -460,7 +461,7 @@ int ClassifySvmSharedCommand::execute() {
 
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
           vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data);
+        processSharedAndDesignData(data, currentLabels);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
         processedLabels.insert(lookup->getLabel());
@@ -474,7 +475,7 @@ int ClassifySvmSharedCommand::execute() {
         lookup = input.getSharedRAbundVectors(lastLabel);
         m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
           vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-          processSharedAndDesignData(data);
+          processSharedAndDesignData(data, currentLabels);
           for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
         processedLabels.insert(lookup->getLabel());
@@ -517,7 +518,7 @@ int ClassifySvmSharedCommand::execute() {
       m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
 
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data);
+        processSharedAndDesignData(data, currentLabels);
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 
       delete lookup;
@@ -553,15 +554,14 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
 
     while ( lookup != NULL ) {
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        readSharedRAbundVectors(data, designMap, labeledObservationVector, featureVector);
+        readSharedRAbundVectors(data, designMap, labeledObservationVector, featureVector, lookup->getOTUNames());
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
         delete lookup;
         lookup = input.getSharedRAbundVectors();
     }
 }
 
-void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
-    vector<string> currentLabels = m->getCurrentSharedBinLabels();
+void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector, vector<string> currentLabels) {
     for ( int j = 0; j < lookup.size(); j++ ) {
         //i++;
         //vector<individual> data = lookup[j]->getData();
@@ -611,13 +611,13 @@ void printPerformanceSummary(MultiClassSVM* s, ostream& output) {
 }
 //**********************************************************************************************************************
 
-void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
+void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup, vector<string> currentLabels) {
     try {
         OutputFilter outputFilter(verbosity);
 
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;
-        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector, currentLabels);
 
         // optionally remove features with low standard deviation
         if ( stdthreshold > 0.0 ) {
@@ -729,11 +729,11 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 }
 //**********************************************************************************************************************
 
-void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
+void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVector*> lookup, vector<string> currentLabels) {
     try {
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;
-        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector, currentLabels);
         SvmDataset svmDataset(labeledObservationVector, featureVector);
         int evaluationFoldCount = 3;
         int trainFoldCount = 5;

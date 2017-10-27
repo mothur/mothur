@@ -118,7 +118,7 @@ int GetgroupCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 					
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         vector<string> namesOfGroups = lookup->getNamesGroups();
         delete lookup;

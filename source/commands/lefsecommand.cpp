@@ -8,7 +8,7 @@
 
 #include "lefsecommand.h"
 #include "linearalgebra.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> LefseCommand::setParameters(){
@@ -273,9 +273,6 @@ LefseCommand::LefseCommand(string option)  {
 int LefseCommand::execute(){
 	try {
         m->setRandomSeed(1982);
-        //for reading lefse formatted file and running in mothur for testing - pass number of rows used for design file
-        if (false) {  makeShared(1); exit(1); }
-		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap(designfile);
@@ -460,7 +457,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: completed lda\n"); } 
         
-        printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes);
+        printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes, lookup->getOTUNames());
         
         return 0;
     }
@@ -1024,7 +1021,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
     }
 }
 //**********************************************************************************************************************
-int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes) {
+int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels) {
     try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -1038,7 +1035,7 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
         out << "OTU\tLogMaxMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
         for (int i = 0; i < means.size(); i++) { //[numOTUs][classes]
             //find max mean of classes
             double maxMean = -1.0; string maxClass = "none";
@@ -1050,7 +1047,7 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
             logMaxMean = log10(logMaxMean);
             
             out << currentLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->getDebug()) { temp = m->getCurrentSharedBinLabels()[i] + '\t' + toString(logMaxMean) + '\t'; }
+            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
             
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
@@ -1070,14 +1067,13 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
 }
 //**********************************************************************************************************************
 //printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, numBins);
-bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >& subClass2GroupIndex, vector<string> groups) {
+bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >& subClass2GroupIndex, vector<string> groups, vector<string> currentLabels) {
     try {
         cout << "rand_s = ";
         for (int h = 0; h < rand_s.size(); h++) { cout << rand_s[h] << '\t'; } cout << endl;
         
         //print otu data
         int count = 0;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
@@ -1173,87 +1169,10 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         exit(1);
     }
 }
-/**********************************************************************************************************************
-int LefseCommand::makeShared(int numDesignLines) {
-    try {
-        ifstream in;
-        m->openInputFile(sharedfile, in);
-        vector< vector<string> > lines;
-        for(int i = 0; i < numDesignLines; i++) {
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = m->getline(in);
-            cout << line << endl;
-            vector<string> pieces = m->splitWhiteSpace(line);
-            lines.push_back(pieces);
-        }
-        
-        ofstream out;
-        m->openOutputFile(sharedfile+".design", out); out << "group";
-        for (int j = 0; j < lines.size(); j++) { out  << '\t' << lines[j][0]; } out << endl;
-        for (int j = 1; j < lines[0].size(); j++) {
-            out <<(j-1);
-            for (int i = 0; i < lines.size(); i++) {
-                 out  << '\t' << lines[i][j];
-            }
-            out << endl;
-        }
-        out.close();
-        DesignMap design(sharedfile+".design");
-        
-        SharedRAbundFloatVectors* lookup;
-        for (int k = 0; k < lines[0].size()-1; k++) {
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-            temp->setLabel("0.03");
-            temp->setGroup(toString(k));
-            lookup.push_back(temp);
-        }
-        
-        m->currentSharedBinLabels.clear();
-        int count = 0;
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = m->getline(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
-            
-            float sum = 0.0;
-            for (int i = 1; i < pieces.size(); i++) {
-                float value; m->mothurConvert(pieces[i], value);
-                sum += value;
-            }
-            
-            if (sum != 0.0) {
-                //cout << count << '\t';
-                for (int i = 1; i < pieces.size(); i++) {
-                    float value; m->mothurConvert(pieces[i], value);
-                    lookup[i-1]->push_back(value, toString(i-1));
-                    //cout << pieces[i] << '\t';
-                }
-                m->currentSharedBinLabels.push_back(toString(count));
-                //m->currentBinLabels.push_back(pieces[0]);
-                //cout << line<< endl;
-                //cout << endl;
-            }
-            count++;
-        }
-        in.close();
-        
-        for (int k = 0; k < lookup.size(); k++) {
-            //cout << "0.03" << '\t' << toString(k) << endl; lookup[k]->print(cout);
-        }
-        
-        process(lookup, design);
-        
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "LefseCommand", "printToCoutForRTesting");
-        exit(1);
-    }
-}
+/******************************************/
 
-//**********************************************************************************************************************/
+
+
 
 
 

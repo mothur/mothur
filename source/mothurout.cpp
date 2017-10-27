@@ -874,6 +874,71 @@ int MothurOut::mothurRandomShuffle(vector<int>& randomize){
     
 }
 /***********************************************************************/
+int MothurOut::getOTUNames(vector<string>& currentLabels, int numBins){
+    try {
+        
+        if (currentLabels.size() == numBins) { return 0; }
+        
+        string tagHeader = "Otu";
+        if (getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
+        
+        if (currentLabels.size() < numBins) {
+            string snumBins = toString(numBins);
+            
+            for (int i = 0; i < numBins; i++) {
+                string binLabel = tagHeader;
+                
+                if (i < currentLabels.size()) { //label exists, check leading zeros length
+                    string sbinNumber = getSimpleLabel(currentLabels[i]);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    currentLabels[i] = binLabel;
+                }else{
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    currentLabels.push_back(binLabel);
+                }
+            }
+        }
+        return currentLabels.size();
+        
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getOTUNames");
+        exit(1);
+    }
+}
+/**************************************************************************************/
+void MothurOut::getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp) { //groupcomb, Groups, numcomb
+    try {
+        sort(userGroups.begin(), userGroups.end());
+        //calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
+        numComp = 0;
+        for (int i=0; i< userGroups.size(); i++) {
+            numComp += i;
+            for (int l = 0; l < i; l++) {
+                if (userGroups[i] > userGroups[l]) {
+                    //set group comparison labels
+                    groupComb.push_back(userGroups[l] + "-" + userGroups[i]);
+                }else{
+                    groupComb.push_back(userGroups[i] + "-" + userGroups[l]);
+                }
+            }
+        } 
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "getCombos");
+        exit(1);
+    }
+}
+/***********************************************************************/
 int MothurOut::mothurRandomShuffle(OrderVector& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);

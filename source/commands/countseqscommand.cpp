@@ -8,7 +8,7 @@
  */
 
 #include "countseqscommand.h"
-#include "sharedutilities.h"
+
 #include "counttable.h"
 #include "inputdata.h"
 
@@ -168,6 +168,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
             m->setGroups(Groups);
             
             string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
@@ -223,6 +224,7 @@ int CountSeqsCommand::execute(){
             InputData input(sharedfile, "sharedfile");
             SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
             string lastLabel = lookup->getLabel();
+            vector<string> currentLabels = lookup->getOTUNames();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
@@ -237,7 +239,7 @@ int CountSeqsCommand::execute(){
                     
                     m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                    processShared(data, variables);
+                    processShared(data, variables, currentLabels);
                     for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
                     processedLabels.insert(lookup->getLabel());
@@ -252,7 +254,7 @@ int CountSeqsCommand::execute(){
                     m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                     
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                    processShared(data, variables);
+                    processShared(data, variables, currentLabels);
                     for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                     
                     processedLabels.insert(lookup->getLabel());
@@ -295,7 +297,7 @@ int CountSeqsCommand::execute(){
                 m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
                 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                processShared(data, variables);
+                processShared(data, variables, currentLabels);
                 for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
                 
                delete lookup;
@@ -324,7 +326,7 @@ int CountSeqsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
+unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables, vector<string> currentLabels){
     try {
         variables["[distance]"] = lookup[0]->getLabel();
         string outputFileName = getOutputFileName("count", variables);
@@ -336,7 +338,6 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
         out << "OTU_Label\ttotal";
         for (int i = 0; i < lookup.size(); i++) { out << '\t' << lookup[i]->getGroup(); } out << endl;
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int j = 0; j < lookup[0]->getNumBins(); j++) {
             if (m->getControl_pressed()) { break; }
             

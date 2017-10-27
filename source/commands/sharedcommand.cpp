@@ -8,7 +8,7 @@
  */
 
 #include "sharedcommand.h"
-#include "sharedutilities.h"
+
 #include "counttable.h"
 
 //********************************************************************************************************************
@@ -229,7 +229,7 @@ SharedCommand::SharedCommand(string option)  {
 			 else {
                  pickedGroups=true;
 				 m->splitAtDash(groups, Groups);
-				 m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			 }
 
 			 //check for optional parameter and set defaults
@@ -442,11 +442,8 @@ int SharedCommand::createSharedFromBiom() {
             groupNames = readRows(thisLine, numCols);
             
             //if users selected groups, then remove the groups not wanted.
-            SharedUtil util;
-            vector<string> Groups = m->getGroups();
-            vector<string> allGroups = groupNames;
-            util.setGroups(Groups, allGroups);
-            m->setGroups(Groups);
+            if (Groups.size() == 0) { Groups = groupNames; }
+            else { groupNames = Groups; }
 
             //set fileroot
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
@@ -472,10 +469,9 @@ int SharedCommand::createSharedFromBiom() {
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
             string thisLine = it->second;
-            m->setCurrentSharedBinLabels(otuNames);
-
             //read data
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
+            lookup->setOTUNames(otuNames);
             lookup->eliminateZeroOTUS();
 
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -709,29 +705,24 @@ int SharedCommand::createSharedFromListGroup() {
 
         GroupMap* groupMap = NULL;
         CountTable* countTable = NULL;
+        pickedGroups = false;
         if (groupfile != "") {
             groupMap = new GroupMap(groupfile);
 
             int groupError = groupMap->readMap();
             if (groupError == 1) { delete groupMap; return 0; }
             vector<string> allGroups = groupMap->getNamesOfGroups();
-            m->setAllGroups(allGroups);
+            if (Groups.size() == 0) { Groups = allGroups; }
+            else { pickedGroups = true; }
         }else{
             countTable = new CountTable();
             countTable->readTable(countfile, true, false);
+            vector<string> allGroups = countTable->getNamesOfGroups();
+            if (Groups.size() == 0) { Groups = allGroups; }
+            else { pickedGroups = true; }
         }
-
+        int numGroups = Groups.size();
         if (m->getControl_pressed()) { return 0; }
-
-        pickedGroups = false;
-
-        //if hte user has not specified any groups then use them all
-        if (Groups.size() == 0) {
-            if (groupfile != "") { Groups = groupMap->getNamesOfGroups();  }
-            else {  Groups = countTable->getNamesOfGroups();  }
-            m->setGroups(Groups);
-        }else { pickedGroups = true; }
-
 
         ofstream out;
         string filename = "";
@@ -752,7 +743,7 @@ int SharedCommand::createSharedFromListGroup() {
 		variables["[filename]"] = fileroot;
         string errorOff = "no error";
 
-        InputData input(listfile, "shared");
+        InputData input(listfile, "shared", Groups);
         SharedListVector* SharedList = input.getSharedListVector();
         string lastLabel = SharedList->getLabel();
         SharedRAbundVectors* lookup;
@@ -785,11 +776,11 @@ int SharedCommand::createSharedFromListGroup() {
         //if user has specified groups make new groupfile for them
         if ((pickedGroups) && (m->getGroupMode() == "group")) { //make new group file
             string groups = "";
-            if (m->getNumGroups() < 4) {
-                for (int i = 0; i < m->getNumGroups()-1; i++) {
-                    groups += (m->getGroups())[i] + ".";
+            if (numGroups < 4) {
+                for (int i = 0; i < numGroups-1; i++) {
+                    groups += Groups[i] + ".";
                 }
-                groups+=(m->getGroups())[m->getNumGroups()-1];
+                groups+=Groups[numGroups-1];
             }else { groups = "merge"; }
             map<string, string> variables;
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
@@ -804,7 +795,7 @@ int SharedCommand::createSharedFromListGroup() {
             string groupName;
             for (int i = 0; i < names.size(); i++) {
                 groupName = groupMap->getGroup(names[i]);
-                if (isValidGroup(groupName, m->getGroups())) {
+                if (isValidGroup(groupName, Groups)) {
                     outGroups << names[i] << '\t' << groupName << endl;
                 }
             }
@@ -848,15 +839,12 @@ int SharedCommand::createSharedFromListGroup() {
                     ofstream out2;
                     m->openOutputFile(filename, out2);
 
-                    vector<string> savedLabels = m->getCurrentSharedBinLabels();
                     lookup->eliminateZeroOTUS();
                     lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
-                    m->setCurrentSharedBinLabels(savedLabels); //restore old labels
-
                 }else {
-                    if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                    if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -894,15 +882,12 @@ int SharedCommand::createSharedFromListGroup() {
                     ofstream out2;
                     m->openOutputFile(filename, out2);
 
-                    vector<string> savedLabels = m->getCurrentSharedBinLabels();
                     lookup->eliminateZeroOTUS();
                     lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
-                    m->setCurrentSharedBinLabels(savedLabels); //restore old labels
-
                 }else {
-                    if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                    if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -957,15 +942,12 @@ int SharedCommand::createSharedFromListGroup() {
                 ofstream out2;
                 m->openOutputFile(filename, out2);
 
-                vector<string> savedLabels = m->getCurrentSharedBinLabels();
                 lookup->eliminateZeroOTUS();
                 lookup->printHeaders(out2);
                 printSharedData(lookup, out2);
                 out2.close();
-                m->setCurrentSharedBinLabels(savedLabels); //restore old labels
-
             }else {
-                if (m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
                 printSharedData(lookup, out); //prints info to the .shared file
             }
             delete lookup;
@@ -993,10 +975,7 @@ void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& 
 	try {
 
 		if (order.size() == 0) { //user has not specified an order so do aplabetically
-			m->clearGroups();
-            vector<string> Groups = thislookup->getNamesGroups();
             thislookup->print(out);
-            m->setGroups(Groups);
 		}else{
 			//create a map from groupName to each sharedrabund
 			map<string, SharedRAbundVector*> myMap;
@@ -1005,7 +984,7 @@ void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& 
 
 			for (int i = 0; i < data.size(); i++) { myMap[data[i]->getGroup()] = data[i]; }
 
-			m->clearGroups();
+			
 			vector<string> Groups;
 
 			//loop through ordered list and print the rabund
@@ -1022,7 +1001,6 @@ void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& 
 				}
 			}
 
-			m->setGroups(Groups);
             for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 		}
 

@@ -19,7 +19,7 @@
 class Weighted : public TreeCalculator  {
 	
 	public:
-        Weighted( bool r) : includeRoot(r) {};
+        Weighted( bool r, vector<string> G) : includeRoot(r), Groups(G){};
 		~Weighted() {};
 		
 		EstOutput getValues(Tree*, string, string);
@@ -32,7 +32,8 @@ class Weighted : public TreeCalculator  {
 			linePair(int i, int j) : start(i), num(j) {}
 		};
 		vector<linePair> lines;
-
+    
+        vector<string> Groups;
 		EstOutput data;
 		map<string, int>::iterator it;
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.

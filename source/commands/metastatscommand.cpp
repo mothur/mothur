@@ -8,7 +8,7 @@
  */
 
 #include "metastatscommand.h"
-#include "sharedutilities.h"
+
 
 
 
@@ -183,13 +183,14 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
-			}
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+            }
 			
 			sets = validParameter.validFile(parameters, "sets", false);			
 			if (sets == "not found") { sets = ""; }
 			else { 
 				m->splitAtDash(sets, Sets);
+                if (Sets.size() != 0) { if (Sets[0] != "all") { Groups.clear(); } }
 			}
 
 			
@@ -219,29 +220,23 @@ int MetaStatsCommand::execute(){
         
         //just used to convert files to test metastats online
         /****************************************************/
-        bool convertInputToShared = false;
-        convertSharedToInput = false;
-        if (convertInputToShared) { convertToShared(sharedfile); return 0; }
+        //bool convertInputToShared = false;
+        //convertSharedToInput = false;
+        //if (convertInputToShared) { convertToShared(sharedfile); return 0; }
         /****************************************************/
 		
 		designMap = new DesignMap(designfile);
 
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		//setup the pairwise comparions of sets for metastats
-		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
-		//make sure sets are all in designMap
-		SharedUtil* util = new SharedUtil(); 
-		vector<string> dGroups = designMap->getCategory();
-		util->setGroups(Sets, dGroups);  
-		delete util;
-		
+        if (Sets.size() == 0) { Sets = designMap->getCategory();  }
 		int numGroups = Sets.size();
 		for (int a=0; a<numGroups; a++) { 
 			for (int l = 0; l < a; l++) {	
@@ -270,7 +265,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup; m->clearGroups(); delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -301,13 +296,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -335,7 +330,7 @@ int MetaStatsCommand::execute(){
 		}
 	
 		//reset groups parameter
-		m->clearGroups();
+		
 		delete designMap;
 		
         if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
@@ -554,11 +549,11 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
 				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
-                if (convertSharedToInput) { convertToInput(subset, subsetGroups, outputFileName);  }
+                //if (convertSharedToInput) { convertToInput(subset, subsetGroups, outputFileName);  }
 				
 				m->mothurOutEndLine();
 				MothurMetastats mothurMeta(threshold, iters);
-				mothurMeta.runMetastats(outputFileName , data2, setACount);
+				mothurMeta.runMetastats(outputFileName , data2, setACount, thisLookUp->getOTUNames());
 				m->mothurOutEndLine();
 				m->mothurOutEndLine(); 
 			}
@@ -590,7 +585,7 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
  TM7_genera_incertae_sedis	0	0	0	0	0	0	0	0	1	0	1	2	0	2	0	0	0	0	0
  Actinobacteria (class)	1	1	1	2	0	0	0	9	3	7	1	1	1	3	1	2	1	2	3
  Betaproteobacteria	0	0	3	3	0	0	9	1	1	0	1	2	3	1	1	0	0	0	0
-*/
+
 //this function is just used to convert files to test the differences between the metastats version and mothurs version
 int MetaStatsCommand::convertToShared(string filename) {
 	try {
@@ -659,7 +654,7 @@ int MetaStatsCommand::convertToShared(string filename) {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
+/**********************************************************************************************************************
 
 int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
 	try {
@@ -691,4 +686,6 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector
 	}
 }
 
-//**********************************************************************************************************************
+//**********************************************************************************************************************/
+
+

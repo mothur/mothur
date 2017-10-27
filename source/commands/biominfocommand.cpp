@@ -7,7 +7,7 @@
 //
 
 #include "biominfocommand.h"
-#include "sharedutilities.h"
+
 
 
 //**********************************************************************************************************************
@@ -413,7 +413,6 @@ int BiomInfoCommand::createFilesFromBiom() {
                 
                 outTaxSum.close();
             }
-            m->setGroups(groupNames);
             
             //set fileroot
             fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
@@ -439,11 +438,8 @@ int BiomInfoCommand::createFilesFromBiom() {
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
             string thisLine = it->second;
-            m->setCurrentSharedBinLabels(otuNames);
-            
-            //read data
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
-            
+            lookup->setOTUNames(otuNames);
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
             lookup->printHeaders(out);
             lookup->print(out);
@@ -857,7 +853,7 @@ void BiomInfoCommand::printSharedData(SharedRAbundVectors* thislookup, ofstream&
     try {
         
         //sorts alphabetically
-        m->clearGroups();
+        
         vector<string> Groups;
         map<string, SharedRAbundVector*> Ovectors;
         for (int i = 0; i < thislookup.size(); i++) { Ovectors[thislookup[i]->getGroup()] = thislookup[i]; }

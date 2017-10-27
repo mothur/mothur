@@ -212,7 +212,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 				
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
@@ -288,6 +288,7 @@ int UnifracWeightedCommand::execute() {
         else { reader = new TreeReader(treefile, countfile); }
         T = reader->getTrees();
         ct = T[0]->getCountTable();
+        if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
         delete reader;
         
         if (m->getControl_pressed()) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
@@ -298,17 +299,13 @@ int UnifracWeightedCommand::execute() {
 		m->openOutputFile(sumFile, outSum);
 		outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
 		
-        SharedUtil util;
-		string s; //to make work with setgroups
-		Groups = m->getGroups();
 		vector<string> nameGroups = ct->getNamesOfGroups();
-        if (nameGroups.size() < 2) { m->mothurOut("[ERROR]: You cannot run unifrac.weighted with less than 2 groups, aborting.\n"); delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
- 		util.setGroups(Groups, nameGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
-		m->setGroups(Groups);
-		
+        if (Groups.size() < 2) { m->mothurOut("[ERROR]: You cannot run unifrac.weighted with less than 2 groups, aborting.\n"); delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
         if (m->getControl_pressed()) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
         
-		Weighted weighted(includeRoot);
+        if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
+        
+		Weighted weighted(includeRoot, Groups);
 			
 		int start = time(NULL);
             
@@ -332,12 +329,12 @@ int UnifracWeightedCommand::execute() {
                     if (thisSize >= subsampleSize) {    Groups.push_back(newGroups[i]);	}
                     else {   m->mothurOut("You have selected a size that is larger than "+newGroups[i]+" number of sequences, removing "+newGroups[i]+".\n"); }
                 } 
-                m->setGroups(Groups);
+                
             }
         }
         
         //here in case some groups are removed by subsample
-        util.getCombos(groupComb, Groups, numComp);
+        m->getCombos(groupComb, Groups, numComp);
         
         if (numComp < processors) { processors = numComp; }
         
@@ -400,7 +397,7 @@ int UnifracWeightedCommand::execute() {
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
-                Weighted thisWeighted(includeRoot);
+                Weighted thisWeighted(includeRoot, Groups);
                 iterData = thisWeighted.getValues(subSampleTree, processors, outputDir); //userData[0] = weightedscore
                 
                 //save data to make ave dist, std dist
@@ -426,7 +423,7 @@ int UnifracWeightedCommand::execute() {
 		printWSummaryFile();
 		
 		//clear out users groups
-		m->clearGroups();
+		
 		delete ct; 
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
@@ -471,19 +468,20 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         //find standard deviation
         vector<double> stdDev = m->getStandardDeviation(dists, averages);
         
+        int numGroups = Groups.size();
         //make matrix with scores in it
         vector< vector<double> > avedists;	//avedists.resize(m->getNumGroups());
-        for (int i = 0; i < m->getNumGroups(); i++) {
+        for (int i = 0; i < numGroups; i++) {
             vector<double> temp;
-            for (int j = 0; j < m->getNumGroups(); j++) { temp.push_back(0.0); }
+            for (int j = 0; j < numGroups; j++) { temp.push_back(0.0); }
             avedists.push_back(temp);
         }
         
         //make matrix with scores in it
         vector< vector<double> > stddists;	//stddists.resize(m->getNumGroups());
-        for (int i = 0; i < m->getNumGroups(); i++) {
+        for (int i = 0; i < numGroups; i++) {
             vector<double> temp;
-            for (int j = 0; j < m->getNumGroups(); j++) { temp.push_back(0.0); }
+            for (int j = 0; j < numGroups; j++) { temp.push_back(0.0); }
             //stddists[i].resize(m->getNumGroups(), 0.0);
             stddists.push_back(temp);
         }
@@ -491,7 +489,7 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         
         //flip it so you can print it
         int count = 0;
-        for (int r=0; r<m->getNumGroups(); r++) { 
+        for (int r=0; r< numGroups; r++) {
             for (int l = 0; l < r; l++) {
                 avedists[r][l] = averages[count];
                 avedists[l][r] = averages[count];
@@ -520,14 +518,14 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         
         if ((outputForm == "lt") || (outputForm == "square")) {
             //output numSeqs
-            out << m->getNumGroups() << endl;
-            outStd << m->getNumGroups() << endl;
+            out << numGroups << endl;
+            outStd << numGroups << endl;
         }
         
         //output to file
-        for (int r=0; r<m->getNumGroups(); r++) { 
+        for (int r=0; r< numGroups; r++) {
             //output name
-            string name = (m->getGroups())[r];
+            string name = Groups[r];
             if (name.length() < 10) { //pad with spaces to make compatible
                 while (name.length() < 10) {  name += " ";  }
             }
@@ -544,12 +542,12 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
                 outStd << name;
                 
                 //output distances
-                for (int l = 0; l < m->getNumGroups(); l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }
+                for (int l = 0; l < numGroups; l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }
                 out << endl; outStd << endl;
             }else{
                 //output distances
                 for (int l = 0; l < r; l++) {	
-                    string otherName = (m->getGroups())[l];
+                    string otherName = Groups[l];
                     if (otherName.length() < 10) { //pad with spaces to make compatible
                         while (otherName.length() < 10) {  otherName += " ";  }
                     }
@@ -582,15 +580,16 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         set<string> nameMap;
         map<string, string> groupMap;
         set<string> gps;
-        for (int i = 0; i < m->getGroups().size(); i++) { 
-            nameMap.insert(m->getGroups()[i]); 
-            gps.insert(m->getGroups()[i]); 
-            groupMap[m->getGroups()[i]] = m->getGroups()[i];
+        int numGroups = Groups.size();
+        for (int i = 0; i < numGroups; i++) {
+            nameMap.insert(Groups[i]);
+            gps.insert(Groups[i]);
+            groupMap[Groups[i]] = Groups[i];
         }
         newCt.createTable(nameMap, groupMap, gps);
         
         //fills globaldatas tree names
-        m->setTreenames(m->getGroups());
+        m->setTreenames(Groups);
         
         vector<Tree*> newTrees = buildTrees(dists, treeNum, newCt); //also creates .all.tre file containing the trees created
         
@@ -637,20 +636,20 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
         
         ofstream outAll;
         m->openOutputFile(outputFile, outAll);
-        
+        int numGroups = Groups.size();
 
         for (int i = 0; i < dists.size(); i++) { //dists[0] are the dists for the first subsampled tree.
             
             if (m->getControl_pressed()) { break; }
             
             //make matrix with scores in it
-            vector< vector<double> > sims;	sims.resize(m->getNumGroups());
-            for (int j = 0; j < m->getNumGroups(); j++) {
-                sims[j].resize(m->getNumGroups(), 0.0);
+            vector< vector<double> > sims;	sims.resize(numGroups);
+            for (int j = 0; j < numGroups; j++) {
+                sims[j].resize(numGroups, 0.0);
             }
             
             int count = 0;
-			for (int r=0; r<m->getNumGroups(); r++) { 
+			for (int r=0; r<numGroups; r++) {
 				for (int l = 0; l < r; l++) {
                     double sim = -(dists[i][count]-1.0);
 					sims[r][l] = sim;
@@ -689,7 +688,7 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
         vector< vector<string> > namesOfGroupCombos;
         for (int a=0; a<numGroups; a++) { 
             for (int l = 0; l < a; l++) {	
-                vector<string> groups; groups.push_back((m->getGroups())[a]); groups.push_back((m->getGroups())[l]);
+                vector<string> groups; groups.push_back(Groups[a]); groups.push_back(Groups[l]);
                 namesOfGroupCombos.push_back(groups);
             }
         }
@@ -915,7 +914,7 @@ int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGrou
  try {
 		Tree* randT = new Tree(ct);
      
-        Weighted weighted(includeRoot);
+        Weighted weighted(includeRoot, Groups);
      
 		for (int h = start; h < (start+num); h++) {
 	
@@ -1022,6 +1021,7 @@ void UnifracWeightedCommand::printWSummaryFile() {
 void UnifracWeightedCommand::createPhylipFile() {
 	try {
 		int count = 0;
+        int numGroups = Groups.size();
 		//for each tree
 		for (int i = 0; i < T.size(); i++) { 
 		
@@ -1043,19 +1043,16 @@ void UnifracWeightedCommand::createPhylipFile() {
 			ofstream out;
 			m->openOutputFile(phylipFileName, out);
 			
-			if ((outputForm == "lt") || (outputForm == "square")) {
-				//output numSeqs
-				out << m->getNumGroups() << endl;
-			}
+			if ((outputForm == "lt") || (outputForm == "square")) { out << numGroups << endl; }
 
 			//make matrix with scores in it
-			vector< vector<float> > dists;	dists.resize(m->getNumGroups());
-			for (int i = 0; i < m->getNumGroups(); i++) {
-				dists[i].resize(m->getNumGroups(), 0.0);
+			vector< vector<float> > dists;	dists.resize(numGroups);
+			for (int i = 0; i < numGroups; i++) {
+				dists[i].resize(numGroups, 0.0);
 			}
 			
 			//flip it so you can print it
-			for (int r=0; r<m->getNumGroups(); r++) { 
+			for (int r=0; r< numGroups; r++) {
 				for (int l = 0; l < r; l++) {
 					dists[r][l] = utreeScores[count];
 					dists[l][r] = utreeScores[count];
@@ -1064,9 +1061,9 @@ void UnifracWeightedCommand::createPhylipFile() {
 			}
 
 			//output to file
-			for (int r=0; r<m->getNumGroups(); r++) { 
+			for (int r=0; r<numGroups; r++) {
 				//output name
-				string name = (m->getGroups())[r];
+				string name = Groups[r];
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
 				}
@@ -1081,12 +1078,12 @@ void UnifracWeightedCommand::createPhylipFile() {
 					out << name;
 					
 					//output distances
-					for (int l = 0; l < m->getNumGroups(); l++) {	out   << '\t' << dists[r][l];  }
+					for (int l = 0; l < numGroups; l++) {	out   << '\t' << dists[r][l];  }
 					out << endl;
 				}else{
 					//output distances
 					for (int l = 0; l < r; l++) {	
-						string otherName = (m->getGroups())[l];
+						string otherName = Groups[l];
 						if (otherName.length() < 10) { //pad with spaces to make compatible
 							while (otherName.length() < 10) {  otherName += " ";  }
 						}

@@ -272,7 +272,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			string temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
@@ -355,8 +355,9 @@ int HeatMapSimCommand::runCommandShared() {
 		//if the users entered no valid calculators don't execute command
 		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
 		
-		input = new InputData(sharedfile, "sharedfile");
+		input = new InputData(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 			
 		if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
@@ -365,12 +366,12 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-        if (m->getControl_pressed()) {  delete input;  delete lookup;  m->clearGroups(); return 0; }
+        if (m->getControl_pressed()) {  delete input;  delete lookup;   return 0; }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->getControl_pressed()) { delete input;  delete lookup; m->clearGroups(); return 0; }
+			if (m->getControl_pressed()) { delete input;  delete lookup;  return 0; }
 
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
@@ -414,7 +415,7 @@ int HeatMapSimCommand::runCommandShared() {
 		}
 		
 			
-		if (m->getControl_pressed()) {  delete input;  m->clearGroups();  return 0; }
+		if (m->getControl_pressed()) {  delete input;    return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -429,7 +430,7 @@ int HeatMapSimCommand::runCommandShared() {
 			}
 		}
 		
-		if (m->getControl_pressed()) {  delete input;  m->clearGroups(); return 0; }
+		if (m->getControl_pressed()) {  delete input;   return 0; }
 		
 		//run last label if you need to
 		if (needToRun )  {
@@ -444,10 +445,10 @@ int HeatMapSimCommand::runCommandShared() {
 			delete lookup;
 		}
 		
-		if (m->getControl_pressed()) {  delete input;  m->clearGroups(); return 0; }
+		if (m->getControl_pressed()) {  delete input;   return 0; }
 			
 		//reset groups parameter
-		m->clearGroups();  
+		  
 			
 		delete input;  
 	

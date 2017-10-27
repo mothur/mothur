@@ -12,27 +12,32 @@
 #include "ordervector.hpp"
 #include "sharedlistvector.h"
 #include "sharedordervector.h"
-#include "sharedutilities.h"
+
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; }
+//SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; fillGroups = true; }
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; }
+//SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; fillGroups = true;  }
 
 /***********************************************************************/
-SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
+        groups = userGroups; fillGroups = true;
+        if (groups.size() > 0) { fillGroups = false; }
+        
         groupmap = NULL; countTable = NULL;
 		//set up groupmap for later.
         if (m->getGroupMode() == "group") {
             groupmap = new GroupMap(m->getGroupFile());
-            groupmap->readMap(); 
+            groupmap->readMap();
+            if (fillGroups) { groups = groupmap->getNamesOfGroups(); fillGroups = false; }
         }else {
             countTable = new CountTable();
             countTable->readTable(m->getCountTableFile(), true, false);
+            if (fillGroups) { groups = countTable->getNamesOfGroups(); fillGroups = false; }
         }
 
         int hold;
@@ -52,15 +57,13 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-                vector<string> labelsInFile;
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
                     
-					labelsInFile.push_back(temp);
+					binLabels.push_back(temp);
 				}
-                m->setListBinLabelsInFile(labelsInFile);
                 
 				f >> label >> hold;
 			}else {
@@ -69,7 +72,6 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(hold);
-                vector<string> labelsInFile;
                 for (int i = 0; i < hold; i++) {
                     //if there is a bin label use it otherwise make one
                     string binLabel = "Otu";
@@ -79,9 +81,8 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
-                    labelsInFile.push_back(binLabel);
+                    binLabels.push_back(binLabel);
                 }
-                m->setListBinLabelsInFile(labelsInFile);
             }
             m->setSaveNextLabel(label);
 		}else {
@@ -89,8 +90,6 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
             m->setSaveNextLabel(label);
         }
         
-        binLabels = m->getListBinLabelsInFile();
-		
 		data.assign(hold, "");
 		string inputData = "";
         
@@ -140,6 +139,7 @@ string SharedListVector::get(int index){
 void SharedListVector::setLabels(vector<string> labels){
 	try {
 		binLabels = labels;
+        getLabels();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedListVector", "setLabels");
@@ -153,34 +153,7 @@ void SharedListVector::setLabels(vector<string> labels){
 //if you had a listfile that had been subsampled and then added to it, dup names would be possible.
 vector<string> SharedListVector::getLabels(){
     try {
-        string tagHeader = "Otu";
-        if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
-        
-        if (binLabels.size() < data.size()) {
-            string snumBins = toString(numBins);
-            
-            for (int i = 0; i < numBins; i++) {
-                string binLabel = tagHeader;
-                
-                if (i < binLabels.size()) { //label exists, check leading zeros length
-                    string sbinNumber = m->getSimpleLabel(binLabels[i]);
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                    binLabels[i] = binLabel;
-                }else{
-                    string sbinNumber = toString(i+1);
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                    binLabels.push_back(binLabel);
-                }
-            }
-        }
+        m->getOTUNames(binLabels, numBins);
         return binLabels;
     }
 	catch(exception& e) {
@@ -200,6 +173,36 @@ void SharedListVector::push_back(string seqNames){
 		if(nNames > maxRank)	{	maxRank = nNames;	}
 	
 		numSeqs += nNames;
+    
+        int otuNum = numBins; bool notDone = true;
+        
+        //find label prefix
+        string prefix = "Otu";
+        if (binLabels[binLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+        
+        string tempLabel = binLabels[binLabels.size()-1];
+        string simpleLastLabel = m->getSimpleLabel(tempLabel);
+        m->mothurConvert(simpleLastLabel, otuNum); otuNum++;
+        string potentialLabel = toString(otuNum);
+        
+        while (notDone) {
+            if (m->getControl_pressed()) { notDone = false; break; }
+            
+            potentialLabel = toString(otuNum);
+            vector<string>::iterator it = find(binLabels.begin(), binLabels.end(), potentialLabel);
+            if (it == binLabels.end()) {
+                potentialLabel = prefix + toString(otuNum);
+                it = find(binLabels.begin(), binLabels.end(), potentialLabel);
+                if (it == binLabels.end()) {
+                    notDone = false; break;
+                }
+            }
+            otuNum++;
+        }
+        
+       
+        binLabels.push_back(potentialLabel);
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedListVector", "push_back");
@@ -224,6 +227,7 @@ void SharedListVector::clear(){
 	numBins = 0;
 	maxRank = 0;
 	numSeqs = 0;
+    binLabels.clear();
 	return data.clear();
 	
 }
@@ -319,14 +323,13 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
                 if (m->getGroupMode() == "group") {
                     string groupName = groupmap->getGroup(binNames[i]);
                     if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + binNames[i] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-				
-                    order->push_back(i, binSize, groupName);  //i represents what bin you are in
+                    if (m->inUsersGroups(groupName, groups)) { order->push_back(i, binSize, groupName);  }//i represents what bin you are in
                 }else {
                     vector<int> groupAbundances = countTable->getGroupCounts(binNames[i]);
                     vector<string> groupNames = countTable->getNamesOfGroups();
                     for (int k = 0; k < groupAbundances.size(); k++) { //groupAbundances.size() == 0 if there is a file mismatch and m->control_pressed is true.
                         if (m->getControl_pressed()) { return order; }
-                        for (int l = 0; l < groupAbundances[k]; l++) {  order->push_back(i, binSize, groupNames[k]);  }
+                        for (int l = 0; l < groupAbundances[k]; l++) {  if (m->inUsersGroups(groupNames[k], groups)) { order->push_back(i, binSize, groupNames[k]); } }
                     }
                 }
 			}
@@ -345,30 +348,17 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 /***********************************************************************/
 SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 	try {
-        m->setCurrentSharedBinLabels(binLabels);
-        
-		SharedUtil util;
-		vector<string> Groups = m->getGroups();
-        vector<string> allGroups;
-		if (m->getGroupMode() == "group") {  allGroups = groupmap->getNamesOfGroups();  }
-        else {  allGroups = countTable->getNamesOfGroups();  }
-		util.setGroups(Groups, allGroups);
-		m->setGroups(Groups);
-
         vector<SharedRAbundVector*> lookup;  //contains just the groups the user selected
-        vector<string> groups;
+        //vector<string> groups;
         map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
         map<string, SharedRAbundVector*>::iterator it;
         
-		for (int i = 0; i < allGroups.size(); i++) {
-			if (m->inUsersGroups(allGroups[i], m->getGroups())) {  //if this group is in user groups
-                SharedRAbundVector* temp = new SharedRAbundVector(numBins);
-                finder[allGroups[i]] = temp;
-                finder[allGroups[i]]->setLabel(label);
-                finder[allGroups[i]]->setGroup(allGroups[i]);
-				lookup.push_back(finder[allGroups[i]]);
-                groups.push_back(allGroups[i]);
-			}
+		for (int i = 0; i < groups.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector(numBins);
+            finder[groups[i]] = temp;
+            finder[groups[i]]->setLabel(label);
+            finder[groups[i]]->setGroup(groups[i]);
+            lookup.push_back(finder[groups[i]]);
         }
 	
 		//fill vectors
@@ -384,6 +374,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
                     if (it != finder.end()) { it->second->set(i, it->second->get(i) + 1); } //i represents what bin you are in
                 }else{
                     vector<int> counts = countTable->getGroupCounts(binNames[j]);
+                    vector<string> allGroups = countTable->getNamesOfGroups();
                     for (int k = 0; k < allGroups.size(); k++) {
                         it = finder.find(allGroups[k]);
                         if (it != finder.end()) { it->second->set(i, it->second->get(i) + counts[k]); } //i represents what bin you are in
@@ -394,6 +385,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
         
         SharedRAbundVectors* shared = new SharedRAbundVectors();
         for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
+        shared->setOTUNames(binLabels);
         shared->eliminateZeroOTUS();
 
 		return shared;

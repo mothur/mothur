@@ -161,6 +161,7 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				m->setGroups(Groups);
 			}
 			
@@ -323,10 +324,6 @@ int FilterSharedCommand::execute(){
 //**********************************************************************************************************************
 int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 	try {
-		
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
-		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[extension]"] = m->getExtension(sharedfile);
@@ -351,7 +348,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 for (int j = 0; j < data.size(); j++) {
                     otuTotal += data[j]->get(i);
                 }
-                spearmanRank temp(saveBinLabels[i], otuTotal);
+                spearmanRank temp(sharedLookup->getOTUName(i), otuTotal);
                 otus.push_back(temp);
             }
             
@@ -432,15 +429,15 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             }
             
             if (okay && (rarePercent != -0.01)) {
-                if (removeLabels.count(saveBinLabels[i]) != 0) { //are we on the 'bad' list
+                if (removeLabels.count(sharedLookup->getOTUName(i)) != 0) { //are we on the 'bad' list
                     okay = false;
                 }
             }
             
             //did this OTU pass the filter criteria
             if (okay) {
-                filteredLabels.push_back(saveBinLabels[i]);
-                labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
+                //filteredLabels.push_back(saveBinLabels[i]);
+                //labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
                 ++i;
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
@@ -482,28 +479,21 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                     otuNum++;
                 }
                 sharedLookup->push_back(rareCounts, "rareOTUs" + toString(otuNum));
-                filteredLabels.push_back("rareOTUs" + toString(otuNum));
+                //filteredLabels.push_back("rareOTUs" + toString(otuNum));
             }
         }
         
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-        m->setCurrentSharedBinLabels(filteredLabels);
         
 		sharedLookup->printHeaders(out);
         sharedLookup->print(out);
 		out.close();
         
-        
-        //save mothurOut's binLabels to restore for next label
-		m->setCurrentSharedBinLabels(saveBinLabels);
-        
         m->mothurOut("\nRemoved " + toString(numRemoved) + " OTUs.\n");
         
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FilterSharedCommand", "processShared");

@@ -26,7 +26,7 @@ MothurMetastats::MothurMetastats(double t, int n) {
 MothurMetastats::~MothurMetastats() {}
 /***********************************************************/
  //main metastats function
-int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secGroupingStart) {
+int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secGroupingStart, vector<string> currentLabels) {
     try {
          
         row = data.size();		 //numBins
@@ -77,7 +77,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
+            //vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for(int i = 0; i < row; i++){
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
@@ -152,7 +152,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //#*************************************
             pvalues = permuted_pvalues(Pmatrix, T_statistics, data);
             
-            if (m->getDebug()) {  vector<string> currentLabels = m->getCurrentSharedBinLabels(); for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + currentLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
+            if (m->getDebug()) {   for (int i = 0; i < row; i++) { m->mothurOut("[DEBUG]: " + currentLabels[i] + " pvalue = " + toString(pvalues[i]) + "\n"); } }
             
             //#*************************************
             //#  generate p values for sparse data 
@@ -168,7 +168,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
             
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for(int i = 0; i < row; i++){
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
@@ -221,7 +220,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		//output column headings - not really sure... documentation labels 9 columns, there are 10 in the output file
 		//storage 0 = meanGroup1 - line 529, 1 = varGroup1 - line 532, 2 = err rate1 - line 534, 3 = mean of counts group1?? - line 291, 4 = meanGroup2 - line 536, 5 = varGroup2 - line 539, 6 = err rate2 - line 541, 7 = mean of counts group2?? - line 292, 8 = pvalues - line 293
 		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tp-value\n";
-		vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		for(int i = 0; i < row; i++){
 			if (m->getControl_pressed()) { out.close(); return 0; }
 			

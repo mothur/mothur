@@ -204,7 +204,7 @@ int GetSAbundCommand::execute(){
         if (countfile != "") {
             processList(out);
         }else {
-            InputData input(inputfile, format);
+            InputData input(inputfile, format, nullVector);
             SAbundVector* sabund = input.getSAbundVector();
             string lastLabel = sabund->getLabel();
             
@@ -310,7 +310,7 @@ int GetSAbundCommand::processList(ofstream& out){
         CountTable ct;
         ct.readTable(countfile, false, false);
         
-        InputData input(inputfile, format);
+        InputData input(inputfile, format, nullVector);
         ListVector* list = input.getListVector();
         string lastLabel = list->getLabel();
         

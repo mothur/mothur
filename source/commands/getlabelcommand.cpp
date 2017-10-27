@@ -161,7 +161,7 @@ int GetlabelCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData* input = new InputData(inputfile, format);
+		InputData* input = new InputData(inputfile, format, nullVector);
 		OrderVector* order = input->getOrderVector();
 		string label = order->getLabel();
 		

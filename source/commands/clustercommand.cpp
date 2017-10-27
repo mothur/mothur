@@ -965,7 +965,7 @@ int ClusterCommand::runOptiCluster(){
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
-        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list->printHeaders(listFile); }
+        if (!m->getPrintedListHeaders()) { list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
@@ -1054,7 +1054,7 @@ int ClusterCommand::runUniqueCluster(){
         m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
-        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list.printHeaders(listFile); }
+        if (!m->getPrintedListHeaders()) { list.printHeaders(listFile); }
         if(countfile != "") { list.print(listFile, counts); }
         else { list.print(listFile); }
         listFile.close();

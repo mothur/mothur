@@ -7,7 +7,7 @@
 //
 
 #include "sequencecountparser.h"
-#include "sharedutilities.h"
+
 
 /************************************************************/
 SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vector<string> groupsSelected) {

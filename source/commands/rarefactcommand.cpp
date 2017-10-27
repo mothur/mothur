@@ -33,6 +33,7 @@ vector<string> RareFactCommand::setParameters(){
 		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false); parameters.push_back(prabund);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false); parameters.push_back(psabund);
 		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
@@ -59,7 +60,7 @@ string RareFactCommand::getHelpString(){
 	try {
 		ValidCalculators validCalculator;
 		string helpString = "";
-		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, processors, groupmode and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, processors, groupmode, groups and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The rarefaction.single command should be in the following format: \n";
@@ -306,6 +307,12 @@ RareFactCommand::RareFactCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);
+            
+            string groups = validParameter.validFile(parameters, "groups", false);
+            if (groups == "not found") { groups = ""; }
+            else {  m->splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+
 		}
 		
 	}
@@ -332,10 +339,10 @@ int RareFactCommand::execute(){
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
 						
-			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}    return 0; }
 			
 			if (inputFileNames.size() > 1) {
-				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOut("Processing group " + Groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 			int i;
 			ValidCalculators validCalculator;
@@ -396,7 +403,7 @@ int RareFactCommand::execute(){
 						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(getOutputFileName("r_nseqs",variables))));
 						outputNames.push_back(getOutputFileName("r_nseqs",variables)); outputTypes["r_nseqs"].push_back(getOutputFileName("r_nseqs",variables));
 					}
-                    if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = groups[p]; }
+                    if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = Groups[p]; }
 				}
 			}
 			
@@ -404,7 +411,7 @@ int RareFactCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (rDisplays.size() == 0) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  return 0; }
 			
-			InputData input(inputFileNames[p], format);
+			InputData input(inputFileNames[p], format, nullVector);
 			OrderVector* order = input.getOrderVector();
 			string lastLabel = order->getLabel();
 			
@@ -687,27 +694,26 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
         map<string, string> files;
         map<string, string>::iterator it3;
         
-        InputData input(filename, "sharedfile");
+        InputData input(filename, "sharedfile", Groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        vector<string> lookupGroups = lookup->getNamesGroups();
+        Groups = lookup->getNamesGroups();
         
         string sharedFileRoot = m->getRootName(filename);
         
         //clears file before we start to write to it below
-        for (int i=0; i<lookupGroups.size(); i++) {
+        for (int i=0; i<Groups.size(); i++) {
             ofstream temp;
-            string group = lookupGroups[i];
+            string group = Groups[i];
             m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
             filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
-            groups.push_back(group);
         }
         
         while(lookup != NULL) {
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
-                string group = lookupGroups[i];
+                string group = Groups[i];
                 m->openOutputFileAppend(files[group], temp);
                 data[i]->getRAbundVector().print(temp);
                 temp.close();
@@ -717,10 +723,8 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
             delete lookup;
             lookup = input.getSharedRAbundVectors();
         }
-        m->clearGroups();
         
         return filenames;
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RareFactCommand", "parseSharedFile");

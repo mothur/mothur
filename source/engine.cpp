@@ -13,6 +13,7 @@
 
 
 #include "engine.hpp"
+#include "mothur.h"
 
 /***********************************************************************/
 Engine::Engine(){
@@ -86,18 +87,12 @@ bool InteractEngine::getInput(){
 					//executes valid command
                     mout->setChangedSeqNames(false);
 					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-                    vector<string> temp;
-					mout->setTreenames(temp);
+                    mout->setTreenames(nullVector);
 					mout->setSaveNextLabel("");
                     mout->setCommandInputsConvertError(false);
 					mout->setPrintedSharedHeaders(false);
-					mout->setCurrentSharedBinLabels(temp);
-					mout->setSharedBinLabelsInFile(temp);
                     mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
-							
+                
 					Command* command = cFactory->getCommand(commandName, options);
 					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
 					else { quitCommandCalled = command->execute(); }
@@ -242,17 +237,11 @@ bool BatchEngine::getInput(){
 					//executes valid command
                     mout->setChangedSeqNames(false);
 					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-					vector<string> temp;
-					mout->setTreenames(temp);
+					mout->setTreenames(nullVector);
 					mout->setSaveNextLabel("");
 					mout->setCommandInputsConvertError(false);
                     mout->setPrintedSharedHeaders(false);
                     mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
-                    mout->setCurrentSharedBinLabels(temp);
-                    mout->setSharedBinLabelsInFile(temp);
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
@@ -380,17 +369,11 @@ bool ScriptEngine::getInput(){
 					//executes valid command
                     mout->setChangedSeqNames(false);
 					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-					vector<string> temp;
-					mout->setTreenames(temp);
-					mout->setSaveNextLabel("");
+					mout->setTreenames(nullVector);
+                    mout->setSaveNextLabel("");
                     mout->setCommandInputsConvertError(false);
                     mout->setPrintedSharedHeaders(false);
-                    mout->setCurrentSharedBinLabels(temp);
-                    mout->setSharedBinLabelsInFile(temp);
                     mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
 
 					Command* command = cFactory->getCommand(commandName, options);
 					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }

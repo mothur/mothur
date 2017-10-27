@@ -16,6 +16,7 @@ vector<string> CatchAllCommand::setParameters(){
 		//can choose shared or sabund not both, so put them in the same chooseOnlyOneGroup
 		CommandParameter pshared("shared", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none","analysis-bestanalysis-models-bubble-summary",false,false,true); parameters.push_back(pshared);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none","analysis-bestanalysis-models-bubble-summary",false,false,true); parameters.push_back(psabund);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -37,7 +38,7 @@ string CatchAllCommand::getHelpString(){
 		helpString += "For more information about catchall refer to http://www.northeastern.edu/catchall/index.html \n";
 		helpString += "The catchall executable must be in the same folder as your mothur executable. \n";
 		helpString += "If you are a MAC or Linux user you must also have installed mono, a link to mono is on the webpage. \n";
-		helpString += "The catchall command parameters are shared, sabund and label.  shared or sabund is required. \n";
+		helpString += "The catchall command parameters are shared, sabund, groups and label.  shared or sabund is required. \n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The catchall command should be in the following format: \n";
 		helpString += "catchall(sabund=yourSabundFile) \n";
@@ -185,6 +186,12 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				if (sabundfile != "") {  outputDir = m->hasPath(sabundfile); }
 				else { outputDir = m->hasPath(sharedfile); }
 			}
+            
+            string groups = validParameter.validFile(parameters, "groups", false);
+            if (groups == "not found") { groups = ""; }
+            else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }  }
+
 		}
 
 	}
@@ -264,10 +271,10 @@ int CatchAllCommand::execute() {
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			if (inputFileNames.size() > 1) {
-				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOut("Processing group " + Groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 			
-			InputData input(inputFileNames[p], "sabund");
+			InputData input(inputFileNames[p], "sabund", nullVector);
 			SAbundVector* sabund = input.getSAbundVector();
 			string lastLabel = sabund->getLabel();
 							
@@ -596,7 +603,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 					temp >> tempLabel; 
 					
 					//save for later
-					if (j == 1) { thisLine += groups[i] + "\t" + tempLabel + "\t";	}
+					if (j == 1) { thisLine += Groups[i] + "\t" + tempLabel + "\t";	}
 					else{  thisLine += tempLabel + "\t";	}
 				}
 				
@@ -713,15 +720,15 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 		vector<string> filenames;
 		
 		//read first line
-		InputData input(filename, "sharedfile");
+		InputData input(filename, "sharedfile", Groups);
 		SharedRAbundVectors* shared = input.getSharedRAbundVectors();
-        groups = shared->getNamesGroups();
+        Groups = shared->getNamesGroups();
 		string sharedFileRoot = outputDir + m->getRootName(m->getSimpleName(filename));
 		
 		//clears file before we start to write to it below
-		for (int i=0; i<groups.size(); i++) {
-			m->mothurRemove((sharedFileRoot + groups[i] + ".sabund"));
-			filenames.push_back((sharedFileRoot + groups[i] + ".sabund"));
+		for (int i=0; i<Groups.size(); i++) {
+			m->mothurRemove((sharedFileRoot + Groups[i] + ".sabund"));
+			filenames.push_back((sharedFileRoot + Groups[i] + ".sabund"));
 		}
     
 		while(shared != NULL) {
@@ -729,7 +736,7 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 			for (int i = 0; i < lookup.size(); i++) {
 				SAbundVector sav = lookup[i]->getSAbundVector();
 				ofstream out;
-				m->openOutputFileAppend(sharedFileRoot + groups[i] + ".sabund", out);
+				m->openOutputFileAppend(sharedFileRoot + Groups[i] + ".sabund", out);
 				sav.print(out);
 				out.close();
 			}

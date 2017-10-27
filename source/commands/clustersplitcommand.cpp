@@ -711,7 +711,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 				return labelBin;
 			}
 			
-			InputData* input = new InputData(listNames[k], "list");
+			InputData* input = new InputData(listNames[k], "list", nullVector);
 			ListVector* list = input->getListVector();
 			string lastLabel = list->getLabel();
             
@@ -840,7 +840,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
 	
 				if (m->getControl_pressed()) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { m->mothurRemove(listNames[i]);  } if (rabund != NULL) { delete rabund; } return 0; }
 				
-				InputData* input = new InputData(listNames[k], "list");
+				InputData* input = new InputData(listNames[k], "list", nullVector);
 				ListVector* list = input->getListVector(thisLabel);
 				
 				//this file has reached the end
@@ -861,8 +861,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
                 sabund.print(outSabund);
                 rabund->print(outRabund);
             }
-			//outList << endl;
-            if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); completeList.printHeaders(outList); }
+
+            if (!m->getPrintedListHeaders()) { completeList.printHeaders(outList); }
             if (countfile == "") { completeList.print(outList); }
             else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);   }
             else { completeList.print(outList); }

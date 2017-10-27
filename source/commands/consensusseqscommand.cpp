@@ -314,7 +314,7 @@ int ConsensusSeqsCommand::execute(){
 		}else {
 			
             
-			InputData* input = new InputData(listfile, "list");
+			InputData* input = new InputData(listfile, "list", nullVector);
 			ListVector* list = input->getListVector();
 			
 			string lastLabel = list->getLabel();

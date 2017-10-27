@@ -198,10 +198,10 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; m->clearGroups(); }
+			if (groups == "not found") { groups = "";  }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 				
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
@@ -268,16 +268,21 @@ int ParsimonyCommand::execute() {
 		}
 			
 		//set users groups to analyze
-		SharedUtil util;
-		vector<string> mGroups = m->getGroups();
 		vector<string> tGroups = ct->getNamesOfGroups();
-		util.setGroups(mGroups, tGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
-		util.getCombos(groupComb, mGroups, numComp);
-		m->setGroups(mGroups);
+        //check that groups are valid
+        for (int i = 0; i < Groups.size(); i++) {
+            if (!m->inUsersGroups(Groups[i], tGroups)) {
+                m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+                // erase the invalid group from userGroups
+                Groups.erase(Groups.begin()+i);
+                i--;
+            }
+        }
+		m->getCombos(groupComb, Groups, numComp);
 			
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
 			
-		Parsimony pars;
+		Parsimony pars(Groups);
 		counter = 0;
 	
 		Progress* reading;
@@ -288,7 +293,7 @@ int ParsimonyCommand::execute() {
 			delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-			m->clearGroups();
+			
 			return 0;
 		}
 			
@@ -313,7 +318,7 @@ int ParsimonyCommand::execute() {
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
+					
 					return 0;
 				}
 
@@ -352,7 +357,7 @@ int ParsimonyCommand::execute() {
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					m->clearGroups();
+					
 					return 0;
 				}
 					

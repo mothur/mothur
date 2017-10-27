@@ -187,6 +187,7 @@ VennCommand::VennCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				m->setGroups(Groups);
 			}
 			
@@ -309,7 +310,7 @@ int VennCommand::execute(){
 			
 				if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-                    delete lookup; m->clearGroups(); delete venn;
+                    delete lookup;  delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 				}
@@ -381,7 +382,7 @@ int VennCommand::execute(){
 			
 			if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					m->clearGroups(); delete venn;
+					 delete venn;
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 			}
@@ -432,10 +433,10 @@ int VennCommand::execute(){
 		
 
 			//reset groups parameter
-			m->clearGroups();  
+			  
 			
 			if (m->getControl_pressed()) {
-					m->clearGroups(); delete venn;
+					 delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;

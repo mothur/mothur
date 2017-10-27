@@ -18,8 +18,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
         CountTable* ct = t->getCountTable();
 		
 		//if the users enters no groups then give them the score of all groups
-		vector<string> mGroups = m->getGroups();
-		int numGroups = mGroups.size();
+		int numGroups = Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -27,7 +26,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(mGroups[r]); groups.push_back(mGroups[l]);
+				vector<string> groups; groups.push_back(Groups[r]); groups.push_back(Groups[l]);
 				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -47,8 +46,8 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < mGroups.size(); i++) {
-					groups.push_back(mGroups[i]);
+				for (int i = 0; i < Groups.size(); i++) {
+					groups.push_back(Groups[i]);
 					//cout << globaldata->Groups[i] << endl;
 				}
 				namesOfGroupCombos.push_back(groups);
@@ -97,7 +96,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+				//myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 				
 				if (m->getControl_pressed()) { exit(0); }
 				
@@ -156,7 +155,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
                     process++;
                 }else if (pid == 0){
                     EstOutput myresults;
-                    myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+                    //myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
                     
                     if (m->getControl_pressed()) { exit(0); }
                     
@@ -178,7 +177,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
         }
 
         
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		//results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 

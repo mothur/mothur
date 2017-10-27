@@ -8,7 +8,7 @@
  */
 
 #include "splitabundcommand.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> SplitAbundCommand::setParameters(){	
@@ -226,7 +226,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
             
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 			
 			if (((groupfile == "") && (countfile == ""))&& (groups != "")) {  m->mothurOut("You cannot select groups without a valid group or count file, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";  Groups.clear(); }
 			
@@ -280,14 +280,6 @@ int SplitAbundCommand::execute(){
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-        
-        if (Groups.size() != 0) {
-            vector<string> allGroups;
-            if (countfile != "") { allGroups = ct.getNamesOfGroups(); }
-            else { allGroups = groupMap.getNamesOfGroups(); }
-            SharedUtil util;
-            util.setGroups(Groups, allGroups);
-        }
 		
 		if (listfile != "") { //you are using a listfile to determine abundance
 			if (outputDir == "") { outputDir = m->hasPath(listfile); }
@@ -296,7 +288,7 @@ int SplitAbundCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;	
 			
-			InputData input(listfile, "list");
+			InputData input(listfile, "list", Groups);
 			ListVector* list = input.getListVector();
 			string lastLabel = list->getLabel();
 			

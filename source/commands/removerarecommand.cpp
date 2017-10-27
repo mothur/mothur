@@ -10,7 +10,7 @@
 #include "removerarecommand.h"
 #include "sequence.hpp"
 #include "groupmap.h"
-#include "sharedutilities.h"
+
 #include "inputdata.h"
 
 //**********************************************************************************************************************
@@ -251,6 +251,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -841,7 +842,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 		}
 		
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
 		if (byGroup) {
 			
 			//for each otu

@@ -157,7 +157,7 @@ int GetListCountCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		input = new InputData(listfile, "list");
+		input = new InputData(listfile, "list", nullVector);
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 

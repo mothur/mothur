@@ -8,7 +8,7 @@
  */
 
 #include "mergegroupscommand.h"
-#include "sharedutilities.h"
+
 #include "counttable.h"
 #include "removeseqscommand.h"
 
@@ -217,6 +217,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			m->setGroups(Groups);
             
             method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
@@ -291,7 +292,7 @@ int MergeGroupsCommand::execute(){
         if (countfile != "") { processCountFile(designMap); }
 
 		//reset groups parameter
-		m->clearGroups();  
+		  
 		delete designMap;
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
@@ -384,7 +385,7 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out)
         merged->eliminateZeroOTUS(); // remove any zero OTUs created by median option.
         
         //print new file
-        if (m->getPrintedSharedHeaders()){ merged->printHeaders(out); }
+        if (!m->getPrintedSharedHeaders()){ merged->printHeaders(out); }
         merged->print(out);
         delete merged;
         
@@ -423,7 +424,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  out.close(); delete lookup; m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) {  out.close(); delete lookup;   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -454,13 +455,13 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  out.close(); m->clearGroups();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  out.close();    delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();				
 		}
 		
-		if (m->getControl_pressed()) { out.close(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) { out.close();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;

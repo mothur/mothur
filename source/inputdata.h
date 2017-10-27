@@ -13,7 +13,7 @@
 class InputData {
 	
 public:
-	InputData(string, string);
+	InputData(string, string, vector<string>);
 	InputData(string, string, string);
 	~InputData();
 	ListVector* getListVector();
@@ -47,6 +47,8 @@ private:
 	map<string,int> orderMap;
 	string filename;
 	MothurOut* m;
+    vector<string> currentLabels;
+    vector<string> groups;
 };
 
 

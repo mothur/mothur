@@ -10,16 +10,16 @@
 #include "heatmap.h"
 
 //**********************************************************************************************************************
-HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, string i){
+HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, string i, vector<string> cl){
 	try {
 		m = MothurOut::getInstance();
-//		format = globaldata->getFormat();
 		sorted = sort;
 		scaler = scale;
 		outputDir = dir;
 		numOTU = num;
 		fontSize = fsize;
 		inputfile = i;
+        currentLabels = cl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HeatMap", "HeatMap");
@@ -119,7 +119,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		}
 		
 		//sort lookup so shared bins are on top
-        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
+        vector<string> sortedLabels = currentLabels;
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -221,14 +221,11 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 //**********************************************************************************************************************
 vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 	try {
-				
+        vector<string> sortedLabels; sortedLabels.resize(currentLabels.size(), "");
 		vector<SharedRAbundVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
-        vector<string> currentLabels  = m->getCurrentSharedBinLabels();
-		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
 			place = orderShared(lookup);	
@@ -236,7 +233,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 			place = orderTopOtu(lookup);	
 		}else if (sorted == "topgroup") {
 			place = orderTopGroup(lookup);	
-		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return sortedLabels; }
+		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();   }
 				
 		
 		/******************* create copy of lookup *********************/
@@ -254,17 +251,11 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
 				int newAbund = looktemp[j]->get(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
+                sortedLabels[place[i]] = currentLabels[i];
 			}
-            sortedLabels[place[i]] = currentLabels[i];
 		}
 		
-		//delete looktemp -- Sarah look at - this is causing segmentation faults
-		for (int j = 0; j < looktemp.size(); j++) {
-            //delete looktemp[j];
-        }
-		
-		return sortedLabels;
-		
+        return sortedLabels;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HeatMap", "sortSharedVectors");
@@ -431,7 +422,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		}
 		
 		//sort lookup so shared bins are on top
-		vector<string> sortedLabels = m->getCurrentSharedBinLabels();
+        vector<string> sortedLabels = currentLabels;
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -537,8 +528,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> looku
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->getCurrentSharedBinLabels();
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> sortedLabels; sortedLabels.resize(currentLabels.size(), "");
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -567,11 +557,6 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> looku
 				lookup[j]->set(place[i], newAbund); //binNumber, abundance, group
                 sortedLabels[place[i]] = currentLabels[i];
 			}
-		}
-		
-		//delete looktemp -- Sarah look at - this is causing segmentation faults
-		for (int j = 0; j < looktemp.size(); j++) {
-//			delete looktemp[j];
 		}
 		
 		return sortedLabels;

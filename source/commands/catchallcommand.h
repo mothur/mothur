@@ -45,7 +45,7 @@ private:
 	bool abort, allLines;
 	set<string> labels;
 	vector<string> outputNames;
-	vector<string> groups;
+	vector<string> Groups;
 	
 	string process(SAbundVector*, string);
 	int createSummaryFile(string, string, ofstream&); 

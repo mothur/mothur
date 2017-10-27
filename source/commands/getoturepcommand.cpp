@@ -12,7 +12,7 @@
 #include "readcolumn.h"
 #include "formatphylip.h"
 #include "formatcolumn.h"
-#include "sharedutilities.h"
+
 
 
 //********************************************************************************************************************
@@ -365,9 +365,9 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					abort = true;
 				}else { 
 					m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 				}
 			}
-			m->setGroups(Groups);
 			
 			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
@@ -415,25 +415,12 @@ int GetOTURepCommand::execute(){
             groupMap = new GroupMap(groupfile);
             int error = groupMap->readMap();
             if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
-            
-            if (Groups.size() != 0) {
-                SharedUtil util;
-                vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
-                util.setGroups(Groups, gNamesOfGroups, "getoturep");
-                groupMap->setNamesOfGroups(gNamesOfGroups);
-            }
-        }else if (hasGroups) {
-            if (Groups.size() != 0) {
-                SharedUtil util;
-                vector<string> gNamesOfGroups = ct.getNamesOfGroups();
-                util.setGroups(Groups, gNamesOfGroups, "getoturep");
-            }
         }
         
         //done with listvector from matrix
         if (list != NULL) { delete list; }
         
-        InputData input(listfile, "list");
+        InputData input(listfile, "list", Groups);
         list = input.getListVector();
         string lastLabel = list->getLabel();
         

@@ -471,7 +471,7 @@ int CreateDatabaseCommand::execute(){
             header += "\tOTUConTaxonomy";
             out << header << endl;
             
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
+            vector<string> currentLabels = lookup->getOTUNames();
             for (int h = 0; h < lookup->getNumBins(); h++) {
                 
                 if (m->getControl_pressed()) { break; }
@@ -614,7 +614,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
 //**********************************************************************************************************************
 ListVector* CreateDatabaseCommand::getList(){
 	try {
-		InputData* input = new InputData(listfile, "list");
+		InputData* input = new InputData(listfile, "list", nullVector);
 		ListVector* list = input->getListVector();
 		string lastLabel = list->getLabel();
 		

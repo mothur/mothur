@@ -49,7 +49,7 @@ private:
     
     unsigned long long createProcesses(GroupMap*&, string);
     unsigned long long driver(unsigned long long, unsigned long long, string, GroupMap*&);
-    unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
+    unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables, vector<string>);
 
     
 };

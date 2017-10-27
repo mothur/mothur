@@ -445,7 +445,7 @@ int SensSpecCommand::processListFile(){
 		if(cutoff == -1.00)	{	getCutoff = 1;                                          }
 		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));	}
 
-		InputData input(listFile, "list");
+		InputData input(listFile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
 

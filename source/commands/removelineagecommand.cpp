@@ -771,7 +771,7 @@ int RemoveLineageCommand::readConsList(){
 //**********************************************************************************************************************
 int RemoveLineageCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -855,15 +855,13 @@ int RemoveLineageCommand::readShared(){
         vector<string> newLabels;
         bool wroteSomething = false;
         int numRemoved = 0;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
-            if (names.count(m->getSimpleLabel(currentLabels[i])) == 0) {
+            if (names.count(m->getSimpleLabel(lookup->getOTUNames()[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(currentLabels[i]);
                 ++i;
             }else { lookup->removeOTU(i); numRemoved++; }
         }
@@ -878,8 +876,6 @@ int RemoveLineageCommand::readShared(){
         ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-    
-        m->setCurrentSharedBinLabels(newLabels);
         
 		lookup->printHeaders(out);
         lookup->print(out);
@@ -899,7 +895,7 @@ int RemoveLineageCommand::readShared(){
 //**********************************************************************************************************************
 SharedRAbundVectors* RemoveLineageCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		

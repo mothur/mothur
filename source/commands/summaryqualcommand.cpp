@@ -35,7 +35,7 @@ string SummaryQualCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The summary.qual command reads a quality file and an optional name or count file, and summarizes the quality information.\n";
-		helpString += "The summary.tax command parameters are qfile, name, count and processors. qfile is required, unless you have a valid current quality file.\n";
+		helpString += "The summary.qual command parameters are qfile, name, count and processors. qfile is required, unless you have a valid current quality file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your quality file. \n";
         helpString += "The count parameter allows you to enter a count file associated with your quality file. \n";
 		helpString += "The summary.qual command should be in the following format: \n";

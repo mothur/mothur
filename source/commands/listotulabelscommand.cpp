@@ -180,7 +180,8 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 			m->setGroups(Groups);
             
             string label = validParameter.validFile(parameters, "label", false);			
@@ -462,7 +463,7 @@ int ListOtuLabelsCommand::createList(SharedRAbundVectors*& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
         
         out.close();
@@ -487,7 +488,7 @@ int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors*& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
         
         out.close();

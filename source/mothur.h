@@ -99,6 +99,7 @@ using namespace std;
 
 typedef unsigned long ull;
 typedef unsigned short intDist;
+const vector<string> nullVector; //used to pass blank vector
 
 struct IntNode {
 	int lvalue;

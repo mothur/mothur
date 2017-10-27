@@ -210,7 +210,7 @@ int ParseListCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;	
 	
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		

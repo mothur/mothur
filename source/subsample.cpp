@@ -105,11 +105,11 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
 	}
 }
 //**********************************************************************************************************************
-vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int size) {
+vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int size, vector<string> currentLabels) {
     try {
         
         //save mothurOut's binLabels to restore for next label
-        vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
+        vector<string> saveBinLabels = currentLabels;
         SharedRAbundVectors* newLookup = new SharedRAbundVectors();
         
         int numBins = rabunds[0]->getNumBins();
@@ -132,7 +132,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                 
                 for (int j = 0; j < size; j++) {
                     
-                    if (m->getControl_pressed()) {  return m->getCurrentSharedBinLabels(); }
+                    if (m->getControl_pressed()) {  return currentLabels; }
                     
                     int bin = order[j];
                     temp->increment(bin);
@@ -140,18 +140,15 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                 newLookup->push_back(temp);
             }else { SharedRAbundVector* temp = new SharedRAbundVector(*rabunds[i]); newLookup->push_back(temp); }
         }
-        
+        newLookup->setOTUNames(currentLabels);
         newLookup->eliminateZeroOTUS();
         
         for (int i = 0; i < rabunds.size(); i++) { delete rabunds[i]; } rabunds.clear();
         rabunds = newLookup->getSharedRAbundVectors();
         
-        delete newLookup;
-        if (m->getControl_pressed()) { return m->getCurrentSharedBinLabels(); }
-        
         //save mothurOut's binLabels to restore for next label
-        vector<string> subsampleBinLabels = m->getCurrentSharedBinLabels();
-        m->setCurrentSharedBinLabels(saveBinLabels);
+        vector<string> subsampleBinLabels = newLookup->getOTUNames();
+        delete newLookup;
         
         return subsampleBinLabels;
         
@@ -165,21 +162,17 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
 vector<string> SubSample::getSample(SharedRAbundVectors*& thislookup, int size) {
 	try {
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
+		vector<string> saveBinLabels = thislookup->getOTUNames();
         vector<SharedRAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
         
-        vector<string> subsampleBinLabels = getSample(rabunds, size);
+        vector<string> subsampleBinLabels = getSample(rabunds, size, saveBinLabels);
         SharedRAbundVectors* newLookup = new SharedRAbundVectors();
 		
 		for (int i = 0; i < rabunds.size(); i++) { newLookup->push_back(rabunds[i]);  }
+        newLookup->setOTUNames(subsampleBinLabels);
         delete thislookup;
         thislookup = newLookup;
         
-		if (m->getControl_pressed()) { return m->getCurrentSharedBinLabels(); }
-		
-		//save mothurOut's binLabels to restore for next label
-		m->setCurrentSharedBinLabels(saveBinLabels);
-		
 		return subsampleBinLabels;
 		
 	}

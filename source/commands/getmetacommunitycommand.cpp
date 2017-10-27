@@ -177,7 +177,8 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 			m->setGroups(Groups);
             
             string label = validParameter.validFile(parameters, "label", false);
@@ -631,14 +632,14 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             if (method == "dmm") {
                 finder->printFitData(cout, minLaplace);
                 finder->printFitData(fitData);
-                vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                vector<string> currentLabels = thislookup->getOTUNames();
                 finder->printRelAbund(relabund, currentLabels);
                 outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
             }else if ((method == "pam") || (method == "kmeans")) { //print silouettes and ch values
                 finder->printSilData(cout, chi, silhouettes);
                 finder->printSilData(silData, chi, silhouettes);
                 if (method == "kmeans") {
-                    vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                    vector<string> currentLabels = thislookup->getOTUNames();
                     finder->printRelAbund(relabund, currentLabels);
                     outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
                 }

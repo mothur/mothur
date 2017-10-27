@@ -34,7 +34,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
+//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"

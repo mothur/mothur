@@ -35,7 +35,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
+//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -88,7 +88,7 @@ private:
 	
 	string format, outputDir;
 	int numGroups, processors, subsampleSize, iters, numCalcs;
-	int process(vector<SharedRAbundVector*>, string, string);
+	int process(vector<SharedRAbundVector*>, string, string, vector<string>);
     int printSims(ostream&, vector< vector<double> >&, vector<string>);
     int runCalcs(vector<SharedRAbundVector*>&, string, string, vector< vector<seqDist>  >&);
 

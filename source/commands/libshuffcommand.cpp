@@ -182,7 +182,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			else { 
 				savegroups = groups;
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 				
 			string temp;
@@ -285,35 +285,35 @@ int LibShuffCommand::execute(){
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
-		if (m->getControl_pressed()) {  delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
+		if (m->getControl_pressed()) {  delete form;  delete matrix; delete groupMap; return 0; }
 	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
 	
-		if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; return 0; }
 				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->getControl_pressed()) {  outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+				if (m->getControl_pressed()) {  outputTypes.clear();  delete form;  delete matrix; delete groupMap; delete reading; return 0; }
 
-				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
-				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = groupMap->groupIndex[groupNames[j]];
+				reading->newLine(Groups[i]+'-'+Groups[j], iters);
+				int spoti = groupMap->groupIndex[Groups[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[Groups[j]];
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; delete reading; return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->getControl_pressed()) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; delete reading; return 0; }
 					
 					reading->update(p);			
 				}
@@ -322,7 +322,7 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  delete form;  delete matrix; delete groupMap; delete reading; return 0; }
 	
 		reading->finish();
 		delete reading;
@@ -332,7 +332,7 @@ int LibShuffCommand::execute(){
 		printCoverageFile();
 				
 		//clear out users groups
-		m->clearGroups();
+		
 		delete form;
 		
 		delete matrix; delete groupMap;
@@ -378,8 +378,8 @@ int LibShuffCommand::printCoverageFile() {
 			for(int j=0;j<numGroups;j++){
 				indices[i][j] = index++;
 				
-				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = groupMap->groupIndex[groupNames[j]];
+				int spoti = groupMap->groupIndex[Groups[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[Groups[j]];
 				
 				for(int k=0;k<savedMinValues[spoti][spotj].size();k++){
 					
@@ -414,13 +414,13 @@ int LibShuffCommand::printCoverageFile() {
 		
 		outCov << "dist";
 		for (int i = 0; i < numGroups; i++){
-			outCov << '\t' << groupNames[i];
+			outCov << '\t' << Groups[i];
 		}
 		for (int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
 				if(m->getControl_pressed())  { outCov.close(); return 0; }
-				outCov << '\t' << groupNames[i] << '-' << groupNames[j] << '\t';
-				outCov << groupNames[j] << '-' << groupNames[i];
+				outCov << '\t' << Groups[i] << '-' << Groups[j] << '\t';
+				outCov << Groups[j] << '-' << Groups[i];
 			}
 		}
 		outCov << endl;
@@ -474,28 +474,28 @@ int LibShuffCommand::printSummaryFile() {
 			for(int j=i+1;j<numGroups;j++){
 				if(m->getControl_pressed())  { outSum.close(); return 0; }
 				
-				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = groupMap->groupIndex[groupNames[j]];
+				int spoti = groupMap->groupIndex[Groups[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[Groups[j]];
 				
 				if(pValueCounts[i][j]){
-					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
-					m->mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); m->mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+					cout << setw(20) << left << Groups[i]+'-'+Groups[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+					m->mothurOutJustToLog(Groups[i]+"-"+Groups[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); m->mothurOutEndLine();
+					outSum << setw(20) << left << Groups[i]+'-'+Groups[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
 				}
 				else{
-					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
-					m->mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+					cout << setw(20) << left << Groups[i]+'-'+Groups[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+					m->mothurOutJustToLog(Groups[i]+"-"+Groups[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
+					outSum << setw(20) << left << Groups[i]+'-'+Groups[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
 				}
 				if(pValueCounts[j][i]){
-					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
-					m->mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); m->mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+					cout << setw(20) << left << Groups[j]+'-'+Groups[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+					m->mothurOutJustToLog(Groups[j]+"-"+Groups[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); m->mothurOutEndLine();
+					outSum << setw(20) << left << Groups[j]+'-'+Groups[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
 				}
 				else{
-					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
-					m->mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
+					cout << setw(20) << left << Groups[j]+'-'+Groups[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
+					m->mothurOutJustToLog(Groups[j]+"-"+Groups[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
+					outSum << setw(20) << left << Groups[j]+'-'+Groups[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
 				}
 			}
 		}
@@ -513,13 +513,11 @@ int LibShuffCommand::printSummaryFile() {
 
 void LibShuffCommand::setGroups() {
 	try {
-		vector<string> myGroups = m->getGroups();
+		vector<string> myGroups = Groups;
 		//if the user has not entered specific groups to analyze then do them all
-		if (m->getNumGroups() == 0) {
+		if (Groups.size() == 0) {
 			numGroups = groupMap->getNumGroups();
-			for (int i=0; i < numGroups; i++) { 
-				myGroups.push_back((groupMap->getNamesOfGroups())[i]);
-			}
+			for (int i=0; i < numGroups; i++) {  myGroups.push_back((groupMap->getNamesOfGroups())[i]); }
 		} else {
 			if (savegroups != "all") {
 				//check that groups are valid
@@ -534,31 +532,23 @@ void LibShuffCommand::setGroups() {
 				//if the user only entered invalid groups
 				if ((myGroups.size() == 0) || (myGroups.size() == 1)) { 
 					numGroups = groupMap->getNumGroups();
-					for (int i=0; i < numGroups; i++) { 
-						myGroups.push_back((groupMap->getNamesOfGroups())[i]);
-					}
+					for (int i=0; i < numGroups; i++) {  myGroups.push_back((groupMap->getNamesOfGroups())[i]); }
 					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 				} else { numGroups = myGroups.size(); }
 			} else { //users wants all groups
 				numGroups = groupMap->getNumGroups();
 				myGroups.clear();
-				for (int i=0; i < numGroups; i++) { 
-					myGroups.push_back((groupMap->getNamesOfGroups())[i]);
-				}
+				for (int i=0; i < numGroups; i++) {  myGroups.push_back((groupMap->getNamesOfGroups())[i]); }
 			}
 		}
 
 		//sort so labels match
 		sort(myGroups.begin(), myGroups.end());
 		
-		//sort
-		//sort(groupMap->namesOfGroups.begin(), groupMap->namesOfGroups.end());
-		
 		for (int i = 0; i < (groupMap->getNamesOfGroups()).size(); i++) {  groupMap->groupIndex[(groupMap->getNamesOfGroups())[i]] = i;  }
 
-		groupNames = myGroups;
-		m->setGroups(myGroups);
-
+		Groups = myGroups;
+        numGroups = Groups.size();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LibShuffCommand", "setGroups");

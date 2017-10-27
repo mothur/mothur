@@ -180,7 +180,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			method = validParameter.validFile(parameters, "method", false);				if (method == "not found") { method = "totalgroup"; }
@@ -211,7 +211,7 @@ int NormalizeSharedCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData input(inputfile, format);
+		InputData input(inputfile, format, Groups);
         
 		//you are reading a sharedfile and you do not want to make relabund
 		if ((format == "sharedfile") && (!makeRelabund)) {
@@ -219,11 +219,9 @@ int NormalizeSharedCommand::execute(){
 			string lastLabel = lookup->getLabel();
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
-			if (norm != 0) { 
-				m->clearGroups();
+			if (norm != 0) {
                 lookup->removeGroups(norm);
-                vector<string> mGroups = lookup->getNamesGroups();
-				m->setGroups(mGroups);
+                Groups = lookup->getNamesGroups();
 			}
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -241,7 +239,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup; m->clearGroups();   return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup;    return 0; }
 				
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
@@ -272,13 +270,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookup;
 				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();  return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();   return 0; }
 				
 				//get next line to process
 				lookup = input.getSharedRAbundVectors();
 			}
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -312,18 +310,8 @@ int NormalizeSharedCommand::execute(){
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { 
-                m->clearGroups();
-                vector<string> mGroups;
-                vector<string> temp;
-                vector<string> lookupGroups = lookupFloat->getNamesGroups();
-                for (int i = 0; i < lookupGroups.size(); i++) {
-                    if (lookupFloat->getNumSeqs(lookupGroups[i]) < norm) {
-                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookupFloat->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
-                        temp.push_back(lookupGroups[i]);
-                    }else { Groups.push_back(lookupGroups[i]); }
-                }
-                lookupFloat->removeGroups(temp);
-                m->setGroups(mGroups);
+                lookupFloat->removeGroups(norm);
+                Groups = lookupFloat->getNamesGroups();
 			}
 			
 			//set norm to smallest group number
@@ -342,7 +330,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat; m->clearGroups();  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat;   return 0; }
 				
 				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
 					
@@ -375,13 +363,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookupFloat;
 				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 				
 				//get next line to process
 				lookupFloat = input.getSharedRAbundFloatVectors();
 			}
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -410,7 +398,7 @@ int NormalizeSharedCommand::execute(){
 			
 		}
 		//reset groups parameter
-		m->clearGroups();
+		
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
@@ -438,10 +426,7 @@ int NormalizeSharedCommand::execute(){
 
 int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 	try {
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
-		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
@@ -512,8 +497,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
         thisLookUp->print(out);
 		out.close();
 		
-		m->setCurrentSharedBinLabels(saveBinLabels);
-		
 		return 0;
 	}
 	catch(exception& e) {
@@ -525,11 +508,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 
 int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 	try {
-		
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
-		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
@@ -592,9 +571,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
         thisLookUp->printHeaders(out);
         thisLookUp->print(out);
         out.close();
-		
-		m->setCurrentSharedBinLabels(saveBinLabels);
-		
+	
 		return 0;
 	}
 	catch(exception& e) {

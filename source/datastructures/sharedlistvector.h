@@ -30,9 +30,9 @@
 class SharedListVector : public DataVector {
 	
 public:
-	SharedListVector();
-	SharedListVector(int);
-	SharedListVector(ifstream&);
+	//SharedListVector();
+	//SharedListVector(int);
+	SharedListVector(ifstream&, vector<string>&);
 	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels) { groupmap = NULL; countTable = NULL; };
 	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } if (countTable != NULL) { delete countTable; } };
 	
@@ -61,6 +61,8 @@ private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
 	GroupMap* groupmap;
     CountTable* countTable;
+    vector<string> groups;
+    bool fillGroups;
 	int maxRank;
 	int numBins;
 	int numSeqs;

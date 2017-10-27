@@ -252,7 +252,7 @@ int BinSeqCommand::execute(){
 		if (namesfile != "") {  readNamesFile();  }
         if (countfile != "") {  ct.readTable(countfile, true, false);  }
 		
-		input = new InputData(listfile, "list");
+		input = new InputData(listfile, "list", nullVector);
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 		

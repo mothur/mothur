@@ -13,7 +13,7 @@
 #include "parsimony.h"
 #include "counttable.h"
 #include "progress.hpp"
-#include "sharedutilities.h"
+
 #include "fileoutput.h"
 #include "readtree.h"
 

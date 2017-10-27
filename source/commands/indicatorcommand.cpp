@@ -8,7 +8,7 @@
  */
 
 #include "indicatorcommand.h"
-#include "sharedutilities.h"
+
 
 
 //**********************************************************************************************************************
@@ -112,10 +112,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			}
 			
 			m->setRunParse(true);
-			m->clearGroups();
-			m->clearAllGroups();
-            vector<string> temp2;
-			m->setTreenames(temp2);
+			m->setTreenames(nullVector);
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -184,8 +181,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
-			else { m->splitAtDash(groups, Groups);	}			
-			m->setGroups(Groups);
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
@@ -247,16 +243,15 @@ int IndicatorCommand::execute(){
 		int start = time(NULL);
 	
 		//read designfile if given and set up groups for read of sharedfiles
+        vector<string> allGroups;
 		if (designfile != "") {
 			designMap = new DesignMap(designfile);
 			
-			//fill Groups - checks for "all" and for any typo groups
-			SharedUtil util;
-			vector<string> nameGroups = designMap->getCategory();
-			util.setGroups(Groups, nameGroups);
-			
+            if (Groups.size() == 0) { Groups = designMap->getCategory(); }
+            allGroups = designMap->getCategory();
+						
 			namesSeqs = designMap->getNamesGroups(Groups);
-			m->setGroups(namesSeqs);
+			//m->setGroups(namesSeqs);
 		}
 	
 		/***************************************************/
@@ -273,7 +268,7 @@ int IndicatorCommand::execute(){
 		}
 		
 		//reset groups if needed
-		if (designfile != "") { m->setGroups(Groups); }
+		//if (designfile != "") { m->setGroups(Groups); }
 			
 		/***************************************************/
 		//    reading tree info							   //
@@ -294,7 +289,7 @@ int IndicatorCommand::execute(){
                 //sanity check - is this a group that is not in the sharedfile?
                 if (i == 0) { gps.insert("Group1"); }
 				if (designfile == "") {
-					if (!(m->inUsersGroups(Treenames[i], m->getAllGroups()))) {
+					if (!(m->inUsersGroups(Treenames[i], allGroups))) {
 						m->mothurOut("[ERROR]: " + Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
@@ -304,7 +299,7 @@ int IndicatorCommand::execute(){
 					vector<string> myNames = designMap->getNamesGroups(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
-						if (!(m->inUsersGroups(myNames[k], m->getAllGroups()))) {
+						if (!(m->inUsersGroups(myNames[k], allGroups))) {
 							m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 							mismatch = true;
 						}
@@ -345,9 +340,9 @@ int IndicatorCommand::execute(){
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
 			/***************************************************/
-			Tree* outputTree = new Tree(m->getNumGroups(), ct); 
+			Tree* outputTree = new Tree(Groups.size(), ct);
 			
-			outputTree->getSubTree(T[0], m->getGroups());
+			outputTree->getSubTree(T[0], Groups);
 			outputTree->assembleTree();
 				
 			//no longer need original tree, we have output tree to use and label
@@ -417,8 +412,9 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		m->mothurOutEndLine(); m->mothurOut("Species\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
 		int numBins = 0;
-		if (sharedfile != "") { numBins = lookup->getNumBins(); }
-		else { numBins = lookupFloat->getNumBins(); }
+        vector<string> currentLabels;
+        if (sharedfile != "") { numBins = lookup->getNumBins(); currentLabels = lookup->getOTUNames(); }
+		else { numBins = lookupFloat->getNumBins(); currentLabels = lookupFloat->getOTUNames(); }
 		
 		if (m->getControl_pressed()) { out.close(); return 0; }
 			
@@ -499,7 +495,6 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		//output indicator values to table form               //
 		/*****************************************************/
 		out << "OTU\tIndicator_Groups\tIndicator_Value\tpValue" << endl;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		for (int j = 0; j < indicatorValues.size(); j++) {
 				
 			if (m->getControl_pressed()) { out.close(); return 0; }
@@ -547,12 +542,13 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		int numBins = 0;
-		if (sharedfile != "") { numBins = lookup->getNumBins(); }
-		else { numBins = lookupFloat->getNumBins(); }
+        vector<string> currentLabels;
+        if (sharedfile != "") { numBins = lookup->getNumBins(); currentLabels = lookup->getOTUNames(); }
+        else { numBins = lookupFloat->getNumBins(); currentLabels = lookupFloat->getOTUNames(); }
+
 		
 		//print headings
 		out << "TreeNode\t";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
 		for (int i = 0; i < numBins; i++) { out << currentLabels[i] << "_IndGroups" << '\t' << currentLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
@@ -714,7 +710,6 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
 			out << (i+1);
-            vector<string> currentLabels = m->getCurrentSharedBinLabels();
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->getControl_pressed()) { out.close(); return 0; }
@@ -1020,8 +1015,9 @@ set<string> IndicatorCommand::getDescendantList(Tree*& T, int i, map<int, set<st
 //**********************************************************************************************************************
 int IndicatorCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		if (label == "") { label = lastLabel;  return 0; }
@@ -1095,8 +1091,9 @@ int IndicatorCommand::getShared(){
 //**********************************************************************************************************************
 int IndicatorCommand::getSharedFloat(){
 	try {
-		InputData input(relabundfile, "relabund");
+		InputData input(relabundfile, "relabund", Groups);
 		lookupFloat = input.getSharedRAbundFloatVectors();
+        Groups = lookupFloat->getNamesGroups();
 		string lastLabel = lookupFloat->getLabel();
 		
 		if (label == "") { label = lastLabel;  return 0; }

@@ -10,7 +10,7 @@
 #include "getgroupscommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
-#include "sharedutilities.h"
+
 #include "inputdata.h"
 #include "designmap.h"
 
@@ -282,10 +282,8 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else {
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
-			}
+			else { m->splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
@@ -383,20 +381,11 @@ int GetGroupsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
+		if (accnosfile != "") { m->readAccnos(accnosfile, Groups);  }
 		
 		if (groupfile != "") {
 			groupMap = new GroupMap(groupfile);
 			groupMap->readMap();
-			
-			//make sure groups are valid
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil* util = new SharedUtil();
-			vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
-			util->setGroups(Groups, gNamesOfGroups);
-            m->setGroups(Groups);
-			groupMap->setNamesOfGroups(gNamesOfGroups);
-			delete util;
 			
 			//fill names with names of sequences that are from the groups we want to remove 
 			fillNames();
@@ -410,10 +399,6 @@ int GetGroupsCommand::execute(){
             ct.readTable(countfile, true, false);
             if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
                 
-            vector<string> gNamesOfGroups = ct.getNamesOfGroups();
-            SharedUtil util;
-            util.setGroups(Groups, gNamesOfGroups);
-            m->setGroups(Groups);
             for (int i = 0; i < Groups.size(); i++) {
                 vector<string> thisGroupsSeqs = ct.getNamesOfSeqs(Groups[i]);
                 for (int j = 0; j < thisGroupsSeqs.size(); j++) { names.insert(thisGroupsSeqs[j]); }
@@ -574,7 +559,7 @@ int GetGroupsCommand::readShared(){
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
 		
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -593,7 +578,7 @@ int GetGroupsCommand::readShared(){
 			
             if (m->getControl_pressed()) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
 			
-			lookup->printHeaders(out);
+            if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
             lookup->print(out);
             wroteSomething = true;
 			
@@ -1239,9 +1224,7 @@ int GetGroupsCommand::fillNames(){
 			
 			string group = groupMap->getGroup(seqs[i]);
 			
-			if (m->inUsersGroups(group, Groups)) {
-				names.insert(seqs[i]);
-			}
+			if (m->inUsersGroups(group, Groups)) { names.insert(seqs[i]); }
 		}
 		
 		return 0;

@@ -8,7 +8,7 @@
  */
 
 #include "getsharedotucommand.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> GetSharedOTUCommand::setParameters(){	
@@ -98,7 +98,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(){
 GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
 	
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;   userGroups = "";
 		unique = true;
 		allLines = 1;
 		
@@ -258,6 +258,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = "unique." + groups;
 				m->splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
 			}
 			
@@ -266,6 +267,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = groups;
 				m->splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "selected_groups"; } //if too many groups then the filename becomes too big.
 				unique = false;
 			}
@@ -287,14 +289,12 @@ int GetSharedOTUCommand::execute(){
 		
         if ( sharedfile != "") { runShared(); }
         else {
-            m->setGroups(Groups);
             if (groupfile != "") {
                 groupMap = new GroupMap(groupfile);
                 
                 int groupError = groupMap->readMap();
                 if (groupError == 1) { delete groupMap; return 0; }
                 vector<string> allGroups = groupMap->getNamesOfGroups();
-                m->setAllGroups(allGroups);
             }else{
                 ct = new CountTable();
                 ct->readTable(countfile, true, false);
@@ -311,23 +311,10 @@ int GetSharedOTUCommand::execute(){
                 for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
                 userGroups = userGroups.substr(0, userGroups.length()-1);
                 if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
-            }else{
-                //sanity check for group names
-                SharedUtil util;
-                vector<string> namesOfGroups;
-                if (groupfile != "") { namesOfGroups = groupMap->getNamesOfGroups(); }
-                else {  namesOfGroups = ct->getNamesOfGroups();  }
-                
-                util.setGroups(Groups, namesOfGroups);
-                
-                if (groupfile != "") { groupMap->setNamesOfGroups(namesOfGroups); }
-                else {  ct->setNamesOfGroups(namesOfGroups);  }
             }
         
             //put groups in map to find easier
-            for(int i = 0; i < Groups.size(); i++) {
-                groupFinder[Groups[i]] = Groups[i];
-            }
+            for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i]; }
             
             if (fastafile != "") {
                 ifstream inFasta;
@@ -416,7 +403,7 @@ int GetSharedOTUCommand::execute(){
             
 
             //reset groups parameter
-            m->clearGroups();  
+              
             
             if (lastlist != NULL) {		delete lastlist;	}
             
@@ -480,9 +467,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			bool uniqueOTU = true;
 			
 			map<string, int> atLeastOne;
-			for (int f = 0; f < Groups.size(); f++) {
-				atLeastOne[Groups[f]] = 0;
-			}
+			for (int f = 0; f < Groups.size(); f++) { atLeastOne[Groups[f]] = 0; }
 			
 			vector<string> namesOfSeqsInThisBin;
 			
@@ -612,29 +597,21 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 /***********************************************************/
 int GetSharedOTUCommand::runShared() {
 	try {
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
-        if (Groups.size() == 0) {
-            Groups = m->getGroups();
-            
+        if (userGroups == "") {
             //make string for outputfile name
             userGroups = "unique.";
             for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
             userGroups = userGroups.substr(0, userGroups.length()-1);
             if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
-        }else {
-            //sanity check for group names
-            SharedUtil util;
-            vector<string> allGroups = m->getAllGroups();
-            util.setGroups(Groups, allGroups);
         }
         
         //put groups in map to find easier
-        for(int i = 0; i < Groups.size(); i++) {
-            groupFinder[Groups[i]] = Groups[i];
-        }
+        for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i];}
 
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -644,7 +621,7 @@ int GetSharedOTUCommand::runShared() {
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) {
                 outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-                delete lookup; m->clearGroups(); return 0;
+                delete lookup;  return 0;
 			}
             
             
@@ -682,7 +659,7 @@ int GetSharedOTUCommand::runShared() {
 		
 		if (m->getControl_pressed()) {
             outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-            delete lookup; m->clearGroups(); return 0;
+            delete lookup;  return 0;
         }
         
 		//output error messages about any remaining user labels
@@ -709,7 +686,7 @@ int GetSharedOTUCommand::runShared() {
 		}
         
 		//reset groups parameter
-		m->clearGroups();  
+		  
 		
 		return 0;
 
@@ -739,7 +716,6 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 		int num = 0;
         
 		//go through each bin, find out if shared
-        vector<string> currentSharedBinLabels = m->getCurrentSharedBinLabels();
 		for (int i = 0; i < lookup->getNumBins(); i++) {
 			if (m->getControl_pressed()) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
@@ -752,7 +728,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
             vector<string> groupNames = lookup->getNamesGroups();
 			for(int j = 0; j < lookup->size(); j++) {
 				string seqGroup = groupNames[j];
-                string name = currentSharedBinLabels[i];
+                string name = lookup->getOTUName(i);
                 int abund = lookup->get(i, seqGroup);
 				
                 if (abund != 0) {

@@ -44,9 +44,10 @@ void RareDisplay::update(SAbundVector* rank){
 }
 
 /***********************************************************************/
-void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb) {
+void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string> g) {
 	try {
-		vector<double> data = estimate->getValues(shared); 
+		vector<double> data = estimate->getValues(shared);
+        Groups = g;
 		
 		map<int, vector<double> >::iterator it = results.find(numSeqs);
         if (it == results.end()) { //first iter for this count

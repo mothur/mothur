@@ -239,7 +239,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			string temp = validParameter.validFile(parameters, "numotu", false);		if (temp == "not found") { temp = "0"; }
@@ -273,16 +273,16 @@ int HeatMapCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir, inputfile);
-
 		string lastLabel;
-		input = new InputData(inputfile, format);
+		input = new InputData(inputfile, format, Groups);
 		
+        vector<string> currentLabels;
 		if (format == "sharedfile") {
 			//you have groups
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
-	
+            currentLabels = lookup->getOTUNames();
+            Groups = lookup->getNamesGroups();
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 			//you are using just a list file and have only one group
 			rabund = input->getRAbundVector();
@@ -291,8 +291,12 @@ int HeatMapCommand::execute(){
 			//you have groups
 			lookupFloat = input->getSharedRAbundFloatVectors();
 			lastLabel = lookupFloat->getLabel();
+            currentLabels = lookup->getOTUNames();
+            Groups = lookupFloat->getNamesGroups();
 		}
 		
+        heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir, inputfile, currentLabels);
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -304,7 +308,7 @@ int HeatMapCommand::execute(){
 				if (m->getControl_pressed()) {
                     delete lookup;
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->clearGroups(); 
+					 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -350,7 +354,7 @@ int HeatMapCommand::execute(){
 			
 			if (m->getControl_pressed()) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->clearGroups(); 
+				 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -382,7 +386,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//reset groups parameter
-			m->clearGroups();  
+			  
 			
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 	
@@ -463,7 +467,7 @@ int HeatMapCommand::execute(){
 				if (m->getControl_pressed()) {
                     delete lookupFloat;
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->clearGroups(); 
+					 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -509,7 +513,7 @@ int HeatMapCommand::execute(){
 			
 			if (m->getControl_pressed()) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->clearGroups(); 
+				 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -540,9 +544,7 @@ int HeatMapCommand::execute(){
 				delete lookupFloat;
 			}
 		
-			//reset groups parameter
-			m->clearGroups();  
-		}
+        }
 		
 		delete input; 
 		delete heatmap;

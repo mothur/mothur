@@ -281,7 +281,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 	try {
         vector< vector<string> > myList;
         
-		InputData input(listFile, "list");
+		InputData input(listFile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
 		

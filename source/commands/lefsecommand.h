@@ -64,10 +64,10 @@ private:
     bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);
     vector< vector<double> > lda(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<int, string>& indexToClass, vector<string>);
     vector< vector<double> > getMeans(SharedRAbundFloatVectors*& lookup, map<string, vector<int> >& class2GroupIndex);
-    int printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>);
+    int printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>, vector<string>);
     
     //for testing
-    bool printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >&, vector<string>);
+    bool printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >&, vector<string>, vector<string>);
     int makeShared(int);
 };
 

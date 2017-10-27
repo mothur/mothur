@@ -38,7 +38,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared){
 		exit(1);
 	}
 }
-/***********************************************************************/
+/***********************************************************************
 //This returns the number of shared species observed in several groups.  
 //The shared vector is each groups sharedrabundvector.
 
@@ -49,7 +49,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared, vector<str
 		int numGroups = shared.size();
         labels.clear();
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = shared->getOTUNames();
         
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//get bin values and set sharedByAll 

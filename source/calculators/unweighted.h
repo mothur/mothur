@@ -19,7 +19,7 @@
 class Unweighted : public TreeCalculator  {
 	
 	public:
-        Unweighted(bool r) : includeRoot(r) {};
+        Unweighted(bool r, vector<string> g) : includeRoot(r), Groups(g) {};
 		~Unweighted() {};
 		EstOutput getValues(Tree*, int, string);
 		EstOutput getValues(Tree*, string, string, int, string);
@@ -32,6 +32,7 @@ class Unweighted : public TreeCalculator  {
 		};
 		vector<linePair> lines;
 		
+        vector<string> Groups;
 		EstOutput data;
 		int processors;
 		string outputDir;

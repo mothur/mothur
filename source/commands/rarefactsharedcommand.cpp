@@ -10,7 +10,7 @@
 #include "rarefactsharedcommand.h"
 #include "sharedsobs.h"
 #include "sharednseqs.h"
-#include "sharedutilities.h"
+
 #include "subsample.h"
 
 
@@ -198,13 +198,14 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
-			m->setGroups(Groups);
             
             string sets = validParameter.validFile(parameters, "sets", false);			
 			if (sets == "not found") { sets = ""; }
 			else { 
 				m->splitAtDash(sets, Sets);
+                if (Sets.size() != 0) { if (Sets[0] != "all") { Sets.clear(); } }
 			}
 			
 			string temp;
@@ -255,14 +256,9 @@ int RareFactSharedCommand::execute(){
         }else {
             designMap.read(designfile);
             
-            //fill Sets - checks for "all" and for any typo groups
-			SharedUtil util;
-			vector<string> nameSets = designMap.getCategory();
-			util.setGroups(Sets, nameSets);
-            
-            for (int i = 0; i < Sets.size(); i++) {
-                process(designMap, Sets[i]);
-            }
+            if (Sets.size() == 0) {  Sets = designMap.getCategory(); }
+        
+            for (int i = 0; i < Sets.size(); i++) { process(designMap, Sets[i]); }
             
             if (groupMode) { outputNames = createGroupFile(outputNames); }
         }
@@ -288,7 +284,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         Rarefact* rCurve;
         vector<Display*> rDisplays;
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         if (lookup->size() < 2) {
 			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
@@ -298,7 +294,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
         
-        vector<string> newGroups = m->getGroups();
+        vector<string> newGroups = lookup->getNamesGroups();
         if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
             vector<string> thisSets; thisSets.push_back(thisSet);
             newGroups = designMap.getNamesGroups(thisSets);

@@ -147,7 +147,7 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "totalgroup"; }
@@ -177,8 +177,9 @@ int GetRelAbundCommand::execute(){
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		input = new InputData(sharedfile, "sharedfile");
+		input = new InputData(sharedfile, "sharedfile", Groups);
 		lookup = input->getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -188,7 +189,7 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup; m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup;  delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -220,13 +221,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear();  m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();   delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -247,14 +248,14 @@ int GetRelAbundCommand::execute(){
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			if (m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+			if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
 			getRelAbundance(lookup, out);
 			
 			delete lookup;
 		}
 	
 		//reset groups parameter
-		m->clearGroups();  
+		  
 		delete input; 
 		out.close();
 		

@@ -405,7 +405,7 @@ int SummaryCommand::execute(){
                 }
             }
 		
-			InputData input(inputFileNames[p], format);
+			InputData input(inputFileNames[p], format, nullVector);
 			sabund = input.getSAbundVector();
 			string lastLabel = sabund->getLabel();
 		
@@ -639,7 +639,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         map<string, string> files;
         map<string, string>::iterator it3;
         
-        InputData input(filename, "sharedfile");
+        InputData input(filename, "sharedfile", groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 
         /******************************************************/

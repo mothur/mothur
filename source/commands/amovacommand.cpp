@@ -10,7 +10,7 @@
 #include "amovacommand.h"
 #include "readphylipvector.h"
 #include "designmap.h"
-#include "sharedutilities.h"
+
 
 
 //**********************************************************************************************************************

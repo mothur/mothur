@@ -110,7 +110,6 @@ int GroupMap::readMap() {
             }
         }
         
-		m->setAllGroups(namesOfGroups);
 		return error;
     }
 	catch(exception& e) {
@@ -183,7 +182,6 @@ int GroupMap::readDesignMap() {
 
         }
         
-		m->setAllGroups(namesOfGroups);
 		return error;
     }
 	catch(exception& e) {
@@ -258,7 +256,6 @@ int GroupMap::readMap(string filename) {
             }
         }
         
-		m->setAllGroups(namesOfGroups);
 		return error;
     }
 	catch(exception& e) {
@@ -333,7 +330,6 @@ int GroupMap::readDesignMap(string filename) {
             }
         }
         
-		m->setAllGroups(namesOfGroups);
 		return error;
     }
 	catch(exception& e) {

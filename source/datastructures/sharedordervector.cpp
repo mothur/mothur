@@ -8,7 +8,7 @@
  */
 
 #include "sharedordervector.h"
-#include "sharedutilities.h"
+
 
 /***********************************************************************/
 
@@ -26,9 +26,10 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 //This function is used to read a .shared file for the collect.shared, rarefaction.shared and summary.shared commands
 //if you don't use a list and groupfile.  
 
-SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a shared file
+SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : DataVector() {  //reads in a shared file
 	try {
 		maxRank = 0; numBins = 0; numSeqs = 0;
+        int numUserGroups = userGroups.size();
 				
 		groupmap = new GroupMap(); 
 		
@@ -55,7 +56,6 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-                vector<string> currentLabels;
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
@@ -64,58 +64,73 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 					currentLabels.push_back(temp);
 				}
 				
-                m->setSharedBinLabelsInFile(currentLabels);
 				f >> label;
 			}
 		}else { label = m->getSaveNextLabel(); }
 		
-		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->setCurrentSharedBinLabels(m->getSharedBinLabelsInFile());
-		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
+        bool readData = false;
+        if (numUserGroups == 0) { //user has not specified groups, so we will use all of them
+            userGroups.push_back(groupN);
+            readData = true;
+        }else{
+            if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+            //else - skipline because you are a group we dont care about
+        }
 		
 		holdLabel = label;
+        
+        if (readData) {
+            //save group in groupmap
+            setNamesOfGroups(groupN);
+            groupmap->groupIndex[groupN] = 0;
+            
+            
+            for(int i=0;i<num;i++){
+                f >> inputData;
+                
+                for (int j = 0; j < inputData; j++) {
+                    push_back(i, i, groupN);
+                    numSeqs++;
+                }
+            }
+        } else { m->getline(f); }
 		
-		
-		vector<string> allGroups;
-		//save group in groupmap
-		allGroups.push_back(groupN);
-		groupmap->groupIndex[groupN] = 0;
-		
-		
-		for(int i=0;i<num;i++){
-			f >> inputData;
-			
-			for (int j = 0; j < inputData; j++) {
-				push_back(i, i, groupN);
-				numSeqs++;
-			}
-		}
-		
-		m->gobble(f); 
+		m->gobble(f);
 		
 		if (!(f.eof())) { f >> nextLabel; }
 		
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
-			count++;
-			
-			
-			//save group in groupmap
-			allGroups.push_back(groupN);
-			groupmap->groupIndex[groupN] = count;
-			
-			
-			for(int i=0;i<num;i++){
-				f >> inputData;
-				
-				for (int j = 0; j < inputData; j++) {
-					push_back(i, i, groupN);
-					numSeqs++;
-				}
-			}
+            
+            bool readData = false;
+            if (numUserGroups == 0) { //user has not specified groups, so we will use all of them
+                userGroups.push_back(groupN);
+                readData = true;
+            }else{
+                if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+                //else - skipline because you are a group we dont care about
+            }
+
+            if (readData) {
+                count++;
+                
+                //save group in groupmap
+                setNamesOfGroups(groupN);
+                groupmap->groupIndex[groupN] = count;
+                
+                
+                for(int i=0;i<num;i++){
+                    f >> inputData;
+                    
+                    for (int j = 0; j < inputData; j++) {
+                        push_back(i, i, groupN);
+                        numSeqs++;
+                    }
+                }
+            }else { m->getline(f); }
 			
 			m->gobble(f);
 				
@@ -124,9 +139,11 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		}
 		
 		m->setSaveNextLabel(nextLabel);
+        
+        sort(userGroups.begin(), userGroups.end());
+        for (int i = 0; i < userGroups.size(); i++) { setNamesOfGroups(userGroups[i]); }
 			
 		groupmap->setNamesOfGroups(allGroups);
-		m->setAllGroups(allGroups);
 		
 		updateStats();
 		
@@ -157,7 +174,7 @@ int SharedOrderVector::getMaxRank(){
 
 /***********************************************************************/
 void SharedOrderVector::set(int index, int binNumber, int abund, string groupName){
-	
+    setNamesOfGroups(groupName);
 	data[index].group = groupName;
 	data[index].bin = binNumber;
 	data[index].abundance = abund;
@@ -171,11 +188,26 @@ individual SharedOrderVector::get(int index){
 	return data[index];			
 }
 
-
+/************************************************************/
+void SharedOrderVector::setNamesOfGroups(string seqGroup) {
+    int i, count;
+    count = 0;
+    for (i=0; i<allGroups.size(); i++) {
+        if (allGroups[i] != seqGroup) {
+            count++; //you have not found this group
+        }else {
+            break; //you already have it
+        }
+    }
+    if (count == allGroups.size()) {
+        allGroups.push_back(seqGroup); //new group
+    }
+}
 /***********************************************************************/
 //commented updateStats out to improve speed, but whoever calls this must remember to update when they are done with all the pushbacks they are doing 
 void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
-	individual newGuy;
+	setNamesOfGroups(groupName);
+    individual newGuy;
 	newGuy.group = groupName;
 	newGuy.abundance = abund;
 	newGuy.bin = binNumber;
@@ -307,6 +339,7 @@ SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector(string group) {
 		}
         
         SharedRAbundVectors* lookup = new SharedRAbundVectors();
+        lookup->setOTUNames(currentLabels);
         lookup->push_back(sharedRav);
 		return lookup;
 	}
@@ -318,15 +351,27 @@ SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector(string group) {
 /***********************************************************************/
 SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector() {
 	try {
-		SharedUtil* util;
-		util = new SharedUtil();
-		
-		vector<string> Groups = m->getGroups();
-		vector<string> allGroups = m->getAllGroups();
-		util->setGroups(Groups, allGroups);
-		SharedRAbundVectors* lookup = util->getSharedVectors(Groups, this);
-		m->setGroups(Groups);
-		m->setAllGroups(allGroups);
+        SharedRAbundVectors* lookup = new SharedRAbundVectors();
+        sort(allGroups.begin(), allGroups.end());
+        
+        //create and initialize vector of sharedvectors, one for each group
+        for (int i = 0; i < allGroups.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector(numBins);
+            temp->setLabel(getLabel());
+            temp->setGroup(allGroups[i]);
+            lookup->push_back(temp);
+        }
+        
+        int numSeqs = size();
+        //sample all the members
+        for(int i=0;i<numSeqs;i++){
+            //get first sample
+            individual chosen = get(i);
+            int abundance = lookup->get(chosen.bin, chosen.group);
+            lookup->set(chosen.bin, (abundance + 1), chosen.group);
+        }
+        
+        lookup->setOTUNames(currentLabels);
 		
 		return lookup;
 	}

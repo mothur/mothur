@@ -47,6 +47,7 @@ public:
 	
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
+    vector<string> currentLabels;
 	int maxRank;
 	int numBins;
 	int numSeqs;

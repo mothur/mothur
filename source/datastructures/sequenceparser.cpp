@@ -8,7 +8,7 @@
  */
 
 #include "sequenceparser.h"
-#include "sharedutilities.h"
+
 
 /************************************************************/
 SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFile, vector<string> groupsSelected) {

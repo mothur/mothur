@@ -62,20 +62,21 @@ class MothurOut {
 		string getVersion() { return version; }
 		void setVersion(string r) { version = r; }
 	
-		void addGroup(string g) { Groups.push_back(g); }
-		void setGroups(vector<string>& g) { sort(g.begin(), g.end()); Groups = g; }
-		void clearGroups() { Groups.clear(); }
-	    int getNumGroups() { return Groups.size(); }
-		vector<string> getGroups() { sort(Groups.begin(), Groups.end()); return Groups; }
-		void addAllGroup(string g) { namesOfGroups.push_back(g); }
-		void setAllGroups(vector<string>& g) { sort(g.begin(), g.end()); namesOfGroups = g; }
-		void clearAllGroups() { namesOfGroups.clear(); }
-		int getNumAllGroups() { return namesOfGroups.size(); }
+		//void addGroup(string g) { Groups.push_back(g); }
+		//void setGroups(vector<string>& g) { sort(g.begin(), g.end()); Groups = g; }
+		//void clearGroups() { Groups.clear(); }
+	    //int getNumGroups() { return Groups.size(); }
+		//vector<string> getGroups() { sort(Groups.begin(), Groups.end()); return Groups; }
+		//void addAllGroup(string g) { namesOfGroups.push_back(g); }
+		//void setAllGroups(vector<string>& g) { sort(g.begin(), g.end()); namesOfGroups = g; }
+		//void clearAllGroups() { namesOfGroups.clear(); }
+		//int getNumAllGroups() { return namesOfGroups.size(); }
 	
-		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
+		//vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		
 		//functions from mothur.h
 		//file operations
+        void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
         bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
         bool dirCheck(string&, string); //completes path, appends appropriate / or \, makes sure dir is writable. - no error
         bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
@@ -247,17 +248,11 @@ class MothurOut {
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&);
     
-        int getControl_pressed()                        { return control_pressed;           }
-        void setControl_pressed(int t)                  { control_pressed = t;              }
+        bool getControl_pressed()                       { return control_pressed;           }
+        void setControl_pressed(bool t)                 { control_pressed = t;              }
         vector<string> getTreenames()                   { return Treenames;                 }
         void setTreenames(vector<string> t)             { Treenames = t;                    }
-        vector<string> getSharedBinLabelsInFile()       { return sharedBinLabelsInFile;     }
-        void setSharedBinLabelsInFile(vector<string> t) { sharedBinLabelsInFile = t;        }
-        vector<string> getCurrentSharedBinLabels()      { return currentSharedBinLabels;    }
-        void setCurrentSharedBinLabels(vector<string> t){ currentSharedBinLabels = t;       }
-        void eraseCurrentSharedBinLabel(int bin)        { currentSharedBinLabels.erase(currentSharedBinLabels.begin()+bin);       }
-        vector<string> getListBinLabelsInFile()         { return listBinLabelsInFile;       }
-        void setListBinLabelsInFile(vector<string> t)   { listBinLabelsInFile = t;          }
+        int getOTUNames(vector<string>& currentLabels, int numBins);
         string getSaveNextLabel()                       { return saveNextLabel;             }
         void setSaveNextLabel(string t)                 { saveNextLabel = t;                }
         string getSharedHeaderMode()                    { return sharedHeaderMode;          }
@@ -418,8 +413,8 @@ class MothurOut {
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile, constaxonomyfile, contigsreportfile;
         mt19937_64 mersenne_twister_engine;
 
-		vector<string> Groups;
-		vector<string> namesOfGroups;
+		//vector<string> Groups;
+		//vector<string> namesOfGroups;
 		ofstream out;
         int numErrors, numWarnings;
         vector<string> Treenames;
@@ -429,7 +424,8 @@ class MothurOut {
         string saveNextLabel, sharedHeaderMode, groupMode, testDirectory;
         bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
         bool executing, runParse, jumble, gui, mothurCalling, debug, quietMode;
-        int control_pressed;
+        bool control_pressed;
+    
 		
 };
 /***********************************************/
