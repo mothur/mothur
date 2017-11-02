@@ -190,10 +190,6 @@ int AmovaCommand::execute(){
 		vector<string> sampleNames = readMatrix.read(distanceMatrix);
         
         if (Sets.size() != 0) { //user selected sets, so we want to remove the samples not in those sets
-            SharedUtil util; 
-            vector<string> dGroups = designMap->getCategory();
-            util.setGroups(Sets, dGroups);  
-
             for(int i=0;i<distanceMatrix.size();i++){
                 
                 if (m->getControl_pressed()) { delete designMap; return 0; }
@@ -204,9 +200,7 @@ int AmovaCommand::execute(){
                     m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
                 }else if (!m->inUsersGroups(group, Sets)){  //not in set we want remove it
                     //remove from all other rows
-                    for(int j=0;j<distanceMatrix.size();j++){
-                        distanceMatrix[j].erase(distanceMatrix[j].begin()+i);
-                    }
+                    for(int j=0;j<distanceMatrix.size();j++){ distanceMatrix[j].erase(distanceMatrix[j].begin()+i); }
                     distanceMatrix.erase(distanceMatrix.begin()+i);
                     sampleNames.erase(sampleNames.begin()+i);
                     i--;

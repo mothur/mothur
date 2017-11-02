@@ -187,8 +187,7 @@ VennCommand::VennCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -284,7 +283,7 @@ int VennCommand::execute(){
 		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
 		
 		venn = new Venn(outputDir, nseqs, inputfile, fontsize, sharedOtus); 
-		InputData input(inputfile, format);
+		InputData input(inputfile, format, Groups);
 		
 		string lastLabel;
 		
@@ -292,6 +291,7 @@ int VennCommand::execute(){
 		if (format == "sharedfile") {
 			lookup = input.getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
+            Groups = lookup->getNamesGroups();
 			
 			if ((lookup->size() > 4)) { combos = findCombinations(lookup->size()); }
 		}else if (format == "list") {

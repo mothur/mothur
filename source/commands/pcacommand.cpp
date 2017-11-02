@@ -174,9 +174,8 @@ PCACommand::PCACommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  }
-			else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}			
-			m->setGroups(Groups);			
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}
+					
 			
 		}
 		
@@ -201,13 +200,14 @@ int PCACommand::execute(){
 		vector< vector<double> > matrix;
 		InputData* input;
 		if (mode == "sharedfile")			{  
-			input = new InputData(inputFile, "sharedfile");
+			input = new InputData(inputFile, "sharedfile", Groups);
 		}else if (mode == "relabund")	{ 
-			input = new InputData(inputFile, "relabund");
+			input = new InputData(inputFile, "relabund", Groups);
 		}else {  m->mothurOut("[ERROR]: filetype not recognized."); m->mothurOutEndLine();  return 0; }
 		
 		SharedRAbundFloatVectors* lookupFloat = input->getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat->getLabel();
+        Groups = lookupFloat->getNamesGroups();
 			
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -386,7 +386,7 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		//string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(fbase, lookupFloat->getLabel(), m->getGroups(), X, d);
+		output(fbase, lookupFloat->getLabel(), Groups, X, d);
 		
 		if (metric) {   
 			

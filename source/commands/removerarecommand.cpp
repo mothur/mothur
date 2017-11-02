@@ -251,7 +251,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+            if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -353,7 +353,7 @@ int RemoveRareCommand::processList(){
 		else if (labels.size() > 1) { m->mothurOut("For the listfile you must select one label, using " + (*labels.begin()) + "."); m->mothurOutEndLine(); thisLabel = *labels.begin(); }
 		else { thisLabel = *labels.begin(); }
 		
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		
 		//get first one or the one we want
@@ -411,17 +411,13 @@ int RemoveRareCommand::processList(){
         CountTable ct;
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
-			SharedUtil util;
-			vector<string> namesGroups = groupMap->getNamesOfGroups();
-			util.setGroups(Groups, namesGroups);
+            if (Groups.size() == 0) { Groups = groupMap->getNamesOfGroups(); }
 			m->openOutputFile(outputGroupFileName, outGroup);
 		}else if (countfile != "") {
             ct.readTable(countfile, true, false);
             if (ct.hasGroupInfo()) {
                 vector<string> namesGroups = ct.getNamesOfGroups();
-                SharedUtil util;
-                util.setGroups(Groups, namesGroups);
-            }
+                if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); }            }
         }
 		
 		
@@ -542,7 +538,7 @@ int RemoveRareCommand::processSabund(){
 		m->openOutputFile(outputFileName, out);
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		InputData input(sabundfile, "sabund");
+		InputData input(sabundfile, "sabund", nullVector);
 		SAbundVector* sabund = input.getSAbundVector();
 		string lastLabel = sabund->getLabel();
 		set<string> processedLabels;
@@ -644,7 +640,7 @@ int RemoveRareCommand::processRabund(){
 		m->openOutputFile(outputFileName, out);
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		InputData input(rabundfile, "rabund");
+		InputData input(rabundfile, "rabund", nullVector);
 		RAbundVector* rabund = input.getRAbundVector();
 		string lastLabel = rabund->getLabel();
 		set<string> processedLabels;
@@ -740,10 +736,8 @@ int RemoveRareCommand::processRabund(){
 //**********************************************************************************************************************
 int RemoveRareCommand::processShared(){
 	try {
-		m->setGroups(Groups);
-		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		set<string> processedLabels;
