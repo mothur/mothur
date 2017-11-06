@@ -168,8 +168,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-            m->setGroups(Groups);
+            if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
             
             string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -221,8 +220,9 @@ int CountSeqsCommand::execute(){
             if (outputDir == "") { outputDir = m->hasPath(sharedfile); }
             variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
             
-            InputData input(sharedfile, "sharedfile");
+            InputData input(sharedfile, "sharedfile", Groups);
             SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            Groups = lookup->getNamesGroups();
             string lastLabel = lookup->getLabel();
             vector<string> currentLabels = lookup->getOTUNames();
             
@@ -371,12 +371,9 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
 			
-			//make sure groups are valid. takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil* util = new SharedUtil();
 			vector<string> nameGroups = groupMap->getNamesOfGroups();
-			util->setGroups(Groups, nameGroups);
-			delete util;
-			
+            if (Groups.size() == 0) { Groups = nameGroups; }
+            
 			//sort groupNames so that the group title match the counts below, this is needed because the map object automatically sorts
 			sort(Groups.begin(), Groups.end());
 			

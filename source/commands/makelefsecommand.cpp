@@ -170,11 +170,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);
 			if (groups == "not found") { groups = "";  }
-			else {
-				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-				m->setGroups(Groups);
-			}
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 
 
             if ((relabundfile == "") && (sharedfile == "")) {
@@ -334,8 +330,9 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
 //**********************************************************************************************************************
 SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* templookup = input.getSharedRAbundVectors();
+        Groups = templookup->getNamesGroups();
 		string lastLabel = templookup->getLabel();
         
 		if (label == "") { label = lastLabel;  }
@@ -454,9 +451,10 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 //**********************************************************************************************************************
 SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 	try {
-		InputData input(relabundfile, "relabund");
+		InputData input(relabundfile, "relabund", Groups);
 		SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat->getLabel();
+        Groups = lookupFloat->getNamesGroups();
 		
 		if (label == "") { label = lastLabel; return lookupFloat; }
 		

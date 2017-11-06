@@ -178,7 +178,7 @@ int KruskalWallisCommand::execute(){
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); }
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", nullVector);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup->getLabel();
         

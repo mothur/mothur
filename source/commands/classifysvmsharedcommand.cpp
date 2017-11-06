@@ -245,14 +245,8 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             //If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you,
             //kinda nice, huh?
             string groups = validParameter.validFile(parameters, "groups", false);
-            if (groups == "not found") {
-                groups = "";
-            }
-            else {
-                m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-            }
-            m->setGroups(Groups);
+            if (groups == "not found") { groups = ""; }
+            else {  m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
 
             //Commonly used to process list, rabund, sabund, shared and relabund files.
             //Look at "smart distancing" examples below in the execute function.
@@ -442,9 +436,10 @@ int ClassifySvmSharedCommand::execute() {
 
     if (abort) { if (calledHelp) { return 0; }  return 2;   }
 
-    InputData input(sharedfile, "sharedfile");
+    InputData input(sharedfile, "sharedfile", Groups);
     SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-      vector<string> currentLabels = lookup->getOTUNames();
+    vector<string> currentLabels = lookup->getOTUNames();
+      Groups = lookup->getNamesGroups();
     //read design file
     designMap.read(designfile);
 
@@ -546,8 +541,9 @@ int ClassifySvmSharedCommand::execute() {
 //   LabeledObservationVector[0] = pair("label 0", &vector[10.0, 21.0, 13.0])
 // where the vector in the second position of the pair records OTU abundances.
 void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFilePath, const string& designFilePath, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
-    InputData input(sharedFilePath, "sharedfile");
+    InputData input(sharedFilePath, "sharedfile", Groups);
     SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+    Groups = lookup->getNamesGroups();
 
     DesignMap designMap;
     designMap.read(designFilePath);

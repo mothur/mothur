@@ -8,12 +8,14 @@
 
 #include "subsample.h"
 //**********************************************************************************************************************
-Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size) {
+Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size, vector<string>& mGroups) {
     try {
         Tree* newTree = NULL;
         
         //remove seqs not in sample from counttable
         vector<string> Groups = ct->getNamesOfGroups();
+        if (mGroups.size() == 0) { mGroups = Groups; }
+        
         newCt->copy(ct);
         newCt->addGroup("doNotIncludeMe");
         
@@ -22,7 +24,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
         for (int i = 0; i < namesSeqs.size(); i++) {  doNotIncludeTotals[namesSeqs[i]] = 0; }
     
         for (int i = 0; i < Groups.size(); i++) {
-            if (m->inUsersGroups(Groups[i], m->getGroups())) {
+            if (m->inUsersGroups(Groups[i], mGroups)) {
                 if (m->getControl_pressed()) { break; }
         
                 int thisSize = ct->getGroupCount(Groups[i]);

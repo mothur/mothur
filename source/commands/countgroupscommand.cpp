@@ -156,8 +156,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else {
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -200,8 +199,6 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 					}
 				}
 			}
-			
-			if ((accnosfile == "") && (Groups.size() == 0)) { Groups.push_back("all"); m->setGroups(Groups); }
 		}
 		
 	}
@@ -218,7 +215,7 @@ int CountGroupsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
+		if (accnosfile != "") { m->readAccnos(accnosfile, Groups);  }
 		
 		if (groupfile != "") {
             map<string, string> variables; 
@@ -233,11 +230,8 @@ int CountGroupsCommand::execute(){
 			GroupMap groupMap(groupfile);
 			groupMap.readMap();
 			
-			//make sure groups are valid
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util;
 			vector<string> nameGroups = groupMap.getNamesOfGroups();
-			util.setGroups(Groups, nameGroups);
+            if (Groups.size() == 0) { Groups = nameGroups;  }
 			
             int total = 0;
 			for (int i = 0; i < Groups.size(); i++) {
@@ -264,12 +258,9 @@ int CountGroupsCommand::execute(){
             
 			CountTable ct;
 			ct.readTable(countfile, true, false);
-            
-			//make sure groups are valid
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util;
+        
 			vector<string> nameGroups = ct.getNamesOfGroups();
-			util.setGroups(Groups, nameGroups);
+			if (Groups.size() == 0) { Groups = nameGroups;  }
 			
             int total = 0;
 			for (int i = 0; i < Groups.size(); i++) {
@@ -286,8 +277,9 @@ int CountGroupsCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
 		
 		if (sharedfile != "")		{		
-			InputData input(sharedfile, "sharedfile");
+			InputData input(sharedfile, "sharedfile", Groups);
 			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            Groups = lookup->getNamesGroups();
 			
             map<string, string> variables; 
             string thisOutputDir = outputDir;

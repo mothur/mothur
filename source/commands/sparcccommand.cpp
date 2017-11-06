@@ -170,9 +170,8 @@ SparccCommand::SparccCommand(string option)  {
     
             string groups = validParameter.validFile(parameters, "groups", false);
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
-			m->setGroups(Groups);
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+			
             
             string label = validParameter.validFile(parameters, "label", false);
 			if (label == "not found") { label = ""; }
@@ -196,9 +195,10 @@ int SparccCommand::execute(){
         
         int start = time(NULL);
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
         
         int numOTUs = lookup->getNumBins();
         if (numOTUs >= maxIterations) {  m->mothurOut("[WARNING]: The number of iterations is set higher than the number of OTUs, reducing to " + toString(numOTUs-1) + "\n"); maxIterations = numOTUs-1; }

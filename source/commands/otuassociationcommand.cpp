@@ -161,9 +161,8 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	
-			}			
-			m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+			}
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
 			
@@ -237,8 +236,9 @@ int OTUAssociationCommand::execute(){
 //**********************************************************************************************************************
 int OTUAssociationCommand::processShared(){
 	try {
-		InputData* input = new InputData(sharedfile, "sharedfile");
+		InputData* input = new InputData(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
         if (metadatafile != "") {
@@ -402,8 +402,9 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 //**********************************************************************************************************************
 int OTUAssociationCommand::processRelabund(){
 	try {
-		InputData* input = new InputData(relabundfile, "relabund");
+		InputData* input = new InputData(relabundfile, "relabund", Groups);
 		SharedRAbundFloatVectors* lookup = input->getSharedRAbundFloatVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
         if (metadatafile != "") {
@@ -588,8 +589,6 @@ int OTUAssociationCommand::readMetadata(){
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
         metadataLookup->setLabels("1");
         
-        vector<string> mGroups = m->getGroups();
-        
 		//read rest of file
 		while (!in.eof()) {
 			
@@ -610,7 +609,7 @@ int OTUAssociationCommand::readMetadata(){
 				tempLookup->push_back(temp);
 			}
 			
-            if (m->inUsersGroups(group, mGroups)) {  metadataLookup->push_back(tempLookup);  }
+            if (m->inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
 			
 			m->gobble(in);
 		}

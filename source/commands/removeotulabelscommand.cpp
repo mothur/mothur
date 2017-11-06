@@ -554,7 +554,7 @@ int RemoveOtuLabelsCommand::readList(){
 //**********************************************************************************************************************
 int RemoveOtuLabelsCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -629,7 +629,7 @@ int RemoveOtuLabelsCommand::getListVector(){
 //**********************************************************************************************************************
 SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile",nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
         

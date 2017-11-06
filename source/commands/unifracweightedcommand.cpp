@@ -391,7 +391,7 @@ int UnifracWeightedCommand::execute() {
                 
                 //uses method of setting groups to doNotIncludeMe
                 SubSample sample;
-                Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize);
+                Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
                 

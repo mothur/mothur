@@ -162,9 +162,8 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 			if (groups == "not found") { groups = "";   }
 			else { 
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	
-			}			
-			m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+			}
             
             string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			m->mothurConvert(temp, runs); 
@@ -184,8 +183,9 @@ int CooccurrenceCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.

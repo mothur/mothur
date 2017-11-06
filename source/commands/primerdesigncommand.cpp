@@ -1243,7 +1243,7 @@ map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
 //**********************************************************************************************************************
 int PrimerDesignCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		

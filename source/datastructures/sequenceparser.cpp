@@ -26,10 +26,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		//initialize maps
         vector<string> namesOfGroups = groupMap->getNamesOfGroups();
         set<string> selectedGroups;
-        if (groupsSelected.size() != 0) {
-            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
-            namesOfGroups = groupsSelected;
-        }
+        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
         
         for (int i = 0; i < namesOfGroups.size(); i++) {
             vector<Sequence> temp;
@@ -127,10 +124,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 		//initialize maps
         vector<string> namesOfGroups = groupMap->getNamesOfGroups();
         set<string> selectedGroups;
-        if (groupsSelected.size() != 0) {
-            SharedUtil util;  util.setGroups(groupsSelected, namesOfGroups);
-            namesOfGroups = groupsSelected;
-        }
+        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
         
 		for (int i = 0; i < namesOfGroups.size(); i++) {
 			vector<Sequence> temp;

@@ -120,6 +120,10 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
         m->setSaveNextLabel(nextLabel);
         
         if (remove) { eliminateZeroOTUS(); }
+        
+        //error in names of user inputted Groups
+        if (lookup.size() < userGroups.size()) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
+
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "SharedRAbundVectors");

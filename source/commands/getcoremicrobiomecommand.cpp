@@ -163,9 +163,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
-			m->setGroups(Groups);
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
             
             string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -219,8 +217,9 @@ int GetCoreMicroBiomeCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        InputData input(inputFileName, format);
+        InputData input(inputFileName, format, Groups);
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
+        Groups = lookup->getNamesGroups();
         string lastLabel = lookup->getLabel();
         
         if (samples != -1) { 

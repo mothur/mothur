@@ -560,7 +560,7 @@ int GetOtuLabelsCommand::readList(){
 //**********************************************************************************************************************
 int GetOtuLabelsCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -635,7 +635,7 @@ int GetOtuLabelsCommand::getListVector(){
 //**********************************************************************************************************************
 SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		

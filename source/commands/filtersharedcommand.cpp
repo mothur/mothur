@@ -161,8 +161,7 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
             bool setSomething = false;
@@ -227,8 +226,9 @@ int FilterSharedCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -336,7 +336,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         vector<string> filteredLabels;
         
         vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
-        vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
+        vector<int> rareCounts; rareCounts.resize(Groups.size(), 0);
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;

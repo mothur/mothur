@@ -214,7 +214,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 		//the listfile does not contain a threshold greater than the cutoff so use highest value
 		if (adjustCutoff) {
             
-            InputData input(listFileName, "list");
+            InputData input(listFileName, "list", nullVector);
             ListVector* list = input.getListVector(lastLabel);
             
             int numOTUs = list->getNumBins();

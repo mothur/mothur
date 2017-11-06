@@ -351,25 +351,22 @@ int RenameSeqsCommand::execute() {
             CountTable* countTable = NULL;
             
             bool hasGroups = false;
-            vector<string> allGroups; allGroups.push_back("");
-            m->setAllGroups(allGroups);
+            vector<string> Groups;
             if (groupfile != "") {
                 groupMap = new GroupMap(groupfile);
-                
                 int groupError = groupMap->readMap();
                 if (groupError == 1) { delete groupMap; return 0; }
-                allGroups = groupMap->getNamesOfGroups();
-                m->setAllGroups(allGroups);
+                Groups = groupMap->getNamesOfGroups();
                 hasGroups = true;
             }else if (countfile != "") {
                 countTable = new CountTable();
                 countTable->readTable(countfile, true, false);
                 hasGroups = countTable->hasGroupInfo();
-                if (hasGroups) {     allGroups = countTable->getNamesOfGroups(); allGroups.push_back("Multi"); m->setAllGroups(allGroups); }
+                if (hasGroups) {     Groups = countTable->getNamesOfGroups(); Groups.push_back("Multi"); }
             }
             
             //set up for reads
-            map<string, int> counts; for (int i = 0; i < allGroups.size(); i++) {  counts[allGroups[i]] = 1; }
+            map<string, int> counts; for (int i = 0; i < Groups.size(); i++) {  counts[Groups[i]] = 1; }
             map<string, string> old2NewNameMap;
             bool fillOld2NewNameMap = false;
             if ((qualfile != "") || (contigsfile != "")) { fillOld2NewNameMap = true; }

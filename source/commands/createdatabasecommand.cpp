@@ -691,7 +691,7 @@ ListVector* CreateDatabaseCommand::getList(){
 //**********************************************************************************************************************
 SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		

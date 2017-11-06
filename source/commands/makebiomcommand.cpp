@@ -313,8 +313,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-				m->setGroups(Groups);
+                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
 			}
 			
             if (picrustOtuFile != "") {
@@ -349,13 +348,15 @@ int MakeBiomCommand::execute(){
         SharedRAbundFloatVectors* lookupRel = NULL;
         string lastLabel;
         
-		InputData input(inputFileName, fileFormat);
+		InputData input(inputFileName, fileFormat, Groups);
         if (fileFormat == "sharedfile") {
             lookup = input.getSharedRAbundVectors();
+            Groups = lookup->getNamesGroups();
             lastLabel = lookup->getLabel();
             getSampleMetaData(lookup);
         }else                        {
             lookupRel = input.getSharedRAbundFloatVectors();
+            Groups = lookupRel->getNamesGroups();
             lastLabel = lookupRel->getLabel();
             getSampleMetaData(lookupRel);
         }
@@ -1404,8 +1405,6 @@ int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
                 metadataLabels.push_back(pieces[i]);
             }
             int count = metadataLabels.size();
-			
-            vector<string> groups = m->getGroups();
             
             //read rest of file
             while (!in.eof()) {
@@ -1422,7 +1421,7 @@ int MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
                 if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + group + " " + m->getStringFromVector(thisPieces, ", ") + "\n"); }
         
                 if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
-                else {  if (m->inUsersGroups(group, groups)) { lines[group] = thisPieces; } }
+                else {  if (m->inUsersGroups(group, Groups)) { lines[group] = thisPieces; } }
                 
                 m->gobble(in);
             }
@@ -1482,8 +1481,6 @@ int MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& lookup){
             }
             int count = metadataLabels.size();
             
-            vector<string> groups = m->getGroups();
-            
             //read rest of file
             while (!in.eof()) {
                 
@@ -1497,7 +1494,7 @@ int MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& lookup){
                 vector<string> thisPieces = m->splitWhiteSpaceWithQuotes(line);
                 
                 if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
-                else {  if (m->inUsersGroups(group, groups)) { lines[group] = thisPieces; } }
+                else {  if (m->inUsersGroups(group, Groups)) { lines[group] = thisPieces; } }
                 
                 m->gobble(in);
             }

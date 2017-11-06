@@ -280,21 +280,16 @@ int LefseCommand::execute(){
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); if (subclass == "") { subclass = mclass; } }
         
+        vector<string> Groups;
         if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
-            //make sure sets are all in designMap
-            SharedUtil* util = new SharedUtil();
-            vector<string> dGroups = designMap.getCategory(mclass);
-            util->setGroups(Sets, dGroups);
-            delete util;
-            
             designMap.setDefaultClass(mclass);
-            vector<string> groupsToSelect = designMap.getNamesGroups(Sets);
-            m->setGroups(groupsToSelect);
+            Groups = designMap.getNamesGroups(Sets);
         }
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
         string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;

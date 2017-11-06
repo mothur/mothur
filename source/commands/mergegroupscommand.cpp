@@ -217,8 +217,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
-			m->setGroups(Groups);
+            if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
             
             method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
             
@@ -413,9 +412,10 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -517,12 +517,9 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 		//read groupfile
 		GroupMap groupMap(groupfile);
 		groupMap.readMap();
-		
-		//fill Groups - checks for "all" and for any typo groups
-		SharedUtil* util = new SharedUtil();
+    
 		vector<string> nameGroups = groupMap.getNamesOfGroups();
-		util->setGroups(Groups, nameGroups);
-		delete util;
+        if (Groups.size() == 0) { Groups = nameGroups; }
 		
 		vector<string> namesOfSeqs = groupMap.getNamesSeqs();
 		bool error = false;
@@ -567,9 +564,9 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
         countTable.readTable(countfile, true, false);
         
         //fill Groups - checks for "all" and for any typo groups
-        SharedUtil util;
         vector<string> nameGroups = countTable.getNamesOfGroups();
-        util.setGroups(Groups, nameGroups);
+        if (Groups.size() == 0) { Groups = nameGroups; }
+        
         
         vector<string> dnamesGroups = designMap->getNamesGroups();
         

@@ -25,7 +25,6 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
 		//sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
-        m->setAllGroups(groups);
         
         uniques = 0;
         total = 0;
@@ -170,7 +169,6 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
 		//sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
-        m->setAllGroups(groups);
         
         bool error = false;
         string name;
@@ -284,7 +282,6 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
-        m->setAllGroups(groups);
         
         bool error = false;
         string name;
@@ -576,7 +573,6 @@ int CountTable::addGroup(string groupName) {
             counts[i] = newCounts;
         }
         hasGroups = true;
-        m->setAllGroups(groups);
         
         return 0;
     }

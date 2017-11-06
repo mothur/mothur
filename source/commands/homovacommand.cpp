@@ -193,9 +193,7 @@ int HomovaCommand::execute(){
 		vector<string> sampleNames = readMatrix.read(distanceMatrix);
 		
         if (Sets.size() != 0) { //user selected sets, so we want to remove the samples not in those sets
-            SharedUtil util; 
             vector<string> dGroups = designMap->getCategory();
-            util.setGroups(Sets, dGroups);  
             
             for(int i=0;i<distanceMatrix.size();i++){
                 

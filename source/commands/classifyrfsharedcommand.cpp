@@ -213,19 +213,10 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
                         
             // end of pruning params
         
-        //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
       string groups = validParameter.validFile(parameters, "groups", false);
       if (groups == "not found") { groups = ""; }
-      else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
-      m->setGroups(Groups);
+      else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
         
-        //sets = validParameter.validFile(parameters, "sets", false);
-        //if (sets == "not found") { sets = ""; }
-        //else {
-           // m->splitAtDash(sets, Sets);
-        //}
-      
         //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
       string label = validParameter.validFile(parameters, "label", false);
       if (label == "not found") { label = ""; }
@@ -251,26 +242,9 @@ int ClassifyRFSharedCommand::execute() {
       //read design file
       designMap.read(designfile);
       
-      /*if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
-          //make sure sets are all in designMap
-          SharedUtil* util = new SharedUtil();
-          vector<string> dGroups = designMap.getCategory();
-          util->setGroups(Sets, dGroups);
-          
-          vector<string> groupsToSelect = designMap.getNamesGroups(Sets);
-          
-          if (Groups.size() != 0) {
-              //make sure all user selected groups are in the sets asked for
-              util->setGroups(Groups, groupsToSelect);
-              m->setGroups(Groups);
-          }else {
-              m->setGroups(groupsToSelect);
-          }
-          delete util;
-      }*/
-      
-      InputData input(sharedfile, "sharedfile");
+      InputData input(sharedfile, "sharedfile", Groups);
       SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+      Groups = lookup->getNamesGroups();
       
       
     string lastLabel = lookup->getLabel();

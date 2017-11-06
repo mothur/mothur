@@ -180,9 +180,7 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
-			m->setGroups(Groups);
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
             
             string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -205,10 +203,11 @@ int ListOtuLabelsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        InputData input(inputFileName, format);
+        InputData input(inputFileName, format, Groups);
         
         if (format == "relabund") {
             SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
+            Groups = lookup->getNamesGroups();
             string lastLabel = lookup->getLabel();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -285,6 +284,7 @@ int ListOtuLabelsCommand::execute(){
         }else if (format == "sharedfile") {
             
             SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            Groups = lookup->getNamesGroups();
             string lastLabel = lookup->getLabel();
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.

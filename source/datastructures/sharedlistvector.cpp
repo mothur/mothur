@@ -33,11 +33,13 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups) : Da
         if (m->getGroupMode() == "group") {
             groupmap = new GroupMap(m->getGroupFile());
             groupmap->readMap();
-            if (fillGroups) { groups = groupmap->getNamesOfGroups(); fillGroups = false; }
+            if (fillGroups) { groups = groupmap->getNamesOfGroups(); m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); fillGroups = false; }
+            else { if (!m->isSubset(groupmap->getNamesOfGroups(), groups)) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); } }
         }else {
             countTable = new CountTable();
             countTable->readTable(m->getCountTableFile(), true, false);
             if (fillGroups) { groups = countTable->getNamesOfGroups(); fillGroups = false; }
+            else { if (!m->isSubset(countTable->getNamesOfGroups(), groups)) { m->setControl_pressed(true); } }
         }
 
         int hold;

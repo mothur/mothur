@@ -29,7 +29,7 @@ class SubSample {
     
         vector<string> getSample(SharedRAbundVectors*&, int); //returns the bin labels for the subsample, mothurOuts binlabels are preserved so you can run this multiple times. Overwrites original vector passed in, if you need to preserve it deep copy first.
         vector<string> getSample(vector<SharedRAbundVector*>&, int, vector<string>); //returns the bin labels for the subsample. Overwrites original vector passed in, if you need to preserve it deep copy first.
-        Tree* getSample(Tree*, CountTable*, CountTable*, int); //creates new subsampled tree. Uses first counttable to fill new counttable with sabsampled seqs. Sets groups of seqs not in subsample to "doNotIncludeMe".
+        Tree* getSample(Tree*, CountTable*, CountTable*, int, vector<string>&); //creates new subsampled tree. Uses first counttable to fill new counttable with sabsampled seqs. Sets groups of seqs not in subsample to "doNotIncludeMe".
         int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
         CountTable getSample(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group, returns subsampled countTable 
         CountTable getSample(CountTable&, int, vector<string>, bool); //subsample a countTable. If you want to only sample from specific groups, pass in groups in the vector and set bool=true, otherwise set bool=false.   
