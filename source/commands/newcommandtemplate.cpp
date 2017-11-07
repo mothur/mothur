@@ -293,7 +293,7 @@ NewCommand::NewCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else {
                 m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
             }
             
             //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.

@@ -365,7 +365,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					abort = true;
 				}else { 
 					m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 				}
 			}
 			

@@ -258,7 +258,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = "unique." + groups;
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
 			}
 			
@@ -267,7 +267,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = groups;
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "selected_groups"; } //if too many groups then the filename becomes too big.
 				unique = false;
 			}

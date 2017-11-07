@@ -161,7 +161,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}

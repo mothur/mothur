@@ -299,7 +299,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}

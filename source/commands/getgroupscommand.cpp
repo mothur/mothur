@@ -283,7 +283,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }

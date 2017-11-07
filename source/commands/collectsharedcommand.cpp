@@ -332,7 +332,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-                    if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
 			string temp;

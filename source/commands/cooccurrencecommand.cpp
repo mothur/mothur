@@ -162,7 +162,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 			if (groups == "not found") { groups = "";   }
 			else { 
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
             
             string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }

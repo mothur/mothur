@@ -181,7 +181,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }	}
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	

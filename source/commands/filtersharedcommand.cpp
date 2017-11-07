@@ -161,7 +161,7 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
             bool setSomething = false;

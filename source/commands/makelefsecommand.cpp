@@ -170,7 +170,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);
 			if (groups == "not found") { groups = "";  }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 
 
             if ((relabundfile == "") && (sharedfile == "")) {

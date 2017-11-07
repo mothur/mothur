@@ -180,7 +180,7 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
             
             string groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
             
             string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }

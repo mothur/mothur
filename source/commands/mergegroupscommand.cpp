@@ -217,7 +217,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
-            if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+            if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
             
             method = validParameter.validFile(parameters, "method", false);		if(method == "not found"){	method = "sum"; }
             

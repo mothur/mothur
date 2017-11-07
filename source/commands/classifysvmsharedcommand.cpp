@@ -246,7 +246,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             //kinda nice, huh?
             string groups = validParameter.validFile(parameters, "groups", false);
             if (groups == "not found") { groups = ""; }
-            else {  m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+            else {  m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 
             //Commonly used to process list, rabund, sabund, shared and relabund files.
             //Look at "smart distancing" examples below in the execute function.

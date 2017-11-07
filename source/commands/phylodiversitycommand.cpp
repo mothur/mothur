@@ -240,7 +240,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			if (groups == "not found") { groups = "";  }
 			else { 
 				m->splitAtDash(groups, Groups);
-                if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } }
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }

@@ -226,7 +226,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
             
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0] != "all") { Groups.clear(); } } }
+			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 			
 			if (((groupfile == "") && (countfile == ""))&& (groups != "")) {  m->mothurOut("You cannot select groups without a valid group or count file, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";  Groups.clear(); }
 			

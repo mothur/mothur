@@ -39,7 +39,7 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups) : Da
             countTable = new CountTable();
             countTable->readTable(m->getCountTableFile(), true, false);
             if (fillGroups) { groups = countTable->getNamesOfGroups(); fillGroups = false; }
-            else { if (!m->isSubset(countTable->getNamesOfGroups(), groups)) { m->setControl_pressed(true); } }
+            else { if (!m->isSubset(countTable->getNamesOfGroups(), groups)) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); } }
         }
 
         int hold;
