@@ -399,6 +399,12 @@ int CommandFactory::checkForRedirects(string optionString) {
 
             if (seed)  { m->mothurOut("Setting random seed to " + toString(random) + ".\n\n"); m->setRandomSeed(random); }
         }
+        
+        pos = optionString.find("mothurcalling=true");
+        if (pos != string::npos) { //user has set seed in command option string
+            current->setMothurCalling(true);
+        }else { current->setMothurCalling(false);  }
+
         return 0;
 	}
 	catch(exception& e) {

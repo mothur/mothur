@@ -16,6 +16,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
         int num;
         string holdLabel, nextLabel, groupN;
         int numUserGroups = userGroups.size();
+        printSharedHeaders = true;
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
         
@@ -134,6 +135,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
 /***********************************************************************/
 void SharedRAbundFloatVectors::print(ostream& output){
     try {
+        printHeaders(output);
         sort(lookup.begin(), lookup.end(), compareRAbundFloats);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -311,12 +313,14 @@ vector<string> SharedRAbundFloatVectors::getOTUNames(){
 /***********************************************************************/
 void SharedRAbundFloatVectors::printHeaders(ostream& output){
     try {
-        getOTUNames();
+        if (printSharedHeaders) {
+            getOTUNames();
         
-        output << "label\tGroup\tnumOtus";
-        for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
+            output << "label\tGroup\tnumOtus";
+            for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
         
-        m->setPrintedSharedHeaders(true);
+            printSharedHeaders = false;
+        }
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundFloatVectors", "printHeaders");

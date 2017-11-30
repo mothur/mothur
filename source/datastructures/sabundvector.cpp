@@ -236,7 +236,7 @@ OrderVector SAbundVector::getOrderVector(map<string,int>* hold){
 			}
 		}
 	
-		m->mothurRandomShuffle(ov);
+		util.mothurRandomShuffle(ov);
 
 		ov.setLabel(label);
 		ov.getNumBins();

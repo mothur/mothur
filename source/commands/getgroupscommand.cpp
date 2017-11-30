@@ -362,7 +362,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
             if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
                     vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -566,7 +566,6 @@ int GetGroupsCommand::readShared(){
         variables["[extension]"] = util.getExtension(sharedfile);
 		
 		bool wroteSomething = false;
-		
 		while(lookup != NULL) {
 			
             variables["[tag]"] = lookup->getLabel();
@@ -578,7 +577,6 @@ int GetGroupsCommand::readShared(){
 			
             if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  delete lookup; return 0; }
 			
-            if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
             lookup->print(out);
             wroteSomething = true;
 			

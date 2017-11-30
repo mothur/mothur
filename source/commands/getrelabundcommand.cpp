@@ -177,8 +177,8 @@ int GetRelAbundCommand::execute(){
 		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		input = new InputData(sharedfile, "sharedfile", Groups);
-		lookup = input->getSharedRAbundVectors();
+        InputData input(sharedfile, "sharedfile", Groups);
+		lookup = input.getSharedRAbundVectors();
         Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
@@ -189,12 +189,12 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup;  delete input;  out.close(); util.mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup;   out.close(); util.mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -205,9 +205,9 @@ int GetRelAbundCommand::execute(){
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);
+				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -221,13 +221,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear();   delete input;  out.close(); util.mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();   out.close(); util.mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();
+			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  delete input;  out.close(); util.mothurRemove(outputFileName);  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();   out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -245,21 +245,17 @@ int GetRelAbundCommand::execute(){
 		//run last label if you need to
 		if (needToRun )  {
             delete lookup;
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+			lookup->printHeaders(out);
 			getRelAbundance(lookup, out);
 			
 			delete lookup;
 		}
-	
-		//reset groups parameter
-		  
-		delete input; 
 		out.close();
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); return 0;}
+		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); return 0;    }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

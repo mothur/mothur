@@ -213,7 +213,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(treefile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
 			}
 		}

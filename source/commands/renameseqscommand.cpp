@@ -274,7 +274,7 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             if (countfile == "") {
                 if (nameFile == "")  {
                     vector<string> files; files.push_back(fastaFile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}

@@ -187,7 +187,7 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
                     
 			if (namefile == "") {
 				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
+				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
 			}
 		}
 	}
@@ -792,7 +792,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->setMothurCalling(true);
+		current->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -800,7 +800,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->setMothurCalling(false);
+		current->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		string newnameFile = filenames["name"][0];

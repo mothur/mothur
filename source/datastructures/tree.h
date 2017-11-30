@@ -82,6 +82,7 @@ private:
 	MothurOut* m;
     CurrentFile* current;
     vector<string> Treenames;
+    Utils util;
 		
 };
 

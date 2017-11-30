@@ -336,7 +336,7 @@ SubSampleCommand::SubSampleCommand(string option) {
             if (countfile == "") {
                 if ((fastafile != "") && (namefile == "")) {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -526,7 +526,7 @@ int SubSampleCommand::getSubSampleFasta() {
             if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
 
 		}
-		m->mothurRandomShuffle(names);
+		util.mothurRandomShuffle(names);
 		
 		set<string> subset; //dont want repeat sequence names added
 		if (persample) {
@@ -666,7 +666,7 @@ int SubSampleCommand::getSubSampleFasta() {
 			string inputString = "fasta=" + outputFileName;
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-			m->setMothurCalling(true);
+			current->setMothurCalling(true);
             
 			Command* uniqueCommand = new DeconvoluteCommand(inputString);
 			uniqueCommand->execute();
@@ -674,7 +674,7 @@ int SubSampleCommand::getSubSampleFasta() {
 			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 			
 			delete uniqueCommand;
-			m->setMothurCalling(false);
+			current->setMothurCalling(false);
             
             util.renameFile(filenames["name"][0], outputNameFileName); 
             util.renameFile(filenames["fasta"][0], outputFileName);  
@@ -1079,7 +1079,7 @@ int SubSampleCommand::getSubSampleList() {
                 }
             }
             
-            m->mothurRandomShuffle(names);
+            util.mothurRandomShuffle(names);
 			
             //randomly select a subset of those names to include in the subsample
             if (persample) {
@@ -1250,7 +1250,7 @@ int SubSampleCommand::getSubSampleList() {
                 string inputString = "dups=f, name=" + namefile + ", taxonomy=" + taxonomyfile + ", accnos=" + tempAccnos;
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 m->mothurOut("Running command: get.seqs(" + inputString + ")"); m->mothurOutEndLine();
-                m->setMothurCalling(true);
+                current->setMothurCalling(true);
                 
                 Command* getCommand = new GetSeqsCommand(inputString);
                 getCommand->execute();
@@ -1258,7 +1258,7 @@ int SubSampleCommand::getSubSampleList() {
                 map<string, vector<string> > filenames = getCommand->getOutputFiles();
                 
                 delete getCommand;
-                m->setMothurCalling(false);
+                current->setMothurCalling(false);
                 
                 util.renameFile(filenames["name"][0], outputNameFileName);
                 util.renameFile(filenames["taxonomy"][0], outputTaxFileName);
@@ -1460,7 +1460,7 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 					order.push_back(p);
 				}
 			}
-			m->mothurRandomShuffle(order);
+			util.mothurRandomShuffle(order);
 			
 			RAbundVector* temp = new RAbundVector(numBins);
 			temp->setLabel(rabund->getLabel());
@@ -1619,7 +1619,7 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 					order.push_back(p);
 				}
 			}
-			m->mothurRandomShuffle(order);
+			util.mothurRandomShuffle(order);
 			
 			RAbundVector* temp = new RAbundVector(numBins);
 			temp->setLabel(rabund->getLabel());

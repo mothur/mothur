@@ -63,7 +63,7 @@ string VsearchFileParser::getVsearchFile() {
         if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->setControl_pressed(true);  }
         
         //Run unique.seqs on the data if a name or count file is not given
-        if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                }
+        if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                  }
         else if (namefile != "")                    {  counts = util.readNames(namefile);        }
         
         if (countfile != "") { CountTable countTable; countTable.readTable(countfile, false, false);  counts = countTable.getNameMap(); }
@@ -130,17 +130,15 @@ string VsearchFileParser::getNamesFile(string& inputFile){
         m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
         
         //use unique.seqs to create new name and fastafile
-        string inputString = "fasta=" + inputFile + ", format=count";
+        string inputString = "fasta=" + inputFile + ", format=count, mothurcalling=true";
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         countfile = filenames["count"][0];

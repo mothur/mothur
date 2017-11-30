@@ -844,7 +844,7 @@ int SharedCommand::createSharedFromListGroup() {
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -887,7 +887,7 @@ int SharedCommand::createSharedFromListGroup() {
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -947,7 +947,7 @@ int SharedCommand::createSharedFromListGroup() {
                 printSharedData(lookup, out2);
                 out2.close();
             }else {
-                if (!m->getPrintedSharedHeaders()){ lookup->printHeaders(out); }
+                lookup->printHeaders(out); 
                 printSharedData(lookup, out); //prints info to the .shared file
             }
             delete lookup;

@@ -207,7 +207,7 @@ int MantelCommand::execute(){
 			
 			//randomize matrix2
 			vector< vector<double> > matrix2Copy = matrix2;
-			m->mothurRandomShuffle(matrix2Copy);
+			util.mothurRandomShuffle(matrix2Copy);
 		
 			//calc random mantel
 			double randomMantel = 0.0;

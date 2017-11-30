@@ -3658,8 +3658,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3691,8 +3692,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3735,7 +3737,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
@@ -3801,8 +3804,9 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

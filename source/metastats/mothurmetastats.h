@@ -12,6 +12,7 @@
 
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 class MothurMetastats {
 	
@@ -25,6 +26,7 @@ class MothurMetastats {
 		MothurOut* m;
 		int row, column, numPermutations, secondGroupingStart;
 		double threshold;
+        Utils util;
         
         vector<double> permuted_pvalues(vector< vector<double> >&, vector<double>&, vector< vector<double> >&);
         vector<double> permute_and_calc_ts(vector< vector<double> >&);

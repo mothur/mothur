@@ -310,7 +310,7 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
         map<int, int> randomMap;
         vector<int> randoms;
         for (int i = 0; i < column; i++) { randoms.push_back(i); }
-        m->mothurRandomShuffle(randoms);
+        util.mothurRandomShuffle(randoms);
         for (int i = 0; i < randoms.size(); i++) {   randomMap[i] = randoms[i];   }
         
         //calc ts

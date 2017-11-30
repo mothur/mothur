@@ -388,10 +388,10 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 				if (m->getControl_pressed()) { return axes; }
 				
 				//generate random int between 0 and 99999
-                int myrand = m->getRandomIndex(99999);
+                int myrand = util.getRandomIndex(99999);
                 
 				//generate random sign
-				int mysign = m->getRandomIndex(99999);
+				int mysign = util.getRandomIndex(99999);
 				
 				//if mysign is even then sign = positive, else sign = negative
 				if ((mysign % 2) == 0) { mysign = 1.0; }

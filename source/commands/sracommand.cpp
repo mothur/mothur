@@ -1207,7 +1207,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             m->mothurOutEndLine();
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
             fastqinfoCommand->execute();
@@ -1218,7 +1218,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             else { m->setControl_pressed(true); } // error in sffinfo
             
             delete fastqinfoCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
@@ -1260,7 +1260,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: sffinfo(" + commandString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
+        current->setMothurCalling(true);
         
         Command* sffinfoCommand = new SffInfoCommand(commandString);
         sffinfoCommand->execute();
@@ -1271,7 +1271,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         else { m->setControl_pressed(true); } // error in sffinfo
         
         delete sffinfoCommand;
-        m->setMothurCalling(false);
+        current->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
@@ -1307,7 +1307,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         m->mothurOutEndLine();
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
+        current->setMothurCalling(true);
         
         Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
         fastqinfoCommand->execute();
@@ -1318,7 +1318,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         else { m->setControl_pressed(true); } // error in sffinfo
         
         delete fastqinfoCommand;
-        m->setMothurCalling(false);
+        current->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }

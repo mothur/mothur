@@ -329,7 +329,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
                     vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}

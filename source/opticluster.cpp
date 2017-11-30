@@ -24,6 +24,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
         bins.push_back(temp);
         seqBin[numSeqs] = -1;
         insertLocation = numSeqs;
+        Utils util;
         
         if (initialize == "singleton") {
             
@@ -36,7 +37,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
                 randomizeSeqs.push_back(i);
             }
             
-            if (randomize) { m->mothurRandomShuffle(randomizeSeqs); }
+            if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
@@ -58,7 +59,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
                 randomizeSeqs.push_back(i);
             }
             
-            if (randomize) { m->mothurRandomShuffle(randomizeSeqs); }
+            if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
             for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {

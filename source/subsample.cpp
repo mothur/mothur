@@ -37,7 +37,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
                         int num = ct->getGroupCount(names[j], Groups[i]);
                         for (int k = 0; k < num; k++) { random.push_back(j); }
                     }
-                    m->mothurRandomShuffle(random);
+                    util.mothurRandomShuffle(random);
                     
                     vector<int> sampleRandoms; sampleRandoms.resize(names.size(), 0);
                     for (int j = 0; j < size; j++) { sampleRandoms[random[j]]++; }
@@ -126,7 +126,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                     for(int k=0;k<abund;k++){ order.push_back(j);  }
                 }
                 
-                m->mothurRandomShuffle(order);
+                util.mothurRandomShuffle(order);
                 
                 SharedRAbundVector* temp = new SharedRAbundVector(numBins);
                 temp->setLabel(rabunds[i]->getLabel());
@@ -193,7 +193,7 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
         OrderVector order = sabund->getOrderVector();
         
 		if (thisSize > size) {
-			m->mothurRandomShuffle(order);
+			util.mothurRandomShuffle(order);
 			
             RAbundVector rabund(numBins);
 			rabund.setLabel(sabund->getLabel());
@@ -242,7 +242,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
                 for (int k = 0; k < num; k++) { allNames.push_back(names[j]); }
             }
             
-            m->mothurRandomShuffle(allNames);
+            util.mothurRandomShuffle(allNames);
             
             if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->setControl_pressed(true); }
             else{
@@ -308,7 +308,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 }
             }
             
-            m->mothurRandomShuffle(allNames);
+            util.mothurRandomShuffle(allNames);
             
             if (allNames.size() < size) { 
                 if (pickedGroups) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); } 
@@ -352,7 +352,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
             
             if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); return sampledCt; }
             else {
-                m->mothurRandomShuffle(allNames);
+                util.mothurRandomShuffle(allNames);
                 
                 for (int j = 0; j < size; j++) {
                     if (m->getControl_pressed()) { return sampledCt; }

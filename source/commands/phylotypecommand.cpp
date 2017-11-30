@@ -190,7 +190,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(taxonomyFileName);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
 			}
 		}
@@ -310,7 +310,6 @@ int PhylotypeCommand::execute(){
 				}	
 				
 				//print listvector
-                if (!m->getPrintedListHeaders()) { list.printHeaders(outList); }
                 if (countfile == "") { list.print(outList);  }
                 else { list.print(outList, counts);  }
                 

@@ -3,6 +3,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 class ListVector;
@@ -38,6 +39,7 @@ private:
 	float smallDist;
 	int minsIndex;
 	MothurOut* m;
+    Utils util;
 };
 
 /***********************************************************************/

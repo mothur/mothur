@@ -20,19 +20,18 @@ struct logger {
     
     template< class T >
     logger& operator <<( const T& o ) {
+        lock_guard<std::mutex> guard(token);
         cout << o; return *this;
     }
     
     logger& operator<<(ostream& (*m)(ostream&) ) {
+        lock_guard<std::mutex> guard(token);
         cout << m; return *this;
     }
-    
-}; 
+private:
+    std::mutex token;
+};
 /***********************************************/
-class OrderVector;
-class SharedOrderVector;
-class RAbundVector;
-class SharedRAbundVector;
 
 class MothurOut {
 	
@@ -45,9 +44,10 @@ class MothurOut {
         void setDebug(bool t)                           { debug = t;                        }
         bool getQuietMode()                             { return quietMode;                 }
         void setQuietMode(bool t)                       { quietMode = t;                    }
-        int getNumErrors()          { return numErrors;         }
+        int getNumErrors()                              { return numErrors;                 }
+        string getLogFileName()                         { return logFileName;               }
 		void setLogFileName(string f, bool append);
-        string getLogFileName() { return logFileName; }
+    
 		void mothurOut(string); //writes to cout and the logfile
 		void mothurOutEndLine(); //writes to cout and the logfile
 		void mothurOut(string, ofstream&); //writes to the ofstream, cout and the logfile
@@ -57,87 +57,52 @@ class MothurOut {
 		void errorOut(exception&, string, string);
 		void closeLog();
     
-        //random operations
-        int getRandomIndex(int); //highest
-        int getRandomNumber();
-        double getRandomDouble0to1();
-        int mothurRandomShuffle(vector<int>&);
-        int mothurRandomShuffle(vector< vector<double> >&);
-        int mothurRandomShuffle(vector<string>&);
-        int mothurRandomShuffle(vector<item>&);
-        int mothurRandomShuffle(vector<PCell*>&);
-        int mothurRandomShuffle(vector<PDistCellMin>&);
-        int mothurRandomShuffle(OrderVector&);
-        int mothurRandomShuffle(SharedOrderVector&);
-        int mothurRandomShuffle(vector<SharedRAbundVector*>&);
-        void setRandomSeed(unsigned s) { mersenne_twister_engine.seed(s); srand(s); }
-    
         //globals
-        
+        void setRandomSeed(long long s)                 { seed = s;                         }
+        long long getRandomSeed()                       { return seed;                      }
         bool getControl_pressed()                       { return control_pressed;           }
         void setControl_pressed(bool t)                 { control_pressed = t;              }
-        bool getPrintedSharedHeaders()                  { return printedSharedHeaders;      }
-        void setPrintedSharedHeaders(bool t)            { printedSharedHeaders = t;         }
-        bool getPrintedListHeaders()                    { return printedListHeaders;        }
-        void setPrintedListHeaders(bool t)              { printedListHeaders = t;           }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
         void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
         bool getModifyNames()                           { return modifyNames;               }
         void setModifyNames(bool t)                     { modifyNames = t;                  }
         bool getExecuting()                             { return executing;                 }
         void setExecuting(bool t)                       { executing = t;                    }
-    
-    bool getJumble()                                { return jumble;                    }
+        bool getJumble()                                { return jumble;                    }
         void setJumble(bool t)                          { jumble = t;                       }
-        bool getMothurCalling()                         { return mothurCalling;             }
-        void setMothurCalling(bool t)                   { mothurCalling = t;                }
+        
     
-    //should be owned by datastructures and passed
-   // vector<string> getTreenames()                   { return Treenames;                 }
-  //  void setTreenames(vector<string> t)             { Treenames = t;                    }
-  //  string getSaveNextLabel()                       { return saveNextLabel;             }
-  //  void setSaveNextLabel(string t)                 { saveNextLabel = t;                }
-  //      
-    
-	
-				
 	private:
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
 		MothurOut() { 
 			control_pressed = false;
-			printedSharedHeaders = false;
-            printedListHeaders = false;
-            mothurCalling = false;
             debug = false;
             quietMode = false;
-			sharedHeaderMode = "";
             changedSeqNames = false;
             modifyNames = true;
+            devNull = false;
             numErrors = 0;
             numWarnings = 0;
-            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-            mersenne_twister_engine.seed(seed);
             logFileName = ""; buffer = "";
+            seed = std::chrono::system_clock::now().time_since_epoch().count();
 		}
 		~MothurOut();
-
 		
-        mt19937_64 mersenne_twister_engine;
 		ofstream out;
+        long long seed;
         int numErrors, numWarnings;
-        //vector<string> Treenames;
-        string sharedHeaderMode,  logfileName, logFileName;
-        bool printedSharedHeaders, printedListHeaders, changedSeqNames, modifyNames;
-        bool executing, runParse, jumble, mothurCalling, debug, quietMode;
+        string logFileName;
+        bool changedSeqNames, modifyNames, devNull;
+        bool executing, runParse, jumble, debug, quietMode;
         bool control_pressed;
         string buffer;
-        //std::mutex token;
-    
+        std::mutex token;
 		
 };
 /***********************************************/
+
 
 #endif
 

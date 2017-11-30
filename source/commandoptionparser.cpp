@@ -16,6 +16,7 @@
 CommandOptionParser::CommandOptionParser(string input){
 	try {
 		m = MothurOut::getInstance();
+        CurrentFile* current = CurrentFile::getInstance();
 		
 		int openParen = input.find_first_of('(');
 		int closeParen = input.find_last_of(')');
@@ -29,6 +30,15 @@ CommandOptionParser::CommandOptionParser(string input){
             if (spot > openParen) { spot = 0; }
 			commandString = input.substr(spot, openParen-spot);   //commandString contains everything before "("
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
+            if (!(commandString == "set.logfile")) {
+                if (m->getLogFileName() == "") {
+                    time_t ltime = time(NULL); /* calendar time */
+                    string outputPath = current->getOutputDir();
+                    if (outputPath == "") { outputPath = current->getDefaultPath();  }
+                    string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
+                    m->setLogFileName(logFileName, false);
+                }
+            }
 		}
 		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing ("); m->mothurOutEndLine(); }
 		else if (closeParen == -1) { m->mothurOut("[ERROR]: You are missing )"); m->mothurOutEndLine(); }

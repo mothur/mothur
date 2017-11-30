@@ -848,32 +848,6 @@ string BiomInfoCommand::getTag(string& line) {
         exit(1);
     }
 }
-/**********************************************************************************************************************
-void BiomInfoCommand::printSharedData(SharedRAbundVectors* thislookup, ofstream& out) {
-    try {
-        
-        //sorts alphabetically
-        
-        vector<string> Groups;
-        map<string, SharedRAbundVector*> Ovectors;
-        for (int i = 0; i < thislookup.size(); i++) { Ovectors[thislookup[i]->getGroup()] = thislookup[i]; }
-        
-        //initialize bin values
-        for (map<string, SharedRAbundVector*>::iterator it = Ovectors.begin(); it != Ovectors.end(); it++) {
-            out << (it->second)->getLabel() << '\t' << it->first << '\t';
-            (it->second)->print(out);
-                
-            Groups.push_back(it->first);
-        }
-        m->setGroups(Groups);
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "printSharedData");
-        exit(1);
-    }
-}
-
 //**********************************************************************************************************************/
 
 

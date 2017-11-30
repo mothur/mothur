@@ -22,7 +22,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		threadID = tid;
         Utils util;
 
-		int randNumber = m->getRandomNumber();;
+		int randNumber = util.getRandomNumber();;
 		//int randNumber = 12345;
 		string pid = toString(threadID);
 		
@@ -75,7 +75,7 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		//make sure blast exists in the write place
 		if (path == "") {  path = current->getBlastPath() + "blast" + PATH_SEPARATOR + "bin" + PATH_SEPARATOR; }
 		
-		int randNumber = m->getRandomNumber();;
+		int randNumber = util.getRandomNumber();;
 		string pid = toString(threadID);
 		dbFileName = pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = pid + toString(randNumber) + ".candidate.unaligned.fasta";
@@ -136,7 +136,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		int randNumber = m->getRandomNumber();;
+		int randNumber = util.getRandomNumber();;
 		string pid = scrubName(seq->getName());
 		
         Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
@@ -202,7 +202,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		
 		ofstream queryFile;
-		int randNumber = m->getRandomNumber();
+		int randNumber = util.getRandomNumber();
 		string pid = scrubName(seq->getName());
 		
         Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);

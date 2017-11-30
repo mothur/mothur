@@ -279,7 +279,7 @@ int ParseFastaQCommand::execute(){
                 
                 if ((fileOption == 2) || (fileOption == 4))  {  processFile(files[i], trimOligos, rtrimOligos);  }
                 else if (fileOption == 3) {
-                    if (m->getMothurCalling()) {
+                    if (current->getMothurCalling()) {
                         //add group names to fastq files and make copies
                         ofstream temp, temp2;
                         map<string, string> variables;

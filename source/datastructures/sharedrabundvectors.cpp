@@ -13,6 +13,7 @@
 //reads a shared file
 SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector(){
     try {
+        printSharedHeaders = true;
         int num, count;
         count = 0;
         string holdLabel, nextLabel, groupN;
@@ -140,6 +141,7 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
 /***********************************************************************/
 void SharedRAbundVectors::print(ostream& output){
     try {
+        printHeaders(output);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -210,12 +212,14 @@ vector<string> SharedRAbundVectors::getOTUNames(){
 /***********************************************************************/
 void SharedRAbundVectors::printHeaders(ostream& output){
     try {
-        getOTUNames();
+        if (printSharedHeaders) {
+            getOTUNames();
         
-        output << "label\tGroup\tnumOtus";
-        for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
+            output << "label\tGroup\tnumOtus";
+            for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
         
-        m->setPrintedSharedHeaders(true);
+            printSharedHeaders = false;
+        }
     }
     catch(exception& e) {
         m->errorOut(e, "SharedVector", "printHeaders");

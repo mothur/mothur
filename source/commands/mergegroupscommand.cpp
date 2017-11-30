@@ -384,7 +384,6 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out)
         merged->eliminateZeroOTUS(); // remove any zero OTUs created by median option.
         
         //print new file
-        if (!m->getPrintedSharedHeaders()){ merged->printHeaders(out); }
         merged->print(out);
         delete merged;
         
@@ -651,7 +650,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* removeCommand = new RemoveSeqsCommand(inputString);
             removeCommand->execute();
@@ -659,7 +658,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             
             delete removeCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             util.mothurRemove(accnosFile);

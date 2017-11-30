@@ -189,12 +189,12 @@ map<string, string> OptionParser::getParameters() {
 //this function will look at each one, if the rootnames match, mothur will warn 
 //the user that they may have neglected to provide a namefile.
 //stops when it finds a match.
-bool OptionParser::getNameFile(vector<string> files) {	
+bool OptionParser::getNameFile(vector<string> files) {
 	try {
 		string namefile = current->getNameFile();
 		bool match = false;
 		
-		if ((namefile != "")&&(!m->getMothurCalling())) {
+		if (namefile != "") {
 			string temp = util.getRootName(util.getSimpleName(namefile));
 			vector<string> rootName;
 			util.splitAtChar(temp, rootName, '.');
@@ -221,9 +221,7 @@ bool OptionParser::getNameFile(vector<string> files) {
 					}
 				}
 			}
-			
 		}
-		
 		
 		return match;
 	}

@@ -269,7 +269,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect, s
 			
 			vector<int> temp;
 			for (int j = 0; j < numToSelect; j++) {
-				int index = m->getRandomIndex(kmers.size()-1);
+				int index = util.getRandomIndex(kmers.size()-1);
 				
 				//add word to temp
 				temp.push_back(kmers[index]);

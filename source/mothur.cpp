@@ -57,6 +57,16 @@ int main(int argc, char *argv[]){
 			temp = util.getFullPathName(temp);
 			current->setDefaultPath(temp);
 		#endif
+        
+        #ifdef LOGFILE_NAME
+            string logfilename = LOGFILE_NAME;
+            logfilename = util.getFullPathName(logfilename);
+        
+            m->appendLogBuffer("Using Static Logfile " + logfilename +  "\n");
+        
+            m->setLogFileName(logfilename, false);
+            m->mothurOut("\n");
+        #endif
 		
 		//get releaseDate from Make
 		string releaseDate = RELEASE_DATE; 

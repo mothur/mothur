@@ -343,7 +343,7 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 			}
 		}
 
-		m->mothurRandomShuffle(*order);
+		util.mothurRandomShuffle(*order);
 		order->updateStats();
 		
 		return order;
@@ -440,7 +440,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					ov.push_back(i);
 				}
 			}
-			m->mothurRandomShuffle(ov);
+			util.mothurRandomShuffle(ov);
 			ov.setLabel(label);
 			ov.getNumBins();
 		

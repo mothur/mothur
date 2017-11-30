@@ -449,7 +449,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     if (m->getControl_pressed()) { return 0; }
                 nextnum2:
                     previous = 0.0;
-                    randnum = m->getRandomDouble0to1();
+                    randnum = util.getRandomDouble0to1();
                     for(int i=0;i<nrows;i++) {
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
@@ -468,7 +468,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
             
             else if (matrix == "sim2") {
                 for(int i=0;i<nrows;i++) {
-                    m->mothurRandomShuffle(co_matrix[i]);
+                    util.mothurRandomShuffle(co_matrix[i]);
                 }
                 //do this for the scoring since those all have nullmatrix as a parameter
                 //nullmatrix gets cleared at the begining of each run
@@ -481,7 +481,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     while(count < rowtotal[i]) {
                         previous = 0.0;
                         if (m->getControl_pressed()) { return 0; }
-                        randnum = m->getRandomDouble0to1();
+                        randnum = util.getRandomDouble0to1();
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
@@ -502,7 +502,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     count = 0;
                     while(count < columntotal[j]) {
                         if (m->getControl_pressed()) { return 0; }
-                        randnum = m->getRandomDouble0to1();
+                        randnum = util.getRandomDouble0to1();
                         for(int i=0;i<nrows;i++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {

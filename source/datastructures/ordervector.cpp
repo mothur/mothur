@@ -85,11 +85,19 @@ void OrderVector::clear(){
 
 
 
+
 void OrderVector::set(int index, int binNumber){
-	
-	data[index] = binNumber;
-	needToUpdate = 1;
-	
+    
+    data[index] = binNumber;
+    needToUpdate = 1;
+    
+}
+/***********************************************************************/
+
+
+void OrderVector::set(vector<int> v){
+    data = v;
+	updateStats();	
 }
 
 /***********************************************************************/

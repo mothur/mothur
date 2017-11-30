@@ -177,7 +177,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
             if (countfile == "") {
                 if ((namefile == "") && (fastafile != "")){
                     vector<string> files; files.push_back(fastafile); 
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}

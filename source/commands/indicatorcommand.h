@@ -108,10 +108,10 @@ static DWORD WINAPI MyIndicatorThreadFunction(LPVOID lpParam){
                 
                 //get random groups to swap to switch with
                 //generate random int between 0 and groupings.size()-1
-                int z = pDataArray->m->getRandomIndex(pDataArray->groupings.size()-1);
-                int x = pDataArray->m->getRandomIndex(pDataArray->groupings.size()-1);
-                int a = pDataArray->m->getRandomIndex(pDataArray->groupings[z].size()-1);
-                int b = pDataArray->m->getRandomIndex(pDataArray->groupings[x].size()-1);
+                int z = pDataArray->util.getRandomIndex(pDataArray->groupings.size()-1);
+                int x = pDataArray->util.getRandomIndex(pDataArray->groupings.size()-1);
+                int a = pDataArray->util.getRandomIndex(pDataArray->groupings[z].size()-1);
+                int b = pDataArray->util.getRandomIndex(pDataArray->groupings[x].size()-1);
                 //cout << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;
                 
                 vector<int> from;

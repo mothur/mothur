@@ -1326,11 +1326,8 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
 /*********************************************************************************************************************************/
 double LinearAlgebra::normalvariate(double mean, double standardDeviation) {
     try {
-        double u1 = m->getRandomDouble0to1();
-        double u2 = m->getRandomDouble0to1();
-        //double r = sqrt( -2.0*log(u1) );
-        //double theta = 2.0*PI*u2;
-        //cout << cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1)) << endl;
+        double u1 = util.getRandomDouble0to1();
+        double u2 = util.getRandomDouble0to1();
         return cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1));
     }
 	catch(exception& e) {

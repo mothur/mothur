@@ -19,7 +19,7 @@ public:
 	ListVector();
 	ListVector(int);
 	ListVector(string, vector<string>, string&);
-	ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), currentLabels(lv.currentLabels), otuTag(lv.otuTag) {};
+    ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), currentLabels(lv.currentLabels), otuTag(lv.otuTag), printListHeaders(true) {};
 	ListVector(ifstream&, string&, string&);
 	~ListVector(){};
 	
@@ -52,6 +52,7 @@ private:
 	int numSeqs;
     vector<string> binLabels;
     string otuTag;
+    bool printListHeaders;
 
 };
 

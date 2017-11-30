@@ -425,7 +425,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			if (countfile == "") { 
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -479,7 +479,7 @@ int ScreenSeqsCommand::execute(){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* removeCommand = new RemoveSeqsCommand(inputString);
             removeCommand->execute();
@@ -487,7 +487,7 @@ int ScreenSeqsCommand::execute(){
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             
             delete removeCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             if (groupfile != "") {

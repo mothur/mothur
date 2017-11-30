@@ -904,7 +904,7 @@ string ChimeraVsearchCommand::getNamesFile(string& inputFile){
         string inputString = "fasta=" + inputFile;
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
+        current->setMothurCalling(true);
         
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
@@ -912,7 +912,7 @@ string ChimeraVsearchCommand::getNamesFile(string& inputFile){
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->setMothurCalling(false);
+        current->setMothurCalling(false);
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         nameFile = filenames["name"][0];

@@ -11,12 +11,31 @@
 
 #include "mothurout.h"
 
+class OrderVector;
+class SharedOrderVector;
+class RAbundVector;
+class SharedRAbundVector;
+
 class Utils {
     
 public:
     
-    Utils() { m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames(); }
+    Utils(); 
     ~Utils() {}
+    
+    //random operations
+    int getRandomIndex(int); //highest
+    int getRandomNumber();
+    double getRandomDouble0to1();
+    void mothurRandomShuffle(vector<int>&);
+    void mothurRandomShuffle(vector< vector<double> >&);
+    void mothurRandomShuffle(vector<string>&);
+    void mothurRandomShuffle(vector<item>&);
+    void mothurRandomShuffle(vector<PCell*>&);
+    void mothurRandomShuffle(vector<PDistCellMin>&);
+    void mothurRandomShuffle(OrderVector&);
+    void mothurRandomShuffle(SharedOrderVector&);
+    void mothurRandomShuffle(vector<SharedRAbundVector*>&);
     
     //checks
     bool isTrue(string);
@@ -185,6 +204,7 @@ public:
 private:
     MothurOut* m;
     bool modifyNames;
+    mt19937_64 mersenne_twister_engine;
     
 };
 

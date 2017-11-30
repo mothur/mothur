@@ -270,7 +270,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 
 			if ((namesFileName == "") && (queryFileName != "")){
 				vector<string> files; files.push_back(queryFileName); 
-				parser.getNameFile(files);
+				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
 			}
 
             if(aligned ){

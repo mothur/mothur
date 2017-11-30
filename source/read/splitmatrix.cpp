@@ -190,23 +190,18 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
             //process each distance file
             for (int i = 0; i < numGroups; i++) {
                 
-                string options = "";
-                if (classic) { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
-                else { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
+                string options = "mothurcalling=true";
+                if (classic) { options += ", fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
+                else { options += ", fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
                 if (outputDir != "") { options += ", outputdir=" + outputDir; }
                 
-                m->setMothurCalling(true);
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: dist.seqs(" + options + ")"); m->mothurOutEndLine();
-                m->setMothurCalling(true);
-                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: dist.seqs(" + options + ")\n");
                 Command* command = new DistanceCommand(options);
-                
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n");
                 
                 command->execute();
                 delete command;
-                m->setMothurCalling(false);
                 
                 util.mothurRemove((fastafile + "." + toString(i) + ".temp"));
                 

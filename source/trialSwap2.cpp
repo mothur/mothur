@@ -199,10 +199,10 @@ int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix, int ncols, 
         //do 100 runs to make sure enough swaps are happening. This does NOT mean that there will be 1000 swaps, but that is the theoretical max.
         for(int a=0;a<1000;a++){
             int i, j, k, l;
-            i = m->getRandomIndex(nrows-1);
-            while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->getControl_pressed()) { return 0; }}
-            k = m->getRandomIndex(ncols-1);
-            while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->getControl_pressed()) { return 0; }}
+            i = util.getRandomIndex(nrows-1);
+            while((j = util.getRandomIndex(nrows-1) ) == i ) {;if (m->getControl_pressed()) { return 0; }}
+            k = util.getRandomIndex(ncols-1);
+            while((l = util.getRandomIndex(ncols-1)) == k ) {;if (m->getControl_pressed()) { return 0; }}
 
             if((co_matrix[i][k]*co_matrix[j][l]==1 && co_matrix[i][l]+co_matrix[j][k]==0)||(co_matrix[i][k]+co_matrix[j][l]==0 && co_matrix[i][l]*co_matrix[j][k]==1)) //checking for checkerboard value and swap
             {

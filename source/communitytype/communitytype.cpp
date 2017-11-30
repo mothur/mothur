@@ -407,7 +407,7 @@ int CommunityTypeFinder::findkMeans(){
         //randomize samples
         vector<int> temp;
         for (int i = 0; i < numSamples; i++) { temp.push_back(i); }
-        m->mothurRandomShuffle(temp);
+        util.mothurRandomShuffle(temp);
         
         //assign each partition at least one random sample
         int numAssignedSamples = 0;

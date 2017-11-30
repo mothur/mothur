@@ -26,8 +26,9 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 	
 	gapOpen = abs(go);				//	This is the penalty to assess for opening a gap (gapOpen >= 0)
 	gapExtend = abs(ge);				//	This is the penalty to assess for extending a gap (gapExtend >= 0)
-		
-	int randNumber = m->getRandomNumber();
+    
+    Utils util;
+	int randNumber = util.getRandomNumber();
 	candidateFileName = toString(randNumber) + ".candidate";
 	templateFileName = toString(randNumber) + ".template";
 	blastFileName = toString(randNumber) + ".pairwise";

@@ -247,7 +247,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			if (countfile=="") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(treefile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 } 
             }
 		}
@@ -606,7 +606,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
         
         
 		for (int l = 0; l < numIters; l++) {
-            m->mothurRandomShuffle(randomLeaf);
+            util.mothurRandomShuffle(randomLeaf);
             
             //initialize counts
             map<string, int> counts;

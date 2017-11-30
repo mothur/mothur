@@ -34,7 +34,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	InputData* input;
 	SharedRAbundVectors* lookup;
 	
 	bool abort, allLines, pickedGroups;

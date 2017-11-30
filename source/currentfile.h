@@ -107,7 +107,8 @@ class CurrentFile {
         vector<string> getLocations() { vector<string> locations; locations.push_back(inputDir); locations.push_back(outputDir); locations.push_back(defaultPath); locations.push_back(mothurProgramPath); return locations; }
     
 
-
+        bool getMothurCalling()                         { return mothurCalling;             }
+        void setMothurCalling(bool t)                   { mothurCalling = t;                }
         void printCurrentFiles(string); //string="" for just to logfile.
         void clearCurrentFiles();
         set<string> getCurrentTypes();
@@ -130,7 +131,7 @@ class CurrentFile {
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile;
         string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode;
-    
+    bool mothurCalling;
 		
 		static CurrentFile* instance;
 		CurrentFile( const CurrentFile& ); // Disable copy constructor
@@ -188,6 +189,7 @@ class CurrentFile {
             contigsreportfile = "";
             groupMode = "group";
             sharedHeaderMode = "otu";
+            mothurCalling = false;
 		}
 		~CurrentFile() { instance = 0; }
 };

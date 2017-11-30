@@ -12,6 +12,7 @@
 #include "mothurout.h"
 #include "macros.h"
 #include "rftreenode.hpp"
+#include "utils.hpp"
 
 #define DEBUG_MODE
 
@@ -67,6 +68,7 @@ protected:
     int optimumFeatureSubsetSize;
     string treeSplitCriterion;
     MothurOut* m;
+    Utils util;
   
 private:
     

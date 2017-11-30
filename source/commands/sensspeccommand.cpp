@@ -683,7 +683,6 @@ string SensSpecCommand::preProcessList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
                 newList.setLabels(newLabels);
-                if (!m->getPrintedListHeaders()) { newList.printHeaders(out); }
 				newList.print(out);
 			}
 

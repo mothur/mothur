@@ -50,6 +50,15 @@ InteractEngine::InteractEngine(string path){
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
         if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
     #endif
+    
+    if (mout->getLogFileName() == "") {
+        time_t ltime = time(NULL); /* calendar time */
+        string outputPath = current->getOutputDir();
+        if (outputPath == "") { outputPath = current->getDefaultPath();  }
+        string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
+        mout->setLogFileName(logFileName, false);
+        mout->mothurOut("\n");
+    }
 }
 
 /***********************************************************************/
@@ -66,51 +75,42 @@ bool InteractEngine::getInput(){
 		string options = "";
 		int quitCommandCalled = 0;
 		
-		while(quitCommandCalled != 1){
-
-                    
-			if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
-                    
-			input = getCommand();	
-			
-			if (mout->getControl_pressed()) { input = "quit()"; }
-			
-			//allow user to omit the () on the quit command
-			if (input == "quit") { input = "quit()"; }
-
-			CommandOptionParser parser(input);
-			commandName = parser.getCommandString();
-	
-			options = parser.getOptionString();
-			
-			if (commandName != "") {
-					mout->setExecuting(true);
-
-					//executes valid command
-                    mout->setChangedSeqNames(false);
-					mout->setPrintedSharedHeaders(false);
-                    mout->setPrintedListHeaders(false);
+        while(quitCommandCalled != 1){
+            
+            
+            if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+            
+            input = getCommand();
+            
+            if (mout->getControl_pressed()) { input = "quit()"; }
+            
+            //allow user to omit the () on the quit command
+            if (input == "quit") { input = "quit()"; }
+            
+            CommandOptionParser parser(input);
+            commandName = parser.getCommandString();
+            
+            options = parser.getOptionString();
+            
+            if (commandName != "") {
+                mout->setExecuting(true);
                 
-					Command* command = cFactory->getCommand(commandName, options);
-                    quitCommandCalled = command->execute();
-							
-					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-
-					mout->setControl_pressed(false);
-					mout->setExecuting(false);
-										
-				}else {		
-					mout->mothurOut("Invalid.\n");
-				}
-            if (mout->getLogFileName() == "") {
-                time_t ltime = time(NULL); /* calendar time */
-                string outputPath = current->getOutputDir();
-                if (outputPath == "") { outputPath = current->getDefaultPath();  }
-                string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
-                mout->setLogFileName(logFileName, false);
+                //executes valid command
+                mout->setChangedSeqNames(false);
+                
+                Command* command = cFactory->getCommand(commandName, options);
+                quitCommandCalled = command->execute();
+                
+                //if we aborted command
+                if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
+                
+                mout->setControl_pressed(false);
+                mout->setExecuting(false);
+                
+            }else {
+                mout->mothurOut("Invalid.\n");
             }
-		}
+        }
 		return 1;
 	}
 	catch(exception& e) {
@@ -130,8 +130,8 @@ string Engine::getCommand()  {
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
 					nextCommand = strdup("quit");
-					mout->mothurOut(nextCommand);
-                    mout->mothurOut("\n");
+					//mout->appendLogBuffer(nextCommand);
+                    //mout->appendLogBuffer("\n");
 				}	
 				
 				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
@@ -222,7 +222,7 @@ bool BatchEngine::getInput(){
             if (input[0] != '#') {
 				if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 				
-				mout->mothurOut("\nmothur > " + input + "\n");
+				mout->appendLogBuffer("\nmothur > " + input + "\n");
 				
 							
 				if (mout->getControl_pressed()) { input = "quit()"; }
@@ -239,8 +239,6 @@ bool BatchEngine::getInput(){
 					
 					//executes valid command
                     mout->setChangedSeqNames(false);
-                    mout->setPrintedSharedHeaders(false);
-                    mout->setPrintedListHeaders(false);
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
@@ -258,13 +256,6 @@ bool BatchEngine::getInput(){
 				
 			}
 			util.gobble(inputBatchFile);
-            if (mout->getLogFileName() == "") {
-                time_t ltime = time(NULL); /* calendar time */
-                string outputPath = current->getOutputDir();
-                if (outputPath == "") { outputPath = current->getDefaultPath();  }
-                string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
-                mout->setLogFileName(logFileName, false);
-            }
 		}
 		
 		inputBatchFile.close();
@@ -351,7 +342,7 @@ bool ScriptEngine::getInput(){
                     
             if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 			
-				mout->mothurOut("\nmothur > " + input + "\n");
+				mout->appendLogBuffer("\nmothur > " + input + "\n");
 			
 			
             if (mout->getControl_pressed()) { input = "quit()"; }
@@ -368,9 +359,7 @@ bool ScriptEngine::getInput(){
                 
                 //executes valid command
                 mout->setChangedSeqNames(false);
-                mout->setPrintedSharedHeaders(false);
-                mout->setPrintedListHeaders(false);
-
+               
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
                 
@@ -382,14 +371,6 @@ bool ScriptEngine::getInput(){
                 mout->setExecuting(false);
                                 
             }else {	mout->mothurOut("Invalid.\n"); }
-            
-            if (mout->getLogFileName() == "") {
-                time_t ltime = time(NULL); /* calendar time */
-                string outputPath = current->getOutputDir();
-                if (outputPath == "") { outputPath = current->getDefaultPath();  }
-                string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
-                mout->setLogFileName(logFileName, false);
-            }
 		}
 		
 		return 1;

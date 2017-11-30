@@ -465,7 +465,6 @@ int MGClusterCommand::runOptiCluster(){
             if (mergedBinCount != 0) { m->mothurOut("Merged " + toString(mergedBinCount) + " OTUs based on blast overlap.\n\n"); }
         }
         
-        if (!m->getPrintedListHeaders()) { list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();

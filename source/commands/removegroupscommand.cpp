@@ -364,7 +364,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
             if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
                     vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -597,7 +597,6 @@ int RemoveGroupsCommand::readShared(){
 		
 		//reset read 
 		delete lookup;
-		m->setPrintedSharedHeaders(false);
 		
 		InputData input2(sharedfile, "sharedfile", groupsToKeep);
 		lookup = input2.getSharedRAbundVectors();
@@ -615,7 +614,6 @@ int RemoveGroupsCommand::readShared(){
             if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  delete lookup; return 0; }
 			
             if (lookup->size() != 0) { wroteSomething = true; }
-            if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
             lookup->print(out);
 			
 			//get next line to process

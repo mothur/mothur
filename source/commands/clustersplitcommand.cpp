@@ -796,14 +796,9 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
         
 		util.openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-		
-		map<double, int>::iterator itLabel;
-        
-        //clears out junk for autocompleting of list files above.  Perhaps there is a beter way to handle this from within the data structure?
-        m->setPrintedListHeaders(false);
 
 		//for each label needed
-		for(itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
+		for(map<double, int>::iterator itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
 			
 			string thisLabel;
 			if (itLabel->first == -1) { thisLabel = "unique"; }
@@ -856,7 +851,6 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
                 rabund->print(outRabund);
             }
 
-            if (!m->getPrintedListHeaders()) { completeList.printHeaders(outList); }
             if (countfile == "") { completeList.print(outList); }
             else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);   }
             else { completeList.print(outList); }
@@ -1705,7 +1699,7 @@ int ClusterSplitCommand::runSensSpec() {
         
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         m->mothurOut("Running command: sens.spec(" + inputString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
+        current->setMothurCalling(true);
         
         Command* sensspecCommand = new SensSpecCommand(inputString);
         sensspecCommand->execute();
@@ -1713,7 +1707,7 @@ int ClusterSplitCommand::runSensSpec() {
         map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
         
         delete sensspecCommand;
-         m->setMothurCalling(false);
+         current->setMothurCalling(false);
         
         string outputFileName = filenames["sensspec"][0];
         

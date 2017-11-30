@@ -318,7 +318,7 @@ int ChopSeqsCommand::execute(){
                 
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-                m->setMothurCalling(true);
+                current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
                 removeCommand->execute();
@@ -326,7 +326,7 @@ int ChopSeqsCommand::execute(){
                 map<string, vector<string> > filenames = removeCommand->getOutputFiles();
                 
                 delete removeCommand;
-                m->setMothurCalling(false);
+                current->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 
                 if (groupfile != "") {

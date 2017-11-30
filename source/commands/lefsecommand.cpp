@@ -797,7 +797,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
                 save = h;
                 rand_s.clear();
                 
-                for (int k = 0; k < fractionNumGroups; k++) {  int index = m->getRandomIndex(numGroups-1); rand_s.push_back(index); }
+                for (int k = 0; k < fractionNumGroups; k++) {  int index = util.getRandomIndex(numGroups-1); rand_s.push_back(index); }
                 if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
             

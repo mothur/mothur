@@ -463,7 +463,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
             m->mothurOut("Running command: sffinfo(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* sffCommand = new SffInfoCommand(inputString);
             sffCommand->execute();
@@ -473,7 +473,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             map<string, vector<string> > filenames = sffCommand->getOutputFiles();
             
             delete sffCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOutEndLine(); 
             
             redirects = "";
@@ -489,7 +489,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* summarySeqsCommand = new SeqSummaryCommand(inputString);
             summarySeqsCommand->execute();
@@ -500,7 +500,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             mergeOutputFileList(filenames, temp);
             
             delete summarySeqsCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             
             m->mothurOutEndLine(); 
             
@@ -518,7 +518,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.flows(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* trimFlowCommand = new TrimFlowsCommand(inputString);
             trimFlowCommand->execute();
@@ -529,7 +529,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             mergeOutputFileList(filenames, temp);
             
             delete trimFlowCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             
             
             string fileFileName = "";
@@ -566,7 +566,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             //run shhh.flows
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: shhh.flows(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* shhhFlowCommand = new ShhherCommand(inputString);
             shhhFlowCommand->execute();
@@ -577,7 +577,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             mergeOutputFileList(filenames, temp);
             
             delete shhhFlowCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             
             vector<string> fastaFiles;
             vector<string> nameFiles;
@@ -614,7 +614,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             //run trim.seqs
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* trimseqsCommand = new TrimSeqsCommand(inputString);
             trimseqsCommand->execute();
@@ -625,7 +625,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             mergeOutputFileList(filenames, temp);
             
             delete trimseqsCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             
             it = temp.find("fasta");
             if (it != temp.end()) {  if ((it->second).size() != 0) { fastaFiles = (it->second);  } }
@@ -664,7 +664,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             summarySeqsCommand = new SeqSummaryCommand(inputString);
             summarySeqsCommand->execute();
@@ -675,7 +675,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             mergeOutputFileList(filenames, temp);
             
             delete summarySeqsCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             
             m->mothurOutEndLine(); 
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 

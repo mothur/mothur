@@ -71,7 +71,7 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 		
 			RAbundVector* lookup	= new RAbundVector(order.getNumBins());
 			SAbundVector* rank	= new SAbundVector(order.getMaxRank()+1);
-			m->mothurRandomShuffle(order);
+			util.mothurRandomShuffle(order);
 		
 			for(int i=0;i<numSeqs;i++){
 			
@@ -251,7 +251,7 @@ try {
 			}
 			
             //randomize the groups
-			if (m->getJumble() )  { m->mothurRandomShuffle(lookup); }
+			if (m->getJumble() )  { util.mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->getNumBins());

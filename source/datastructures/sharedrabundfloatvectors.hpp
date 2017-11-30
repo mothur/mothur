@@ -24,13 +24,14 @@ inline bool compareRAbundFloats(SharedRAbundFloatVector* left, SharedRAbundFloat
 class SharedRAbundFloatVectors : public DataVector {
     
 public:
-    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; }
+    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; printSharedHeaders = true; }
     SharedRAbundFloatVectors(ifstream&, vector<string>&, string&, string&);
     SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
         setLabels(bv.getLabel());
+        printSharedHeaders = true; 
     }
     ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
     
@@ -75,6 +76,7 @@ private:
     map<string, int> groupNames;
     int numBins;
     string otuTag;
+    bool printSharedHeaders;
 
 };
 

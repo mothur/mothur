@@ -690,12 +690,12 @@ string RenameFileCommand::renameOrCopy(string oldName, string newName){
             string inputString = command + oldName + " " + newName;
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running command: system(" + inputString + ")"); m->mothurOutEndLine();
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* systemCommand = new SystemCommand(inputString);
             systemCommand->execute();
             delete systemCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         }
         

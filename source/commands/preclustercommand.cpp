@@ -250,7 +250,7 @@ PreClusterCommand::PreClusterCommand(string option) {
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -309,7 +309,7 @@ int PreClusterCommand::execute(){
                 m->mothurOutEndLine(); 
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
                 m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-                m->setMothurCalling(true);
+                current->setMothurCalling(true);
                 
                 Command* uniqueCommand = new DeconvoluteCommand(inputString);
                 uniqueCommand->execute();
@@ -317,7 +317,7 @@ int PreClusterCommand::execute(){
                 map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
                 
                 delete uniqueCommand;
-                m->setMothurCalling(false);
+                current->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
                 
                 util.renameFile(filenames["fasta"][0], newFastaFile);

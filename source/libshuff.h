@@ -27,10 +27,9 @@ protected:
 	void initializeGroups(FullMatrix*);
 	vector<double> getMinX(int);
 	vector<double> getMinXY(int, int);
-	
 	vector<vector<vector<double> > > savedMins;
 	
-	
+    MothurOut* m;
 	FullMatrix* matrix;
 	vector<int> groupSizes;
 	vector<string> groupNames;
@@ -38,12 +37,9 @@ protected:
 	vector<vector<int> > savedGroups;
 	vector<double> minX;
 	vector<double> minXY;
-	float cutOff;
-	int iters;
-	float stepSize;
-	
-	int numGroups;
-	MothurOut* m;
+	float cutOff, stepSize;
+	int iters, numGroups;
+    Utils util;
 };
 
 #endif

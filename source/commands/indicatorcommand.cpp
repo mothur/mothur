@@ -1638,10 +1638,10 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 			
 			//get random groups to swap to switch with
 			//generate random int between 0 and groupings.size()-1
-			int z = m->getRandomIndex(groupings.size()-1);
-			int x = m->getRandomIndex(groupings.size()-1);
-			int a = m->getRandomIndex(groupings[z].size()-1);
-			int b = m->getRandomIndex(groupings[x].size()-1);
+			int z = util.getRandomIndex(groupings.size()-1);
+			int x = util.getRandomIndex(groupings.size()-1);
+			int a = util.getRandomIndex(groupings[z].size()-1);
+			int b = util.getRandomIndex(groupings[x].size()-1);
 			//cout << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;	
 			//if ((z < 0) || (z > 1) || x<0 || x>1 || a <0 || a>groupings[z].size()-1 || b<0 || b>groupings[x].size()-1) { cout << "probelm" << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;	}
 			
@@ -1672,10 +1672,10 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 			
 			//get random groups to swap to switch with
 			//generate random int between 0 and groupings.size()-1
-			int z = m->getRandomIndex(groupings.size()-1);
-			int x = m->getRandomIndex(groupings.size()-1);
-			int a = m->getRandomIndex(groupings[z].size()-1);
-			int b = m->getRandomIndex(groupings[x].size()-1);
+			int z = util.getRandomIndex(groupings.size()-1);
+			int x = util.getRandomIndex(groupings.size()-1);
+			int a = util.getRandomIndex(groupings[z].size()-1);
+			int b = util.getRandomIndex(groupings[x].size()-1);
 			//cout << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;		
 			
 			vector<int> from;

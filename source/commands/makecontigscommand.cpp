@@ -441,7 +441,7 @@ int MakeContigsCommand::execute(){
             
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            m->setMothurCalling(true);
+            current->setMothurCalling(true);
             
             Command* renameSeqsCommand = new RenameSeqsCommand(inputString);
             renameSeqsCommand->execute();
@@ -449,7 +449,7 @@ int MakeContigsCommand::execute(){
             map<string, vector<string> > filenames = renameSeqsCommand->getOutputFiles();
             
             delete renameSeqsCommand;
-            m->setMothurCalling(false);
+            current->setMothurCalling(false);
             m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             
             vector<string> mapFiles = filenames["map"];
@@ -501,7 +501,7 @@ int MakeContigsCommand::execute(){
                 inputString = "file=" + tempFileFile;
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 m->mothurOut("Running rename.seqs to reduce file sizes: rename.seqs(" + inputString + ")"); m->mothurOutEndLine();
-                m->setMothurCalling(true);
+                current->setMothurCalling(true);
                 
                 Command* renameSeqsAllFilesCommand = new RenameSeqsCommand(inputString);
                 renameSeqsAllFilesCommand->execute();
@@ -509,7 +509,7 @@ int MakeContigsCommand::execute(){
                 filenames = renameSeqsAllFilesCommand->getOutputFiles();
                 
                 delete renameSeqsAllFilesCommand;
-                m->setMothurCalling(false);
+                current->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 
                 int countFasta = 0;

@@ -217,7 +217,7 @@ BinSeqCommand::BinSeqCommand(string option) {
             if (countfile == "") {
                 if (namesfile == ""){
                     vector<string> files; files.push_back(fastafile); 
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 			

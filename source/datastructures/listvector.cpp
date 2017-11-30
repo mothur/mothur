@@ -48,16 +48,17 @@ inline bool abundNamesSort2(listCt left, listCt right){
 
 /***********************************************************************/
 
-ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), otuTag("Otu") {}
+ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true) {}
 
 /***********************************************************************/
 
-ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"){}
+ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true){}
 
 /***********************************************************************/
 
 ListVector::ListVector(string id, vector<string> lv, string& tag) : DataVector(id), data(lv){
 	try {
+        printListHeaders = true;
         otuTag = tag;
         Utils util;
 		for(int i=0;i<data.size();i++){
@@ -79,6 +80,7 @@ ListVector::ListVector(string id, vector<string> lv, string& tag) : DataVector(i
 
 ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
+        printListHeaders = true;
 		int hold;
         Utils util;
         
@@ -246,19 +248,19 @@ void ListVector::clear(){
 /***********************************************************************/
 void ListVector::printHeaders(ostream& output){
 	try {
-        //string tagHeader = "Otu";
-        //if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
-		output << "label\tnum" + otuTag + "s";
-        
-        vector<string> theseLabels = getLabels();
-        
-        for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
-            output  << '\t' << theseLabels[i];
+        if (printListHeaders) {
+            output << "label\tnum" + otuTag + "s";
+            
+            vector<string> theseLabels = getLabels();
+            
+            for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
+                output  << '\t' << theseLabels[i];
+            }
+            
+            output << endl;
+            
+            printListHeaders = false;
         }
-					
-        output << endl;
-		
-		m->setPrintedListHeaders(true);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "printHeaders");
@@ -270,6 +272,7 @@ void ListVector::printHeaders(ostream& output){
 
 void ListVector::print(ostream& output, map<string, int>& ct){
 	try {
+        printHeaders(output);
 		output << label << '\t' << numBins;
 	
         Utils util;
@@ -310,6 +313,7 @@ void ListVector::print(ostream& output, map<string, int>& ct){
 
 void ListVector::print(ostream& output){
     try {
+        printHeaders(output);
         output << label << '\t' << numBins;
         
         vector<string> hold = data;
@@ -335,6 +339,7 @@ void ListVector::print(ostream& output){
 //no sort for subsampling and get.otus and remove.otus
 void ListVector::print(ostream& output, bool sortOtus){
     try {
+        printHeaders(output);
         output << label << '\t' << numBins;
         
         vector<string> hold = data;
@@ -422,7 +427,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					ov.push_back(i);
 				}
 			}
-			m->mothurRandomShuffle(ov);
+			util.mothurRandomShuffle(ov);
 			ov.setLabel(label);
 			ov.getNumBins();
 		
